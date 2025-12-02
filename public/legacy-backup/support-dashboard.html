@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTAM Customer Support Dashboard - แดชบอร์ดงานลูกค้าสัมพันธ์</title>
+    <style>
+        :root {
+            --primary-color: #10b981;
+            --primary-dark: #059669;
+            --secondary-color: #ecfdf5;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #06b6d4;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .stat-change {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--secondary-color);
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-new {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-inprogress {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-resolved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-urgent {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--text-dark);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .priority-urgent {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .priority-high {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .priority-medium {
+            border-left: 4px solid var(--info-color);
+        }
+
+        .priority-low {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .ticket-item {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            background: white;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .ticket-title {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .ticket-meta {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .ticket-preview {
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .ticket-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .communication-panel {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .quick-tools {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+
+        .tool-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .tool-btn:hover {
+            background: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+
+        .satisfaction-meter {
+            margin: 1rem 0;
+        }
+
+        .satisfaction-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .satisfaction-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--error-color), var(--warning-color), var(--success-color));
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div>🎧</div>
+                <div>
+                    <h1>Customer Support Dashboard</h1>
+                    <p style="opacity: 0.9; font-size: 0.875rem;">แดชบอร์ดงานลูกค้าสัมพันธ์</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <div id="userName">นางสาวมาลี ดูแล</div>
+                    <div style="opacity: 0.8; font-size: 0.875rem;" id="userRole">เจ้าหน้าที่ลูกค้าสัมพันธ์</div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Support Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="openTickets">23</div>
+                <div class="stat-label">ตั๋วเปิดอยู่</div>
+                <div class="stat-change positive">-5 จากเมื่อวาน</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="resolvedToday">8</div>
+                <div class="stat-label">แก้ไขวันนี้</div>
+                <div class="stat-change positive">เป้า: 10 รายการ</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgResponseTime">1.8</div>
+                <div class="stat-label">เวลาตอบกลับ (ชม.)</div>
+                <div class="stat-change positive">เป้า: <2 ชม.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="satisfaction">96%</div>
+                <div class="stat-label">ความพึงพอใจ</div>
+                <div class="stat-change positive">+2% จากเดือนที่แล้ว</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Support Tickets -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">ตั๋วสนับสนุนลูกค้า</h3>
+                    <div>
+                        <select style="margin-right: 1rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+                            <option>ทั้งหมด</option>
+                            <option>ใหม่</option>
+                            <option>กำลังดำเนินการ</option>
+                            <option>รอตอบกลับ</option>
+                            <option>ด่วน</option>
+                        </select>
+                        <button class="btn btn-primary">รีเฟรช</button>
+                    </div>
+                </div>
+                
+                <div class="communication-panel">
+                    <div class="ticket-item priority-urgent">
+                        <div class="ticket-header">
+                            <div class="ticket-title">ปัญหาการชำระเงินผ่านระบบ</div>
+                            <span class="status-badge status-urgent">ด่วน</span>
+                        </div>
+                        <div class="ticket-meta">
+                            รหัส: TK-2025-089 | จาก: นายสมชาย ใจดี | 30 นาทีที่แล้ว
+                        </div>
+                        <div class="ticket-preview">
+                            "ผมพยายามชำระค่าธรรมเนียมใบรับรอง GACP แล้วระบบขัดข้อง เงินถูกหักแต่สถานะยังไม่อัปเดต..."
+                        </div>
+                        <div class="ticket-actions">
+                            <button class="btn btn-primary" onclick="respondTicket('TK-2025-089')">ตอบกลับ</button>
+                            <button class="btn btn-warning" onclick="escalateTicket('TK-2025-089')">ส่งต่อ</button>
+                            <button class="btn btn-secondary" onclick="viewTicket('TK-2025-089')">ดูรายละเอียด</button>
+                        </div>
+                    </div>
+
+                    <div class="ticket-item priority-high">
+                        <div class="ticket-header">
+                            <div class="ticket-title">สอบถามขั้นตอนการสมัคร GACP</div>
+                            <span class="status-badge status-new">ใหม่</span>
+                        </div>
+                        <div class="ticket-meta">
+                            รหัส: TK-2025-090 | จาก: นางสมหญิง รักดี | 1 ชั่วโมงที่แล้ว
+                        </div>
+                        <div class="ticket-preview">
+                            "ดิฉันต้องการสมัครใบรับรอง GACP สำหรับฟาร์มขิง แต่ไม่แน่ใจว่าเอกสารที่เตรียมครบหรือไม่..."
+                        </div>
+                        <div class="ticket-actions">
+                            <button class="btn btn-primary" onclick="respondTicket('TK-2025-090')">ตอบกลับ</button>
+                            <button class="btn btn-success" onclick="sendTemplate('TK-2025-090')">ส่งคู่มือ</button>
+                            <button class="btn btn-secondary" onclick="viewTicket('TK-2025-090')">ดูรายละเอียด</button>
+                        </div>
+                    </div>
+
+                    <div class="ticket-item priority-medium">
+                        <div class="ticket-header">
+                            <div class="ticket-title">ขอเปลี่ยนแปลงข้อมูลในใบรับรอง</div>
+                            <span class="status-badge status-inprogress">กำลังดำเนินการ</span>
+                        </div>
+                        <div class="ticket-meta">
+                            รหัส: TK-2025-088 | จาก: นายประชา เกษตรกร | 3 ชั่วโมงที่แล้ว
+                        </div>
+                        <div class="ticket-preview">
+                            "ผมย้ายที่อยู่แล้ว ต้องการเปลี่ยนแปลงข้อมูลในใบรับรอง GACP ที่เพิ่งได้รับ..."
+                        </div>
+                        <div class="ticket-actions">
+                            <button class="btn btn-warning" onclick="updateInfo('TK-2025-088')">อัปเดตข้อมูล</button>
+                            <button class="btn btn-primary" onclick="respondTicket('TK-2025-088')">ตอบกลับ</button>
+                            <button class="btn btn-secondary" onclick="viewTicket('TK-2025-088')">ดูรายละเอียด</button>
+                        </div>
+                    </div>
+
+                    <div class="ticket-item priority-low">
+                        <div class="ticket-header">
+                            <div class="ticket-title">ขอคำแนะนำเรื่องการเก็บรักษาเอกสาร</div>
+                            <span class="status-badge status-resolved">แก้ไขแล้ว</span>
+                        </div>
+                        <div class="ticket-meta">
+                            รหัส: TK-2025-087 | จาก: นายวิเชียร สมบูรณ์ | 1 วันที่แล้ว
+                        </div>
+                        <div class="ticket-preview">
+                            "ต้องการคำแนะนำในการเก็บรักษาใบรับรอง GACP และเอกสารที่เกี่ยวข้อง..."
+                        </div>
+                        <div class="ticket-actions">
+                            <button class="btn btn-success" onclick="viewResolution('TK-2025-087')">ดูการแก้ไข</button>
+                            <button class="btn btn-secondary" onclick="followUp('TK-2025-087')">ติดตาม</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tools & Performance -->
+            <div>
+                <!-- Performance Metrics -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header">
+                        <h3 class="card-title">ผลงานวันนี้</h3>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                        <div style="text-align: center; padding: 1rem; background: var(--secondary-color); border-radius: 8px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">8</div>
+                            <div style="font-size: 0.75rem; color: var(--text-light);">ตั๋วแก้ไข</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--secondary-color); border-radius: 8px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">15</div>
+                            <div style="font-size: 0.75rem; color: var(--text-light);">การตอบกลับ</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--secondary-color); border-radius: 8px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">1.2</div>
+                            <div style="font-size: 0.75rem; color: var(--text-light);">ชม. เฉลี่ย</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--secondary-color); border-radius: 8px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">98%</div>
+                            <div style="font-size: 0.75rem; color: var(--text-light);">ความพึงพอใจ</div>
+                        </div>
+                    </div>
+                    
+                    <div class="satisfaction-meter">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.875rem; font-weight: 600;">คะแนนความพึงพอใจเฉลี่ย</span>
+                            <span style="font-size: 0.875rem; color: var(--primary-color);">4.8/5.0</span>
+                        </div>
+                        <div class="satisfaction-bar">
+                            <div class="satisfaction-fill" style="width: 96%;"></div>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.25rem;">
+                            เป้าหมาย: >4.5/5.0
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support Tools -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">เครื่องมือสนับสนุน</h3>
+                    </div>
+                    
+                    <div class="quick-tools">
+                        <a href="#" class="tool-btn" onclick="knowledgeBase()">
+                            📚 ฐานความรู้และ FAQ
+                        </a>
+                        <a href="#" class="tool-btn" onclick="ticketTemplates()">
+                            📝 เทมเพลตการตอบ
+                        </a>
+                        <a href="#" class="tool-btn" onclick="escalationRules()">
+                            🔄 กฎการส่งต่อ
+                        </a>
+                        <a href="#" class="tool-btn" onclick="customerHistory()">
+                            📊 ประวัติลูกค้า
+                        </a>
+                        <a href="#" class="tool-btn" onclick="liveChat()">
+                            💬 แชทสด
+                        </a>
+                        <a href="#" class="tool-btn" onclick="phoneSystem()">
+                            📞 ระบบโทรศัพท์
+                        </a>
+                        <a href="#" class="tool-btn" onclick="videoCall()">
+                            📹 วิดีโอคอล
+                        </a>
+                        <a href="#" class="tool-btn" onclick="surveyTools()">
+                            📋 แบบสำรวจความพึงพอใจ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Communication History -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">ประวัติการสื่อสาร</h3>
+                <button class="btn btn-primary">ส่งออกรายงาน</button>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>เวลา</th>
+                        <th>ลูกค้า</th>
+                        <th>ประเภท</th>
+                        <th>หัวข้อ</th>
+                        <th>สถานะ</th>
+                        <th>เวลาตอบกลับ</th>
+                        <th>คะแนน</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>14:30</td>
+                        <td>นายสมชาย ใจดี</td>
+                        <td>อีเมล</td>
+                        <td>ปัญหาการชำระเงิน</td>
+                        <td><span class="status-badge status-inprogress">กำลังดำเนินการ</span></td>
+                        <td>30 นาที</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>13:15</td>
+                        <td>นางสมหญิง รักดี</td>
+                        <td>โทรศัพท์</td>
+                        <td>สอบถามขั้นตอนสมัคร</td>
+                        <td><span class="status-badge status-resolved">แก้ไขแล้ว</span></td>
+                        <td>15 นาที</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td>11:45</td>
+                        <td>นายประชา เกษตรกร</td>
+                        <td>แชท</td>
+                        <td>เปลี่ยนแปลงข้อมูล</td>
+                        <td><span class="status-badge status-inprogress">กำลังดำเนินการ</span></td>
+                        <td>1 ชม.</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>10:20</td>
+                        <td>นายวิเชียร สมบูรณ์</td>
+                        <td>อีเมล</td>
+                        <td>คำแนะนำการเก็บเอกสาร</td>
+                        <td><span class="status-badge status-resolved">แก้ไขแล้ว</span></td>
+                        <td>45 นาที</td>
+                        <td>⭐⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td>09:30</td>
+                        <td>นางมาลี ดอกไม้</td>
+                        <td>วิดีโอคอล</td>
+                        <td>ปรึกษามาตรฐาน GACP</td>
+                        <td><span class="status-badge status-resolved">แก้ไขแล้ว</span></td>
+                        <td>1.5 ชม.</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Knowledge Base -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">ฐานความรู้ที่ใช้บ่อย</h3>
+                <button class="btn btn-primary">จัดการฐานความรู้</button>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>หัวข้อ</th>
+                        <th>ประเภท</th>
+                        <th>จำนวนการใช้</th>
+                        <th>คะแนนประโยชน์</th>
+                        <th>อัปเดตล่าสุด</th>
+                        <th>การดำเนินการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>วิธีการสมัคร GACP ทีละขั้นตอน</strong></td>
+                        <td>คู่มือ</td>
+                        <td>156 ครั้ง</td>
+                        <td>⭐⭐⭐⭐⭐ (4.9)</td>
+                        <td>25 ก.ย. 2025</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="useKnowledge('KB-001')">ใช้งาน</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>ปัญหาการชำระเงินที่พบบ่อย</strong></td>
+                        <td>FAQ</td>
+                        <td>89 ครั้ง</td>
+                        <td>⭐⭐⭐⭐ (4.2)</td>
+                        <td>28 ก.ย. 2025</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="useKnowledge('KB-002')">ใช้งาน</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>เอกสารที่ต้องเตรียมสำหรับการสมัคร</strong></td>
+                        <td>เช็คลิสต์</td>
+                        <td>134 ครั้ง</td>
+                        <td>⭐⭐⭐⭐⭐ (4.8)</td>
+                        <td>20 ก.ย. 2025</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="useKnowledge('KB-003')">ใช้งาน</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            // Get user info
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                
+                // Check if user is customer support
+                if (currentUser.organizationType !== 'customer_support') {
+                    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+                    redirectToLogin();
+                    return;
+                }
+                
+                updateUserDisplay();
+            }
+
+            await loadDashboardData();
+        });
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Mock data loading - replace with real API calls
+                updateStatistics();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateStatistics() {
+            // Mock statistics - replace with real API calls
+            document.getElementById('openTickets').textContent = '23';
+            document.getElementById('resolvedToday').textContent = '8';
+            document.getElementById('avgResponseTime').textContent = '1.8';
+            document.getElementById('satisfaction').textContent = '96%';
+        }
+
+        // Ticket Management Functions
+        function respondTicket(ticketId) {
+            alert(`ตอบกลับตั๋ว: ${ticketId}\n\nฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป:\n- Rich text editor\n- Template selection\n- File attachments\n- Auto-translation`);
+        }
+
+        function escalateTicket(ticketId) {
+            alert(`ส่งต่อตั๋ว: ${ticketId}\n\nส่งต่อไปยัง:\n• ผู้เชี่ยวชาญ\n• ฝ่ายเทคนิค\n• ผู้จัดการ\n• ฝ่ายการเงิน`);
+        }
+
+        function viewTicket(ticketId) {
+            alert(`ดูรายละเอียดตั๋ว: ${ticketId}`);
+        }
+
+        function sendTemplate(ticketId) {
+            alert(`ส่งคู่มือให้ลูกค้า: ${ticketId}\n\nเลือกเทมเพลต:\n• คู่มือการสมัคร\n• รายการเอกสาร\n• ขั้นตอนการชำระเงิน`);
+        }
+
+        function updateInfo(ticketId) {
+            alert(`อัปเดตข้อมูลลูกค้า: ${ticketId}`);
+        }
+
+        function viewResolution(ticketId) {
+            alert(`ดูการแก้ไขปัญหา: ${ticketId}`);
+        }
+
+        function followUp(ticketId) {
+            alert(`ติดตามความพึงพอใจ: ${ticketId}`);
+        }
+
+        // Support Tool Functions
+        function knowledgeBase() {
+            alert('ฐานความรู้และ FAQ:\n\n• คำถามที่พบบ่อย\n• คู่มือแก้ปัญหา\n• วิธีการใช้งาน\n• ข้อมูลผลิตภัณฑ์\n• นโยบายบริษัท');
+        }
+
+        function ticketTemplates() {
+            alert('เทมเพลตการตอบ:\n\n• การทักทาย\n• การแก้ปัญหา\n• การขอข้อมูลเพิ่ม\n• การปิดตั๋ว\n• การติดตาม');
+        }
+
+        function escalationRules() {
+            alert('กฎการส่งต่อ:\n\n• ตั๋วเร่งด่วน\n• ปัญหาเทคนิค\n• เรื่องการเงิน\n• ข้อร้องเรียน\n• ขอคืนเงิน');
+        }
+
+        function customerHistory() {
+            alert('ประวัติลูกค้า:\n\n• ข้อมูลติดต่อ\n• ประวัติการสื่อสาร\n• ใบสมัครที่ผ่านมา\n• การชำระเงิน\n• ความพึงพอใจ');
+        }
+
+        function liveChat() {
+            alert('แชทสด:\n\n• แชทแบบเรียลไทม์\n• การแชร์หน้าจอ\n• การส่งไฟล์\n• การบันทึกการสนทนา\n• แชทบอท');
+        }
+
+        function phoneSystem() {
+            alert('ระบบโทรศัพท์:\n\n• การโทรเข้า-ออก\n• การบันทึกเสียง\n• การโอนสาย\n• IVR system\n• Call analytics');
+        }
+
+        function videoCall() {
+            alert('วิดีโอคอล:\n\n• การประชุมออนไลน์\n• การแชร์หน้าจอ\n• การบันทึกวิดีโอ\n• การนำเสนอ\n• Remote assistance');
+        }
+
+        function surveyTools() {
+            alert('แบบสำรวจความพึงพอใจ:\n\n• แบบฟอร์มประเมิน\n• การให้คะแนน\n• ความคิดเห็น\n• การวิเคราะห์ผล\n• รายงานผล');
+        }
+
+        function useKnowledge(kbId) {
+            alert(`ใช้ฐานความรู้: ${kbId}\n\nคัดลอกข้อมูลไปใช้ในการตอบลูกค้า`);
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/auth.html';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+    </script>
+</body>
+</html>

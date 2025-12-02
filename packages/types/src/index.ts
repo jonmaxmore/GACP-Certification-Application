@@ -1,0 +1,2 @@
+// Shared TypeScript Types
+export {};

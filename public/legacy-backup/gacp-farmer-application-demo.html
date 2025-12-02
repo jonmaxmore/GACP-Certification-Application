@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="th">
+<head        <!-- Header -->
+        <header class="bg-green-600 text-white p-4 shadow-lg">
+            <div class="container mx-auto">
+                <h1 class="text-2xl font-bold">🌿 Thailand Herbal GACP Application System</h1>
+                <p class="text-green-100">ระบบยื่นขอใบรับรอง GACP สำหรับสมุนไพรไทย 6 ชนิดหลัก</p>
+            </div>
+        </header><meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thailand Herbal GACP Application - ระบบยื่นขอใบรับรอง GACP สมุนไพรไทย</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <style>
+        .sop-step { 
+            border-left: 4px solid #10b981; 
+            padding-left: 1rem; 
+            margin-bottom: 1rem; 
+        }
+        .validation-success { 
+            border-color: #10b981; 
+            background-color: #f0fdf4; 
+        }
+        .validation-error { 
+            border-color: #ef4444; 
+            background-color: #fef2f2; 
+        }
+        .document-preview { 
+            border: 2px dashed #d1d5db; 
+            border-radius: 0.5rem; 
+            padding: 1rem; 
+            text-align: center; 
+        }
+        .coa-display { 
+            background-color: #eff6ff; 
+            border: 2px solid #bfdbfe; 
+            border-radius: 0.5rem; 
+            padding: 1rem; 
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <!-- Header -->
+        <header class="bg-green-600 text-white p-4 shadow-lg">
+            <div class="container mx-auto">
+                <h1 class="text-2xl font-bold">� Thailand Cannabis GACP Application System</h1>
+                <p class="text-green-100">ระบบยื่นขอใบรับรอง GACP สำหรับการปลูกกัญชาตามกฎหมายไทย</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="container mx-auto px-4 py-8">
+            <!-- SOP Progress Indicator -->
+            <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">📋 SOP Progress Tracker</h2>
+                <div class="flex flex-wrap gap-2">
+                    <div v-for="(step, index) in sopSteps" :key="index" 
+                         :class="getSopStepClass(index)"
+                         class="flex-1 min-w-48 p-3 rounded border text-center">
+                        <div class="font-semibold">{{ step.title }}</div>
+                        <div class="text-sm text-gray-600">{{ step.description }}</div>
+                        <div class="mt-2">
+                            <span v-if="currentStep > index" class="text-green-600">✅ สำเร็จ</span>
+                            <span v-else-if="currentStep === index" class="text-blue-600">🔄 กำลังดำเนินการ</span>
+                            <span v-else class="text-gray-400">⏳ รอดำเนินการ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Sections -->
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Left Column: Farmer Information & Documents -->
+                <div class="space-y-6">
+                    <!-- Farmer Information Form -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">👨‍🌾 ข้อมูลเกษตรกร</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="space-y-6">
+                                <!-- ข้อมูลส่วนตัว -->
+                                <div class="bg-blue-50 p-4 rounded-lg">
+                                    <h3 class="text-lg font-semibold text-blue-800 mb-4">📝 ข้อมูลส่วนตัว</h3>
+                                    <div class="grid md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">คำนำหน้า *</label>
+                                            <select v-model="farmerData.title" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                                <option value="">เลือกคำนำหน้า</option>
+                                                <option value="นาย">นาย</option>
+                                                <option value="นาง">นาง</option>
+                                                <option value="นางสาว">นางสาว</option>
+                                                <option value="ดร.">ดร.</option>
+                                                <option value="ศาสตราจารย์">ศาสตราจารย์</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อ *</label>
+                                            <input v-model="farmerData.firstName" 
+                                                   type="text" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="ชื่อ">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">นามสกุล *</label>
+                                            <input v-model="farmerData.lastName" 
+                                                   type="text" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="นามสกุล">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid md:grid-cols-3 gap-4 mt-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">เลขบัตรประชาชน *</label>
+                                            <input v-model="farmerData.idCard" 
+                                                   type="text" 
+                                                   maxlength="13"
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="1234567890123">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">วันเกิด *</label>
+                                            <input v-model="farmerData.birthDate" 
+                                                   type="date" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">อายุ *</label>
+                                            <input v-model="farmerData.age" 
+                                                   type="number" 
+                                                   min="18" max="99"
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="อายุ">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">เพศ *</label>
+                                            <div class="flex space-x-4">
+                                                <label class="flex items-center">
+                                                    <input type="radio" v-model="farmerData.gender" value="male" class="mr-2">
+                                                    <span>ชาย</span>
+                                                </label>
+                                                <label class="flex items-center">
+                                                    <input type="radio" v-model="farmerData.gender" value="female" class="mr-2">
+                                                    <span>หญิง</span>
+                                                </label>
+                                                <label class="flex items-center">
+                                                    <input type="radio" v-model="farmerData.gender" value="other" class="mr-2">
+                                                    <span>อื่นๆ</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">สัญชาติ *</label>
+                                            <select v-model="farmerData.nationality" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                                <option value="">เลือกสัญชาติ</option>
+                                                <option value="thai">ไทย</option>
+                                                <option value="other">อื่นๆ</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- ข้อมูลติดต่อ -->
+                                <div class="bg-green-50 p-4 rounded-lg">
+                                    <h3 class="text-lg font-semibold text-green-800 mb-4">📞 ข้อมูลติดต่อ</h3>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">โทรศัพท์มือถือ *</label>
+                                            <input v-model="farmerData.mobilePhone" 
+                                                   type="tel" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="08xxxxxxxx">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">โทรศัพท์บ้าน</label>
+                                            <input v-model="farmerData.homePhone" 
+                                                   type="tel" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="02xxxxxxx">
+                                        </div>
+                                    </div>
+                                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">อีเมล *</label>
+                                            <input v-model="farmerData.email" 
+                                                   type="email" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="example@email.com">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Line ID</label>
+                                            <input v-model="farmerData.lineId" 
+                                                   type="text" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="@lineid">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- ที่อยู่ปัจจุบัน -->
+                                <div class="bg-yellow-50 p-4 rounded-lg">
+                                    <h3 class="text-lg font-semibold text-yellow-800 mb-4">🏠 ที่อยู่ปัจจุบัน</h3>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">บ้านเลขที่ *</label>
+                                            <input v-model="farmerData.houseNumber" 
+                                                   type="text" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="123">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">หมู่ที่</label>
+                                            <input v-model="farmerData.village" 
+                                                   type="text" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="5">
+                                        </div>
+                                    </div>
+                                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">ซอย</label>
+                                            <input v-model="farmerData.lane" 
+                                                   type="text" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="ซอยสุขใจ">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">ถนน</label>
+                                            <input v-model="farmerData.road" 
+                                                   type="text" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="ถนนพหลโยธิน">
+                                        </div>
+                                    </div>
+                                    <div class="grid md:grid-cols-4 gap-4 mt-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">ตำบล/แขวง *</label>
+                                            <input v-model="farmerData.subdistrict" 
+                                                   type="text" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="ป่าซาง">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">อำเภอ/เขต *</label>
+                                            <input v-model="farmerData.district" 
+                                                   type="text" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="แม่แตง">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">จังหวัด *</label>
+                                            <input v-model="farmerData.province" 
+                                                   type="text" 
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="เชียงใหม่">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">รหัสไปรษณีย์ *</label>
+                                            <input v-model="farmerData.zipCode" 
+                                                   type="text" 
+                                                   maxlength="5"
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="50150">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- ข้อมูลการศึกษาและอาชีพ -->
+                                <div class="bg-purple-50 p-4 rounded-lg">
+                                    <h3 class="text-lg font-semibold text-purple-800 mb-4">🎓 ข้อมูลการศึกษาและอาชีพ</h3>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">ระดับการศึกษา *</label>
+                                            <select v-model="farmerData.education" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                                <option value="">เลือกระดับการศึกษา</option>
+                                                <option value="primary">ประถมศึกษา</option>
+                                                <option value="secondary">มัธยมศึกษา</option>
+                                                <option value="vocational">ปวช./ปวส.</option>
+                                                <option value="bachelor">ปริญญาตรี</option>
+                                                <option value="master">ปริญญาโท</option>
+                                                <option value="doctorate">ปริญญาเอก</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">อาชีพหลัก *</label>
+                                            <select v-model="farmerData.occupation" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                                <option value="">เลือกอาชีพ</option>
+                                                <option value="farmer">เกษตรกร</option>
+                                                <option value="business">ธุรกิจส่วนตัว</option>
+                                                <option value="government">ข้าราชการ</option>
+                                                <option value="private">พนักงานเอกชน</option>
+                                                <option value="freelance">อิสระ</option>
+                                                <option value="retired">เกษียณ</option>
+                                                <option value="other">อื่นๆ</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">รายได้ต่อเดือน *</label>
+                                            <select v-model="farmerData.monthlyIncome" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                                <option value="">เลือกช่วงรายได้</option>
+                                                <option value="below-15000">ต่ำกว่า 15,000 บาท</option>
+                                                <option value="15000-30000">15,000-30,000 บาท</option>
+                                                <option value="30000-50000">30,000-50,000 บาท</option>
+                                                <option value="50000-100000">50,000-100,000 บาท</option>
+                                                <option value="above-100000">มากกว่า 100,000 บาท</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">ประสบการณ์ทำเกษตร *</label>
+                                            <input v-model="farmerData.farmingExperience" 
+                                                   type="number" 
+                                                   min="0"
+                                                   class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                                   placeholder="จำนวนปี">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- วัตถุประสงค์และเป้าหมาย -->
+                                <div class="bg-indigo-50 p-4 rounded-lg">
+                                    <h3 class="text-lg font-semibold text-indigo-800 mb-4">🎯 วัตถุประสงค์และเป้าหมาย</h3>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">วัตถุประสงค์การขอใบรับรอง *</label>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center">
+                                                <input type="radio" v-model="farmerData.purpose" value="medical" class="mr-2">
+                                                <span>เพื่อใช้ทางการแพทย์แผนไทย</span>
+                                            </label>
+                                            <label class="flex items-center">
+                                                <input type="radio" v-model="farmerData.purpose" value="export" class="mr-2">
+                                                <span>เพื่อการส่งออก</span>
+                                            </label>
+                                            <label class="flex items-center">
+                                                <input type="radio" v-model="farmerData.purpose" value="domestic" class="mr-2">
+                                                <span>เพื่อจำหน่ายในประเทศ</span>
+                                            </label>
+                                            <label class="flex items-center">
+                                                <input type="radio" v-model="farmerData.purpose" value="processing" class="mr-2">
+                                                <span>เพื่อแปรรูปเป็นผลิตภัณฑ์</span>
+                                            </label>
+                                            <label class="flex items-center">
+                                                <input type="radio" v-model="farmerData.purpose" value="research" class="mr-2">
+                                                <span>เพื่อการวิจัยและพัฒนา</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">เป้าหมายการผลิต (กิโลกรัม/ปี) *</label>
+                                        <input v-model="farmerData.productionTarget" 
+                                               type="number" 
+                                               min="1"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="เช่น 1000">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">ที่อยู่แปลงเกษตร</label>
+                                <textarea v-model="farmerData.farmAddress" 
+                                          class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 h-20"
+                                          placeholder="หมู่ที่ 5 ตำบลป่าซาง อำเภอแม่แตง จังหวัดเชียงใหม่ 50150"></textarea>
+                            </div>
+                            
+                            <!-- ข้อมูลฟาร์มโดยละเอียด -->
+                            <div class="bg-orange-50 p-4 rounded-lg">
+                                <h3 class="text-lg font-semibold text-orange-800 mb-4">🚜 ข้อมูลฟาร์มและแปลงเกษตร</h3>
+                                
+                                <!-- พิกัดและขนาดแปลง -->
+                                <div class="grid md:grid-cols-4 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">พิกัด GPS (ละติจูด) *</label>
+                                        <input v-model="farmerData.latitude" 
+                                               type="number" 
+                                               step="0.000001"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="18.901500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">พิกัด GPS (ลองจิจูด) *</label>
+                                        <input v-model="farmerData.longitude" 
+                                               type="number" 
+                                               step="0.000001"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="98.984700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ขนาดแปลงรวม (ไร่) *</label>
+                                        <input v-model="farmerData.totalFarmSize" 
+                                               type="number" 
+                                               min="0.1" 
+                                               step="0.1"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="5.0">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ขนาดพื้นที่ปลูกสมุนไพร (ไร่) *</label>
+                                        <input v-model="farmerData.herbalFarmSize" 
+                                               type="number" 
+                                               min="0.1" 
+                                               step="0.1"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="2.5">
+                                    </div>
+                                </div>
+                                
+                                <!-- ลักษณะที่ดินและสิ่งแวดล้อม -->
+                                <div class="grid md:grid-cols-3 gap-4 mt-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ลักษณะภูมิประเทศ *</label>
+                                        <select v-model="farmerData.topography" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                            <option value="">เลือกลักษณะภูมิประเทศ</option>
+                                            <option value="flat">ที่ราบ</option>
+                                            <option value="slope">ที่ลาดเอียง</option>
+                                            <option value="hill">เนินเขา</option>
+                                            <option value="mountain">ที่สูง/ภูเขา</option>
+                                            <option value="valley">หุบเขา</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทดิน *</label>
+                                        <select v-model="farmerData.soilType" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                            <option value="">เลือกประเภทดิน</option>
+                                            <option value="clay">ดินเหนียว</option>
+                                            <option value="loam">ดินร่วน</option>
+                                            <option value="sandy">ดินทราย</option>
+                                            <option value="clay_loam">ดินเหนียวร่วน</option>
+                                            <option value="sandy_loam">ดินทรายร่วน</option>
+                                            <option value="organic">ดินอินทรีย์</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ระดับ pH ของดิน</label>
+                                        <input v-model="farmerData.soilPH" 
+                                               type="number" 
+                                               min="1" 
+                                               max="14"
+                                               step="0.1"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="6.5">
+                                    </div>
+                                </div>
+                                
+                                <!-- แหล่งน้ำและการระบายน้ำ -->
+                                <div class="grid md:grid-cols-3 gap-4 mt-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">แหล่งน้ำหลัก *</label>
+                                        <select v-model="farmerData.waterSource" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                            <option value="">เลือกแหล่งน้ำ</option>
+                                            <option value="well">น้ำบาดาล/บ่อน้ำ</option>
+                                            <option value="river">แม่น้ำ/ลำธาร</option>
+                                            <option value="canal">คลอง/ท่อส่งน้ำ</option>
+                                            <option value="pond">บ่อเก็บน้ำ</option>
+                                            <option value="rain">น้ำฝน</option>
+                                            <option value="municipal">น้ำประปา</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">คุณภาพน้ำ *</label>
+                                        <select v-model="farmerData.waterQuality" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                            <option value="">เลือกคุณภาพน้ำ</option>
+                                            <option value="excellent">ดีเยี่ยม</option>
+                                            <option value="good">ดี</option>
+                                            <option value="fair">พอใช้</option>
+                                            <option value="poor">ต้องปรับปรุง</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ระบบการระบายน้ำ *</label>
+                                        <select v-model="farmerData.drainage" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                            <option value="">เลือกระบบระบายน้ำ</option>
+                                            <option value="natural">ระบายน้ำตามธรรมชาติ</option>
+                                            <option value="ditch">ระบบท่อระบายน้ำ/ร่องน้ำ</option>
+                                            <option value="pump">ระบบสูบน้ำ</option>
+                                            <option value="controlled">ระบบควบคุมน้ำ</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- สภาพอากาศและสิ่งแวดล้อม -->
+                                <div class="grid md:grid-cols-3 gap-4 mt-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ระดับความสูงจากน้ำทะเล (เมตร)</label>
+                                        <input v-model="farmerData.altitude" 
+                                               type="number" 
+                                               min="0"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="300">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">อุณหภูมิเฉลี่ย (°C)</label>
+                                        <input v-model="farmerData.avgTemperature" 
+                                               type="number" 
+                                               min="0" 
+                                               max="50"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="28">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ปริมาณน้ำฝนเฉลี่ย (มม./ปี)</label>
+                                        <input v-model="farmerData.avgRainfall" 
+                                               type="number" 
+                                               min="0"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="1200">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ชนิดสมุนไพรและระบบการผลิต -->
+                            <div class="bg-teal-50 p-4 rounded-lg">
+                                <h3 class="text-lg font-semibold text-teal-800 mb-4">🌿 ชนิดสมุนไพรและระบบการผลิต</h3>
+                                
+                                <!-- เลือกสมุนไพร -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทสมุนไพรไทยที่ต้องการปลูก *</label>
+                                    <div class="grid md:grid-cols-2 gap-3">
+                                        <div v-for="herb in herbTypes" :key="herb.id" class="border rounded-lg p-3">
+                                            <label class="flex items-center cursor-pointer">
+                                                <input 
+                                                    type="radio" 
+                                                    :value="herb.id" 
+                                                    v-model="farmerData.cropType"
+                                                    class="mr-3 h-4 w-4 text-green-600 focus:ring-green-500">
+                                                <div class="flex-1">
+                                                    <div class="font-semibold text-gray-900">{{ herb.name }}</div>
+                                                    <div class="text-sm text-gray-600">{{ herb.description }}</div>
+                                                    <div class="text-xs text-gray-500 italic">{{ herb.scientificName }}</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- ระบบการผลิต -->
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ระบบการผลิต *</label>
+                                        <select v-model="farmerData.productionSystem" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                            <option value="">เลือกระบบการผลิต</option>
+                                            <option value="organic">เกษตรอินทรีย์</option>
+                                            <option value="conventional">เกษตรทั่วไป</option>
+                                            <option value="integrated">เกษตรผสมผสาน</option>
+                                            <option value="greenhouse">โรงเรือนควบคุม</option>
+                                            <option value="hydroponic">ระบบไฮโดรโปนิกส์</option>
+                                            <option value="precision">เกษตรแม่นยำ</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">วิธีการเพาะปลูก *</label>
+                                        <select v-model="farmerData.cultivationMethod" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                            <option value="">เลือกวิธีการเพาะปลูก</option>
+                                            <option value="seed">การเพาะเมล็ด</option>
+                                            <option value="seedling">การปลูกต้นกล้า</option>
+                                            <option value="cutting">การปักชำ</option>
+                                            <option value="division">การแบ่งหัว</option>
+                                            <option value="rhizome">การปลูกเหง้า</option>
+                                            <option value="tissue_culture">เพาะเลี้ยงเนื้อเยื่อ</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- ระยะการปลูกและการเก็บเกี่ยว -->
+                                <div class="grid md:grid-cols-4 gap-4 mt-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ระยะเวลาเพาะปลูก (เดือน) *</label>
+                                        <input v-model="farmerData.growingPeriod" 
+                                               type="number" 
+                                               min="1" 
+                                               max="36"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="6">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">จำนวนครั้งการเก็บเกี่ยว/ปี *</label>
+                                        <input v-model="farmerData.harvestFrequency" 
+                                               type="number" 
+                                               min="1" 
+                                               max="12"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="2">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ผลผลิตคาดหวัง (กก./ไร่)</label>
+                                        <input v-model="farmerData.expectedYield" 
+                                               type="number" 
+                                               min="1"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ประสบการณ์สมุนไพรนี้ (ปี)</label>
+                                        <input v-model="farmerData.herbExperience" 
+                                               type="number" 
+                                               min="0"
+                                               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                               placeholder="3">
+                                    </div>
+                                </div>
+                                
+                                <!-- การจัดการหลังการเก็บเกี่ยว -->
+                                <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">วิธีการแปรรูปหลังเก็บเกี่ยว *</label>
+                                        <select v-model="farmerData.postHarvestProcessing" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                            <option value="">เลือกวิธีการแปรรูป</option>
+                                            <option value="fresh">จำหน่ายสด</option>
+                                            <option value="dried">อบแห้ง</option>
+                                            <option value="powder">บดเป็นผง</option>
+                                            <option value="extract">สกัดสาระสำคัญ</option>
+                                            <option value="capsule">แคปซูล</option>
+                                            <option value="tea">ชาสมุนไพร</option>
+                                            <option value="oil">น้ำมันหอมระเหย</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">การเก็บรักษาผลผลิต *</label>
+                                        <select v-model="farmerData.storageMethod" class="w-full border rounded-lg px-3 py-2 focus:ring-green-500">
+                                            <option value="">เลือกวิธีการเก็บรักษา</option>
+                                            <option value="ambient">เก็บในที่แห้งธรรมดา</option>
+                                            <option value="refrigerated">เก็บในตู้เย็น</option>
+                                            <option value="freezer">เก็บในตู้แช่แข็ง</option>
+                                            <option value="warehouse">โกดังควบคุมอุณหภูมิ</option>
+                                            <option value="vacuum">บรรจุสุญญากาศ</option>
+                                            <option value="controlled_atmosphere">บรรยากาศควบคุม</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทพืชสมุนไพรกัญชา</label>
+                                    <div class="space-y-2">
+                                        <div v-for="herb in herbTypes" :key="herb.id" class="flex items-center">
+                                            <input 
+                                                :id="'herb-' + herb.id" 
+                                                type="radio" 
+                                                :value="herb.id" 
+                                                v-model="farmerData.cropType"
+                                                :disabled="!herb.available"
+                                                class="mr-3 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+                                                :class="herb.available ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'">
+                                            <label 
+                                                :for="'herb-' + herb.id" 
+                                                class="text-sm"
+                                                :class="herb.available ? 'text-gray-900 cursor-pointer' : 'text-gray-400 cursor-not-allowed'">
+                                                {{ herb.name }}
+                                                <span v-if="!herb.available" class="text-xs text-gray-400 ml-1">(ยังไม่เปิดให้บริการ)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">พื้นที่เกษตร (ไร่)</label>
+                                    <input v-model="farmerData.farmSize" 
+                                           type="number" 
+                                           class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
+                                           placeholder="10">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">ระบบการผลิตกัญชา (ตาม Thailand Cannabis GACP)</label>
+                                    <select v-model="farmerData.productionSystem" 
+                                            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                        <option value="">เลือกระบบการผลิต</option>
+                                        <option value="outdoor">กลางแจ้ง (Outdoor)</option>
+                                        <option value="greenhouse">โรงเรือนทั่วไป (Greenhouse)</option>
+                                        <option value="indoor">อาคารหรือโรงเรือนระบบปิด (Indoor)</option>
+                                        <option value="hydroponic_controlled">ไฮโดรโปนิกส์ในสภาพแวดล้อมควบคุม</option>
+                                        <option value="organic_outdoor">เกษตรอินทรีย์กลางแจ้ง</option>
+                                        <option value="led_indoor">ระบบ LED ในอาคาร</option>
+                                    </select>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        * ต้องมีระบบรักษาความปลอดภัยตามกฎหมาย
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Validation Status -->
+                        <div v-if="farmerData.fullName" class="mt-4 p-3 bg-green-50 border border-green-200 rounded">
+                            <div class="flex items-center">
+                                <span class="text-green-600">✅</span>
+                                <span class="ml-2 text-green-700">ข้อมูลเกษตรกรถูกต้องตาม SOP</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Document Upload Section -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">📄 อัพโหลดเอกสาร</h2>
+                        
+                        <div class="space-y-4">
+                            <!-- Required Documents -->
+                            <div v-for="doc in requiredDocuments" :key="doc.id" class="border rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-semibold text-gray-800">{{ doc.name }}</h3>
+                                    <span :class="getDocumentStatusClass(doc.id)" class="px-2 py-1 rounded text-xs">
+                                        {{ getDocumentStatus(doc.id) }}
+                                    </span>
+                                </div>
+                                
+                                <div class="document-preview" 
+                                     @drop="handleDrop($event, doc.id)" 
+                                     @dragover.prevent 
+                                     @dragenter.prevent>
+                                    <input :id="'file-' + doc.id" 
+                                           type="file" 
+                                           class="hidden" 
+                                           @change="handleFileUpload($event, doc.id)"
+                                           accept=".jpg,.jpeg,.png,.pdf">
+                                    
+                                    <div v-if="!uploadedDocuments[doc.id]" 
+                                         @click="document.getElementById('file-' + doc.id).click()" 
+                                         class="cursor-pointer py-8">
+                                        <div class="text-4xl mb-2">📁</div>
+                                        <div class="text-gray-600">ลากไฟล์มาวาง หรือคลิกเพื่อเลือกไฟล์</div>
+                                        <div class="text-sm text-gray-500 mt-1">รองรับ: JPG, PNG, PDF</div>
+                                    </div>
+                                    
+                                    <div v-else class="py-4">
+                                        <div class="text-2xl mb-2">✅</div>
+                                        <div class="text-green-600 font-semibold">{{ uploadedDocuments[doc.id].name }}</div>
+                                        <div class="text-sm text-gray-500">{{ formatFileSize(uploadedDocuments[doc.id].size) }}</div>
+                                        
+                                        <!-- Document Analysis Results -->
+                                        <div v-if="documentAnalysis[doc.id]" class="mt-3 text-left">
+                                            <div class="bg-green-50 border border-green-200 rounded p-3">
+                                                <div class="font-semibold text-green-800 mb-2">🤖 AI Analysis Results</div>
+                                                <div class="space-y-1 text-sm">
+                                                    <div>Document Type: <span class="font-semibold">{{ documentAnalysis[doc.id].detectedType }}</span></div>
+                                                    <div>Confidence: <span class="font-semibold">{{ documentAnalysis[doc.id].confidence }}%</span></div>
+                                                    <div>Quality Score: <span class="font-semibold">{{ documentAnalysis[doc.id].qualityScore }}/100</span></div>
+                                                    <div v-if="documentAnalysis[doc.id].extractedText">
+                                                        Extracted Text: <span class="font-semibold">{{ documentAnalysis[doc.id].extractedText.substring(0, 50) }}...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- COA Upload Section -->
+                            <div class="border-2 border-blue-300 rounded-lg p-4 bg-blue-50">
+                                <h3 class="font-semibold text-blue-800 mb-2">📊 Certificate of Analysis (COA) - ไม่บังคับ</h3>
+                                
+                                <div class="document-preview border-blue-300" 
+                                     @drop="handleDrop($event, 'coa')" 
+                                     @dragover.prevent 
+                                     @dragenter.prevent>
+                                    <input id="file-coa" 
+                                           type="file" 
+                                           class="hidden" 
+                                           @change="handleFileUpload($event, 'coa')"
+                                           accept=".pdf,.jpg,.jpeg,.png">
+                                    
+                                    <div v-if="!uploadedDocuments.coa" 
+                                         @click="document.getElementById('file-coa').click()" 
+                                         class="cursor-pointer py-6">
+                                        <div class="text-3xl mb-2">📊</div>
+                                        <div class="text-blue-600">อัพโหลด COA เพื่อเพิ่มความน่าเชื่อถือ</div>
+                                        <div class="text-sm text-blue-500 mt-1">ผลการตรวจสอบคุณภาพผลิตภัณฑ์</div>
+                                    </div>
+                                    
+                                    <div v-else class="py-4">
+                                        <div class="text-2xl mb-2">📊</div>
+                                        <div class="text-blue-600 font-semibold">{{ uploadedDocuments.coa.name }}</div>
+                                        <div class="text-sm text-blue-500">{{ formatFileSize(uploadedDocuments.coa.size) }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Validation Results & COA Display -->
+                <div class="space-y-6">
+                    <!-- Real-time SOP Validation -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">🔍 SOP Validation Real-time</h2>
+                        
+                        <div class="space-y-3">
+                            <div v-for="validation in sopValidations" :key="validation.id" 
+                                 :class="getValidationClass(validation.status)"
+                                 class="p-3 rounded border">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">{{ validation.name }}</span>
+                                    <span :class="getStatusIconClass(validation.status)">
+                                        {{ getStatusIcon(validation.status) }}
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-600 mt-1">{{ validation.description }}</div>
+                                <div v-if="validation.error" class="text-sm text-red-600 mt-1">
+                                    ⚠️ {{ validation.error }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Overall Compliance Score -->
+                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-semibold">SOP Compliance Score</span>
+                                <span class="text-2xl font-bold" :class="getScoreColor(complianceScore)">
+                                    {{ complianceScore }}%
+                                </span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full transition-all duration-500" 
+                                     :style="{ width: complianceScore + '%' }"
+                                     :class="getScoreBarColor(complianceScore)"></div>
+                            </div>
+                            <div class="text-sm text-gray-600 mt-2">
+                                {{ getComplianceMessage(complianceScore) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COA Analysis Display -->
+                    <div v-if="coaAnalysis" class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">📊 COA Analysis Results</h2>
+                        
+                        <div class="coa-display">
+                            <div class="grid md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <div class="text-sm text-gray-600">Sample ID</div>
+                                    <div class="font-semibold">{{ coaAnalysis.sampleId || 'COA-2025-001' }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-600">Test Date</div>
+                                    <div class="font-semibold">{{ coaAnalysis.testDate || '2025-09-15' }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-600">Laboratory</div>
+                                    <div class="font-semibold">{{ coaAnalysis.laboratory || 'National Food Institute' }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-600">Overall Result</div>
+                                    <div class="font-semibold text-green-600">{{ coaAnalysis.overallResult || 'PASS' }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Test Parameters -->
+                            <div class="mb-4">
+                                <h3 class="font-semibold mb-2">Test Parameters</h3>
+                                <div class="space-y-2">
+                                    <div v-for="param in coaAnalysis.parameters" :key="param.name" 
+                                         class="flex justify-between items-center py-2 border-b">
+                                        <span>{{ param.name }}</span>
+                                        <span class="flex items-center space-x-2">
+                                            <span class="font-mono">{{ param.result }} {{ param.unit }}</span>
+                                            <span :class="param.status === 'pass' ? 'text-green-600' : 'text-red-600'">
+                                                {{ param.status === 'pass' ? '✅' : '❌' }}
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quality Score -->
+                            <div class="bg-green-50 border border-green-200 rounded p-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-green-800">Quality Score</span>
+                                    <span class="text-2xl font-bold text-green-600">{{ coaAnalysis.qualityScore || 95 }}/100</span>
+                                </div>
+                                <div class="text-sm text-green-700 mt-1">
+                                    ผลการตรวจสอบคุณภาพอยู่ในเกณฑ์มาตรฐาน GACP
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Application -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">🚀 ยื่นคำขอ</h2>
+                        
+                        <div class="space-y-4">
+                            <!-- Pre-submission Checklist -->
+                            <div class="bg-yellow-50 border border-yellow-200 rounded p-4">
+                                <h3 class="font-semibold text-yellow-800 mb-2">✅ Pre-submission Checklist</h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" :checked="farmerData.fullName" class="mr-2" disabled>
+                                        <span :class="farmerData.fullName ? 'text-green-600' : 'text-gray-500'">
+                                            ข้อมูลเกษตรกรครบถ้วน
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" :checked="isAllDocumentsUploaded" class="mr-2" disabled>
+                                        <span :class="isAllDocumentsUploaded ? 'text-green-600' : 'text-gray-500'">
+                                            เอกสารที่จำเป็นครบถ้วน
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" :checked="complianceScore >= 80" class="mr-2" disabled>
+                                        <span :class="complianceScore >= 80 ? 'text-green-600' : 'text-gray-500'">
+                                            SOP Compliance ≥ 80%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button @click="submitApplication" 
+                                    :disabled="!canSubmit"
+                                    :class="canSubmit ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'"
+                                    class="w-full text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                                <span v-if="!isSubmitting">🚀 ยื่นคำขอ GACP</span>
+                                <span v-else>⏳ กำลังดำเนินการ...</span>
+                            </button>
+
+                            <!-- Application Status -->
+                            <div v-if="applicationStatus" 
+                                 :class="applicationStatus.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'"
+                                 class="p-4 border rounded">
+                                <div class="font-semibold mb-1">{{ applicationStatus.title }}</div>
+                                <div class="text-sm">{{ applicationStatus.message }}</div>
+                                <div v-if="applicationStatus.referenceNumber" class="text-sm mt-2">
+                                    เลขที่อ้างอิง: <span class="font-mono">{{ applicationStatus.referenceNumber }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    currentStep: 0,
+                    herbTypes: [
+                        { id: 'cannabis', name: 'กัญชา (Cannabis)', available: true, description: 'พืชสมุนไพรไทยที่มีสรรพคุณทางยา', scientificName: 'Cannabis sativa L.' },
+                        { id: 'turmeric', name: 'ขมิ้นชัน (Turmeric)', available: true, description: 'สมุนไพรต้านอักเสบและแก้ปวด', scientificName: 'Curcuma longa L.' },
+                        { id: 'ginger', name: 'ขิง (Ginger)', available: true, description: 'สมุนไพรช่วยย่อยและแก้คลื่นไส้', scientificName: 'Zingiber officinale Roscoe' },
+                        { id: 'black_galingale', name: 'กระชายดำ (Black Galingale)', available: true, description: 'สมุนไพรบำรุงกำลังและเพิ่มพลังงาน', scientificName: 'Kaempferia parviflora Wall.' },
+                        { id: 'cassumunar_ginger', name: 'ไพล (Cassumunar Ginger)', available: true, description: 'สมุนไพรแก้ปวดและลดการอักเสบ', scientificName: 'Zingiber cassumunar Roxb.' },
+                        { id: 'kratom', name: 'กระท่อม (Kratom)', available: true, description: 'สมุนไพรพื้นบ้านไทยช่วยคลายเครียด', scientificName: 'Mitragyna speciosa Korth.' }
+                    ],
+                    farmerData: {
+                        // ข้อมูลส่วนตัว
+                        title: 'นาย',
+                        firstName: 'สมชาย',
+                        lastName: 'รักเกษตร',
+                        idCard: '1234567890123',
+                        birthDate: '1985-05-15',
+                        age: 38,
+                        gender: 'male',
+                        nationality: 'thai',
+                        
+                        // ข้อมูลติดต่อ
+                        mobilePhone: '0812345678',
+                        homePhone: '0532345678',
+                        email: 'somchai.farmer@example.com',
+                        lineId: '@somchai_farmer',
+                        
+                        // ที่อยู่ปัจจุบัน
+                        houseNumber: '123',
+                        village: '5',
+                        lane: '',
+                        road: 'ถนนพหลโยธิน',
+                        subdistrict: 'ป่าซาง',
+                        district: 'แม่แตง',
+                        province: 'เชียงใหม่',
+                        zipCode: '50150',
+                        
+                        // การศึกษาและอาชีพ
+                        education: 'bachelor',
+                        occupation: 'farmer',
+                        monthlyIncome: '30000-50000',
+                        farmingExperience: 5,
+                        
+                        // ข้อมูลฟาร์ม
+                        farmAddress: 'หมู่ที่ 5 ตำบลป่าซาง อำเภอแม่แตง จังหวัดเชียงใหม่ 50150',
+                        latitude: 18.901500,
+                        longitude: 98.984700,
+                        totalFarmSize: 5.0,
+                        herbalFarmSize: 2.5,
+                        
+                        // สภาพแวดล้อม
+                        topography: 'flat',
+                        soilType: 'loam',
+                        soilPH: 6.5,
+                        waterSource: 'well',
+                        waterQuality: 'good',
+                        drainage: 'natural',
+                        altitude: 300,
+                        avgTemperature: 28,
+                        avgRainfall: 1200,
+                        
+                        // การเพาะปลูก
+                        cropType: 'cannabis',
+                        productionSystem: 'organic',
+                        cultivationMethod: 'seedling',
+                        growingPeriod: 6,
+                        harvestFrequency: 2,
+                        expectedYield: 500,
+                        herbExperience: 3,
+                        postHarvestProcessing: 'dried',
+                        storageMethod: 'warehouse',
+                        
+                        // วัตถุประสงค์
+                        purpose: 'medical',
+                        productionTarget: 1000
+                    },
+                    },
+                    uploadedDocuments: {},
+                    documentAnalysis: {},
+                    coaAnalysis: null,
+                    isSubmitting: false,
+                    applicationStatus: null,
+                    sopSteps: [
+                        { title: 'ข้อมูลเกษตรกร', description: 'กรอกข้อมูลส่วนตัวและแปลงเกษตร' },
+                        { title: 'อัพโหลดเอกสาร', description: 'เอกสารหลักฐานที่จำเป็น' },
+                        { title: 'ตรวจสอบ SOP', description: 'ตรวจสอบความถูกต้องตามมาตรฐาน' },
+                        { title: 'ยื่นคำขอ', description: 'ส่งคำขอเข้าสู่ระบบ' }
+                    ],
+                    requiredDocuments: [
+                        { id: 'idCard', name: 'สำเนาบัตรประจำตัวประชาชน และสำเนาทะเบียนบ้าน', required: true },
+                        { id: 'landTitle', name: 'สำเนาโฉนดที่ดิน หรือหนังสือแสดงกรรมสิทธิ์ในที่ดิน', required: true },
+                        { id: 'farmingLicense', name: 'ใบอนุญาตประกอบการเกษตร หรือใบรับรองการเป็นเกษตรกร', required: true },
+                        { id: 'plotMap', name: 'แผนที่แปลงเกษตร พร้อมแสดงพิกัด GPS', required: true },
+                        { id: 'soilTest', name: 'ผลการตรวจสอบคุณภาพดินและน้ำ', required: true },
+                        { id: 'farmPlan', name: 'แผนการผลิตและปฏิทินการเพาะปลูก', required: true },
+                        { id: 'educationCert', name: 'หลักฐานการศึกษา หรือใบประกาศนียบัตร', required: false },
+                        { id: 'experienceCert', name: 'หนังสือรับรองประสบการณ์การทำเกษตร', required: false },
+                        { id: 'groupMember', name: 'หลักฐานการเป็นสมาชิกกลุ่มเกษตรกร (ถ้ามี)', required: false },
+                        { id: 'bankAccount', name: 'สำเนาสมุดบัญชีธนาคาร', required: true },
+                        { id: 'healthCert', name: 'ใบรับรองแพทย์', required: true },
+                        { id: 'facilityPhotos', name: 'รูปถ่ายสถานที่เก็บรักษาและแปรรูป', required: true },
+                        { id: 'equipmentList', name: 'รายการเครื่องมือและอุปกรณ์การเกษตร', required: true },
+                        { id: 'seedSource', name: 'หลักฐานแหล่งที่มาของเมล็ดพันธุ์หรือกล้าพันธุ์', required: true },
+                        { id: 'chemicalList', name: 'รายการสารเคมีและปุ่ยที่ใช้ (ถ้ามี)', required: false },
+                        { id: 'organicCert', name: 'ใบรับรองมาตรฐานเกษตรอินทรีย์ (ถ้ามี)', required: false },
+                        { id: 'insuranceDoc', name: 'เอกสารประกันภัยพืชผล (ถ้ามี)', required: false },
+                        { id: 'contractDoc', name: 'สัญญาซื้อขายผลผลิตล่วงหน้า (ถ้ามี)', required: false }
+                    ],
+                    sopValidations: [
+                        { id: 'farmer_info', name: 'ข้อมูลเกษตรกร', status: 'pending', description: 'ตรวจสอบความครบถ้วนของข้อมูล' },
+                        { id: 'document_completeness', name: 'ความครบถ้วนเอกสาร', status: 'pending', description: 'เอกสารที่จำเป็นครบถ้วน' },
+                        { id: 'document_validity', name: 'ความถูกต้องเอกสาร', status: 'pending', description: 'AI ตรวจสอบความถูกต้อง' },
+                        { id: 'land_eligibility', name: 'คุณสมบัติที่ดิน', status: 'pending', description: 'ที่ดินเหมาะสมสำหรับ GACP' },
+                        { id: 'production_system', name: 'ระบบการผลิต', status: 'pending', description: 'ระบบตรงตามมาตรฐาน GACP' }
+                    ]
+                }
+            },
+            computed: {
+                complianceScore() {
+                    const validations = this.sopValidations;
+                    const passed = validations.filter(v => v.status === 'pass').length;
+                    const total = validations.length;
+                    return Math.round((passed / total) * 100);
+                },
+                isAllDocumentsUploaded() {
+                    const requiredDocs = this.requiredDocuments.filter(doc => doc.required);
+                    return requiredDocs.every(doc => this.uploadedDocuments[doc.id]);
+                },
+                canSubmit() {
+                    return this.farmerData.fullName && 
+                           this.isAllDocumentsUploaded && 
+                           this.complianceScore >= 80 && 
+                           !this.isSubmitting;
+                }
+            },
+            watch: {
+                farmerData: {
+                    handler() {
+                        this.validateFarmerData();
+                        this.updateCurrentStep();
+                    },
+                    deep: true
+                },
+                uploadedDocuments: {
+                    handler() {
+                        this.validateDocuments();
+                        this.updateCurrentStep();
+                    },
+                    deep: true
+                }
+            },
+            methods: {
+                getSopStepClass(index) {
+                    if (this.currentStep > index) return 'bg-green-100 border-green-500';
+                    if (this.currentStep === index) return 'bg-blue-100 border-blue-500';
+                    return 'bg-gray-100 border-gray-300';
+                },
+                
+                handleFileUpload(event, docType) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.uploadedDocuments[docType] = file;
+                        this.analyzeDocument(file, docType);
+                    }
+                },
+                
+                handleDrop(event, docType) {
+                    event.preventDefault();
+                    const file = event.dataTransfer.files[0];
+                    if (file) {
+                        this.uploadedDocuments[docType] = file;
+                        this.analyzeDocument(file, docType);
+                    }
+                },
+                
+                async analyzeDocument(file, docType) {
+                    // Simulate AI document analysis
+                    setTimeout(() => {
+                        const analysis = {
+                            detectedType: this.getExpectedDocumentType(docType),
+                            confidence: Math.floor(Math.random() * 20) + 80, // 80-99%
+                            qualityScore: Math.floor(Math.random() * 20) + 80, // 80-99
+                            extractedText: `Sample extracted text from ${file.name}`
+                        };
+                        
+                        this.documentAnalysis[docType] = analysis;
+                        
+                        // Special handling for COA
+                        if (docType === 'coa') {
+                            this.analyzeCoA(file);
+                        }
+                    }, 1500);
+                },
+                
+                analyzeCoA(file) {
+                    // Simulate COA analysis
+                    setTimeout(() => {
+                        this.coaAnalysis = {
+                            sampleId: 'COA-2025-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
+                            testDate: new Date().toISOString().split('T')[0],
+                            laboratory: 'National Food Institute Thailand',
+                            overallResult: 'PASS',
+                            qualityScore: Math.floor(Math.random() * 10) + 90, // 90-99
+                            parameters: [
+                                { name: 'Heavy Metals (Lead)', result: '0.05', unit: 'mg/kg', status: 'pass' },
+                                { name: 'Pesticide Residues', result: '< 0.01', unit: 'mg/kg', status: 'pass' },
+                                { name: 'Microbiological Safety', result: 'Negative', unit: '', status: 'pass' },
+                                { name: 'Moisture Content', result: '12.5', unit: '%', status: 'pass' },
+                                { name: 'pH Level', result: '6.8', unit: '', status: 'pass' }
+                            ]
+                        };
+                    }, 2000);
+                },
+                
+                getExpectedDocumentType(docType) {
+                    const types = {
+                        'landTitle': 'Land Title Deed',
+                        'idCard': 'National ID Card',
+                        'farmingLicense': 'Farming License',
+                        'plotMap': 'Farm Plot Map',
+                        'waterSource': 'Water Source Certificate',
+                        'coa': 'Certificate of Analysis'
+                    };
+                    return types[docType] || 'Document';
+                },
+                
+                validateFarmerData() {
+                    const validation = this.sopValidations.find(v => v.id === 'farmer_info');
+                    if (validation) {
+                        // สมุนไพรไทย-specific validations
+                        const errors = [];
+                        
+                        // ข้อมูลส่วนตัวพื้นฐาน
+                        if (!this.farmerData.title) errors.push('คำนำหน้า');
+                        if (!this.farmerData.firstName) errors.push('ชื่อ');
+                        if (!this.farmerData.lastName) errors.push('นามสกุล');
+                        if (!this.farmerData.idCard || this.farmerData.idCard.length !== 13) errors.push('เลขบัตรประชาชน 13 หลัก');
+                        if (!this.farmerData.birthDate) errors.push('วันเกิด');
+                        if (!this.farmerData.age || this.farmerData.age < 18) errors.push('อายุ (ต้องมากกว่า 18 ปี)');
+                        if (!this.farmerData.gender) errors.push('เพศ');
+                        if (!this.farmerData.nationality) errors.push('สัญชาติ');
+                        
+                        // ข้อมูลติดต่อ
+                        if (!this.farmerData.mobilePhone || this.farmerData.mobilePhone.length < 10) errors.push('เบอร์โทรศัพท์มือถือ');
+                        if (!this.farmerData.email) errors.push('อีเมล');
+                        
+                        // ที่อยู่
+                        if (!this.farmerData.houseNumber) errors.push('บ้านเลขที่');
+                        if (!this.farmerData.subdistrict) errors.push('ตำบล/แขวง');
+                        if (!this.farmerData.district) errors.push('อำเภอ/เขต');
+                        if (!this.farmerData.province) errors.push('จังหวัด');
+                        if (!this.farmerData.zipCode || this.farmerData.zipCode.length !== 5) errors.push('รหัสไปรษณีย์ 5 หลัก');
+                        
+                        // การศึกษาและอาชีพ
+                        if (!this.farmerData.education) errors.push('ระดับการศึกษา');
+                        if (!this.farmerData.occupation) errors.push('อาชีพหลัก');
+                        if (!this.farmerData.monthlyIncome) errors.push('รายได้ต่อเดือน');
+                        if (!this.farmerData.farmingExperience || this.farmerData.farmingExperience < 0) errors.push('ประสบการณ์ทำเกษตร');
+                        
+                        // ข้อมูลฟาร์ม
+                        if (!this.farmerData.farmAddress) errors.push('ที่อยู่แปลงเกษตร');
+                        if (!this.farmerData.latitude || !this.farmerData.longitude) errors.push('พิกัด GPS');
+                        if (!this.farmerData.totalFarmSize || this.farmerData.totalFarmSize <= 0) errors.push('ขนาดแปลงรวม');
+                        if (!this.farmerData.herbalFarmSize || this.farmerData.herbalFarmSize <= 0) errors.push('ขนาดพื้นที่ปลูกสมุนไพร');
+                        if (this.farmerData.herbalFarmSize > this.farmerData.totalFarmSize) errors.push('พื้นที่ปลูกสมุนไพรต้องไม่เกินขนาดแปลงรวม');
+                        
+                        // สภาพแวดล้อม
+                        if (!this.farmerData.topography) errors.push('ลักษณะภูมิประเทศ');
+                        if (!this.farmerData.soilType) errors.push('ประเภทดิน');
+                        if (!this.farmerData.waterSource) errors.push('แหล่งน้ำหลัก');
+                        if (!this.farmerData.waterQuality) errors.push('คุณภาพน้ำ');
+                        if (!this.farmerData.drainage) errors.push('ระบบการระบายน้ำ');
+                        
+                        // การเพาะปลูก
+                        if (!this.farmerData.cropType) errors.push('ประเภทสมุนไพรที่ต้องการปลูก');
+                        if (!this.farmerData.productionSystem) errors.push('ระบบการผลิต');
+                        if (!this.farmerData.cultivationMethod) errors.push('วิธีการเพาะปลูก');
+                        if (!this.farmerData.growingPeriod || this.farmerData.growingPeriod <= 0) errors.push('ระยะเวลาเพาะปลูก');
+                        if (!this.farmerData.harvestFrequency || this.farmerData.harvestFrequency <= 0) errors.push('จำนวนครั้งการเก็บเกี่ยว/ปี');
+                        if (!this.farmerData.postHarvestProcessing) errors.push('วิธีการแปรรูปหลังเก็บเกี่ยว');
+                        if (!this.farmerData.storageMethod) errors.push('การเก็บรักษาผลผลิต');
+                        
+                        // วัตถุประสงค์
+                        if (!this.farmerData.purpose) errors.push('วัตถุประสงค์การขอใบรับรอง');
+                        if (!this.farmerData.productionTarget || this.farmerData.productionTarget <= 0) errors.push('เป้าหมายการผลิต');
+                        
+                        if (errors.length === 0) {
+                            validation.status = 'pass';
+                            validation.error = null;
+                        } else {
+                            validation.status = 'pending';
+                            validation.error = 'ข้อมูลไม่ครบ: ' + errors.slice(0, 5).join(', ') + (errors.length > 5 ? ` และอีก ${errors.length - 5} รายการ` : '');
+                        }
+                    }
+                },
+                
+                validateDocuments() {
+                    // Document completeness
+                    const completeness = this.sopValidations.find(v => v.id === 'document_completeness');
+                    if (completeness) {
+                        if (this.isAllDocumentsUploaded) {
+                            completeness.status = 'pass';
+                            completeness.error = null;
+                        } else {
+                            completeness.status = 'pending';
+                            completeness.error = 'เอกสารยังไม่ครบถ้วน';
+                        }
+                    }
+                    
+                    // Document validity
+                    const validity = this.sopValidations.find(v => v.id === 'document_validity');
+                    if (validity) {
+                        const hasAnalysis = Object.keys(this.documentAnalysis).length > 0;
+                        const highConfidence = Object.values(this.documentAnalysis).every(a => a.confidence >= 80);
+                        
+                        if (hasAnalysis && highConfidence) {
+                            validity.status = 'pass';
+                            validity.error = null;
+                        } else if (hasAnalysis) {
+                            validity.status = 'warning';
+                            validity.error = 'เอกสารบางส่วนมีความแม่นยำต่ำ';
+                        }
+                    }
+                    
+                    // Land eligibility (simulated)
+                    const landEligibility = this.sopValidations.find(v => v.id === 'land_eligibility');
+                    if (landEligibility && this.uploadedDocuments.landTitle) {
+                        setTimeout(() => {
+                            landEligibility.status = 'pass';
+                            landEligibility.error = null;
+                        }, 2000);
+                    }
+                    
+                    // Production system
+                    const productionSystem = this.sopValidations.find(v => v.id === 'production_system');
+                    if (productionSystem && this.farmerData.productionSystem) {
+                        productionSystem.status = 'pass';
+                        productionSystem.error = null;
+                    }
+                },
+                
+                updateCurrentStep() {
+                    if (this.farmerData.fullName && this.farmerData.idCard) {
+                        this.currentStep = Math.max(this.currentStep, 1);
+                    }
+                    if (this.isAllDocumentsUploaded) {
+                        this.currentStep = Math.max(this.currentStep, 2);
+                    }
+                    if (this.complianceScore >= 80) {
+                        this.currentStep = Math.max(this.currentStep, 3);
+                    }
+                },
+                
+                getDocumentStatus(docId) {
+                    if (this.uploadedDocuments[docId]) {
+                        return this.documentAnalysis[docId] ? 'วิเคราะห์แล้ว' : 'กำลังวิเคราะห์';
+                    }
+                    return 'รอการอัพโหลด';
+                },
+                
+                getDocumentStatusClass(docId) {
+                    if (this.uploadedDocuments[docId]) {
+                        return this.documentAnalysis[docId] ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                    }
+                    return 'bg-gray-100 text-gray-800';
+                },
+                
+                getValidationClass(status) {
+                    if (status === 'pass') return 'validation-success';
+                    if (status === 'warning') return 'border-yellow-500 bg-yellow-50';
+                    if (status === 'error') return 'validation-error';
+                    return 'border-gray-300 bg-gray-50';
+                },
+                
+                getStatusIcon(status) {
+                    const icons = { 'pass': '✅', 'warning': '⚠️', 'error': '❌', 'pending': '⏳' };
+                    return icons[status] || '⏳';
+                },
+                
+                getStatusIconClass(status) {
+                    const classes = { 
+                        'pass': 'text-green-600', 
+                        'warning': 'text-yellow-600', 
+                        'error': 'text-red-600', 
+                        'pending': 'text-gray-400' 
+                    };
+                    return classes[status] || 'text-gray-400';
+                },
+                
+                getScoreColor(score) {
+                    if (score >= 90) return 'text-green-600';
+                    if (score >= 80) return 'text-blue-600';
+                    if (score >= 70) return 'text-yellow-600';
+                    return 'text-red-600';
+                },
+                
+                getScoreBarColor(score) {
+                    if (score >= 90) return 'bg-green-500';
+                    if (score >= 80) return 'bg-blue-500';
+                    if (score >= 70) return 'bg-yellow-500';
+                    return 'bg-red-500';
+                },
+                
+                getComplianceMessage(score) {
+                    if (score >= 90) return 'ممتاز! ระบบพร้อมสำหรับการยื่นคำขอ';
+                    if (score >= 80) return 'ดี - สามารถยื่นคำขอได้';
+                    if (score >= 70) return 'ปานกลาง - ควรปรับปรุงก่อนยื่นคำขอ';
+                    return 'ต้องปรับปรุง - ไม่สามารถยื่นคำขอได้';
+                },
+                
+                formatFileSize(bytes) {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                },
+                
+                async submitApplication() {
+                    if (!this.canSubmit) return;
+                    
+                    this.isSubmitting = true;
+                    
+                    // Simulate API call for Thailand Herbal GACP
+                    try {
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+                        
+                        const referenceNumber = 'GACP-TH-' + new Date().getFullYear() + '-' + 
+                                              Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                        
+                        this.applicationStatus = {
+                            type: 'success',
+                            title: '✅ ยื่นคำขอ Thailand Herbal GACP สำเร็จ!',
+                            message: `คำขอใบรับรอง GACP สำหรับ${this.getHerbName()}ได้รับการบันทึกแล้ว เจ้าหน้าที่จะติดต่อกลับภายใน 7-14 วันทำการ`,
+                            referenceNumber: referenceNumber
+                        };
+                        
+                        this.currentStep = 4;
+                        
+                    } catch (error) {
+                        this.applicationStatus = {
+                            type: 'error',
+                            title: '❌ เกิดข้อผิดพลาด',
+                            message: 'ไม่สามารถยื่นคำขอได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง หรือติดต่อ กรมพัฒนาการแพทย์แผนไทยและเวชกรรมพื้นบ้าน'
+                        };
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                },
+                
+                getHerbName() {
+                    const herb = this.herbTypes.find(h => h.id === this.farmerData.cropType);
+                    return herb ? herb.name : 'สมุนไพรไทย';
+                }
+            },
+            
+            mounted() {
+                // Initialize with sample data for demo
+                setTimeout(() => {
+                    this.farmerData = {
+                        fullName: 'นายสมชาย รักเกษตร',
+                        idCard: '1234567890123',
+                        farmAddress: 'หมู่ที่ 5 ตำบลป่าซาง อำเภอแม่แตง จังหวัดเชียงใหม่ 50150',
+                        cropType: 'herb',
+                        farmSize: '15',
+                        productionSystem: 'organic'
+                    };
+                }, 1000);
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

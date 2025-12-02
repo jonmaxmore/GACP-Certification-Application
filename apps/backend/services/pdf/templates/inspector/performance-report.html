@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+  <style>
+    .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+    .kpi-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; text-align: center; }
+    .kpi-value { font-size: 32pt; font-weight: 700; margin: 10px 0; }
+    .kpi-label { font-size: 14pt; }
+  </style>
+</head>
+<body>
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">รายงานสถิติการตรวจสอบ (Inspector)</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">Inspector Performance Report</div>
+  
+  <div class="document-number">รหัสเจ้าหน้าที่: {{inspectorId}}<br>ช่วงเวลา: {{periodStart}} - {{periodEnd}}</div>
+
+  <div class="section">
+    <div class="section-title">ข้อมูลผู้ตรวจสอบ</div>
+    <div class="info-row"><div class="info-label">ชื่อ-นามสกุล:</div><div class="info-value">{{inspectorName}}</div></div>
+    <div class="info-row"><div class="info-label">ตำแหน่ง:</div><div class="info-value">{{position}}</div></div>
+    <div class="info-row"><div class="info-label">พื้นที่รับผิดชอบ:</div><div class="info-value">{{responsibleArea}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">KPI Dashboard</div>
+    <div class="kpi-grid">
+      <div class="kpi-box">
+        <div class="kpi-label">การตรวจสอบทั้งหมด</div>
+        <div class="kpi-value">{{totalInspections}}</div>
+        <div class="kpi-label">ครั้ง</div>
+      </div>
+      <div class="kpi-box" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+        <div class="kpi-label">เวลาเฉลี่ย</div>
+        <div class="kpi-value">{{avgTime}}</div>
+        <div class="kpi-label">ชั่วโมง/ครั้ง</div>
+      </div>
+      <div class="kpi-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="kpi-label">อัตราอนุมัติ</div>
+        <div class="kpi-value">{{approvalRate}}%</div>
+        <div class="kpi-label">ของทั้งหมด</div>
+      </div>
+      <div class="kpi-box" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+        <div class="kpi-label">คะแนนเฉลี่ย</div>
+        <div class="kpi-value">{{avgScore}}</div>
+        <div class="kpi-label">/ 100</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">สรุปการตรวจสอบ</div>
+    <table>
+      <thead>
+        <tr><th>ประเภท</th><th>จำนวน</th><th>ร้อยละ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Video Call Inspection</td><td>{{videoCount}}</td><td>{{videoPercent}}%</td></tr>
+        <tr><td>Onsite Inspection</td><td>{{onsiteCount}}</td><td>{{onsitePercent}}%</td></tr>
+        <tr style="font-weight: 700;"><td>รวม</td><td>{{totalInspections}}</td><td>100%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ผลการตรวจสอบ</div>
+    <table>
+      <thead>
+        <tr><th>ผลการตัดสิน</th><th>จำนวน</th><th>ร้อยละ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="color: #28a745;">✓ อนุมัติ (Approved)</td><td>{{approvedCount}}</td><td>{{approvalRate}}%</td></tr>
+        <tr><td style="color: #ffc107;">⚠ ต้องตรวจสอบเพิ่ม (Need Onsite)</td><td>{{needOnsiteCount}}</td><td>{{needOnsiteRate}}%</td></tr>
+        <tr><td style="color: #dc3545;">✗ ไม่ผ่าน (Rejected)</td><td>{{rejectedCount}}</td><td>{{rejectionRate}}%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">การตรวจสอบตามพืช</div>
+    <table>
+      <thead>
+        <tr><th>ประเภทพืช</th><th>จำนวน</th><th>คะแนนเฉลี่ย</th><th>อัตราผ่าน</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>กัญชา (Cannabis)</td><td>{{cannabisCount}}</td><td>{{cannabisAvgScore}}</td><td>{{cannabisPassRate}}%</td></tr>
+        <tr><td>ขมิ้นชัน (Turmeric)</td><td>{{turmericCount}}</td><td>{{turmericAvgScore}}</td><td>{{turmericPassRate}}%</td></tr>
+        <tr><td>ขิง (Ginger)</td><td>{{gingerCount}}</td><td>{{gingerAvgScore}}</td><td>{{gingerPassRate}}%</td></tr>
+        <tr><td>อื่นๆ</td><td>{{othersCount}}</td><td>{{othersAvgScore}}</td><td>{{othersPassRate}}%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ข้อบกพร่องที่พบบ่อย</div>
+    <table>
+      <thead>
+        <tr><th>CCP</th><th>ข้อบกพร่อง</th><th>จำนวนครั้ง</th></tr>
+      </thead>
+      <tbody>{{commonIssues}}</tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">เปรียบเทียบผลงาน</div>
+    <div class="info-row"><div class="info-label">เดือนนี้:</div><div class="info-value">{{currentMonthCount}} ครั้ง</div></div>
+    <div class="info-row"><div class="info-label">เดือนที่แล้ว:</div><div class="info-value">{{lastMonthCount}} ครั้ง</div></div>
+    <div class="info-row"><div class="info-label">เป้าหมาย:</div><div class="info-value">{{targetCount}} ครั้ง/เดือน</div></div>
+    <div class="info-row"><div class="info-label">สถานะ:</div><div class="info-value" style="color: {{statusColor}};">{{statusText}}</div></div>
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-line">
+      ({{supervisorName}})<br>
+      หัวหน้าแผนก<br>
+      วันที่: {{reportDate}}
+    </div>
+  </div>
+
+  <div class="footer-info">
+    รายงานนี้สร้างโดยระบบอัตโนมัติ<br>
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข
+  </div>
+</body>
+</html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTAM Super Admin Dashboard - แดชบอร์ดผู้ดูแลระบบสูงสุด</title>
+    <style>
+        :root {
+            --primary-color: #7c2d12;
+            --primary-dark: #6c2e0e;
+            --secondary-color: #fef7ed;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #06b6d4;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .super-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .super-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .super-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .super-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .super-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--text-dark);
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .super-tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .super-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .super-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .super-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .super-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .super-btn:hover {
+            background: var(--secondary-color);
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .critical-action {
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        .critical-action:hover {
+            background: #fef2f2;
+            border-color: var(--error-color);
+        }
+
+        @media (max-width: 1024px) {
+            .super-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .super-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div>👑</div>
+                <div>
+                    <h1>Super Admin Dashboard</h1>
+                    <p style="opacity: 0.9; font-size: 0.875rem;">แดชบอร์ดผู้ดูแลระบบสูงสุด</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <div id="userName">ดร.วุฒิ สูงสุด</div>
+                    <div style="opacity: 0.8; font-size: 0.875rem;" id="userRole">Super Administrator</div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Critical System Metrics -->
+        <div class="super-grid">
+            <div class="super-card">
+                <div class="super-number" id="totalUsers">1,247</div>
+                <div class="super-label">ผู้ใช้ทั้งหมด</div>
+            </div>
+            <div class="super-card">
+                <div class="super-number" id="systemHealth">98.7%</div>
+                <div class="super-label">สุขภาพระบบ</div>
+            </div>
+            <div class="super-card">
+                <div class="super-number" id="securityLevel">🔒 SECURE</div>
+                <div class="super-label">ระดับความปลอดภัย</div>
+            </div>
+            <div class="super-card">
+                <div class="super-number" id="globalUptime">99.99%</div>
+                <div class="super-label">Uptime ทั่วโลก</div>
+            </div>
+        </div>
+
+        <!-- Super Administrator Tools -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🛠️ เครื่องมือผู้ดูแลระบบสูงสุด</h3>
+                <div style="color: var(--error-color); font-weight: 600;">⚠️ เครื่องมือระดับวิกฤต</div>
+            </div>
+            
+            <div class="super-tool-grid">
+                <!-- Global System Control -->
+                <div class="super-section">
+                    <h4 class="super-title">🌍 การควบคุมระบบทั่วโลก</h4>
+                    <div class="super-list">
+                        <a href="#" class="super-btn critical-action" onclick="globalShutdown()">
+                            🔴 ปิดระบบทั้งหมด (EMERGENCY)
+                        </a>
+                        <a href="#" class="super-btn" onclick="globalMaintenance()">
+                            🔧 เข้าสู่โหมดบำรุงรักษา
+                        </a>
+                        <a href="#" class="super-btn" onclick="systemRecovery()">
+                            🔄 กู้คืนระบบ
+                        </a>
+                        <a href="#" class="super-btn" onclick="disasterPlan()">
+                            🚨 แผนรองรับภัยพิบัติ
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Master Data Management -->
+                <div class="super-section">
+                    <h4 class="super-title">📊 จัดการข้อมูลหลัก</h4>
+                    <div class="super-list">
+                        <a href="#" class="super-btn critical-action" onclick="masterDataBackup()">
+                            💾 สำรองข้อมูลหลักทั้งหมด
+                        </a>
+                        <a href="#" class="super-btn" onclick="dataIntegrity()">
+                            🔍 ตรวจสอบความสมบูรณ์ข้อมูล
+                        </a>
+                        <a href="#" class="super-btn" onclick="crossSystemSync()">
+                            🔗 ซิงค์ข้อมูลข้ามระบบ
+                        </a>
+                        <a href="#" class="super-btn" onclick="archiveManagement()">
+                            📚 จัดการข้อมูลเก่า
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Security & Compliance -->
+                <div class="super-section">
+                    <h4 class="super-title">🔐 ความปลอดภัย & กฎระเบียบ</h4>
+                    <div class="super-list">
+                        <a href="#" class="super-btn critical-action" onclick="securityLockdown()">
+                            🚨 ล็อคดาวน์ความปลอดภัย
+                        </a>
+                        <a href="#" class="super-btn" onclick="auditCompliance()">
+                            📋 ตรวจสอบการปฏิบัติตามกฎ
+                        </a>
+                        <a href="#" class="super-btn" onclick="encryptionManagement()">
+                            🔒 จัดการการเข้ารหัส
+                        </a>
+                        <a href="#" class="super-btn" onclick="accessAudit()">
+                            👥 ตรวจสอบสิทธิ์การเข้าถึง
+                        </a>
+                    </div>
+                </div>
+
+                <!-- User & Role Management -->
+                <div class="super-section">
+                    <h4 class="super-title">👤 จัดการผู้ใช้ & สิทธิ์</h4>
+                    <div class="super-list">
+                        <a href="#" class="super-btn" onclick="masterUserControl()">
+                            👑 ควบคุมผู้ใช้หลัก
+                        </a>
+                        <a href="#" class="super-btn" onclick="roleHierarchy()">
+                            🏗️ จัดการลำดับชั้นสิทธิ์
+                        </a>
+                        <a href="#" class="super-btn" onclick="privilegeEscalation()">
+                            ⬆️ การเพิ่มสิทธิ์พิเศษ
+                        </a>
+                        <a href="#" class="super-btn critical-action" onclick="emergencyAccess()">
+                            🚪 สิทธิ์เข้าถึงฉุกเฉิน
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Infrastructure Control -->
+                <div class="super-section">
+                    <h4 class="super-title">🏗️ ควบคุมโครงสร้างพื้นฐาน</h4>
+                    <div class="super-list">
+                        <a href="#" class="super-btn" onclick="cloudInfrastructure()">
+                            ☁️ จัดการคลาวด์
+                        </a>
+                        <a href="#" class="super-btn" onclick="loadBalancing()">
+                            ⚖️ การกระจายโหลด
+                        </a>
+                        <a href="#" class="super-btn" onclick="scalingControl()">
+                            📈 ควบคุมการขยายระบบ
+                        </a>
+                        <a href="#" class="super-btn" onclick="resourceAllocation()">
+                            🎯 จัดสรรทรัพยากร
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Business Intelligence -->
+                <div class="super-section">
+                    <h4 class="super-title">📈 ธุรกิจอัจฉริยะ</h4>
+                    <div class="super-list">
+                        <a href="#" class="super-btn" onclick="executiveDashboard()">
+                            📊 แดชบอร์ดผู้บริหาร
+                        </a>
+                        <a href="#" class="super-btn" onclick="predictiveAnalytics()">
+                            🔮 การวิเคราะห์เชิงพยากรณ์
+                        </a>
+                        <a href="#" class="super-btn" onclick="kpiMonitoring()">
+                            🎯 ติดตาม KPI สำคัญ
+                        </a>
+                        <a href="#" class="super-btn" onclick="strategicReports()">
+                            📋 รายงานเชิงกลยุทธ์
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Critical Alerts & Notifications -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🚨 การแจ้งเตือนวิกฤต</h3>
+                <button class="btn btn-danger">แจ้งเตือนฉุกเฉิน</button>
+            </div>
+            
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                <div style="font-weight: 600; color: #b91c1c; margin-bottom: 0.5rem;">⚠️ การแจ้งเตือนระดับวิกฤต</div>
+                <div style="font-size: 0.875rem; color: #7f1d1d;">
+                    • ไม่มีการแจ้งเตือนวิกฤตในขณะนี้<br>
+                    • ระบบทำงานปกติ<br>
+                    • การตรวจสอบล่าสุด: 2 นาทีที่แล้ว
+                </div>
+            </div>
+
+            <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 1rem;">
+                <div style="font-weight: 600; color: #0369a1; margin-bottom: 0.5rem;">ℹ️ ข้อมูลระบบ</div>
+                <div style="font-size: 0.875rem; color: #075985;">
+                    • เซิร์ฟเวอร์หลัก: ✅ ออนไลน์<br>
+                    • ฐานข้อมูล: ✅ ปกติ<br>
+                    • การสำรองข้อมูล: ✅ เสร็จสิ้น (6 ชั่วโมงที่แล้ว)<br>
+                    • การอัปเดตความปลอดภัย: ✅ ล่าสุด
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                
+                if (currentUser.organizationType !== 'super_admin') {
+                    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+                    redirectToLogin();
+                    return;
+                }
+                
+                updateUserDisplay();
+            }
+
+            await loadDashboardData();
+        });
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                updateCriticalMetrics();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateCriticalMetrics() {
+            document.getElementById('totalUsers').textContent = '1,247';
+            document.getElementById('systemHealth').textContent = '98.7%';
+            document.getElementById('securityLevel').textContent = '🔒 SECURE';
+            document.getElementById('globalUptime').textContent = '99.99%';
+        }
+
+        // Critical System Functions
+        function globalShutdown() {
+            if (confirm('⚠️ คำเตือน: คุณกำลังจะปิดระบบทั้งหมด!\n\nการดำเนินการนี้จะส่งผลกระทบต่อผู้ใช้ทั้งหมด\nคุณแน่ใจหรือไม่?')) {
+                if (confirm('❌ ยืนยันอีกครั้ง: ปิดระบบทั้งหมดหรือไม่?')) {
+                    alert('🚨 ฟีเจอร์นี้ถูกปิดการใช้งานเพื่อความปลอดภัย\n\nกรุณาติดต่อทีมพัฒนาเพื่อใช้งานจริง');
+                }
+            }
+        }
+
+        function globalMaintenance() {
+            alert('🔧 เข้าสู่โหมดบำรุงรักษา:\n\n• ปิดการเข้าถึงจากผู้ใช้ทั่วไป\n• แสดงหน้า Maintenance\n• รักษาการเข้าถึงของ Admin\n• บันทึก Log การบำรุงรักษา');
+        }
+
+        function systemRecovery() {
+            alert('🔄 กู้คืนระบบ:\n\n• Disaster recovery procedures\n• Data restoration\n• Service recovery\n• System validation');
+        }
+
+        function disasterPlan() {
+            alert('🚨 แผนรองรับภัยพิบัติ:\n\n• Emergency protocols\n• Backup activation\n• Failover procedures\n• Communication plan');
+        }
+
+        function masterDataBackup() {
+            alert('💾 สำรองข้อมูลหลักทั้งหมด:\n\n• Full system backup\n• Database snapshots\n• Configuration files\n• Security policies');
+        }
+
+        function dataIntegrity() {
+            alert('🔍 ตรวจสอบความสมบูรณ์ข้อมูล:\n\n• Data validation\n• Consistency checks\n• Corruption detection\n• Repair procedures');
+        }
+
+        function crossSystemSync() {
+            alert('🔗 ซิงค์ข้อมูลข้ามระบบ:\n\n• Multi-system integration\n• Data synchronization\n• Conflict resolution\n• Sync monitoring');
+        }
+
+        function archiveManagement() {
+            alert('📚 จัดการข้อมูลเก่า:\n\n• Data archiving\n• Retention policies\n• Storage optimization\n• Access management');
+        }
+
+        function securityLockdown() {
+            alert('🚨 ล็อคดาวน์ความปลอดภัย:\n\n• Emergency security mode\n• Access restrictions\n• Threat containment\n• Incident response');
+        }
+
+        function auditCompliance() {
+            alert('📋 ตรวจสอบการปฏิบัติตามกฎ:\n\n• Compliance auditing\n• Regulatory requirements\n• Policy enforcement\n• Audit trails');
+        }
+
+        function encryptionManagement() {
+            alert('🔒 จัดการการเข้ารหัส:\n\n• Encryption policies\n• Key management\n• Certificate handling\n• Security standards');
+        }
+
+        function accessAudit() {
+            alert('👥 ตรวจสอบสิทธิ์การเข้าถึง:\n\n• Permission review\n• Access patterns\n• Privilege analysis\n• Security assessment');
+        }
+
+        function masterUserControl() {
+            alert('👑 ควบคุมผู้ใช้หลัก:\n\n• User management\n• Account administration\n• Profile management\n• Activity monitoring');
+        }
+
+        function roleHierarchy() {
+            alert('🏗️ จัดการลำดับชั้นสิทธิ์:\n\n• Role definitions\n• Permission inheritance\n• Hierarchy management\n• Access control');
+        }
+
+        function privilegeEscalation() {
+            alert('⬆️ การเพิ่มสิทธิ์พิเศษ:\n\n• Temporary privileges\n• Emergency access\n• Approval workflows\n• Audit logging');
+        }
+
+        function emergencyAccess() {
+            alert('🚪 สิทธิ์เข้าถึงฉุกเฉิน:\n\n• Break-glass access\n• Emergency procedures\n• Incident response\n• Recovery operations');
+        }
+
+        function cloudInfrastructure() {
+            alert('☁️ จัดการคลาวด์:\n\n• Cloud resources\n• Cost optimization\n• Performance monitoring\n• Scalability management');
+        }
+
+        function loadBalancing() {
+            alert('⚖️ การกระจายโหลด:\n\n• Traffic distribution\n• Server allocation\n• Performance optimization\n• Failover management');
+        }
+
+        function scalingControl() {
+            alert('📈 ควบคุมการขยายระบบ:\n\n• Auto-scaling\n• Resource planning\n• Capacity management\n• Performance tuning');
+        }
+
+        function resourceAllocation() {
+            alert('🎯 จัดสรรทรัพยากร:\n\n• Resource planning\n• Allocation strategies\n• Usage optimization\n• Cost management');
+        }
+
+        function executiveDashboard() {
+            alert('📊 แดชบอร์ดผู้บริหาร:\n\n• Executive metrics\n• Business KPIs\n• Strategic insights\n• Performance analytics');
+        }
+
+        function predictiveAnalytics() {
+            alert('🔮 การวิเคราะห์เชิงพยากรณ์:\n\n• Predictive modeling\n• Trend analysis\n• Forecasting\n• Risk assessment');
+        }
+
+        function kpiMonitoring() {
+            alert('🎯 ติดตาม KPI สำคัญ:\n\n• Key performance indicators\n• Metric tracking\n• Goal monitoring\n• Performance alerts');
+        }
+
+        function strategicReports() {
+            alert('📋 รายงานเชิงกลยุทธ์:\n\n• Strategic analysis\n• Business intelligence\n• Executive summaries\n• Decision support');
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/auth.html';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+    </script>
+</body>
+</html>

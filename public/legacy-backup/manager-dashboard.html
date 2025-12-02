@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTAM Manager Dashboard - แดชบอร์ดผู้จัดการทั่วไป DTAM</title>
+    <style>
+        :root {
+            --primary-color: #1f2937;
+            --primary-dark: #111827;
+            --secondary-color: #f9fafb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #06b6d4;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .manager-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .manager-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .manager-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .manager-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .manager-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--secondary-color);
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-excellent {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-good {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-critical {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--text-dark);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .manager-tools {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        .tool-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .tool-btn:hover {
+            background: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+
+        .department-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .department-card {
+            background: var(--secondary-color);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .department-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .department-name {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .score-excellent {
+            color: var(--success-color);
+        }
+
+        .score-good {
+            color: #3b82f6;
+        }
+
+        .score-warning {
+            color: var(--warning-color);
+        }
+
+        .score-critical {
+            color: var(--error-color);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .manager-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .manager-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div>🎖️</div>
+                <div>
+                    <h1>DTAM Manager Dashboard</h1>
+                    <p style="opacity: 0.9; font-size: 0.875rem;">แดชบอร์ดผู้จัดการทั่วไป DTAM</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <div id="userName">นายผู้จัดการ องค์การ</div>
+                    <div style="opacity: 0.8; font-size: 0.875rem;" id="userRole">ผู้จัดการทั่วไป DTAM</div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Management KPIs -->
+        <div class="manager-grid">
+            <div class="manager-card">
+                <div class="manager-number" id="overallScore">8.6</div>
+                <div class="manager-label">คะแนนรวม DTAM</div>
+            </div>
+            <div class="manager-card">
+                <div class="manager-number" id="teamEfficiency">92%</div>
+                <div class="manager-label">ประสิทธิภาพทีม</div>
+            </div>
+            <div class="manager-card">
+                <div class="manager-number" id="customerSatisfaction">94%</div>
+                <div class="manager-label">ความพึงพอใจลูกค้า</div>
+            </div>
+            <div class="manager-card">
+                <div class="manager-number" id="monthlyRevenue">4.2M</div>
+                <div class="manager-label">รายได้เดือนนี้</div>
+            </div>
+        </div>
+
+        <div class="dashboard-layout">
+            <!-- Department Performance Overview -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">ภาพรวมผลงานหน่วยงาน</h3>
+                    <div>
+                        <select style="margin-right: 1rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+                            <option>ทั้งหมด</option>
+                            <option>สัปดาห์นี้</option>
+                            <option>เดือนนี้</option>
+                            <option>ไตรมาสนี้</option>
+                        </select>
+                        <button class="btn btn-primary">ส่งออกรายงาน</button>
+                    </div>
+                </div>
+                
+                <div class="department-grid">
+                    <div class="department-card">
+                        <div class="department-score score-excellent">9.2</div>
+                        <div class="department-name">ตรวจสอบพื้นที่</div>
+                    </div>
+                    <div class="department-card">
+                        <div class="department-score score-warning">7.8</div>
+                        <div class="department-name">ตรวจสอบเอกสาร</div>
+                    </div>
+                    <div class="department-card">
+                        <div class="department-score score-excellent">9.5</div>
+                        <div class="department-name">การเงิน</div>
+                    </div>
+                    <div class="department-card">
+                        <div class="department-score score-good">8.9</div>
+                        <div class="department-name">CMS</div>
+                    </div>
+                    <div class="department-card">
+                        <div class="department-score score-warning">7.6</div>
+                        <div class="department-name">ลูกค้าสัมพันธ์</div>
+                    </div>
+                    <div class="department-card">
+                        <div class="department-score score-excellent">9.8</div>
+                        <div class="department-name">ระบบ</div>
+                    </div>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>หน่วยงาน</th>
+                            <th>ผู้รับผิดชอบ</th>
+                            <th>KPI หลัก</th>
+                            <th>ผลงาน</th>
+                            <th>เป้าหมาย</th>
+                            <th>สถานะ</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>ตรวจสอบเอกสาร</strong></td>
+                            <td>นางสมใจ ใสใส</td>
+                            <td>ตรวจเอกสาร/วัน</td>
+                            <td><strong>8.2</strong></td>
+                            <td>10</td>
+                            <td><span class="status-badge status-warning">ต้องปรับปรุง</span></td>
+                            <td>
+                                <button class="btn btn-warning" onclick="reviewDepartment('document')">ทบทวน</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>ตรวจสอบพื้นที่</strong></td>
+                            <td>นายวิชัย สำรวจพื้นที่</td>
+                            <td>ฟาร์ม/สัปดาห์</td>
+                            <td><strong>12</strong></td>
+                            <td>10</td>
+                            <td><span class="status-badge status-excellent">เกินเป้า</span></td>
+                            <td>
+                                <button class="btn btn-success" onclick="rewardTeam('field')">ชื่นชม</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>การเงิน</strong></td>
+                            <td>นางวาลี เก็บเงิน</td>
+                            <td>รายได้/เดือน</td>
+                            <td><strong>4.8M</strong></td>
+                            <td>4.2M</td>
+                            <td><span class="status-badge status-excellent">เกินเป้า</span></td>
+                            <td>
+                                <button class="btn btn-success" onclick="viewFinancials('finance')">ดูรายละเอียด</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>CMS</strong></td>
+                            <td>นายสมศักดิ์ จัดการ</td>
+                            <td>ความพึงพอใจ</td>
+                            <td><strong>94%</strong></td>
+                            <td>95%</td>
+                            <td><span class="status-badge status-good">ใกล้เป้า</span></td>
+                            <td>
+                                <button class="btn btn-primary" onclick="improveCMS('cms')">ปรับปรุง</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>ลูกค้าสัมพันธ์</strong></td>
+                            <td>นางสาวมาลี ดูแล</td>
+                            <td>เวลาตอบกลับ</td>
+                            <td><strong>2.1 ชม.</strong></td>
+                            <td>2 ชม.</td>
+                            <td><span class="status-badge status-warning">ต้องปรับปรุง</span></td>
+                            <td>
+                                <button class="btn btn-warning" onclick="improveSupport('support')">ปรับปรุง</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Management Tools -->
+            <div>
+                <!-- Team Performance -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header">
+                        <h3 class="card-title">ผลงานทีมรวม</h3>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                        <div style="text-align: center; padding: 1rem; background: var(--secondary-color); border-radius: 8px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--success-color);">43</div>
+                            <div style="font-size: 0.75rem; color: var(--text-light);">พนักงานทั้งหมด</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--secondary-color); border-radius: 8px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">92%</div>
+                            <div style="font-size: 0.75rem; color: var(--text-light);">ประสิทธิภาพ</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--secondary-color); border-radius: 8px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--info-color);">156K</div>
+                            <div style="font-size: 0.75rem; color: var(--text-light);">ค่าใช้จ่าย/เดือน</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--secondary-color); border-radius: 8px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--warning-color);">11.7%</div>
+                            <div style="font-size: 0.75rem; color: var(--text-light);">ROI</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Management Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">เครื่องมือการจัดการ</h3>
+                    </div>
+                    
+                    <div class="manager-tools">
+                        <a href="#" class="tool-btn" onclick="teamMeeting()">
+                            👥 ประชุมทีมผู้บริหาร
+                        </a>
+                        <a href="#" class="tool-btn" onclick="performanceReview()">
+                            📊 ทบทวนผลงาน
+                        </a>
+                        <a href="#" class="tool-btn" onclick="resourcePlanning()">
+                            📈 วางแผนทรัพยากร
+                        </a>
+                        <a href="#" class="tool-btn" onclick="policyManagement()">
+                            📋 จัดการนโยบาย
+                        </a>
+                        <a href="#" class="tool-btn" onclick="budgetReview()">
+                            💰 ทบทวนงบประมาณ
+                        </a>
+                        <a href="#" class="tool-btn" onclick="qualityAssurance()">
+                            ✅ ประกันคุณภาพ
+                        </a>
+                        <a href="#" class="tool-btn" onclick="stakeholderComm()">
+                            🤝 สื่อสารผู้มีส่วนได้เสีย
+                        </a>
+                        <a href="#" class="tool-btn" onclick="strategicPlanning()">
+                            🎯 วางแผนกลยุทธ์
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strategic Initiatives -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">โครงการเชิงกลยุทธ์</h3>
+                <button class="btn btn-primary">เพิ่มโครงการใหม่</button>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>โครงการ</th>
+                        <th>ผู้รับผิดชอบ</th>
+                        <th>ความคืบหน้า</th>
+                        <th>งบประมาณ</th>
+                        <th>กำหนดเสร็จ</th>
+                        <th>สถานะ</th>
+                        <th>การดำเนินการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>ระบบ AI สำหรับการประเมิน</strong></td>
+                        <td>ทีมเทคโนโลยี</td>
+                        <td>75%</td>
+                        <td>2.5M บาท</td>
+                        <td>31 ธ.ค. 2025</td>
+                        <td><span class="status-badge status-good">กำลังดำเนินการ</span></td>
+                        <td>
+                            <button class="btn btn-primary" onclick="viewProject('AI-001')">ดูโครงการ</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>การพัฒนาบุคลากร 2025</strong></td>
+                        <td>ฝ่ายทรัพยากรบุคคล</td>
+                        <td>60%</td>
+                        <td>800K บาท</td>
+                        <td>30 มิ.ย. 2025</td>
+                        <td><span class="status-badge status-excellent">ตามแผน</span></td>
+                        <td>
+                            <button class="btn btn-success" onclick="viewProject('HR-001')">ดูโครงการ</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>ปรับปรุงประสบการณ์ลูกค้า</strong></td>
+                        <td>ฝ่าย CMS & Support</td>
+                        <td>45%</td>
+                        <td>1.2M บาท</td>
+                        <td>15 ก.ย. 2025</td>
+                        <td><span class="status-badge status-warning">ล่าช้า</span></td>
+                        <td>
+                            <button class="btn btn-warning" onclick="escalateProject('CX-001')">เร่งด่วน</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                
+                if (currentUser.organizationType !== 'dtam_manager') {
+                    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+                    redirectToLogin();
+                    return;
+                }
+                
+                updateUserDisplay();
+            }
+
+            await loadDashboardData();
+        });
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                updateKPIs();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateKPIs() {
+            document.getElementById('overallScore').textContent = '8.6';
+            document.getElementById('teamEfficiency').textContent = '92%';
+            document.getElementById('customerSatisfaction').textContent = '94%';
+            document.getElementById('monthlyRevenue').textContent = '4.2M';
+        }
+
+        // Department Management Functions
+        function reviewDepartment(dept) {
+            alert(`ทบทวนผลงานหน่วยงาน: ${dept}\n\nการวิเคราะห์:\n• ประสิทธิภาพการทำงาน\n• คอขวดในกระบวนการ\n• แผนปรับปรุง\n• การฝึกอบรม`);
+        }
+
+        function rewardTeam(dept) {
+            alert(`ชื่นชมทีม: ${dept}\n\nการให้รางวัล:\n• โบนัสประสิทธิภาพ\n• การยกย่องสาธารณะ\n• โอกาสพัฒนาเพิ่ม\n• วันลาพิเศษ`);
+        }
+
+        function viewFinancials(dept) {
+            alert(`ดูรายละเอียดการเงิน: ${dept}\n\nรายงาน:\n• กำไรขาดทุน\n• กระแสเงินสด\n• การใช้งบประมาณ\n• คาดการณ์รายได้`);
+        }
+
+        function improveCMS(dept) {
+            alert(`ปรับปรุง CMS: ${dept}\n\nแผนปรับปรุง:\n• อัปเดตเนื้อหา\n• ปรับปรุง UX/UI\n• เพิ่มฟีเจอร์\n• ฝึกอบรมทีม`);
+        }
+
+        function improveSupport(dept) {
+            alert(`ปรับปรุงลูกค้าสัมพันธ์: ${dept}\n\nแผนปรับปรุง:\n• ลดเวลาตอบกลับ\n• เพิ่มช่องทางสื่อสาร\n• ฝึกอบรมทักษะ\n• ระบบติดตาม`);
+        }
+
+        // Management Tool Functions
+        function teamMeeting() {
+            alert('ประชุมทีมผู้บริหาร:\n\n• Weekly management meeting\n• Performance review\n• Strategic planning\n• Problem solving\n• Resource allocation');
+        }
+
+        function performanceReview() {
+            alert('ทบทวนผลงาน:\n\n• Individual performance\n• Team metrics\n• Goal achievement\n• Improvement plans\n• Career development');
+        }
+
+        function resourcePlanning() {
+            alert('วางแผนทรัพยากร:\n\n• Human resources\n• Budget allocation\n• Technology needs\n• Infrastructure planning\n• Capacity management');
+        }
+
+        function policyManagement() {
+            alert('จัดการนโยบาย:\n\n• Policy development\n• Implementation guidelines\n• Compliance monitoring\n• Regular reviews\n• Training programs');
+        }
+
+        function budgetReview() {
+            alert('ทบทวนงบประมาณ:\n\n• Budget vs actual\n• Variance analysis\n• Cost optimization\n• Future planning\n• ROI assessment');
+        }
+
+        function qualityAssurance() {
+            alert('ประกันคุณภาพ:\n\n• Quality standards\n• Process improvement\n• Audit procedures\n• Certification maintenance\n• Customer satisfaction');
+        }
+
+        function stakeholderComm() {
+            alert('สื่อสารผู้มีส่วนได้เสีย:\n\n• Stakeholder mapping\n• Communication strategy\n• Regular updates\n• Feedback collection\n• Relationship management');
+        }
+
+        function strategicPlanning() {
+            alert('วางแผนกลยุทธ์:\n\n• Strategic analysis\n• Goal setting\n• Action planning\n• Progress monitoring\n• Continuous improvement');
+        }
+
+        // Project Management Functions
+        function viewProject(projectId) {
+            alert(`ดูโครงการ: ${projectId}\n\nรายละเอียด:\n• Project charter\n• Timeline & milestones\n• Resource allocation\n• Risk assessment\n• Progress tracking`);
+        }
+
+        function escalateProject(projectId) {
+            alert(`เร่งด่วนโครงการ: ${projectId}\n\nการดำเนินการ:\n• Resource reallocation\n• Timeline adjustment\n• Risk mitigation\n• Stakeholder communication\n• Recovery planning`);
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/auth.html';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+    </script>
+</body>
+</html>

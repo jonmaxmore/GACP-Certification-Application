@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GACP Inspector Dashboard - แดชบอร์ดผู้ตรวจประเมิน</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #f1f5f9;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--secondary-color);
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-scheduled {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--text-dark);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .calendar-widget {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .audit-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .audit-info h4 {
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .audit-info p {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .action-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div>🔍</div>
+                <div>
+                    <h1>GACP Inspector Dashboard</h1>
+                    <p style="opacity: 0.9; font-size: 0.875rem;">แดชบอร์ดผู้ตรวจประเมิน GACP</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <div id="userName">นายสมศักดิ์ ประเมินใจ</div>
+                    <div style="opacity: 0.8; font-size: 0.875rem;" id="userRole">ผู้ตรวจประเมิน GACP</div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="pendingApplications">12</div>
+                <div class="stat-label">คำขอรอตรวจสอบ</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="scheduledAudits">8</div>
+                <div class="stat-label">การตรวจประเมินที่กำหนด</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedThisMonth">15</div>
+                <div class="stat-label">เสร็จสิ้นเดือนนี้</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="averageScore">92</div>
+                <div class="stat-label">คะแนนเฉลี่ย (%)</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">การดำเนินการด่วน</h3>
+            </div>
+            <div class="quick-actions">
+                <div class="action-card" onclick="reviewApplications()">
+                    <div class="action-icon">📋</div>
+                    <h4>ตรวจสอบเอกสาร</h4>
+                    <p>ทบทวนคำขอที่รอการตรวจสอบ</p>
+                </div>
+                <div class="action-card" onclick="scheduleAudit()">
+                    <div class="action-icon">📅</div>
+                    <h4>จัดตารางตรวจประเมิน</h4>
+                    <p>กำหนดการลงพื้นที่ตรวจประเมิน</p>
+                </div>
+                <div class="action-card" onclick="generateReport()">
+                    <div class="action-icon">📊</div>
+                    <h4>สร้างรายงาน</h4>
+                    <p>รายงานผลการตรวจประเมิน</p>
+                </div>
+                <div class="action-card" onclick="manageCertificates()">
+                    <div class="action-icon">🏆</div>
+                    <h4>จัดการใบรับรอง</h4>
+                    <p>อนุมัติ/ปฏิเสธใบรับรอง</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Pending Applications -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">คำขอรอตรวจสอบ</h3>
+                    <button class="btn btn-primary">ดูทั้งหมด</button>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>เกษตรกร</th>
+                            <th>ประเภท</th>
+                            <th>สถานะ</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingApplicationsTable">
+                        <tr>
+                            <td>นายสมชาย ใจดี</td>
+                            <td>ขิง</td>
+                            <td><span class="status-badge status-pending">รอตรวจสอบ</span></td>
+                            <td><button class="btn btn-primary">ตรวจสอบ</button></td>
+                        </tr>
+                        <tr>
+                            <td>นางสมหญิง รักดี</td>
+                            <td>ขมิ้นชัน</td>
+                            <td><span class="status-badge status-pending">รอตรวจสอบ</span></td>
+                            <td><button class="btn btn-primary">ตรวจสอบ</button></td>
+                        </tr>
+                        <tr>
+                            <td>นายประชา เกษตรกร</td>
+                            <td>ไพล</td>
+                            <td><span class="status-badge status-scheduled">กำหนดตรวจ</span></td>
+                            <td><button class="btn btn-success">ลงพื้นที่</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Scheduled Audits -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">การตรวจประเมินที่กำหนด</h3>
+                    <button class="btn btn-primary">เพิ่มตารางงาน</button>
+                </div>
+                <div class="calendar-widget" id="scheduledAuditsWidget">
+                    <div class="audit-item">
+                        <div class="audit-info">
+                            <h4>ฟาร์มสมุนไพรใจดี</h4>
+                            <p>📍 เชียงใหม่ | ⏰ 9:00 น. - 16:00 น.</p>
+                            <p>📞 นายสมชาย ใจดี | 081-234-5678</p>
+                        </div>
+                        <div>
+                            <span class="status-badge status-scheduled">วันนี้</span>
+                        </div>
+                    </div>
+                    <div class="audit-item">
+                        <div class="audit-info">
+                            <h4>สวนสมุนไพรออร์แกนิค</h4>
+                            <p>📍 ลำปาง | ⏰ 8:30 น. - 15:30 น.</p>
+                            <p>📞 นางสมหญิง รักดี | 089-876-5432</p>
+                        </div>
+                        <div>
+                            <span class="status-badge status-pending">พรุ่งนี้</span>
+                        </div>
+                    </div>
+                    <div class="audit-item">
+                        <div class="audit-info">
+                            <h4>เครือข่ายเกษตรกรไผล</h4>
+                            <p>📍 น่าน | ⏰ 9:00 น. - 17:00 น.</p>
+                            <p>📞 นายประชา เกษตรกร | 094-555-1234</p>
+                        </div>
+                        <div>
+                            <span class="status-badge status-pending">3 ก.ย.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Completed Audits -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">การตรวจประเมินล่าสุด</h3>
+                    <button class="btn btn-primary">ดูรายงาน</button>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>เกษตรกร</th>
+                            <th>คะแนน</th>
+                            <th>ผล</th>
+                            <th>วันที่</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>นายวิชัย แสงใส</td>
+                            <td>95%</td>
+                            <td><span class="status-badge status-completed">ผ่าน</span></td>
+                            <td>28 ส.ค.</td>
+                        </tr>
+                        <tr>
+                            <td>นางมาลี ดอกไม้</td>
+                            <td>88%</td>
+                            <td><span class="status-badge status-completed">ผ่าน</span></td>
+                            <td>26 ส.ค.</td>
+                        </tr>
+                        <tr>
+                            <td>นายเกษม เกษตรกรรม</td>
+                            <td>78%</td>
+                            <td><span class="status-badge status-warning">ต้องปรับปรุง</span></td>
+                            <td>25 ส.ค.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Performance Analytics -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">การวิเคราะห์ผลงาน</h3>
+                </div>
+                <div style="text-align: center; padding: 2rem;">
+                    <canvas id="performanceChart" width="300" height="200"></canvas>
+                    <p style="margin-top: 1rem; color: var(--text-light);">
+                        แสดงสถิติการตรวจประเมิน 6 เดือนที่ผ่านมา
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            // Get user info
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                
+                // Check if user is inspector
+                if (currentUser.organizationType !== 'inspector') {
+                    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+                    redirectToLogin();
+                    return;
+                }
+                
+                updateUserDisplay();
+            }
+
+            await loadDashboardData();
+        });
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Mock data loading - replace with real API calls
+                updateStatistics();
+                loadPendingApplications();
+                loadScheduledAudits();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateStatistics() {
+            // Mock statistics
+            document.getElementById('pendingApplications').textContent = '12';
+            document.getElementById('scheduledAudits').textContent = '8';
+            document.getElementById('completedThisMonth').textContent = '15';
+            document.getElementById('averageScore').textContent = '92';
+        }
+
+        function loadPendingApplications() {
+            // Already populated in HTML
+        }
+
+        function loadScheduledAudits() {
+            // Already populated in HTML
+        }
+
+        function reviewApplications() {
+            alert('เปิดหน้าตรวจสอบเอกสาร - ฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป');
+        }
+
+        function scheduleAudit() {
+            alert('เปิดระบบจัดตารางตรวจประเมิน - ฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป');
+        }
+
+        function generateReport() {
+            alert('เปิดระบบสร้างรายงาน - ฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป');
+        }
+
+        function manageCertificates() {
+            alert('เปิดระบบจัดการใบรับรอง - ฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป');
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/auth.html';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+
+        // Simple chart drawing for performance analytics
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('performanceChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Mock chart data
+            const data = [85, 92, 88, 95, 91, 89];
+            const labels = ['มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.'];
+            
+            drawSimpleChart(ctx, data, labels);
+        });
+
+        function drawSimpleChart(ctx, data, labels) {
+            const width = ctx.canvas.width;
+            const height = ctx.canvas.height;
+            const padding = 40;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw axes
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 1;
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.stroke();
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+            
+            // Draw data
+            ctx.strokeStyle = '#3b82f6';
+            ctx.fillStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            
+            const stepX = chartWidth / (data.length - 1);
+            const maxY = Math.max(...data);
+            const minY = Math.min(...data);
+            const range = maxY - minY || 1;
+            
+            ctx.beginPath();
+            data.forEach((value, index) => {
+                const x = padding + index * stepX;
+                const y = height - padding - ((value - minY) / range) * chartHeight;
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+                
+                // Draw point
+                ctx.fillRect(x - 2, y - 2, 4, 4);
+            });
+            ctx.stroke();
+            
+            // Draw labels
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            
+            labels.forEach((label, index) => {
+                const x = padding + index * stepX;
+                ctx.fillText(label, x, height - padding + 20);
+            });
+        }
+    </script>
+</body>
+</html>

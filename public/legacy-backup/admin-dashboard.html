@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GACP Admin Dashboard - แดชบอร์ดผู้ดูแลระบบ</title>
+    <style>
+        :root {
+            --primary-color: #7c3aed;
+            --primary-dark: #5b21b6;
+            --secondary-color: #f1f5f9;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #3b82f6;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .dashboard-nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .nav-tab.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .nav-tab:hover {
+            background: var(--secondary-color);
+        }
+
+        .nav-tab.active:hover {
+            background: var(--primary-dark);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .stat-change {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .stat-change.negative {
+            color: var(--error-color);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--secondary-color);
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-online {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--text-dark);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .system-health {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .health-item {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .health-item.healthy {
+            background: #d1fae5;
+            border-color: var(--success-color);
+        }
+
+        .health-item.warning {
+            background: #fef3c7;
+            border-color: var(--warning-color);
+        }
+
+        .health-item.error {
+            background: #fee2e2;
+            border-color: var(--error-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .dashboard-nav {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div>⚙️</div>
+                <div>
+                    <h1>GACP Admin Dashboard</h1>
+                    <p style="opacity: 0.9; font-size: 0.875rem;">แดชบอร์ดผู้ดูแลระบบ GACP</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <div id="userName">ผู้ดูแลระบบ</div>
+                    <div style="opacity: 0.8; font-size: 0.875rem;" id="userRole">Administrator</div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Navigation Tabs -->
+        <div class="dashboard-nav">
+            <div class="nav-tab active" onclick="switchTab('overview')">📊 ภาพรวม</div>
+            <div class="nav-tab" onclick="switchTab('users')">👥 ผู้ใช้งาน</div>
+            <div class="nav-tab" onclick="switchTab('applications')">📋 คำขอ</div>
+            <div class="nav-tab" onclick="switchTab('system')">🔧 ระบบ</div>
+            <div class="nav-tab" onclick="switchTab('reports')">📈 รายงาน</div>
+            <div class="nav-tab" onclick="switchTab('settings')">⚙️ ตั้งค่า</div>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <!-- System Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsers">1,248</div>
+                    <div class="stat-label">ผู้ใช้งานทั้งหมด</div>
+                    <div class="stat-change positive">+12% จากเดือนที่แล้ว</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeApplications">189</div>
+                    <div class="stat-label">คำขอที่อยู่ในกระบวนการ</div>
+                    <div class="stat-change positive">+8% จากเดือนที่แล้ว</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="completedCertifications">95</div>
+                    <div class="stat-label">ใบรับรองที่ออกแล้ว</div>
+                    <div class="stat-change positive">+25% จากเดือนที่แล้ว</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="systemUptime">99.8%</div>
+                    <div class="stat-label">ระยะเวลาทำงานของระบบ</div>
+                    <div class="stat-change positive">ในมาตรฐาน</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">การดำเนินการด่วน</h3>
+                </div>
+                <div class="quick-actions">
+                    <div class="action-card" onclick="createUser()">
+                        <div class="action-icon">👤</div>
+                        <h4>สร้างผู้ใช้ใหม่</h4>
+                        <p>เพิ่มผู้ใช้งานหรือเจ้าหน้าที่</p>
+                    </div>
+                    <div class="action-card" onclick="generateSystemReport()">
+                        <div class="action-icon">📊</div>
+                        <h4>รายงานระบบ</h4>
+                        <p>สร้างรายงานสถิติและประสิทธิภาพ</p>
+                    </div>
+                    <div class="action-card" onclick="backupDatabase()">
+                        <div class="action-icon">💾</div>
+                        <h4>สำรองข้อมูล</h4>
+                        <p>สำรองฐานข้อมูลระบบ</p>
+                    </div>
+                    <div class="action-card" onclick="systemMaintenance()">
+                        <div class="action-icon">🔧</div>
+                        <h4>บำรุงรักษาระบบ</h4>
+                        <p>ตรวจสอบและบำรุงรักษา</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- System Health -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">สถานะระบบ</h3>
+                        <span class="status-badge status-online">ปกติ</span>
+                    </div>
+                    <div class="system-health">
+                        <div class="health-item healthy">
+                            <div style="font-weight: 600;">API Server</div>
+                            <div style="color: var(--success-color);">✅ ปกติ</div>
+                        </div>
+                        <div class="health-item healthy">
+                            <div style="font-weight: 600;">Database</div>
+                            <div style="color: var(--success-color);">✅ ปกติ</div>
+                        </div>
+                        <div class="health-item warning">
+                            <div style="font-weight: 600;">File Storage</div>
+                            <div style="color: var(--warning-color);">⚠️ เตือน</div>
+                        </div>
+                        <div class="health-item healthy">
+                            <div style="font-weight: 600;">Email Service</div>
+                            <div style="color: var(--success-color);">✅ ปกติ</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activities -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">กิจกรรมล่าสุด</h3>
+                    </div>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>เวลา</th>
+                                    <th>กิจกรรม</th>
+                                    <th>ผู้ใช้</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>14:32</td>
+                                    <td>เข้าสู่ระบบ</td>
+                                    <td>นายสมชาย ใจดี</td>
+                                </tr>
+                                <tr>
+                                    <td>14:28</td>
+                                    <td>อนุมัติใบรับรอง</td>
+                                    <td>ผู้ตรวจประเมิน A</td>
+                                </tr>
+                                <tr>
+                                    <td>14:15</td>
+                                    <td>อัพโหลดเอกสาร</td>
+                                    <td>นางสมหญิง รักดี</td>
+                                </tr>
+                                <tr>
+                                    <td>13:45</td>
+                                    <td>สร้างผู้ใช้ใหม่</td>
+                                    <td>Admin</td>
+                                </tr>
+                                <tr>
+                                    <td>13:30</td>
+                                    <td>ชำระค่าธรรมเนียม</td>
+                                    <td>นายประชา เกษตรกร</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="users" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">จัดการผู้ใช้งาน</h3>
+                    <button class="btn btn-primary" onclick="showCreateUserModal()">เพิ่มผู้ใช้ใหม่</button>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ชื่อ</th>
+                            <th>อีเมล</th>
+                            <th>ประเภท</th>
+                            <th>สถานะ</th>
+                            <th>วันที่สร้าง</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTable">
+                        <tr>
+                            <td>นายสมชาย ใจดี</td>
+                            <td>somchai@farmer.th</td>
+                            <td>เกษตรกร</td>
+                            <td><span class="status-badge status-active">ใช้งาน</span></td>
+                            <td>25 ส.ค. 2025</td>
+                            <td>
+                                <button class="btn btn-warning">แก้ไข</button>
+                                <button class="btn btn-danger">ระงับ</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>นางสมหญิง รักดี</td>
+                            <td>somying@farmer.th</td>
+                            <td>เกษตรกร</td>
+                            <td><span class="status-badge status-active">ใช้งาน</span></td>
+                            <td>24 ส.ค. 2025</td>
+                            <td>
+                                <button class="btn btn-warning">แก้ไข</button>
+                                <button class="btn btn-danger">ระงับ</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>นายสมศักดิ์ ประเมินใจ</td>
+                            <td>inspector1@dtam.go.th</td>
+                            <td>ผู้ตรวจประเมิน</td>
+                            <td><span class="status-badge status-active">ใช้งาน</span></td>
+                            <td>20 ส.ค. 2025</td>
+                            <td>
+                                <button class="btn btn-warning">แก้ไข</button>
+                                <button class="btn btn-danger">ระงับ</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Applications Tab -->
+        <div id="applications" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">คำขอทั้งหมด</h3>
+                    <div>
+                        <select class="form-input" style="width: auto; margin-right: 1rem;">
+                            <option>ทั้งหมด</option>
+                            <option>รอตรวจสอบ</option>
+                            <option>กำลังดำเนินการ</option>
+                            <option>เสร็จสิ้น</option>
+                        </select>
+                        <button class="btn btn-primary">ส่งออกข้อมูล</button>
+                    </div>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>รหัสคำขอ</th>
+                            <th>เกษตรกร</th>
+                            <th>ประเภทสมุนไพร</th>
+                            <th>สถานะ</th>
+                            <th>ผู้ตรวจประเมิน</th>
+                            <th>วันที่สร้าง</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>GACP-2025-001</td>
+                            <td>นายสมชาย ใจดี</td>
+                            <td>ขิง</td>
+                            <td><span class="status-badge status-pending">รอตรวจสอบ</span></td>
+                            <td>-</td>
+                            <td>30 ส.ค. 2025</td>
+                            <td><button class="btn btn-primary">ดูรายละเอียด</button></td>
+                        </tr>
+                        <tr>
+                            <td>GACP-2025-002</td>
+                            <td>นางสมหญิง รักดี</td>
+                            <td>ขมิ้นชัน</td>
+                            <td><span class="status-badge status-online">กำลังตรวจ</span></td>
+                            <td>นายสมศักดิ์ ประเมินใจ</td>
+                            <td>29 ส.ค. 2025</td>
+                            <td><button class="btn btn-primary">ดูรายละเอียด</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- System Tab -->
+        <div id="system" class="tab-content">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">การใช้งานเซิร์ฟเวอร์</h3>
+                    </div>
+                    <div style="padding: 1rem 0;">
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>CPU</span>
+                                <span>45%</span>
+                            </div>
+                            <div style="background: #e5e7eb; height: 8px; border-radius: 4px;">
+                                <div style="background: var(--primary-color); width: 45%; height: 100%; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Memory</span>
+                                <span>68%</span>
+                            </div>
+                            <div style="background: #e5e7eb; height: 8px; border-radius: 4px;">
+                                <div style="background: var(--warning-color); width: 68%; height: 100%; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Disk</span>
+                                <span>82%</span>
+                            </div>
+                            <div style="background: #e5e7eb; height: 8px; border-radius: 4px;">
+                                <div style="background: var(--error-color); width: 82%; height: 100%; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">บริการภายนอก</h3>
+                    </div>
+                    <div class="system-health">
+                        <div class="health-item healthy">
+                            <div style="font-weight: 600;">Payment Gateway</div>
+                            <div style="color: var(--success-color);">✅ ปกติ</div>
+                        </div>
+                        <div class="health-item healthy">
+                            <div style="font-weight: 600;">SMS Service</div>
+                            <div style="color: var(--success-color);">✅ ปกติ</div>
+                        </div>
+                        <div class="health-item healthy">
+                            <div style="font-weight: 600;">Email Service</div>
+                            <div style="color: var(--success-color);">✅ ปกติ</div>
+                        </div>
+                        <div class="health-item warning">
+                            <div style="font-weight: 600;">File Storage</div>
+                            <div style="color: var(--warning-color);">⚠️ เตือน</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">รายงานระบบ</h3>
+                </div>
+                <div class="quick-actions">
+                    <div class="action-card" onclick="generateUserReport()">
+                        <div class="action-icon">👥</div>
+                        <h4>รายงานผู้ใช้งาน</h4>
+                        <p>สถิติและกิจกรรมผู้ใช้งาน</p>
+                    </div>
+                    <div class="action-card" onclick="generateApplicationReport()">
+                        <div class="action-icon">📋</div>
+                        <h4>รายงานคำขอ</h4>
+                        <p>สถิติและสถานะคำขอ</p>
+                    </div>
+                    <div class="action-card" onclick="generateFinancialReport()">
+                        <div class="action-icon">💰</div>
+                        <h4>รายงานการเงิน</h4>
+                        <p>รายได้และค่าธรรมเนียม</p>
+                    </div>
+                    <div class="action-card" onclick="generateSystemReport()">
+                        <div class="action-icon">📊</div>
+                        <h4>รายงานระบบ</h4>
+                        <p>ประสิทธิภาพและการใช้งาน</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">ตั้งค่าทั่วไป</h3>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ชื่อระบบ</label>
+                        <input type="text" class="form-input" value="ระบบรับรอง GACP">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">อีเมลติดต่อ</label>
+                        <input type="email" class="form-input" value="admin@gacp.dtam.go.th">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">เวลาหมดอายุ Session (นาที)</label>
+                        <input type="number" class="form-input" value="120">
+                    </div>
+                    <button class="btn btn-primary">บันทึกการตั้งค่า</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">ตั้งค่าความปลอดภัย</h3>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">จำนวนครั้งที่ลองเข้าสู่ระบบผิดสูงสุด</label>
+                        <input type="number" class="form-input" value="5">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ระยะเวลาล็อคบัญชี (นาที)</label>
+                        <input type="number" class="form-input" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ความยาวรหัสผ่านขั้นต่ำ</label>
+                        <input type="number" class="form-input" value="8">
+                    </div>
+                    <button class="btn btn-primary">บันทึกการตั้งค่า</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            // Get user info
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                
+                // Check if user is admin
+                if (currentUser.organizationType !== 'admin') {
+                    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+                    redirectToLogin();
+                    return;
+                }
+                
+                updateUserDisplay();
+            }
+
+            await loadDashboardData();
+        });
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Mock data loading - replace with real API calls
+                updateStatistics();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateStatistics() {
+            // Mock statistics
+            document.getElementById('totalUsers').textContent = '1,248';
+            document.getElementById('activeApplications').textContent = '189';
+            document.getElementById('completedCertifications').textContent = '95';
+            document.getElementById('systemUptime').textContent = '99.8%';
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(nav => {
+                nav.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+        }
+
+        function createUser() {
+            alert('เปิดฟอร์มสร้างผู้ใช้ใหม่ - ฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป');
+        }
+
+        function generateSystemReport() {
+            alert('สร้างรายงานระบบ - ฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป');
+        }
+
+        function backupDatabase() {
+            alert('สำรองฐานข้อมูล - ฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป');
+        }
+
+        function systemMaintenance() {
+            alert('บำรุงรักษาระบบ - ฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป');
+        }
+
+        function showCreateUserModal() {
+            alert('เปิดโมดอลสร้างผู้ใช้ใหม่ - ฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป');
+        }
+
+        function generateUserReport() {
+            alert('สร้างรายงานผู้ใช้งาน - ฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป');
+        }
+
+        function generateApplicationReport() {
+            alert('สร้างรายงานคำขอ - ฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป');
+        }
+
+        function generateFinancialReport() {
+            alert('สร้างรายงานการเงิน - ฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป');
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/auth.html';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+    </script>
+</body>
+</html>

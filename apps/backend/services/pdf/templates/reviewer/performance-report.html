@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+  <style>
+    .kpi-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin: 10px 0; text-align: center; }
+    .kpi-number { font-size: 36pt; font-weight: 700; }
+    .chart-placeholder { background: #f9f9f9; border: 2px dashed #ddd; padding: 40px; text-align: center; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">รายงานสถิติการทำงาน (Reviewer)</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">Reviewer Performance Report</div>
+  
+  <div class="document-number">รหัสเจ้าหน้าที่: {{reviewerId}}<br>ช่วงเวลา: {{periodStart}} - {{periodEnd}}</div>
+
+  <div class="section">
+    <div class="section-title">ข้อมูลเจ้าหน้าที่</div>
+    <div class="info-row"><div class="info-label">ชื่อ-นามสกุล:</div><div class="info-value">{{reviewerName}}</div></div>
+    <div class="info-row"><div class="info-label">ตำแหน่ง:</div><div class="info-value">{{position}}</div></div>
+    <div class="info-row"><div class="info-label">แผนก:</div><div class="info-value">{{department}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">สรุปผลงาน (Summary)</div>
+    <table>
+      <tr>
+        <td style="background: #e3f2fd;"><div class="kpi-card"><div class="kpi-number">{{totalReviewed}}</div><div>คำขอที่ตรวจสอบ</div></div></td>
+        <td style="background: #e8f5e9;"><div class="kpi-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);"><div class="kpi-number">{{avgTime}}</div><div>ชั่วโมง (เฉลี่ย)</div></div></td>
+      </tr>
+      <tr>
+        <td style="background: #fff3e0;"><div class="kpi-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"><div class="kpi-number">{{passRate}}%</div><div>อัตราผ่าน</div></div></td>
+        <td style="background: #fce4ec;"><div class="kpi-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"><div class="kpi-number">{{rejectionRate}}%</div><div>อัตราไม่ผ่าน</div></div></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">รายละเอียดการทำงาน</div>
+    <table>
+      <thead>
+        <tr><th>รายการ</th><th>จำนวน</th><th>ร้อยละ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>คำขอที่ผ่านการตรวจสอบ</td><td>{{passedCount}}</td><td style="color: #28a745;">{{passRate}}%</td></tr>
+        <tr><td>คำขอที่ไม่ผ่าน/ต้องแก้ไข</td><td>{{failedCount}}</td><td style="color: #dc3545;">{{rejectionRate}}%</td></tr>
+        <tr><td>คำขอที่รอดำเนินการ</td><td>{{pendingCount}}</td><td style="color: #ffc107;">{{pendingRate}}%</td></tr>
+        <tr style="font-weight: 700;"><td>รวมทั้งหมด</td><td>{{totalReviewed}}</td><td>100%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">เวลาเฉลี่ยในการตรวจสอบ</div>
+    <table>
+      <thead>
+        <tr><th>ประเภทพืช</th><th>จำนวนคำขอ</th><th>เวลาเฉลี่ย (ชม.)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>กัญชา (Cannabis)</td><td>{{cannabisCount}}</td><td>{{cannabisAvgTime}}</td></tr>
+        <tr><td>ขมิ้นชัน (Turmeric)</td><td>{{turmericCount}}</td><td>{{turmericAvgTime}}</td></tr>
+        <tr><td>ขิง (Ginger)</td><td>{{gingerCount}}</td><td>{{gingerAvgTime}}</td></tr>
+        <tr><td>อื่นๆ</td><td>{{othersCount}}</td><td>{{othersAvgTime}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ข้อบกพร่องที่พบบ่อย (Top Issues)</div>
+    <table>
+      <thead>
+        <tr><th>ลำดับ</th><th>ข้อบกพร่อง</th><th>จำนวนครั้ง</th></tr>
+      </thead>
+      <tbody>{{topIssues}}</tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">การเปรียบเทียบ (Comparison)</div>
+    <div class="info-row"><div class="info-label">เดือนนี้:</div><div class="info-value">{{currentMonthCount}} คำขอ</div></div>
+    <div class="info-row"><div class="info-label">เดือนที่แล้ว:</div><div class="info-value">{{lastMonthCount}} คำขอ</div></div>
+    <div class="info-row"><div class="info-label">การเปลี่ยนแปลง:</div><div class="info-value" style="color: {{changeColor}};">{{changePercent}}%</div></div>
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-line">
+      ({{supervisorName}})<br>
+      หัวหน้าแผนก<br>
+      วันที่: {{reportDate}}
+    </div>
+  </div>
+
+  <div class="footer-info">
+    รายงานนี้สร้างโดยระบบอัตโนมัติ<br>
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข
+  </div>
+</body>
+</html>

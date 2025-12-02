@@ -1,0 +1,912 @@
+openapi: 3.0.3
+info:
+  title: GACP Certify Flow Admin Portal API
+  description: |
+    RESTful API for GACP Certify Flow Admin Portal - Managing agricultural certification applications, 
+    document verification, payment processing, and administrative operations.
+
+    ## Features
+    - Application management (CRUD operations)
+    - Document upload and verification
+    - Payment processing
+    - User management
+    - Dashboard analytics
+    - Notification system
+
+    ## Authentication
+    All API endpoints require JWT authentication via Bearer token in the Authorization header.
+
+  version: 1.0.0
+  contact:
+    name: GACP Development Team
+    email: dev@gacp-certify.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.gacp-certify.com/v1
+    description: Production server
+  - url: https://staging-api.gacp-certify.com/v1
+    description: Staging server
+  - url: http://localhost:3000/api
+    description: Local development
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Applications
+    description: Certification application management
+  - name: Documents
+    description: Document upload and management
+  - name: Payments
+    description: Payment processing
+  - name: Users
+    description: User management
+  - name: Analytics
+    description: Dashboard analytics and reports
+  - name: Health
+    description: System health and monitoring
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: 'VALIDATION_ERROR'
+            message:
+              type: string
+              example: 'Invalid input data'
+            details:
+              type: object
+            timestamp:
+              type: string
+              format: date-time
+            path:
+              type: string
+            requestId:
+              type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN, MODERATOR, USER]
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, SUSPENDED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Application:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        farmName:
+          type: string
+        farmerName:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED, EXPIRED]
+        applicationDate:
+          type: string
+          format: date-time
+        reviewDate:
+          type: string
+          format: date-time
+        expiryDate:
+          type: string
+          format: date-time
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        payment:
+          $ref: '#/components/schemas/Payment'
+        reviewer:
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [ID_CARD, LAND_DEED, FARM_PHOTO, OTHER]
+        url:
+          type: string
+          format: uri
+        size:
+          type: integer
+          description: File size in bytes
+        mimeType:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, VERIFIED, REJECTED]
+        uploadedAt:
+          type: string
+          format: date-time
+        verifiedAt:
+          type: string
+          format: date-time
+        verifiedBy:
+          type: string
+          format: uuid
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+          default: THB
+        status:
+          type: string
+          enum: [PENDING, PAID, FAILED, REFUNDED]
+        method:
+          type: string
+          enum: [BANK_TRANSFER, CREDIT_CARD, QR_CODE]
+        transactionId:
+          type: string
+        paidAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    HealthCheck:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: integer
+        version:
+          type: string
+        dependencies:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              status:
+                type: string
+              responseTime:
+                type: integer
+              message:
+                type: string
+
+paths:
+  # Authentication Endpoints
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and return JWT tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      accessToken:
+                        type: string
+                      refreshToken:
+                        type: string
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: New access token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully logged out
+
+  # Application Endpoints
+  /applications:
+    get:
+      tags:
+        - Applications
+      summary: List all applications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED]
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [createdAt, applicationDate, farmName]
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        '200':
+          description: List of applications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Application'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+    post:
+      tags:
+        - Applications
+      summary: Create new application
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - farmName
+                - farmerName
+              properties:
+                farmName:
+                  type: string
+                farmerName:
+                  type: string
+                farmAddress:
+                  type: string
+                farmSize:
+                  type: number
+                cropType:
+                  type: string
+      responses:
+        '201':
+          description: Application created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Application'
+
+  /applications/{id}:
+    get:
+      tags:
+        - Applications
+      summary: Get application by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Application details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Application'
+        '404':
+          description: Application not found
+
+    put:
+      tags:
+        - Applications
+      summary: Update application
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                farmName:
+                  type: string
+                farmerName:
+                  type: string
+                status:
+                  type: string
+      responses:
+        '200':
+          description: Application updated
+
+    delete:
+      tags:
+        - Applications
+      summary: Delete application
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Application deleted
+
+  /applications/{id}/submit:
+    post:
+      tags:
+        - Applications
+      summary: Submit application for review
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application submitted
+
+  /applications/{id}/approve:
+    post:
+      tags:
+        - Applications
+      summary: Approve application
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Application approved
+
+  /applications/{id}/reject:
+    post:
+      tags:
+        - Applications
+      summary: Reject application
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Application rejected
+
+  # Document Endpoints
+  /documents/upload:
+    post:
+      tags:
+        - Documents
+      summary: Upload document
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - applicationId
+                - type
+              properties:
+                file:
+                  type: string
+                  format: binary
+                applicationId:
+                  type: string
+                  format: uuid
+                type:
+                  type: string
+                  enum: [ID_CARD, LAND_DEED, FARM_PHOTO, OTHER]
+      responses:
+        '201':
+          description: Document uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Document'
+
+  /documents/{id}/verify:
+    post:
+      tags:
+        - Documents
+      summary: Verify document
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Document verified
+
+  # Payment Endpoints
+  /payments:
+    post:
+      tags:
+        - Payments
+      summary: Create payment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - applicationId
+                - amount
+                - method
+              properties:
+                applicationId:
+                  type: string
+                  format: uuid
+                amount:
+                  type: number
+                method:
+                  type: string
+                  enum: [BANK_TRANSFER, CREDIT_CARD, QR_CODE]
+      responses:
+        '201':
+          description: Payment created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Payment'
+
+  /payments/{id}/confirm:
+    post:
+      tags:
+        - Payments
+      summary: Confirm payment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionId:
+                  type: string
+      responses:
+        '200':
+          description: Payment confirmed
+
+  # User Management
+  /users:
+    get:
+      tags:
+        - Users
+      summary: List users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [ADMIN, MODERATOR, USER]
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+
+    post:
+      tags:
+        - Users
+      summary: Create user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - name
+                - password
+                - role
+              properties:
+                email:
+                  type: string
+                  format: email
+                name:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                role:
+                  type: string
+                  enum: [ADMIN, MODERATOR, USER]
+      responses:
+        '201':
+          description: User created
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User details
+
+    put:
+      tags:
+        - Users
+      summary: Update user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                role:
+                  type: string
+                status:
+                  type: string
+      responses:
+        '200':
+          description: User updated
+
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User deleted
+
+  # Analytics Endpoints
+  /analytics/dashboard:
+    get:
+      tags:
+        - Analytics
+      summary: Get dashboard statistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalApplications:
+                    type: integer
+                  pendingReview:
+                    type: integer
+                  approved:
+                    type: integer
+                  rejected:
+                    type: integer
+                  totalRevenue:
+                    type: number
+
+  /analytics/reports:
+    get:
+      tags:
+        - Analytics
+      summary: Get reports
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [applications, revenue, users]
+      responses:
+        '200':
+          description: Report data
+
+  # Health Check Endpoints
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Full health check
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'
+        '503':
+          description: System is unhealthy
+
+  /health/live:
+    get:
+      tags:
+        - Health
+      summary: Liveness probe
+      responses:
+        '200':
+          description: Application is alive
+
+  /health/ready:
+    get:
+      tags:
+        - Health
+      summary: Readiness probe
+      responses:
+        '200':
+          description: Application is ready
+        '503':
+          description: Application is not ready

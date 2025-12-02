@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ - GACP Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .role-selector {
+            margin-bottom: 2rem;
+        }
+
+        .role-tabs {
+            display: flex;
+            background: #ecf0f1;
+            border-radius: 8px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .role-tab {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .role-tab.active {
+            background: white;
+            color: #2c3e50;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .role-tab:not(.active) {
+            color: #7f8c8d;
+        }
+
+        .role-tab:not(.active):hover {
+            color: #34495e;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+        }
+
+        .form-group input::placeholder {
+            color: #95a5a6;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .login-btn:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .login-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fadbd8;
+            color: #c0392b;
+            padding: 0.875rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            border-left: 4px solid #e74c3c;
+            display: none;
+        }
+
+        .success-message {
+            background: #d5f4e6;
+            color: #27ae60;
+            padding: 0.875rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            border-left: 4px solid #2ecc71;
+            display: none;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .forgot-password a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .register-link p {
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .register-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .spinner {
+            border: 3px solid #ecf0f1;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .test-accounts {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 0.85rem;
+        }
+
+        .test-accounts h4 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .test-accounts p {
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
+
+        .test-account-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin: 0.25rem 0.25rem 0 0;
+        }
+
+        .test-account-btn:hover {
+            background: #e67e22;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+
+            .role-tab {
+                padding: 0.625rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>GACP Platform</h1>
+            <p>ระบบรับรองมาตรฐาน GACP</p>
+        </div>
+
+        <div class="role-selector">
+            <div class="role-tabs">
+                <div class="role-tab active" data-role="farmer">เกษตรกร</div>
+                <div class="role-tab" data-role="dtam">DTAM ทีม</div>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">อีเมล</label>
+                <input type="email" id="email" name="email" placeholder="กรุณากรอกอีเมล" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">รหัสผ่าน</label>
+                <input type="password" id="password" name="password" placeholder="กรุณากรอกรหัสผ่าน" required>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                <span id="loginBtnText">เข้าสู่ระบบ</span>
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>กำลังเข้าสู่ระบบ...</p>
+        </div>
+
+        <div class="forgot-password">
+            <a href="#" onclick="showForgotPassword()">ลืมรหัสผ่าน?</a>
+        </div>
+
+        <div class="register-link">
+            <p>ยังไม่มีบัญชี?</p>
+            <a href="#" id="registerLink">สมัครสมาชิก</a>
+        </div>
+
+        <div class="test-accounts">
+            <h4>บัญชีทดสอบ</h4>
+            <p><strong>เกษตรกร:</strong></p>
+            <button class="test-account-btn" onclick="fillTestData('farmer@test.com', 'farmer123')">farmer@test.com</button>
+            <p><strong>DTAM ทีม:</strong></p>
+            <button class="test-account-btn" onclick="fillTestData('auditor@gacp.com', 'auditor123')">Auditor</button>
+            <button class="test-account-btn" onclick="fillTestData('officer@gacp.com', 'officer123')">Officer</button>
+            <button class="test-account-btn" onclick="fillTestData('admin@gacp.com', 'admin123')">Admin</button>
+        </div>
+    </div>
+
+    <script>
+        // Role tab switching
+        document.querySelectorAll('.role-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                updateRegisterLink();
+            });
+        });
+
+        function updateRegisterLink() {
+            const activeRole = document.querySelector('.role-tab.active').dataset.role;
+            const registerLink = document.getElementById('registerLink');
+            
+            if (activeRole === 'farmer') {
+                registerLink.href = 'farmer-register.html';
+                registerLink.textContent = 'สมัครสมาชิกเกษตรกร';
+            } else {
+                registerLink.href = 'dtam-register.html';
+                registerLink.textContent = 'สมัครสมาชิก DTAM ทีม';
+            }
+        }
+
+        // Initialize register link
+        updateRegisterLink();
+
+        // Test data filling function
+        function fillTestData(email, password) {
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = password;
+        }
+
+        function showForgotPassword() {
+            alert('สำหรับการรีเซ็ตรหัสผ่าน กรุณาติดต่อ:\n\nเกษตรกร: 02-XXX-XXXX ต่อ 1\nDTAM ทีม: 02-XXX-XXXX ต่อ 2\nอีเมล: support@gacp.go.th');
+        }
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loginBtnText = document.getElementById('loginBtnText');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            // Show loading
+            loginBtn.disabled = true;
+            loginBtnText.textContent = 'กำลังเข้าสู่ระบบ...';
+            loading.style.display = 'block';
+
+            try {
+                const response = await fetch('http://localhost:3000/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Login successful
+                    successMessage.textContent = 'เข้าสู่ระบบสำเร็จ! กำลังพาคุณไปยังหน้าหลัก...';
+                    successMessage.style.display = 'block';
+                    
+                    // Store token and user info
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('userRole', data.user.role);
+                    localStorage.setItem('userName', data.user.name);
+                    localStorage.setItem('userEmail', data.user.email);
+                    
+                    // Redirect based on role
+                    setTimeout(() => {
+                        switch(data.user.role) {
+                            case 'farmer':
+                                window.location.href = 'farmer-dashboard.html';
+                                break;
+                            case 'auditor':
+                                window.location.href = 'auditor-dashboard.html';
+                                break;
+                            case 'officer':
+                                window.location.href = 'officer-dashboard.html';
+                                break;
+                            case 'admin':
+                                window.location.href = 'admin-dashboard.html';
+                                break;
+                            default:
+                                window.location.href = 'dashboard.html';
+                        }
+                    }, 1500);
+                    
+                } else {
+                    // Login failed
+                    throw new Error(data.message || 'การเข้าสู่ระบบล้มเหลว');
+                }
+
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = error.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองอีกครั้ง';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Hide loading
+                loading.style.display = 'none';
+                loginBtn.disabled = false;
+                loginBtnText.textContent = 'เข้าสู่ระบบ';
+            }
+        });
+
+        // Check if user is already logged in
+        if (localStorage.getItem('token')) {
+            const userRole = localStorage.getItem('userRole');
+            switch(userRole) {
+                case 'farmer':
+                    window.location.href = 'farmer-dashboard.html';
+                    break;
+                case 'auditor':
+                    window.location.href = 'auditor-dashboard.html';
+                    break;
+                case 'officer':
+                    window.location.href = 'officer-dashboard.html';
+                    break;
+                case 'admin':
+                    window.location.href = 'admin-dashboard.html';
+                    break;
+                default:
+                    window.location.href = 'dashboard.html';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+  <style>
+    .decision-box { border: 3px solid {{borderColor}}; background: {{bgColor}}; padding: 30px; margin: 30px 0; text-align: center; }
+    .decision-text { font-size: 24pt; font-weight: 700; color: {{textColor}}; }
+  </style>
+</head>
+<body>
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">หนังสือแจ้งผลการพิจารณา</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">Approval Decision Letter</div>
+  
+  <div class="document-number">ที่ {{letterNumber}}<br>วันที่: {{letterDate}}</div>
+
+  <div class="section">
+    <div class="section-title">เรียน {{farmerName}}</div>
+    <p style="margin: 20px 0; text-indent: 50px;">
+      ตามที่ท่านได้ยื่นคำขอรับรองมาตรฐาน GACP เลขที่ {{applicationNumber}} 
+      เมื่อวันที่ {{submissionDate}} สำหรับฟาร์ม {{farmName}} นั้น
+    </p>
+  </div>
+
+  <div class="decision-box">
+    <div class="decision-text">{{decisionText}}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">รายละเอียด (Details)</div>
+    <div class="info-row"><div class="info-label">เลขที่คำขอ:</div><div class="info-value">{{applicationNumber}}</div></div>
+    <div class="info-row"><div class="info-label">ชื่อฟาร์ม:</div><div class="info-value">{{farmName}}</div></div>
+    <div class="info-row"><div class="info-label">พืชที่ขอรับรอง:</div><div class="info-value">{{cropType}}</div></div>
+    <div class="info-row"><div class="info-label">วันที่ตรวจสอบ:</div><div class="info-value">{{inspectionDate}}</div></div>
+    <div class="info-row"><div class="info-label">คะแนนรวม:</div><div class="info-value">{{totalScore}}/100</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">เหตุผลประกอบการตัดสิน (Reasons)</div>
+    <p>{{reasons}}</p>
+  </div>
+
+  {{#if conditions}}
+  <div class="section">
+    <div class="section-title">เงื่อนไข (Conditions)</div>
+    <p>{{conditions}}</p>
+  </div>
+  {{/if}}
+
+  {{#if nextSteps}}
+  <div class="section">
+    <div class="section-title">ขั้นตอนต่อไป (Next Steps)</div>
+    <p>{{nextSteps}}</p>
+  </div>
+  {{/if}}
+
+  <div class="section" style="margin-top: 40px;">
+    <p style="text-indent: 50px;">
+      จึงเรียนมาเพื่อโปรดทราบ หากมีข้อสงสัยประการใด กรุณาติดต่อ {{contactInfo}}
+    </p>
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-line">
+      ({{approverName}})<br>
+      {{approverPosition}}<br>
+      ผู้อนุมัติ
+    </div>
+  </div>
+
+  <div class="footer-info">
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข<br>
+    88/22 ถนนติวานนท์ ตำบลตลาดขวัญ อำเภอเมือง จังหวัดนนทบุรี 11000<br>
+    โทร: 02-xxx-xxxx | อีเมล: info@dtam.go.th
+  </div>
+</body>
+</html>

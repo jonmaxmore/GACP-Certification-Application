@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌾 GACP Demo: Farmer Journey SOP Compliance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        .step-indicator {
+            background: linear-gradient(45deg, #10b981, #065f46);
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .step-line {
+            height: 2px;
+            background: #e5e7eb;
+            flex: 1;
+        }
+        .step-line.active {
+            background: #10b981;
+        }
+        .document-upload {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .document-upload:hover {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        .document-upload.dragover {
+            border-color: #10b981;
+            background-color: #dcfce7;
+        }
+        .sop-check {
+            transition: all 0.5s ease;
+        }
+        .coa-display {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        .compliance-meter {
+            background: conic-gradient(from 0deg, #ef4444 0deg, #f59e0b 90deg, #10b981 180deg, #10b981 360deg);
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .compliance-inner {
+            background: white;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
+    <div id="app">
+        <!-- Header -->
+        <header class="bg-white shadow-lg border-b-4 border-green-500">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">🌾 GACP Farmer Application</h1>
+                        <p class="text-gray-600 mt-1">ระบบยื่นขอใบรับรอง GACP ตาม SOP มาตรฐาน</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="compliance-meter">
+                            <div class="compliance-inner" :class="getComplianceColor(complianceScore)">
+                                {{ complianceScore }}%
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-600 mt-2">SOP Compliance</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Progress Steps -->
+        <div class="container mx-auto px-4 py-6">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <div v-for="(step, index) in steps" :key="index" class="flex items-center" :class="index < steps.length - 1 ? 'flex-1' : ''">
+                        <div class="step-indicator" :class="getStepClass(index)">
+                            <span v-if="currentStep > index">✓</span>
+                            <span v-else>{{ index + 1 }}</span>
+                        </div>
+                        <div class="ml-3 mr-4">
+                            <div class="font-semibold" :class="currentStep >= index ? 'text-green-600' : 'text-gray-400'">
+                                {{ step.title }}
+                            </div>
+                            <div class="text-sm text-gray-500">{{ step.description }}</div>
+                        </div>
+                        <div v-if="index < steps.length - 1" class="step-line" :class="currentStep > index ? 'active' : ''"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Left Column: Farmer Info & Documents -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Farmer Information -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 fade-in">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                            <span class="mr-2">👨‍🌾</span>
+                            ข้อมูลเกษตรกร
+                            <span v-if="farmerDataComplete" class="ml-auto text-green-600">✅</span>
+                        </h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อ-นามสกุล *</label>
+                                <input v-model="farmerData.fullName" 
+                                       type="text" 
+                                       class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                       placeholder="นายสมชาย รักเกษตร">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">เลขบัตรประชาชน *</label>
+                                <input v-model="farmerData.idCard" 
+                                       type="text" 
+                                       class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                       placeholder="1234567890123">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">ที่อยู่แปลงเกษตร *</label>
+                                <textarea v-model="farmerData.farmAddress" 
+                                          class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 h-20"
+                                          placeholder="หมู่ที่ 5 ตำบลป่าซาง อำเภอแม่แตง จังหวัดเชียงใหม่ 50150"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทพืช *</label>
+                                <select v-model="farmerData.cropType" 
+                                        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                    <option value="">เลือกประเภทพืช</option>
+                                    <option value="rice">ข้าว</option>
+                                    <option value="vegetable">ผัก</option>
+                                    <option value="fruit">ผลไม้</option>
+                                    <option value="herb">สมุนไพร</option>
+                                    <option value="spice">เครื่องเทศ</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">พื้นที่เกษตร (ไร่) *</label>
+                                <input v-model="farmerData.farmSize" 
+                                       type="number" 
+                                       class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                       placeholder="10">
+                            </div>
+                        </div>
+
+                        <!-- Real-time Validation -->
+                        <div v-if="farmerDataComplete" class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg fade-in">
+                            <div class="flex items-center text-green-700">
+                                <span class="mr-2">✅</span>
+                                ข้อมูลเกษตรกรครบถ้วนตาม SOP
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Document Upload Section -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 fade-in">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                            <span class="mr-2">📄</span>
+                            อัพโหลดเอกสาร
+                            <span v-if="allRequiredDocsUploaded" class="ml-auto text-green-600">✅</span>
+                        </h2>
+                        
+                        <div class="space-y-4">
+                            <!-- Required Documents -->
+                            <div v-for="doc in requiredDocuments" :key="doc.id" class="border rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-semibold text-gray-800">{{ doc.name }}</h3>
+                                    <span :class="getDocStatusClass(doc.id)" class="px-2 py-1 rounded text-xs font-medium">
+                                        {{ getDocStatus(doc.id) }}
+                                    </span>
+                                </div>
+                                
+                                <!-- Upload Area -->
+                                <div class="document-upload" 
+                                     @drop="handleDrop($event, doc.id)" 
+                                     @dragover.prevent="handleDragOver($event, doc.id)"
+                                     @dragleave="handleDragLeave($event, doc.id)"
+                                     @dragenter.prevent>
+                                    
+                                    <input :id="'file-' + doc.id" 
+                                           type="file" 
+                                           class="hidden" 
+                                           @change="handleFileUpload($event, doc.id)"
+                                           accept=".jpg,.jpeg,.png,.pdf">
+                                    
+                                    <div v-if="!uploadedDocs[doc.id]" 
+                                         @click="document.getElementById('file-' + doc.id).click()" 
+                                         class="cursor-pointer py-8">
+                                        <div class="text-4xl mb-2">📁</div>
+                                        <div class="text-gray-600 font-medium">ลากไฟล์มาวาง หรือคลิกเพื่อเลือก</div>
+                                        <div class="text-sm text-gray-500 mt-1">รองรับ: JPG, PNG, PDF (ขนาดไม่เกิน 10MB)</div>
+                                    </div>
+                                    
+                                    <!-- Uploaded Document Display -->
+                                    <div v-else class="py-4">
+                                        <div class="text-2xl mb-2">✅</div>
+                                        <div class="text-green-600 font-semibold">{{ uploadedDocs[doc.id].name }}</div>
+                                        <div class="text-sm text-gray-500">{{ formatFileSize(uploadedDocs[doc.id].size) }}</div>
+                                        
+                                        <!-- AI Analysis Progress -->
+                                        <div v-if="analyzingDocs[doc.id]" class="mt-3">
+                                            <div class="text-sm text-blue-600 flex items-center">
+                                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                                กำลังวิเคราะห์ด้วย AI...
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                                     :style="{ width: analysisProgress[doc.id] + '%' }"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- AI Analysis Results -->
+                                        <div v-if="docAnalysis[doc.id]" class="mt-3 p-3 bg-green-50 border border-green-200 rounded fade-in">
+                                            <div class="text-sm">
+                                                <div class="font-semibold text-green-800 mb-2">🤖 AI Analysis Results</div>
+                                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                                    <div>Type: <span class="font-semibold">{{ docAnalysis[doc.id].detectedType }}</span></div>
+                                                    <div>Confidence: <span class="font-semibold">{{ docAnalysis[doc.id].confidence }}%</span></div>
+                                                    <div>Quality: <span class="font-semibold">{{ docAnalysis[doc.id].qualityScore }}/100</span></div>
+                                                    <div>Status: <span class="font-semibold text-green-600">{{ docAnalysis[doc.id].issues.length === 0 ? 'Valid' : 'Issues Found' }}</span></div>
+                                                </div>
+                                                <div v-if="docAnalysis[doc.id].issues.length > 0" class="mt-2 text-yellow-700">
+                                                    <div class="font-semibold">Issues:</div>
+                                                    <ul class="list-disc list-inside">
+                                                        <li v-for="issue in docAnalysis[doc.id].issues" :key="issue">{{ getIssueText(issue) }}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- COA Upload (Optional) -->
+                            <div class="border-2 border-blue-300 rounded-lg p-4 bg-blue-50">
+                                <h3 class="font-semibold text-blue-800 mb-3 flex items-center">
+                                    <span class="mr-2">📊</span>
+                                    Certificate of Analysis (COA) - ไม่บังคับ
+                                    <span v-if="uploadedDocs.coa" class="ml-auto text-blue-600">✅</span>
+                                </h3>
+                                
+                                <div class="document-upload border-blue-300" 
+                                     @drop="handleDrop($event, 'coa')" 
+                                     @dragover.prevent 
+                                     @dragenter.prevent>
+                                    <input id="file-coa" 
+                                           type="file" 
+                                           class="hidden" 
+                                           @change="handleFileUpload($event, 'coa')"
+                                           accept=".pdf,.jpg,.jpeg,.png">
+                                    
+                                    <div v-if="!uploadedDocs.coa" 
+                                         @click="document.getElementById('file-coa').click()" 
+                                         class="cursor-pointer py-6">
+                                        <div class="text-3xl mb-2">📊</div>
+                                        <div class="text-blue-600 font-medium">อัพโหลด COA เพื่อเพิ่มความน่าเชื่อถือ</div>
+                                        <div class="text-sm text-blue-500 mt-1">ผลการตรวจสอบคุณภาพผลิตภัณฑ์</div>
+                                    </div>
+                                    
+                                    <div v-else class="py-4">
+                                        <div class="text-2xl mb-2">📊</div>
+                                        <div class="text-blue-600 font-semibold">{{ uploadedDocs.coa.name }}</div>
+                                        <div class="text-sm text-blue-500">{{ formatFileSize(uploadedDocs.coa.size) }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: SOP Validation & COA Results -->
+                <div class="space-y-6">
+                    <!-- SOP Compliance Tracker -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 fade-in">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                            <span class="mr-2">🔍</span>
+                            SOP Compliance
+                        </h2>
+                        
+                        <div class="space-y-3">
+                            <div v-for="check in sopChecks" :key="check.id" 
+                                 :class="getSopCheckClass(check.status)"
+                                 class="sop-check p-3 rounded border">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">{{ check.name }}</span>
+                                    <span class="text-lg">{{ getSopIcon(check.status) }}</span>
+                                </div>
+                                <div class="text-sm text-gray-600 mt-1">{{ check.description }}</div>
+                                <div v-if="check.error" class="text-sm text-red-600 mt-1">
+                                    ⚠️ {{ check.error }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Overall Score -->
+                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-semibold">Overall Score</span>
+                                <span class="text-2xl font-bold" :class="getScoreColor(complianceScore)">
+                                    {{ complianceScore }}%
+                                </span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="h-3 rounded-full transition-all duration-1000" 
+                                     :style="{ width: complianceScore + '%' }"
+                                     :class="getScoreBarColor(complianceScore)"></div>
+                            </div>
+                            <div class="text-sm text-gray-600 mt-2">
+                                {{ getComplianceMessage(complianceScore) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COA Analysis Display -->
+                    <div v-if="coaAnalysis" class="bg-white rounded-lg shadow-lg p-6 fade-in">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                            <span class="mr-2">📊</span>
+                            COA Analysis
+                        </h2>
+                        
+                        <div class="coa-display">
+                            <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                                <div>
+                                    <div class="text-gray-600">Sample ID</div>
+                                    <div class="font-semibold">{{ coaAnalysis.sampleId }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-gray-600">Test Date</div>
+                                    <div class="font-semibold">{{ coaAnalysis.testDate }}</div>
+                                </div>
+                                <div class="col-span-2">
+                                    <div class="text-gray-600">Laboratory</div>
+                                    <div class="font-semibold">{{ coaAnalysis.laboratory }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Test Parameters -->
+                            <div class="mb-4">
+                                <h3 class="font-semibold mb-2">Test Results</h3>
+                                <div class="space-y-2 text-sm">
+                                    <div v-for="param in coaAnalysis.parameters" :key="param.name" 
+                                         class="flex justify-between items-center py-1 border-b border-blue-200">
+                                        <span>{{ param.name }}</span>
+                                        <span class="flex items-center space-x-1">
+                                            <span class="font-mono">{{ param.result }} {{ param.unit }}</span>
+                                            <span :class="param.status === 'pass' ? 'text-green-600' : 'text-red-600'">
+                                                {{ param.status === 'pass' ? '✅' : '❌' }}
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Overall Result -->
+                            <div class="bg-green-50 border border-green-200 rounded p-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-green-800">Overall Result</span>
+                                    <span class="text-xl font-bold text-green-600">{{ coaAnalysis.overallResult }}</span>
+                                </div>
+                                <div class="text-sm text-green-700 mt-1">
+                                    Quality Score: {{ coaAnalysis.qualityScore }}/100
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Section -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 fade-in">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                            <span class="mr-2">🚀</span>
+                            ยื่นคำขอ
+                        </h2>
+                        
+                        <!-- Pre-submission Checklist -->
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" :checked="farmerDataComplete" class="mr-2" disabled>
+                                <span :class="farmerDataComplete ? 'text-green-600' : 'text-gray-500'" class="text-sm">
+                                    ข้อมูลเกษตรกรครบถ้วน
+                                </span>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" :checked="allRequiredDocsUploaded" class="mr-2" disabled>
+                                <span :class="allRequiredDocsUploaded ? 'text-green-600' : 'text-gray-500'" class="text-sm">
+                                    เอกสารที่จำเป็นครบถ้วน
+                                </span>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" :checked="complianceScore >= 80" class="mr-2" disabled>
+                                <span :class="complianceScore >= 80 ? 'text-green-600' : 'text-gray-500'" class="text-sm">
+                                    SOP Compliance ≥ 80%
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button @click="submitApplication" 
+                                :disabled="!canSubmit"
+                                :class="canSubmit ? 'bg-green-600 hover:bg-green-700 cursor-pointer' : 'bg-gray-400 cursor-not-allowed'"
+                                class="w-full text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300">
+                            <span v-if="!isSubmitting" class="flex items-center justify-center">
+                                <span class="mr-2">🚀</span>
+                                ยื่นคำขอ GACP
+                            </span>
+                            <span v-else class="flex items-center justify-center">
+                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                กำลังดำเนินการ...
+                            </span>
+                        </button>
+
+                        <!-- Submission Result -->
+                        <div v-if="submissionResult" 
+                             :class="submissionResult.success ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'"
+                             class="mt-4 p-4 border rounded-lg fade-in">
+                            <div class="font-semibold mb-1">{{ submissionResult.title }}</div>
+                            <div class="text-sm">{{ submissionResult.message }}</div>
+                            <div v-if="submissionResult.referenceNumber" class="text-sm mt-2">
+                                เลขที่อ้างอิง: <span class="font-mono">{{ submissionResult.referenceNumber }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    currentStep: 0,
+                    steps: [
+                        { title: 'ข้อมูลเกษตรกร', description: 'กรอกข้อมูลส่วนตัว' },
+                        { title: 'อัพโหลดเอกสาร', description: 'เอกสารหลักฐาน' },
+                        { title: 'ตรวจสอบ SOP', description: 'ความถูกต้องตามมาตรฐาน' },
+                        { title: 'ยื่นคำขอ', description: 'ส่งคำขอเข้าระบบ' }
+                    ],
+                    farmerData: {
+                        fullName: '',
+                        idCard: '',
+                        farmAddress: '',
+                        cropType: '',
+                        farmSize: ''
+                    },
+                    requiredDocuments: [
+                        { id: 'landTitle', name: 'โฉนดที่ดิน/หนังสือรับรองการทำประโยชน์' },
+                        { id: 'idCard', name: 'สำเนาบัตรประชาชน' },
+                        { id: 'farmingLicense', name: 'ใบอนุญาตประกอบกิจการเกษตร' },
+                        { id: 'plotMap', name: 'แผนผังแปลงเกษตร' }
+                    ],
+                    uploadedDocs: {},
+                    analyzingDocs: {},
+                    analysisProgress: {},
+                    docAnalysis: {},
+                    coaAnalysis: null,
+                    sopChecks: [
+                        { id: 'farmer_info', name: 'ข้อมูลเกษตรกร', status: 'pending', description: 'ตรวจสอบความครบถ้วน' },
+                        { id: 'document_upload', name: 'การอัพโหลดเอกสาร', status: 'pending', description: 'เอกสารที่จำเป็นครบถ้วน' },
+                        { id: 'document_validation', name: 'การตรวจสอบเอกสาร', status: 'pending', description: 'AI ตรวจสอบความถูกต้อง' },
+                        { id: 'sop_compliance', name: 'ความถูกต้อง SOP', status: 'pending', description: 'ตรงตามมาตรฐาน GACP' }
+                    ],
+                    isSubmitting: false,
+                    submissionResult: null
+                }
+            },
+            computed: {
+                farmerDataComplete() {
+                    return this.farmerData.fullName && 
+                           this.farmerData.idCard && 
+                           this.farmerData.farmAddress && 
+                           this.farmerData.cropType && 
+                           this.farmerData.farmSize;
+                },
+                allRequiredDocsUploaded() {
+                    return this.requiredDocuments.every(doc => this.uploadedDocs[doc.id]);
+                },
+                complianceScore() {
+                    let score = 0;
+                    const checks = this.sopChecks;
+                    
+                    // Farmer info check
+                    if (this.farmerDataComplete) score += 25;
+                    
+                    // Document upload check
+                    if (this.allRequiredDocsUploaded) score += 25;
+                    
+                    // Document validation check
+                    const validatedDocs = Object.keys(this.docAnalysis).length;
+                    const requiredDocs = this.requiredDocuments.length;
+                    if (validatedDocs === requiredDocs) score += 25;
+                    
+                    // SOP compliance check
+                    const avgQuality = this.getAverageDocumentQuality();
+                    if (avgQuality >= 80) score += 25;
+                    
+                    return Math.min(score, 100);
+                },
+                canSubmit() {
+                    return this.farmerDataComplete && 
+                           this.allRequiredDocsUploaded && 
+                           this.complianceScore >= 80 && 
+                           !this.isSubmitting;
+                }
+            },
+            watch: {
+                farmerData: {
+                    handler() {
+                        this.updateSOPChecks();
+                        this.updateCurrentStep();
+                    },
+                    deep: true
+                },
+                uploadedDocs: {
+                    handler() {
+                        this.updateSOPChecks();
+                        this.updateCurrentStep();
+                    },
+                    deep: true
+                },
+                docAnalysis: {
+                    handler() {
+                        this.updateSOPChecks();
+                    },
+                    deep: true
+                }
+            },
+            methods: {
+                handleFileUpload(event, docType) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.processFile(file, docType);
+                    }
+                },
+                
+                handleDrop(event, docType) {
+                    event.preventDefault();
+                    const file = event.dataTransfer.files[0];
+                    if (file) {
+                        this.processFile(file, docType);
+                    }
+                    event.target.classList.remove('dragover');
+                },
+                
+                handleDragOver(event, docType) {
+                    event.preventDefault();
+                    event.target.classList.add('dragover');
+                },
+                
+                handleDragLeave(event, docType) {
+                    event.target.classList.remove('dragover');
+                },
+                
+                processFile(file, docType) {
+                    // Store uploaded file
+                    this.uploadedDocs[docType] = {
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        uploadedAt: new Date()
+                    };
+                    
+                    // Start AI analysis simulation
+                    this.analyzeDocument(file, docType);
+                    
+                    // Handle COA specially
+                    if (docType === 'coa') {
+                        this.analyzeCoA(file);
+                    }
+                },
+                
+                async analyzeDocument(file, docType) {
+                    this.analyzingDocs[docType] = true;
+                    this.analysisProgress[docType] = 0;
+                    
+                    // Simulate progress
+                    const progressInterval = setInterval(() => {
+                        if (this.analysisProgress[docType] < 90) {
+                            this.analysisProgress[docType] += Math.random() * 15;
+                        }
+                    }, 200);
+                    
+                    // Simulate analysis time
+                    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
+                    
+                    clearInterval(progressInterval);
+                    this.analysisProgress[docType] = 100;
+                    
+                    // Generate analysis result
+                    const result = this.generateDocumentAnalysis(file, docType);
+                    this.docAnalysis[docType] = result;
+                    
+                    this.analyzingDocs[docType] = false;
+                },
+                
+                generateDocumentAnalysis(file, docType) {
+                    const documentTypes = {
+                        landTitle: 'Land Title Deed',
+                        idCard: 'National ID Card',
+                        farmingLicense: 'Farming License',
+                        plotMap: 'Farm Plot Map',
+                        coa: 'Certificate of Analysis'
+                    };
+                    
+                    const confidence = Math.floor(Math.random() * 20) + 80; // 80-99%
+                    const qualityScore = Math.floor(Math.random() * 25) + 75; // 75-99
+                    
+                    // Simulate possible issues
+                    const issues = [];
+                    if (confidence < 85) issues.push('low_confidence');
+                    if (qualityScore < 80) issues.push('poor_quality');
+                    if (Math.random() < 0.1) issues.push('blurry');
+                    
+                    return {
+                        detectedType: documentTypes[docType] || 'Unknown',
+                        confidence,
+                        qualityScore,
+                        issues,
+                        timestamp: new Date()
+                    };
+                },
+                
+                async analyzeCoA(file) {
+                    // Simulate COA analysis
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    
+                    this.coaAnalysis = {
+                        sampleId: 'COA-2025-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
+                        testDate: new Date().toISOString().split('T')[0],
+                        laboratory: 'National Food Institute Thailand',
+                        overallResult: 'PASS',
+                        qualityScore: Math.floor(Math.random() * 10) + 90,
+                        parameters: [
+                            { name: 'Heavy Metals', result: '0.05', unit: 'mg/kg', status: 'pass' },
+                            { name: 'Pesticides', result: '< 0.01', unit: 'mg/kg', status: 'pass' },
+                            { name: 'Microbiological', result: 'Negative', unit: '', status: 'pass' },
+                            { name: 'Moisture', result: '12.5', unit: '%', status: 'pass' },
+                            { name: 'pH Level', result: '6.8', unit: '', status: 'pass' }
+                        ]
+                    };
+                },
+                
+                updateSOPChecks() {
+                    // Update farmer info check
+                    const farmerCheck = this.sopChecks.find(c => c.id === 'farmer_info');
+                    if (farmerCheck) {
+                        farmerCheck.status = this.farmerDataComplete ? 'pass' : 'pending';
+                        farmerCheck.error = this.farmerDataComplete ? null : 'กรุณากรอกข้อมูลให้ครบถ้วน';
+                    }
+                    
+                    // Update document upload check
+                    const docUploadCheck = this.sopChecks.find(c => c.id === 'document_upload');
+                    if (docUploadCheck) {
+                        docUploadCheck.status = this.allRequiredDocsUploaded ? 'pass' : 'pending';
+                        docUploadCheck.error = this.allRequiredDocsUploaded ? null : 'เอกสารยังไม่ครบถ้วน';
+                    }
+                    
+                    // Update document validation check
+                    const docValidationCheck = this.sopChecks.find(c => c.id === 'document_validation');
+                    if (docValidationCheck) {
+                        const validatedCount = Object.keys(this.docAnalysis).length;
+                        const requiredCount = this.requiredDocuments.length;
+                        const hasIssues = Object.values(this.docAnalysis).some(analysis => analysis.issues.length > 0);
+                        
+                        if (validatedCount === requiredCount && !hasIssues) {
+                            docValidationCheck.status = 'pass';
+                            docValidationCheck.error = null;
+                        } else if (validatedCount === requiredCount && hasIssues) {
+                            docValidationCheck.status = 'warning';
+                            docValidationCheck.error = 'เอกสารบางส่วนมีปัญหา';
+                        } else {
+                            docValidationCheck.status = 'pending';
+                            docValidationCheck.error = 'รอการวิเคราะห์เอกสาร';
+                        }
+                    }
+                    
+                    // Update SOP compliance check
+                    const sopComplianceCheck = this.sopChecks.find(c => c.id === 'sop_compliance');
+                    if (sopComplianceCheck) {
+                        sopComplianceCheck.status = this.complianceScore >= 80 ? 'pass' : 'pending';
+                        sopComplianceCheck.error = this.complianceScore >= 80 ? null : `คะแนน SOP: ${this.complianceScore}% (ต้อง ≥ 80%)`;
+                    }
+                },
+                
+                updateCurrentStep() {
+                    if (this.farmerDataComplete) {
+                        this.currentStep = Math.max(this.currentStep, 1);
+                    }
+                    if (this.allRequiredDocsUploaded) {
+                        this.currentStep = Math.max(this.currentStep, 2);
+                    }
+                    if (this.complianceScore >= 80) {
+                        this.currentStep = Math.max(this.currentStep, 3);
+                    }
+                },
+                
+                async submitApplication() {
+                    if (!this.canSubmit) return;
+                    
+                    this.isSubmitting = true;
+                    
+                    try {
+                        // Simulate API call
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+                        
+                        const referenceNumber = 'GACP-' + new Date().getFullYear() + '-' + 
+                                              Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                        
+                        this.submissionResult = {
+                            success: true,
+                            title: '✅ ยื่นคำขอสำเร็จ!',
+                            message: 'คำขอใบรับรอง GACP ได้รับการบันทึกแล้ว เจ้าหน้าที่จะติดต่อกลับภายใน 3-5 วันทำการ',
+                            referenceNumber: referenceNumber
+                        };
+                        
+                        this.currentStep = 4;
+                        
+                    } catch (error) {
+                        this.submissionResult = {
+                            success: false,
+                            title: '❌ เกิดข้อผิดพลาด',
+                            message: 'ไม่สามารถยื่นคำขอได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง'
+                        };
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                },
+                
+                // Helper methods
+                getStepClass(index) {
+                    if (this.currentStep > index) return 'bg-green-600';
+                    if (this.currentStep === index) return 'bg-blue-600';
+                    return 'bg-gray-400';
+                },
+                
+                getDocStatus(docId) {
+                    if (this.analyzingDocs[docId]) return 'กำลังวิเคราะห์';
+                    if (this.docAnalysis[docId]) return 'วิเคราะห์แล้ว';
+                    if (this.uploadedDocs[docId]) return 'อัพโหลดแล้ว';
+                    return 'รอการอัพโหลด';
+                },
+                
+                getDocStatusClass(docId) {
+                    if (this.analyzingDocs[docId]) return 'bg-blue-100 text-blue-800';
+                    if (this.docAnalysis[docId]) return 'bg-green-100 text-green-800';
+                    if (this.uploadedDocs[docId]) return 'bg-yellow-100 text-yellow-800';
+                    return 'bg-gray-100 text-gray-800';
+                },
+                
+                getSopCheckClass(status) {
+                    const classes = {
+                        'pass': 'border-green-500 bg-green-50',
+                        'warning': 'border-yellow-500 bg-yellow-50',
+                        'error': 'border-red-500 bg-red-50',
+                        'pending': 'border-gray-300 bg-gray-50'
+                    };
+                    return classes[status] || classes.pending;
+                },
+                
+                getSopIcon(status) {
+                    const icons = { 'pass': '✅', 'warning': '⚠️', 'error': '❌', 'pending': '⏳' };
+                    return icons[status] || '⏳';
+                },
+                
+                getComplianceColor(score) {
+                    if (score >= 90) return 'text-green-600';
+                    if (score >= 80) return 'text-blue-600';
+                    if (score >= 70) return 'text-yellow-600';
+                    return 'text-red-600';
+                },
+                
+                getScoreColor(score) {
+                    if (score >= 90) return 'text-green-600';
+                    if (score >= 80) return 'text-blue-600';
+                    if (score >= 70) return 'text-yellow-600';
+                    return 'text-red-600';
+                },
+                
+                getScoreBarColor(score) {
+                    if (score >= 90) return 'bg-green-500';
+                    if (score >= 80) return 'bg-blue-500';
+                    if (score >= 70) return 'bg-yellow-500';
+                    return 'bg-red-500';
+                },
+                
+                getComplianceMessage(score) {
+                    if (score >= 90) return 'ยอดเยียม! พร้อมสำหรับการยื่นคำขอ';
+                    if (score >= 80) return 'ดี - สามารถยื่นคำขอได้';
+                    if (score >= 70) return 'ปานกลาง - ควรปรับปรุงก่อนยื่น';
+                    return 'ต้องปรับปรุง - ไม่สามารถยื่นคำขอได้';
+                },
+                
+                getIssueText(issue) {
+                    const issueTexts = {
+                        'low_confidence': 'ความมั่นใจในการตรวจสอบต่ำ',
+                        'poor_quality': 'คุณภาพภาพต่ำ',
+                        'blurry': 'ภาพเบลอ'
+                    };
+                    return issueTexts[issue] || issue;
+                },
+                
+                formatFileSize(bytes) {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                },
+                
+                getAverageDocumentQuality() {
+                    const analyses = Object.values(this.docAnalysis);
+                    if (analyses.length === 0) return 0;
+                    const sum = analyses.reduce((total, analysis) => total + analysis.qualityScore, 0);
+                    return sum / analyses.length;
+                }
+            },
+            
+            mounted() {
+                // Initialize with demo data after a short delay
+                setTimeout(() => {
+                    this.farmerData = {
+                        fullName: 'นายสมชาย รักเกษตร',
+                        idCard: '1234567890123',
+                        farmAddress: 'หมู่ที่ 5 ตำบลป่าซาง อำเภอแม่แตง จังหวัดเชียงใหม่ 50150',
+                        cropType: 'herb',
+                        farmSize: '15'
+                    };
+                }, 500);
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

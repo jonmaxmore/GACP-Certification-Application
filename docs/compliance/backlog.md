@@ -1,0 +1,23 @@
+# Compliance Backlog Tracker (Updated 2025-10-28)
+
+| ID        | Title                                                    | Area               | Owner | Status      | Notes                                                                                                          | Evidence Path              |
+| --------- | -------------------------------------------------------- | ------------------ | ----- | ----------- | -------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| COMPL-001 | Activate Track & Trace module with QR transfers          | Backend            | TBD   | Not Started | Audit schemas, enable routes in `atlas-server.js`, ensure scan endpoints documented.                           | `docs/evidence/COMPL-001/` |
+| COMPL-002 | Finalise PromptPay payment service integration           | Backend            | TBD   | Not Started | Wire `payment-service`, add reconciliation tests, update compliance matrix evidence.                           | `docs/evidence/COMPL-002/` |
+| COMPL-003 | Admin analytics to live data (backend + frontend)        | Full-stack         | TBD   | Not Started | Connect reporting APIs, update `admin/dashboard.tsx` charts, ensure cannabis-first metrics.                    | `docs/evidence/COMPL-003/` |
+| COMPL-004 | Cannabis-first UI audit across portals                   | UX/Frontend        | TBD   | Not Started | Follow `cannabis-first-checklist.md`, capture evidence screenshots, update seeds.                              | `docs/evidence/COMPL-004/` |
+| COMPL-005 | Fertilizer engine explainability & model lineage         | AI                 | TBD   | Not Started | Document inputs/outputs, log model versions, plan for AI compliance requirements.                              | `docs/evidence/COMPL-005/` |
+| COMPL-006 | Populate compliance matrix with verified evidence        | Compliance         | TBD   | In Progress | Collect authoritative sources, link to modules, file citations.                                                | `docs/evidence/COMPL-006/` |
+| COMPL-007 | Log retention & SIEM integration                         | DevOps             | TBD   | Not Started | Define retention policy, integrate with monitoring platform, document in deployment guide.                     | `docs/evidence/COMPL-007/` |
+| COMPL-008 | Document retention, checksum, and versioning             | Backend            | TBD   | Not Started | Update `document` modules to meet WHO GACP requirements, add tests.                                            | `docs/evidence/COMPL-008/` |
+| COMPL-009 | Consolidate notification modules and enable messaging    | Backend            | TBD   | Not Started | Select single notification pipeline, ensure audit logging, connect to frontend alerts.                         | `docs/evidence/COMPL-009/` |
+| COMPL-010 | Re-enable dashboard routes with validated data sources   | Backend            | TBD   | Not Started | Validate data providers, reintroduce middleware, coordinate with COMPL-003.                                    | `docs/evidence/COMPL-010/` |
+| COMPL-011 | Replace inspector portal mock data with live APIs        | Frontend           | TBD   | Not Started | Connect to inspection services, handle auth, ensure cannabis-first reporting.                                  | `docs/evidence/COMPL-011/` |
+| COMPL-012 | Validate IoT sensor ingestion pipeline                   | IoT                | TBD   | Not Started | Test MQTT → Redis → Mongo path, define alert thresholds, record compliance evidence.                           | `docs/evidence/COMPL-012/` |
+| COMPL-013 | Operationalise training module per WHO GACP              | Backend            | TBD   | Not Started | Confirm schema, connect to admin UI, provide reporting for staff competency.                                   | `docs/evidence/COMPL-013/` |
+| COMPL-014 | Consolidate survey modules and enable compliance surveys | Product/Backend    | TBD   | Not Started | Review `cannabis-survey` and `survey-system`, align with compliance requirements, prepare UI integration plan. | `docs/evidence/COMPL-014/` |
+| COMPL-015 | Standards comparison module assessment                   | Compliance/Backend | TBD   | Not Started | Determine whether to enable or absorb `standards-comparison` outputs into compliance tooling.                  | `docs/evidence/COMPL-015/` |
+
+> Evidence folders must follow the structure defined in `docs/evidence/README.md` before tickets can be closed.
+
+> Assign owners during sprint planning. Update this file weekly with progress and links to supporting evidence or PRs.

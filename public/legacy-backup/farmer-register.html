@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สมัครสมาชิกเกษตรกร - GACP Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            padding: 2rem 0;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo .icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
+        }
+
+        .logo h1 {
+            color: #2c3e50;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        .logo p {
+            color: #64748b;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .user-type-badge {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin: 0 auto 2rem;
+            display: table;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.75rem;
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: #374151;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .required {
+            color: #dc2626;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+            color: #111827;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 1.125rem 1.5rem;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .register-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .register-btn:hover::before {
+            left: 100%;
+        }
+
+        .register-btn:hover {
+            background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .register-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            border: 1px solid #fca5a5;
+            display: none;
+            position: relative;
+        }
+
+        .error-message::before {
+            content: '⚠️';
+            margin-right: 0.5rem;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #059669;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            border: 1px solid #6ee7b7;
+            display: none;
+            position: relative;
+        }
+
+        .success-message::before {
+            content: '✅';
+            margin-right: 0.5rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            gap: 0.75rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            min-width: 18px;
+            height: 18px;
+            margin-top: 0.125rem;
+            accent-color: #4CAF50;
+        }
+
+        .checkbox-group label {
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-bottom: 0;
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: 500;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .divider span {
+            padding: 0 1rem;
+            background: white;
+        }
+
+        .login-link {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f9fafb;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .login-link p {
+            color: #6b7280;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .login-link a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .login-link a:hover {
+            background: #f0fdf4;
+            color: #45a049;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-to-home {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #374151;
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-to-home:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .test-data-btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            margin-bottom: 2rem;
+            width: 100%;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .test-data-btn:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .register-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+
+            .back-to-home {
+                position: static;
+                margin-bottom: 2rem;
+                text-align: center;
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/index.html" class="back-to-home">← กลับสู่หน้าหลัก</a>
+
+    <div class="register-container">
+        <div class="logo">
+            <div class="icon">🌿</div>
+            <h1>GACP Platform</h1>
+            <p>ระบบรับรองมาตรฐาน GACP</p>
+        </div>
+
+        <div class="user-type-badge">🌱 สมัครสมาชิกเกษตรกร</div>
+
+        <button class="test-data-btn" onclick="fillTestData()">🧪 เติมข้อมูลทดสอบ</button>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <form id="registerForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">ชื่อ <span class="required">*</span></label>
+                    <input type="text" id="firstName" name="firstName" placeholder="ชื่อจริง" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">นามสกุล <span class="required">*</span></label>
+                    <input type="text" id="lastName" name="lastName" placeholder="นามสกุล" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email">อีเมล <span class="required">*</span></label>
+                    <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">เบอร์โทรศัพท์ <span class="required">*</span></label>
+                    <input type="tel" id="phone" name="phone" placeholder="08X-XXX-XXXX" required>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="farmName">ชื่อฟาร์ม/สวน <span class="required">*</span></label>
+                <input type="text" id="farmName" name="farmName" placeholder="ชื่อฟาร์มหรือสวนของคุณ" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="farmSize">ขนาดพื้นที่ (ไร่)</label>
+                    <input type="number" id="farmSize" name="farmSize" placeholder="เช่น 10.5" step="0.1" min="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="cropTypes">ประเภทพืชหลัก</label>
+                    <select id="cropTypes" name="cropTypes">
+                        <option value="">เลือกประเภทพืช</option>
+                        <option value="herbs">สมุนไพร</option>
+                        <option value="vegetables">ผัก</option>
+                        <option value="fruits">ผลไม้</option>
+                        <option value="grains">ธัญพืช</option>
+                        <option value="cannabis">กัญชา</option>
+                        <option value="other">อื่นๆ</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="address">ที่อยู่ฟาร์ม</label>
+                <textarea id="address" name="address" placeholder="ที่อยู่ของฟาร์ม/สวน (บ้านเลขที่ ตำบล อำเภอ จังหวัด รหัสไปรษณีย์)" rows="3"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">รหัสผ่าน <span class="required">*</span></label>
+                    <input type="password" id="password" name="password" placeholder="อย่างน้อย 8 ตัวอักษร" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">ยืนยันรหัสผ่าน <span class="required">*</span></label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="กรอกรหัสผ่านอีกครั้ง" required>
+                </div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
+                <label for="agreeTerms">
+                    ฉันยอมรับ<a href="#" style="color: #4CAF50; text-decoration: underline;">เงื่อนไขการใช้งาน</a>และ<a href="#" style="color: #4CAF50; text-decoration: underline;">นโยบายความเป็นส่วนตัว</a> <span class="required">*</span>
+                </label>
+            </div>
+
+            <button type="submit" class="register-btn" id="registerBtn">
+                <span id="registerBtnText">สมัครสมาชิกเกษตรกร</span>
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>กำลังสมัครสมาชิก...</p>
+        </div>
+
+        <div class="divider">
+            <span>หรือ</span>
+        </div>
+
+        <div class="login-link">
+            <p>มีบัญชีเกษตรกรอยู่แล้ว?</p>
+            <a href="/farmer-login.html">เข้าสู่ระบบเกษตรกร</a>
+        </div>
+    </div>
+
+    <script>
+        // Fill test data function
+        function fillTestData() {
+            document.getElementById('firstName').value = 'สมชาย';
+            document.getElementById('lastName').value = 'ใจดี';
+            document.getElementById('email').value = 'somchai.farmer@example.com';
+            document.getElementById('phone').value = '081-234-5678';
+            document.getElementById('farmName').value = 'สวนสมุนไพรใจดี';
+            document.getElementById('farmSize').value = '15.5';
+            document.getElementById('cropTypes').value = 'herbs';
+            document.getElementById('address').value = '123 หมู่ 5 ตำบลใจดี อำเภอเมือง จังหวัดสมุนไพร 12345';
+            document.getElementById('password').value = 'farmer123456';
+            document.getElementById('confirmPassword').value = 'farmer123456';
+            document.getElementById('agreeTerms').checked = true;
+        }
+
+        // Password confirmation validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.setCustomValidity('รหัสผ่านไม่ตรงกัน');
+                this.style.borderColor = '#dc2626';
+            } else {
+                this.setCustomValidity('');
+                this.style.borderColor = '#e5e7eb';
+            }
+        });
+
+        // Form submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const registerBtn = document.getElementById('registerBtn');
+            const registerBtnText = document.getElementById('registerBtnText');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            // Validate password
+            if (password.length < 8) {
+                errorMessage.textContent = 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'รหัสผ่านไม่ตรงกัน';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            // Show loading
+            registerBtn.disabled = true;
+            registerBtnText.textContent = 'กำลังสมัครสมาชิก...';
+            loading.style.display = 'block';
+
+            try {
+                const requestData = {
+                    name: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`,
+                    email: document.getElementById('email').value,
+                    password: password,
+                    phone: document.getElementById('phone').value,
+                    userType: 'farmer',
+                    role: 'farmer',
+                    farmName: document.getElementById('farmName').value,
+                    farmSize: parseFloat(document.getElementById('farmSize').value) || 0,
+                    cropTypes: document.getElementById('cropTypes').value,
+                    address: document.getElementById('address').value
+                };
+
+                const response = await fetch('/api/auth/farmer/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    successMessage.textContent = 'สมัครสมาชิกเกษตรกรสำเร็จ! กำลังพาคุณไปยังหน้าเข้าสู่ระบบ...';
+                    successMessage.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        window.location.href = '/farmer-login.html';
+                    }, 2000);
+                    
+                } else {
+                    throw new Error(result.message || 'การสมัครสมาชิกล้มเหลว');
+                }
+
+            } catch (error) {
+                console.error('Registration error:', error);
+                errorMessage.textContent = error.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก กรุณาลองอีกครั้ง';
+                errorMessage.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                registerBtn.disabled = false;
+                registerBtnText.textContent = 'สมัครสมาชิกเกษตรกร';
+            }
+        });
+
+        // Add input animation effects
+        document.querySelectorAll('input, select, textarea').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

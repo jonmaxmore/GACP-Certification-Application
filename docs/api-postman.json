@@ -1,0 +1,516 @@
+{
+  "info": {
+    "name": "GACP Certification System API",
+    "description": "Complete API collection for GACP certification system",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"john_farmer\",\n  \"email\": \"john@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"role\": \"farmer\",\n  \"fullName\": \"John Doe\",\n  \"phoneNumber\": \"+66812345678\",\n  \"address\": \"123 Farm Road, Chiang Mai, Thailand\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('token', jsonData.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Applications",
+      "item": [
+        {
+          "name": "Get All Applications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/applications?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"farmName\": \"Green Valley Organic Farm\",\n  \"cropType\": \"Organic Vegetables\",\n  \"farmSize\": 5.5,\n  \"location\": \"Chiang Mai, Thailand\",\n  \"practicesImplemented\": [\n    \"Organic fertilizers\",\n    \"Crop rotation\",\n    \"Integrated pest management\"\n  ],\n  \"previousCertifications\": [\"Organic Thailand\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/applications",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Application by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/applications/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "application_id_here"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Application",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/applications/:id/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications", ":id", "submit"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "application_id_here"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Application Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/applications/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications", "stats"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Certificates",
+      "item": [
+        {
+          "name": "Get All Certificates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/certificates",
+              "host": ["{{baseUrl}}"],
+              "path": ["certificates"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Certificate (Public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/certificates/verify/:certificateNumber",
+              "host": ["{{baseUrl}}"],
+              "path": ["certificates", "verify", ":certificateNumber"],
+              "variable": [
+                {
+                  "key": "certificateNumber",
+                  "value": "GACP-2024-001"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download Certificate (Public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/certificates/download/:certificateNumber",
+              "host": ["{{baseUrl}}"],
+              "path": ["certificates", "download", ":certificateNumber"],
+              "variable": [
+                {
+                  "key": "certificateNumber",
+                  "value": "GACP-2024-001"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Certificate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"applicationId\": \"app_id_here\",\n  \"certificateNumber\": \"GACP-2024-001\",\n  \"farmName\": \"Green Valley Organic Farm\",\n  \"farmerName\": \"John Doe\",\n  \"cropType\": \"Organic Vegetables\",\n  \"validFrom\": \"2024-01-01\",\n  \"validTo\": \"2025-01-01\",\n  \"standards\": [\"GACP-V1.0\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/certificates",
+              "host": ["{{baseUrl}}"],
+              "path": ["certificates"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Audits",
+      "item": [
+        {
+          "name": "Get All Audits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/audits",
+              "host": ["{{baseUrl}}"],
+              "path": ["audits"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Schedule Field Audit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"applicationId\": \"app_id_here\",\n  \"auditorId\": \"auditor_id_here\",\n  \"scheduledDate\": \"2024-02-15T09:00:00Z\",\n  \"estimatedDuration\": 4,\n  \"auditType\": \"field_inspection\",\n  \"notes\": \"Initial field audit for GACP certification\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/audits/schedule",
+              "host": ["{{baseUrl}}"],
+              "path": ["audits", "schedule"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Auditor Schedule",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/audits/schedule/:auditorId",
+              "host": ["{{baseUrl}}"],
+              "path": ["audits", "schedule", ":auditorId"],
+              "variable": [
+                {
+                  "key": "auditorId",
+                  "value": "auditor_id_here"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Initiate Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"applicationId\": \"app_id_here\",\n  \"amount\": 2500.00,\n  \"currency\": \"THB\",\n  \"paymentMethod\": \"credit_card\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/initiate",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "initiate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Payment Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/status/:applicationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "status", ":applicationId"],
+              "variable": [
+                {
+                  "key": "applicationId",
+                  "value": "app_id_here"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Surveys",
+      "item": [
+        {
+          "name": "Get Survey Regions (Public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/surveys/regions",
+              "host": ["{{baseUrl}}"],
+              "path": ["surveys", "regions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Survey by Region (Public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/surveys/region/:regionCode",
+              "host": ["{{baseUrl}}"],
+              "path": ["surveys", "region", ":regionCode"],
+              "variable": [
+                {
+                  "key": "regionCode",
+                  "value": "CM"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Survey Response (Public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"farmerName\": \"John Doe\",\n  \"farmLocation\": \"Chiang Mai\",\n  \"cropTypes\": [\"Rice\", \"Vegetables\"],\n  \"farmSize\": 3.2,\n  \"currentPractices\": [\"Organic fertilizers\", \"Crop rotation\"],\n  \"interestedInCertification\": true,\n  \"contactInfo\": {\n    \"phone\": \"+66812345678\",\n    \"email\": \"john@example.com\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/surveys/submit/:regionCode",
+              "host": ["{{baseUrl}}"],
+              "path": ["surveys", "submit", ":regionCode"],
+              "variable": [
+                {
+                  "key": "regionCode",
+                  "value": "CM"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/../health",
+              "host": ["{{baseUrl}}"],
+              "path": ["..", "health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "API Documentation",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/docs",
+              "host": ["{{baseUrl}}"],
+              "path": ["docs"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+# Dependencies
+node_modules/
+.next/
+dist/
+build/
+coverage/
+
+# Test files (non-critical for production)
+tests/
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts
+
+# Database files (contain console statements for seeding and development)
+database/
+mongo-init.js
+
+# Example files (for documentation only)
+examples/
+
+# Simulation and demo files
+farmer-simulation/
+demo-standalone.html
+
+# Utility and configuration scripts
+scripts/
+*.config.js
+*.config.ts
+webpack.config.js
+next.config.js
+tailwind.config.js
+
+# Legacy or experimental files
+archive/
+migration-reports/
+weekly-reports/
+
+# Build outputs
+.turbo/
+.cache/
+*.tsbuildinfo
+
+# Environment files
+.env*
+
+# Logs
+logs/
+*.log
+
+# Specific utility files with non-critical warnings
+analyze-gacp-platform-modules.js
+clean-code-summary.js
+clean-console-statements.js
+project-size-cleanup.js
+setup-infrastructure.js
+start-dev.js
+gacp-demo.js
+gacp-simple-server.mjs
+robust-gacp-server.mjs
+
+# Rate limiter (middleware with extensive console logging for debugging)
+middleware/rateLimiter.js
+
+# Frontend build outputs
+apps/*/dist/
+apps/*/.next/
+frontend-nextjs/.next/

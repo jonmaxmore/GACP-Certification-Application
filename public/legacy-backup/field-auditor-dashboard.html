@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTAM Field Auditor Dashboard - แดชบอร์ดผู้ตรวจสอบพื้นที่</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary-color: #eff6ff;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #06b6d4;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .stat-change {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--secondary-color);
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-scheduled {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-inprogress {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-complete {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-pending {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .status-urgent {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--text-dark);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .btn-info {
+            background: var(--info-color);
+            color: white;
+        }
+
+        .map-container {
+            height: 300px;
+            background: #f8fafc;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            margin: 1rem 0;
+        }
+
+        .audit-checklist {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background: #fafafa;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .checklist-label {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+
+        .priority-high {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .priority-medium {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .priority-low {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .weather-widget {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .weather-current {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .weather-temp {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .weather-desc {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .travel-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .travel-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--secondary-color);
+            border-radius: 8px;
+        }
+
+        .travel-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .travel-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div>🌱</div>
+                <div>
+                    <h1>Field Auditor Dashboard</h1>
+                    <p style="opacity: 0.9; font-size: 0.875rem;">แดชบอร์ดผู้ตรวจสอบพื้นที่</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <div id="userName">นายวิชัย สำรวจพื้นที่</div>
+                    <div style="opacity: 0.8; font-size: 0.875rem;" id="userRole">ผู้ตรวจสอบพื้นที่</div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Performance Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="scheduledAudits">5</div>
+                <div class="stat-label">การตรวจที่กำหนด</div>
+                <div class="stat-change positive">สัปดาห์นี้</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedToday">2</div>
+                <div class="stat-label">ตรวจเสร็จวันนี้</div>
+                <div class="stat-change positive">เป้า: 3 ฟาร์ม</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="travelDistance">127</div>
+                <div class="stat-label">ระยะทาง (กม.)</div>
+                <div class="stat-change positive">สัปดาห์นี้</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgScore">8.6</div>
+                <div class="stat-label">คะแนนเฉลี่ย</div>
+                <div class="stat-change positive">จาก 10 คะแนน</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Field Audit Schedule -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">ตารางตรวจพื้นที่</h3>
+                    <div>
+                        <button class="btn btn-info" onclick="viewMap()">🗺️ แผนที่</button>
+                        <button class="btn btn-primary" onclick="syncSchedule()">ซิงค์ปฏิทิน</button>
+                    </div>
+                </div>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>วันที่</th>
+                            <th>เวลา</th>
+                            <th>เกษตรกร/ฟาร์ม</th>
+                            <th>ระยะทาง</th>
+                            <th>สถานะ</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditSchedule">
+                        <tr class="priority-high">
+                            <td><strong>1 ต.ค. 2025</strong></td>
+                            <td>09:00</td>
+                            <td>นายสมชาย ใจดี<br><small>ฟาร์มขมิ้นชัน - เชียงใหม่</small></td>
+                            <td>45 กม.</td>
+                            <td><span class="status-badge status-scheduled">กำหนดการ</span></td>
+                            <td>
+                                <button class="btn btn-primary" onclick="startAudit('GACP-2025-089')">เริ่มตรวจ</button>
+                            </td>
+                        </tr>
+                        <tr class="priority-medium">
+                            <td><strong>1 ต.ค. 2025</strong></td>
+                            <td>14:00</td>
+                            <td>นางสมหญิง รักดี<br><small>ฟาร์มขิง - ลำปาง</small></td>
+                            <td>23 กม.</td>
+                            <td><span class="status-badge status-scheduled">กำหนดการ</span></td>
+                            <td>
+                                <button class="btn btn-primary" onclick="startAudit('GACP-2025-090')">เริ่มตรวจ</button>
+                            </td>
+                        </tr>
+                        <tr class="priority-low">
+                            <td><strong>30 ก.ย. 2025</strong></td>
+                            <td>11:30</td>
+                            <td>นายประชา เกษตรกร<br><small>ฟาร์มไพล - น่าน</small></td>
+                            <td>67 กม.</td>
+                            <td><span class="status-badge status-inprogress">กำลังตรวจ</span></td>
+                            <td>
+                                <button class="btn btn-warning" onclick="continueAudit('GACP-2025-091')">ดำเนินการต่อ</button>
+                            </td>
+                        </tr>
+                        <tr class="priority-medium">
+                            <td><strong>2 ต.ค. 2025</strong></td>
+                            <td>10:00</td>
+                            <td>นายวิเชียร สมบูรณ์<br><small>ฟาร์มกระชาย - พะเยา</small></td>
+                            <td>89 กม.</td>
+                            <td><span class="status-badge status-pending">รอกำหนด</span></td>
+                            <td>
+                                <button class="btn btn-secondary" onclick="scheduleAudit('GACP-2025-087')">กำหนดเวลา</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Today's Tasks & Tools -->
+            <div>
+                <!-- Weather & Travel Info -->
+                <div class="weather-widget">
+                    <div class="weather-current">
+                        <div>
+                            <div class="weather-temp">28°C</div>
+                            <div class="weather-desc">อากาศแจ่มใส</div>
+                        </div>
+                        <div style="font-size: 2rem;">☀️</div>
+                    </div>
+                    <div style="margin-top: 0.5rem; font-size: 0.875rem; opacity: 0.9;">
+                        ลมเบา 15 กม./ชม. | ความชื้น 65%
+                    </div>
+                </div>
+
+                <!-- Travel Information -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header">
+                        <h3 class="card-title">ข้อมูลการเดินทาง</h3>
+                    </div>
+                    <div class="travel-info">
+                        <div class="travel-item">
+                            <div class="travel-value">68</div>
+                            <div class="travel-label">กม. วันนี้</div>
+                        </div>
+                        <div class="travel-item">
+                            <div class="travel-value">2.5</div>
+                            <div class="travel-label">ชม. เดินทาง</div>
+                        </div>
+                        <div class="travel-item">
+                            <div class="travel-value">3</div>
+                            <div class="travel-label">ฟาร์มที่ตรวจ</div>
+                        </div>
+                        <div class="travel-item">
+                            <div class="travel-value">₿ 850</div>
+                            <div class="travel-label">ค่าเดินทาง</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audit Tools -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">เครื่องมือตรวจสอบ</h3>
+                    </div>
+                    
+                    <div>
+                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;" onclick="openFieldAuditForm()">
+                            📝 แบบฟอร์มตรวจพื้นที่
+                        </button>
+                        <button class="btn btn-info" style="width: 100%; margin-bottom: 0.5rem;" onclick="takePhotos()">
+                            📷 ถ่ายภาพหลักฐาน
+                        </button>
+                        <button class="btn btn-warning" style="width: 100%; margin-bottom: 0.5rem;" onclick="recordGPS()">
+                            📍 บันทึกพิกัด GPS
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;" onclick="soilSample()">
+                            🧪 เก็บตัวอย่างดิน
+                        </button>
+                        <button class="btn btn-success" style="width: 100%; margin-bottom: 0.5rem;" onclick="measureArea()">
+                            📐 วัดพื้นที่
+                        </button>
+                        <button class="btn btn-danger" style="width: 100%; margin-bottom: 0.5rem;" onclick="reportIssue()">
+                            ⚠️ รายงานปัญหา
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Checklist -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Checklist การตรวจสอบพื้นที่ (ฟาร์มปัจจุบัน: นายประชา เกษตรกร)</h3>
+                <div>
+                    <span style="margin-right: 1rem; color: var(--text-light);">ความคืบหน้า: 75%</span>
+                    <button class="btn btn-primary" onclick="saveProgress()">บันทึกความคืบหน้า</button>
+                </div>
+            </div>
+            
+            <div class="audit-checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" checked disabled>
+                    <div class="checklist-label">
+                        <strong>1. การเตรียมพื้นที่</strong><br>
+                        <small>ตรวจสอบการล้างทำความสะอาดพื้นที่ปลูก</small>
+                    </div>
+                    <span class="status-badge status-complete">เสร็จ</span>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" checked disabled>
+                    <div class="checklist-label">
+                        <strong>2. แหล่งน้ำ</strong><br>
+                        <small>ตรวจสอบคุณภาพน้ำและระบบการให้น้ำ</small>
+                    </div>
+                    <span class="status-badge status-complete">เสร็จ</span>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" checked disabled>
+                    <div class="checklist-label">
+                        <strong>3. พันธุ์สมุนไพร</strong><br>
+                        <small>ตรวจสอบแหล่งที่มาและคุณภาพของพันธุ์</small>
+                    </div>
+                    <span class="status-badge status-complete">เสร็จ</span>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox">
+                    <div class="checklist-label">
+                        <strong>4. การใช้ปุ์ย</strong><br>
+                        <small>ตรวจสอบชนิดและวิธีการใช้ปุ่ยอินทรีย์</small>
+                    </div>
+                    <span class="status-badge status-inprogress">กำลังดำเนินการ</span>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox">
+                    <div class="checklist-label">
+                        <strong>5. การป้องกันศัตรูพืช</strong><br>
+                        <small>ตรวจสอบวิธีการป้องกันแบบธรรมชาติ</small>
+                    </div>
+                    <span class="status-badge status-pending">รอดำเนินการ</span>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox">
+                    <div class="checklist-label">
+                        <strong>6. การเก็บเกี่ยว</strong><br>
+                        <small>ตรวจสอบวิธีการและเครื่องมือในการเก็บเกี่ยว</small>
+                    </div>
+                    <span class="status-badge status-pending">รอดำเนินการ</span>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox">
+                    <div class="checklist-label">
+                        <strong>7. การจัดเก็บและขนส่ง</strong><br>
+                        <small>ตรวจสอบสภาพการจัดเก็บหลังการเก็บเกี่ยว</small>
+                    </div>
+                    <span class="status-badge status-pending">รอดำเนินการ</span>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox">
+                    <div class="checklist-label">
+                        <strong>8. บันทึกและเอกสาร</strong><br>
+                        <small>ตรวจสอบความครบถ้วนของบันทึกการดำเนินงาน</small>
+                    </div>
+                    <span class="status-badge status-pending">รอดำเนินการ</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Audit Reports -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">รายงานการตรวจสอบล่าสุด</h3>
+                <button class="btn btn-primary">ส่งออกรายงาน</button>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>วันที่</th>
+                        <th>เกษตรกร/ฟาร์ม</th>
+                        <th>สมุนไพร</th>
+                        <th>คะแนน</th>
+                        <th>ผลการตรวจ</th>
+                        <th>ข้อเสนอแนะ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>29 ก.ย. 2025</td>
+                        <td>นายสมศักดิ์ ทำดี<br><small>เชียงราย</small></td>
+                        <td>กระเทียม</td>
+                        <td><strong>9.2/10</strong></td>
+                        <td><span class="status-badge status-complete">ผ่าน</span></td>
+                        <td>คุณภาพดีเยี่ยม</td>
+                    </tr>
+                    <tr>
+                        <td>28 ก.ย. 2025</td>
+                        <td>นางมาลี ดอกไม้<br><small>ลำพูน</small></td>
+                        <td>ชีพจร</td>
+                        <td><strong>7.8/10</strong></td>
+                        <td><span class="status-badge status-warning">ต้องปรับปรุง</span></td>
+                        <td>ระบบน้ำต้องปรับปรุง</td>
+                    </tr>
+                    <tr>
+                        <td>27 ก.ย. 2025</td>
+                        <td>นายวิชัย แสงใส<br><small>แพร่</small></td>
+                        <td>สมุนไพรรวม</td>
+                        <td><strong>8.9/10</strong></td>
+                        <td><span class="status-badge status-complete">ผ่าน</span></td>
+                        <td>ปฏิบัติตามมาตรฐาน</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            // Get user info
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                
+                // Check if user is field auditor
+                if (currentUser.organizationType !== 'field_auditor') {
+                    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+                    redirectToLogin();
+                    return;
+                }
+                
+                updateUserDisplay();
+            }
+
+            await loadDashboardData();
+        });
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Mock data loading - replace with real API calls
+                updateStatistics();
+                loadAuditSchedule();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateStatistics() {
+            // Mock statistics - replace with real API calls
+            document.getElementById('scheduledAudits').textContent = '5';
+            document.getElementById('completedToday').textContent = '2';
+            document.getElementById('travelDistance').textContent = '127';
+            document.getElementById('avgScore').textContent = '8.6';
+        }
+
+        function loadAuditSchedule() {
+            // Already populated in HTML - replace with real API calls
+        }
+
+        function startAudit(applicationId) {
+            alert(`เริ่มการตรวจสอบพื้นที่: ${applicationId}\n\nฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป:\n- GPS tracking\n- Field audit forms\n- Photo documentation\n- Real-time reporting`);
+        }
+
+        function continueAudit(applicationId) {
+            alert(`ดำเนินการตรวจสอบต่อ: ${applicationId}`);
+        }
+
+        function scheduleAudit(applicationId) {
+            alert(`กำหนดเวลาตรวจสอบ: ${applicationId}`);
+        }
+
+        function viewMap() {
+            alert('เปิดแผนที่การตรวจสอบ:\n\n• ตำแหน่งฟาร์มทั้งหมด\n• เส้นทางที่เหมาะสม\n• สภาพการจราจร\n• จุดแวะพัก');
+        }
+
+        function syncSchedule() {
+            alert('ซิงค์ปฏิทินกับระบบ:\n\n• Google Calendar\n• Outlook\n• ปฏิทินมือถือ\n• แจ้งเตือนอัตโนมัติ');
+        }
+
+        function openFieldAuditForm() {
+            alert('เปิดแบบฟอร์มตรวจพื้นที่:\n\n• GACP Checklist\n• การประเมินคุณภาพ\n• บันทึกข้อมูลภาคสนาม\n• ผลการตรวจสอบ');
+        }
+
+        function takePhotos() {
+            alert('เครื่องมือถ่ายภาพ:\n\n• กล้องอัตโนมัติ\n• เพิ่ม GPS coordinates\n• หมวดหมู่ภาพ\n• อัปโหลดทันที');
+        }
+
+        function recordGPS() {
+            alert('บันทึกพิกัด GPS:\n\n• ตำแหน่งฟาร์ม\n• ขอบเขตพื้นที่\n• จุดเก็บตัวอย่าง\n• พิกัดอ้างอิง');
+        }
+
+        function soilSample() {
+            alert('เก็บตัวอย่างดิน:\n\n• จุดเก็บตัวอย่าง\n• ลึกของการเก็บ\n• ประเภทการทดสอบ\n• รหัสตัวอย่าง');
+        }
+
+        function measureArea() {
+            alert('วัดพื้นที่การเพาะปลูก:\n\n• พื้นที่รวม\n• พื้นที่แต่ละแปลง\n• ความหนาแน่น\n• ประมาณการผลผลิต');
+        }
+
+        function reportIssue() {
+            alert('รายงานปัญหา:\n\n• ปัญหาด้านสุขอนามัย\n• การไม่ปฏิบัติตามมาตรฐาน\n• ปัญหาสิ่งแวดล้อม\n• ส่งต่อผู้เชี่ยวชาญ');
+        }
+
+        function saveProgress() {
+            alert('บันทึกความคืบหน้าการตรวจสอบ:\n\n• ข้อมูลท้องถิ่น\n• รูปภาพหลักฐาน\n• บันทึกเสียง\n• อัปเดตสถานะ');
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/auth.html';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+    </script>
+</body>
+</html>

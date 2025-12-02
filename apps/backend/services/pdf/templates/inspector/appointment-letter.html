@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+  <style>
+    .appointment-box { border: 3px solid #0066cc; background: #e3f2fd; padding: 30px; margin: 30px 0; text-align: center; }
+    .appointment-date { font-size: 24pt; font-weight: 700; color: #0066cc; margin: 15px 0; }
+    .preparation-list { background: #fff3cd; padding: 20px; margin: 20px 0; border-left: 4px solid #ffc107; }
+  </style>
+</head>
+<body>
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">ใบนัดหมายตรวจสอบมาตรฐาน GACP</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">GACP Inspection Appointment</div>
+  
+  <div class="document-number">ที่ {{letterNumber}}<br>วันที่: {{letterDate}}</div>
+
+  <div class="section">
+    <div class="section-title">เรียน {{farmerName}}</div>
+    <p style="margin: 20px 0; text-indent: 50px;">
+      ตามที่ท่านได้ยื่นคำขอรับรองมาตรฐาน GACP เลขที่ {{applicationNumber}} 
+      สำหรับฟาร์ม {{farmName}} นั้น กรมการแพทย์แผนไทยและการแพทย์ทางเลือก 
+      ขอนัดหมายเพื่อดำเนินการตรวจสอบ ดังรายละเอียดต่อไปนี้
+    </p>
+  </div>
+
+  <div class="appointment-box">
+    <div style="font-size: 18pt; font-weight: 600; margin-bottom: 10px;">📅 รายละเอียดการนัดหมาย</div>
+    <div class="appointment-date">{{inspectionDate}}</div>
+    <div style="font-size: 18pt; margin: 10px 0;">เวลา: {{inspectionTime}}</div>
+    <div style="font-size: 16pt; color: #666;">ประเภท: {{inspectionType}}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ข้อมูลการตรวจสอบ</div>
+    <div class="info-row"><div class="info-label">เลขที่คำขอ:</div><div class="info-value">{{applicationNumber}}</div></div>
+    <div class="info-row"><div class="info-label">ชื่อฟาร์ม:</div><div class="info-value">{{farmName}}</div></div>
+    <div class="info-row"><div class="info-label">ที่ตั้งฟาร์ม:</div><div class="info-value">{{farmLocation}}</div></div>
+    <div class="info-row"><div class="info-label">พืชที่ตรวจสอบ:</div><div class="info-value">{{cropType}}</div></div>
+    <div class="info-row"><div class="info-label">ผู้ตรวจสอบ:</div><div class="info-value">{{inspectorName}}</div></div>
+    <div class="info-row"><div class="info-label">โทรศัพท์:</div><div class="info-value">{{inspectorPhone}}</div></div>
+  </div>
+
+  <div class="preparation-list">
+    <div class="section-title">⚠️ เอกสารและสิ่งที่ต้องเตรียม</div>
+    <ul style="margin-left: 30px; line-height: 2;">
+      <li>สำเนาบัตรประชาชนเจ้าของฟาร์ม</li>
+      <li>เอกสารสิทธิ์ที่ดิน (โฉนด/น.ส.3/ส.ค.1)</li>
+      <li>แผนผังฟาร์มและแปลงเพาะปลูก</li>
+      <li>บันทึกการเพาะปลูกย้อนหลัง 6 เดือน</li>
+      <li>บันทึกการใช้ปุ๋ยและสารเคมี</li>
+      <li>ใบรับรองเมล็ดพันธุ์/กล้าพันธุ์</li>
+      <li>ผลตรวจวิเคราะห์ดินและน้ำ (ถ้ามี)</li>
+      <li>ใบรับรองการอบรมพนักงาน (ถ้ามี)</li>
+    </ul>
+  </div>
+
+  {{#if isVideoCall}}
+  <div class="section">
+    <div class="section-title">📹 วิธีการเข้าร่วม Video Call</div>
+    <p>1. เข้าสู่ระบบ GACP Platform ที่ <strong>{{platformUrl}}</strong></p>
+    <p>2. ไปที่เมนู "การตรวจสอบของฉัน"</p>
+    <p>3. คลิก "เข้าร่วม Video Call" ในวันและเวลาที่นัดหมาย</p>
+    <p>4. เตรียมกล้องและไมโครโฟนให้พร้อม</p>
+    <p>5. เตรียมแสดงพื้นที่ฟาร์มผ่านกล้อง</p>
+  </div>
+  {{/if}}
+
+  {{#if isOnsite}}
+  <div class="section">
+    <div class="section-title">🚗 แผนที่ตั้งฟาร์ม</div>
+    <p>{{farmDirections}}</p>
+    <p><strong>พิกัด GPS:</strong> {{gpsCoordinates}}</p>
+  </div>
+  {{/if}}
+
+  <div class="section">
+    <div class="section-title">📞 การติดต่อ</div>
+    <p>หากมีข้อสงสัยหรือต้องการเลื่อนนัดหมาย กรุณาติดต่อ:</p>
+    <p><strong>{{inspectorName}}</strong></p>
+    <p>โทร: {{inspectorPhone}}</p>
+    <p>อีเมล: {{inspectorEmail}}</p>
+    <p style="color: #dc3545; font-weight: 600;">⚠️ หากต้องการเลื่อนนัด กรุณาแจ้งล่วงหน้าอย่างน้อย 3 วันทำการ</p>
+  </div>
+
+  <div class="section" style="margin-top: 40px;">
+    <p style="text-indent: 50px;">
+      จึงเรียนมาเพื่อโปรดเตรียมความพร้อมและให้ความร่วมมือในการตรวจสอบ
+    </p>
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-line">
+      ({{inspectorName}})<br>
+      ผู้ตรวจสอบมาตรฐาน GACP
+    </div>
+  </div>
+
+  <div class="footer-info">
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข<br>
+    88/22 ถนนติวานนท์ ตำบลตลาดขวัญ อำเภอเมือง จังหวัดนนทบุรี 11000<br>
+    โทร: 02-xxx-xxxx | อีเมล: info@dtam.go.th
+  </div>
+</body>
+</html>

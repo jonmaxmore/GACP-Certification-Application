@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTAM Document Reviewer Dashboard - แดชบอร์ดนักวิชาการตรวจเอกสาร</title>
+    <style>
+        :root {
+            --primary-color: #059669;
+            --primary-dark: #047857;
+            --secondary-color: #f0fdf4;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #3b82f6;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .stat-change {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--secondary-color);
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-review {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-urgent {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-complete {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--text-dark);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .priority-high {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .priority-medium {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .priority-low {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .document-viewer {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .document-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background: #fafafa;
+        }
+
+        .document-info {
+            flex: 1;
+        }
+
+        .document-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .document-meta {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .quality-meter {
+            margin: 1rem 0;
+        }
+
+        .quality-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .quality-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--error-color), var(--warning-color), var(--success-color));
+            transition: width 0.3s ease;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .quick-stat {
+            text-align: center;
+            padding: 1rem;
+            background: var(--secondary-color);
+            border-radius: 8px;
+        }
+
+        .quick-stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .quick-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div>📋</div>
+                <div>
+                    <h1>Document Reviewer Dashboard</h1>
+                    <p style="opacity: 0.9; font-size: 0.875rem;">แดชบอร์ดนักวิชาการตรวจเอกสาร</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <div id="userName">นางสมใจ ใสใส</div>
+                    <div style="opacity: 0.8; font-size: 0.875rem;" id="userRole">นักวิชาการตรวจเอกสาร</div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Performance Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="pendingDocs">15</div>
+                <div class="stat-label">เอกสารรอตรวจ</div>
+                <div class="stat-change positive">+3 จากเมื่อวาน</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayReviewed">8</div>
+                <div class="stat-label">ตรวจแล้ววันนี้</div>
+                <div class="stat-change positive">เป้า: 10 รายการ</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="averageTime">2.5</div>
+                <div class="stat-label">เวลาเฉลี่ย (ชม.)</div>
+                <div class="stat-change positive">ดีขึ้น 15%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracyRate">96%</div>
+                <div class="stat-label">ความแม่นยำ</div>
+                <div class="stat-change positive">เป้า: >95%</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Document Review Queue -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">คิวตรวจเอกสาร</h3>
+                    <div>
+                        <select style="margin-right: 1rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+                            <option>ทั้งหมด</option>
+                            <option>ความสำคัญสูง</option>
+                            <option>ส่งใหม่</option>
+                            <option>แก้ไขแล้ว</option>
+                        </select>
+                        <button class="btn btn-primary">รีเฟรช</button>
+                    </div>
+                </div>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>รหัสใบสมัคร</th>
+                            <th>เกษตรกร</th>
+                            <th>สมุนไพร</th>
+                            <th>ความสำคัญ</th>
+                            <th>สถานะ</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="documentQueue">
+                        <tr class="priority-high">
+                            <td><strong>GACP-2025-089</strong></td>
+                            <td>นายสมชาย ใจดี<br><small>เชียงใหม่</small></td>
+                            <td>ขมิ้นชัน<br><small>5 ไร่</small></td>
+                            <td><span class="status-badge status-urgent">สูง</span></td>
+                            <td><span class="status-badge status-pending">รอตรวจ</span></td>
+                            <td>
+                                <button class="btn btn-primary" onclick="reviewDocument('GACP-2025-089')">ตรวจสอบ</button>
+                            </td>
+                        </tr>
+                        <tr class="priority-medium">
+                            <td><strong>GACP-2025-090</strong></td>
+                            <td>นางสมหญิง รักดี<br><small>ลำปาง</small></td>
+                            <td>ขิง<br><small>3 ไร่</small></td>
+                            <td><span class="status-badge status-warning">กลาง</span></td>
+                            <td><span class="status-badge status-pending">รอตรวจ</span></td>
+                            <td>
+                                <button class="btn btn-primary" onclick="reviewDocument('GACP-2025-090')">ตรวจสอบ</button>
+                            </td>
+                        </tr>
+                        <tr class="priority-low">
+                            <td><strong>GACP-2025-091</strong></td>
+                            <td>นายประชา เกษตรกร<br><small>น่าน</small></td>
+                            <td>ไพล<br><small>2 ไร่</small></td>
+                            <td><span class="status-badge status-success">ต่ำ</span></td>
+                            <td><span class="status-badge status-review">กำลังตรวจ</span></td>
+                            <td>
+                                <button class="btn btn-warning" onclick="continueReview('GACP-2025-091')">ดำเนินการต่อ</button>
+                            </td>
+                        </tr>
+                        <tr class="priority-medium">
+                            <td><strong>GACP-2025-087</strong></td>
+                            <td>นายวิเชียร สมบูรณ์<br><small>พะเยา</small></td>
+                            <td>กระชาย<br><small>4 ไร่</small></td>
+                            <td><span class="status-badge status-warning">กลาง</span></td>
+                            <td><span class="status-badge status-pending">รอตรวจ (ส่งใหม่)</span></td>
+                            <td>
+                                <button class="btn btn-primary" onclick="reviewDocument('GACP-2025-087')">ตรวจสอบ</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Today's Performance & Tools -->
+            <div>
+                <!-- Today's Performance -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header">
+                        <h3 class="card-title">ผลงานวันนี้</h3>
+                    </div>
+                    <div class="quick-stats">
+                        <div class="quick-stat">
+                            <div class="quick-stat-number">8</div>
+                            <div class="quick-stat-label">ตรวจแล้ว</div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="quick-stat-number">6</div>
+                            <div class="quick-stat-label">อนุมัติ</div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="quick-stat-number">2</div>
+                            <div class="quick-stat-label">ต้องแก้ไข</div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="quick-stat-number">2.5</div>
+                            <div class="quick-stat-label">ชม./รายการ</div>
+                        </div>
+                    </div>
+                    
+                    <div class="quality-meter">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.875rem; font-weight: 600;">ความก้าวหน้า</span>
+                            <span style="font-size: 0.875rem; color: var(--primary-color);">80%</span>
+                        </div>
+                        <div class="quality-bar">
+                            <div class="quality-fill" style="width: 80%;"></div>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.25rem;">
+                            เป้าหมาย: 10 รายการ/วัน
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document Review Tools -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">เครื่องมือช่วยงาน</h3>
+                    </div>
+                    
+                    <div>
+                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;" onclick="openChecklistTool()">
+                            📋 Checklist ตรวจเอกสาร
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;" onclick="openGuidelines()">
+                            📖 คู่มือ GACP Standards
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;" onclick="openTemplates()">
+                            📄 เทมเพลตความเห็น
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;" onclick="contactFarmer()">
+                            📞 ติดต่อเกษตรกร
+                        </button>
+                        <button class="btn btn-warning" style="width: 100%; margin-bottom: 0.5rem;" onclick="escalateIssue()">
+                            ⚠️ ส่งต่อปัญหา
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Review History -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">ประวัติการตรวจสอบ (7 วันที่ผ่านมา)</h3>
+                <button class="btn btn-primary">ส่งออกรายงาน</button>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>วันที่</th>
+                        <th>รหัสใบสมัคร</th>
+                        <th>เกษตรกร</th>
+                        <th>เวลาที่ใช้</th>
+                        <th>ผลการตรวจ</th>
+                        <th>หมายเหตุ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>30 ก.ย. 2025</td>
+                        <td>GACP-2025-085</td>
+                        <td>นายสมศักดิ์ ทำดี</td>
+                        <td>2.5 ชม.</td>
+                        <td><span class="status-badge status-complete">อนุมัติ</span></td>
+                        <td>เอกสารครบถ้วน</td>
+                    </tr>
+                    <tr>
+                        <td>30 ก.ย. 2025</td>
+                        <td>GACP-2025-086</td>
+                        <td>นางมาลี ดอกไม้</td>
+                        <td>3.0 ชม.</td>
+                        <td><span class="status-badge status-warning">ต้องแก้ไข</span></td>
+                        <td>SOP ไม่สมบูรณ์</td>
+                    </tr>
+                    <tr>
+                        <td>29 ก.ย. 2025</td>
+                        <td>GACP-2025-083</td>
+                        <td>นายวิชัย แสงใส</td>
+                        <td>2.0 ชม.</td>
+                        <td><span class="status-badge status-complete">อนุมัติ</span></td>
+                        <td>ผ่านการตรวจทั้งหมด</td>
+                    </tr>
+                    <tr>
+                        <td>29 ก.ย. 2025</td>
+                        <td>GACP-2025-084</td>
+                        <td>นายประเสริฐ เก่งกาจ</td>
+                        <td>4.0 ชม.</td>
+                        <td><span class="status-badge status-warning">ต้องแก้ไข</span></td>
+                        <td>COA หมดอายุ</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            // Get user info
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                
+                // Check if user is document reviewer
+                if (currentUser.organizationType !== 'document_reviewer') {
+                    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+                    redirectToLogin();
+                    return;
+                }
+                
+                updateUserDisplay();
+            }
+
+            await loadDashboardData();
+        });
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Mock data loading - replace with real API calls
+                updateStatistics();
+                loadDocumentQueue();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateStatistics() {
+            // Mock statistics - replace with real API calls
+            document.getElementById('pendingDocs').textContent = '15';
+            document.getElementById('todayReviewed').textContent = '8';
+            document.getElementById('averageTime').textContent = '2.5';
+            document.getElementById('accuracyRate').textContent = '96%';
+        }
+
+        function loadDocumentQueue() {
+            // Already populated in HTML - replace with real API calls
+        }
+
+        function reviewDocument(applicationId) {
+            // Open document review interface
+            alert(`เปิดหน้าตรวจสอบเอกสาร: ${applicationId}\n\nฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป:\n- Document viewer\n- Checklist interface\n- Approval/rejection workflow`);
+        }
+
+        function continueReview(applicationId) {
+            alert(`ดำเนินการตรวจสอบต่อ: ${applicationId}`);
+        }
+
+        function openChecklistTool() {
+            alert('เปิดเครื่องมือ Checklist ตรวจเอกสาร:\n\n• ตรวจสอบ กทล.1\n• ตรวจสอบ SOP\n• ตรวจสอบ COA\n• ตรวจสอบเอกสารแนบ\n• การให้คะแนน');
+        }
+
+        function openGuidelines() {
+            alert('เปิดคู่มือมาตรฐาน GACP:\n\n• หลักการ Good Agricultural and Collection Practices\n• ข้อกำหนดเฉพาะสมุนไพรแต่ละชนิด\n• เกณฑ์การประเมิน');
+        }
+
+        function openTemplates() {
+            alert('เทมเพลตความเห็น:\n\n• ความเห็นอนุมัติ\n• ความเห็นให้แก้ไข\n• ความเห็นปฏิเสธ\n• แนวทางการปรับปรุง');
+        }
+
+        function contactFarmer() {
+            alert('ติดต่อเกษตรกร:\n\n• โทรศัพท์\n• อีเมล\n• SMS\n• ระบบแชท');
+        }
+
+        function escalateIssue() {
+            alert('ส่งต่อปัญหาไปยัง:\n\n• หัวหน้างาน\n• ผู้เชี่ยวชาญเฉพาะด้าน\n• ผู้อนุมัติ\n• ทีมเทคนิค');
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/auth.html';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+    </script>
+</body>
+</html>

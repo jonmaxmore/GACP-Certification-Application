@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Manager Dashboard - แดชบอร์ดผู้บริหารระดับสูง</title>
+    <style>
+        :root {
+            --primary-color: #1f2937;
+            --primary-dark: #111827;
+            --secondary-color: #f9fafb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #06b6d4;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .mode-button {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-button.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
+        .executive-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .executive-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .executive-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .executive-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .executive-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--secondary-color);
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-excellent {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-good {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-critical {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .executive-tools {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .tool-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .tool-btn:hover {
+            background: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+
+        .emergency-panel {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .emergency-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .emergency-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .emergency-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .executive-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .executive-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div>👨‍💼</div>
+                <div>
+                    <h1>Executive Manager Dashboard</h1>
+                    <p style="opacity: 0.9; font-size: 0.875rem;">แดชบอร์ดผู้บริหารระดับสูง DTAM</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <div id="userName">นายผู้จัดการ บริหารสูง</div>
+                    <div style="opacity: 0.8; font-size: 0.875rem;" id="userRole">ผู้บริหารระดับสูง DTAM</div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Mode Toggle -->
+        <div class="mode-toggle">
+            <button class="mode-button active" onclick="switchMode('executive')">
+                📊 โหมดบริหารงาน
+            </button>
+            <button class="mode-button" onclick="switchMode('security')">
+                🔒 โหมดความปลอดภัยระดับสูง
+            </button>
+        </div>
+
+        <!-- Executive Mode -->
+        <div class="mode-content active" id="executive-mode">
+            <!-- Executive KPIs -->
+            <div class="executive-grid">
+                <div class="executive-card">
+                    <div class="executive-number" id="overallScore">8.7</div>
+                    <div class="executive-label">คะแนนรวมองค์การ</div>
+                </div>
+                <div class="executive-card">
+                    <div class="executive-number" id="teamEfficiency">93%</div>
+                    <div class="executive-label">ประสิทธิภาพทีม</div>
+                </div>
+                <div class="executive-card">
+                    <div class="executive-number" id="monthlyRevenue">4.8M</div>
+                    <div class="executive-label">รายได้เดือนนี้</div>
+                </div>
+                <div class="executive-card">
+                    <div class="executive-number" id="customerSat">96%</div>
+                    <div class="executive-label">ความพึงพอใจลูกค้า</div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout">
+                <!-- Strategic Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">ภาพรวมการบริหารเชิงกลยุทธ์</h3>
+                        <div>
+                            <select style="margin-right: 1rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+                                <option>ภาพรวมทั้งหมด</option>
+                                <option>สัปดาห์นี้</option>
+                                <option>เดือนนี้</option>
+                                <option>ไตรมาสนี้</option>
+                            </select>
+                            <button class="btn btn-primary">ส่งออกรายงาน</button>
+                        </div>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>แผนก/โครงการ</th>
+                                <th>ผู้รับผิดชอบ</th>
+                                <th>เป้าหมายหลัก</th>
+                                <th>ผลงาน</th>
+                                <th>งบประมาณ</th>
+                                <th>สถานะ</th>
+                                <th>การดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Document & Customer Service</strong></td>
+                                <td>ทีมเอกสารและลูกค้า</td>
+                                <td>ตรวจเอกสาร 150 ฉบับ/เดือน</td>
+                                <td><strong>142 ฉบับ</strong></td>
+                                <td>140K บาท/เดือน</td>
+                                <td><span class="status-badge status-good">95% ของเป้า</span></td>
+                                <td>
+                                    <button class="btn btn-success" onclick="reviewDepartment('doc_customer')">ทบทวน</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Field Auditor Team</strong></td>
+                                <td>ทีมตรวจสอบภาคสนาม</td>
+                                <td>ตรวจฟาร์ม 40 แห่ง/เดือน</td>
+                                <td><strong>45 แห่ง</strong></td>
+                                <td>180K บาท/เดือน</td>
+                                <td><span class="status-badge status-excellent">112% ของเป้า</span></td>
+                                <td>
+                                    <button class="btn btn-success" onclick="rewardTeam('field_audit')">ชื่นชม</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Digital Technology</strong></td>
+                                <td>ทีมเทคโนโลยีดิจิทัล</td>
+                                <td>Uptime 99.5%</td>
+                                <td><strong>99.9%</strong></td>
+                                <td>100K บาท/เดือน</td>
+                                <td><span class="status-badge status-excellent">เกินเป้า</span></td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="expandTech('digital_tech')">ขยายขีดความสามารถ</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Finance Team</strong></td>
+                                <td>ทีมการเงิน</td>
+                                <td>รายได้ 4.2M บาท/เดือน</td>
+                                <td><strong>4.8M บาท</strong></td>
+                                <td>100K บาท/เดือน</td>
+                                <td><span class="status-badge status-excellent">114% ของเป้า</span></td>
+                                <td>
+                                    <button class="btn btn-success" onclick="reviewFinancials('finance')">ดูรายละเอียด</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>AI Development Project</strong></td>
+                                <td>ทีมพัฒนา AI</td>
+                                <td>ความก้าวหน้า 75%</td>
+                                <td><strong>68%</strong></td>
+                                <td>2.5M บาท/โครงการ</td>
+                                <td><span class="status-badge status-warning">ล่าช้า 7%</span></td>
+                                <td>
+                                    <button class="btn btn-warning" onclick="accelerateProject('ai_dev')">เร่งโครงการ</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Executive Tools -->
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">เครื่องมือบริหารระดับสูง</h3>
+                        </div>
+                        
+                        <div class="executive-tools">
+                            <a href="#" class="tool-btn" onclick="executiveMeeting()">
+                                👥 ประชุมผู้บริหารระดับสูง
+                            </a>
+                            <a href="#" class="tool-btn" onclick="strategicPlanning()">
+                                🎯 วางแผนกลยุทธ์องค์การ
+                            </a>
+                            <a href="#" class="tool-btn" onclick="budgetReview()">
+                                💰 ทบทวนงบประมาณรายไตรมาส
+                            </a>
+                            <a href="#" class="tool-btn" onclick="performanceReview()">
+                                📊 ประเมินผลงานแผนก
+                            </a>
+                            <a href="#" class="tool-btn" onclick="stakeholderReport()">
+                                📈 รายงานผู้มีส่วนได้เสีย
+                            </a>
+                            <a href="#" class="tool-btn" onclick="riskManagement()">
+                                ⚠️ การจัดการความเสี่ยง
+                            </a>
+                            <a href="#" class="tool-btn" onclick="policyMaking()">
+                                📋 กำหนดนโยบายใหม่
+                            </a>
+                            <a href="#" class="tool-btn" onclick="innovationLab()">
+                                🚀 ห้องปฏิบัติการนวัตกรรม
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Mode -->
+        <div class="mode-content" id="security-mode">
+            <!-- Security Stats -->
+            <div class="executive-grid">
+                <div class="executive-card">
+                    <div class="executive-number" id="securityLevel">9.2</div>
+                    <div class="executive-label">ระดับความปลอดภัย</div>
+                </div>
+                <div class="executive-card">
+                    <div class="executive-number" id="threatCount">3</div>
+                    <div class="executive-label">ภัยคุกคามที่ตรวจพบ</div>
+                </div>
+                <div class="executive-card">
+                    <div class="executive-number" id="systemIntegrity">99.8%</div>
+                    <div class="executive-label">ความสมบูรณ์ระบบ</div>
+                </div>
+                <div class="executive-card">
+                    <div class="executive-number" id="complianceScore">98%</div>
+                    <div class="executive-label">การปฏิบัติตามมาตรฐาน</div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout">
+                <!-- Security Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">ภาพรวมความปลอดภัยระบบ</h3>
+                        <button class="btn btn-danger" onclick="emergencyLockdown()">🚨 EMERGENCY LOCKDOWN</button>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ระบบ/บริการ</th>
+                                <th>สถานะความปลอดภัย</th>
+                                <th>การเข้าถึงล่าสุด</th>
+                                <th>ระดับการเข้าถึง</th>
+                                <th>การดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Core Database</strong></td>
+                                <td><span class="status-badge status-excellent">ปลอดภัย</span></td>
+                                <td>2 นาทีที่แล้ว</td>
+                                <td>Admin Level</td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="viewAccess('core_db')">ดูการเข้าถึง</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>User Authentication</strong></td>
+                                <td><span class="status-badge status-warning">ต้องติดตาม</span></td>
+                                <td>15 นาทีที่แล้ว</td>
+                                <td>Multiple Failed</td>
+                                <td>
+                                    <button class="btn btn-warning" onclick="investigateAuth('auth_sys')">สอบสวน</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Financial System</strong></td>
+                                <td><span class="status-badge status-excellent">ปลอดภัย</span></td>
+                                <td>5 นาทีที่แล้ว</td>
+                                <td>Finance Team</td>
+                                <td>
+                                    <button class="btn btn-success" onclick="auditFinance('fin_sys')">ตรวจสอบ</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>External API</strong></td>
+                                <td><span class="status-badge status-critical">ต้องแก้ไข</span></td>
+                                <td>1 ชั่วโมงที่แล้ว</td>
+                                <td>Suspicious Access</td>
+                                <td>
+                                    <button class="btn btn-danger" onclick="blockAccess('ext_api')">บล็อกทันที</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Emergency Controls -->
+                <div>
+                    <div class="emergency-panel">
+                        <div class="emergency-title">
+                            🚨 ระบบควบคุมฉุกเฉิน
+                        </div>
+                        <button class="emergency-btn" onclick="systemLockdown()">
+                            🔒 ล็อกระบบทั้งหมด
+                        </button>
+                        <button class="emergency-btn" onclick="backupEmergency()">
+                            💾 สำรองข้อมูลฉุกเฉิน
+                        </button>
+                        <button class="emergency-btn" onclick="alertAll()">
+                            📢 แจ้งเตือนทุกแผนก
+                        </button>
+                        <button class="emergency-btn" onclick="contactAuthorities()">
+                            📞 ติดต่อหน่วยงานรับผิดชอบ
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">เครื่องมือความปลอดภัย</h3>
+                        </div>
+                        
+                        <div class="executive-tools">
+                            <a href="#" class="tool-btn" onclick="securityAudit()">
+                                🔍 ตรวจสอบความปลอดภัยรอบด้าน
+                            </a>
+                            <a href="#" class="tool-btn" onclick="accessControl()">
+                                👤 จัดการสิทธิ์การเข้าถึง
+                            </a>
+                            <a href="#" class="tool-btn" onclick="threatAnalysis()">
+                                ⚠️ วิเคราะห์ภัยคุกคาม
+                            </a>
+                            <a href="#" class="tool-btn" onclick="incidentResponse()">
+                                🚨 ระบบตอบสนองเหตุการณ์
+                            </a>
+                            <a href="#" class="tool-btn" onclick="complianceCheck()">
+                                📋 ตรวจสอบการปฏิบัติตามกฎ
+                            </a>
+                            <a href="#" class="tool-btn" onclick="securityTraining()">
+                                🎓 การฝึกอบรมความปลอดภัย
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+        let currentMode = 'executive';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                
+                if (currentUser.organizationType !== 'executive_manager') {
+                    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+                    redirectToLogin();
+                    return;
+                }
+                
+                updateUserDisplay();
+            }
+
+            await loadDashboardData();
+        });
+
+        function switchMode(mode) {
+            // Update buttons
+            document.querySelectorAll('.mode-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.mode-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(mode + '-mode').classList.add('active');
+
+            currentMode = mode;
+            loadModeData(mode);
+        }
+
+        function loadModeData(mode) {
+            if (mode === 'executive') {
+                updateExecutiveStats();
+            } else {
+                updateSecurityStats();
+            }
+        }
+
+        function updateExecutiveStats() {
+            document.getElementById('overallScore').textContent = '8.7';
+            document.getElementById('teamEfficiency').textContent = '93%';
+            document.getElementById('monthlyRevenue').textContent = '4.8M';
+            document.getElementById('customerSat').textContent = '96%';
+        }
+
+        function updateSecurityStats() {
+            document.getElementById('securityLevel').textContent = '9.2';
+            document.getElementById('threatCount').textContent = '3';
+            document.getElementById('systemIntegrity').textContent = '99.8%';
+            document.getElementById('complianceScore').textContent = '98%';
+        }
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                updateExecutiveStats();
+                updateSecurityStats();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Executive Functions
+        function reviewDepartment(dept) {
+            alert(`ทบทวนแผนก: ${dept}\n\nการทบทวนระดับผู้บริหาร:\n• วิเคราะห์ KPI และผลงาน\n• ประเมินความเสี่ยงและโอกาส\n• กำหนดทิศทางและเป้าหมายใหม่\n• อนุมัติงบประมาณเพิ่มเติม`);
+        }
+
+        function rewardTeam(team) {
+            alert(`ชื่นชมทีม: ${team}\n\nการยกย่องระดับผู้บริหาร:\n💰 โบนัสพิเศษ 20%\n🏆 รางวัลประจำปี\n📈 การเลื่อนตำแหน่ง\n🎯 โอกาสพัฒนาใหม่`);
+        }
+
+        function expandTech(tech) {
+            alert(`ขยายขีดความสามารถ: ${tech}\n\nการขยายระดับกลยุทธ์:\n💻 เพิ่มเทคโนโลยีใหม่\n👥 เพิ่มทีมงาน\n🚀 นวัตกรรมใหม่\n💰 งบประมาณพัฒนา`);
+        }
+
+        function reviewFinancials(dept) {
+            alert(`ดูรายละเอียดการเงิน: ${dept}\n\nการวิเคราะห์ระดับผู้บริหาร:\n📊 P&L Statement\n💰 Cash Flow Analysis\n📈 ROI และ Growth Rate\n🎯 Financial Projections`);
+        }
+
+        function accelerateProject(project) {
+            alert(`เร่งโครงการ: ${project}\n\nมาตรการเร่งด่วน:\n👥 เพิ่มทีมงาน\n💰 เพิ่มงบประมาณ\n⏱️ ขยายเวลาทำงาน\n🎯 ปรับเป้าหมาย`);
+        }
+
+        function executiveMeeting() {
+            alert('ประชุมผู้บริหารระดับสูง:\n\n📅 กำหนดการประชุม\n📊 ทบทวนผลงานทั้งองค์การ\n🎯 วางแผนกลยุทธ์\n💰 อนุมัติงบประมาณใหญ่\n🚀 โครงการนวัตกรรม');
+        }
+
+        function strategicPlanning() {
+            alert('วางแผนกลยุทธ์องค์การ:\n\n🎯 วิสัยทัศน์ 5 ปี\n📈 เป้าหมายการเติบโต\n🌐 ขยายตลาดใหม่\n💡 นวัตกรรมเทคโนโลジี\n🤝 พันธมิตรเชิงกลยุทธ์');
+        }
+
+        function budgetReview() {
+            alert('ทบทวนงบประมาณรายไตรมาส:\n\n💰 งบประมาณทั้งหมด: 16.9M บาท\n📊 การใช้จ่ายจริง: 14.2M บาท\n📈 ผลตอบแทน: 18.9M บาท\n🎯 ROI: 11.7%\n💡 ข้อเสนอปรับปรุง');
+        }
+
+        function performanceReview() {
+            alert('ประเมินผลงานแผนก:\n\n📊 KPI Dashboard ทุกแผนก\n⭐ การจัดอันดับประสิทธิภาพ\n🎯 ความสำเร็จตามเป้าหมาย\n💡 ข้อเสนอแนะปรับปรุง\n🏆 การยกย่องชื่นชม');
+        }
+
+        function stakeholderReport() {
+            alert('รายงานผู้มีส่วนได้เสีย:\n\n🏛️ กระทรวงสาธารณสุข\n👨‍🌾 เกษตรกรและผู้ประกอบการ\n🏛️ หน่วยงานรัฐที่เกี่ยวข้อง\n🌍 องค์การระหว่างประเทศ\n👥 ประชาชนทั่วไป');
+        }
+
+        function riskManagement() {
+            alert('การจัดการความเสี่ยง:\n\n⚠️ ระบุความเสี่ยงที่สำคัญ\n📊 ประเมินผลกระทบ\n🛡️ มาตรการป้องกัน\n📋 แผนฉุกเฉิน\n🔄 ติดตามและทบทวน');
+        }
+
+        function policyMaking() {
+            alert('กำหนดนโยบายใหม่:\n\n📋 นโยบายการทำงาน\n🔒 นโยบายความปลอดภัย\n💰 นโยบายการเงิน\n👥 นโยบายทรัพยากรบุคคล\n🌍 นโยบายสิ่งแวดล้อม');
+        }
+
+        function innovationLab() {
+            alert('ห้องปฏิบัติการนวัตกรรม:\n\n🤖 AI และ Machine Learning\n🌐 Blockchain Technology\n📱 Mobile Applications\n☁️ Cloud Computing\n🔗 IoT Integration');
+        }
+
+        // Security Functions
+        function emergencyLockdown() {
+            if (confirm('⚠️ คำเตือน: คุณต้องการดำเนินการ Emergency Lockdown หรือไม่?\n\nการดำเนินการนี้จะ:\n• ล็อกระบบทั้งหมดทันที\n• ตัดการเชื่อมต่อผู้ใช้ทั้งหมด\n• หยุดการทำงานของระบบชั่วคราว\n• แจ้งเตือนหน่วยงานความปลอดภัย')) {
+                alert('🚨 EMERGENCY LOCKDOWN ACTIVATED\n\n✅ ระบบถูกล็อกทั้งหมด\n🔒 การเชื่อมต่อถูกตัด\n📞 แจ้งเตือนหน่วยงานแล้ว\n⏰ เวลา: ' + new Date().toLocaleString());
+            }
+        }
+
+        function viewAccess(system) {
+            alert(`ดูการเข้าถึง: ${system}\n\nรายงานการเข้าถึงล่าสุด:\n👤 ผู้ใช้: 23 คน\n⏰ เวลา: ล่าสุด 2 นาทีที่แล้ว\n🔍 การดำเนินการ: Query Database\n✅ สถานะ: ปกติ`);
+        }
+
+        function investigateAuth(system) {
+            alert(`สอบสวน: ${system}\n\n🔍 การสอบสวน:\n❌ Failed Login Attempts: 15 ครั้ง\n🌐 IP Address: 192.168.1.xxx\n⏰ ช่วงเวลา: 10:30-10:45\n🚨 ระดับภัยคุกคาม: กลาง`);
+        }
+
+        function auditFinance(system) {
+            alert(`ตรวจสอบ: ${system}\n\nการตรวจสอบการเงิน:\n💰 ธุรกรรม: 234 รายการ\n✅ ผ่านการตรวจสอบ: 231 รายการ\n⚠️ ต้องทบทวน: 3 รายการ\n🔒 ระบบปลอดภัย: ปกติ`);
+        }
+
+        function blockAccess(system) {
+            if (confirm(`⚠️ ยืนยันการบล็อก: ${system}\n\nการดำเนินการนี้จะ:\n• บล็อกการเข้าถึงทันที\n• บันทึกเหตุการณ์\n• แจ้งเตือนทีมรักษาความปลอดภัย`)) {
+                alert(`🚫 บล็อกการเข้าถึงสำเร็จ: ${system}\n\n✅ ระบบถูกบล็อกแล้ว\n📝 บันทึกเหตุการณ์แล้ว\n🚨 แจ้งเตือนทีมแล้ว`);
+            }
+        }
+
+        function systemLockdown() {
+            alert('🔒 ล็อกระบบทั้งหมด:\n\n⚠️ ระบบกำลังเข้าสู่โหมดล็อกดาวน์\n🔐 ตัดการเชื่อมต่อทั้งหมด\n💾 สำรองข้อมูลฉุกเฉิน\n📞 แจ้งเตือนผู้บริหาร');
+        }
+
+        function backupEmergency() {
+            alert('💾 สำรองข้อมูลฉุกเฉิน:\n\n🔄 เริ่มการสำรองข้อมูล\n📊 ข้อมูลสำคัญ: 15.6 GB\n⏱️ เวลาโดยประมาณ: 45 นาที\n☁️ สำรองไปยัง: Cloud Backup');
+        }
+
+        function alertAll() {
+            alert('📢 แจ้งเตือนทุกแผนก:\n\n🚨 ส่งการแจ้งเตือนฉุกเฉิน\n👥 ผู้รับ: พนักงานทั้งหมด\n📧 ช่องทาง: อีเมล, SMS, ระบบ\n⏰ เวลา: ทันที');
+        }
+
+        function contactAuthorities() {
+            alert('📞 ติดต่อหน่วยงานรับผิดชอบ:\n\n🏛️ กระทรวงสาธารณสุข\n🚔 ตำรวจไซเบอร์\n🛡️ หน่วยรักษาความปลอดภัย\n📞 เจ้าหน้าที่รัฐ\n⚡ สถานะ: กำลังติดต่อ');
+        }
+
+        function securityAudit() {
+            alert('🔍 ตรวจสอบความปลอดภัยรอบด้าน:\n\n🛡️ ความปลอดภัยเครือข่าย\n🔐 ระบบรับรองตัวตน\n💾 ความปลอดภัยข้อมูล\n👤 สิทธิ์การเข้าถึง\n📋 การปฏิบัติตามมาตรฐาน');
+        }
+
+        function accessControl() {
+            alert('👤 จัดการสิทธิ์การเข้าถึง:\n\n🔐 กำหนดระดับสิทธิ์\n👥 จัดการกลุ่มผู้ใช้\n⏰ กำหนดเวลาเข้าถึง\n🌐 จำกัดที่อยู่ IP\n📊 รายงานการใช้งาน');
+        }
+
+        function threatAnalysis() {
+            alert('⚠️ วิเคราะห์ภัยคุกคาม:\n\n🔍 ตรวจสอบภัยคุกคาม\n📊 วิเคราะห์แนวโน้ม\n🎯 ประเมินความเสี่ยง\n🛡️ มาตรการป้องกัน\n📈 รายงานสถานการณ์');
+        }
+
+        function incidentResponse() {
+            alert('🚨 ระบบตอบสนองเหตุการณ์:\n\n⚡ แจ้งเตือนฉุกเฉิน\n🔍 สอบสวนเหตุการณ์\n🛡️ มาตรการแก้ไข\n📝 บันทึกเหตุการณ์\n📊 รายงานผลการแก้ไข');
+        }
+
+        function complianceCheck() {
+            alert('📋 ตรวจสอบการปฏิบัติตามกฎ:\n\n⚖️ กฎหมายที่เกี่ยวข้อง\n📜 มาตรฐานสากล\n🔒 ความปลอดภัยข้อมูล\n👥 สิทธิ์ผู้ใช้\n📊 รายงานการปฏิบัติ');
+        }
+
+        function securityTraining() {
+            alert('🎓 การฝึกอบรมความปลอดภัย:\n\n📚 หลักสูตรความปลอดภัย\n💻 การใช้งานระบบอย่างปลอดภัย\n🔐 การจัดการรหัสผ่าน\n📧 ระบุอีเมลหลอกลวง\n🎯 แบบทดสอบความรู้');
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/auth.html';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+    </script>
+</body>
+</html>

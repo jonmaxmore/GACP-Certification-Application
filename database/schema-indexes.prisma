@@ -1,0 +1,256 @@
+/**
+ * GACP Platform - Prisma Schema Indexes Configuration
+ * 
+ * This file documents the index strategy for the GACP Platform.
+ * These indexes should be added to your schema.prisma file.
+ * 
+ * @version 1.0.0
+ * @created October 14, 2025
+ */
+
+// ============================================================================
+// APPLICATIONS MODEL
+// ============================================================================
+
+model Application {
+  id              String   @id @default(cuid())
+  userId          String
+  status          String
+  submissionCount Int      @default(1)
+  rejectionCount  Int      @default(0)
+  rescheduleCount Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  user         User          @relation(fields: [userId], references: [id])
+  payments     Payment[]
+  inspections  Inspection[]
+  documents    Document[]
+  
+  // Indexes for performance
+  @@index([userId])                    // User's applications
+  @@index([status])                    // Filter by status
+  @@index([userId, status])            // User + status combined
+  @@index([createdAt(sort: Desc)])     // Recent applications
+  @@index([status, createdAt(sort: Desc)]) // Status + recent
+  
+  @@map("applications")
+}
+
+// ============================================================================
+// CERTIFICATES MODEL
+// ============================================================================
+
+model Certificate {
+  id            String    @id @default(cuid())
+  applicationId String    @unique
+  userId        String
+  status        String    // ACTIVE, REVOKED, EXPIRED
+  revokedAt     DateTime?
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+  
+  // Relations
+  user        User        @relation(fields: [userId], references: [id])
+  application Application @relation(fields: [applicationId], references: [id])
+  
+  // Indexes
+  @@index([userId])
+  @@index([status])
+  @@index([userId, status])
+  @@index([revokedAt])  // For revocation period checks
+  @@index([expiresAt])  // For expiry monitoring
+  
+  @@map("certificates")
+}
+
+// ============================================================================
+// PAYMENTS MODEL
+// ============================================================================
+
+model Payment {
+  id            String    @id @default(cuid())
+  applicationId String
+  userId        String
+  amount        Int       // in Thai Baht
+  status        String    // PENDING, PAID, TIMEOUT, CANCELLED
+  reason        String    // INITIAL_SUBMISSION, RESUBMISSION_FEE
+  transactionId String?   @unique
+  createdAt     DateTime  @default(now())
+  expiresAt     DateTime
+  paidAt        DateTime?
+  cancelledAt   DateTime?
+  
+  // Relations
+  application Application @relation(fields: [applicationId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+  
+  // Indexes
+  @@index([applicationId])
+  @@index([userId])
+  @@index([status])
+  @@index([transactionId])  // For payment verification
+  @@index([status, createdAt])  // Pending payments monitoring
+  @@index([expiresAt])  // Timeout monitoring
+  
+  @@map("payments")
+}
+
+// ============================================================================
+// LOTS MODEL (Farm Lot Management)
+// ============================================================================
+
+model Lot {
+  id        String   @id @default(cuid())
+  lotId     String   @unique
+  userId    String
+  name      String
+  area      Float    // in rai
+  location  String
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+  
+  // Indexes
+  @@index([lotId])
+  @@index([userId])
+  @@index([userId, lotId])
+  
+  @@map("lots")
+}
+
+// ============================================================================
+// INSPECTIONS MODEL
+// ============================================================================
+
+model Inspection {
+  id            String    @id @default(cuid())
+  applicationId String
+  inspectorId   String
+  scheduledDate DateTime
+  completedAt   DateTime?
+  status        String    // SCHEDULED, COMPLETED, RESCHEDULED, CANCELLED
+  notes         String?
+  createdAt     DateTime  @default(now())
+  
+  // Relations
+  application Application @relation(fields: [applicationId], references: [id])
+  inspector   User        @relation("InspectorInspections", fields: [inspectorId], references: [id])
+  
+  // Indexes
+  @@index([applicationId])
+  @@index([inspectorId])
+  @@index([scheduledDate])
+  @@index([status])
+  @@index([inspectorId, scheduledDate])  // Inspector schedule
+  
+  @@map("inspections")
+}
+
+// ============================================================================
+// DOCUMENTS MODEL
+// ============================================================================
+
+model Document {
+  id            String   @id @default(cuid())
+  applicationId String
+  userId        String
+  documentType  String   // ID_CARD, LAND_DEED, FARM_PHOTOS, etc.
+  fileName      String
+  fileUrl       String
+  status        String   // PENDING, VERIFIED, REJECTED
+  createdAt     DateTime @default(now())
+  
+  // Relations
+  application Application @relation(fields: [applicationId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+  
+  // Indexes
+  @@index([applicationId])
+  @@index([userId])
+  @@index([documentType])
+  @@index([status])
+  
+  @@map("documents")
+}
+
+// ============================================================================
+// NOTIFICATIONS MODEL
+// ============================================================================
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  title      String
+  message    String
+  type       String   // INFO, WARNING, SUCCESS, ERROR
+  readStatus Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+  
+  // Indexes
+  @@index([userId])
+  @@index([userId, readStatus])  // Unread notifications
+  @@index([createdAt(sort: Desc)])  // Recent notifications
+  
+  @@map("notifications")
+}
+
+// ============================================================================
+// AUDIT LOGS MODEL (For Admin & Compliance)
+// ============================================================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String   // LOGIN, SUBMIT_APPLICATION, APPROVE, REJECT, etc.
+  entity    String   // APPLICATION, PAYMENT, CERTIFICATE, etc.
+  entityId  String
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+  
+  // Indexes
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])  // User audit trail
+  
+  @@map("audit_logs")
+}
+
+// ============================================================================
+// INDEX STRATEGY SUMMARY
+// ============================================================================
+
+/**
+ * INDEX CATEGORIES:
+ * 
+ * 1. Single Column Indexes:
+ *    - Used for simple filtering (userId, status, lotId, transactionId)
+ *    
+ * 2. Composite Indexes:
+ *    - Used for combined filtering (userId + status, inspectorId + scheduledDate)
+ *    
+ * 3. Conditional Indexes:
+ *    - Used for nullable columns (revokedAt, transactionId)
+ *    
+ * 4. Sorted Indexes:
+ *    - Used for ordering (createdAt DESC, scheduledDate)
+ *    
+ * 5. Analytics Indexes:
+ *    - Used for reporting (status + createdAt, status + paid_at)
+ * 
+ * PERFORMANCE TARGETS:
+ * - API response time: < 500ms (average)
+ * - Database query time: < 100ms (p95)
+ * - Cache hit rate: > 70%
+ * - Concurrent users: 1,000+
+ */

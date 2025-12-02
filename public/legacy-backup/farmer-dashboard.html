@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GACP Dashboard - แดชบอร์ดเกษตรกร</title>
+    <style>
+        :root {
+            --primary-color: #10b981;
+            --primary-dark: #047857;
+            --secondary-color: #f3f4f6;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+            --error-color: #ef4444;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f9fafb;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .logout-btn {
+            background: var(--error-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            margin-bottom: 2rem;
+        }
+
+        .page-title h2 {
+            color: var(--text-dark);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-title p {
+            color: var(--text-light);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-card h3 {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .stat-change.negative {
+            color: var(--error-color);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .application-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .application-item {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .application-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .application-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .application-id {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-review {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .application-details {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .action-item {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-dark);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .action-item:hover {
+            background: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+
+        .action-icon {
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .action-content h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .action-content p {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .user-menu {
+                gap: 0.5rem;
+            }
+
+            .user-info {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <h1>🌿 GACP</h1>
+        </div>
+        <div class="user-menu">
+            <div class="user-info">
+                <span id="userName">กำลังโหลด...</span>
+                <span>•</span>
+                <span id="userRole">เกษตรกร</span>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()">ออกจากระบบ</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title">
+            <h2>แดชบอร์ดเกษตรกร</h2>
+            <p>จัดการการสมัครรับรอง GACP และติดตามสถานะการรับรอง</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>คำขอทั้งหมด</h3>
+                <div class="stat-value" id="totalApplications">0</div>
+                <div class="stat-change positive">
+                    <span>↗</span>
+                    <span>ใหม่เมื่อเร็วๆ นี้</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>อนุมัติแล้ว</h3>
+                <div class="stat-value" id="approvedApplications">0</div>
+                <div class="stat-change positive">
+                    <span>✓</span>
+                    <span>ผ่านการรับรอง</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>รอดำเนินการ</h3>
+                <div class="stat-value" id="pendingApplications">0</div>
+                <div class="stat-change">
+                    <span>⏳</span>
+                    <span>กำลังประมวลผล</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>ค่าใช้จ่ายรวม</h3>
+                <div class="stat-value" id="totalCost">0 ฿</div>
+                <div class="stat-change">
+                    <span>💰</span>
+                    <span>ค่าธรรมเนียมทั้งหมด</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">คำขอรับรอง GACP</h3>
+                    <a href="#" class="btn btn-primary" onclick="startNewApplication()">
+                        ➕ สมัครใหม่
+                    </a>
+                </div>
+
+                <div class="application-list" id="applicationList">
+                    <!-- Applications will be loaded here -->
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">เมนูด่วน</h3>
+                </div>
+
+                <div class="quick-actions">
+                    <a href="#" class="action-item" onclick="startNewApplication()">
+                        <div class="action-icon">📝</div>
+                        <div class="action-content">
+                            <h4>สมัครรับรอง GACP</h4>
+                            <p>เริ่มต้นกระบวนการรับรองใหม่</p>
+                        </div>
+                    </a>
+
+                    <a href="#" class="action-item" onclick="viewDocuments()">
+                        <div class="action-icon">📁</div>
+                        <div class="action-content">
+                            <h4>จัดการเอกสาร</h4>
+                            <p>อัพโหลดและจัดการเอกสาร</p>
+                        </div>
+                    </a>
+
+                    <a href="#" class="action-item" onclick="viewPayments()">
+                        <div class="action-icon">💳</div>
+                        <div class="action-content">
+                            <h4>ประวัติการชำระเงิน</h4>
+                            <p>ดูรายการและใบเสร็จ</p>
+                        </div>
+                    </a>
+
+                    <a href="#" class="action-item" onclick="contactSupport()">
+                        <div class="action-icon">💬</div>
+                        <div class="action-content">
+                            <h4>ติดต่อสอบถาม</h4>
+                            <p>ขอความช่วยเหลือจากเจ้าหน้าที่</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_BASE = 'http://localhost:3000/api';
+        
+        // Current user info
+        let currentUser = null;
+        let authToken = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            // Get user info
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                updateUserDisplay();
+            }
+
+            // Load dashboard data
+            await loadDashboardData();
+        });
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+                document.getElementById('userRole').textContent = 
+                    getRoleDisplayName(currentUser.organizationType);
+            }
+        }
+
+        function getRoleDisplayName(role) {
+            const roleMap = {
+                'farmer': 'เกษตรกร',
+                'processor': 'ผู้แปรรูป',
+                'distributor': 'ผู้จัดจำหน่าย',
+                'inspector': 'ผู้ตรวจประเมิน',
+                'admin': 'ผู้ดูแลระบบ'
+            };
+            return roleMap[role] || role;
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Mock data for now - replace with actual API calls
+                const mockApplications = [
+                    {
+                        id: 'GACP-2024-001',
+                        herbs: ['ขมิ้นชัน', 'โหระพา'],
+                        status: 'pending',
+                        submittedDate: '2024-03-15',
+                        stage: 'document_review'
+                    },
+                    {
+                        id: 'GACP-2024-002',
+                        herbs: ['กะเพรา'],
+                        status: 'approved',
+                        submittedDate: '2024-02-20',
+                        approvedDate: '2024-03-10'
+                    }
+                ];
+
+                updateStats(mockApplications);
+                displayApplications(mockApplications);
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showError('ไม่สามารถโหลดข้อมูลได้');
+            }
+        }
+
+        function updateStats(applications) {
+            const total = applications.length;
+            const approved = applications.filter(app => app.status === 'approved').length;
+            const pending = applications.filter(app => app.status === 'pending').length;
+            const totalCost = applications.length * 30000; // Mock calculation
+
+            document.getElementById('totalApplications').textContent = total;
+            document.getElementById('approvedApplications').textContent = approved;
+            document.getElementById('pendingApplications').textContent = pending;
+            document.getElementById('totalCost').textContent = totalCost.toLocaleString() + ' ฿';
+        }
+
+        function displayApplications(applications) {
+            const container = document.getElementById('applicationList');
+            
+            if (applications.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>ยังไม่มีคำขอรับรอง</h3>
+                        <p>เริ่มต้นการสมัครรับรอง GACP เพื่อเพิ่มมูลค่าผลิตภัณฑ์ของคุณ</p>
+                        <button class="btn btn-primary" onclick="startNewApplication()">
+                            สมัครเลย
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = applications.map(app => `
+                <div class="application-item">
+                    <div class="application-header">
+                        <div class="application-id">${app.id}</div>
+                        <div class="status-badge status-${app.status}">
+                            ${getStatusDisplayName(app.status)}
+                        </div>
+                    </div>
+                    <div class="application-details">
+                        <span>สมุนไพร: ${app.herbs.join(', ')}</span>
+                        <span>วันที่ส่ง: ${formatDate(app.submittedDate)}</span>
+                        ${app.approvedDate ? `<span>วันที่อนุมัติ: ${formatDate(app.approvedDate)}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getStatusDisplayName(status) {
+            const statusMap = {
+                'pending': 'รอดำเนินการ',
+                'approved': 'อนุมัติแล้ว',
+                'review': 'กำลังตรวจสอบ',
+                'rejected': 'ไม่อนุมัติ'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function startNewApplication() {
+            // Redirect to application form
+            alert('การสมัครใหม่ - ระบบจะเปิดในเร็วๆ นี้');
+        }
+
+        function viewDocuments() {
+            alert('จัดการเอกสาร - ระบบจะเปิดในเร็วๆ นี้');
+        }
+
+        function viewPayments() {
+            alert('ประวัติการชำระเงิน - ระบบจะเปิดในเร็วๆ นี้');
+        }
+
+        function contactSupport() {
+            alert('ติดต่อสอบถาม - โทร 02-XXX-XXXX หรืออีเมล support@gacp.go.th');
+        }
+
+        function handleLogout() {
+            if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userInfo');
+                redirectToLogin();
+            }
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+
+        function showError(message) {
+            // Simple error display - can be enhanced
+            alert('ข้อผิดพลาด: ' + message);
+        }
+
+        // Refresh data every 5 minutes
+        setInterval(loadDashboardData, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+  <style>
+    .revenue-box { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; margin: 20px 0; }
+    .revenue-amount { font-size: 48pt; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">รายงานการเงิน</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">Financial Report</div>
+  
+  <div class="document-number">ช่วงเวลา: {{periodStart}} - {{periodEnd}}<br>วันที่: {{reportDate}}</div>
+
+  <div class="revenue-box">
+    <div style="font-size: 18pt; margin-bottom: 15px;">รายได้รวม</div>
+    <div class="revenue-amount">{{totalRevenue}}</div>
+    <div style="font-size: 16pt; margin-top: 10px;">บาท</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">สรุปรายได้</div>
+    <table>
+      <thead><tr><th>รายการ</th><th>จำนวน</th><th>จำนวนเงิน (บาท)</th></tr></thead>
+      <tbody>
+        <tr><td>ค่าธรรมเนียมยื่นคำขอ (Phase 1)</td><td>{{phase1Count}}</td><td>{{phase1Revenue}}</td></tr>
+        <tr><td>ค่าธรรมเนียมรับรอง (Phase 2)</td><td>{{phase2Count}}</td><td>{{phase2Revenue}}</td></tr>
+        <tr style="font-weight: 700; background: #f0f0f0;"><td>รวม</td><td>{{totalCount}}</td><td>{{totalRevenue}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">สถานะการชำระเงิน</div>
+    <table>
+      <thead><tr><th>สถานะ</th><th>จำนวน</th><th>ร้อยละ</th><th>จำนวนเงิน</th></tr></thead>
+      <tbody>
+        <tr><td style="color: #28a745;">✓ ชำระแล้ว</td><td>{{paidCount}}</td><td>{{paidPercent}}%</td><td>{{paidAmount}}</td></tr>
+        <tr><td style="color: #ffc107;">⏳ รอชำระ</td><td>{{pendingCount}}</td><td>{{pendingPercent}}%</td><td>{{pendingAmount}}</td></tr>
+        <tr><td style="color: #dc3545;">✗ ยกเลิก/คืนเงิน</td><td>{{refundCount}}</td><td>{{refundPercent}}%</td><td>{{refundAmount}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">รายได้ตามประเภทพืช</div>
+    <table>
+      <thead><tr><th>ประเภทพืช</th><th>จำนวนคำขอ</th><th>รายได้ (บาท)</th><th>ร้อยละ</th></tr></thead>
+      <tbody>
+        <tr><td>กัญชา (Cannabis)</td><td>{{cannabisCount}}</td><td>{{cannabisRevenue}}</td><td>{{cannabisPercent}}%</td></tr>
+        <tr><td>ขมิ้นชัน (Turmeric)</td><td>{{turmericCount}}</td><td>{{turmericRevenue}}</td><td>{{turmericPercent}}%</td></tr>
+        <tr><td>ขิง (Ginger)</td><td>{{gingerCount}}</td><td>{{gingerRevenue}}</td><td>{{gingerPercent}}%</td></tr>
+        <tr><td>อื่นๆ</td><td>{{othersCount}}</td><td>{{othersRevenue}}</td><td>{{othersPercent}}%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">รายได้ตามภูมิภาค</div>
+    <table>
+      <thead><tr><th>ภูมิภาค</th><th>จำนวนคำขอ</th><th>รายได้ (บาท)</th></tr></thead>
+      <tbody>
+        <tr><td>ภาคเหนือ</td><td>{{northCount}}</td><td>{{northRevenue}}</td></tr>
+        <tr><td>ภาคกลาง</td><td>{{centralCount}}</td><td>{{centralRevenue}}</td></tr>
+        <tr><td>ภาคตะวันออกเฉียงเหนือ</td><td>{{northeastCount}}</td><td>{{northeastRevenue}}</td></tr>
+        <tr><td>ภาคใต้</td><td>{{southCount}}</td><td>{{southRevenue}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">แนวโน้มรายได้รายเดือน</div>
+    <table>
+      <thead><tr><th>เดือน</th><th>จำนวนคำขอ</th><th>รายได้ (บาท)</th><th>เปลี่ยนแปลง</th></tr></thead>
+      <tbody>{{monthlyTrend}}</tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">วิธีการชำระเงิน</div>
+    <table>
+      <thead><tr><th>วิธีการ</th><th>จำนวน</th><th>ร้อยละ</th></tr></thead>
+      <tbody>
+        <tr><td>โอนเงินผ่านธนาคาร</td><td>{{bankTransferCount}}</td><td>{{bankTransferPercent}}%</td></tr>
+        <tr><td>บัตรเครดิต/เดบิต</td><td>{{cardCount}}</td><td>{{cardPercent}}%</td></tr>
+        <tr><td>PromptPay</td><td>{{promptpayCount}}</td><td>{{promptpayPercent}}%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-line">
+      ({{financeOfficer}})<br>
+      เจ้าหน้าที่การเงิน<br>
+      วันที่: {{reportDate}}
+    </div>
+  </div>
+
+  <div class="footer-info">
+    รายงานนี้สร้างโดยระบบอัตโนมัติ<br>
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข
+  </div>
+</body>
+</html>

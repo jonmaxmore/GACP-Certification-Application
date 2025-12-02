@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ DTAM - GACP Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            padding: 2rem 0;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2196F3, #1976D2);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo .icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 8px 16px rgba(33, 150, 243, 0.3);
+        }
+
+        .logo h1 {
+            color: #2c3e50;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        .logo p {
+            color: #64748b;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .user-type-badge {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin: 0 auto 2rem;
+            display: table;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1.75rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: #374151;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+            color: #111827;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2196F3;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+
+        .form-group .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 3.25rem;
+            color: #6b7280;
+            pointer-events: none;
+        }
+
+        .form-group input.has-icon {
+            padding-left: 3rem;
+        }
+
+        .role-selection {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #bae6fd;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .role-selection h4 {
+            color: #0369a1;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .role-selection select {
+            background: white;
+            border: 1px solid #93c5fd;
+        }
+
+        .role-selection select:focus {
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1.125rem 1.5rem;
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4);
+        }
+
+        .login-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            border: 1px solid #fca5a5;
+            display: none;
+            position: relative;
+        }
+
+        .error-message::before {
+            content: '⚠️';
+            margin-right: 0.5rem;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #059669;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            border: 1px solid #6ee7b7;
+            display: none;
+            position: relative;
+        }
+
+        .success-message::before {
+            content: '✅';
+            margin-right: 0.5rem;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .forgot-password a {
+            color: #2196F3;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: #1976D2;
+            text-decoration: underline;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .divider span {
+            padding: 0 1rem;
+            background: white;
+        }
+
+        .register-link {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f9fafb;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .register-link p {
+            color: #6b7280;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .register-link a {
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .register-link a:hover {
+            background: #eff6ff;
+            color: #1976D2;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2196F3;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-to-home {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #374151;
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-to-home:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .test-credentials {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+        }
+
+        .test-credentials h4 {
+            color: #92400e;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .test-credentials p {
+            color: #78350f;
+            margin-bottom: 0.25rem;
+        }
+
+        .test-credential-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            margin: 0.25rem 0.25rem 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .test-credential-btn:hover {
+            background: #d97706;
+            transform: translateY(-1px);
+        }
+
+        .role-info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #1e40af;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+
+            .back-to-home {
+                position: static;
+                margin-bottom: 2rem;
+                text-align: center;
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/index.html" class="back-to-home">← กลับสู่หน้าหลัก</a>
+
+    <div class="login-container">
+        <div class="logo">
+            <div class="icon">🏛️</div>
+            <h1>GACP Platform</h1>
+            <p>ระบบรับรองมาตรฐาน GACP</p>
+        </div>
+
+        <div class="user-type-badge">🏛️ เข้าสู่ระบบ DTAM</div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <form id="loginForm">
+            <div class="role-selection">
+                <h4>เลือกบทบาทของคุณ</h4>
+                <select id="role" name="role" required>
+                    <option value="">เลือกบทบาท</option>
+                    <option value="officer">เจ้าหน้าที่ (Officer)</option>
+                    <option value="auditor">ผู้ตรวจสอบ (Auditor)</option>
+                    <option value="admin">ผู้ดูแลระบบ (Admin)</option>
+                    <option value="organization">หน่วยงาน (Organization)</option>
+                </select>
+                <div class="role-info" id="roleInfo" style="display: none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">อีเมล</label>
+                <div style="position: relative;">
+                    <span class="input-icon">📧</span>
+                    <input type="email" id="email" name="email" placeholder="กรุณากรอกอีเมล" class="has-icon" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">รหัสผ่าน</label>
+                <div style="position: relative;">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="password" name="password" placeholder="กรุณากรอกรหัสผ่าน" class="has-icon" required>
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                <span id="loginBtnText">เข้าสู่ระบบ</span>
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>กำลังเข้าสู่ระบบ...</p>
+        </div>
+
+        <div class="forgot-password">
+            <a href="#" onclick="showForgotPassword()">ลืมรหัสผ่าน?</a>
+        </div>
+
+        <div class="divider">
+            <span>หรือ</span>
+        </div>
+
+        <div class="register-link">
+            <p>ยังไม่มีบัญชี DTAM?</p>
+            <a href="/dtam-register.html">สมัครสมาชิก DTAM</a>
+        </div>
+
+        <div class="test-credentials">
+            <h4>🧪 บัญชีทดสอบสำหรับ DTAM</h4>
+            <p><strong>ผู้ตรวจสอบ:</strong></p>
+            <button class="test-credential-btn" onclick="fillTestData('auditor@gacp.com', 'auditor123', 'auditor')">auditor@gacp.com</button>
+            <p><strong>เจ้าหน้าที่:</strong></p>
+            <button class="test-credential-btn" onclick="fillTestData('officer@gacp.com', 'officer123', 'officer')">officer@gacp.com</button>
+            <p><strong>ผู้ดูแลระบบ:</strong></p>
+            <button class="test-credential-btn" onclick="fillTestData('admin@gacp.com', 'admin123', 'admin')">admin@gacp.com</button>
+        </div>
+    </div>
+
+    <script>
+        // Role information descriptions
+        const roleDescriptions = {
+            'officer': 'เจ้าหน้าที่: รับผิดชอบการประมวลผลใบสมัคร การตรวจสอบเอกสาร และการติดตามงาน',
+            'auditor': 'ผู้ตรวจสอบ: รับผิดชอบการตรวจสอบมาตรฐาน GACP ในพื้นที่และการรับรองใบรับรอง',
+            'admin': 'ผู้ดูแลระบบ: รับผิดชอบการจัดการระบบ การกำหนดสิทธิ์ และการบำรุงรักษา',
+            'organization': 'หน่วยงาน: หน่วยงานพันธมิตรที่มีสิทธิ์เข้าถึงข้อมูลเพื่อการประสานงาน'
+        };
+
+        // Role selection change handler
+        document.getElementById('role').addEventListener('change', function() {
+            const roleInfo = document.getElementById('roleInfo');
+            const selectedRole = this.value;
+            
+            if (selectedRole && roleDescriptions[selectedRole]) {
+                roleInfo.textContent = roleDescriptions[selectedRole];
+                roleInfo.style.display = 'block';
+            } else {
+                roleInfo.style.display = 'none';
+            }
+        });
+
+        // Test data filling function
+        function fillTestData(email, password, role) {
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = password;
+            document.getElementById('role').value = role;
+            
+            // Trigger role change event
+            document.getElementById('role').dispatchEvent(new Event('change'));
+        }
+
+        function showForgotPassword() {
+            alert('สำหรับการรีเซ็ตรหัสผ่าน กรุณาติดต่อ:\n\nสำหรับ DTAM: 02-XXX-XXXX ต่อ 2\nอีเมล: dtam-support@gacp.go.th\n\nหรือติดต่อผ่านไลน์: @gacp-dtam-support');
+        }
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loginBtnText = document.getElementById('loginBtnText');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            // Validate role selection
+            if (!role) {
+                errorMessage.textContent = 'กรุณาเลือกบทบาทของคุณ';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            // Show loading
+            loginBtn.disabled = true;
+            loginBtnText.textContent = 'กำลังเข้าสู่ระบบ...';
+            loading.style.display = 'block';
+
+            try {
+                const response = await fetch('/api/auth/dtam/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        role: role,
+                        userType: 'dtam'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Login successful
+                    successMessage.textContent = `เข้าสู่ระบบสำเร็จ! กำลังพาคุณไปยังแดชบอร์ด ${roleDescriptions[role].split(':')[0]}...`;
+                    successMessage.style.display = 'block';
+                    
+                    // Store token and user info
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('userType', 'dtam');
+                    localStorage.setItem('userRole', data.user.role);
+                    localStorage.setItem('userName', data.user.name);
+                    localStorage.setItem('userEmail', data.user.email);
+                    localStorage.setItem('organization', data.user.organization || '');
+                    
+                    // Redirect based on role
+                    setTimeout(() => {
+                        switch(data.user.role) {
+                            case 'auditor':
+                                window.location.href = '/auditor-dashboard.html';
+                                break;
+                            case 'officer':
+                                window.location.href = '/officer-dashboard.html';
+                                break;
+                            case 'admin':
+                                window.location.href = '/admin-dashboard.html';
+                                break;
+                            case 'organization':
+                                window.location.href = '/organization-dashboard.html';
+                                break;
+                            default:
+                                window.location.href = '/dtam-dashboard.html';
+                        }
+                    }, 1500);
+                    
+                } else {
+                    // Login failed
+                    throw new Error(data.message || 'การเข้าสู่ระบบล้มเหลว');
+                }
+
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = error.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองอีกครั้ง';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Hide loading
+                loading.style.display = 'none';
+                loginBtn.disabled = false;
+                loginBtnText.textContent = 'เข้าสู่ระบบ';
+            }
+        });
+
+        // Check if user is already logged in
+        if (localStorage.getItem('token') && localStorage.getItem('userType') === 'dtam') {
+            const userRole = localStorage.getItem('userRole');
+            switch(userRole) {
+                case 'auditor':
+                    window.location.href = '/auditor-dashboard.html';
+                    break;
+                case 'officer':
+                    window.location.href = '/officer-dashboard.html';
+                    break;
+                case 'admin':
+                    window.location.href = '/admin-dashboard.html';
+                    break;
+                case 'organization':
+                    window.location.href = '/organization-dashboard.html';
+                    break;
+                default:
+                    window.location.href = '/dtam-dashboard.html';
+            }
+        }
+
+        // Add input animation effects
+        document.querySelectorAll('input, select').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

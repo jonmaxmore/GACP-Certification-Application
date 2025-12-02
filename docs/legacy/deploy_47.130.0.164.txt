@@ -1,0 +1,63 @@
+===========================================
+Deploy GACP Platform - EC2: 47.130.0.164
+Copy-Paste ทีละบล็อก
+===========================================
+
+=== บล็อก 1: ติดตั้ง Software ===
+sudo apt update && sudo apt upgrade -y
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs git nginx
+sudo npm install -g pnpm pm2
+sudo systemctl start nginx
+
+=== บล็อก 2: Clone Project ===
+cd /home/ubuntu
+git clone https://github.com/jonmaxmore/Botanical-Audit-Framework.git
+cd Botanical-Audit-Framework
+pnpm install
+
+=== บล็อก 3: สร้าง .env ===
+cd apps/backend
+cat > .env << 'EOF'
+MONGODB_URI=mongodb+srv://gacp-premierprime:qwer1234@thai-gacp.re1651p.mongodb.net/gacp-platform?retryWrites=true&w=majority&appName=thai-gacp
+NODE_ENV=production
+PORT=3000
+EOF
+echo "JWT_SECRET_FARMER=$(openssl rand -hex 64)" >> .env
+echo "JWT_SECRET_DTAM=$(openssl rand -hex 64)" >> .env
+
+=== บล็อก 4: Start Backend ===
+pm2 start server.js --name gacp-backend
+pm2 save
+pm2 startup
+
+=== บล็อก 5: ตั้งค่า Nginx ===
+sudo tee /etc/nginx/sites-available/gacp > /dev/null << 'EOF'
+server {
+    listen 80;
+    server_name _;
+    location / {
+    proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+    }
+}
+EOF
+sudo ln -sf /etc/nginx/sites-available/gacp /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl restart nginx
+
+=== ทดสอบ ===
+curl http://localhost:5000/health
+
+===========================================
+✅ Test URL: http://47.130.0.164/health
+===========================================
+
+MongoDB Atlas:
+- เพิ่ม IP: 47.130.0.164
+- หรือ: 0.0.0.0/0 (Allow all)
+- ที่: https://cloud.mongodb.com → Network Access

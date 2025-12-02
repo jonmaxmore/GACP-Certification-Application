@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GACP Platform - ระบบรับรองมาตรฐาน GACP</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .logo-text h1 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .logo-text p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .btn-login {
+            color: white;
+            border-color: white;
+        }
+
+        .btn-login:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-signup {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-signup:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .systems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .system-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .system-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #2196F3, #FF9800, #E91E63);
+        }
+
+        .system-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .system-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .system-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .system-icon.gacp {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+
+        .system-icon.dtam {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        }
+
+        .system-icon.survey {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+        }
+
+        .system-icon.track {
+            background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%);
+        }
+
+        .system-icon.compare {
+            background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+        }
+
+        .system-title {
+            flex: 1;
+        }
+
+        .system-title h3 {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .system-title p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .system-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .system-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .system-features i {
+            color: #4CAF50;
+            width: 16px;
+        }
+
+        .system-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
+            transform: translateY(-2px);
+        }
+
+        .action-btn.secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .action-btn.secondary:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+        }
+
+        .action-btn.warning {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+        }
+
+        .action-btn.warning:hover {
+            background: linear-gradient(135deg, #F57C00 0%, #E65100 100%);
+        }
+
+        .tracking-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .tracking-input {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .tracking-input input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .tracking-input input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .qr-scanner {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .qr-scanner:hover {
+            border-color: #4CAF50;
+            background: #f1f8e9;
+        }
+
+        .comparison-tools {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .standard-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .standard-card:hover {
+            background: #e9ecef;
+            transform: translateY(-5px);
+        }
+
+        .standard-card img {
+            width: 60px;
+            height: 40px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .footer p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .systems-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tracking-input {
+                flex-direction: column;
+            }
+
+            .comparison-tools {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .status-badge.ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.development {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.research {
+            background: #cce7ff;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">🌿</div>
+                <div class="logo-text">
+                    <h1>GACP Platform</h1>
+                    <p>ระบบรับรองมาตรฐาน GACP</p>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="#home" class="active">หน้าหลัก</a>
+                <a href="#services">บริการ</a>
+                <a href="#about">เกี่ยวกับ</a>
+                <a href="#contact">ติดต่อ</a>
+            </nav>
+            <div class="auth-buttons">
+                <a href="/farmer-login.html" class="btn btn-login">เข้าสู่ระบบ (เกษตรกร)</a>
+                <a href="/dtam-login.html" class="btn btn-signup">เข้าสู่ระบบ (DTAM)</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <section class="hero">
+            <h1>GACP Platform</h1>
+            <p>ระบบครบวงจรสำหรับการรับรองมาตรฐาน GACP และการติดตามคุณภาพสมุนไพร</p>
+        </section>
+
+        <div class="systems-grid">
+            <!-- 1. ระบบลงทะเบียนขอใบรับรอง GACP -->
+            <div class="system-card">
+                <div class="system-header">
+                    <div class="system-icon gacp">🌿</div>
+                    <div class="system-title">
+                        <h3>ระบบลงทะเบียนขอใบรับรอง GACP</h3>
+                        <p>Good Agricultural and Collection Practices</p>
+                        <span class="status-badge ready">พร้อมใช้งาน</span>
+                    </div>
+                </div>
+                <ul class="system-features">
+                    <li><i>✓</i> ลงทะเบียนขอใบรับรอง GACP</li>
+                    <li><i>✓</i> ติดตามสถานะการขอใบรับรอง</li>
+                    <li><i>✓</i> จัดการเอกสารและหลักฐาน</li>
+                    <li><i>✓</i> ระบบการจ่ายเงิน</li>
+                </ul>
+                <div class="system-actions">
+                    <a href="/farmer-login.html" class="action-btn primary">
+                        <i>👤</i> เข้าสู่ระบบ (เกษตรกร)
+                    </a>
+                    <a href="/farmer-register.html" class="action-btn secondary">
+                        <i>📝</i> ลงทะเบียน (เกษตรกร)
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. ระบบ DTAM -->
+            <div class="system-card">
+                <div class="system-header">
+                    <div class="system-icon dtam">🏛️</div>
+                    <div class="system-title">
+                        <h3>ระบบ DTAM</h3>
+                        <p>กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</p>
+                        <span class="status-badge ready">พร้อมใช้งาน</span>
+                    </div>
+                </div>
+                <ul class="system-features">
+                    <li><i>✓</i> ตรวจสอบและรับรองมาตรฐาน</li>
+                    <li><i>✓</i> จัดการใบรับรอง</li>
+                    <li><i>✓</i> ระบบรายงานและสถิติ</li>
+                    <li><i>✓</i> ติดตามและควบคุมคุณภาพ</li>
+                </ul>
+                <div class="system-actions">
+                    <a href="/dtam-login.html" class="action-btn primary">
+                        <i>👥</i> เข้าสู่ระบบ (DTAM)
+                    </a>
+                    <a href="/dtam-register.html" class="action-btn secondary">
+                        <i>📋</i> ลงทะเบียน (DTAM)
+                    </a>
+                </div>
+            </div>
+
+            <!-- 3. ระบบทำแบบสำรวจ -->
+            <div class="system-card">
+                <div class="system-header">
+                    <div class="system-icon survey">📊</div>
+                    <div class="system-title">
+                        <h3>ระบบทำแบบสำรวจ</h3>
+                        <p>แบบสำรวจคุณภาพและมาตรฐาน</p>
+                        <span class="status-badge development">กำลังพัฒนา</span>
+                    </div>
+                </div>
+                <ul class="system-features">
+                    <li><i>✓</i> สร้างแบบสำรวจแบบกำหนดเอง</li>
+                    <li><i>✓</i> เก็บข้อมูลภาคสนาม</li>
+                    <li><i>✓</i> วิเคราะห์ผลและรายงาน</li>
+                    <li><i>✓</i> ระบบแจ้งเตือนและติดตาม</li>
+                </ul>
+                <div class="system-actions">
+                    <a href="#" class="action-btn warning">
+                        <i>📋</i> ทำแบบสำรวจ
+                    </a>
+                    <a href="#" class="action-btn secondary">
+                        <i>📊</i> ดูผลสำรวจ
+                    </a>
+                    <a href="#" class="action-btn secondary">
+                        <i>⚙️</i> สร้างแบบสำรวจ
+                    </a>
+                </div>
+            </div>
+
+            <!-- 4. ระบบติดตามและตรวจสอบสถานะ -->
+            <div class="system-card">
+                <div class="system-header">
+                    <div class="system-icon track">📱</div>
+                    <div class="system-title">
+                        <h3>ระบบติดตามและตรวจสอบสถานะ</h3>
+                        <p>LOT Tracking & QR Code System</p>
+                        <span class="status-badge development">กำลังพัฒนา</span>
+                    </div>
+                </div>
+                <ul class="system-features">
+                    <li><i>✓</i> ติดตาม LOT ผลิตภัณฑ์</li>
+                    <li><i>✓</i> สแกน QR Code</li>
+                    <li><i>✓</i> ตรวจสอบประวัติการผลิต</li>
+                    <li><i>✓</i> ระบบเตือนภัยและแจ้งเหตุ</li>
+                </ul>
+                
+                <div class="tracking-section">
+                    <h4>🔍 ติดตามผลิตภัณฑ์</h4>
+                    <div class="tracking-input">
+                        <input type="text" placeholder="ใส่เลข LOT หรือรหัสผลิตภัณฑ์" id="trackingCode">
+                        <button class="action-btn primary" onclick="trackProduct()">
+                            <i>🔍</i> ค้นหา
+                        </button>
+                    </div>
+                    
+                    <div class="qr-scanner" onclick="openQRScanner()">
+                        <i style="font-size: 3rem;">📱</i>
+                        <h4>สแกน QR Code</h4>
+                        <p>คลิกเพื่อเปิดกล้องสแกน QR Code</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. ระบบเปรียบเทียบมาตรฐาน -->
+            <div class="system-card">
+                <div class="system-header">
+                    <div class="system-icon compare">⚖️</div>
+                    <div class="system-title">
+                        <h3>ระบบเปรียบเทียบมาตรฐาน</h3>
+                        <p>WHO / FDA / ASIA Standards Comparison</p>
+                        <span class="status-badge research">กำลังวิจัย</span>
+                    </div>
+                </div>
+                <ul class="system-features">
+                    <li><i>✓</i> เปรียบเทียบมาตรฐาน WHO/FDA/ASIA</li>
+                    <li><i>✓</i> วิเคราะห์ความแตกต่าง</li>
+                    <li><i>✓</i> คำแนะนำการปรับปรุง</li>
+                    <li><i>✓</i> รายงานการประเมิน</li>
+                </ul>
+                
+                <div class="comparison-tools">
+                    <div class="standard-card" onclick="compareStandard('WHO')">
+                        <div style="font-size: 2rem;">🌍</div>
+                        <h4>WHO</h4>
+                        <p>World Health Organization</p>
+                    </div>
+                    <div class="standard-card" onclick="compareStandard('FDA')">
+                        <div style="font-size: 2rem;">🇺🇸</div>
+                        <h4>FDA</h4>
+                        <p>Food and Drug Administration</p>
+                    </div>
+                    <div class="standard-card" onclick="compareStandard('ASIA')">
+                        <div style="font-size: 2rem;">🌏</div>
+                        <h4>ASIA</h4>
+                        <p>Asian Standards</p>
+                    </div>
+                </div>
+
+                <div class="system-actions">
+                    <a href="#" class="action-btn primary">
+                        <i>⚖️</i> เปรียบเทียบมาตรฐาน
+                    </a>
+                    <a href="#" class="action-btn secondary">
+                        <i>📊</i> ดูรายงานการวิจัย
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 GACP Platform - ระบบรับรองมาตรฐาน GACP ครบวงจร</p>
+        <p>พัฒนาโดย: กรมการแพทย์แผนไทยและการแพทย์ทางเลือก (DTAM)</p>
+    </footer>
+
+    <script>
+        function trackProduct() {
+            const code = document.getElementById('trackingCode').value;
+            if (code.trim()) {
+                alert(`กำลังติดตามผลิตภัณฑ์: ${code}`);
+                // TODO: Implement actual tracking functionality
+            } else {
+                alert('กรุณาใส่รหัสผลิตภัณฑ์');
+            }
+        }
+
+        function openQRScanner() {
+            alert('กำลังเปิดกล้องสแกน QR Code...\n(ฟีเจอร์นี้อยู่ระหว่างการพัฒนา)');
+            // TODO: Implement QR scanner functionality
+        }
+
+        function compareStandard(standard) {
+            alert(`กำลังเปรียบเทียบมาตรฐาน ${standard}...\n(ฟีเจอร์นี้อยู่ระหว่างการวิจัยและพัฒนา)`);
+            // TODO: Implement standards comparison functionality
+        }
+
+        // Add smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Add loading animation when clicking system actions
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (this.href === '#' || this.href === '') {
+                    e.preventDefault();
+                }
+                
+                // Add loading state
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i>⏳</i> กำลังโหลด...';
+                this.style.pointerEvents = 'none';
+                
+                // Reset after 1.5 seconds
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.style.pointerEvents = 'auto';
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>

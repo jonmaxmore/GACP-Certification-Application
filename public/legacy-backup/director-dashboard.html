@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTAM Director Dashboard - แดชบอร์ดผู้อำนวยการ</title>
+    <style>
+        :root {
+            --primary-color: #7c3aed;
+            --primary-dark: #6d28d9;
+            --secondary-color: #f3f4f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #06b6d4;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .executive-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .kpi-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .kpi-trend {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .kpi-trend.positive {
+            color: var(--success-color);
+        }
+
+        .kpi-trend.negative {
+            color: var(--error-color);
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--secondary-color);
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-review {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--text-dark);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .priority-urgent {
+            border-left: 4px solid var(--error-color);
+            background: #fef2f2;
+        }
+
+        .priority-high {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .priority-normal {
+            border-left: 4px solid var(--info-color);
+        }
+
+        .chart-container {
+            height: 300px;
+            background: #f8fafc;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            margin: 1rem 0;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 1rem;
+            background: #faf5ff;
+            border-radius: 8px;
+            border: 1px solid #e9d5ff;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .approval-queue {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .approval-item {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            background: white;
+        }
+
+        .approval-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .approval-title {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .approval-meta {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .approval-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .executive-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .executive-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div>👔</div>
+                <div>
+                    <h1>Director Dashboard</h1>
+                    <p style="opacity: 0.9; font-size: 0.875rem;">แดชบอร์ดผู้อำนวยการ DTAM</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <div id="userName">นายประเสริฐ นำองค์การ</div>
+                    <div style="opacity: 0.8; font-size: 0.875rem;" id="userRole">ผู้อำนวยการ DTAM</div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Executive KPIs -->
+        <div class="executive-grid">
+            <div class="kpi-card">
+                <div class="kpi-number" id="totalApplications">1,247</div>
+                <div class="kpi-label">ใบสมัครทั้งหมด</div>
+                <div class="kpi-trend positive">
+                    <span>↗</span> +12% จากเดือนที่แล้ว
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="approvalRate">87%</div>
+                <div class="kpi-label">อัตราการอนุมัติ</div>
+                <div class="kpi-trend positive">
+                    <span>↗</span> +3% จากเดือนที่แล้ว
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="avgProcessTime">12.5</div>
+                <div class="kpi-label">เวลาประมวลผล (วัน)</div>
+                <div class="kpi-trend positive">
+                    <span>↘</span> -1.2 วัน
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="revenue">18.9M</div>
+                <div class="kpi-label">รายได้ (บาท/ปี)</div>
+                <div class="kpi-trend positive">
+                    <span>↗</span> +8% จากเป้าหมาย
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-layout">
+            <!-- Approval Queue -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">คิวรออนุมัติระดับผู้อำนวยการ</h3>
+                    <div>
+                        <select style="margin-right: 1rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+                            <option>ทั้งหมด</option>
+                            <option>ด่วนมาก</option>
+                            <option>ความสำคัญสูง</option>
+                            <option>รออนุมัติ</option>
+                        </select>
+                        <button class="btn btn-primary">รีเฟรช</button>
+                    </div>
+                </div>
+                
+                <div class="approval-queue">
+                    <div class="approval-item priority-urgent">
+                        <div class="approval-header">
+                            <div class="approval-title">การอนุมัติใบรับรอง GACP ระดับพิเศษ</div>
+                            <span class="status-badge status-pending">รออนุมัติ</span>
+                        </div>
+                        <div class="approval-meta">
+                            รหัส: GACP-SPECIAL-2025-001 | ยื่นโดย: ทีมตรวจสอบ | 2 ชั่วโมงที่แล้ว
+                        </div>
+                        <div style="font-size: 0.875rem; margin: 0.5rem 0;">
+                            <strong>เกษตรกร:</strong> บริษัท ไทยสมุนไพรออร์แกนิค จำกัด<br>
+                            <strong>สมุนไพร:</strong> ขมิ้นชันคุณภาพสูง (100 ไร่)<br>
+                            <strong>เหตุผล:</strong> โครงการส่งออกระดับสากล, มูลค่า 50 ล้านบาท
+                        </div>
+                        <div class="approval-actions">
+                            <button class="btn btn-success" onclick="approveApplication('GACP-SPECIAL-2025-001')">อนุมัติ</button>
+                            <button class="btn btn-warning" onclick="reviewApplication('GACP-SPECIAL-2025-001')">ขอข้อมูลเพิ่ม</button>
+                            <button class="btn btn-danger" onclick="rejectApplication('GACP-SPECIAL-2025-001')">ปฏิเสธ</button>
+                            <button class="btn btn-secondary" onclick="viewDetails('GACP-SPECIAL-2025-001')">ดูรายละเอียด</button>
+                        </div>
+                    </div>
+
+                    <div class="approval-item priority-high">
+                        <div class="approval-header">
+                            <div class="approval-title">การปรับปรุงมาตรฐาน GACP ใหม่</div>
+                            <span class="status-badge status-review">รอทบทวน</span>
+                        </div>
+                        <div class="approval-meta">
+                            รหัส: POLICY-2025-015 | ยื่นโดย: ทีมพัฒนามาตรฐาน | 1 วันที่แล้ว
+                        </div>
+                        <div style="font-size: 0.875rem; margin: 0.5rem 0;">
+                            <strong>เรื่อง:</strong> การปรับปรุงเกณฑ์การประเมินสมุนไพรเศรษฐกิจ<br>
+                            <strong>ผลกระทบ:</strong> เกษตรกร 5,000+ ราย<br>
+                            <strong>ประโยชน์:</strong> เพิ่มความชัดเจนในการประเมิน 40%
+                        </div>
+                        <div class="approval-actions">
+                            <button class="btn btn-success" onclick="approvePolicy('POLICY-2025-015')">อนุมัติ</button>
+                            <button class="btn btn-warning" onclick="requestRevision('POLICY-2025-015')">ขอแก้ไข</button>
+                            <button class="btn btn-secondary" onclick="viewPolicyDetails('POLICY-2025-015')">ดูรายละเอียด</button>
+                        </div>
+                    </div>
+
+                    <div class="approval-item priority-normal">
+                        <div class="approval-header">
+                            <div class="approval-title">การอนุมัติงบประมาณประจำปี 2026</div>
+                            <span class="status-badge status-pending">รออนุมัติ</span>
+                        </div>
+                        <div class="approval-meta">
+                            รหัส: BUDGET-2026-001 | ยื่นโดย: ฝ่ายการเงิน | 3 วันที่แล้ว
+                        </div>
+                        <div style="font-size: 0.875rem; margin: 0.5rem 0;">
+                            <strong>งบประมาณรวม:</strong> 120 ล้านบาท<br>
+                            <strong>เพิ่มขึ้น:</strong> 15% จากปีที่แล้ว<br>
+                            <strong>จุดเน้น:</strong> เทคโนโลยีดิจิทัล และการพัฒนาบุคลากร
+                        </div>
+                        <div class="approval-actions">
+                            <button class="btn btn-success" onclick="approveBudget('BUDGET-2026-001')">อนุมัติ</button>
+                            <button class="btn btn-warning" onclick="requestBudgetRevision('BUDGET-2026-001')">ขอปรับแก้</button>
+                            <button class="btn btn-secondary" onclick="viewBudgetDetails('BUDGET-2026-001')">ดูรายละเอียด</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Executive Summary & Quick Actions -->
+            <div>
+                <!-- Performance Metrics -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header">
+                        <h3 class="card-title">สรุปผลงานเดือนนี้</h3>
+                    </div>
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <div class="metric-value">234</div>
+                            <div class="metric-label">ใบรับรองออก</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">18</div>
+                            <div class="metric-label">นโยบายอนุมัติ</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">95%</div>
+                            <div class="metric-label">ความพึงพอใจ</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">4.2M</div>
+                            <div class="metric-label">รายได้เดือนนี้</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">การดำเนินการด่วน</h3>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn" onclick="viewDashboard()">
+                            📊 แดชบอร์ดผู้บริหาร
+                        </a>
+                        <a href="#" class="action-btn" onclick="viewReports()">
+                            📈 รายงานผลประกอบการ
+                        </a>
+                        <a href="#" class="action-btn" onclick="viewPolicies()">
+                            📋 การจัดการนโยบาย
+                        </a>
+                        <a href="#" class="action-btn" onclick="viewBudget()">
+                            💰 การอนุมัติงบประมาณ
+                        </a>
+                        <a href="#" class="action-btn" onclick="viewTeam()">
+                            👥 การจัดการทีม
+                        </a>
+                        <a href="#" class="action-btn" onclick="viewStrategic()">
+                            🎯 การวางแผนกลยุทธ์
+                        </a>
+                        <a href="#" class="action-btn" onclick="viewRisk()">
+                            ⚠️ การบริหารความเสี่ยง
+                        </a>
+                        <a href="#" class="action-btn" onclick="viewStakeholder()">
+                            🤝 การประสานผู้มีส่วนได้ส่วนเสีย
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Performance Overview -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">ภาพรวมผลงานแต่ละหน่วยงาน</h3>
+                <button class="btn btn-primary">ส่งออกรายงาน</button>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>หน่วยงาน</th>
+                        <th>ผู้รับผิดชอบ</th>
+                        <th>KPI หลัก</th>
+                        <th>ผลงานเดือนนี้</th>
+                        <th>เป้าหมาย</th>
+                        <th>สถานะ</th>
+                        <th>การดำเนินการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>ตรวจสอบเอกสาร</strong></td>
+                        <td>นางสมใจ ใสใส</td>
+                        <td>ตรวจเอกสาร/วัน</td>
+                        <td><strong>8.2</strong></td>
+                        <td>10</td>
+                        <td><span class="status-badge status-review">ต้องปรับปรุง</span></td>
+                        <td>
+                            <button class="btn btn-warning" onclick="reviewDepartment('document')">ทบทวน</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>ตรวจสอบพื้นที่</strong></td>
+                        <td>นายวิชัย สำรวจพื้นที่</td>
+                        <td>ฟาร์มตรวจ/สัปดาห์</td>
+                        <td><strong>12</strong></td>
+                        <td>10</td>
+                        <td><span class="status-badge status-approved">เกินเป้า</span></td>
+                        <td>
+                            <button class="btn btn-success" onclick="rewardDepartment('field')">ชื่นชม</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>การเงิน</strong></td>
+                        <td>นางวาลี เก็บเงิน</td>
+                        <td>รายได้/เดือน</td>
+                        <td><strong>4.8M</strong></td>
+                        <td>4.2M</td>
+                        <td><span class="status-badge status-approved">เกินเป้า</span></td>
+                        <td>
+                            <button class="btn btn-success" onclick="reviewFinance()">ดูรายละเอียด</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>CMS</strong></td>
+                        <td>นายสมศักดิ์ จัดการ</td>
+                        <td>ความพึงพอใจ</td>
+                        <td><strong>94%</strong></td>
+                        <td>95%</td>
+                        <td><span class="status-badge status-review">ใกล้เป้า</span></td>
+                        <td>
+                            <button class="btn btn-warning" onclick="improveCMS()">ปรับปรุง</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>ลูกค้าสัมพันธ์</strong></td>
+                        <td>นางสาวมาลี ดูแล</td>
+                        <td>เวลาตอบกลับ</td>
+                        <td><strong>2.1 ชม.</strong></td>
+                        <td>2 ชม.</td>
+                        <td><span class="status-badge status-review">ต้องปรับปรุง</span></td>
+                        <td>
+                            <button class="btn btn-warning" onclick="improveSupport()">ปรับปรุง</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Strategic Decisions & Policies -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">การตัดสินใจเชิงกลยุทธ์ & นโยบาย</h3>
+                <button class="btn btn-primary">เพิ่มนโยบายใหม่</button>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>วันที่</th>
+                        <th>ประเภท</th>
+                        <th>หัวข้อ</th>
+                        <th>ผลกระทบ</th>
+                        <th>สถานะ</th>
+                        <th>กำหนดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>25 ก.ย. 2025</td>
+                        <td><strong>นโยบาย</strong></td>
+                        <td>การปรับปรุงมาตรฐาน GACP 2025</td>
+                        <td>เกษตรกร 5,000+ ราย</td>
+                        <td><span class="status-badge status-approved">อนุมัติแล้ว</span></td>
+                        <td>1 พ.ย. 2025</td>
+                    </tr>
+                    <tr>
+                        <td>20 ก.ย. 2025</td>
+                        <td><strong>เทคโนโลยี</strong></td>
+                        <td>ระบบ AI สำหรับการประเมิน</td>
+                        <td>ลดเวลา 50%</td>
+                        <td><span class="status-badge status-review">ทดลองใช้</span></td>
+                        <td>1 ก.ย. 2026</td>
+                    </tr>
+                    <tr>
+                        <td>15 ก.ย. 2025</td>
+                        <td><strong>งบประมาณ</strong></td>
+                        <td>การลงทุนโครงสร้างพื้นฐาน</td>
+                        <td>30 ล้านบาท</td>
+                        <td><span class="status-badge status-pending">รออนุมัติ</span></td>
+                        <td>31 ต.ค. 2025</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            // Get user info
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                
+                // Check if user is director
+                if (currentUser.organizationType !== 'director_approver') {
+                    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+                    redirectToLogin();
+                    return;
+                }
+                
+                updateUserDisplay();
+            }
+
+            await loadDashboardData();
+        });
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Mock data loading - replace with real API calls
+                updateKPIs();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateKPIs() {
+            // Mock KPI data - replace with real API calls
+            document.getElementById('totalApplications').textContent = '1,247';
+            document.getElementById('approvalRate').textContent = '87%';
+            document.getElementById('avgProcessTime').textContent = '12.5';
+            document.getElementById('revenue').textContent = '18.9M';
+        }
+
+        // Approval Functions
+        function approveApplication(id) {
+            alert(`อนุมัติใบสมัคร: ${id}\n\nฟีเจอร์นี้จะพัฒนาในขั้นตอนถัดไป:\n- Digital signature\n- Approval workflow\n- Notification system\n- Audit trail`);
+        }
+
+        function reviewApplication(id) {
+            alert(`ขอข้อมูลเพิ่มเติม: ${id}`);
+        }
+
+        function rejectApplication(id) {
+            alert(`ปฏิเสธใบสมัคร: ${id}\nเหตุผล: [ระบุเหตุผล]`);
+        }
+
+        function viewDetails(id) {
+            alert(`ดูรายละเอียดใบสมัคร: ${id}`);
+        }
+
+        // Policy Functions
+        function approvePolicy(id) {
+            alert(`อนุมัตินโยบาย: ${id}`);
+        }
+
+        function requestRevision(id) {
+            alert(`ขอแก้ไขนโยบาย: ${id}`);
+        }
+
+        function viewPolicyDetails(id) {
+            alert(`ดูรายละเอียดนโยบาย: ${id}`);
+        }
+
+        // Budget Functions
+        function approveBudget(id) {
+            alert(`อนุมัติงบประมาণ: ${id}`);
+        }
+
+        function requestBudgetRevision(id) {
+            alert(`ขอปรับแก้งบประมาณ: ${id}`);
+        }
+
+        function viewBudgetDetails(id) {
+            alert(`ดูรายละเอียดงบประมาณ: ${id}`);
+        }
+
+        // Quick Action Functions
+        function viewDashboard() {
+            alert('แดชบอร์ดผู้บริหาร:\n\n• KPI รวม\n• แนวโน้มธุรกิจ\n• การวิเคราะห์ข้อมูล\n• การคาดการณ์');
+        }
+
+        function viewReports() {
+            alert('รายงานผลประกอบการ:\n\n• รายได้-ค่าใช้จ่าย\n• ROI\n• Growth metrics\n• Benchmarking');
+        }
+
+        function viewPolicies() {
+            alert('การจัดการนโยบาย:\n\n• นโยบายใหม่\n• การปรับปรุง\n• การอนุมัติ\n• การติดตาม');
+        }
+
+        function viewBudget() {
+            alert('การอนุมัติงบประมาณ:\n\n• งบประจำปี\n• งบลงทุน\n• งบพิเศษ\n• การติดตามใช้จ่าย');
+        }
+
+        function viewTeam() {
+            alert('การจัดการทีม:\n\n• โครงสร้างองค์กร\n• การประเมินผล\n• การพัฒนา\n• การจูงใจ');
+        }
+
+        function viewStrategic() {
+            alert('การวางแผนกลยุทธ์:\n\n• วิสัยทัศน์\n• แผนธุรกิจ\n• การแข่งขัน\n• การขยายตัว');
+        }
+
+        function viewRisk() {
+            alert('การบริหารความเสี่ยง:\n\n• ความเสี่ยงองค์กร\n• แผนรองรับ\n• การประกัน\n• การติดตาม');
+        }
+
+        function viewStakeholder() {
+            alert('การประสานผู้มีส่วนได้ส่วนเสีย:\n\n• เกษตรกร\n• หน่วยงานรัฐ\n• พันธมิตร\n• ชุมชน');
+        }
+
+        // Department Management
+        function reviewDepartment(dept) {
+            alert(`ทบทวนผลงานหน่วยงาน: ${dept}`);
+        }
+
+        function rewardDepartment(dept) {
+            alert(`ชื่นชมหน่วยงาน: ${dept}`);
+        }
+
+        function reviewFinance() {
+            alert('ดูรายละเอียดการเงิน');
+        }
+
+        function improveCMS() {
+            alert('ปรับปรุงระบบ CMS');
+        }
+
+        function improveSupport() {
+            alert('ปรับปรุงงานลูกค้าสัมพันธ์');
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/auth.html';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+    </script>
+</body>
+</html>

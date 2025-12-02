@@ -1,0 +1,220 @@
+{
+  "aggregate": {
+    "counters": {
+      "vusers.created_by_name.Verify Certificate": 4,
+      "vusers.created": 60,
+      "http.requests": 60,
+      "plugins.metrics-by-endpoint./api/certificates/verify/GACP-2025-BKK-0001.errors.ECONNREFUSED": 4,
+      "errors.ECONNREFUSED": 60,
+      "vusers.failed": 60,
+      "vusers.created_by_name.View Applications": 7,
+      "plugins.metrics-by-endpoint./api/auth/farmer/login.errors.ECONNREFUSED": 34,
+      "vusers.created_by_name.Farmer Login": 13,
+      "vusers.created_by_name.Farmer Registration": 13,
+      "plugins.metrics-by-endpoint./api/auth/farmer/register.errors.ECONNREFUSED": 13,
+      "vusers.created_by_name.View Dashboard": 14,
+      "vusers.created_by_name.Officer Login": 3,
+      "plugins.metrics-by-endpoint./api/auth/dtam/login.errors.ECONNREFUSED": 3,
+      "vusers.created_by_name.Health Check": 6,
+      "plugins.metrics-by-endpoint./health.errors.ECONNREFUSED": 6
+    },
+    "rates": {
+      "http.request_rate": 1
+    },
+    "firstCounterAt": 1762098016379,
+    "lastCounterAt": 1762098075379,
+    "firstMetricAt": 1762098016379,
+    "lastMetricAt": 1762098075379,
+    "period": 1762098070000,
+    "summaries": {},
+    "histograms": {}
+  },
+  "intermediate": [
+    {
+      "counters": {
+        "vusers.created_by_name.Verify Certificate": 1,
+        "vusers.created": 4,
+        "http.requests": 4,
+        "plugins.metrics-by-endpoint./api/certificates/verify/GACP-2025-BKK-0001.errors.ECONNREFUSED": 1,
+        "errors.ECONNREFUSED": 4,
+        "vusers.failed": 4,
+        "vusers.created_by_name.View Applications": 1,
+        "plugins.metrics-by-endpoint./api/auth/farmer/login.errors.ECONNREFUSED": 3,
+        "vusers.created_by_name.Farmer Login": 2
+      },
+      "rates": {
+        "http.request_rate": 1
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1762098016379,
+      "lastCounterAt": 1762098019379,
+      "firstMetricAt": 1762098016379,
+      "lastMetricAt": 1762098019379,
+      "period": "1762098010000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Farmer Login": 3,
+        "vusers.created": 10,
+        "http.requests": 10,
+        "plugins.metrics-by-endpoint./api/auth/farmer/login.errors.ECONNREFUSED": 7,
+        "errors.ECONNREFUSED": 10,
+        "vusers.failed": 10,
+        "vusers.created_by_name.Farmer Registration": 3,
+        "plugins.metrics-by-endpoint./api/auth/farmer/register.errors.ECONNREFUSED": 3,
+        "vusers.created_by_name.View Dashboard": 3,
+        "vusers.created_by_name.View Applications": 1
+      },
+      "rates": {
+        "http.request_rate": 1
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1762098020377,
+      "lastCounterAt": 1762098029379,
+      "firstMetricAt": 1762098020377,
+      "lastMetricAt": 1762098029379,
+      "period": "1762098020000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Officer Login": 2,
+        "vusers.created": 10,
+        "http.requests": 10,
+        "plugins.metrics-by-endpoint./api/auth/dtam/login.errors.ECONNREFUSED": 2,
+        "errors.ECONNREFUSED": 10,
+        "vusers.failed": 10,
+        "vusers.created_by_name.Farmer Registration": 4,
+        "plugins.metrics-by-endpoint./api/auth/farmer/register.errors.ECONNREFUSED": 4,
+        "vusers.created_by_name.View Dashboard": 2,
+        "plugins.metrics-by-endpoint./api/auth/farmer/login.errors.ECONNREFUSED": 4,
+        "vusers.created_by_name.View Applications": 2
+      },
+      "rates": {
+        "http.request_rate": 1
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1762098030377,
+      "lastCounterAt": 1762098039379,
+      "firstMetricAt": 1762098030377,
+      "lastMetricAt": 1762098039379,
+      "period": "1762098030000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Farmer Login": 3,
+        "vusers.created": 10,
+        "http.requests": 10,
+        "plugins.metrics-by-endpoint./api/auth/farmer/login.errors.ECONNREFUSED": 7,
+        "errors.ECONNREFUSED": 10,
+        "vusers.failed": 10,
+        "vusers.created_by_name.View Applications": 1,
+        "vusers.created_by_name.Health Check": 2,
+        "plugins.metrics-by-endpoint./health.errors.ECONNREFUSED": 2,
+        "vusers.created_by_name.Verify Certificate": 1,
+        "plugins.metrics-by-endpoint./api/certificates/verify/GACP-2025-BKK-0001.errors.ECONNREFUSED": 1,
+        "vusers.created_by_name.View Dashboard": 3
+      },
+      "rates": {
+        "http.request_rate": 1
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1762098040377,
+      "lastCounterAt": 1762098049379,
+      "firstMetricAt": 1762098040377,
+      "lastMetricAt": 1762098049379,
+      "period": "1762098040000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Farmer Login": 3,
+        "vusers.created": 10,
+        "http.requests": 10,
+        "plugins.metrics-by-endpoint./api/auth/farmer/login.errors.ECONNREFUSED": 6,
+        "errors.ECONNREFUSED": 10,
+        "vusers.failed": 10,
+        "vusers.created_by_name.View Dashboard": 2,
+        "vusers.created_by_name.View Applications": 1,
+        "vusers.created_by_name.Farmer Registration": 3,
+        "plugins.metrics-by-endpoint./api/auth/farmer/register.errors.ECONNREFUSED": 3,
+        "vusers.created_by_name.Health Check": 1,
+        "plugins.metrics-by-endpoint./health.errors.ECONNREFUSED": 1
+      },
+      "rates": {
+        "http.request_rate": 1
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1762098050377,
+      "lastCounterAt": 1762098059379,
+      "firstMetricAt": 1762098050377,
+      "lastMetricAt": 1762098059379,
+      "period": "1762098050000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Farmer Registration": 3,
+        "vusers.created": 10,
+        "http.requests": 10,
+        "plugins.metrics-by-endpoint./api/auth/farmer/register.errors.ECONNREFUSED": 3,
+        "errors.ECONNREFUSED": 10,
+        "vusers.failed": 10,
+        "vusers.created_by_name.View Dashboard": 3,
+        "plugins.metrics-by-endpoint./api/auth/farmer/login.errors.ECONNREFUSED": 5,
+        "vusers.created_by_name.Health Check": 1,
+        "plugins.metrics-by-endpoint./health.errors.ECONNREFUSED": 1,
+        "vusers.created_by_name.View Applications": 1,
+        "vusers.created_by_name.Verify Certificate": 1,
+        "plugins.metrics-by-endpoint./api/certificates/verify/GACP-2025-BKK-0001.errors.ECONNREFUSED": 1,
+        "vusers.created_by_name.Farmer Login": 1
+      },
+      "rates": {
+        "http.request_rate": 1
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1762098060377,
+      "lastCounterAt": 1762098069379,
+      "firstMetricAt": 1762098060377,
+      "lastMetricAt": 1762098069379,
+      "period": "1762098060000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Health Check": 2,
+        "vusers.created": 6,
+        "http.requests": 6,
+        "plugins.metrics-by-endpoint./health.errors.ECONNREFUSED": 2,
+        "errors.ECONNREFUSED": 6,
+        "vusers.failed": 6,
+        "vusers.created_by_name.Verify Certificate": 1,
+        "plugins.metrics-by-endpoint./api/certificates/verify/GACP-2025-BKK-0001.errors.ECONNREFUSED": 1,
+        "vusers.created_by_name.Officer Login": 1,
+        "plugins.metrics-by-endpoint./api/auth/dtam/login.errors.ECONNREFUSED": 1,
+        "vusers.created_by_name.Farmer Login": 1,
+        "plugins.metrics-by-endpoint./api/auth/farmer/login.errors.ECONNREFUSED": 2,
+        "vusers.created_by_name.View Dashboard": 1
+      },
+      "rates": {
+        "http.request_rate": 1
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1762098070377,
+      "lastCounterAt": 1762098075379,
+      "firstMetricAt": 1762098070377,
+      "lastMetricAt": 1762098075379,
+      "period": "1762098070000",
+      "summaries": {},
+      "histograms": {}
+    }
+  ]
+}

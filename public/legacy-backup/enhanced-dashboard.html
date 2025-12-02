@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced GACP System Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+        .dashboard-card { transition: all 0.3s ease; }
+        .dashboard-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .metric-number { font-size: 2.5rem; font-weight: 700; }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .progress-ring-circle {
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 251.2;
+            transition: stroke-dashoffset 1s ease-in-out;
+        }
+        .status-online { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app">
+        <!-- Header -->
+        <nav class="bg-white shadow-lg border-b-4 border-green-500">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <div class="h-8 w-8 bg-green-500 rounded-full mr-3 flex items-center justify-center">
+                            <span class="text-white font-bold">G</span>
+                        </div>
+                        <h1 class="text-xl font-bold text-gray-800">Enhanced GACP Dashboard</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <div class="w-3 h-3 bg-green-500 rounded-full mr-2 status-online"></div>
+                            <span>System Online</span>
+                        </div>
+                        <span class="text-gray-600">{{ new Date().toLocaleDateString('th-TH') }}</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- System Status Banner -->
+        <div class="bg-gradient-to-r from-green-500 to-green-600 text-white py-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                    <div>
+                        <div class="text-2xl font-bold">{{ systemMetrics.totalUsers }}</div>
+                        <div class="text-green-100">Total Users</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold">{{ systemMetrics.successRate }}%</div>
+                        <div class="text-green-100">Success Rate</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold">{{ systemMetrics.avgResponseTime }}ms</div>
+                        <div class="text-green-100">Avg Response</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold">{{ systemMetrics.uptime }}</div>
+                        <div class="text-green-100">System Uptime</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <!-- Real-time Metrics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="dashboard-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="metric-number text-blue-600">{{ metrics.applications.total }}</p>
+                            <p class="text-gray-600">Total Applications</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-green-600">+{{ metrics.applications.todayNew }} today</span>
+                            <span class="text-gray-500">{{ metrics.applications.pending }} pending</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="metric-number text-green-600">{{ metrics.certificates.issued }}</p>
+                            <p class="text-gray-600">Certificates Issued</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-green-600">{{ metrics.certificates.thisMonth }} this month</span>
+                            <span class="text-gray-500">{{ metrics.certificates.validity }} avg validity</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M12 2l3.09 6.26L22 9l-5 4.87L18.18 22 12 18.5 5.82 22 7 13.87 2 9l6.91-.74L12 2z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="metric-number text-yellow-600">{{ metrics.audits.completed }}</p>
+                            <p class="text-gray-600">Audits Completed</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-green-600">{{ metrics.audits.passed }}% passed</span>
+                            <span class="text-gray-500">{{ metrics.audits.scheduled }} scheduled</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="metric-number text-purple-600">{{ metrics.revenue.total.toLocaleString() }}</p>
+                            <p class="text-gray-600">Revenue (THB)</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-green-600">+{{ metrics.revenue.growth }}% growth</span>
+                            <span class="text-gray-500">{{ metrics.revenue.thisMonth.toLocaleString() }} this month</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Application Trends Chart -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Application Trends (Last 30 Days)</h3>
+                    <canvas id="applicationChart" width="400" height="200"></canvas>
+                </div>
+
+                <!-- Success Rate by Province -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Success Rate by Province</h3>
+                    <canvas id="provinceChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Live Activity Feed & System Status -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Live Activity Feed -->
+                <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Live Activity Feed</h3>
+                    <div class="space-y-3 max-h-96 overflow-y-auto">
+                        <div v-for="activity in realtimeActivities" :key="activity.id" class="flex items-center p-3 bg-gray-50 rounded-lg">
+                            <div :class="getActivityIcon(activity.type)" class="p-2 rounded-full mr-3">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium">{{ activity.message }}</p>
+                                <p class="text-xs text-gray-500">{{ formatTime(activity.timestamp) }}</p>
+                            </div>
+                            <div :class="getStatusBadge(activity.status)" class="px-2 py-1 rounded-full text-xs">
+                                {{ activity.status }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Health Monitor -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">System Health</h3>
+                    <div class="space-y-4">
+                        <div v-for="service in systemHealth" :key="service.name" class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium">{{ service.name }}</p>
+                                <p class="text-xs text-gray-500">{{ service.description }}</p>
+                            </div>
+                            <div class="flex items-center">
+                                <div :class="service.status === 'healthy' ? 'text-green-500' : 'text-red-500'" class="mr-2">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-sm">{{ service.uptime }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Panel -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <button @click="runFullSystemTest" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <svg class="w-8 h-8 text-blue-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-sm text-center">Run Full Test</span>
+                    </button>
+                    
+                    <button @click="generateReport" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <svg class="w-8 h-8 text-green-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 102 0V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm text-center">Generate Report</span>
+                    </button>
+                    
+                    <button @click="viewAnalytics" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <svg class="w-8 h-8 text-purple-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+                        </svg>
+                        <span class="text-sm text-center">View Analytics</span>
+                    </button>
+                    
+                    <button @click="manageUsers" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <svg class="w-8 h-8 text-orange-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                        </svg>
+                        <span class="text-sm text-center">Manage Users</span>
+                    </button>
+                    
+                    <button @click="systemSettings" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <svg class="w-8 h-8 text-red-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm text-center">Settings</span>
+                    </button>
+                    
+                    <button @click="exportData" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <svg class="w-8 h-8 text-teal-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm text-center">Export Data</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results Modal -->
+        <div v-if="showTestModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Full System Test Results</h3>
+                    <button @click="showTestModal = false" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div v-if="testResults">
+                    <p class="text-green-600 font-medium">✅ Test completed successfully!</p>
+                    <div class="mt-4 space-y-2">
+                        <p><strong>Total Users:</strong> {{ testResults.total }}</p>
+                        <p><strong>Successful:</strong> {{ testResults.successful }}</p>
+                        <p><strong>Failed:</strong> {{ testResults.failed }}</p>
+                        <p><strong>Success Rate:</strong> {{ testResults.successRate }}%</p>
+                    </div>
+                </div>
+                <div v-else class="text-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-2 text-gray-600">Running system test...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    showTestModal: false,
+                    testResults: null,
+                    systemMetrics: {
+                        totalUsers: 1247,
+                        successRate: 94.2,
+                        avgResponseTime: 245,
+                        uptime: '99.9%'
+                    },
+                    metrics: {
+                        applications: {
+                            total: 1247,
+                            todayNew: 23,
+                            pending: 45
+                        },
+                        certificates: {
+                            issued: 1156,
+                            thisMonth: 89,
+                            validity: '2.3 years'
+                        },
+                        audits: {
+                            completed: 892,
+                            passed: 87,
+                            scheduled: 23
+                        },
+                        revenue: {
+                            total: 37350000,
+                            growth: 15.2,
+                            thisMonth: 2675000
+                        }
+                    },
+                    realtimeActivities: [
+                        {
+                            id: 1,
+                            type: 'application',
+                            message: 'นายสมชาย ใจดี ยื่นใบสมัคร GACP ใหม่',
+                            timestamp: new Date(Date.now() - 2 * 60 * 1000),
+                            status: 'pending'
+                        },
+                        {
+                            id: 2,
+                            type: 'payment',
+                            message: 'การชำระเงิน 5,000 บาท จาก FARM123 เสร็จสิ้น',
+                            timestamp: new Date(Date.now() - 5 * 60 * 1000),
+                            status: 'completed'
+                        },
+                        {
+                            id: 3,
+                            type: 'audit',
+                            message: 'การตรวจสอบภาคสนาม ฟาร์มกัญชง001 เสร็จสิ้น',
+                            timestamp: new Date(Date.now() - 8 * 60 * 1000),
+                            status: 'completed'
+                        },
+                        {
+                            id: 4,
+                            type: 'certificate',
+                            message: 'ออกใบรับรอง GACP-2025-0234 เรียบร้อยแล้ว',
+                            timestamp: new Date(Date.now() - 12 * 60 * 1000),
+                            status: 'completed'
+                        }
+                    ],
+                    systemHealth: [
+                        { name: 'Database', description: 'MongoDB', status: 'healthy', uptime: 99.9 },
+                        { name: 'API Gateway', description: 'Express.js', status: 'healthy', uptime: 99.8 },
+                        { name: 'Payment Service', description: 'PromptPay Gateway', status: 'healthy', uptime: 98.5 },
+                        { name: 'Document Service', description: 'File Upload', status: 'healthy', uptime: 99.2 },
+                        { name: 'Notification Service', description: 'Email/SMS', status: 'healthy', uptime: 97.8 }
+                    ]
+                }
+            },
+            mounted() {
+                this.initializeCharts();
+                this.startRealtimeUpdates();
+            },
+            methods: {
+                async runFullSystemTest() {
+                    this.showTestModal = true;
+                    this.testResults = null;
+                    
+                    try {
+                        // Simulate full system test
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+                        
+                        this.testResults = {
+                            total: 500,
+                            successful: 471,
+                            failed: 29,
+                            successRate: 94.2
+                        };
+                        
+                        // Update metrics
+                        this.systemMetrics.totalUsers += 500;
+                        this.systemMetrics.successRate = this.testResults.successRate;
+                        
+                    } catch (error) {
+                        console.error('Test failed:', error);
+                    }
+                },
+                
+                generateReport() {
+                    alert('📊 Generating comprehensive system report...\n\nFeatures:\n- User journey analytics\n- Performance metrics\n- Revenue analysis\n- System health report');
+                },
+                
+                viewAnalytics() {
+                    alert('📈 Opening advanced analytics dashboard...\n\nIncludes:\n- Real-time metrics\n- Predictive analysis\n- User behavior patterns\n- Performance optimization');
+                },
+                
+                manageUsers() {
+                    alert('👥 User management panel\n\nFeatures:\n- Role-based access control\n- User activity monitoring\n- Account management\n- Permission settings');
+                },
+                
+                systemSettings() {
+                    alert('⚙️ System configuration panel\n\nSettings:\n- Payment gateway config\n- Notification preferences\n- Security settings\n- Database optimization');
+                },
+                
+                exportData() {
+                    alert('📤 Data export utility\n\nExport formats:\n- CSV for Excel analysis\n- JSON for API integration\n- PDF for reports\n- XML for data exchange');
+                },
+                
+                getActivityIcon(type) {
+                    const icons = {
+                        application: 'bg-blue-100 text-blue-600',
+                        payment: 'bg-green-100 text-green-600',
+                        audit: 'bg-yellow-100 text-yellow-600',
+                        certificate: 'bg-purple-100 text-purple-600'
+                    };
+                    return icons[type] || 'bg-gray-100 text-gray-600';
+                },
+                
+                getStatusBadge(status) {
+                    const badges = {
+                        pending: 'bg-yellow-100 text-yellow-800',
+                        completed: 'bg-green-100 text-green-800',
+                        failed: 'bg-red-100 text-red-800'
+                    };
+                    return badges[status] || 'bg-gray-100 text-gray-800';
+                },
+                
+                formatTime(timestamp) {
+                    const diff = Date.now() - timestamp.getTime();
+                    const minutes = Math.floor(diff / (1000 * 60));
+                    
+                    if (minutes < 1) return 'Just now';
+                    if (minutes < 60) return `${minutes} minutes ago`;
+                    
+                    const hours = Math.floor(minutes / 60);
+                    return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+                },
+                
+                initializeCharts() {
+                    // Application Trends Chart
+                    const appCtx = document.getElementById('applicationChart').getContext('2d');
+                    new Chart(appCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Day 1', 'Day 7', 'Day 14', 'Day 21', 'Day 30'],
+                            datasets: [{
+                                label: 'Applications',
+                                data: [12, 19, 25, 34, 42],
+                                borderColor: 'rgb(59, 130, 246)',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                    
+                    // Province Success Rate Chart
+                    const provinceCtx = document.getElementById('provinceChart').getContext('2d');
+                    new Chart(provinceCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['เชียงใหม่', 'ขอนแก่น', 'อุบลราชธานี', 'สุราษฎร์ธานี'],
+                            datasets: [{
+                                label: 'Success Rate (%)',
+                                data: [95, 87, 92, 89],
+                                backgroundColor: [
+                                    'rgba(34, 197, 94, 0.8)',
+                                    'rgba(59, 130, 246, 0.8)',
+                                    'rgba(147, 51, 234, 0.8)',
+                                    'rgba(245, 101, 101, 0.8)'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: { 
+                                    beginAtZero: true,
+                                    max: 100
+                                }
+                            }
+                        }
+                    });
+                },
+                
+                startRealtimeUpdates() {
+                    // Simulate real-time data updates
+                    setInterval(() => {
+                        // Add new activity
+                        const activities = [
+                            'ใบสมัครใหม่จากเกษตรกร',
+                            'การชำระเงินเสร็จสิ้น',
+                            'การตรวจสอบเอกสารเสร็จสิ้น',
+                            'การออกใบรับรองเสร็จสิ้น'
+                        ];
+                        
+                        const newActivity = {
+                            id: Date.now(),
+                            type: ['application', 'payment', 'audit', 'certificate'][Math.floor(Math.random() * 4)],
+                            message: activities[Math.floor(Math.random() * activities.length)],
+                            timestamp: new Date(),
+                            status: ['pending', 'completed'][Math.floor(Math.random() * 2)]
+                        };
+                        
+                        this.realtimeActivities.unshift(newActivity);
+                        if (this.realtimeActivities.length > 10) {
+                            this.realtimeActivities.pop();
+                        }
+                        
+                        // Update metrics randomly
+                        if (Math.random() > 0.7) {
+                            this.metrics.applications.total += Math.floor(Math.random() * 3);
+                            this.metrics.revenue.total += Math.floor(Math.random() * 50000);
+                        }
+                        
+                    }, 10000); // Update every 10 seconds
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

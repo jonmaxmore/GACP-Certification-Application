@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GACP Platform - หน้าการใช้งานจริง</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+      }
+
+      .demo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      .demo-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+
+      .demo-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .card-icon {
+        font-size: 1.8rem;
+        margin-right: 15px;
+      }
+
+      .card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .demo-content {
+        margin-bottom: 20px;
+      }
+
+      .api-endpoint {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+        border-left: 4px solid #3b82f6;
+      }
+
+      .endpoint-method {
+        display: inline-block;
+        background: #3b82f6;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-right: 10px;
+      }
+
+      .endpoint-method.post {
+        background: #10b981;
+      }
+
+      .endpoint-url {
+        font-family: 'Courier New', monospace;
+        color: #374151;
+        font-weight: 500;
+      }
+
+      .endpoint-description {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-top: 8px;
+      }
+
+      .test-button {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin: 5px;
+      }
+
+      .test-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .test-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .result-container {
+        background: #1f2937;
+        color: #f9fafb;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        max-height: 300px;
+        overflow-y: auto;
+        display: none;
+      }
+
+      .result-container.show {
+        display: block;
+      }
+
+      .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+
+      .status-success {
+        background-color: #10b981;
+        animation: pulse 2s infinite;
+      }
+
+      .status-error {
+        background-color: #ef4444;
+      }
+
+      .status-loading {
+        background-color: #f59e0b;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .monitoring-section {
+        grid-column: 1 / -1;
+      }
+
+      .live-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .metric-box {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        border: 2px solid #e5e7eb;
+      }
+
+      .metric-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #3b82f6;
+        margin-bottom: 5px;
+      }
+
+      .metric-label {
+        font-size: 0.9rem;
+        color: #6b7280;
+      }
+
+      .footer {
+        text-align: center;
+        color: white;
+        margin-top: 30px;
+        opacity: 0.8;
+      }
+
+      .compliance-badges {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+
+      .badge {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #333;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🌿 GACP Platform - หน้าการใช้งานจริง</h1>
+        <p>ระบบมาตรฐาน WHO-GACP สำหรับการปลูกกัญชาเพื่อการแพทย์</p>
+
+        <div class="compliance-badges">
+          <div class="badge">✅ WHO-GACP 2024.1</div>
+          <div class="badge">✅ Thai-FDA Certified</div>
+          <div class="badge">✅ ASEAN-TM Standard</div>
+          <div class="badge">✅ HACCP Methodology</div>
+        </div>
+      </div>
+
+      <div class="demo-grid">
+        <!-- GACP Workflow Demo -->
+        <div class="demo-card">
+          <div class="card-header">
+            <span class="card-icon">🔄</span>
+            <div class="card-title">GACP Workflow Management</div>
+          </div>
+
+          <div class="demo-content">
+            <div class="api-endpoint">
+              <span class="endpoint-method">GET</span>
+              <span class="endpoint-url">/api/gacp/workflow</span>
+              <div class="endpoint-description">
+                ข้อมูล workflow ทั้งหมด 17 ขั้นตอนตามมาตรฐาน WHO-GACP
+              </div>
+            </div>
+
+            <button class="test-button" onclick="testWorkflowAPI()">
+              <span id="workflow-status" class="status-indicator"></span>
+              ทดสอบ Workflow API
+            </button>
+
+            <div id="workflow-result" class="result-container"></div>
+          </div>
+        </div>
+
+        <!-- CCP Framework Demo -->
+        <div class="demo-card">
+          <div class="card-header">
+            <span class="card-icon">🎯</span>
+            <div class="card-title">Critical Control Points (CCPs)</div>
+          </div>
+
+          <div class="demo-content">
+            <div class="api-endpoint">
+              <span class="endpoint-method">GET</span>
+              <span class="endpoint-url">/api/gacp/ccps</span>
+              <div class="endpoint-description">
+                จุดวิกฤต 8 จุดตาม HACCP methodology สำหรับการควบคุมคุณภาพ
+              </div>
+            </div>
+
+            <button class="test-button" onclick="testCCPsAPI()">
+              <span id="ccps-status" class="status-indicator"></span>
+              ทดสอบ CCPs API
+            </button>
+
+            <div id="ccps-result" class="result-container"></div>
+          </div>
+        </div>
+
+        <!-- Score Calculation Demo -->
+        <div class="demo-card">
+          <div class="card-header">
+            <span class="card-icon">📊</span>
+            <div class="card-title">Score Calculation System</div>
+          </div>
+
+          <div class="demo-content">
+            <div class="api-endpoint">
+              <span class="endpoint-method post">POST</span>
+              <span class="endpoint-url">/api/gacp/test/score-calculation</span>
+              <div class="endpoint-description">ระบบคำนวณคะแนนแบบถ่วงน้ำหนักตาม CCP framework</div>
+            </div>
+
+            <button class="test-button" onclick="testScoreCalculation()">
+              <span id="score-status" class="status-indicator"></span>
+              ทดสอบการคำนวณคะแนน
+            </button>
+
+            <div id="score-result" class="result-container"></div>
+          </div>
+        </div>
+
+        <!-- Compliance Framework Demo -->
+        <div class="demo-card">
+          <div class="card-header">
+            <span class="card-icon">📋</span>
+            <div class="card-title">Compliance Framework</div>
+          </div>
+
+          <div class="demo-content">
+            <div class="api-endpoint">
+              <span class="endpoint-method">GET</span>
+              <span class="endpoint-url">/api/gacp/compliance</span>
+              <div class="endpoint-description">
+                กรอบมาตรฐานการปฏิบัติตาม WHO-GACP, Thai-FDA, ASEAN-TM
+              </div>
+            </div>
+
+            <button class="test-button" onclick="testComplianceAPI()">
+              <span id="compliance-status" class="status-indicator"></span>
+              ทดสอบ Compliance API
+            </button>
+
+            <div id="compliance-result" class="result-container"></div>
+          </div>
+        </div>
+
+        <!-- System Monitoring Demo -->
+        <div class="demo-card monitoring-section">
+          <div class="card-header">
+            <span class="card-icon">🏥</span>
+            <div class="card-title">System Health Monitoring</div>
+          </div>
+
+          <div class="demo-content">
+            <div class="api-endpoint">
+              <span class="endpoint-method">GET</span>
+              <span class="endpoint-url">/api/monitoring/health</span>
+              <div class="endpoint-description">
+                ตรวจสอบสถานะระบบแบบ real-time รวมถึงฐานข้อมูลและ API performance
+              </div>
+            </div>
+
+            <button class="test-button" onclick="testSystemHealth()">
+              <span id="health-status" class="status-indicator"></span>
+              ตรวจสอบสถานะระบบ
+            </button>
+
+            <button class="test-button" onclick="openMonitoringDashboard()">
+              📊 เปิด Monitoring Dashboard
+            </button>
+
+            <div class="live-metrics" id="liveMetrics">
+              <!-- Live metrics will be populated here -->
+            </div>
+
+            <div id="health-result" class="result-container"></div>
+          </div>
+        </div>
+
+        <!-- API Documentation Demo -->
+        <div class="demo-card">
+          <div class="card-header">
+            <span class="card-icon">📚</span>
+            <div class="card-title">API Documentation</div>
+          </div>
+
+          <div class="demo-content">
+            <div class="api-endpoint">
+              <span class="endpoint-method">GET</span>
+              <span class="endpoint-url">/api/docs/docs</span>
+              <div class="endpoint-description">
+                เอกสาร API ฉบับสมบูรณ์พร้อม examples และ OpenAPI specification
+              </div>
+            </div>
+
+            <button class="test-button" onclick="testAPIDocs()">
+              <span id="docs-status" class="status-indicator"></span>
+              ดู API Documentation
+            </button>
+
+            <button class="test-button" onclick="openSwaggerUI()">🔧 เปิด Swagger UI</button>
+
+            <div id="docs-result" class="result-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>⚡ Powered by GACP Platform | 🔒 Enterprise Security | 📊 Real-time Monitoring</p>
+        <p>Last Updated: <span id="lastUpdated">--</span></p>
+      </div>
+    </div>
+
+    <script>
+      // Configuration
+      const API_BASE_URL = window.location.origin.includes('localhost')
+        ? 'http://localhost:3004'
+        : window.location.origin;
+
+      // Update last updated time
+      document.getElementById('lastUpdated').textContent = new Date().toLocaleString('th-TH');
+
+      // Utility functions
+      function setStatus(elementId, status) {
+        const element = document.getElementById(elementId);
+        element.className = 'status-indicator';
+
+        if (status === 'loading') {
+          element.classList.add('status-loading');
+        } else if (status === 'success') {
+          element.classList.add('status-success');
+        } else if (status === 'error') {
+          element.classList.add('status-error');
+        }
+      }
+
+      function showResult(containerId, data, success = true) {
+        const container = document.getElementById(containerId);
+        const jsonString = JSON.stringify(data, null, 2);
+
+        container.innerHTML = success
+          ? `<pre style="color: #10b981;">${jsonString}</pre>`
+          : `<pre style="color: #ef4444;">${jsonString}</pre>`;
+
+        container.classList.add('show');
+      }
+
+      async function makeAPICall(endpoint, method = 'GET', data = null) {
+        const options = {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        };
+
+        if (data) {
+          options.body = JSON.stringify(data);
+        }
+
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+        const result = await response.json();
+
+        return {
+          success: response.ok,
+          status: response.status,
+          data: result,
+        };
+      }
+
+      // API Test Functions
+      async function testWorkflowAPI() {
+        setStatus('workflow-status', 'loading');
+
+        try {
+          const result = await makeAPICall('/api/gacp/workflow');
+          setStatus('workflow-status', result.success ? 'success' : 'error');
+          showResult('workflow-result', result.data, result.success);
+        } catch (error) {
+          setStatus('workflow-status', 'error');
+          showResult('workflow-result', { error: error.message }, false);
+        }
+      }
+
+      async function testCCPsAPI() {
+        setStatus('ccps-status', 'loading');
+
+        try {
+          const result = await makeAPICall('/api/gacp/ccps');
+          setStatus('ccps-status', result.success ? 'success' : 'error');
+          showResult('ccps-result', result.data, result.success);
+        } catch (error) {
+          setStatus('ccps-status', 'error');
+          showResult('ccps-result', { error: error.message }, false);
+        }
+      }
+
+      async function testScoreCalculation() {
+        setStatus('score-status', 'loading');
+
+        const testScores = {
+          scores: {
+            CCP01: 85, // Soil Quality Management
+            CCP02: 90, // Water Quality Control
+            CCP03: 80, // Seed/Propagation Material
+            CCP04: 88, // Cultivation Practices
+            CCP05: 92, // Harvesting Procedures
+            CCP06: 78, // Post-harvest Handling
+            CCP07: 85, // Storage and Packaging
+            CCP08: 87, // Documentation and Traceability
+          },
+        };
+
+        try {
+          const result = await makeAPICall('/api/gacp/test/score-calculation', 'POST', testScores);
+          setStatus('score-status', result.success ? 'success' : 'error');
+          showResult('score-result', result.data, result.success);
+        } catch (error) {
+          setStatus('score-status', 'error');
+          showResult('score-result', { error: error.message }, false);
+        }
+      }
+
+      async function testComplianceAPI() {
+        setStatus('compliance-status', 'loading');
+
+        try {
+          const result = await makeAPICall('/api/gacp/compliance');
+          setStatus('compliance-status', result.success ? 'success' : 'error');
+          showResult('compliance-result', result.data, result.success);
+        } catch (error) {
+          setStatus('compliance-status', 'error');
+          showResult('compliance-result', { error: error.message }, false);
+        }
+      }
+
+      async function testSystemHealth() {
+        setStatus('health-status', 'loading');
+
+        try {
+          const result = await makeAPICall('/api/monitoring/health');
+          setStatus('health-status', result.success ? 'success' : 'error');
+          showResult('health-result', result.data, result.success);
+
+          // Update live metrics
+          if (result.success && result.data.data) {
+            updateLiveMetrics(result.data.data);
+          }
+        } catch (error) {
+          setStatus('health-status', 'error');
+          showResult('health-result', { error: error.message }, false);
+        }
+      }
+
+      async function testAPIDocs() {
+        setStatus('docs-status', 'loading');
+
+        try {
+          const result = await makeAPICall('/api/docs/docs');
+          setStatus('docs-status', result.success ? 'success' : 'error');
+          showResult('docs-result', result.data, result.success);
+        } catch (error) {
+          setStatus('docs-status', 'error');
+          showResult('docs-result', { error: error.message }, false);
+        }
+      }
+
+      function updateLiveMetrics(healthData) {
+        const metricsContainer = document.getElementById('liveMetrics');
+
+        const metrics = [
+          {
+            label: 'API Status',
+            value: healthData.database?.status?.toUpperCase() || 'N/A',
+          },
+          {
+            label: 'Response Time',
+            value: healthData.database?.responseTime
+              ? `${healthData.database.responseTime}ms`
+              : 'N/A',
+          },
+          {
+            label: 'Success Rate',
+            value: healthData.database?.successRate ? `${healthData.database.successRate}%` : 'N/A',
+          },
+          {
+            label: 'Memory Usage',
+            value: healthData.system?.memory?.heapUsed
+              ? `${Math.round(healthData.system.memory.heapUsed / 1024 / 1024)}MB`
+              : 'N/A',
+          },
+          {
+            label: 'Uptime',
+            value: healthData.api?.uptime
+              ? `${Math.floor(healthData.api.uptime / 3600)}h ${Math.floor((healthData.api.uptime % 3600) / 60)}m`
+              : 'N/A',
+          },
+          {
+            label: 'Environment',
+            value: healthData.api?.environment?.toUpperCase() || 'N/A',
+          },
+        ];
+
+        metricsContainer.innerHTML = metrics
+          .map(
+            metric => `
+                <div class="metric-box">
+                    <div class="metric-value">${metric.value}</div>
+                    <div class="metric-label">${metric.label}</div>
+                </div>
+            `
+          )
+          .join('');
+      }
+
+      function openMonitoringDashboard() {
+        window.open(`${API_BASE_URL}/monitoring-dashboard.html`, '_blank');
+      }
+
+      function openSwaggerUI() {
+        window.open(`${API_BASE_URL}/api/docs/openapi`, '_blank');
+      }
+
+      // Auto-refresh system health every 30 seconds
+      setInterval(() => {
+        testSystemHealth();
+      }, 30000);
+
+      // Initial health check
+      setTimeout(() => {
+        testSystemHealth();
+      }, 1000);
+    </script>
+  </body>
+</html>

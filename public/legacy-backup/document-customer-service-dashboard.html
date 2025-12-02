@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document & Customer Service Dashboard - แดชบอร์ดเอกสารและลูกค้าสัมพันธ์</title>
+    <style>
+        :root {
+            --primary-color: #1f2937;
+            --primary-dark: #111827;
+            --secondary-color: #f9fafb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #06b6d4;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .mode-button {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-button.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--secondary-color);
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-complete {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-urgent {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-open {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-closed {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .tools-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .tool-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .tool-btn:hover {
+            background: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div>📋</div>
+                <div>
+                    <h1>Document & Customer Service Dashboard</h1>
+                    <p style="opacity: 0.9; font-size: 0.875rem;">แดชบอร์ดเอกสารและลูกค้าสัมพันธ์</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <div id="userName">นางสมใจ ใสใส</div>
+                    <div style="opacity: 0.8; font-size: 0.875rem;" id="userRole">เจ้าหน้าที่เอกสารและลูกค้าสัมพันธ์</div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Mode Toggle -->
+        <div class="mode-toggle">
+            <button class="mode-button active" onclick="switchMode('document')">
+                📋 โหมดตรวจเอกสาร
+            </button>
+            <button class="mode-button" onclick="switchMode('customer')">
+                🎧 โหมดลูกค้าสัมพันธ์
+            </button>
+        </div>
+
+        <!-- Document Mode -->
+        <div class="mode-content active" id="document-mode">
+            <!-- Document Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingDocs">12</div>
+                    <div class="stat-label">เอกสารรอตรวจ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="completedToday">8</div>
+                    <div class="stat-label">ตรวจเสร็จวันนี้</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="averageTime">2.5</div>
+                    <div class="stat-label">ชั่วโมงเฉลี่ย/เอกสาร</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="accuracy">96%</div>
+                    <div class="stat-label">ความถูกต้อง</div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout">
+                <!-- Document Queue -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">คิวเอกสารรอตรวจสอบ</h3>
+                        <button class="btn btn-primary">รีเฟรช</button>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>รหัสใบสมัคร</th>
+                                <th>ชื่อเกษตรกร</th>
+                                <th>ประเภทใบอนุญาต</th>
+                                <th>วันที่ส่ง</th>
+                                <th>สถานะ</th>
+                                <th>การดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>GACP2025001</strong></td>
+                                <td>นายสมชาย ปลูกผัก</td>
+                                <td>ปลูกขมิ้นชัน</td>
+                                <td>28/09/2025</td>
+                                <td><span class="status-badge status-pending">รอตรวจ</span></td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="reviewDocument('GACP2025001')">ตรวจสอบ</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>GACP2025002</strong></td>
+                                <td>นางมาลี ขิงดี</td>
+                                <td>ปลูกขิง</td>
+                                <td>29/09/2025</td>
+                                <td><span class="status-badge status-urgent">เร่งด่วน</span></td>
+                                <td>
+                                    <button class="btn btn-warning" onclick="reviewDocument('GACP2025002')">ตรวจด่วน</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>GACP2025003</strong></td>
+                                <td>นายวิชัย พลายงาม</td>
+                                <td>ปลูกพลาย</td>
+                                <td>30/09/2025</td>
+                                <td><span class="status-badge status-complete">ตรวจแล้ว</span></td>
+                                <td>
+                                    <button class="btn btn-success" onclick="viewReport('GACP2025003')">ดูรายงาน</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Document Tools -->
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">เครื่องมือตรวจเอกสาร</h3>
+                        </div>
+                        
+                        <div class="tools-grid">
+                            <a href="#" class="tool-btn" onclick="openChecklist()">
+                                ✅ เปิด Checklist มาตรฐาน
+                            </a>
+                            <a href="#" class="tool-btn" onclick="searchDatabase()">
+                                🔍 ค้นหาฐานข้อมูล
+                            </a>
+                            <a href="#" class="tool-btn" onclick="viewTemplates()">
+                                📄 เทมเพลตรายงาน
+                            </a>
+                            <a href="#" class="tool-btn" onclick="uploadDocument()">
+                                📤 อัปโหลดเอกสาร
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Service Mode -->
+        <div class="mode-content" id="customer-mode">
+            <!-- Customer Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="openTickets">15</div>
+                    <div class="stat-label">ปัญหาที่เปิดอยู่</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="closedToday">12</div>
+                    <div class="stat-label">ปิดปัญหาวันนี้</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="responseTime">1.8</div>
+                    <div class="stat-label">ชั่วโมงตอบกลับ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="satisfaction">95%</div>
+                    <div class="stat-label">ความพึงพอใจ</div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout">
+                <!-- Support Tickets -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">ตั๋วสนับสนุนลูกค้า</h3>
+                        <button class="btn btn-primary">รีเฟรช</button>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>รหัสปัญหา</th>
+                                <th>ลูกค้า</th>
+                                <th>หมวดหมู่</th>
+                                <th>ความเร่งด่วน</th>
+                                <th>สถานะ</th>
+                                <th>การดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>#SUPP001</strong></td>
+                                <td>นายสมชาย ปลูกผัก</td>
+                                <td>ปัญหาการชำระเงิน</td>
+                                <td><span class="status-badge status-urgent">เร่งด่วน</span></td>
+                                <td><span class="status-badge status-open">เปิด</span></td>
+                                <td>
+                                    <button class="btn btn-warning" onclick="respondTicket('SUPP001')">ตอบกลับ</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>#SUPP002</strong></td>
+                                <td>นางมาลี ขิงดี</td>
+                                <td>สอบถามขั้นตอน</td>
+                                <td><span class="status-badge status-pending">ปกติ</span></td>
+                                <td><span class="status-badge status-open">เปิด</span></td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="respondTicket('SUPP002')">ตอบกลับ</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>#SUPP003</strong></td>
+                                <td>นายวิชัย พลายงาม</td>
+                                <td>ขอใบรับรอง</td>
+                                <td><span class="status-badge status-complete">เสร็จสิ้น</span></td>
+                                <td><span class="status-badge status-closed">ปิด</span></td>
+                                <td>
+                                    <button class="btn btn-success" onclick="viewHistory('SUPP003')">ดูประวัติ</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Customer Tools -->
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">เครื่องมือลูกค้าสัมพันธ์</h3>
+                        </div>
+                        
+                        <div class="tools-grid">
+                            <a href="#" class="tool-btn" onclick="newTicket()">
+                                📞 สร้างปัญหาใหม่
+                            </a>
+                            <a href="#" class="tool-btn" onclick="knowledgeBase()">
+                                📚 ฐานความรู้
+                            </a>
+                            <a href="#" class="tool-btn" onclick="customerHistory()">
+                                👤 ประวัติลูกค้า
+                            </a>
+                            <a href="#" class="tool-btn" onclick="sendNotification()">
+                                📧 ส่งการแจ้งเตือน
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+        let currentMode = 'document';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                
+                if (currentUser.organizationType !== 'document_customer_service') {
+                    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+                    redirectToLogin();
+                    return;
+                }
+                
+                updateUserDisplay();
+            }
+
+            await loadDashboardData();
+        });
+
+        function switchMode(mode) {
+            // Update buttons
+            document.querySelectorAll('.mode-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.mode-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(mode + '-mode').classList.add('active');
+
+            currentMode = mode;
+            loadModeData(mode);
+        }
+
+        function loadModeData(mode) {
+            if (mode === 'document') {
+                updateDocumentStats();
+            } else {
+                updateCustomerStats();
+            }
+        }
+
+        function updateDocumentStats() {
+            document.getElementById('pendingDocs').textContent = '12';
+            document.getElementById('completedToday').textContent = '8';
+            document.getElementById('averageTime').textContent = '2.5';
+            document.getElementById('accuracy').textContent = '96%';
+        }
+
+        function updateCustomerStats() {
+            document.getElementById('openTickets').textContent = '15';
+            document.getElementById('closedToday').textContent = '12';
+            document.getElementById('responseTime').textContent = '1.8';
+            document.getElementById('satisfaction').textContent = '95%';
+        }
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                updateDocumentStats();
+                updateCustomerStats();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Document Functions
+        function reviewDocument(docId) {
+            alert(`ตรวจสอบเอกสาร: ${docId}\n\nการตรวจสอบ:\n• ความครบถ้วนของเอกสาร\n• ความถูกต้องตามมาตรฐาน\n• การลงนามและวันที่\n• เอกสารแนบประกอบ`);
+        }
+
+        function viewReport(docId) {
+            alert(`ดูรายงานการตรวจสอบ: ${docId}\n\nรายงาน:\n• ผลการตรวจสอบ: ผ่าน\n• ข้อบกพร่อง: ไม่มี\n• คำแนะนำ: ส่งต่อไปยังขั้นตอนถัดไป\n• ผู้ตรวจ: ${currentUser?.firstName || 'เจ้าหน้าที่'}`);
+        }
+
+        function openChecklist() {
+            alert('เปิด Checklist มาตรฐาน:\n\n✅ เอกสารคำขอ\n✅ สำเนาบัตรประชาชน\n✅ หนังสือรับรองการปลูก\n✅ แผนที่แปลงปลูก\n✅ รายงานดิน/น้ำ\n✅ ใบอนุญาตที่เกี่ยวข้อง');
+        }
+
+        function searchDatabase() {
+            alert('ค้นหาฐานข้อมูล:\n\n🔍 ค้นหาเกษตรกร\n🔍 ประวัติการสมัคร\n🔍 เอกสารที่เกี่ยวข้อง\n🔍 กฎระเบียบและมาตรฐาน');
+        }
+
+        function viewTemplates() {
+            alert('เทมเพลตรายงาน:\n\n📄 รายงานการตรวจเอกสาร\n📄 บันทึกข้อบกพร่อง\n📄 คำแนะนำแก้ไข\n📄 ใบส่งต่อขั้นตอนถัดไป');
+        }
+
+        function uploadDocument() {
+            alert('อัปโหลดเอกสาร:\n\n📤 อัปโหลดเอกสารเพิ่มเติม\n📤 ส่งรายงานการตรวจสอบ\n📤 แนบไฟล์ประกอบ\n📤 อัปเดตสถานะ');
+        }
+
+        // Customer Service Functions
+        function respondTicket(ticketId) {
+            alert(`ตอบกลับปัญหา: ${ticketId}\n\nเครื่องมือตอบกลับ:\n📞 โทรศัพท์\n📧 อีเมล\n💬 แชท\n📱 SMS\n\nรูปแบบการตอบ:\n• แก้ไขปัญหาทันที\n• ส่งต่อผู้เชี่ยวชาญ\n• นัดหมายติดตาม`);
+        }
+
+        function viewHistory(ticketId) {
+            alert(`ประวัติปัญหา: ${ticketId}\n\nรายละเอียด:\n• สร้างเมื่อ: 25/09/2025\n• ประเภท: ขอใบรับรอง\n• ผู้รับผิดชอบ: ${currentUser?.firstName || 'เจ้าหน้าที่'}\n• สถานะ: ปิดแล้ว\n• ความพึงพอใจ: 5/5`);
+        }
+
+        function newTicket() {
+            alert('สร้างปัญหาใหม่:\n\n📋 กรอกรายละเอียดปัญหา\n👤 ระบุข้อมูลลูกค้า\n🏷️ เลือกหมวดหมู่\n⚡ กำหนดความเร่งด่วน\n📄 แนบเอกสารประกอบ');
+        }
+
+        function knowledgeBase() {
+            alert('ฐานความรู้:\n\n📚 คู่มือการใช้งาน\n❓ คำถามที่พบบ่อย\n📞 ข้อมูลติดต่อ\n📋 ขั้นตอนการดำเนินการ\n🔧 วิธีแก้ปัญหาเบื้องต้น');
+        }
+
+        function customerHistory() {
+            alert('ประวัติลูกค้า:\n\n👤 ข้อมูลส่วนตัว\n📋 ประวัติการสมัคร\n💬 ประวัติการติดต่อ\n📊 สถิติการใช้บริการ\n⭐ คะแนนความพึงพอใจ');
+        }
+
+        function sendNotification() {
+            alert('ส่งการแจ้งเตือน:\n\n📧 ส่งอีเมล\n📱 ส่ง SMS\n🔔 แจ้งเตือนในระบบ\n📞 โทรติดตาม\n📄 ส่งเอกสาร');
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/auth.html';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+    </script>
+</body>
+</html>

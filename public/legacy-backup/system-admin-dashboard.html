@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTAM System Admin Dashboard - แดชบอร์ดผู้ดูแลระบบ</title>
+    <style>
+        :root {
+            --primary-color: #ef4444;
+            --primary-dark: #dc2626;
+            --secondary-color: #fef2f2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #06b6d4;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .system-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .system-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .system-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .system-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .system-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--text-dark);
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .tool-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tool-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .tool-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .tool-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: white;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .tool-btn:hover {
+            background: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+
+        @media (max-width: 1024px) {
+            .system-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .system-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div>⚙️</div>
+                <div>
+                    <h1>System Admin Dashboard</h1>
+                    <p style="opacity: 0.9; font-size: 0.875rem;">แดชบอร์ดผู้ดูแลระบบ</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <div id="userName">นายเทคนิค ระบบใหญ่</div>
+                    <div style="opacity: 0.8; font-size: 0.875rem;" id="userRole">ผู้ดูแลระบบ</div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- System Status Overview -->
+        <div class="system-grid">
+            <div class="system-card">
+                <div class="system-number" id="serverUptime">99.9%</div>
+                <div class="system-label">Uptime เซิร์ฟเวอร์</div>
+            </div>
+            <div class="system-card">
+                <div class="system-number" id="activeUsers">156</div>
+                <div class="system-label">ผู้ใช้ออนไลน์</div>
+            </div>
+            <div class="system-card">
+                <div class="system-number" id="systemLoad">45%</div>
+                <div class="system-label">Load เฉลี่ย</div>
+            </div>
+            <div class="system-card">
+                <div class="system-number" id="storageUsed">67%</div>
+                <div class="system-label">การใช้พื้นที่</div>
+            </div>
+        </div>
+
+        <!-- System Administration Tools -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">เครื่องมือดูแลระบบ</h3>
+            </div>
+            
+            <div class="tool-grid">
+                <!-- Server Management -->
+                <div class="tool-section">
+                    <h4 class="tool-title">🖥️ การจัดการเซิร์ฟเวอร์</h4>
+                    <div class="tool-list">
+                        <a href="#" class="tool-btn" onclick="serverMonitoring()">
+                            📊 ตรวจสอบสถานะเซิร์ฟเวอร์
+                        </a>
+                        <a href="#" class="tool-btn" onclick="serviceManagement()">
+                            🔧 จัดการ Services
+                        </a>
+                        <a href="#" class="tool-btn" onclick="logAnalysis()">
+                            📝 วิเคราะห์ Log
+                        </a>
+                        <a href="#" class="tool-btn" onclick="performanceTuning()">
+                            ⚡ ปรับแต่งประสิทธิภาพ
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Database Management -->
+                <div class="tool-section">
+                    <h4 class="tool-title">🗄️ การจัดการฐานข้อมูล</h4>
+                    <div class="tool-list">
+                        <a href="#" class="tool-btn" onclick="databaseBackup()">
+                            💾 สำรองข้อมูล
+                        </a>
+                        <a href="#" class="tool-btn" onclick="queryOptimization()">
+                            🔍 ปรับแต่ง Query
+                        </a>
+                        <a href="#" class="tool-btn" onclick="indexManagement()">
+                            📑 จัดการ Index
+                        </a>
+                        <a href="#" class="tool-btn" onclick="dataCleanup()">
+                            🧹 ทำความสะอาดข้อมูล
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Security Management -->
+                <div class="tool-section">
+                    <h4 class="tool-title">🔒 การจัดการความปลอดภัย</h4>
+                    <div class="tool-list">
+                        <a href="#" class="tool-btn" onclick="securityScan()">
+                            🛡️ สแกนความปลอดภัย
+                        </a>
+                        <a href="#" class="tool-btn" onclick="accessControl()">
+                            🔐 ควบคุมการเข้าถึง
+                        </a>
+                        <a href="#" class="tool-btn" onclick="auditLogs()">
+                            📋 ตรวจสอบ Audit
+                        </a>
+                        <a href="#" class="tool-btn" onclick="firewallConfig()">
+                            🔥 ตั้งค่า Firewall
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Network Management -->
+                <div class="tool-section">
+                    <h4 class="tool-title">🌐 การจัดการเครือข่าย</h4>
+                    <div class="tool-list">
+                        <a href="#" class="tool-btn" onclick="networkMonitoring()">
+                            📡 ตรวจสอบเครือข่าย
+                        </a>
+                        <a href="#" class="tool-btn" onclick="bandwidthAnalysis()">
+                            📈 วิเคราะห์ Bandwidth
+                        </a>
+                        <a href="#" class="tool-btn" onclick="loadBalancer()">
+                            ⚖️ Load Balancer
+                        </a>
+                        <a href="#" class="tool-btn" onclick="vpnManagement()">
+                            🔗 จัดการ VPN
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Application Management -->
+                <div class="tool-section">
+                    <h4 class="tool-title">📱 การจัดการแอปพลิเคชัน</h4>
+                    <div class="tool-list">
+                        <a href="#" class="tool-btn" onclick="deploymentManager()">
+                            🚀 Deploy แอปพลิเคชัน
+                        </a>
+                        <a href="#" class="tool-btn" onclick="versionControl()">
+                            📝 ควบคุมเวอร์ชัน
+                        </a>
+                        <a href="#" class="tool-btn" onclick="configManagement()">
+                            ⚙️ จัดการ Config
+                        </a>
+                        <a href="#" class="tool-btn" onclick="apiMonitoring()">
+                            🔌 ตรวจสอบ API
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Maintenance Tools -->
+                <div class="tool-section">
+                    <h4 class="tool-title">🔧 เครื่องมือบำรุงรักษา</h4>
+                    <div class="tool-list">
+                        <a href="#" class="tool-btn" onclick="scheduledTasks()">
+                            ⏰ งานตามกำหนดเวลา
+                        </a>
+                        <a href="#" class="tool-btn" onclick="systemCleanup()">
+                            🧼 ทำความสะอาดระบบ
+                        </a>
+                        <a href="#" class="tool-btn" onclick="updateManager()">
+                            🔄 จัดการอัปเดต
+                        </a>
+                        <a href="#" class="tool-btn" onclick="healthCheck()">
+                            ❤️ ตรวจสุขภาพระบบ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                
+                if (currentUser.organizationType !== 'system_admin') {
+                    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+                    redirectToLogin();
+                    return;
+                }
+                
+                updateUserDisplay();
+            }
+
+            await loadDashboardData();
+        });
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                updateSystemStatus();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateSystemStatus() {
+            document.getElementById('serverUptime').textContent = '99.9%';
+            document.getElementById('activeUsers').textContent = '156';
+            document.getElementById('systemLoad').textContent = '45%';
+            document.getElementById('storageUsed').textContent = '67%';
+        }
+
+        // System Management Functions
+        function serverMonitoring() {
+            alert('ตรวจสอบสถานะเซิร์ฟเวอร์:\n\n• CPU, RAM, Disk usage\n• Network performance\n• Service status\n• Error monitoring');
+        }
+
+        function serviceManagement() {
+            alert('จัดการ Services:\n\n• Start/Stop/Restart services\n• Service dependencies\n• Auto-start configuration\n• Health monitoring');
+        }
+
+        function logAnalysis() {
+            alert('วิเคราะห์ Log:\n\n• System logs\n• Application logs\n• Error tracking\n• Performance analysis');
+        }
+
+        function performanceTuning() {
+            alert('ปรับแต่งประสิทธิภาพ:\n\n• Resource optimization\n• Cache configuration\n• Load balancing\n• Performance metrics');
+        }
+
+        function databaseBackup() {
+            alert('สำรองข้อมูล:\n\n• Automated backup\n• Point-in-time recovery\n• Backup verification\n• Disaster recovery');
+        }
+
+        function queryOptimization() {
+            alert('ปรับแต่ง Query:\n\n• Slow query analysis\n• Index recommendations\n• Query plan optimization\n• Performance monitoring');
+        }
+
+        function indexManagement() {
+            alert('จัดการ Index:\n\n• Index analysis\n• Rebuild/reorganize\n• Usage statistics\n• Performance impact');
+        }
+
+        function dataCleanup() {
+            alert('ทำความสะอาดข้อมูล:\n\n• Remove old data\n• Archive logs\n• Compress files\n• Free up space');
+        }
+
+        function securityScan() {
+            alert('สแกนความปลอดภัย:\n\n• Vulnerability assessment\n• Security patches\n• Threat detection\n• Compliance check');
+        }
+
+        function accessControl() {
+            alert('ควบคุมการเข้าถึง:\n\n• User permissions\n• Role management\n• Access logs\n• Authentication');
+        }
+
+        function auditLogs() {
+            alert('ตรวจสอบ Audit:\n\n• User activities\n• System changes\n• Security events\n• Compliance reports');
+        }
+
+        function firewallConfig() {
+            alert('ตั้งค่า Firewall:\n\n• Rule management\n• Port configuration\n• Traffic monitoring\n• Intrusion detection');
+        }
+
+        function networkMonitoring() {
+            alert('ตรวจสอบเครือข่าย:\n\n• Bandwidth usage\n• Connection status\n• Latency monitoring\n• Network topology');
+        }
+
+        function bandwidthAnalysis() {
+            alert('วิเคราะห์ Bandwidth:\n\n• Traffic patterns\n• Peak usage times\n• Application usage\n• Capacity planning');
+        }
+
+        function loadBalancer() {
+            alert('Load Balancer:\n\n• Server distribution\n• Health checks\n• Failover configuration\n• Performance metrics');
+        }
+
+        function vpnManagement() {
+            alert('จัดการ VPN:\n\n• User connections\n• Access policies\n• Security protocols\n• Connection logs');
+        }
+
+        function deploymentManager() {
+            alert('Deploy แอปพลิเคชัน:\n\n• Automated deployment\n• Rollback capabilities\n• Environment management\n• Release tracking');
+        }
+
+        function versionControl() {
+            alert('ควบคุมเวอร์ชัน:\n\n• Code versioning\n• Branch management\n• Merge conflicts\n• Release management');
+        }
+
+        function configManagement() {
+            alert('จัดการ Config:\n\n• Configuration files\n• Environment variables\n• Settings management\n• Version control');
+        }
+
+        function apiMonitoring() {
+            alert('ตรวจสอบ API:\n\n• Response times\n• Error rates\n• Usage statistics\n• Performance metrics');
+        }
+
+        function scheduledTasks() {
+            alert('งานตามกำหนดเวลา:\n\n• Cron jobs\n• Scheduled maintenance\n• Automated tasks\n• Task monitoring');
+        }
+
+        function systemCleanup() {
+            alert('ทำความสะอาดระบบ:\n\n• Temporary files\n• Cache cleanup\n• Log rotation\n• Disk cleanup');
+        }
+
+        function updateManager() {
+            alert('จัดการอัปเดต:\n\n• System updates\n• Security patches\n• Application updates\n• Update scheduling');
+        }
+
+        function healthCheck() {
+            alert('ตรวจสุขภาพระบบ:\n\n• System diagnostics\n• Performance metrics\n• Resource usage\n• Problem detection');
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/auth.html';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+    </script>
+</body>
+</html>

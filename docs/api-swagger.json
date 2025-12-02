@@ -1,0 +1,391 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "GACP Certification System API",
+    "version": "1.0.0",
+    "description": "RESTful API for Good Agricultural and Collection Practices (GACP) certification system management",
+    "contact": {
+      "name": "GACP Development Team",
+      "email": "dev@gacp-system.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "API Version 1.0"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register new user",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegistration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "409": {
+            "description": "User already exists"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "User login",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLogin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/applications": {
+      "get": {
+        "summary": "Get all applications",
+        "tags": ["Applications"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10 }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["draft", "submitted", "reviewed", "approved", "rejected"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applications retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationList"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create new application",
+        "tags": ["Applications"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Application created successfully"
+          }
+        }
+      }
+    },
+    "/certificates": {
+      "get": {
+        "summary": "Get all certificates",
+        "tags": ["Certificates"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Certificates retrieved successfully"
+          }
+        }
+      }
+    },
+    "/certificates/verify/{certificateNumber}": {
+      "get": {
+        "summary": "Verify certificate (public endpoint)",
+        "tags": ["Certificates"],
+        "parameters": [
+          {
+            "name": "certificateNumber",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Certificate verification result"
+          }
+        }
+      }
+    },
+    "/audits": {
+      "get": {
+        "summary": "Get all audits",
+        "tags": ["Audits"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Audits retrieved successfully"
+          }
+        }
+      }
+    },
+    "/payments/initiate": {
+      "post": {
+        "summary": "Initiate payment",
+        "tags": ["Payments"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentInitiation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment initiated successfully"
+          }
+        }
+      }
+    },
+    "/surveys/regions": {
+      "get": {
+        "summary": "Get survey regions (public)",
+        "tags": ["Surveys"],
+        "responses": {
+          "200": {
+            "description": "Survey regions retrieved successfully"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "UserRegistration": {
+        "type": "object",
+        "required": ["username", "email", "password", "role"],
+        "properties": {
+          "username": { "type": "string", "minLength": 3 },
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string", "minLength": 8 },
+          "role": { "type": "string", "enum": ["farmer", "auditor", "director", "admin"] },
+          "fullName": { "type": "string" },
+          "phoneNumber": { "type": "string" },
+          "address": { "type": "string" }
+        }
+      },
+      "UserLogin": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "message": { "type": "string" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": { "$ref": "#/components/schemas/User" },
+              "token": { "type": "string" },
+              "refreshToken": { "type": "string" }
+            }
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "username": { "type": "string" },
+          "email": { "type": "string" },
+          "role": { "type": "string" },
+          "fullName": { "type": "string" },
+          "phoneNumber": { "type": "string" },
+          "isActive": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ApplicationCreate": {
+        "type": "object",
+        "required": ["farmName", "cropType", "farmSize", "location"],
+        "properties": {
+          "farmName": { "type": "string" },
+          "cropType": { "type": "string" },
+          "farmSize": { "type": "number" },
+          "location": { "type": "string" },
+          "practicesImplemented": { "type": "array", "items": { "type": "string" } },
+          "previousCertifications": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "ApplicationList": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "applications": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/Application" }
+              },
+              "pagination": { "$ref": "#/components/schemas/Pagination" }
+            }
+          }
+        }
+      },
+      "Application": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "farmName": { "type": "string" },
+          "cropType": { "type": "string" },
+          "farmSize": { "type": "number" },
+          "location": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["draft", "submitted", "reviewed", "approved", "rejected"]
+          },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "PaymentInitiation": {
+        "type": "object",
+        "required": ["applicationId", "amount"],
+        "properties": {
+          "applicationId": { "type": "string" },
+          "amount": { "type": "number" },
+          "currency": { "type": "string", "default": "THB" },
+          "paymentMethod": {
+            "type": "string",
+            "enum": ["credit_card", "bank_transfer", "mobile_payment"]
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": { "type": "integer" },
+          "limit": { "type": "integer" },
+          "total": { "type": "integer" },
+          "totalPages": { "type": "integer" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" },
+              "details": { "type": "object" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "User authentication and authorization"
+    },
+    {
+      "name": "Applications",
+      "description": "GACP certification applications management"
+    },
+    {
+      "name": "Certificates",
+      "description": "Certificate management and verification"
+    },
+    {
+      "name": "Audits",
+      "description": "Field audit management"
+    },
+    {
+      "name": "Payments",
+      "description": "Payment processing and management"
+    },
+    {
+      "name": "Surveys",
+      "description": "Farmer survey management"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+# Production Docker Multi-Stage Build for Backend
+# Optimized for size and security
+
+# Stage 1: Dependencies
+FROM node:22-alpine AS deps
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    libc6-compat
+
+# Copy backend package files only
+COPY apps/backend/package.json ./
+# Install production dependencies and rebuild native modules
+RUN npm install --only=production --ignore-scripts && \
+    npm rebuild bcrypt sharp
+
+# Stage 2: Runner (Production)
+FROM node:22-alpine AS runner
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 expressjs
+
+# Install production dependencies for image processing
+RUN apk add --no-cache \
+    libc6-compat \
+    vips-dev \
+    fftw-dev \
+    build-base \
+    python3
+
+# Copy backend source
+COPY apps/backend ./apps/backend
+# Copy root config directory (needed for jwt-security.js, etc.)
+COPY config ./config
+# Copy installed dependencies
+COPY --from=deps /app/node_modules ./apps/backend/node_modules
+
+# Create directories for uploads, logs
+RUN mkdir -p /app/uploads /app/logs && \
+    chown -R expressjs:nodejs /app
+
+# Switch to non-root user
+USER expressjs
+
+# Expose port
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:5000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"
+
+# Start application (run from apps/backend directory for correct relative paths)
+WORKDIR /app/apps/backend
+CMD ["node", "atlas-server.js"]

@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GACP Platform Monitoring Dashboard</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .dashboard {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+      }
+
+      .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .status-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .status-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .status-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      .status-healthy {
+        background-color: #10b981;
+      }
+
+      .status-warning {
+        background-color: #f59e0b;
+      }
+
+      .status-error {
+        background-color: #ef4444;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .metric {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .metric:last-child {
+        border-bottom: none;
+      }
+
+      .metric-label {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .metric-value {
+        font-weight: 600;
+        color: #333;
+      }
+
+      .refresh-info {
+        text-align: center;
+        color: white;
+        margin-top: 20px;
+        opacity: 0.8;
+      }
+
+      .api-endpoints {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 25px;
+        margin-top: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+
+      .endpoint-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .endpoint {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        background: #f8fafc;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        color: #374151;
+      }
+
+      .endpoint-method {
+        background: #3b82f6;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        margin-right: 8px;
+        font-weight: 600;
+      }
+
+      .endpoint-method.post {
+        background: #10b981;
+      }
+
+      .loading {
+        text-align: center;
+        color: white;
+        font-size: 1.1rem;
+      }
+
+      .error-message {
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard">
+      <div class="header">
+        <h1>🌿 GACP Platform Monitoring</h1>
+        <p>Real-time system health and performance monitoring</p>
+      </div>
+
+      <div id="loading" class="loading">
+        <p>Loading system status...</p>
+      </div>
+
+      <div id="dashboard-content" style="display: none">
+        <div class="status-grid" id="statusGrid"></div>
+
+        <div class="api-endpoints">
+          <h3>🔗 Available API Endpoints</h3>
+          <div class="endpoint-list" id="endpointList"></div>
+        </div>
+      </div>
+
+      <div class="refresh-info">
+        <p>⏱️ Auto-refreshing every 30 seconds | Last updated: <span id="lastUpdated">--</span></p>
+      </div>
+    </div>
+
+    <script>
+      class GACPMonitoringDashboard {
+        constructor() {
+          this.apiBase = window.location.origin;
+          this.updateInterval = null;
+          this.init();
+        }
+
+        async init() {
+          await this.loadSystemStatus();
+          this.startAutoRefresh();
+        }
+
+        async loadSystemStatus() {
+          try {
+            // Load system health data
+            const [healthResponse, statusResponse] = await Promise.all([
+              fetch(`${this.apiBase}/api/monitoring/health/detailed`),
+              fetch(`${this.apiBase}/api/monitoring/status`),
+            ]);
+
+            const healthData = await healthResponse.json();
+            const statusData = await statusResponse.json();
+
+            this.renderDashboard(healthData.data, statusData.data);
+            this.hideLoading();
+          } catch (error) {
+            console.error('Failed to load system status:', error);
+            this.showError('Failed to connect to monitoring API. Please check server status.');
+          }
+        }
+
+        renderDashboard(healthData, statusData) {
+          const statusGrid = document.getElementById('statusGrid');
+          statusGrid.innerHTML = '';
+
+          // System Overview Card
+          const overviewCard = this.createStatusCard(
+            'System Overview',
+            statusData.overall === 'operational' ? 'healthy' : 'error',
+            [
+              { label: 'Overall Status', value: statusData.overall.toUpperCase() },
+              { label: 'Environment', value: statusData.metadata.environment.toUpperCase() },
+              { label: 'API Version', value: statusData.metadata.version },
+              {
+                label: 'Generated At',
+                value: new Date(statusData.metadata.generatedAt).toLocaleTimeString(),
+              },
+            ]
+          );
+          statusGrid.appendChild(overviewCard);
+
+          // Database Health Card
+          const dbStatus = healthData.overview.summary.isHealthy ? 'healthy' : 'error';
+          const dbCard = this.createStatusCard('Database Health', dbStatus, [
+            { label: 'Connection Status', value: healthData.overview.status.toUpperCase() },
+            { label: 'Response Time', value: `${healthData.overview.summary.avgResponseTime}ms` },
+            { label: 'Success Rate', value: `${healthData.overview.summary.successRate}%` },
+            {
+              label: 'Active Connections',
+              value: healthData.overview.metrics.activeConnections || 'N/A',
+            },
+          ]);
+          statusGrid.appendChild(dbCard);
+
+          // API Services Card
+          const apiCard = this.createStatusCard(
+            'API Services',
+            statusData.services.api.status === 'operational' ? 'healthy' : 'warning',
+            [
+              { label: 'API Status', value: statusData.services.api.status.toUpperCase() },
+              {
+                label: 'Uptime',
+                value: `${Math.floor(statusData.services.api.uptime / 3600)}h ${Math.floor((statusData.services.api.uptime % 3600) / 60)}m`,
+              },
+              { label: 'Total Queries', value: healthData.performance.totalQueries },
+              { label: 'Failed Queries', value: healthData.performance.failedQueries },
+            ]
+          );
+          statusGrid.appendChild(apiCard);
+
+          // GACP Workflow Card
+          const gacpCard = this.createStatusCard(
+            'GACP Workflow',
+            statusData.services.gacpWorkflow.status === 'operational' ? 'healthy' : 'warning',
+            [
+              {
+                label: 'Workflow Status',
+                value: statusData.services.gacpWorkflow.status.toUpperCase(),
+              },
+              { label: 'Endpoints Available', value: statusData.services.gacpWorkflow.endpoints },
+              {
+                label: 'Peak Response Time',
+                value: `${healthData.performance.peakResponseTime}ms`,
+              },
+              { label: 'Collections', value: Object.keys(healthData.collections || {}).length },
+            ]
+          );
+          statusGrid.appendChild(gacpCard);
+
+          // System Resources Card
+          const memoryUsage = healthData.systemInfo.memory;
+          const memoryUsedMB = Math.round(memoryUsage.heapUsed / 1024 / 1024);
+          const memoryTotalMB = Math.round(memoryUsage.heapTotal / 1024 / 1024);
+
+          const resourcesCard = this.createStatusCard(
+            'System Resources',
+            memoryUsedMB < memoryTotalMB * 0.8 ? 'healthy' : 'warning',
+            [
+              { label: 'Memory Usage', value: `${memoryUsedMB}MB / ${memoryTotalMB}MB` },
+              { label: 'Node.js Version', value: healthData.systemInfo.nodeVersion },
+              { label: 'Platform', value: healthData.systemInfo.platform },
+              {
+                label: 'Uptime',
+                value: `${Math.floor(healthData.systemInfo.uptime / 3600)}h ${Math.floor((healthData.systemInfo.uptime % 3600) / 60)}m`,
+              },
+            ]
+          );
+          statusGrid.appendChild(resourcesCard);
+
+          // Authentication Card
+          const authCard = this.createStatusCard(
+            'Authentication',
+            statusData.services.authentication.status === 'operational' ? 'healthy' : 'warning',
+            [
+              {
+                label: 'Auth Status',
+                value: statusData.services.authentication.status.toUpperCase(),
+              },
+              { label: 'Security', value: 'JWT + Helmet' },
+              { label: 'CORS', value: 'Enabled' },
+              { label: 'Rate Limiting', value: 'Active' },
+            ]
+          );
+          statusGrid.appendChild(authCard);
+
+          // Render API endpoints
+          this.renderApiEndpoints();
+
+          // Update last updated time
+          document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+        }
+
+        createStatusCard(title, status, metrics) {
+          const card = document.createElement('div');
+          card.className = 'status-card';
+
+          const statusClass =
+            status === 'healthy'
+              ? 'status-healthy'
+              : status === 'warning'
+                ? 'status-warning'
+                : 'status-error';
+
+          card.innerHTML = `
+                    <div class="status-header">
+                        <div class="status-title">${title}</div>
+                        <div class="status-indicator ${statusClass}"></div>
+                    </div>
+                    ${metrics
+                      .map(
+                        metric => `
+                        <div class="metric">
+                            <span class="metric-label">${metric.label}</span>
+                            <span class="metric-value">${metric.value}</span>
+                        </div>
+                    `
+                      )
+                      .join('')}
+                `;
+
+          return card;
+        }
+
+        renderApiEndpoints() {
+          const endpointList = document.getElementById('endpointList');
+          const endpoints = [
+            { method: 'GET', path: '/api/gacp/workflow', desc: 'GACP Workflow' },
+            { method: 'GET', path: '/api/gacp/ccps', desc: 'Critical Control Points' },
+            { method: 'POST', path: '/api/gacp/test/score-calculation', desc: 'Score Calculation' },
+            { method: 'GET', path: '/api/gacp/compliance', desc: 'Compliance Framework' },
+            { method: 'GET', path: '/api/monitoring/health', desc: 'System Health' },
+            { method: 'GET', path: '/api/monitoring/status', desc: 'System Status' },
+            { method: 'GET', path: '/api/docs/docs', desc: 'API Documentation' },
+            { method: 'GET', path: '/api/docs/openapi', desc: 'OpenAPI Spec' },
+          ];
+
+          endpointList.innerHTML = endpoints
+            .map(
+              endpoint => `
+                    <div class="endpoint">
+                        <span class="endpoint-method ${endpoint.method.toLowerCase()}">${endpoint.method}</span>
+                        <span>${endpoint.path}</span>
+                    </div>
+                `
+            )
+            .join('');
+        }
+
+        hideLoading() {
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('dashboard-content').style.display = 'block';
+        }
+
+        showError(message) {
+          document.getElementById('loading').innerHTML = `
+                    <div class="error-message">
+                        <strong>⚠️ Error:</strong> ${message}
+                    </div>
+                `;
+        }
+
+        startAutoRefresh() {
+          this.updateInterval = setInterval(() => {
+            this.loadSystemStatus();
+          }, 30000); // Refresh every 30 seconds
+        }
+
+        stopAutoRefresh() {
+          if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+            this.updateInterval = null;
+          }
+        }
+      }
+
+      // Initialize dashboard when page loads
+      document.addEventListener('DOMContentLoaded', () => {
+        new GACPMonitoringDashboard();
+      });
+
+      // Clean up on page unload
+      window.addEventListener('beforeunload', () => {
+        if (window.dashboard) {
+          window.dashboard.stopAutoRefresh();
+        }
+      });
+    </script>
+  </body>
+</html>

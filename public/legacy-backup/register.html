@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สมัครสมาชิก - GACP Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            padding: 2rem 0;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .role-selector {
+            margin-bottom: 2rem;
+        }
+
+        .role-tabs {
+            display: flex;
+            background: #ecf0f1;
+            border-radius: 8px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .role-tab {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .role-tab.active {
+            background: white;
+            color: #2c3e50;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .role-tab:not(.active) {
+            color: #7f8c8d;
+        }
+
+        .role-tab:not(.active):hover {
+            color: #34495e;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .register-btn:hover {
+            background: #229954;
+            transform: translateY(-1px);
+        }
+
+        .register-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .login-link p {
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .login-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fadbd8;
+            color: #c0392b;
+            padding: 0.875rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            border-left: 4px solid #e74c3c;
+            display: none;
+        }
+
+        .success-message {
+            background: #d5f4e6;
+            color: #27ae60;
+            padding: 0.875rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            border-left: 4px solid #2ecc71;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .spinner {
+            border: 3px solid #ecf0f1;
+            border-top: 3px solid #27ae60;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 0.5rem;
+            margin-top: 0.2rem;
+        }
+
+        .checkbox-group label {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-bottom: 0;
+        }
+
+        .test-data-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+            width: 100%;
+        }
+
+        .test-data-btn:hover {
+            background: #e67e22;
+        }
+
+        @media (max-width: 480px) {
+            .register-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">
+            <h1>GACP Platform</h1>
+            <p>สมัครสมาชิกใหม่</p>
+        </div>
+
+        <div class="role-selector">
+            <div class="role-tabs">
+                <div class="role-tab active" data-role="farmer">เกษตรกร</div>
+                <div class="role-tab" data-role="dtam">DTAM ทีม</div>
+            </div>
+        </div>
+
+        <button class="test-data-btn" onclick="fillTestData()">เติมข้อมูลทดสอบ</button>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <form id="registerForm">
+            <!-- Farmer Registration Form -->
+            <div class="form-section active" id="farmerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">ชื่อ <span class="required">*</span></label>
+                        <input type="text" id="firstName" name="firstName" placeholder="ชื่อจริง" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">นามสกุล <span class="required">*</span></label>
+                        <input type="text" id="lastName" name="lastName" placeholder="นามสกุล" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">อีเมล <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">เบอร์โทรศัพท์ <span class="required">*</span></label>
+                        <input type="tel" id="phone" name="phone" placeholder="08X-XXX-XXXX" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmName">ชื่อฟาร์ม <span class="required">*</span></label>
+                    <input type="text" id="farmName" name="farmName" placeholder="ชื่อฟาร์มหรือสวน" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="farmSize">ขนาดพื้นที่ (ไร่)</label>
+                        <input type="number" id="farmSize" name="farmSize" placeholder="เช่น 10.5" step="0.1" min="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="cropTypes">ประเภทพืช</label>
+                        <select id="cropTypes" name="cropTypes">
+                            <option value="">เลือกประเภทพืช</option>
+                            <option value="herbs">สมุนไพร</option>
+                            <option value="vegetables">ผัก</option>
+                            <option value="fruits">ผลไม้</option>
+                            <option value="grains">ธัญพืช</option>
+                            <option value="cannabis">กัญชา</option>
+                            <option value="other">อื่นๆ</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DTAM Registration Form -->
+            <div class="form-section" id="dtamForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dtamFirstName">ชื่อ <span class="required">*</span></label>
+                        <input type="text" id="dtamFirstName" name="dtamFirstName" placeholder="ชื่อจริง" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dtamLastName">นามสกุล <span class="required">*</span></label>
+                        <input type="text" id="dtamLastName" name="dtamLastName" placeholder="นามสกุล" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dtamEmail">อีเมล <span class="required">*</span></label>
+                        <input type="email" id="dtamEmail" name="dtamEmail" placeholder="example@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dtamPhone">เบอร์โทรศัพท์ <span class="required">*</span></label>
+                        <input type="tel" id="dtamPhone" name="dtamPhone" placeholder="08X-XXX-XXXX" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="organization">หน่วยงาน/องค์กร <span class="required">*</span></label>
+                    <input type="text" id="organization" name="organization" placeholder="ชื่อหน่วยงานหรือองค์กร" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="position">ตำแหน่ง <span class="required">*</span></label>
+                    <input type="text" id="position" name="position" placeholder="ตำแหน่งงาน" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dtamRole">บทบาท <span class="required">*</span></label>
+                    <select id="dtamRole" name="dtamRole" required>
+                        <option value="">เลือกบทบาท</option>
+                        <option value="officer">เจ้าหน้าที่</option>
+                        <option value="auditor">ผู้ตรวจสอบ</option>
+                        <option value="admin">ผู้ดูแลระบบ</option>
+                        <option value="organization">หน่วยงาน</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Common Password Fields -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">รหัสผ่าน <span class="required">*</span></label>
+                    <input type="password" id="password" name="password" placeholder="อย่างน้อย 8 ตัวอักษร" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">ยืนยันรหัสผ่าน <span class="required">*</span></label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="กรอกรหัสผ่านอีกครั้ง" required>
+                </div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
+                <label for="agreeTerms">
+                    ฉันยอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว <span class="required">*</span>
+                </label>
+            </div>
+
+            <button type="submit" class="register-btn" id="registerBtn">
+                <span id="registerBtnText">สมัครสมาชิก</span>
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>กำลังสมัครสมาชิก...</p>
+        </div>
+
+        <div class="login-link">
+            <p>มีบัญชีอยู่แล้ว?</p>
+            <a href="login.html">เข้าสู่ระบบ</a>
+        </div>
+    </div>
+
+    <script>
+        // Role tab switching
+        document.querySelectorAll('.role-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Hide all form sections
+                document.querySelectorAll('.form-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Show selected form section
+                const role = this.dataset.role;
+                if (role === 'farmer') {
+                    document.getElementById('farmerForm').classList.add('active');
+                } else {
+                    document.getElementById('dtamForm').classList.add('active');
+                }
+            });
+        });
+
+        // Password confirmation validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.setCustomValidity('รหัสผ่านไม่ตรงกัน');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Fill test data function
+        function fillTestData() {
+            const activeRole = document.querySelector('.role-tab.active').dataset.role;
+            
+            if (activeRole === 'farmer') {
+                document.getElementById('firstName').value = 'สมชาย';
+                document.getElementById('lastName').value = 'ใจดี';
+                document.getElementById('email').value = 'somchai.test@example.com';
+                document.getElementById('phone').value = '081-234-5678';
+                document.getElementById('farmName').value = 'สวนสมุนไพรใจดี';
+                document.getElementById('farmSize').value = '15.5';
+                document.getElementById('cropTypes').value = 'herbs';
+            } else {
+                document.getElementById('dtamFirstName').value = 'ดร.สมศักดิ์';
+                document.getElementById('dtamLastName').value = 'พืชปลอดภัย';
+                document.getElementById('dtamEmail').value = 'somsak.auditor@example.com';
+                document.getElementById('dtamPhone').value = '082-345-6789';
+                document.getElementById('organization').value = 'สำนักงานมาตรฐานเกษตรอินทรีย์';
+                document.getElementById('position').value = 'ผู้ตรวจสอบ GACP';
+                document.getElementById('dtamRole').value = 'auditor';
+            }
+            
+            document.getElementById('password').value = 'test123456';
+            document.getElementById('confirmPassword').value = 'test123456';
+            document.getElementById('agreeTerms').checked = true;
+        }
+
+        // Form submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const activeRole = document.querySelector('.role-tab.active').dataset.role;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const registerBtn = document.getElementById('registerBtn');
+            const registerBtnText = document.getElementById('registerBtnText');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            // Validate password
+            if (password.length < 8) {
+                errorMessage.textContent = 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'รหัสผ่านไม่ตรงกัน';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            // Show loading
+            registerBtn.disabled = true;
+            registerBtnText.textContent = 'กำลังสมัครสมาชิก...';
+            loading.style.display = 'block';
+
+            try {
+                let requestData;
+
+                if (activeRole === 'farmer') {
+                    requestData = {
+                        name: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`,
+                        email: document.getElementById('email').value,
+                        password: password,
+                        phone: document.getElementById('phone').value,
+                        role: 'farmer',
+                        farmName: document.getElementById('farmName').value,
+                        farmSize: parseFloat(document.getElementById('farmSize').value) || 0,
+                        cropTypes: document.getElementById('cropTypes').value
+                    };
+                } else {
+                    requestData = {
+                        name: `${document.getElementById('dtamFirstName').value} ${document.getElementById('dtamLastName').value}`,
+                        email: document.getElementById('dtamEmail').value,
+                        password: password,
+                        phone: document.getElementById('dtamPhone').value,
+                        role: document.getElementById('dtamRole').value,
+                        organization: document.getElementById('organization').value,
+                        position: document.getElementById('position').value
+                    };
+                }
+
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    successMessage.textContent = 'สมัครสมาชิกสำเร็จ! กำลังพาคุณไปยังหน้าเข้าสู่ระบบ...';
+                    successMessage.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    
+                } else {
+                    throw new Error(result.message || 'การสมัครสมาชิกล้มเหลว');
+                }
+
+            } catch (error) {
+                console.error('Registration error:', error);
+                errorMessage.textContent = error.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก กรุณาลองอีกครั้ง';
+                errorMessage.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                registerBtn.disabled = false;
+                registerBtnText.textContent = 'สมัครสมาชิก';
+            }
+        });
+    </script>
+</body>
+</html>

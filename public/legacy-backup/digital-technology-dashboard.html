@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Technology Dashboard - แดชบอร์ดเทคโนโลยีดิจิทัล</title>
+    <style>
+        :root {
+            --primary-color: #1f2937;
+            --primary-dark: #111827;
+            --secondary-color: #f9fafb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #06b6d4;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .mode-button {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-button.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--secondary-color);
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-critical {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-published {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-draft {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .tools-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .tool-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .tool-btn:hover {
+            background: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success-color);
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div>🖥️</div>
+                <div>
+                    <h1>Digital Technology Dashboard</h1>
+                    <p style="opacity: 0.9; font-size: 0.875rem;">แดชบอร์ดเทคโนโลยีดิจิทัล</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="text-align: right;">
+                    <div id="userName">นายสมศักดิ์ เทคโนโลยี</div>
+                    <div style="opacity: 0.8; font-size: 0.875rem;" id="userRole">เจ้าหน้าที่เทคโนโลยีดิจิทัล</div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Mode Toggle -->
+        <div class="mode-toggle">
+            <button class="mode-button active" onclick="switchMode('cms')">
+                📰 โหมด CMS/เว็บไซต์
+            </button>
+            <button class="mode-button" onclick="switchMode('system')">
+                ⚙️ โหมดระบบและโครงสร้าง
+            </button>
+        </div>
+
+        <!-- CMS Mode -->
+        <div class="mode-content active" id="cms-mode">
+            <!-- CMS Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalContent">247</div>
+                    <div class="stat-label">เนื้อหาทั้งหมด</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="monthlyViews">23.5K</div>
+                    <div class="stat-label">ยอดเข้าชม/เดือน</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="publishedToday">5</div>
+                    <div class="stat-label">เผยแพร่วันนี้</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="engagementRate">94%</div>
+                    <div class="stat-label">ความพึงพอใจ</div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout">
+                <!-- Content Management -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">จัดการเนื้อหาและสื่อ</h3>
+                        <button class="btn btn-primary" onclick="createContent()">สร้างเนื้อหาใหม่</button>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>หัวข้อเนื้อหา</th>
+                                <th>ประเภท</th>
+                                <th>วันที่แก้ไข</th>
+                                <th>สถานะ</th>
+                                <th>ยอดเข้าชม</th>
+                                <th>การดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>แนวทางการปลูกขมิ้นชันมาตรฐาน GACP</strong></td>
+                                <td>บทความ</td>
+                                <td>30/09/2025</td>
+                                <td><span class="status-badge status-published">เผยแพร่แล้ว</span></td>
+                                <td>1,234</td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="editContent('1')">แก้ไข</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>วิดีโอสอนการตรวจสอบคุณภาพสมุนไพร</strong></td>
+                                <td>วิดีโอ</td>
+                                <td>29/09/2025</td>
+                                <td><span class="status-badge status-draft">ร่าง</span></td>
+                                <td>-</td>
+                                <td>
+                                    <button class="btn btn-success" onclick="publishContent('2')">เผยแพร่</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>ข่าวประชาสัมพันธ์การอบรมเดือนตุลาคม</strong></td>
+                                <td>ข่าวประชาสัมพันธ์</td>
+                                <td>28/09/2025</td>
+                                <td><span class="status-badge status-published">เผยแพร่แล้ว</span></td>
+                                <td>856</td>
+                                <td>
+                                    <button class="btn btn-warning" onclick="updateContent('3')">อัปเดต</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- CMS Tools -->
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">เครื่องมือ CMS</h3>
+                        </div>
+                        
+                        <div class="tools-grid">
+                            <a href="#" class="tool-btn" onclick="mediaLibrary()">
+                                🎨 คลังสื่อมัลติมีเดีย
+                            </a>
+                            <a href="#" class="tool-btn" onclick="seoTools()">
+                                🔍 เครื่องมือ SEO
+                            </a>
+                            <a href="#" class="tool-btn" onclick="analyticsReport()">
+                                📊 รายงานการเข้าใช้งาน
+                            </a>
+                            <a href="#" class="tool-btn" onclick="socialMedia()">
+                                📱 จัดการโซเชียลมีเดีย
+                            </a>
+                            <a href="#" class="tool-btn" onclick="contentSchedule()">
+                                📅 กำหนดการเผยแพร่
+                            </a>
+                            <a href="#" class="tool-btn" onclick="backupContent()">
+                                💾 สำรองข้อมูลเนื้อหา
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Mode -->
+        <div class="mode-content" id="system-mode">
+            <!-- System Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="systemUptime">99.9%</div>
+                    <div class="stat-label">ระบบพร้อมใช้งาน</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeUsers">156</div>
+                    <div class="stat-label">ผู้ใช้งานออนไลน์</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="serverLoad">45%</div>
+                    <div class="stat-label">การใช้งานเซิร์ฟเวอร์</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="diskSpace">78%</div>
+                    <div class="stat-label">พื้นที่จัดเก็บข้อมูล</div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout">
+                <!-- System Monitoring -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">การตรวจสอบระบบ</h3>
+                        <button class="btn btn-primary" onclick="refreshSystem()">รีเฟรช</button>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>บริการ</th>
+                                <th>สถานะ</th>
+                                <th>การใช้งาน CPU</th>
+                                <th>การใช้งาน RAM</th>
+                                <th>อัปไทม์</th>
+                                <th>การดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Web Server (Nginx)</strong></td>
+                                <td><span class="status-badge status-online">ออนไลน์</span></td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 25%"></div>
+                                    </div>
+                                    25%
+                                </td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 40%"></div>
+                                    </div>
+                                    40%
+                                </td>
+                                <td>99.9%</td>
+                                <td>
+                                    <button class="btn btn-warning" onclick="restartService('nginx')">รีสตาร์ท</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Database (MongoDB)</strong></td>
+                                <td><span class="status-badge status-online">ออนไลน์</span></td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 15%"></div>
+                                    </div>
+                                    15%
+                                </td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 60%"></div>
+                                    </div>
+                                    60%
+                                </td>
+                                <td>99.8%</td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="optimizeDB()">เพิ่มประสิทธิภาพ</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Application Server</strong></td>
+                                <td><span class="status-badge status-warning">โหลดสูง</span></td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 85%"></div>
+                                    </div>
+                                    85%
+                                </td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 75%"></div>
+                                    </div>
+                                    75%
+                                </td>
+                                <td>99.5%</td>
+                                <td>
+                                    <button class="btn btn-danger" onclick="scaleServer()">เพิ่มทรัพยากร</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- System Tools -->
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">เครื่องมือระบบ</h3>
+                        </div>
+                        
+                        <div class="tools-grid">
+                            <a href="#" class="tool-btn" onclick="serverMonitoring()">
+                                📈 ตรวจสอบเซิร์ฟเวอร์
+                            </a>
+                            <a href="#" class="tool-btn" onclick="databaseManagement()">
+                                🗄️ จัดการฐานข้อมูล
+                            </a>
+                            <a href="#" class="tool-btn" onclick="securityScan()">
+                                🔒 ตรวจสอบความปลอดภัย
+                            </a>
+                            <a href="#" class="tool-btn" onclick="backupRestore()">
+                                💾 สำรองและกู้คืนข้อมูล
+                            </a>
+                            <a href="#" class="tool-btn" onclick="logAnalysis()">
+                                📝 วิเคราะห์ Log ระบบ
+                            </a>
+                            <a href="#" class="tool-btn" onclick="performanceTuning()">
+                                ⚡ ปรับแต่งประสิทธิภาพ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication check
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+        let currentMode = 'cms';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!authToken) {
+                redirectToLogin();
+                return;
+            }
+
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+                
+                if (currentUser.organizationType !== 'digital_technology') {
+                    alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
+                    redirectToLogin();
+                    return;
+                }
+                
+                updateUserDisplay();
+            }
+
+            await loadDashboardData();
+        });
+
+        function switchMode(mode) {
+            // Update buttons
+            document.querySelectorAll('.mode-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.mode-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(mode + '-mode').classList.add('active');
+
+            currentMode = mode;
+            loadModeData(mode);
+        }
+
+        function loadModeData(mode) {
+            if (mode === 'cms') {
+                updateCMSStats();
+            } else {
+                updateSystemStats();
+            }
+        }
+
+        function updateCMSStats() {
+            document.getElementById('totalContent').textContent = '247';
+            document.getElementById('monthlyViews').textContent = '23.5K';
+            document.getElementById('publishedToday').textContent = '5';
+            document.getElementById('engagementRate').textContent = '94%';
+        }
+
+        function updateSystemStats() {
+            document.getElementById('systemUptime').textContent = '99.9%';
+            document.getElementById('activeUsers').textContent = '156';
+            document.getElementById('serverLoad').textContent = '45%';
+            document.getElementById('diskSpace').textContent = '78%';
+        }
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = 
+                    `${currentUser.firstName} ${currentUser.lastName}`;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                updateCMSStats();
+                updateSystemStats();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // CMS Functions
+        function createContent() {
+            alert('สร้างเนื้อหาใหม่:\n\n📝 เขียนบทความ\n🎥 อัปโหลดวิดีโอ\n📷 เพิ่มรูปภาพ\n📄 สร้างเอกสาร PDF\n📊 แชร์ข้อมูลสถิติ');
+        }
+
+        function editContent(id) {
+            alert(`แก้ไขเนื้อหา ID: ${id}\n\nเครื่องมือแก้ไข:\n✏️ Text Editor\n🎨 Image Editor\n📐 Layout Designer\n🔗 Link Manager\n📊 SEO Optimizer`);
+        }
+
+        function publishContent(id) {
+            alert(`เผยแพร่เนื้อหา ID: ${id}\n\nการเผยแพร่:\n🌐 เว็บไซต์หลัก\n📱 โซเชียลมีเดีย\n📧 อีเมลแจ้งเตือน\n📰 RSS Feed\n🔍 SEO Indexing`);
+        }
+
+        function updateContent(id) {
+            alert(`อัปเดตเนื้อหา ID: ${id}\n\nการอัปเดต:\n📝 แก้ไขข้อความ\n🖼️ เปลี่ยนรูปภาพ\n📅 อัปเดตวันที่\n🏷️ แก้ไขแท็ก\n🔄 รีเฟรชเนื้อหา`);
+        }
+
+        function mediaLibrary() {
+            alert('คลังสื่อมัลติมีเดีย:\n\n📷 รูปภาพ (1,234 ไฟล์)\n🎥 วิดีโอ (45 ไฟล์)\n📄 เอกสาร (789 ไฟล์)\n🎵 เสียง (12 ไฟล์)\n🎨 กราฟิก (156 ไฟล์)');
+        }
+
+        function seoTools() {
+            alert('เครื่องมือ SEO:\n\n🔍 วิเคราะห์คำหลัก\n📊 ตรวจสอบ Ranking\n🔗 จัดการ Meta Tags\n📝 สร้าง Sitemap\n⚡ ตรวจสอบความเร็ว');
+        }
+
+        function analyticsReport() {
+            alert('รายงานการเข้าใช้งาน:\n\n👥 ผู้เยี่ยมชม: 23,456/เดือน\n📄 หน้าที่ดูมากที่สุด\n🕐 เวลาใช้งานเฉลี่ย: 3.5 นาที\n📱 อุปกรณ์ที่ใช้เข้าถึง\n🌍 ประเทศที่เข้าเยี่ยมชม');
+        }
+
+        function socialMedia() {
+            alert('จัดการโซเชียลมีเดีย:\n\n📘 Facebook: 12.5K followers\n📷 Instagram: 8.2K followers\n🐦 Twitter: 5.1K followers\n📺 YouTube: 3.8K subscribers\n💼 LinkedIn: 2.1K connections');
+        }
+
+        function contentSchedule() {
+            alert('กำหนดการเผยแพร่:\n\n📅 เนื้อหาวันนี้: 3 รายการ\n⏰ กำหนดเผยแพร่: 8 รายการ\n📝 ร่างที่รอ: 12 รายการ\n🔄 เนื้อหาแบบวนลูป: 5 รายการ');
+        }
+
+        function backupContent() {
+            alert('สำรองข้อมูลเนื้อหา:\n\n💾 สำรองอัตโนมัติ: เปิดใช้งาน\n📅 สำรองล่าสุด: 30/09/2025 02:00\n💿 ขนาดไฟล์สำรอง: 2.5 GB\n☁️ Cloud Backup: Google Drive\n🔄 ความถี่: ทุกวันเที่ยงคืน');
+        }
+
+        // System Functions
+        function refreshSystem() {
+            alert('รีเฟรชข้อมูลระบบ:\n\n🔄 อัปเดตสถานะเซิร์ฟเวอร์\n📊 โหลดข้อมูลล่าสุด\n⚡ ตรวจสอบประสิทธิภาพ\n🔍 สแกนปัญหาใหม่\n📈 อัปเดตกราฟ');
+        }
+
+        function restartService(service) {
+            alert(`รีสตาร์ทบริการ: ${service}\n\n⚠️ การรีสตาร์ทจะใช้เวลา 30-60 วินาที\n🔄 บริการจะหยุดชั่วคราว\n✅ ระบบจะกลับมาทำงานอัตโนมัติ\n📊 ประสิทธิภาพจะดีขึ้น`);
+        }
+
+        function optimizeDB() {
+            alert('เพิ่มประสิทธิภาพฐานข้อมูล:\n\n🗃️ จัดระเบียบข้อมูล\n🔍 ปรับปรุง Index\n🧹 ลบข้อมูลขยะ\n📊 วิเคราะห์การใช้งาน\n⚡ เพิ่มความเร็ว');
+        }
+
+        function scaleServer() {
+            alert('เพิ่มทรัพยากรเซิร์ฟเวอร์:\n\n💻 เพิ่ม CPU Core\n💾 เพิ่ม RAM\n💿 เพิ่มพื้นที่เก็บข้อมูล\n🌐 เพิ่ม Bandwidth\n⚖️ กระจายโหลด');
+        }
+
+        function serverMonitoring() {
+            alert('ตรวจสอบเซิร์ฟเวอร์:\n\n📈 กราฟการใช้งาน Real-time\n🌡️ อุณหภูมิ CPU: 52°C\n💾 RAM ใช้ไป: 4.2/8 GB\n💿 Disk ใช้ไป: 78%\n🌐 Bandwidth: 45 Mbps');
+        }
+
+        function databaseManagement() {
+            alert('จัดการฐานข้อมูล:\n\n🗄️ สำรองข้อมูล\n🔄 กู้คืนข้อมูล\n🔍 ค้นหาข้อมูล\n📊 วิเคราะห์ Performance\n🧹 ทำความสะอาด');
+        }
+
+        function securityScan() {
+            alert('ตรวจสอบความปลอดภัย:\n\n🔒 สแกนช่องโหว่\n🛡️ ตรวจสอบไฟร์วอลล์\n🔐 วิเคราะห์ SSL Certificate\n👤 ตรวจสอบการเข้าถึง\n⚠️ แจ้งเตือนความเสี่ยง');
+        }
+
+        function backupRestore() {
+            alert('สำรองและกู้คืนข้อมูล:\n\n💾 สำรองข้อมูลเต็มระบบ\n🔄 กู้คืนข้อมูลแบบเลือก\n📅 กำหนดการสำรองอัตโนมัติ\n☁️ สำรองบน Cloud\n✅ ทดสอบการกู้คืน');
+        }
+
+        function logAnalysis() {
+            alert('วิเคราะห์ Log ระบบ:\n\n📝 Error Logs: 12 รายการ\n⚠️ Warning Logs: 45 รายการ\n📊 Access Logs: 12,345 รายการ\n🔍 Security Logs: 234 รายการ\n📈 Performance Logs');
+        }
+
+        function performanceTuning() {
+            alert('ปรับแต่งประสิทธิภาพ:\n\n⚡ เพิ่มความเร็วเว็บไซต์\n🗃️ ปรับปรุงฐานข้อมูล\n🖼️ บีบอัดรูปภาพ\n📦 บีบอัดไฟล์ CSS/JS\n🚀 เปิดใช้ Cache');
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/auth.html';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '/auth.html';
+        }
+    </script>
+</body>
+</html>

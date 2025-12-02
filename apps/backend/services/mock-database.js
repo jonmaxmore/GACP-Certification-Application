@@ -200,7 +200,8 @@ class MockDatabaseService {
 
       updateOne: async (query, update) => {
         const collection = this.collections.get(name);
-        const doc = await this.collection(name).findOne(query);
+        const col = await this.collection(name);
+        const doc = await col.findOne(query);
         if (doc) {
           const updatedDoc = { ...doc, ...update.$set, updatedAt: new Date() };
           collection.set(doc._id, updatedDoc);
@@ -211,7 +212,8 @@ class MockDatabaseService {
 
       deleteOne: async query => {
         const collection = this.collections.get(name);
-        const doc = await this.collection(name).findOne(query);
+        const col = await this.collection(name);
+        const doc = await col.findOne(query);
         if (doc) {
           collection.delete(doc._id);
           return { deletedCount: 1 };
@@ -220,7 +222,8 @@ class MockDatabaseService {
       },
 
       countDocuments: async (query = {}) => {
-        const docs = await this.collection(name).find(query);
+        const col = await this.collection(name);
+        const docs = await col.find(query);
         const results = await docs.toArray();
         return results.length;
       },

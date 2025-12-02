@@ -1,58 +1,24 @@
 version: '3.8'
 
 services:
-  gacp-backend:
-    image: node:22-alpine
-    container_name: gacp-platform
+  backend:
+    build: ./apps/backend
     ports:
-      - '3004:3004'
-      - '3005:3005' # Alternative port
-    volumes:
-      - .:/workspace
-      - /workspace/node_modules
-    working_dir: /workspace/apps/backend
-    command: |
-      sh -c "
-      echo 'Installing GACP Platform dependencies...' &&
-      npm install &&
-      echo 'Starting GACP Platform server...' &&
-      echo 'Access Demo at http://localhost:3004/demo.html' &&
-      echo 'Monitoring at http://localhost:3004/monitoring-dashboard.html' &&
-      echo 'API Docs at http://localhost:3004/api/docs/docs' &&
-      node atlas-server.js"
+      - "3000:3000"
     environment:
-      - NODE_ENV=development
-      - PORT=3004
-    restart: unless-stopped
-    healthcheck:
-      test:
-        [
-          'CMD',
-          'wget',
-          '--quiet',
-          '--tries=1',
-          '--spider',
-          'http://localhost:3004/api/monitoring/health',
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongo:27017/gacp
+      - JWT_SECRET=dev_secret_change_in_prod
+    depends_on:
+      - mongo
 
-  # Optional: MongoDB for full functionality
-  mongodb:
-    image: mongo:7-alpine
-    container_name: gacp-mongodb
+  mongo:
+    image: mongo:6.0
     ports:
-      - '27017:27017'
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=gacp2024
-      - MONGO_INITDB_DATABASE=gacp_platform
+      - "27017:27017"
     volumes:
-      - mongodb_data:/data/db
-      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-    restart: unless-stopped
+      - mongo-data:/data/db
 
 volumes:
-  mongodb_data:
+  mongo-data:

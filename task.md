@@ -51,3 +51,24 @@
 - [x] Final System Setup
     - [x] Generate Run Instructions (`RUN_INSTRUCTIONS.md`)
     - [x] Start Backend Server
+- [x] System Verification
+    - [x] Verify Full Workflow (Register -> Certificate)
+    - [x] Fix Mock Database Async Bug
+    - [x] Fix Job Assignment Logic
+
+# Priority 3: Production Readiness
+
+- [x] **Cleanup Legacy Files**
+    - [x] Remove `apps/backend/src` (Incomplete TS migration)
+    - [x] Remove `apps/backend/atlas-server.js` (Broken entry point)
+    - [x] Remove unused setup scripts (`setup-*.js`)
+- [x] **Production Server Setup**
+    - [x] Create `apps/backend/server.js` (Production Entry Point)
+    - [x] Configure `server.js` to use `ProductionDatabaseService`
+    - [x] Mount existing routes from `apps/backend/routes`
+    - [x] Update `package.json` start script
+- [x] **Containerization**
+    - [x] Create `Dockerfile` for Backend
+    - [x] Create `docker-compose.yml` (Backend + MongoDB)
+- [x] **Environment Configuration**
+    - [x] Create `.env.production.example`

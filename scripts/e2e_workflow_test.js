@@ -3,7 +3,12 @@ const http = require('http');
 const BASE_URL = 'http://localhost:3004/api';
 
 // Test Data
-const farmerCreds = { email: 'farmer@example.com', password: 'password' };
+const newFarmer = {
+    email: `farmer_${Date.now()}@example.com`,
+    password: 'password',
+    name: 'New Farmer',
+    role: 'farmer'
+};
 const officerCreds = { email: 'officer@dtam.go.th', password: 'password' };
 const auditorCreds = { email: 'auditor@dtam.go.th', password: 'password' };
 
@@ -36,7 +41,6 @@ function request(url, method = 'GET', body = null, token = null) {
 
             res.on('end', () => {
                 try {
-                    // console.log('Response:', data);
                     const parsedData = data ? JSON.parse(data) : {};
                     if (res.statusCode >= 200 && res.statusCode < 300) {
                         resolve(parsedData);
@@ -63,20 +67,25 @@ function request(url, method = 'GET', body = null, token = null) {
 }
 
 async function runTest() {
-    console.log('🚀 Starting GACP End-to-End Workflow Test (using native http)...\n');
+    console.log('🚀 Starting Full GACP System Verification (Register -> Certificate)...\n');
 
     try {
+        // 0. Register New Farmer
+        console.log('0️⃣  Registering New Farmer...');
+        const registerRes = await request(`${BASE_URL}/auth/register`, 'POST', newFarmer);
+        console.log('   ✅ Registration Successful:', registerRes.user.email);
+
         // 1. Login as Farmer
-        console.log('1️⃣  Logging in as Farmer...');
-        const farmerLogin = await request(`${BASE_URL}/auth/login`, 'POST', farmerCreds);
+        console.log('\n1️⃣  Logging in as New Farmer...');
+        const farmerLogin = await request(`${BASE_URL}/auth/login`, 'POST', { email: newFarmer.email, password: newFarmer.password });
         farmerToken = farmerLogin.token;
-        console.log('   ✅ Farmer Logged In. Token:', farmerToken.substring(0, 10) + '...');
+        console.log('   ✅ Farmer Logged In.');
 
         // 2. Create Application
         console.log('\n2️⃣  Creating New Application...');
         const appData = {
             farmInformation: {
-                farmName: 'E2E Test Farm',
+                farmName: 'Verified E2E Farm',
                 location: { province: 'Chiang Mai' }
             },
             cropInformation: { crops: [{ name: 'Cannabis' }] }
@@ -100,12 +109,18 @@ async function runTest() {
         if (targetJob) {
             console.log('   ✅ Found Unassigned Job:', targetJob.applicationNumber);
         } else {
-            console.error('   ❌ Job not found in unassigned list!');
+            throw new Error('Job not found in unassigned list!');
         }
 
         // 5. Login as Auditor (to get ID)
         console.log('\n5️⃣  Logging in as Auditor...');
         const auditorLogin = await request(`${BASE_URL}/auth/login`, 'POST', auditorCreds);
+        console.log('   🔍 Auditor Login Response:', JSON.stringify(auditorLogin));
+
+        if (!auditorLogin.user) {
+            throw new Error('Auditor login response missing user object');
+        }
+
         auditorToken = auditorLogin.token;
         auditorId = auditorLogin.user.id;
         console.log('   ✅ Auditor Logged In. ID:', auditorId);
@@ -122,7 +137,8 @@ async function runTest() {
         console.log('\n7️⃣  Auditor Checking Assignments...');
         const myAssignmentsRes = await request(`${BASE_URL}/job-assignment/my-assignments`, 'GET', null, auditorToken);
         const myJobs = myAssignmentsRes.data;
-        const assignedJob = myJobs.find(j => j._id === applicationId || j.id === applicationId);
+        console.log('   🔍 My Assignments:', JSON.stringify(myJobs));
+        const assignedJob = myJobs.find(j => j.applicationId === applicationId);
 
         if (assignedJob) {
             console.log('   ✅ Found Assigned Job:', assignedJob.applicationNumber);
@@ -140,19 +156,35 @@ async function runTest() {
         await request(`${BASE_URL}/job-assignment/${applicationId}/start`, 'POST', {}, auditorToken);
         console.log('   ✅ Job Started.');
 
-        // 10. Complete Job
-        console.log('\n🔟 Auditor Completing Job...');
+        // 10. Complete Job (Pass)
+        console.log('\n🔟 Auditor Completing Job (Pass)...');
         await request(`${BASE_URL}/job-assignment/${applicationId}/complete`, 'POST', {
             result: 'pass',
             checklist: { 'item1': true },
-            comments: 'E2E Test Passed'
+            comments: 'Full System Verification Passed'
         }, auditorToken);
         console.log('   ✅ Job Completed.');
 
-        console.log('\n🎉 E2E Workflow Test PASSED Successfully!');
+        // 11. Verify Certificate
+        console.log('\n1️⃣1️⃣ Verifying Certificate Issuance...');
+        const certRes = await request(`${BASE_URL}/certificates`, 'GET', null, farmerToken);
+        const certificates = certRes.data;
+        const myCert = certificates.find(c => c.applicationId === applicationId);
+
+        if (myCert) {
+            console.log('   ✅ Certificate Found!');
+            console.log('      Number:', myCert.certificateNumber);
+            console.log('      Status:', myCert.status);
+            console.log('      Expiry:', myCert.expiryDate);
+        } else {
+            throw new Error('Certificate NOT found for completed application!');
+        }
+
+        console.log('\n🎉 FULL SYSTEM VERIFICATION PASSED! (Register -> Certificate)');
 
     } catch (error) {
-        console.error('\n❌ Test FAILED:', error.stack);
+        console.error('\n❌ Verification FAILED:', error.message);
+        if (error.stack) console.error(error.stack);
     }
 }
 

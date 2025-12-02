@@ -160,6 +160,37 @@ app.get('/api', (req, res) => {
 });
 
 // Mock Authentication Routes
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { email, password, name, role } = req.body;
+    const users = await mockDb.collection('users');
+
+    // Check if user exists
+    const existingUser = await users.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'User already exists' });
+    }
+
+    const newUser = {
+      email,
+      password, // In real app, hash this!
+      name: name || 'New User',
+      role: role || 'farmer',
+      createdAt: new Date(),
+    };
+
+    const result = await users.insertOne(newUser);
+
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful',
+      user: { ...newUser, _id: result.insertedId }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Registration failed', error: error.message });
+  }
+});
+
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
 

@@ -10,16 +10,17 @@
 - [x] **Implement Job Assignment**
     - [x] Create API for Officer to assign tasks to Auditor
 
-# Priority 2: Frontend Implementation (Officer Dashboard)
+# Priority 2: Unified Frontend Implementation (Pure Flutter)
 
-- [x] **Setup Admin Portal**
-    - [x] Initialize Next.js project in `apps/web`
-    - [x] Configure TailwindCSS & ShadcnUI
-    - [x] Setup API Client (Axios/TanStack Query)
-- [x] **Implement Authentication**
-    - [x] Login Page (Officer/Admin)
-    - [x] Auth Context & Protected Routes
-- [x] **Implement Dashboard & Job Assignment**
-    - [x] Dashboard Overview (Stats)
-    - [x] Task Queue View (Unassigned Jobs)
-    - [x] Assignment Modal/Page
+- [x] **Setup Flutter Web**
+    - [x] Enable Web support in `apps/mobile_app`
+    - [x] Configure Responsive Layout (Web/Mobile)
+    - [x] Setup Navigation (GoRouter for Web URLs)
+- [x] **Implement Admin Features (Web)**
+    - [x] Admin Login Screen
+    - [x] Dashboard Overview (Web Layout)
+    - [x] Task Queue & Assignment (Web Layout)
+- [x] **Implement Auditor Features (Mobile)**
+    - [x] My Assignments Screen
+    - [x] Inspection Form Screen
+    - [ ] Offline Mode Support

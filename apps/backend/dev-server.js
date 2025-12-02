@@ -14,7 +14,7 @@
  * @date 2025-10-19
  */
 
-const logger = require('shared/logger/logger');
+const logger = require('./shared/logger');
 require('dotenv').config();
 
 const express = require('express');
@@ -80,10 +80,24 @@ const authenticateToken = (req, res, next) => {
 
   // Simple token validation for development
   if (token === 'dev_token' || token.startsWith('mock_')) {
+    let userId = 'user001';
+    let role = 'farmer';
+    let email = 'farmer@example.com';
+
+    // Try to extract user ID from token (format: mock_USERID_TIMESTAMP)
+    const parts = token.split('_');
+    if (parts.length >= 3) {
+      userId = parts[1];
+      // Look up user details from mockDb if possible, or infer
+      // For simplicity, we'll just use the ID and try to find it in mockDb
+      // But we can't access mockDb easily here without making this async
+      // So let's just set the ID and let the controllers handle the rest
+    }
+
     req.user = {
-      id: 'user001',
-      email: 'farmer@example.com',
-      role: 'farmer',
+      id: userId,
+      email: email, // Placeholder
+      role: role,   // Placeholder
     };
     next();
   } else {
@@ -158,7 +172,7 @@ app.post('/api/auth/login', async (req, res) => {
       res.json({
         success: true,
         message: 'Login successful',
-        token: `mock_${Date.now()}`,
+        token: `mock_${user._id}_${Date.now()}`,
         user: {
           id: user._id,
           email: user.email,
@@ -330,10 +344,24 @@ try {
 }
 
 // Job Assignment Routes
+// Job Assignment Routes
 try {
-  const jobAssignmentRoutes = require('./routes/job-assignment.routes');
-  app.use('/api/job-assignment', authenticateToken, jobAssignmentRoutes);
-  logger.info('✅ Job Assignment Routes mounted at /api/job-assignment');
+  const MockJobAssignmentController = require('./controllers/MockJobAssignmentController');
+  const mockJobController = new MockJobAssignmentController(mockDb);
+  const jobRouter = express.Router();
+
+  // Officer routes
+  jobRouter.get('/unassigned', authenticateToken, mockJobController.getUnassignedJobs);
+  jobRouter.post('/assign', authenticateToken, mockJobController.assignJob);
+
+  // Auditor routes
+  jobRouter.get('/my-assignments', authenticateToken, mockJobController.getMyAssignments);
+  jobRouter.post('/:id/accept', authenticateToken, mockJobController.acceptAssignment);
+  jobRouter.post('/:id/start', authenticateToken, mockJobController.startAssignment);
+  jobRouter.post('/:id/complete', authenticateToken, mockJobController.completeAssignment);
+
+  app.use('/api/job-assignment', authenticateToken, jobRouter);
+  logger.info('✅ Job Assignment Routes mounted at /api/job-assignment (Mock Mode)');
 } catch (error) {
   logger.warn('⚠️  Job Assignment Routes not available:', error.message);
 }

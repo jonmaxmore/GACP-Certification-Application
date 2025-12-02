@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../data/services/offline_service.dart';
 
 class InspectionFormScreen extends ConsumerStatefulWidget {
   final String applicationId;
@@ -186,7 +187,7 @@ class _InspectionFormScreenState extends ConsumerState<InspectionFormScreen> {
     );
   }
 
-  void _submitInspection() {
+  Future<void> _submitInspection() async {
     // Validate checklist
     if (_checklist.containsValue(null)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -195,10 +196,32 @@ class _InspectionFormScreenState extends ConsumerState<InspectionFormScreen> {
       return;
     }
 
-    // Submit logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Inspection submitted successfully')),
-    );
-    Navigator.pop(context);
+    final offlineService = ref.read(offlineServiceProvider);
+    final isConnected = await offlineService.isConnected();
+
+    final inspectionData = {
+      'applicationId': widget.applicationId,
+      'checklist': _checklist,
+      'comments': 'Inspection completed via mobile app',
+      'completedAt': DateTime.now().toIso8601String(),
+    };
+
+    if (isConnected) {
+      // TODO: Call API to submit
+      // await api.submitInspection(inspectionData);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Inspection submitted successfully')),
+      );
+    } else {
+      // Save locally
+      await offlineService.saveInspectionLocally(widget.applicationId, inspectionData);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No internet. Saved locally. Will sync when online.')),
+      );
+    }
+    
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 }

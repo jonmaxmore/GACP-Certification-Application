@@ -61,10 +61,20 @@ class MockDatabaseService {
 
     users.set('user002', {
       _id: 'user002',
-      email: 'inspector@dtam.go.th',
-      name: 'นายตรวจสอบ มาตรฐาน',
-      role: 'inspector',
+      email: 'officer@dtam.go.th',
+      name: 'เจ้าหน้าที่ รับเรื่อง',
+      role: 'officer',
       nationalId: '1234567890124',
+      createdAt: new Date(),
+      isActive: true,
+    });
+
+    users.set('user003', {
+      _id: 'user003',
+      email: 'auditor@dtam.go.th',
+      name: 'นายตรวจสอบ ภาคสนาม',
+      role: 'auditor',
+      nationalId: '1234567890125',
       createdAt: new Date(),
       isActive: true,
     });

@@ -10,7 +10,7 @@
  * - Clear reset token
  */
 
-const Password = require('../../domain/value-objects/Password');
+const Password = require('../domain/value-objects/Password');
 
 class ResetPasswordUseCase {
   constructor({ userRepository, passwordHasher }) {

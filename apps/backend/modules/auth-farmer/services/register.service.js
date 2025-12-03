@@ -12,11 +12,11 @@
  * - Publish UserRegistered event
  */
 
-const User = require('../../domain/entities/User');
-const Email = require('../../domain/value-objects/Email');
-const Password = require('../../domain/value-objects/Password');
-const UserRegistered = require('../../domain/events/UserRegistered');
-const { validateThaiID, validateLaserCode } = require('../../../../utils/validators');
+const User = require('../domain/entities/User');
+const Email = require('../domain/value-objects/Email');
+const Password = require('../domain/value-objects/Password');
+const UserRegistered = require('../domain/events/UserRegistered');
+const { validateThaiID, validateLaserCode } = require('../../../utils/validators');
 
 class RegisterUserUseCase {
   constructor({ userRepository, passwordHasher, tokenGenerator, eventBus }) {

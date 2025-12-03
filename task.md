@@ -55,6 +55,10 @@
     - [x] Verify Full Workflow (Register -> Certificate)
     - [x] Fix Mock Database Async Bug
     - [x] Fix Job Assignment Logic
+    - [ ] **Refactor `auth-farmer` Module**
+        - [ ] Flatten Clean Architecture to MVC
+        - [ ] Rename files for clarity
+        - [ ] Update imports and wiring
 
 # Priority 3: Production Readiness
 

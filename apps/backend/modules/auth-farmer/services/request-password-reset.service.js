@@ -9,8 +9,8 @@
  * - Publish PasswordResetRequested event
  */
 
-const Email = require('../../domain/value-objects/Email');
-const PasswordResetRequested = require('../../domain/events/PasswordResetRequested');
+const Email = require('../domain/value-objects/Email');
+const PasswordResetRequested = require('../domain/events/PasswordResetRequested');
 
 class RequestPasswordResetUseCase {
   constructor({ userRepository, tokenGenerator, eventBus }) {

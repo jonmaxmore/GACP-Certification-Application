@@ -11,8 +11,8 @@
  * - Publish UserLoggedIn event
  */
 
-const Email = require('../../domain/value-objects/Email');
-const UserLoggedIn = require('../../domain/events/UserLoggedIn');
+const Email = require('../domain/value-objects/Email');
+const UserLoggedIn = require('../domain/events/UserLoggedIn');
 
 class LoginUserUseCase {
   constructor({ userRepository, passwordHasher, jwtService, eventBus }) {

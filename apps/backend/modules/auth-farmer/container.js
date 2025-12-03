@@ -17,24 +17,24 @@ const mongoose = require('mongoose'); // Used in JSDoc type annotations
 const IUserRepository = require('./domain/interfaces/IUserRepository'); // Used for interface documentation
 /* eslint-enable no-unused-vars */
 
-// Infrastructure
-const MongoDBUserRepository = require('./infrastructure/database/user-model');
-const BcryptPasswordHasher = require('./infrastructure/security/password');
-const JWTService = require('./infrastructure/security/token');
+// Infrastructure -> Repositories & Services
+const MongoDBUserRepository = require('./repositories/user.repository');
+const BcryptPasswordHasher = require('./services/security/password.service');
+const JWTService = require('./services/security/token.service');
 const jwtSecurity = require(path.resolve(__dirname, '../../../../config/jwt-security'));
 
-// Application (Use Cases)
-const RegisterUserUseCase = require('./application/use-cases/register-usecase');
-const LoginUserUseCase = require('./application/use-cases/login-usecase');
-const VerifyEmailUseCase = require('./application/use-cases/verify-email-usecase');
-const RequestPasswordResetUseCase = require('./application/use-cases/request-password-reset-usecase');
-const ResetPasswordUseCase = require('./application/use-cases/reset-password-usecase');
-const GetUserProfileUseCase = require('./application/use-cases/get-profile-usecase');
-const UpdateUserProfileUseCase = require('./application/use-cases/update-profile-usecase');
+// Application (Use Cases) -> Services
+const RegisterUserUseCase = require('./services/register.service');
+const LoginUserUseCase = require('./services/login.service');
+const VerifyEmailUseCase = require('./services/verify-email.service');
+const RequestPasswordResetUseCase = require('./services/request-password-reset.service');
+const ResetPasswordUseCase = require('./services/reset-password.service');
+const GetUserProfileUseCase = require('./services/get-profile.service');
+const UpdateUserProfileUseCase = require('./services/update-profile.service');
 
-// Presentation
-const AuthController = require('./presentation/controllers/auth-controller');
-const createAuthRouter = require('./presentation/routes/auth.routes');
+// Presentation -> Controllers & Routes
+const AuthController = require('./controllers/auth.controller');
+const createAuthRouter = require('./routes/auth.routes');
 
 /**
  * Simple Event Bus implementation

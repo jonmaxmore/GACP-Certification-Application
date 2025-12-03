@@ -62,6 +62,7 @@
     - [x] Remove `apps/backend/src` (Incomplete TS migration)
     - [x] Remove `apps/backend/atlas-server.js` (Broken entry point)
     - [x] Remove unused setup scripts (`setup-*.js`)
+    - [x] Remove `public/index.html` and `packages/` (Legacy Frontend)
 - [x] **Production Server Setup**
     - [x] Create `apps/backend/server.js` (Production Entry Point)
     - [x] Configure `server.js` to use `ProductionDatabaseService`

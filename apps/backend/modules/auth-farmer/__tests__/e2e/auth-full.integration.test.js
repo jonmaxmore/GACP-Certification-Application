@@ -84,10 +84,6 @@ describe('Auth Farmer E2E Integration Tests', () => {
         .post(`${baseURL}/register`)
         .send(registerPayload);
 
-      if (registerRes.status !== 201) {
-        console.log('DEBUG: Register failed', registerRes.status, registerRes.text);
-      }
-
       expect(registerRes.headers['content-type']).toMatch(/json/);
 
       // Assert registration response

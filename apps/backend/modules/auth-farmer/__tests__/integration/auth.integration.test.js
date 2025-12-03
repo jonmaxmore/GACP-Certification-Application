@@ -20,13 +20,14 @@ describe('Auth Farmer Integration Tests', () => {
     password: 'SecureP@ssw0rd123',
     firstName: 'Test',
     lastName: 'Farmer',
-    idCard: '1234567890123',
+    idCard: '1234567890121', // Valid Thai ID
     phoneNumber: '0812345678',
     address: '123 Test Street',
     province: 'Bangkok',
     district: 'Bang Khen',
     subDistrict: 'Anusawari',
     postalCode: '10220',
+    laserCode: 'ME1234567890',
   };
 
   beforeAll(async () => {

@@ -38,8 +38,8 @@ class AuthController {
    */
   async register(req, res) {
     try {
-      console.log('Register Request Body:', JSON.stringify(req.body, null, 2));
-      console.log('Register Request File:', req.file);
+      console.error('DEBUG Register Request Body:', JSON.stringify(req.body, null, 2));
+      console.error('DEBUG Register Request File:', req.file);
 
       const result = await this.registerUserUseCase.execute({
         email: req.body.email,

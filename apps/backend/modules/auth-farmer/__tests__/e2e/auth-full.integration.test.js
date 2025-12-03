@@ -31,7 +31,17 @@ describe('Auth Farmer E2E Integration Tests', () => {
 
     // Import app after setting env vars
     // Adjust path based on your app structure
-    app = require('../../../../atlas-server');
+    const mongoose = require('mongoose');
+    await mongoose.disconnect(); // Ensure clean state
+
+    // Verify MongoMemoryServer is reachable
+    const verifyClient = new MongoClient(uri);
+    await verifyClient.connect();
+    console.log('DEBUG: Native client connected successfully to', uri);
+    await verifyClient.close();
+
+    jest.resetModules(); // Ensure fresh server instance and DB connection
+    app = require('../../../../server');
     baseURL = '/api/auth/farmer';
   });
 
@@ -58,7 +68,7 @@ describe('Auth Farmer E2E Integration Tests', () => {
 
   beforeEach(async () => {
     // Clear users collection before each test
-  await db.collection('users_farmer').deleteMany({});
+    await db.collection('users_farmer').deleteMany({});
   });
 
   describe('POST /register → POST /login flow', () => {
@@ -69,13 +79,14 @@ describe('Auth Farmer E2E Integration Tests', () => {
         password: 'Str0ngE2EPass!123',
         firstName: 'E2E',
         lastName: 'Farmer',
-        idCard: '1234567890123',
+        idCard: '1234567890121', // Valid Thai ID
         phoneNumber: '+66812345678',
         address: '123 E2E Test Street',
         province: 'Bangkok',
         district: 'Bang Khen',
         subDistrict: 'Anusawari',
         postalCode: '10220',
+        laserCode: 'ME1234567890',
       };
 
       const registerRes = await request(app)
@@ -127,8 +138,9 @@ describe('Auth Farmer E2E Integration Tests', () => {
         password: 'CorrectP@ss123',
         firstName: 'Wrong',
         lastName: 'Pass',
-        idCard: '9876543210987',
+        idCard: '1111111111119', // Valid Thai ID
         phoneNumber: '+66876543210',
+        laserCode: 'ME1234567890',
       };
 
       await request(app).post(`${baseURL}/register`).send(registerPayload).expect(201);
@@ -172,8 +184,9 @@ describe('Auth Farmer E2E Integration Tests', () => {
         password: 'Str0ngPass!123',
         firstName: 'Duplicate',
         lastName: 'User',
-        idCard: '1111111111111',
+        idCard: '1234567890121', // Valid Thai ID
         phoneNumber: '+66811111111',
+        laserCode: 'ME1234567890',
       };
 
       // First registration
@@ -184,8 +197,9 @@ describe('Auth Farmer E2E Integration Tests', () => {
         .post(`${baseURL}/register`)
         .send({
           ...registerPayload,
-          idCard: '2222222222222', // Different ID card
+          idCard: '1111111111119', // Different Valid ID
           phoneNumber: '+66822222222',
+          laserCode: 'ME0987654321',
         })
         .expect('Content-Type', /json/);
 
@@ -200,8 +214,9 @@ describe('Auth Farmer E2E Integration Tests', () => {
         password: 'Str0ngPass!123',
         firstName: 'IDCard',
         lastName: 'User',
-        idCard: '3333333333333',
+        idCard: '1234567890121', // Valid Thai ID
         phoneNumber: '+66833333333',
+        laserCode: 'ME1234567890',
       };
 
       // First registration
@@ -234,8 +249,9 @@ describe('Auth Farmer E2E Integration Tests', () => {
         password: 'Pr0filePass!123',
         firstName: 'Profile',
         lastName: 'User',
-        idCard: '5555555555555',
+        idCard: '1234567890121', // Valid Thai ID
         phoneNumber: '+66855555555',
+        laserCode: 'ME1234567890',
       };
 
       const registerRes = await request(app).post(`${baseURL}/register`).send(registerPayload);
@@ -300,8 +316,9 @@ describe('Auth Farmer E2E Integration Tests', () => {
         password: 'Upd@tePass123',
         firstName: 'Update',
         lastName: 'User',
-        idCard: '6666666666666',
+        idCard: '1234567890121', // Valid Thai ID
         phoneNumber: '+66866666666',
+        laserCode: 'ME1234567890',
       };
 
       const registerRes = await request(app).post(`${baseURL}/register`).send(registerPayload);
@@ -359,8 +376,9 @@ describe('Auth Farmer E2E Integration Tests', () => {
         password: 'OldP@ss123',
         firstName: 'Reset',
         lastName: 'User',
-        idCard: '7777777777777',
+        idCard: '1234567890121', // Valid Thai ID
         phoneNumber: '+66877777777',
+        laserCode: 'ME1234567890',
       });
 
       // Request password reset

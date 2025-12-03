@@ -57,7 +57,7 @@ class RegisterUserUseCase {
 
     // 4.2 Validate Laser Code (Real Format)
     if (!request.laserCode || !validateLaserCode(request.laserCode)) {
-      throw new Error('Invalid Laser Code format');
+      throw new Error(`Invalid Laser Code format: '${request.laserCode}'`);
     }
 
     // 4.3 Validate Corporate ID (if present)
@@ -83,15 +83,15 @@ class RegisterUserUseCase {
       idCardImage: request.idCardImage,
       laserCode: request.laserCode,
       corporateId: request.corporateId,
-      farmerType: request.farmerType || 'individual',
+      farmerType: (request.farmerType || 'INDIVIDUAL').toUpperCase(),
       farmingExperience: request.farmingExperience || 0,
       address: request.address || '',
       province: request.province || '',
       district: request.district || '',
       subdistrict: request.subdistrict || '',
       zipCode: request.zipCode || '',
-      role: 'farmer',
-      status: 'pending_verification',
+      role: 'FARMER',
+      status: 'PENDING_VERIFICATION',
       verificationStatus: 'pending',
       isEmailVerified: false,
       emailVerificationToken: verificationToken,

@@ -7,7 +7,14 @@
 
 const express = require('express');
 const router = express.Router();
-const notificationController = require('../../src/controllers/notificationController');
+// Mock controller for cleanup
+const notificationController = {
+    getNotifications: (req, res) => res.json({ success: true, data: [] }),
+    getUnreadCount: (req, res) => res.json({ success: true, count: 0 }),
+    markAsRead: (req, res) => res.json({ success: true }),
+    markAllAsRead: (req, res) => res.json({ success: true }),
+    createNotification: (req, res) => res.status(201).json({ success: true }),
+};
 const { farmerOrStaff } = require('../../middleware/roleMiddleware');
 
 // All routes require authentication

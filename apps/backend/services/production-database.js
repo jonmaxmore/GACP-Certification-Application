@@ -37,7 +37,6 @@ class ProductionDatabaseService {
         minPoolSize: 2,
         socketTimeoutMS: 45000,
         serverSelectionTimeoutMS: 5000,
-        family: 4, // Use IPv4
       });
 
       this.connection = mongoose.connection;

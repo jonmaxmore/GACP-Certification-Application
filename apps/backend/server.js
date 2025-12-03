@@ -12,10 +12,8 @@ const morgan = require('morgan');
 const logger = require('./shared/logger');
 const databaseService = require('./services/production-database');
 
-// Import Routes
-const authRoutes = require('./routes/auth');
-const applicationRoutes = require('./routes/applications');
-const jobAssignmentRoutes = require('./routes/job-assignment.routes');
+// Import Modules
+const { createModule: createAuthFarmerModule } = require('./modules/auth-farmer');
 const v2Routes = require('./routes/v2');
 
 const app = express();
@@ -40,10 +38,17 @@ databaseService.connect().catch(err => {
     process.exit(1);
 });
 
+// Initialize Modules
+// Auth Farmer Module
+const authFarmerModule = createAuthFarmerModule({
+    database: require('mongoose').connection,
+    jwtSecret: process.env.FARMER_JWT_SECRET || process.env.JWT_SECRET,
+    jwtExpiresIn: '24h',
+    bcryptSaltRounds: 12,
+});
+
 // Mount Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/applications', applicationRoutes);
-app.use('/api/job-assignment', jobAssignmentRoutes);
+app.use('/api/auth-farmer', authFarmerModule.router);
 app.use('/api/v2', v2Routes);
 
 // Health Check
@@ -76,8 +81,10 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-app.listen(port, () => {
-    logger.info(`✅ Production Server running on port ${port}`);
-});
+if (require.main === module) {
+    app.listen(port, () => {
+        logger.info(`✅ Production Server running on port ${port}`);
+    });
+}
 
 module.exports = app;

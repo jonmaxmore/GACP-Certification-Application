@@ -107,13 +107,13 @@ describe('RegisterUserUseCase', () => {
 
       // Assert
       expect(result.user).toBeInstanceOf(User);
-      expect(result.user.farmerType).toBe('corporate');
+      expect(result.user.farmerType).toBe('CORPORATE');
       expect(result.user.corporateId).toBe('1711266102673');
       expect(result.user.farmingExperience).toBe(5);
 
       // Verify save called with correct data
       const savedUser = mockUserRepository.save.mock.calls[0][0];
-      expect(savedUser.farmerType).toBe('corporate');
+      expect(savedUser.farmerType).toBe('CORPORATE');
       expect(savedUser.corporateId).toBe('1711266102673');
     });
 

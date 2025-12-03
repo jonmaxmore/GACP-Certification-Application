@@ -11,13 +11,14 @@ const validUserPayload = {
   password: 'Str0ngP@ssw0rd!',
   firstName: 'Alice',
   lastName: 'Wonderland',
-  idCard: '1234567890123',
+  idCard: '1234567890121', // Valid Thai ID
   phoneNumber: '+66812345678',
   address: '123 Test Street',
   province: 'Bangkok',
   district: 'Bang Khen',
   subDistrict: 'Anusawari',
   postalCode: '10220',
+  laserCode: 'ME1234567890',
 };
 
 /**
@@ -28,7 +29,7 @@ const validUserPayload2 = {
   password: 'Str0ngPass123!',
   firstName: 'Bob',
   lastName: 'Builder',
-  idCard: '9876543210987',
+  idCard: '1111111111119', // Valid Thai ID
   phoneNumber: '+66876543210',
   address: '456 Builder Ave',
   province: 'Chiang Mai',
@@ -45,7 +46,7 @@ const minimalValidUserPayload = {
   password: 'M1n!malPass',
   firstName: 'Min',
   lastName: 'Imal',
-  idCard: '1111111111111',
+  idCard: '1111111111119', // Valid Thai ID
   phoneNumber: '+66811111111',
 };
 

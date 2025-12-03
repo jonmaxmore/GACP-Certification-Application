@@ -459,6 +459,7 @@ describe('User Domain Entity', () => {
         lastName: 'Doe',
         idCard: '1234567890123',
         phoneNumber: '0812345678',
+        laserCode: 'ME1234567890',
       });
 
       const errors = user.validate();
@@ -488,6 +489,7 @@ describe('User Domain Entity', () => {
         lastName: 'Doe',
         idCard: '1234567890123',
         phoneNumber: '0812345678',
+        laserCode: 'ME1234567890',
       });
 
       const errors = user.validate();

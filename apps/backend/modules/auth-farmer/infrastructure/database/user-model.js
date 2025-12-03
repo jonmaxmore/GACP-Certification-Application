@@ -13,7 +13,7 @@ const UserEntity = require('../../domain/entities/User');
 const IUserRepository = require('../../domain/interfaces/IUserRepository');
 const { createLogger } = require('../../../../shared/logger');
 const logger = createLogger('auth-farmer-user');
-const UserModel = require('../../../../models/User');
+const UserModel = require('../../models/User');
 
 class MongoDBUserRepository extends IUserRepository {
   constructor(database) {

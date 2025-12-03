@@ -27,8 +27,8 @@ class User {
     district,
     subdistrict,
     zipCode,
-    role = 'farmer',
-    status = 'pending_verification',
+    role = 'FARMER',
+    status = 'PENDING_VERIFICATION',
     verificationStatus = 'pending',
     isEmailVerified = false,
     emailVerificationToken = null,
@@ -307,7 +307,7 @@ class User {
       errors.push('Laser code is required');
     }
 
-    const validStatuses = ['pending_verification', 'active', 'suspended', 'inactive'];
+    const validStatuses = ['PENDING_VERIFICATION', 'ACTIVE', 'SUSPENDED', 'INACTIVE'];
     if (!validStatuses.includes(this.status)) {
       errors.push('Invalid user status');
     }

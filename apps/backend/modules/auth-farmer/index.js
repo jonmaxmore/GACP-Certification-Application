@@ -9,7 +9,7 @@
 const createAuthFarmerModule = require('./container');
 
 // Import legacy models for backward compatibility (will be deprecated)
-const User = require('./models/user-model');
+const User = require('./models/User');
 
 // Import services
 const logger = require('../../shared/logger');

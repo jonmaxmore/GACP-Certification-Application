@@ -31,18 +31,9 @@ describe('Auth Farmer E2E Integration Tests', () => {
 
     // Import app after setting env vars
     // Adjust path based on your app structure
-    const mongoose = require('mongoose');
-    await mongoose.disconnect(); // Ensure clean state
-
-    // Verify MongoMemoryServer is reachable
-    const verifyClient = new MongoClient(uri);
-    await verifyClient.connect();
-    console.log('DEBUG: Native client connected successfully to', uri);
-    await verifyClient.close();
-
     jest.resetModules(); // Ensure fresh server instance and DB connection
     app = require('../../../../server');
-    baseURL = '/api/auth/farmer';
+    baseURL = '/api/auth-farmer';
   });
 
   afterAll(async () => {
@@ -68,7 +59,7 @@ describe('Auth Farmer E2E Integration Tests', () => {
 
   beforeEach(async () => {
     // Clear users collection before each test
-    await db.collection('users_farmer').deleteMany({});
+    await db.collection('users').deleteMany({});
   });
 
   describe('POST /register → POST /login flow', () => {
@@ -91,8 +82,13 @@ describe('Auth Farmer E2E Integration Tests', () => {
 
       const registerRes = await request(app)
         .post(`${baseURL}/register`)
-        .send(registerPayload)
-        .expect('Content-Type', /json/);
+        .send(registerPayload);
+
+      if (registerRes.status !== 201) {
+        console.log('DEBUG: Register failed', registerRes.status, registerRes.text);
+      }
+
+      expect(registerRes.headers['content-type']).toMatch(/json/);
 
       // Assert registration response
       expect(registerRes.status).toBe(201);
@@ -104,7 +100,7 @@ describe('Auth Farmer E2E Integration Tests', () => {
       const userId = registerRes.body.id;
 
       // Step 2: Manually verify email (skip email verification for testing)
-      await db.collection('users_farmer').updateOne(
+      await db.collection('users').updateOne(
         { _id: new ObjectId(userId) },
         { $set: { isEmailVerified: true, status: 'ACTIVE' } },
       );
@@ -146,7 +142,7 @@ describe('Auth Farmer E2E Integration Tests', () => {
       await request(app).post(`${baseURL}/register`).send(registerPayload).expect(201);
 
       // Manually verify email
-      await db.collection('users_farmer').updateOne(
+      await db.collection('users').updateOne(
         { email: registerPayload.email.toLowerCase() },
         { $set: { isEmailVerified: true, status: 'ACTIVE' } },
       );
@@ -259,7 +255,7 @@ describe('Auth Farmer E2E Integration Tests', () => {
       userId = registerRes.body.id;
 
       // Verify email
-      await db.collection('users_farmer').updateOne(
+      await db.collection('users').updateOne(
         { _id: new ObjectId(userId) },
         { $set: { isEmailVerified: true, status: 'ACTIVE' } },
       );
@@ -325,7 +321,7 @@ describe('Auth Farmer E2E Integration Tests', () => {
 
       userId = registerRes.body.id;
 
-      await db.collection('users_farmer').updateOne(
+      await db.collection('users').updateOne(
         { _id: new ObjectId(userId) },
         { $set: { isEmailVerified: true, status: 'ACTIVE' } },
       );

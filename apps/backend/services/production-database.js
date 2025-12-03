@@ -30,6 +30,13 @@ class ProductionDatabaseService {
     }
 
     try {
+      if (mongoose.connection.readyState === 1) {
+        logger.info('Mongoose already connected, reusing connection');
+        this.connection = mongoose.connection;
+        this.isConnected = true;
+        return this.connection;
+      }
+
       logger.info('Connecting to MongoDB Atlas...');
 
       await mongoose.connect(mongoUri, {
@@ -37,6 +44,7 @@ class ProductionDatabaseService {
         minPoolSize: 2,
         socketTimeoutMS: 45000,
         serverSelectionTimeoutMS: 5000,
+        family: 4,
       });
 
       this.connection = mongoose.connection;
@@ -95,7 +103,10 @@ class ProductionDatabaseService {
   async handleReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       logger.error('Max reconnection attempts reached. Exiting...');
-      process.exit(1);
+      if (process.env.NODE_ENV !== 'test') {
+        process.exit(1);
+      }
+      return;
     }
 
     this.reconnectAttempts++;

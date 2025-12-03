@@ -35,7 +35,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Connect to Database
 databaseService.connect().catch(err => {
     logger.error('Failed to connect to database', err);
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'test') {
+        process.exit(1);
+    }
 });
 
 // Initialize Modules

@@ -18,9 +18,9 @@
  * @date 2025-10-18
  */
 
-const logger = require('../../../shared/logger/logger');
+const logger = require('../../../shared/logger');
 const EventEmitter = require('events');
-const ApplicationStateMachine = require('./StateMachine');
+const ApplicationStateMachine = require('./state-machine');
 
 class ApplicationWorkflowEngine extends EventEmitter {
   constructor(dependencies = {}) {
@@ -60,8 +60,35 @@ class ApplicationWorkflowEngine extends EventEmitter {
     try {
       // Validate farmer exists and is active
       const farmer = await this.userRepo.findById(farmerId);
-      if (!farmer || farmer.role !== 'FARMER' || !farmer.isActive) {
+      if (!farmer || farmer.role !== 'FARMER' || farmer.status !== 'ACTIVE') {
         throw new Error('Invalid or inactive farmer account');
+      }
+
+      // Validate Application Type
+      const validTypes = ['NEW', 'RENEWAL', 'REPLACEMENT'];
+      if (applicationData.type && !validTypes.includes(applicationData.type)) {
+        throw new Error(`Invalid application type. Must be one of: ${validTypes.join(', ')}`);
+      }
+
+      // Validate specific fields based on type
+      if (applicationData.type === 'RENEWAL') {
+        if (!applicationData.previousCertificateId) {
+          throw new Error(`previousCertificateId is required for ${applicationData.type} applications`);
+        }
+
+        // Check eligibility
+        const eligibility = await this.validateRenewalEligibility(farmerId, applicationData.previousCertificateId);
+        if (!eligibility.eligible) {
+          throw new Error(`Renewal eligibility failed: ${eligibility.reasons.join(', ')}`);
+        }
+      } else if (applicationData.type === 'REPLACEMENT') {
+        if (!applicationData.previousCertificateId) {
+          throw new Error(`previousCertificateId is required for ${applicationData.type} applications`);
+        }
+      }
+
+      if (applicationData.type === 'REPLACEMENT' && !applicationData.replacementDetails) {
+        throw new Error('replacementDetails are required for REPLACEMENT applications');
       }
 
       // Generate application number
@@ -168,12 +195,14 @@ class ApplicationWorkflowEngine extends EventEmitter {
   async approveForPayment(applicationId, reviewerId, reviewData) {
     try {
       const application = await this.applicationRepo.findById(applicationId);
+      const reviewer = await this.userRepo.findById(reviewerId);
+      const reviewerRole = this._mapUserRoleToWorkflowRole(reviewer.role);
 
       // Validate transition
       const validation = this.stateMachine.validateTransition(
         application,
         this.stateMachine.STATES.PAYMENT_PENDING,
-        'DTAM_REVIEWER',
+        reviewerRole,
       );
 
       if (!validation.valid) {
@@ -196,7 +225,7 @@ class ApplicationWorkflowEngine extends EventEmitter {
         application,
         this.stateMachine.STATES.PAYMENT_PENDING,
         reviewerId,
-        'DTAM_REVIEWER',
+        reviewerRole,
         `Review completed. Approved for payment. ${reviewData.notes || ''}`,
       );
 
@@ -241,19 +270,53 @@ class ApplicationWorkflowEngine extends EventEmitter {
       const application = await this.applicationRepo.findById(applicationId);
 
       // Check revision limit
-      if (application.revisionCount >= this.config.maxRevisionAttempts) {
-        // Automatically reject if too many revisions
-        return await this.rejectApplication(applicationId, reviewerId, {
-          reason: 'Maximum revision attempts exceeded',
-          autoRejection: true,
+      if (application.revisionCount >= 2) {
+        // Transition to PENALTY_PAYMENT_PENDING
+        const reviewer = await this.userRepo.findById(reviewerId);
+        const reviewerRole = this._mapUserRoleToWorkflowRole(reviewer.role);
+
+        const updatedApplication = await this._transitionState(
+          application,
+          this.stateMachine.STATES.PENALTY_PAYMENT_PENDING,
+          reviewerId,
+          reviewerRole,
+          'Maximum revision attempts exceeded. Penalty payment required.',
+        );
+
+        // Generate penalty payment
+        const paymentData = await this.paymentService.generatePayment({
+          applicationId,
+          amount: 5000,
+          phase: 'PENALTY',
+          description: `Penalty Fee - ${application.applicationNumber}`,
         });
+
+        await this.applicationRepo.update(applicationId, {
+          'payment.penalty': paymentData,
+          'review.revisionRequested': true,
+          'review.revisionReasons': revisionData.reasons,
+          'review.revisionNotes': revisionData.notes,
+        });
+
+        // Send notification
+        await this._sendNotification(application.farmerId, 'PENALTY_PAYMENT_REQUIRED', {
+          applicationNumber: application.applicationNumber,
+          amount: 5000,
+          paymentUrl: paymentData.paymentUrl,
+          qrCode: paymentData.qrCode,
+        });
+
+        return await this.applicationRepo.findById(applicationId);
       }
+
+      const reviewer = await this.userRepo.findById(reviewerId);
+      const reviewerRole = this._mapUserRoleToWorkflowRole(reviewer.role);
 
       // Validate transition
       const validation = this.stateMachine.validateTransition(
         application,
         this.stateMachine.STATES.REVISION_REQUIRED,
-        'DTAM_REVIEWER',
+        reviewerRole,
       );
 
       if (!validation.valid) {
@@ -273,7 +336,7 @@ class ApplicationWorkflowEngine extends EventEmitter {
         application,
         this.stateMachine.STATES.REVISION_REQUIRED,
         reviewerId,
-        'DTAM_REVIEWER',
+        reviewerRole,
         `Revision requested (${application.revisionCount + 1}/${this.config.maxRevisionAttempts}): ${revisionData.notes}`,
       );
 
@@ -303,11 +366,25 @@ class ApplicationWorkflowEngine extends EventEmitter {
     try {
       const application = await this.applicationRepo.findById(applicationId);
 
-      // Determine target state based on payment phase
-      const targetState =
-        paymentData.phase === 1
-          ? this.stateMachine.STATES.PAYMENT_VERIFIED
-          : this.stateMachine.STATES.PHASE2_PAYMENT_VERIFIED;
+      // Determine target state and payment field based on payment phase
+      let targetState;
+      let paymentField;
+
+      if (paymentData.phase === 1) {
+        targetState = this.stateMachine.STATES.PAYMENT_VERIFIED;
+        paymentField = 'payment.phase1';
+      } else if (paymentData.phase === 2) {
+        targetState = this.stateMachine.STATES.PHASE2_PAYMENT_VERIFIED;
+        paymentField = 'payment.phase2';
+      } else if (paymentData.phase === 'REPLACEMENT') {
+        targetState = this.stateMachine.STATES.REPLACEMENT_ADMIN_CHECK;
+        paymentField = 'payment.replacement';
+      } else if (paymentData.phase === 'PENALTY') {
+        targetState = this.stateMachine.STATES.REVISION_REQUIRED;
+        paymentField = 'payment.penalty';
+      } else {
+        throw new Error('Invalid payment phase');
+      }
 
       // Validate transition
       const validation = this.stateMachine.validateTransition(application, targetState, 'SYSTEM', {
@@ -319,7 +396,6 @@ class ApplicationWorkflowEngine extends EventEmitter {
       }
 
       // Update payment information
-      const paymentField = paymentData.phase === 1 ? 'payment.phase1' : 'payment.phase2';
       await this.applicationRepo.update(applicationId, {
         [`${paymentField}.paidAt`]: new Date(),
         [`${paymentField}.transactionId`]: paymentData.transactionId,
@@ -345,7 +421,7 @@ class ApplicationWorkflowEngine extends EventEmitter {
           priority: 'NORMAL',
           dueDate: this._calculateDueDate(14), // 14 days SLA
         });
-      } else {
+      } else if (paymentData.phase === 2) {
         // Phase 2 payment - create job for admin approval
         await this._createJobTicket(applicationId, 'DTAM_ADMIN', {
           title: `Final Approval Required - ${application.applicationNumber}`,
@@ -353,6 +429,17 @@ class ApplicationWorkflowEngine extends EventEmitter {
           priority: 'HIGH',
           dueDate: this._calculateDueDate(7), // 7 days SLA
         });
+      } else if (paymentData.phase === 'REPLACEMENT') {
+        // Replacement payment - create job for admin
+        await this._createJobTicket(applicationId, 'DTAM_ADMIN', {
+          title: `Replacement Request - ${application.applicationNumber}`,
+          description: 'Review and approve certificate replacement',
+          priority: 'NORMAL',
+          dueDate: this._calculateDueDate(3),
+        });
+      } else if (paymentData.phase === 'PENALTY') {
+        // Penalty payment - Auto-transition to review (since it goes to SUBMITTED)
+        await this._autoTransitionToReview(applicationId);
       }
 
       return updatedApplication;
@@ -428,12 +515,14 @@ class ApplicationWorkflowEngine extends EventEmitter {
   async completeInspection(applicationId, inspectorId, inspectionReport) {
     try {
       const application = await this.applicationRepo.findById(applicationId);
+      const inspector = await this.userRepo.findById(inspectorId);
+      const inspectorRole = this._mapUserRoleToWorkflowRole(inspector.role);
 
       // Validate transition
       const validation = this.stateMachine.validateTransition(
         application,
         this.stateMachine.STATES.INSPECTION_COMPLETED,
-        'DTAM_INSPECTOR',
+        inspectorRole,
         { inspectionReport },
       );
 
@@ -469,7 +558,7 @@ class ApplicationWorkflowEngine extends EventEmitter {
         application,
         this.stateMachine.STATES.INSPECTION_COMPLETED,
         inspectorId,
-        'DTAM_INSPECTOR',
+        inspectorRole,
         `Inspection completed successfully. Compliance score: ${complianceScore}%`,
       );
 
@@ -495,12 +584,14 @@ class ApplicationWorkflowEngine extends EventEmitter {
   async finalApproval(applicationId, adminId, approvalData) {
     try {
       const application = await this.applicationRepo.findById(applicationId);
+      const admin = await this.userRepo.findById(adminId);
+      const adminRole = this._mapUserRoleToWorkflowRole(admin.role);
 
       // Validate transition
       const validation = this.stateMachine.validateTransition(
         application,
         this.stateMachine.STATES.APPROVED,
-        'DTAM_ADMIN',
+        adminRole,
         { approverSignature: approvalData.signature },
       );
 
@@ -522,7 +613,7 @@ class ApplicationWorkflowEngine extends EventEmitter {
         application,
         this.stateMachine.STATES.APPROVED,
         adminId,
-        'DTAM_ADMIN',
+        adminRole,
         `Application approved for certificate issuance. ${approvalData.notes || ''}`,
       );
 
@@ -636,6 +727,138 @@ class ApplicationWorkflowEngine extends EventEmitter {
     }
   }
 
+  /**
+   * Validate renewal eligibility
+   * @param {string} farmerId - Farmer ID
+   * @param {string} certificateId - Previous certificate ID
+   * @returns {Promise<Object>} - Eligibility result
+   */
+  async validateRenewalEligibility(farmerId, certificateId) {
+    try {
+      const result = { eligible: true, reasons: [] };
+
+      // 1. Check if certificate exists and belongs to farmer
+      // Note: Assuming certificateService or repository exists
+      // const certificate = await this.certificateService.findById(certificateId);
+      // For now, we'll skip strict certificate check or assume it's valid if passed
+
+      // 2. Check for existing active renewal applications
+      const activeApps = await this.applicationRepo.findActiveByFarmer(farmerId);
+      const pendingRenewal = activeApps.find(app => app.type === 'RENEWAL');
+
+      if (pendingRenewal) {
+        result.eligible = false;
+        result.reasons.push(`Pending renewal application exists: ${pendingRenewal.applicationNumber}`);
+      }
+
+      // 3. Check timing (e.g., can only renew 90 days before expiry)
+      // if (certificate && certificate.expiresAt) {
+      //   const daysUntilExpiry = Math.ceil((new Date(certificate.expiresAt) - new Date()) / (1000 * 60 * 60 * 24));
+      //   if (daysUntilExpiry > 90) {
+      //     result.eligible = false;
+      //     result.reasons.push(`Too early to renew. Can renew 90 days before expiry (current: ${daysUntilExpiry} days)`);
+      //   }
+      // }
+
+      return result;
+    } catch (error) {
+      logger.error('[WorkflowEngine] Error validating renewal eligibility:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get dashboard summary for user
+   * @param {string} userId - User ID
+   * @param {string} userRole - User Role
+   * @returns {Promise<Object>} - Dashboard summary
+   */
+  async getDashboardSummary(userId, userRole) {
+    try {
+      const summary = {
+        overview: {
+          total: 0,
+          pending: 0,
+          approved: 0,
+          rejected: 0
+        },
+        recentActivity: [],
+        actionItems: []
+      };
+
+      // Get applications based on role
+      let applications = [];
+      if (userRole === 'FARMER') {
+        applications = await this.applicationRepo.findByFarmerId(userId);
+      } else {
+        // DTAM staff - get all or assigned
+        // For simplicity, getting all for now, but should be filtered
+        applications = await this.applicationRepo.findAll();
+      }
+
+      // Calculate overview stats
+      summary.overview.total = applications.length;
+      summary.overview.pending = applications.filter(app =>
+        ['submitted', 'under_review', 'payment_pending', 'inspection_scheduled', 'phase2_payment_pending'].includes(app.status)
+      ).length;
+      summary.overview.approved = applications.filter(app => app.status === 'certificate_issued').length;
+      summary.overview.rejected = applications.filter(app => app.status === 'rejected').length;
+
+      // Recent activity (last 5 workflow history items across applications)
+      const allHistory = applications.flatMap(app =>
+        (app.workflowHistory || []).map(h => ({ ...h, applicationNumber: app.applicationNumber, applicationId: app.id }))
+      );
+      summary.recentActivity = allHistory
+        .sort((a, b) => new Date(b.enteredAt) - new Date(a.enteredAt))
+        .slice(0, 5);
+
+      // Action items (applications requiring user's attention)
+      if (userRole === 'FARMER') {
+        summary.actionItems = applications
+          .filter(app => ['draft', 'revision_required', 'payment_pending', 'phase2_payment_pending'].includes(app.status))
+          .map(app => ({
+            id: app.id,
+            applicationNumber: app.applicationNumber,
+            status: app.status,
+            message: this._getActionMessage(app.status)
+          }));
+      } else if (['DTAM_REVIEWER', 'DTAM_INSPECTOR', 'DTAM_ADMIN', 'ADMIN'].includes(userRole)) {
+        // DTAM action items
+        const roleActionStates = {
+          'DTAM_REVIEWER': ['submitted', 'under_review'],
+          'DTAM_INSPECTOR': ['payment_verified', 'inspection_scheduled'],
+          'DTAM_ADMIN': ['phase2_payment_verified', 'approved'],
+          'ADMIN': ['phase2_payment_verified', 'approved']
+        };
+
+        const targetStates = roleActionStates[userRole] || [];
+        summary.actionItems = applications
+          .filter(app => targetStates.includes(app.status))
+          .map(app => ({
+            id: app.id,
+            applicationNumber: app.applicationNumber,
+            status: app.status,
+            message: `Requires ${userRole} attention`
+          }));
+      }
+
+      return summary;
+    } catch (error) {
+      logger.error('[WorkflowEngine] Error getting dashboard summary:', error);
+      throw error;
+    }
+  }
+
+  _getActionMessage(status) {
+    const messages = {
+      'draft': 'Complete and submit application',
+      'revision_required': 'Update application based on feedback',
+      'payment_pending': 'Complete Phase 1 payment',
+      'phase2_payment_pending': 'Complete Phase 2 payment'
+    };
+    return messages[status] || 'View details';
+  }
+
   // Private helper methods
 
   async _generateApplicationNumber() {
@@ -707,21 +930,52 @@ class ApplicationWorkflowEngine extends EventEmitter {
     try {
       const application = await this.applicationRepo.findById(applicationId);
       if (application.status === this.stateMachine.STATES.SUBMITTED) {
-        await this._transitionState(
-          application,
-          this.stateMachine.STATES.UNDER_REVIEW,
-          'SYSTEM',
-          'SYSTEM',
-          'Automatically assigned to reviewer',
-        );
+        if (application.type === 'REPLACEMENT') {
+          await this._transitionState(
+            application,
+            this.stateMachine.STATES.REPLACEMENT_PAYMENT_PENDING,
+            'SYSTEM',
+            'SYSTEM',
+            'Automatically moved to Replacement Payment Pending',
+          );
 
-        // Create job ticket for reviewer
-        await this._createJobTicket(applicationId, 'DTAM_REVIEWER', {
-          title: `Document Review Required - ${application.applicationNumber}`,
-          description: 'Review application documents for completeness and accuracy',
-          priority: 'NORMAL',
-          dueDate: this._calculateDueDate(14),
-        });
+          // Generate Replacement Payment
+          const paymentData = await this.paymentService.generatePayment({
+            applicationId,
+            amount: 500, // Replacement Fee
+            phase: 'REPLACEMENT',
+            description: `Certificate Replacement Fee - ${application.applicationNumber}`,
+          });
+
+          await this.applicationRepo.update(applicationId, {
+            'payment.replacement': paymentData,
+          });
+
+          // Send notification
+          await this._sendNotification(application.farmerId, 'PAYMENT_REQUIRED', {
+            applicationNumber: application.applicationNumber,
+            amount: 500,
+            phase: 'REPLACEMENT',
+            paymentUrl: paymentData.paymentUrl,
+            qrCode: paymentData.qrCode,
+          });
+        } else {
+          await this._transitionState(
+            application,
+            this.stateMachine.STATES.UNDER_REVIEW,
+            'SYSTEM',
+            'SYSTEM',
+            'Automatically assigned to reviewer',
+          );
+
+          // Create job ticket for reviewer
+          await this._createJobTicket(applicationId, 'DTAM_REVIEWER', {
+            title: `Document Review Required - ${application.applicationNumber}`,
+            description: 'Review application documents for completeness and accuracy',
+            priority: 'NORMAL',
+            dueDate: this._calculateDueDate(14),
+          });
+        }
       }
     } catch (error) {
       logger.error('[WorkflowEngine] Error in auto-transition to review:', error);
@@ -814,39 +1068,44 @@ class ApplicationWorkflowEngine extends EventEmitter {
     };
 
     // 1. Check required documents with detailed validation
-    const requiredDocuments = {
-      farm_license: {
-        required: true,
-        description: 'Farm registration license',
-        validityCheck: true,
-      },
-      land_deed: {
-        required: true,
-        description: 'Land ownership document',
-        validityCheck: true,
-      },
-      farmer_id: {
-        required: true,
-        description: 'Farmer identification card',
-        validityCheck: true,
-      },
-      farm_photos: {
-        required: true,
-        description: 'Farm site photos (minimum 5 photos)',
-        minCount: 5,
-      },
-      water_test_report: {
-        required: true,
-        description: 'Water quality test report',
-        maxAge: 90, // days
-      },
-      soil_test_report: {
-        required: false,
-        description: 'Soil analysis report',
-        maxAge: 180, // days
-        recommended: true,
-      },
-    };
+    // 1. Check required documents based on Application Type
+    let requiredDocuments = {};
+
+    if (application.type === 'NEW') {
+      requiredDocuments = {
+        farm_license: { required: true, description: 'Farm registration license (Form 09)', validityCheck: true },
+        land_deed: { required: true, description: 'Land ownership document (Form 10)', validityCheck: true },
+        farmer_id: { required: true, description: 'Farmer identification card', validityCheck: true },
+        farm_photos: { required: true, description: 'Farm site photos (minimum 5 photos)', minCount: 5 },
+        water_test_report: { required: true, description: 'Water quality test report', maxAge: 90 },
+        soil_test_report: { required: false, description: 'Soil analysis report', maxAge: 180, recommended: true },
+        gacp_training_cert: { required: false, description: 'GACP Training Certificate (Form 11)', recommended: true }
+      };
+    } else if (application.type === 'RENEWAL') {
+      // 22-Item Checklist for Renewal (Groups A-E)
+      requiredDocuments = {
+        // Group A: General Info
+        farm_license: { required: true, description: 'Current Farm License', validityCheck: true },
+        farmer_id: { required: true, description: 'Farmer ID', validityCheck: true },
+
+        // Group B: Production Process (Simplified for validation)
+        production_plan: { required: true, description: 'Annual Production Plan' },
+
+        // Group C: Quality Control
+        water_test_report: { required: true, description: 'Water Analysis Report', maxAge: 90 },
+
+        // Group D: Personnel
+        training_records: { required: true, description: 'Staff Training Records' },
+
+        // Group E: Facilities
+        facility_photos: { required: true, description: 'Current Facility Photos', minCount: 5 }
+      };
+    } else if (application.type === 'REPLACEMENT') {
+      requiredDocuments = {
+        police_report: { required: true, description: 'Police Report (for lost certificate)' },
+        damaged_certificate: { required: false, description: 'Damaged Certificate (if applicable)' }
+      };
+    }
 
     const uploadedDocs = application.documents || [];
 
@@ -905,7 +1164,7 @@ class ApplicationWorkflowEngine extends EventEmitter {
     }
 
     // 3. Validate farmer eligibility
-    const eligibilityCheck = await this._validateFarmerEligibility(application.farmerId);
+    const eligibilityCheck = await this._validateFarmerEligibility(application.farmerId, application._id || application.id);
     if (!eligibilityCheck.valid) {
       validationResult.errors.push(...eligibilityCheck.errors);
       validationResult.valid = false;
@@ -984,8 +1243,16 @@ class ApplicationWorkflowEngine extends EventEmitter {
   _mapUserRoleToWorkflowRole(userRole) {
     const roleMapping = {
       FARMER: 'FARMER',
-      DTAM_REVIEWER: 'DTAM_REVIEWER',
-      DTAM_INSPECTOR: 'DTAM_INSPECTOR',
+      // DTAM Staff Roles (from DTAMStaff model)
+      auditor: 'AUDITOR',
+      officer: 'OFFICER',
+      admin: 'DTAM_ADMIN',
+      // Legacy/Fallback Roles
+      reviewer: 'AUDITOR',
+      inspector: 'AUDITOR',
+      manager: 'OFFICER',
+      DTAM_REVIEWER: 'AUDITOR',
+      DTAM_INSPECTOR: 'AUDITOR',
       DTAM_ADMIN: 'DTAM_ADMIN',
       ADMIN: 'DTAM_ADMIN',
     };
@@ -1108,7 +1375,7 @@ class ApplicationWorkflowEngine extends EventEmitter {
    * Validate farmer eligibility for GACP certification
    * @private
    */
-  async _validateFarmerEligibility(farmerId) {
+  async _validateFarmerEligibility(farmerId, currentApplicationId = null) {
     const result = { valid: true, errors: [], warnings: [] };
 
     try {
@@ -1121,12 +1388,12 @@ class ApplicationWorkflowEngine extends EventEmitter {
       }
 
       // Check farmer account status
-      if (!farmer.isActive) {
+      if (farmer.status !== 'ACTIVE') {
         result.errors.push('Farmer account is inactive');
         result.valid = false;
       }
 
-      if (!farmer.isVerified) {
+      if (farmer.verificationStatus !== 'approved') {
         result.errors.push('Farmer account is not verified');
         result.valid = false;
       }
@@ -1134,12 +1401,19 @@ class ApplicationWorkflowEngine extends EventEmitter {
       // Check for existing active applications
       const activeApplications = await this.applicationRepo.findActiveByFarmer(farmerId);
       if (activeApplications.length > 0) {
-        const activeApp = activeApplications[0];
-        if (!['REJECTED', 'CERTIFICATE_ISSUED'].includes(activeApp.status)) {
-          result.errors.push(
-            `Farmer already has an active application: ${activeApp.applicationNumber}`,
-          );
-          result.valid = false;
+        // Filter out current application if provided
+        const otherActiveApps = currentApplicationId
+          ? activeApplications.filter(app => app.id.toString() !== currentApplicationId.toString() && app._id.toString() !== currentApplicationId.toString())
+          : activeApplications;
+
+        if (otherActiveApps.length > 0) {
+          const activeApp = otherActiveApps[0];
+          if (!['REJECTED', 'CERTIFICATE_ISSUED'].includes(activeApp.status)) {
+            result.errors.push(
+              `Farmer already has an active application: ${activeApp.applicationNumber}`,
+            );
+            result.valid = false;
+          }
         }
       }
 

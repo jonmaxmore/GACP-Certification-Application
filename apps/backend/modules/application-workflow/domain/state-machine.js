@@ -30,7 +30,13 @@ class ApplicationStateMachine {
 
       // Payment States
       PAYMENT_PENDING: 'payment_pending', // Awaiting Phase 1 payment (5,000฿)
-      PAYMENT_VERIFIED: 'payment_verified', // Payment confirmed, ready for inspection
+      PAYMENT_VERIFIED: 'payment_verified', // Payment confirmed
+
+      // Penalty State
+      PENALTY_PAYMENT_PENDING: 'penalty_payment_pending', // Awaiting penalty payment (5,000฿) after failed revisions
+
+      // Assignment State
+      ASSIGNMENT_PENDING: 'assignment_pending', // Waiting for Officer to assign Auditor
 
       // Inspection States
       INSPECTION_SCHEDULED: 'inspection_scheduled', // Farm inspection scheduled
@@ -40,6 +46,10 @@ class ApplicationStateMachine {
       PHASE2_PAYMENT_PENDING: 'phase2_payment_pending', // Awaiting Phase 2 payment (25,000฿)
       PHASE2_PAYMENT_VERIFIED: 'phase2_payment_verified', // Final payment confirmed
       APPROVED: 'approved', // Application approved by DTAM
+
+      // Replacement States
+      REPLACEMENT_PAYMENT_PENDING: 'replacement_payment_pending', // Awaiting replacement fee
+      REPLACEMENT_ADMIN_CHECK: 'replacement_admin_check', // Admin validating replacement request
 
       // Terminal States
       CERTIFICATE_ISSUED: 'certificate_issued', // Certificate generated and issued
@@ -51,25 +61,9 @@ class ApplicationStateMachine {
     this.TRANSITIONS = {
       [this.STATES.DRAFT]: [
         this.STATES.SUBMITTED, // Farmer completes and submits application
+        this.STATES.PAYMENT_PENDING, // New/Renewal: Go to payment first
+        this.STATES.REPLACEMENT_PAYMENT_PENDING, // Replacement: Go to payment
         this.STATES.EXPIRED, // Draft timeout (30 days)
-      ],
-
-      [this.STATES.SUBMITTED]: [
-        this.STATES.UNDER_REVIEW, // Auto-transition when payment confirmed
-        this.STATES.EXPIRED, // Submission timeout
-      ],
-
-      [this.STATES.UNDER_REVIEW]: [
-        this.STATES.PAYMENT_PENDING, // Reviewer approves documents
-        this.STATES.REVISION_REQUIRED, // Reviewer requests changes
-        this.STATES.REJECTED, // Reviewer rejects application
-        this.STATES.EXPIRED, // Review timeout (14 days)
-      ],
-
-      [this.STATES.REVISION_REQUIRED]: [
-        this.STATES.SUBMITTED, // Farmer resubmits with changes
-        this.STATES.REJECTED, // Max revisions exceeded (3 times)
-        this.STATES.EXPIRED, // Revision timeout (30 days)
       ],
 
       [this.STATES.PAYMENT_PENDING]: [
@@ -78,19 +72,51 @@ class ApplicationStateMachine {
       ],
 
       [this.STATES.PAYMENT_VERIFIED]: [
-        this.STATES.INSPECTION_SCHEDULED, // Inspector schedules farm visit
-        this.STATES.EXPIRED, // Scheduling timeout (14 days)
+        this.STATES.SUBMITTED, // Auto-transition to submitted after payment (New/Renewal)
+        this.STATES.ASSIGNMENT_PENDING, // Legacy/Direct path
+        this.STATES.EXPIRED, // Timeout
+      ],
+
+      [this.STATES.SUBMITTED]: [
+        this.STATES.UNDER_REVIEW, // Auto-transition to review
+        this.STATES.REPLACEMENT_PAYMENT_PENDING, // Auto-transition for Replacement
+        this.STATES.EXPIRED, // Submission timeout
+      ],
+
+      [this.STATES.UNDER_REVIEW]: [
+        this.STATES.PAYMENT_PENDING, // (Legacy)
+        this.STATES.ASSIGNMENT_PENDING, // Approved -> Assign Auditor (if paid)
+        this.STATES.REVISION_REQUIRED, // Auditor requests changes
+        this.STATES.REJECTED, // Auditor rejects application
+        this.STATES.EXPIRED, // Review timeout (14 days)
+      ],
+
+      [this.STATES.REVISION_REQUIRED]: [
+        this.STATES.SUBMITTED, // Farmer resubmits with changes
+        this.STATES.PENALTY_PAYMENT_PENDING, // Max revisions exceeded -> Pay penalty
+        this.STATES.REJECTED, // Max revisions exceeded (if no penalty logic)
+        this.STATES.EXPIRED, // Revision timeout (30 days)
+      ],
+
+      [this.STATES.PENALTY_PAYMENT_PENDING]: [
+        this.STATES.SUBMITTED, // Payment confirmed -> Back to Submitted
+        this.STATES.EXPIRED, // Payment timeout
+      ],
+
+      [this.STATES.ASSIGNMENT_PENDING]: [
+        this.STATES.INSPECTION_SCHEDULED, // Officer assigns Auditor
+        this.STATES.EXPIRED, // Assignment timeout
       ],
 
       [this.STATES.INSPECTION_SCHEDULED]: [
-        this.STATES.INSPECTION_COMPLETED, // Inspector completes inspection
-        this.STATES.REJECTED, // Inspector fails application
+        this.STATES.INSPECTION_COMPLETED, // Auditor completes inspection
+        this.STATES.REJECTED, // Auditor fails application
         this.STATES.EXPIRED, // Inspection timeout (30 days)
       ],
 
       [this.STATES.INSPECTION_COMPLETED]: [
         this.STATES.PHASE2_PAYMENT_PENDING, // Auto-transition after successful inspection
-        this.STATES.REJECTED, // Inspector fails application
+        this.STATES.REJECTED, // Auditor fails application
         this.STATES.EXPIRED, // Report timeout (7 days)
       ],
 
@@ -100,9 +126,21 @@ class ApplicationStateMachine {
       ],
 
       [this.STATES.PHASE2_PAYMENT_VERIFIED]: [
-        this.STATES.APPROVED, // Approver grants final approval
-        this.STATES.REJECTED, // Approver rejects
+        this.STATES.APPROVED, // Auditor grants final approval
+        this.STATES.REJECTED, // Auditor rejects
         this.STATES.EXPIRED, // Approval timeout (14 days)
+      ],
+
+      // Replacement Flow
+      [this.STATES.REPLACEMENT_PAYMENT_PENDING]: [
+        this.STATES.REPLACEMENT_ADMIN_CHECK, // Payment confirmed
+        this.STATES.EXPIRED,
+      ],
+
+      [this.STATES.REPLACEMENT_ADMIN_CHECK]: [
+        this.STATES.APPROVED, // Admin approves replacement
+        this.STATES.REJECTED, // Admin rejects
+        this.STATES.EXPIRED,
       ],
 
       [this.STATES.APPROVED]: [
@@ -126,18 +164,49 @@ class ApplicationStateMachine {
         paymentRequired: false,
       },
 
+      [this.STATES.PAYMENT_PENDING]: {
+        description: 'Awaiting Phase 1 payment (฿5,000) for application fee',
+        owner: 'FARMER',
+        timeoutDays: 7,
+        nextActions: ['Make payment via PromptPay', 'Wait for confirmation'],
+        canEdit: false,
+        paymentRequired: true,
+        paymentAmount: 5000,
+        paymentPhase: 1,
+      },
+
+      [this.STATES.PENALTY_PAYMENT_PENDING]: {
+        description: 'Awaiting Penalty payment (฿5,000) due to excessive revisions',
+        owner: 'FARMER',
+        timeoutDays: 7,
+        nextActions: ['Make penalty payment', 'Wait for confirmation'],
+        canEdit: false,
+        paymentRequired: true,
+        paymentAmount: 5000,
+        paymentPhase: 'PENALTY',
+      },
+
+      [this.STATES.PAYMENT_VERIFIED]: {
+        description: 'Payment confirmed',
+        owner: 'SYSTEM',
+        timeoutDays: 1,
+        nextActions: ['Auto-transition'],
+        canEdit: false,
+        paymentRequired: false,
+      },
+
       [this.STATES.SUBMITTED]: {
         description: 'Application submitted and waiting for initial review',
         owner: 'SYSTEM',
         timeoutDays: 3,
-        nextActions: ['Automatic assignment to reviewer'],
+        nextActions: ['Automatic assignment to auditor'],
         canEdit: false,
         paymentRequired: false,
       },
 
       [this.STATES.UNDER_REVIEW]: {
-        description: 'DTAM reviewer checking document completeness and accuracy',
-        owner: 'DTAM_REVIEWER',
+        description: 'Auditor checking document completeness and accuracy',
+        owner: 'AUDITOR',
         timeoutDays: 14,
         nextActions: ['Review documents', 'Approve or request revision'],
         canEdit: false,
@@ -148,34 +217,23 @@ class ApplicationStateMachine {
         description: 'Farmer must make requested changes and resubmit',
         owner: 'FARMER',
         timeoutDays: 30,
-        nextActions: ['Address reviewer comments', 'Resubmit application'],
+        nextActions: ['Address auditor comments', 'Resubmit application'],
         canEdit: true,
         paymentRequired: false,
       },
 
-      [this.STATES.PAYMENT_PENDING]: {
-        description: 'Awaiting Phase 1 payment (฿5,000) for inspection processing',
-        owner: 'FARMER',
-        timeoutDays: 7,
-        nextActions: ['Make payment via PromptPay', 'Wait for confirmation'],
-        canEdit: false,
-        paymentRequired: true,
-        paymentAmount: 5000,
-        paymentPhase: 1,
-      },
-
-      [this.STATES.PAYMENT_VERIFIED]: {
-        description: 'Payment confirmed, ready for inspection scheduling',
-        owner: 'DTAM_INSPECTOR',
-        timeoutDays: 14,
-        nextActions: ['Schedule farm inspection', 'Contact farmer'],
+      [this.STATES.ASSIGNMENT_PENDING]: {
+        description: 'Waiting for Officer to assign an Auditor',
+        owner: 'OFFICER',
+        timeoutDays: 3,
+        nextActions: ['Assign Auditor'],
         canEdit: false,
         paymentRequired: false,
       },
 
       [this.STATES.INSPECTION_SCHEDULED]: {
         description: 'Farm inspection scheduled, waiting for completion',
-        owner: 'DTAM_INSPECTOR',
+        owner: 'AUDITOR',
         timeoutDays: 30,
         nextActions: ['Conduct farm inspection', 'Submit inspection report'],
         canEdit: false,
@@ -203,10 +261,31 @@ class ApplicationStateMachine {
       },
 
       [this.STATES.PHASE2_PAYMENT_VERIFIED]: {
-        description: 'Final payment confirmed, awaiting admin approval',
-        owner: 'DTAM_ADMIN',
+        description: 'Final payment confirmed, awaiting final approval',
+        owner: 'AUDITOR',
         timeoutDays: 14,
         nextActions: ['Final review and approval', 'Generate certificate'],
+        canEdit: false,
+        paymentRequired: false,
+      },
+
+      // Replacement Metadata
+      [this.STATES.REPLACEMENT_PAYMENT_PENDING]: {
+        description: 'Awaiting Replacement Fee payment',
+        owner: 'FARMER',
+        timeoutDays: 7,
+        nextActions: ['Make payment'],
+        canEdit: false,
+        paymentRequired: true,
+        paymentAmount: 500, // Configurable
+        paymentPhase: 'REPLACEMENT',
+      },
+
+      [this.STATES.REPLACEMENT_ADMIN_CHECK]: {
+        description: 'Admin verifying replacement request',
+        owner: 'DTAM_ADMIN', // Or Officer? User said Admin check
+        timeoutDays: 3,
+        nextActions: ['Approve replacement'],
         canEdit: false,
         paymentRequired: false,
       },
@@ -231,7 +310,7 @@ class ApplicationStateMachine {
       },
 
       [this.STATES.REJECTED]: {
-        description: 'Application rejected by DTAM staff',
+        description: 'Application rejected by Auditor',
         owner: 'FARMER',
         timeoutDays: null,
         nextActions: ['Review rejection reason', 'Submit new application'],
@@ -255,27 +334,47 @@ class ApplicationStateMachine {
     this.ROLE_PERMISSIONS = {
       FARMER: [
         'draft_to_submitted',
+        'draft_to_payment_pending',
+        'draft_to_replacement_payment_pending',
         'revision_required_to_submitted',
+        'revision_required_to_penalty_payment_pending',
         'payment_pending_to_payment_verified',
+        'penalty_payment_pending_to_submitted',
+        'replacement_payment_pending_to_replacement_admin_check',
         'phase2_payment_pending_to_phase2_payment_verified',
       ],
 
-      DTAM_REVIEWER: [
+      AUDITOR: [
         'under_review_to_payment_pending',
+        'under_review_to_assignment_pending', // If approved
         'under_review_to_revision_required',
+        'under_review_to_penalty_payment_pending',
         'under_review_to_rejected',
-      ],
-
-      DTAM_INSPECTOR: [
-        'payment_verified_to_inspection_scheduled',
         'inspection_scheduled_to_inspection_completed',
         'inspection_scheduled_to_rejected',
+        'phase2_payment_verified_to_approved',
+        'phase2_payment_verified_to_rejected',
       ],
 
-      DTAM_ADMIN: ['phase2_payment_verified_to_approved', 'phase2_payment_verified_to_rejected'],
+      OFFICER: [
+        'assignment_pending_to_inspection_scheduled',
+      ],
+
+      DTAM_ADMIN: [
+        'replacement_admin_check_to_approved',
+        'replacement_admin_check_to_rejected',
+        'phase2_payment_verified_to_approved',
+        'phase2_payment_verified_to_rejected',
+      ],
 
       SYSTEM: [
         'submitted_to_under_review',
+        'submitted_to_replacement_payment_pending', // Added for Replacement
+        'payment_pending_to_payment_verified',
+        'phase2_payment_pending_to_phase2_payment_verified',
+        'replacement_payment_pending_to_replacement_admin_check', // Added for Replacement
+        'payment_verified_to_submitted',
+        'payment_verified_to_assignment_pending',
         'inspection_completed_to_phase2_payment_pending',
         'approved_to_certificate_issued',
         '*_to_expired', // System can expire any state

@@ -65,6 +65,18 @@ function createApplicationRoutes(dependencies = {}) {
   );
 
   /**
+   * Get dashboard summary
+   * GET /api/applications/dashboard/summary
+   * @access Private (Authenticated users)
+   */
+  router.get(
+    '/dashboard/summary',
+    authenticate,
+    auditLog('DASHBOARD_VIEW'),
+    applicationController.getDashboardSummary,
+  );
+
+  /**
    * Get application by ID
    * GET /api/applications/:id
    * @access Private (Owner or DTAM staff)
@@ -103,6 +115,19 @@ function createApplicationRoutes(dependencies = {}) {
     validateRequest('submitApplication'),
     auditLog('APPLICATION_SUBMIT'),
     applicationController.submitApplication,
+  );
+
+  /**
+   * Confirm payment
+   * POST /api/applications/:id/payment/confirm
+   * @access Private (Admin, System, or Owner for mock)
+   */
+  router.post(
+    '/:id/payment/confirm',
+    authenticate,
+    // validateRequest('confirmPayment'), // TODO: Add validation schema
+    auditLog('PAYMENT_CONFIRM'),
+    applicationController.confirmPayment,
   );
 
   /**

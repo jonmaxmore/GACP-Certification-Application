@@ -56,8 +56,8 @@ const dtamStaffSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['admin', 'reviewer', 'manager', 'inspector', 'operator'],
-      default: 'reviewer',
+      enum: ['admin', 'auditor', 'officer'],
+      default: 'auditor',
       required: true,
     },
     department: {
@@ -106,8 +106,8 @@ const dtamStaffSchema = new mongoose.Schema(
 // dtamStaffSchema.plugin(shared.database.mongoosePlugins.timestampPlugin);
 
 // Indexes for performance
-dtamStaffSchema.index({ username: 1 }, { unique: true });
-dtamStaffSchema.index({ email: 1 }, { unique: true });
+// dtamStaffSchema.index({ username: 1 }, { unique: true }); // Already defined in schema
+// dtamStaffSchema.index({ email: 1 }, { unique: true }); // Already defined in schema
 dtamStaffSchema.index({ role: 1 });
 dtamStaffSchema.index({ isActive: 1 });
 dtamStaffSchema.index({ userType: 1 });
@@ -188,20 +188,18 @@ dtamStaffSchema.methods.isAccountLocked = function () {
 dtamStaffSchema.methods.getPermissions = function () {
   const rolePermissions = {
     admin: ['*'], // All permissions
-    manager: [
-      'view_all_applications',
+    auditor: [
+      'view_applications',
+      'review_documents',
+      'conduct_inspections',
       'approve_applications',
-      'reject_applications',
       'view_statistics',
-      'manage_staff',
-      'export_data',
+      'create_reports',
     ],
-    reviewer: ['view_applications', 'review_applications', 'view_statistics', 'create_reports'],
-    inspector: ['view_applications', 'conduct_inspections', 'upload_documents', 'create_reports'],
-    operator: ['view_applications', 'update_status', 'view_statistics'],
+    officer: ['view_applications', 'assign_tasks', 'manage_queue', 'view_statistics'],
   };
 
-  return rolePermissions[this.role] || rolePermissions.operator;
+  return rolePermissions[this.role] || [];
 };
 
 /**
@@ -263,10 +261,10 @@ dtamStaffSchema.statics.createStaff = async function (staffData, creator = null)
       userType: 'DTAM_STAFF',
       metadata: creator
         ? {
-            createdByUsername: creator.username,
-            createdByRole: creator.role,
-            ipAddress: creator.ipAddress,
-          }
+          createdByUsername: creator.username,
+          createdByRole: creator.role,
+          ipAddress: creator.ipAddress,
+        }
         : {},
     });
 

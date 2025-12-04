@@ -18,7 +18,7 @@
  * @date 2025-10-18
  */
 
-const logger = require('../../../../shared/logger/logger');
+const logger = require('../../../../shared/logger');
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
@@ -203,6 +203,15 @@ const FarmSchema = new Schema(
         enum: ['greenhouse', 'storage', 'processing', 'irrigation', 'other'],
       },
     ],
+    farmType: {
+      type: String,
+      enum: ['ORGANIC', 'CONVENTIONAL', 'MIXED'],
+      required: true,
+    },
+    owner: {
+      type: String,
+      required: true,
+    },
   },
   { _id: false },
 );
@@ -491,6 +500,36 @@ const ApplicationSchema = new Schema(
       trim: true,
     },
 
+    // Application Type & Context
+    type: {
+      type: String,
+      enum: ['NEW', 'RENEWAL', 'REPLACEMENT'],
+      default: 'NEW',
+      required: true,
+      index: true,
+    },
+    userType: {
+      type: String,
+      enum: ['individual', 'community_enterprise', 'juristic'],
+      required: true,
+    },
+    previousCertificateId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Certificate',
+      default: null,
+    },
+    replacementDetails: {
+      reason: {
+        type: String,
+        enum: ['lost', 'damaged'],
+      },
+      evidence: [String], // URLs to uploaded evidence
+    },
+    penaltyPaid: {
+      type: Boolean,
+      default: false,
+    },
+
     // Farm Information
     farm: {
       type: FarmSchema,
@@ -539,6 +578,8 @@ const ApplicationSchema = new Schema(
     payment: {
       phase1: PaymentSchema,
       phase2: PaymentSchema,
+      penalty: PaymentSchema,
+      replacement: PaymentSchema,
     },
 
     // Process Stages
@@ -650,7 +691,7 @@ ApplicationSchema.index({
 });
 
 // Geospatial index for farm locations
-ApplicationSchema.index({ 'farm.coordinates': '2dsphere' });
+// ApplicationSchema.index({ 'farm.coordinates': '2dsphere' });
 
 // ==============================================
 // SCHEMA METHODS

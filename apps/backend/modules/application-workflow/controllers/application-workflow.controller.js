@@ -48,6 +48,30 @@ class ApplicationWorkflowController {
   };
 
   /**
+     * Confirm payment
+     * POST /api/applications/:id/payment/confirm
+     */
+  confirmPayment = async (req, res) => {
+    try {
+      // In a real scenario, this would be called by a payment gateway webhook
+      // For now, we allow admin or system to call it, or the user for mock payment
+      const paymentData = {
+        ...req.body,
+        transactionId: req.body.transactionId || `TXN-${Date.now()}`,
+        amount: req.body.amount,
+        phase: req.body.phase || 1,
+      };
+
+      const application = await this.workflowService.confirmPayment(req.params.id, paymentData);
+
+      return successResponse(res, application, 'Payment confirmed successfully');
+    } catch (error) {
+      logger.error('[WorkflowController] Confirm payment error:', error);
+      return errorResponse(res, error);
+    }
+  };
+
+  /**
    * Start document review (reviewer)
    * POST /api/applications/:id/review
    */
@@ -297,6 +321,20 @@ class ApplicationWorkflowController {
       });
     } catch (error) {
       logger.error('[WorkflowController] List applications error:', error);
+      return errorResponse(res, error);
+    }
+  };
+
+  /**
+   * Get dashboard summary
+   * GET /api/applications/dashboard/summary
+   */
+  getDashboardSummary = async (req, res) => {
+    try {
+      const summary = await this.workflowService.getDashboardSummary(req.user.id, req.user.role);
+      return successResponse(res, summary);
+    } catch (error) {
+      logger.error('[WorkflowController] Get dashboard summary error:', error);
       return errorResponse(res, error);
     }
   };

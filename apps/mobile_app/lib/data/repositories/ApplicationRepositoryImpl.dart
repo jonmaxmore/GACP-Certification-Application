@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import '../../core/errors/failures.dart';
-import '../../core/network/dio_client.dart';
-import '../../domain/entities/application_entity.dart';
-import '../../domain/repositories/application_repository.dart';
+import '../../core/errors/Failures.dart';
+import '../../core/network/DioClient.dart';
+import '../../domain/entities/ApplicationEntity.dart';
+import '../../domain/repositories/ApplicationRepository.dart';
 
 class ApplicationRepositoryImpl implements ApplicationRepository {
   final DioClient _dioClient;

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../providers/application_provider.dart';
-import '../../establishment/providers/establishment_provider.dart';
+import '../providers/ApplicationProvider.dart';
+import '../../establishment/providers/EstablishmentProvider.dart';
 
 class ApplicationFormScreen extends ConsumerStatefulWidget {
   final String formType; // 'GACP_FORM_9', 'GACP_FORM_10', 'GACP_FORM_11'

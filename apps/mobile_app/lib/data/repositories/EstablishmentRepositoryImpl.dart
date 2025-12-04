@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import '../../core/errors/failures.dart';
-import '../../core/network/dio_client.dart';
-import '../../domain/entities/establishment_entity.dart';
-import '../../domain/repositories/establishment_repository.dart';
+import '../../core/errors/Failures.dart';
+import '../../core/network/DioClient.dart';
+import '../../domain/entities/EstablishmentEntity.dart';
+import '../../domain/repositories/EstablishmentRepository.dart';
 
 class EstablishmentRepositoryImpl implements EstablishmentRepository {
   final DioClient _dioClient;

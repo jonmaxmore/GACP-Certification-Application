@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/network/dio_client.dart';
-import '../../../../data/repositories/dashboard_repository_impl.dart';
-import '../../../../domain/entities/dashboard_stats_entity.dart';
-import '../../../../domain/repositories/dashboard_repository.dart';
-import '../../auth/providers/auth_provider.dart'; // To get dioClientProvider
+import '../../../../core/network/DioClient.dart';
+import '../../../../data/repositories/DashboardRepositoryImpl.dart';
+import '../../../../domain/entities/DashboardStatsEntity.dart';
+import '../../../../domain/repositories/DashboardRepository.dart';
+import '../../auth/providers/AuthProvider.dart'; // To get dioClientProvider
 
 // 1. Repository Provider
 final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {

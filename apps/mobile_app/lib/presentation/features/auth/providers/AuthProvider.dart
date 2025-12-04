@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../../../../core/network/dio_client.dart';
-import '../../../../data/repositories/auth_repository_impl.dart';
-import '../../../../domain/entities/user_entity.dart';
-import '../../../../domain/repositories/auth_repository.dart';
+import '../../../../core/network/DioClient.dart';
+import '../../../../data/repositories/AuthRepositoryImpl.dart';
+import '../../../../domain/entities/UserEntity.dart';
+import '../../../../domain/repositories/AuthRepository.dart';
 
 // 1. Providers for Dependencies
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {

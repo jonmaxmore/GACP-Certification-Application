@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:dartz/dartz.dart';
-import '../../core/errors/failures.dart';
-import '../entities/establishment_entity.dart';
+import '../../core/errors/Failures.dart';
+import '../entities/EstablishmentEntity.dart';
 
 abstract class EstablishmentRepository {
   Future<Either<Failure, List<EstablishmentEntity>>> getEstablishments();

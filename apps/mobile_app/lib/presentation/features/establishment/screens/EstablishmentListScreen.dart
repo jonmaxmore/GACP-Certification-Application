@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../../../core/ui/responsive_layout.dart';
-import '../providers/establishment_provider.dart';
-import '../../../../domain/entities/establishment_entity.dart';
+import '../../../../core/ui/ResponsiveLayout.dart';
+import '../providers/EstablishmentProvider.dart';
+import '../../../../domain/entities/EstablishmentEntity.dart';
 
 class EstablishmentListScreen extends ConsumerWidget {
   const EstablishmentListScreen({super.key});

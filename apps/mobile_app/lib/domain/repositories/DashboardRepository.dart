@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import '../../core/errors/failures.dart';
-import '../entities/dashboard_stats_entity.dart';
+import '../../core/errors/Failures.dart';
+import '../entities/DashboardStatsEntity.dart';
 
 abstract class DashboardRepository {
   Future<Either<Failure, DashboardStatsEntity>> getDashboardStats();

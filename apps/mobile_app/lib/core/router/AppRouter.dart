@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../presentation/navigation/app_shell.dart';
-import '../../presentation/features/establishment/screens/establishment_list_screen.dart';
-import '../../presentation/features/establishment/screens/establishment_form_screen.dart';
-import '../../presentation/features/dashboard/screens/dashboard_screen.dart';
-import '../../presentation/features/application/screens/application_form_screen.dart';
-import '../../presentation/features/application/screens/application_type_selection_screen.dart';
-import '../../presentation/features/admin/screens/admin_login_screen.dart';
-import '../../presentation/features/admin/screens/admin_dashboard_screen.dart';
-import '../../presentation/features/admin/screens/task_queue_screen.dart';
-import '../../presentation/features/auditor/screens/my_assignments_screen.dart';
-import '../../presentation/features/auditor/screens/inspection_form_screen.dart';
+import '../../presentation/navigation/AppShell.dart';
+import '../../presentation/features/establishment/screens/EstablishmentListScreen.dart';
+import '../../presentation/features/establishment/screens/EstablishmentFormScreen.dart';
+import '../../presentation/features/dashboard/screens/DashboardScreen.dart';
+import '../../presentation/features/application/screens/ApplicationFormScreen.dart';
+import '../../presentation/features/application/screens/ApplicationTypeSelectionScreen.dart';
+import '../../presentation/features/admin/screens/AdminLoginScreen.dart';
+import '../../presentation/features/admin/screens/admin_DashboardScreen.dart';
+import '../../presentation/features/admin/screens/TaskQueueScreen.dart';
+import '../../presentation/features/auditor/screens/MyAssignmentsScreen.dart';
+import '../../presentation/features/auditor/screens/InspectionFormScreen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();

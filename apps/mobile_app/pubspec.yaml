@@ -26,7 +26,7 @@ dependencies:
   
   # UI Components
   google_fonts: ^6.1.0
-  lucide_icons: ^0.1.0
+  lucide_icons: ^0.257.0
   
   # Utilities
   json_annotation: ^4.8.1

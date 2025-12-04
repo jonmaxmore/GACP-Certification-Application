@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/network/dio_client.dart';
-import '../../../../data/repositories/application_repository_impl.dart';
-import '../../../../domain/entities/application_entity.dart';
-import '../../../../domain/repositories/application_repository.dart';
-import '../../auth/providers/auth_provider.dart';
+import '../../../../core/network/DioClient.dart';
+import '../../../../data/repositories/ApplicationRepositoryImpl.dart';
+import '../../../../domain/entities/ApplicationEntity.dart';
+import '../../../../domain/repositories/ApplicationRepository.dart';
+import '../../auth/providers/AuthProvider.dart';
 
 // 1. Repository Provider
 final applicationRepositoryProvider = Provider<ApplicationRepository>((ref) {

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../../../core/ui/responsive_layout.dart';
-import '../providers/dashboard_provider.dart';
+import '../../../../core/ui/ResponsiveLayout.dart';
+import '../providers/DashboardProvider.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});

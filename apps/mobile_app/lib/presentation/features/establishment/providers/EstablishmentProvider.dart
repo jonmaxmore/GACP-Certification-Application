@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
-import '../../../../core/network/dio_client.dart';
-import '../../../../data/repositories/establishment_repository_impl.dart';
-import '../../../../domain/entities/establishment_entity.dart';
-import '../../../../domain/repositories/establishment_repository.dart';
-import '../providers/auth_provider.dart'; // To get dioClientProvider
+import '../../../../core/network/DioClient.dart';
+import '../../../../data/repositories/EstablishmentRepositoryImpl.dart';
+import '../../../../domain/entities/EstablishmentEntity.dart';
+import '../../../../domain/repositories/EstablishmentRepository.dart';
+import '../providers/AuthProvider.dart'; // To get dioClientProvider
 
 // 1. Repository Provider
 final establishmentRepositoryProvider = Provider<EstablishmentRepository>((ref) {

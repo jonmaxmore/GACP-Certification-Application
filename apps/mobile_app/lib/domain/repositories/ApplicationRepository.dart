@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:dartz/dartz.dart';
-import '../../core/errors/failures.dart';
-import '../entities/application_entity.dart';
+import '../../core/errors/Failures.dart';
+import '../entities/ApplicationEntity.dart';
 
 abstract class ApplicationRepository {
   Future<Either<Failure, List<ApplicationEntity>>> getMyApplications();

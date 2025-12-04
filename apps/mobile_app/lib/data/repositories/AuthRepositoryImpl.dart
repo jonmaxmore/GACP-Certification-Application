@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../../core/errors/failures.dart';
-import '../../core/network/dio_client.dart';
-import '../../domain/entities/user_entity.dart';
-import '../../domain/repositories/auth_repository.dart';
+import '../../core/errors/Failures.dart';
+import '../../core/network/DioClient.dart';
+import '../../domain/entities/UserEntity.dart';
+import '../../domain/repositories/AuthRepository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final DioClient _dioClient;

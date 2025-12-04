@@ -6,7 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../providers/establishment_provider.dart';
+import '../providers/EstablishmentProvider.dart';
 
 class EstablishmentFormScreen extends ConsumerStatefulWidget {
   const EstablishmentFormScreen({super.key});

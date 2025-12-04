@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import '../../core/errors/failures.dart';
-import '../../core/network/dio_client.dart';
-import '../../domain/entities/dashboard_stats_entity.dart';
-import '../../domain/repositories/dashboard_repository.dart';
+import '../../core/errors/Failures.dart';
+import '../../core/network/DioClient.dart';
+import '../../domain/entities/DashboardStatsEntity.dart';
+import '../../domain/repositories/DashboardRepository.dart';
 
 class DashboardRepositoryImpl implements DashboardRepository {
   final DioClient _dioClient;

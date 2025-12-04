@@ -1,5 +1,12 @@
 const { createLogger } = require('../../../shared/logger');
 const logger = createLogger('auth-farmer-auth');
+const {
+  ValidationError,
+  AuthenticationError,
+  AuthorizationError,
+  NotFoundError,
+  ConflictError,
+} = require('../../../shared/errors');
 
 /**
  * Auth Controller
@@ -12,7 +19,6 @@ const logger = createLogger('auth-farmer-auth');
  * - Password reset flow
  * - Profile management
  */
-
 class AuthController {
   constructor({
     registerUserUseCase,
@@ -35,12 +41,11 @@ class AuthController {
   /**
    * Register new farmer
    * POST /api/auth/farmer/register
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
    */
   async register(req, res) {
     try {
-      console.error('DEBUG Register Request Body:', JSON.stringify(req.body, null, 2));
-      console.error('DEBUG Register Request File:', req.file);
-
       const result = await this.registerUserUseCase.execute({
         email: req.body.email,
         password: req.body.password,
@@ -74,36 +79,15 @@ class AuthController {
         verificationToken: result.verificationToken,
       });
     } catch (error) {
-      console.error('FULL ERROR:', error);
-      logger.error('Registration error:', error);
-
-      if (
-        error.message.includes('already exists') ||
-        error.message.includes('already registered')
-      ) {
-        return res.status(409).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      if (error.message.includes('Invalid') || error.message.includes('required')) {
-        return res.status(400).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        error: 'Registration failed. Please try again.',
-      });
+      this._handleError(res, error, 'Registration error');
     }
   }
 
   /**
    * Login farmer
    * POST /api/auth/farmer/login
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
    */
   async login(req, res) {
     try {
@@ -130,49 +114,15 @@ class AuthController {
         },
       });
     } catch (error) {
-      logger.error('Login error:', error);
-
-      if (
-        error.message.includes('Invalid email or password') ||
-        error.message.includes('Invalid credentials')
-      ) {
-        return res.status(401).json({
-          success: false,
-          error: 'Invalid email or password',
-        });
-      }
-
-      if (error.message.includes('locked')) {
-        return res.status(403).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      if (error.message.includes('verify your email')) {
-        return res.status(403).json({
-          success: false,
-          error: 'Please verify your email before logging in',
-        });
-      }
-
-      if (error.message.includes('suspended') || error.message.includes('inactive')) {
-        return res.status(403).json({
-          success: false,
-          error: 'Your account is not active. Please contact support.',
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        error: 'Login failed. Please try again.',
-      });
+      this._handleError(res, error, 'Login error');
     }
   }
 
   /**
    * Verify email
    * GET /api/auth/farmer/verify-email/:token
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
    */
   async verifyEmail(req, res) {
     try {
@@ -189,32 +139,15 @@ class AuthController {
         },
       });
     } catch (error) {
-      logger.error('Email verification error:', error);
-
-      if (error.message.includes('not found') || error.message.includes('Invalid')) {
-        return res.status(404).json({
-          success: false,
-          message: 'Invalid or expired verification token',
-        });
-      }
-
-      if (error.message.includes('already verified')) {
-        return res.status(400).json({
-          success: false,
-          message: 'Email is already verified',
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        message: 'Email verification failed. Please try again.',
-      });
+      this._handleError(res, error, 'Email verification error');
     }
   }
 
   /**
    * Request password reset
    * POST /api/auth/farmer/request-password-reset
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
    */
   async requestPasswordReset(req, res) {
     try {
@@ -229,7 +162,6 @@ class AuthController {
       });
     } catch (error) {
       logger.error('Password reset request error:', error);
-
       // Always return success to prevent email enumeration
       return res.status(200).json({
         success: true,
@@ -241,6 +173,8 @@ class AuthController {
   /**
    * Reset password
    * POST /api/auth/farmer/reset-password
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
    */
   async resetPassword(req, res) {
     try {
@@ -256,36 +190,15 @@ class AuthController {
         message: 'Password reset successful. You can now login with your new password.',
       });
     } catch (error) {
-      logger.error('Password reset error:', error);
-
-      if (
-        error.message.includes('not found') ||
-        error.message.includes('Invalid') ||
-        error.message.includes('expired')
-      ) {
-        return res.status(404).json({
-          success: false,
-          message: 'Invalid or expired reset token',
-        });
-      }
-
-      if (error.message.includes('weak') || error.message.includes('requirements')) {
-        return res.status(400).json({
-          success: false,
-          message: error.message,
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        message: 'Password reset failed. Please try again.',
-      });
+      this._handleError(res, error, 'Password reset error');
     }
   }
 
   /**
    * Get user profile
    * GET /api/auth/farmer/profile
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
    */
   async getProfile(req, res) {
     try {
@@ -298,25 +211,15 @@ class AuthController {
         success: true,
       });
     } catch (error) {
-      logger.error('Get profile error:', error);
-
-      if (error.message.includes('not found')) {
-        return res.status(404).json({
-          success: false,
-          message: 'User not found',
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to retrieve profile',
-      });
+      this._handleError(res, error, 'Get profile error');
     }
   }
 
   /**
    * Update user profile
    * PUT /api/auth/farmer/profile
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
    */
   async updateProfile(req, res) {
     try {
@@ -345,34 +248,68 @@ class AuthController {
         message: 'Profile updated successfully',
       });
     } catch (error) {
-      logger.error('Update profile error:', error);
+      this._handleError(res, error, 'Update profile error');
+    }
+  }
 
-      if (error.message.includes('not found')) {
-        return res.status(404).json({
-          success: false,
-          message: 'User not found',
-        });
-      }
+  /**
+   * Standardized error handler
+   * @private
+   * @param {import('express').Response} res
+   * @param {Error} error
+   * @param {string} contextMessage
+   */
+  _handleError(res, error, contextMessage) {
+    logger.error(`${contextMessage}:`, error);
 
-      if (error.message.includes('not active')) {
-        return res.status(403).json({
-          success: false,
-          message: 'Cannot update profile. Account is not active.',
-        });
-      }
-
-      if (error.message.includes('Invalid') || error.message.includes('required')) {
-        return res.status(400).json({
-          success: false,
-          message: error.message,
-        });
-      }
-
-      return res.status(500).json({
+    if (error instanceof ValidationError) {
+      return res.status(400).json({
         success: false,
-        message: 'Profile update failed. Please try again.',
+        error: error.message,
+        details: error.details,
       });
     }
+
+    if (error instanceof AuthenticationError) {
+      return res.status(401).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    if (error instanceof AuthorizationError) {
+      return res.status(403).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    if (error instanceof ConflictError || error.message.includes('already exists')) {
+      return res.status(409).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    // Fallback for generic errors
+    if (error.message.includes('Invalid') || error.message.includes('required')) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      error: 'An unexpected error occurred. Please try again later.',
+    });
   }
 }
 

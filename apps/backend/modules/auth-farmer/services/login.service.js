@@ -13,6 +13,7 @@
 
 const Email = require('../domain/value-objects/Email');
 const UserLoggedIn = require('../domain/events/UserLoggedIn');
+const { AuthenticationError, AuthorizationError } = require('../../../shared/errors');
 
 class LoginUserUseCase {
   constructor({ userRepository, passwordHasher, jwtService, eventBus }) {
@@ -25,7 +26,13 @@ class LoginUserUseCase {
   /**
    * Execute login use case
    * @param {Object} request - Login credentials
+   * @param {string} request.email - User email
+   * @param {string} request.password - User password
+   * @param {string} [request.ipAddress] - Client IP address
+   * @param {string} [request.userAgent] - Client User Agent
    * @returns {Promise<Object>} - { user, token }
+   * @throws {AuthenticationError} If credentials are invalid
+   * @throws {AuthorizationError} If account is locked or inactive
    */
   async execute(request) {
     const { email, password, ipAddress, userAgent } = request;
@@ -36,24 +43,24 @@ class LoginUserUseCase {
     // 2. Find user by email
     const user = await this.userRepository.findByEmail(emailVO.value);
     if (!user) {
-      throw new Error('Invalid email or password');
+      throw new AuthenticationError('Invalid email or password');
     }
 
     // 3. Check if account is locked
     if (user.isAccountLocked()) {
       const lockDuration = Math.ceil((user.lockedUntil - new Date()) / 1000 / 60);
-      throw new Error(`Account is locked. Please try again in ${lockDuration} minutes`);
+      throw new AuthorizationError(`Account is locked. Please try again in ${lockDuration} minutes`);
     }
 
     // 4. Check if account is active
     if (!user.isActive()) {
       if (user.status === 'PENDING_VERIFICATION') {
-        throw new Error('Please verify your email before logging in');
+        throw new AuthorizationError('Please verify your email before logging in');
       }
       if (user.status === 'SUSPENDED') {
-        throw new Error('Your account has been suspended. Please contact support');
+        throw new AuthorizationError('Your account has been suspended. Please contact support');
       }
-      throw new Error('Account is inactive');
+      throw new AuthorizationError('Account is inactive');
     }
 
     // 5. Verify password
@@ -64,7 +71,7 @@ class LoginUserUseCase {
       user.recordFailedLogin();
       await this.userRepository.save(user);
 
-      throw new Error('Invalid email or password');
+      throw new AuthenticationError('Invalid email or password');
     }
 
     // 6. Record successful login

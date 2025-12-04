@@ -18,19 +18,62 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
-        final apps = data.map((item) => ApplicationEntity(
-          id: item['_id'] ?? item['id'],
-          type: item['type'] ?? 'Unknown',
-          status: item['status'] ?? 'Draft',
-          establishmentId: item['establishment']?['_id'] ?? item['establishment'] ?? '',
-          establishmentName: item['establishment']?['name'] ?? 'Unknown Farm',
-          formData: item['data'] ?? {},
-          documents: (item['documents'] as List?)?.map((d) => d.toString()).toList() ?? [],
-          createdAt: DateTime.tryParse(item['createdAt']) ?? DateTime.now(),
-        )).toList();
+        final apps = data.map((item) {
+          final formData = item['data'] ?? {};
+          return ApplicationEntity(
+            id: item['_id'] ?? item['id'],
+            type: item['type'] ?? 'Unknown',
+            status: item['status'] ?? 'Draft',
+            establishmentId:
+                item['establishment']?['_id'] ?? item['establishment'] ?? '',
+            establishmentName: item['establishment']?['name'] ?? 'Unknown Farm',
+            // Map form data fields
+            totalArea: formData['totalArea']?.toDouble(),
+            cultivatedArea: formData['cultivatedArea']?.toDouble(),
+            areaUnit: formData['areaUnit'] ?? 'rai',
+            landOwnershipType: formData['landOwnershipType'] ?? 'owned',
+            landDocumentId: formData['landDocumentId'] ?? '',
+            waterSourceType: formData['waterSourceType'] ?? 'well',
+            soilType: formData['soilType'] ?? 'loam',
+            plantingSystem: formData['plantingSystem'] ?? 'soil',
+            cropName: formData['cropName'] ?? '',
+            cropVariety: formData['cropVariety'] ?? '',
+            cropSource: formData['cropSource'] ?? '',
+            plantingMethod: formData['plantingMethod'] ?? 'seeds',
+            fenceDescription: formData['fenceDescription'] ?? '',
+            cctvCount: formData['cctvCount'],
+            guardCount: formData['guardCount'],
+            accessControl: formData['accessControl'] ?? '',
+            storageLocation: formData['storageLocation'] ?? '',
+            storageSecurity: formData['storageSecurity'] ?? '',
+            tempControl: formData['tempControl'] ?? false,
+            dispensingMethod: formData['dispensingMethod'] ?? 'pharmacy',
+            pharmacistName: formData['pharmacistName'] ?? '',
+            pharmacistLicense: formData['pharmacistLicense'] ?? '',
+            operatingHours: formData['operatingHours'] ?? '',
+            commercialRegNumber: formData['commercialRegNumber'] ?? '',
+            importExportType: formData['importExportType'] ?? 'import',
+            country: formData['country'] ?? '',
+            portOfEntryExit: formData['portOfEntryExit'] ?? '',
+            transportMode: formData['transportMode'] ?? 'air',
+            carrierName: formData['carrierName'] ?? '',
+            expectedDate: formData['expectedDate'] != null
+                ? DateTime.tryParse(formData['expectedDate'])
+                : null,
+            plantParts: formData['plantParts'] ?? '',
+            quantity: formData['quantity']?.toDouble(),
+            purpose: formData['purpose'] ?? '',
+            documents: (item['documents'] as List?)
+                    ?.map((d) => d.toString())
+                    .toList() ??
+                [],
+            createdAt: DateTime.tryParse(item['createdAt']) ?? DateTime.now(),
+          );
+        }).toList();
         return Right(apps);
       } else {
-        return const Left(ServerFailure(message: 'Failed to fetch applications'));
+        return const Left(
+            ServerFailure(message: 'Failed to fetch applications'));
       }
     } on DioException catch (e) {
       return Left(ServerFailure(message: e.message ?? 'Network Error'));
@@ -58,7 +101,8 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final item = response.data['data'];
-        final applicationId = item['applicationId'] ?? item['_id']; // Handle different response formats
+        final applicationId = item['applicationId'] ??
+            item['_id']; // Handle different response formats
 
         // Step 2: Upload Documents
         for (var entry in documents.entries) {
@@ -71,12 +115,48 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
           status: 'Pending',
           establishmentId: establishmentId,
           establishmentName: 'Current Farm', // Placeholder until refresh
-          formData: formData,
+          // Map form data fields
+          totalArea: formData['totalArea']?.toDouble(),
+          cultivatedArea: formData['cultivatedArea']?.toDouble(),
+          areaUnit: formData['areaUnit'] ?? 'rai',
+          landOwnershipType: formData['landOwnershipType'] ?? 'owned',
+          landDocumentId: formData['landDocumentId'] ?? '',
+          waterSourceType: formData['waterSourceType'] ?? 'well',
+          soilType: formData['soilType'] ?? 'loam',
+          plantingSystem: formData['plantingSystem'] ?? 'soil',
+          cropName: formData['cropName'] ?? '',
+          cropVariety: formData['cropVariety'] ?? '',
+          cropSource: formData['cropSource'] ?? '',
+          plantingMethod: formData['plantingMethod'] ?? 'seeds',
+          fenceDescription: formData['fenceDescription'] ?? '',
+          cctvCount: formData['cctvCount'],
+          guardCount: formData['guardCount'],
+          accessControl: formData['accessControl'] ?? '',
+          storageLocation: formData['storageLocation'] ?? '',
+          storageSecurity: formData['storageSecurity'] ?? '',
+          tempControl: formData['tempControl'] ?? false,
+          dispensingMethod: formData['dispensingMethod'] ?? 'pharmacy',
+          pharmacistName: formData['pharmacistName'] ?? '',
+          pharmacistLicense: formData['pharmacistLicense'] ?? '',
+          operatingHours: formData['operatingHours'] ?? '',
+          commercialRegNumber: formData['commercialRegNumber'] ?? '',
+          importExportType: formData['importExportType'] ?? 'import',
+          country: formData['country'] ?? '',
+          portOfEntryExit: formData['portOfEntryExit'] ?? '',
+          transportMode: formData['transportMode'] ?? 'air',
+          carrierName: formData['carrierName'] ?? '',
+          expectedDate: formData['expectedDate'] != null
+              ? DateTime.tryParse(formData['expectedDate'])
+              : null,
+          plantParts: formData['plantParts'] ?? '',
+          quantity: formData['quantity']?.toDouble(),
+          purpose: formData['purpose'] ?? '',
           documents: documents.keys.toList(),
           createdAt: DateTime.now(),
         ));
       } else {
-        return const Left(ServerFailure(message: 'Failed to submit application'));
+        return const Left(
+            ServerFailure(message: 'Failed to submit application'));
       }
     } on DioException catch (e) {
       return Left(ServerFailure(message: e.message ?? 'Network Error'));
@@ -85,7 +165,8 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
     }
   }
 
-  Future<void> _uploadDocument(String applicationId, String docType, File file) async {
+  Future<void> _uploadDocument(
+      String applicationId, String docType, File file) async {
     try {
       String fileName = file.path.split('/').last;
       FormData formData = FormData.fromMap({

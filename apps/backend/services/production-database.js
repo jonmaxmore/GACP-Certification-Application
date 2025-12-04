@@ -38,14 +38,9 @@ class ProductionDatabaseService {
       }
 
       logger.info('Connecting to MongoDB Atlas...');
+      console.log('DEBUG: Connecting to MongoDB URI:', mongoUri);
 
-      await mongoose.connect(mongoUri, {
-        maxPoolSize: 10,
-        minPoolSize: 2,
-        socketTimeoutMS: 45000,
-        serverSelectionTimeoutMS: 5000,
-        family: 4,
-      });
+      await mongoose.connect(mongoUri);
 
       this.connection = mongoose.connection;
       this.isConnected = true;
@@ -58,6 +53,7 @@ class ProductionDatabaseService {
 
       return this.connection;
     } catch (error) {
+      console.error('DEBUG: Connection Error:', error);
       logger.error('Failed to connect to MongoDB Atlas:', error);
       await this.handleReconnect();
       throw error;

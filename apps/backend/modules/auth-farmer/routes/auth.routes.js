@@ -7,8 +7,8 @@
 
 const express = require('express');
 const authValidator = require('../validators/auth.validator');
-const authMiddleware = require('../../../../middleware/auth-middleware');
-const upload = require('../../../../middleware/upload');
+const authMiddleware = require('../../../middleware/auth-middleware');
+const upload = require('../../../middleware/upload');
 
 /**
  * Create auth router

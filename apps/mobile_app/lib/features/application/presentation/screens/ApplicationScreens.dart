@@ -145,7 +145,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
             children: [
               // 1. Form Type
               DropdownButtonFormField<String>(
-                value: _selectedFormType,
+                initialValue: _selectedFormType,
                 decoration: const InputDecoration(labelText: 'ประเภทแบบคำขอ'),
                 items: const [
                   DropdownMenuItem(
@@ -160,7 +160,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
               // 2. Applicant Type
               DropdownButtonFormField<String>(
-                value: _applicantType,
+                initialValue: _applicantType,
                 decoration: const InputDecoration(labelText: 'ประเภทผู้ขอ'),
                 items: const [
                   DropdownMenuItem(
@@ -179,7 +179,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
               establishmentState.when(
                 data: (establishments) {
                   return DropdownButtonFormField<String>(
-                    value: _selectedEstablishmentId,
+                    initialValue: _selectedEstablishmentId,
                     decoration: const InputDecoration(
                         labelText: 'เลือกสถานที่ประกอบการ'),
                     hint: const Text('เลือกสถานที่...'),

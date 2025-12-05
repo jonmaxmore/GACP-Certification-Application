@@ -29,8 +29,10 @@ class DashboardScreen extends ConsumerWidget {
               : SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
                   child: ResponsiveLayout(
-                    mobileBody: _DashboardContent(stats: state.stats, crossAxisCount: 2),
-                    desktopBody: _DashboardContent(stats: state.stats, crossAxisCount: 4),
+                    mobileBody: _DashboardContent(
+                        stats: state.stats, crossAxisCount: 2),
+                    desktopBody: _DashboardContent(
+                        stats: state.stats, crossAxisCount: 4),
                   ),
                 ),
       floatingActionButton: FloatingActionButton.extended(
@@ -142,9 +144,12 @@ class _QuickActionButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: Theme.of(context)
+                .colorScheme
+                .surfaceContainerHighest
+                .withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+            border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
           ),
           child: Column(
             children: [
@@ -179,7 +184,7 @@ class _StatCard extends StatelessWidget {
       color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+        side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -187,7 +192,7 @@ class _StatCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircleAvatar(
-              backgroundColor: color.withOpacity(0.1),
+              backgroundColor: color.withValues(alpha: 0.1),
               child: Icon(icon, color: color),
             ),
             const SizedBox(height: 12),

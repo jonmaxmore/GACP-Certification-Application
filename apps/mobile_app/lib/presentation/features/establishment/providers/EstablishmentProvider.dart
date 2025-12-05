@@ -1,14 +1,14 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
-import '../../../../core/network/DioClient.dart';
 import '../../../../data/repositories/EstablishmentRepositoryImpl.dart';
 import '../../../../domain/entities/EstablishmentEntity.dart';
 import '../../../../domain/repositories/EstablishmentRepository.dart';
-import '../providers/AuthProvider.dart'; // To get dioClientProvider
+import '../../../../core/providers/CoreProviders.dart';
 
 // 1. Repository Provider
-final establishmentRepositoryProvider = Provider<EstablishmentRepository>((ref) {
+final establishmentRepositoryProvider =
+    Provider<EstablishmentRepository>((ref) {
   final dioClient = ref.watch(dioClientProvider);
   return EstablishmentRepositoryImpl(dioClient);
 });
@@ -18,7 +18,7 @@ class EstablishmentState {
   final bool isLoading;
   final List<EstablishmentEntity> establishments;
   final String? error;
-  
+
   // Form State
   final File? selectedImage;
   final LatLng? selectedLocation;
@@ -64,7 +64,8 @@ class EstablishmentNotifier extends StateNotifier<EstablishmentState> {
     state = state.copyWith(isLoading: true, error: null);
     final result = await _repository.getEstablishments();
     result.fold(
-      (failure) => state = state.copyWith(isLoading: false, error: failure.message),
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
       (data) => state = state.copyWith(isLoading: false, establishments: data),
     );
   }
@@ -99,7 +100,8 @@ class EstablishmentNotifier extends StateNotifier<EstablishmentState> {
     );
 
     result.fold(
-      (failure) => state = state.copyWith(isLoading: false, error: failure.message),
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
       (newItem) {
         // Add new item to list and reset form
         final newList = [...state.establishments, newItem];
@@ -113,9 +115,9 @@ class EstablishmentNotifier extends StateNotifier<EstablishmentState> {
       },
     );
   }
-  
+
   void resetForm() {
-     state = state.copyWith(
+    state = state.copyWith(
       isSuccess: false,
       error: null,
       selectedImage: null,
@@ -125,7 +127,8 @@ class EstablishmentNotifier extends StateNotifier<EstablishmentState> {
 }
 
 // 4. Provider
-final establishmentProvider = StateNotifierProvider<EstablishmentNotifier, EstablishmentState>((ref) {
+final establishmentProvider =
+    StateNotifierProvider<EstablishmentNotifier, EstablishmentState>((ref) {
   final repository = ref.watch(establishmentRepositoryProvider);
   return EstablishmentNotifier(repository);
 });

@@ -12,10 +12,12 @@ class EstablishmentFormScreen extends ConsumerStatefulWidget {
   const EstablishmentFormScreen({super.key});
 
   @override
-  ConsumerState<EstablishmentFormScreen> createState() => _EstablishmentFormScreenState();
+  ConsumerState<EstablishmentFormScreen> createState() =>
+      _EstablishmentFormScreenState();
 }
 
-class _EstablishmentFormScreenState extends ConsumerState<EstablishmentFormScreen> {
+class _EstablishmentFormScreenState
+    extends ConsumerState<EstablishmentFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
@@ -42,8 +44,8 @@ class _EstablishmentFormScreenState extends ConsumerState<EstablishmentFormScree
 
       Position position = await Geolocator.getCurrentPosition();
       ref.read(establishmentProvider.notifier).setLocation(
-        LatLng(position.latitude, position.longitude),
-      );
+            LatLng(position.latitude, position.longitude),
+          );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error getting location: $e')),
@@ -111,7 +113,10 @@ class _EstablishmentFormScreenState extends ConsumerState<EstablishmentFormScree
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(LucideIcons.tag),
                       ),
-                      items: _types.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+                      items: _types
+                          .map(
+                              (t) => DropdownMenuItem(value: t, child: Text(t)))
+                          .toList(),
                       onChanged: (v) => setState(() => _selectedType = v!),
                     ),
                     const SizedBox(height: 16),
@@ -130,7 +135,9 @@ class _EstablishmentFormScreenState extends ConsumerState<EstablishmentFormScree
                     const SizedBox(height: 24),
 
                     // Location Map
-                    const Text('Location', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const Text('Location',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     Container(
                       height: 200,
@@ -150,12 +157,13 @@ class _EstablishmentFormScreenState extends ConsumerState<EstablishmentFormScree
                               children: [
                                 FlutterMap(
                                   options: MapOptions(
-                                    center: state.selectedLocation!,
-                                    zoom: 15,
+                                    initialCenter: state.selectedLocation!,
+                                    initialZoom: 15,
                                   ),
                                   children: [
                                     TileLayer(
-                                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                      urlTemplate:
+                                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                                       userAgentPackageName: 'com.gacp.app',
                                     ),
                                     MarkerLayer(
@@ -164,7 +172,8 @@ class _EstablishmentFormScreenState extends ConsumerState<EstablishmentFormScree
                                           point: state.selectedLocation!,
                                           width: 40,
                                           height: 40,
-                                          builder: (ctx) => const Icon(LucideIcons.mapPin, color: Colors.red, size: 40),
+                                          child: const Icon(LucideIcons.mapPin,
+                                              color: Colors.red, size: 40),
                                         ),
                                       ],
                                     ),
@@ -184,7 +193,9 @@ class _EstablishmentFormScreenState extends ConsumerState<EstablishmentFormScree
                     const SizedBox(height: 24),
 
                     // Image Picker
-                    const Text('Evidence Photo', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const Text('Evidence Photo',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     if (state.selectedImage != null)
                       Stack(
@@ -213,7 +224,8 @@ class _EstablishmentFormScreenState extends ConsumerState<EstablishmentFormScree
                               onPressed: () => _pickImage(ImageSource.camera),
                               icon: const Icon(LucideIcons.camera),
                               label: const Text('Camera'),
-                              style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
+                              style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.all(16)),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -222,12 +234,13 @@ class _EstablishmentFormScreenState extends ConsumerState<EstablishmentFormScree
                               onPressed: () => _pickImage(ImageSource.gallery),
                               icon: const Icon(LucideIcons.image),
                               label: const Text('Gallery'),
-                              style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
+                              style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.all(16)),
                             ),
                           ),
                         ],
                       ),
-                    
+
                     const SizedBox(height: 32),
 
                     // Submit Button

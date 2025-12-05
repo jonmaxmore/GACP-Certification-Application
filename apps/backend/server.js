@@ -10,7 +10,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
 const logger = require('./shared/logger');
-const databaseService = require('./services/production-database');
+const databaseService = require('./services/ProductionDatabase');
 
 // Import Modules
 const AuthFarmerRoutes = require('./routes/api/AuthFarmerRoutes');

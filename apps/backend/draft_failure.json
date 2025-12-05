@@ -1,6 +1,0 @@
-{
-  "success": false,
-  "error": "Unauthorized",
-  "message": "Invalid token",
-  "code": "INVALID_TOKEN"
-}

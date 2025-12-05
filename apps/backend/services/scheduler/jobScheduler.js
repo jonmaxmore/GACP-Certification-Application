@@ -5,7 +5,7 @@
 
 const cron = require('node-cron');
 const logger = require('../../utils/logger');
-const aiQcTrigger = require('../services/ai/aiQcTrigger');
+// const aiQcTrigger = require('../services/ai/aiQcTrigger'); // Removed during cleanup
 
 class JobScheduler {
   constructor() {
@@ -18,20 +18,12 @@ class JobScheduler {
   start() {
     logger.info('Starting job scheduler');
 
-    // AI QC Queue Processing - Every 5 minutes
+    // AI QC Queue Processing - Removed
+    /*
     if (process.env.ENABLE_AI_QC === 'true') {
-      const aiQcJob = cron.schedule('*/5 * * * *', async () => {
-        try {
-          logger.info('Running scheduled AI QC queue processing');
-          await aiQcTrigger.processAIQCQueue();
-        } catch (error) {
-          logger.error('Scheduled AI QC processing failed:', error);
-        }
-      });
-
-      this.jobs.push({ name: 'AI QC Queue', job: aiQcJob });
-      logger.info('Scheduled: AI QC Queue Processing (every 5 minutes)');
+      // ...
     }
+    */
 
     // Certificate Expiry Check - Daily at 8 AM
     const certExpiryJob = cron.schedule('0 8 * * *', async () => {
@@ -125,9 +117,9 @@ class JobScheduler {
     // Jobs are functions, so we need to extract and call them
     // This is a workaround since cron jobs don't expose their callback directly
     switch (jobName) {
-      case 'AI QC Queue':
-        await aiQcTrigger.processAIQCQueue();
-        break;
+      // case 'AI QC Queue':
+      //   await aiQcTrigger.processAIQCQueue();
+      //   break;
       default:
         throw new Error(`Manual execution not implemented for: ${jobName}`);
     }

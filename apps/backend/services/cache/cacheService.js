@@ -3,7 +3,7 @@
  * Provides caching layer for frequently accessed data
  */
 
-const redisManager = require('../../config/redis-manager');
+const redisManager = require('../../config/RedisManager');
 const logger = require('../../shared/logger');
 
 class CacheService {

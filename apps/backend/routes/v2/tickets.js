@@ -17,51 +17,51 @@ const ticketController = {
     resolveTicket: (req, res) => res.json({ success: true }),
     closeTicket: (req, res) => res.json({ success: true }),
 };
-const { farmerOrStaff, canAccessApplication } = require('../../middleware/RoleMiddleware');
+const { authenticate, checkPermission } = require('../../middleware/AuthMiddleware');
 
 // All routes require authentication
-router.use(farmerOrStaff);
+router.use(authenticate);
 
 /**
  * GET /api/v2/tickets
  * Get user's tickets
  */
-router.get('/', ticketController.getTickets);
+router.get('/', checkPermission('dashboard.view'), ticketController.getTickets);
 
 /**
  * GET /api/v2/tickets/application/:applicationId
  * Get tickets for specific application
  */
-router.get('/application/:applicationId', canAccessApplication, ticketController.getApplicationTickets);
+router.get('/application/:applicationId', checkPermission('application.read', 'application', 'applicationId'), ticketController.getApplicationTickets);
 
 /**
  * GET /api/v2/tickets/:id
  * Get specific ticket details
  */
-router.get('/:id', ticketController.getTicketById);
+router.get('/:id', checkPermission('dashboard.view'), ticketController.getTicketById);
 
 /**
  * POST /api/v2/tickets
  * Create a new ticket
  */
-router.post('/', ticketController.createTicket);
+router.post('/', checkPermission('dashboard.view'), ticketController.createTicket);
 
 /**
  * POST /api/v2/tickets/:id/messages
  * Add message to ticket
  */
-router.post('/:id/messages', ticketController.addMessage);
+router.post('/:id/messages', checkPermission('dashboard.view'), ticketController.addMessage);
 
 /**
  * PUT /api/v2/tickets/:id/resolve
  * Resolve ticket
  */
-router.put('/:id/resolve', ticketController.resolveTicket);
+router.put('/:id/resolve', checkPermission('dashboard.view'), ticketController.resolveTicket);
 
 /**
  * PUT /api/v2/tickets/:id/close
  * Close ticket
  */
-router.put('/:id/close', ticketController.closeTicket);
+router.put('/:id/close', checkPermission('dashboard.view'), ticketController.closeTicket);
 
 module.exports = router;

@@ -75,7 +75,7 @@ describe('🎯 GACP Golden Loop (Corrected Workflow)', () => {
         app = require('../../server');
 
         // Ensure database is connected before running tests
-        const databaseService = require('../../services/production-database');
+        const databaseService = require('../../services/ProductionDatabase');
         await databaseService.connect();
     });
 

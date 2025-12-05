@@ -6,10 +6,10 @@
 const express = require('express');
 const router = express.Router();
 const gacpService = require('../../services/ApplicationWorkflowService');
-const { authenticate } = require('../../middleware/auth-middleware');
+const { authenticate, checkPermission } = require('../../middleware/AuthMiddleware');
 
 // Process payment
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, checkPermission('payment.process', 'payment'), async (req, res) => {
     try {
         const { applicationId, phase, paymentDetails } = req.body;
 

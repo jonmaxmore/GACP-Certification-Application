@@ -15,39 +15,39 @@ const notificationController = {
     markAllAsRead: (req, res) => res.json({ success: true }),
     createNotification: (req, res) => res.status(201).json({ success: true }),
 };
-const { farmerOrStaff } = require('../../middleware/RoleMiddleware');
+const { authenticate, checkPermission } = require('../../middleware/AuthMiddleware');
 
 // All routes require authentication
-router.use(farmerOrStaff);
+router.use(authenticate);
 
 /**
  * GET /api/v2/notifications
  * Get user's notifications
  */
-router.get('/', notificationController.getNotifications);
+router.get('/', checkPermission('dashboard.view'), notificationController.getNotifications);
 
 /**
  * GET /api/v2/notifications/unread-count
  * Get count of unread notifications
  */
-router.get('/unread-count', notificationController.getUnreadCount);
+router.get('/unread-count', checkPermission('dashboard.view'), notificationController.getUnreadCount);
 
 /**
  * PUT /api/v2/notifications/:id/read
  * Mark notification as read
  */
-router.put('/:id/read', notificationController.markAsRead);
+router.put('/:id/read', checkPermission('dashboard.view'), notificationController.markAsRead);
 
 /**
  * PUT /api/v2/notifications/mark-all-read
  * Mark all notifications as read
  */
-router.put('/mark-all-read', notificationController.markAllAsRead);
+router.put('/mark-all-read', checkPermission('dashboard.view'), notificationController.markAllAsRead);
 
 /**
  * POST /api/v2/notifications (Admin/Staff only)
  * Create a new notification
  */
-router.post('/', notificationController.createNotification);
+router.post('/', checkPermission('system.admin'), notificationController.createNotification);
 
 module.exports = router;

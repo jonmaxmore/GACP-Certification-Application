@@ -34,8 +34,21 @@ const verifyToken = (token, type, config) => {
     }
 };
 
+const generateToken = (payload, type = 'public') => {
+    const config = getJWTConfiguration();
+    const secret = type === 'dtam' ? config.dtam.secret : config.public.secret;
+    const options = {
+        expiresIn: type === 'dtam' ? config.dtam.expiry : config.public.expiry,
+        issuer: type === 'dtam' ? config.dtam.issuer : config.public.issuer,
+        audience: type === 'dtam' ? config.dtam.audience : config.public.audience,
+        algorithm: type === 'dtam' ? config.dtam.algorithm : config.public.algorithm
+    };
+    return jwt.sign(payload, secret, options);
+};
+
 module.exports = {
     getJWTConfiguration,
     loadJWTConfiguration: getJWTConfiguration, // Alias
-    verifyToken
+    verifyToken,
+    generateToken
 };

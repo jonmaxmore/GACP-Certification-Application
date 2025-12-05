@@ -7,6 +7,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const gacpService = require('../../services/ApplicationWorkflowService');
+const { authenticate, checkPermission } = require('../../middleware/AuthMiddleware');
 
 const router = express.Router();
 
@@ -36,62 +37,72 @@ const upload = multer({
   },
 });
 
-const { authenticate } = require('../../middleware/auth-middleware');
-
 // Create new application
-router.post('/applications', authenticate, async (req, res) => {
-  try {
-    const farmerId = req.user.id || req.user._id;
-    const applicationData = req.body;
-    const application = await gacpService.createApplication(farmerId, applicationData);
+router.post(
+  '/applications',
+  authenticate,
+  checkPermission('application.create', 'application'),
+  async (req, res) => {
+    try {
+      const farmerId = req.user.id || req.user._id;
+      const applicationData = req.body;
+      const application = await gacpService.createApplication(farmerId, applicationData);
 
-    res.json({
-      success: true,
-      data: {
-        applicationId: application.id,
-        farmerData: application.farmerData,
-        complianceScore: application.complianceScore,
-        sopValidation: application.sopValidation,
-        submissionReady: application.submissionReady,
-      },
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+      res.json({
+        success: true,
+        data: {
+          applicationId: application.id,
+          farmerData: application.farmerData,
+          complianceScore: application.complianceScore,
+          sopValidation: application.sopValidation,
+          submissionReady: application.submissionReady,
+        },
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 // Update farmer data
-router.put('/applications/:applicationId/farmer-data', async (req, res) => {
-  try {
-    const { applicationId } = req.params;
-    const { farmerData } = req.body;
+router.put(
+  '/applications/:applicationId/farmer-data',
+  authenticate,
+  checkPermission('application.update', 'application'),
+  async (req, res) => {
+    try {
+      const { applicationId } = req.params;
+      const { farmerData } = req.body;
 
-    const application = await gacpService.updateFarmerData(applicationId, farmerData);
+      const application = await gacpService.updateFarmerData(applicationId, farmerData);
 
-    res.json({
-      success: true,
-      data: {
-        applicationId: application.id,
-        farmerData: application.farmerData,
-        complianceScore: application.complianceScore,
-        sopValidation: application.sopValidation,
-        submissionReady: application.submissionReady,
-      },
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+      res.json({
+        success: true,
+        data: {
+          applicationId: application.id,
+          farmerData: application.farmerData,
+          complianceScore: application.complianceScore,
+          sopValidation: application.sopValidation,
+          submissionReady: application.submissionReady,
+        },
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 // Upload document
 router.post(
   '/applications/:applicationId/documents/:documentType',
+  authenticate,
+  checkPermission('application.update', 'application'),
   upload.single('document'),
   async (req, res) => {
     try {
@@ -142,124 +153,149 @@ router.post(
         error: error.message,
       });
     }
-  },
+  }
 );
 
 // Get application details
-router.get('/applications/:applicationId', async (req, res) => {
-  try {
-    const { applicationId } = req.params;
-    const application = gacpService.getApplication(applicationId);
+router.get(
+  '/applications/:applicationId',
+  authenticate,
+  checkPermission('application.read', 'application'),
+  async (req, res) => {
+    try {
+      const { applicationId } = req.params;
+      const application = gacpService.getApplication(applicationId);
 
-    if (!application) {
-      return res.status(404).json({
+      if (!application) {
+        return res.status(404).json({
+          success: false,
+          error: 'Application not found',
+        });
+      }
+
+      res.json({
+        success: true,
+        data: {
+          applicationId: application.id,
+          farmerData: application.farmerData,
+          documents: Object.keys(application.documents),
+          documentAnalyses: application.documentAnalyses,
+          sopValidation: application.sopValidation,
+          complianceScore: application.complianceScore,
+          submissionReady: application.submissionReady,
+          coaAnalysis: application.coaAnalysis,
+          status: application.status,
+          createdAt: application.createdAt,
+          updatedAt: application.updatedAt,
+        },
+      });
+    } catch (error) {
+      res.status(400).json({
         success: false,
-        error: 'Application not found',
+        error: error.message,
       });
     }
-
-    res.json({
-      success: true,
-      data: {
-        applicationId: application.id,
-        farmerData: application.farmerData,
-        documents: Object.keys(application.documents),
-        documentAnalyses: application.documentAnalyses,
-        sopValidation: application.sopValidation,
-        complianceScore: application.complianceScore,
-        submissionReady: application.submissionReady,
-        coaAnalysis: application.coaAnalysis,
-        status: application.status,
-        createdAt: application.createdAt,
-        updatedAt: application.updatedAt,
-      },
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
   }
-});
+);
 
 // Get SOP validation status
-router.get('/applications/:applicationId/sop-validation', async (req, res) => {
-  try {
-    const { applicationId } = req.params;
-    const validationResult = await gacpService.validateSOP(applicationId);
+router.get(
+  '/applications/:applicationId/sop-validation',
+  authenticate,
+  checkPermission('application.read', 'application'),
+  async (req, res) => {
+    try {
+      const { applicationId } = req.params;
+      const validationResult = await gacpService.validateSOP(applicationId);
 
-    res.json({
-      success: true,
-      data: validationResult,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
-  }
-});
-
-// Submit application
-router.post('/applications/:applicationId/submit', async (req, res) => {
-  try {
-    const { applicationId } = req.params;
-    const receipt = await gacpService.submitApplication(applicationId);
-
-    res.json({
-      success: true,
-      data: receipt,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
-  }
-});
-
-// Get application status
-router.get('/applications/:applicationId/status', async (req, res) => {
-  try {
-    const { applicationId } = req.params;
-    const status = gacpService.getApplicationStatus(applicationId);
-
-    if (!status) {
-      return res.status(404).json({
+      res.json({
+        success: true,
+        data: validationResult,
+      });
+    } catch (error) {
+      res.status(400).json({
         success: false,
-        error: 'Application not found',
+        error: error.message,
       });
     }
-
-    res.json({
-      success: true,
-      data: status,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
   }
-});
+);
+
+// Submit application
+router.post(
+  '/applications/:applicationId/submit',
+  authenticate,
+  checkPermission('application.update', 'application'),
+  async (req, res) => {
+    try {
+      const { applicationId } = req.params;
+      const receipt = await gacpService.submitApplication(applicationId);
+
+      res.json({
+        success: true,
+        data: receipt,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+);
+
+// Get application status
+router.get(
+  '/applications/:applicationId/status',
+  authenticate,
+  checkPermission('application.read', 'application'),
+  async (req, res) => {
+    try {
+      const { applicationId } = req.params;
+      const status = gacpService.getApplicationStatus(applicationId);
+
+      if (!status) {
+        return res.status(404).json({
+          success: false,
+          error: 'Application not found',
+        });
+      }
+
+      res.json({
+        success: true,
+        data: status,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+);
 
 // Generate SOP compliance report
-router.get('/applications/:applicationId/sop-report', async (req, res) => {
-  try {
-    const { applicationId } = req.params;
-    const report = gacpService.generateSOPReport(applicationId);
+router.get(
+  '/applications/:applicationId/sop-report',
+  authenticate,
+  checkPermission('application.read', 'application'),
+  async (req, res) => {
+    try {
+      const { applicationId } = req.params;
+      const report = gacpService.generateSOPReport(applicationId);
 
-    res.json({
-      success: true,
-      data: report,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+      res.json({
+        success: true,
+        data: report,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 // Simulate document analysis (for demo purposes)
 router.post('/demo/analyze-document', upload.single('document'), async (req, res) => {

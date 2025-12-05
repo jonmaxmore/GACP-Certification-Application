@@ -5,7 +5,7 @@
  * and pub/sub capabilities for horizontal scaling.
  */
 const { createClient } = require('redis');
-const configManager = require('./config-manager');
+const configManager = require('./ConfigManager');
 const logger = require('../shared/logger');
 const redisLogger = logger.createLogger('redis');
 

@@ -185,7 +185,7 @@ class RBACService {
       'dashboard.view': 'View dashboard',
     };
 
-    permissions.forEach((description, permission) => {
+    Object.entries(permissions).forEach(([permission, description]) => {
       this.permissions.set(permission, { permission, description });
     });
 
@@ -201,6 +201,33 @@ class RBACService {
       admin: {
         name: 'Administrator',
         description: 'Administrative access',
+        permissions: [
+          'user.create',
+          'user.read',
+          'user.update',
+          'user.list',
+          'application.read',
+          'application.review',
+          'application.approve',
+          'application.reject',
+          'certificate.issue',
+          'certificate.read',
+          'certificate.revoke',
+          'certificate.renew',
+          'inspection.schedule',
+          'inspection.review',
+          'inspection.approve',
+          'payment.view',
+          'audit.read',
+          'report.generate',
+          'dashboard.view',
+        ],
+        inheritFrom: [],
+      },
+
+      dtam_admin: {
+        name: 'DTAM Administrator',
+        description: 'Administrative access (Alias)',
         permissions: [
           'user.create',
           'user.read',
@@ -278,9 +305,25 @@ class RBACService {
         permissions: ['audit.read', 'audit.export', 'report.generate', 'report.export'],
         inheritFrom: [],
       },
+
+      officer: {
+        name: 'DTAM Officer',
+        description: 'DTAM Staff for KYC and Application Review',
+        permissions: [
+          'user.read',
+          'user.update',
+          'user.list',
+          'application.read',
+          'application.review',
+          'certificate.read',
+          'dashboard.view',
+          'report.generate',
+        ],
+        inheritFrom: [],
+      },
     };
 
-    roles.forEach((role, roleName) => {
+    Object.entries(roles).forEach(([roleName, role]) => {
       this.roles.set(roleName, role);
     });
 
@@ -303,7 +346,8 @@ class RBACService {
   async hasPermission(user, action, resource = null, context = {}) {
     try {
       // Get user role
-      const userRole = this.roles.get(user.role);
+      const userRoleName = user.role ? user.role.toLowerCase() : '';
+      const userRole = this.roles.get(userRoleName);
       if (!userRole) {
         return false;
       }
@@ -375,7 +419,7 @@ class RBACService {
   /**
    * Express.js middleware for RBAC enforcement
    */
-  rbacMiddleware(requiredPermission, resourceType = null) {
+  rbacMiddleware(requiredPermission, resourceType = null, idParam = 'id') {
     return async (req, res, next) => {
       try {
         const user = req.user;
@@ -384,11 +428,11 @@ class RBACService {
         }
 
         let resource = null;
-        if (resourceType && req.params.id) {
+        if (resourceType && req.params[idParam]) {
           // Load resource for permission check
           resource = {
             type: resourceType,
-            id: req.params.id,
+            id: req.params[idParam],
             ownerId: req.resource?.ownerId || req.resource?.userId,
           };
         }

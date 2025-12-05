@@ -265,11 +265,16 @@ function optionalAuth(req, res, next) {
   }
 }
 
+const { RBACService } = require('../services/SecurityCompliance');
+const rbacService = new RBACService();
+
 module.exports = {
   authenticateFarmer,
   authenticateDTAM,
   optionalAuth,
   authenticate: authenticateFarmer, // Alias for generic authentication
+
+  // Legacy Role-Based Check (Keep for backward compatibility)
   authorize: roles => (req, res, next) => {
     // Simple role-based authorization middleware
     if (!req.user) {
@@ -296,6 +301,10 @@ module.exports = {
 
     next();
   },
+
+  // New Granular Permission Check (RBAC)
+  checkPermission: (permission, resourceType, idParam) => rbacService.rbacMiddleware(permission, resourceType, idParam),
+
   rateLimitSensitive: (_windowMs, _max) => {
     // Simple rate limiting placeholder
     // In production, use express-rate-limit

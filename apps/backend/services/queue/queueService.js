@@ -1,17 +1,21 @@
 /**
  * Job Queue Service using Bull
- * Handles background processing for AI QC, notifications, and other async tasks
+ * Handles background processing for notifications and other async tasks
  */
 
 const Bull = require('bull');
 const logger = require('../../shared/logger');
-const geminiService = require('../ai/geminiService');
 const notificationService = require('../notification/notificationService');
 const cacheService = require('../cache/cacheService');
 const DTAMApplication = require('../../models/ApplicationModel');
 
 class QueueService {
   constructor() {
+    if (process.env.NODE_ENV === 'test') {
+      logger.info('Queue Service disabled in test mode');
+      return;
+    }
+
     // Initialize queues with Redis connection
     const redisConfig = {
       host: process.env.REDIS_HOST || 'localhost',
@@ -20,20 +24,6 @@ class QueueService {
       maxRetriesPerRequest: null,
       enableReadyCheck: false,
     };
-
-    // AI QC Processing Queue
-    this.aiQcQueue = new Bull('ai-qc-processing', {
-      redis: redisConfig,
-      defaultJobOptions: {
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 2000,
-        },
-        removeOnComplete: 100, // Keep last 100 completed jobs
-        removeOnFail: 500, // Keep last 500 failed jobs
-      },
-    });
 
     // Email Notification Queue
     this.emailQueue = new Bull('email-notifications', {
@@ -101,74 +91,6 @@ class QueueService {
    * Setup queue processors
    */
   setupProcessors() {
-    // AI QC Processor
-    this.aiQcQueue.process('run-ai-qc', async job => {
-      const { applicationId } = job.data;
-      logger.info(`Processing AI QC for application ${applicationId}`);
-
-      try {
-        const application = await DTAMApplication.findById(applicationId)
-          .populate('documents')
-          .populate('images');
-
-        if (!application) {
-          throw new Error('Application not found');
-        }
-
-        // Run AI QC
-        const qcResult = await geminiService.performAIQC({
-          id: application._id,
-          lotId: application.lotId,
-          farmer: {
-            name: application.farmer.name,
-            idCard: application.farmer.idCard,
-          },
-          farm: {
-            name: application.farmer.farmName,
-            location: application.farmer.farmLocation,
-            area: application.farmArea,
-          },
-          documents: application.documents || [],
-          images: application.images || [],
-        });
-
-        if (qcResult.success) {
-          // Update application with results
-          application.aiQc = {
-            completedAt: new Date(),
-            overallScore: qcResult.data.overallScore,
-            scores: qcResult.data.scores,
-            inspectionType: qcResult.data.inspectionType,
-            issues: qcResult.data.issues,
-            recommendations: qcResult.data.recommendations,
-          };
-          application.inspectionType = qcResult.data.inspectionType;
-          application.status = 'IN_REVIEW';
-          application.aiQcCompletedAt = new Date();
-          await application.save();
-
-          // Cache AI QC result
-          await cacheService.cacheAIQCResult(applicationId, qcResult.data);
-
-          // Invalidate application cache
-          await cacheService.invalidateApplication(applicationId);
-
-          // Queue notification
-          await this.addEmailJob({
-            type: 'new-application',
-            applicationId: application._id,
-          });
-
-          return { success: true, result: qcResult.data };
-        } else {
-          throw new Error(qcResult.error);
-        }
-      } catch (error) {
-        logger.error('AI QC processing failed:', error);
-        throw error;
-      }
-    });
-
     // Email Processor
     this.emailQueue.process('send-email', async job => {
       const { type, applicationId, data } = job.data;
@@ -262,7 +184,7 @@ class QueueService {
           // But GACPCertificateService depends on QueueService
           // We should require it inside the processor or use dependency injection
           // For now, let's dynamic require
-          const gacpCertificateService = require('../gacp-certificate');
+          const gacpCertificateService = require('../GacpCertificate');
           const applicationRepository = require('../../repositories/ApplicationRepository');
           const appRepo = new applicationRepository();
 
@@ -287,19 +209,6 @@ class QueueService {
    * Setup event listeners for monitoring
    */
   setupEventListeners() {
-    // AI QC Queue Events
-    this.aiQcQueue.on('completed', (job, result) => {
-      logger.info(`AI QC job ${job.id} completed:`, result);
-    });
-
-    this.aiQcQueue.on('failed', (job, err) => {
-      logger.error(`AI QC job ${job.id} failed:`, err.message);
-    });
-
-    this.aiQcQueue.on('stalled', job => {
-      logger.warn(`AI QC job ${job.id} stalled`);
-    });
-
     // Email Queue Events
     this.emailQueue.on('completed', job => {
       logger.info(`Email job ${job.id} completed`);
@@ -337,23 +246,6 @@ class QueueService {
     });
 
     logger.info('Queue event listeners registered');
-  }
-
-  /**
-   * Add AI QC job to queue
-   */
-  async addAIQCJob(applicationId, options = {}) {
-    return this.aiQcQueue.add(
-      'run-ai-qc',
-      {
-        applicationId,
-      },
-      {
-        priority: options.priority || 5,
-        delay: options.delay || 0,
-        ...options,
-      },
-    );
   }
 
   /**
@@ -430,21 +322,15 @@ class QueueService {
    */
   async getQueueStats() {
     const [
-      aiQcWaiting,
-      aiQcActive,
-      aiQcCompleted,
-      aiQcFailed,
       emailWaiting,
       emailActive,
       calendarWaiting,
       calendarActive,
       reportWaiting,
       reportActive,
+      documentWaiting,
+      documentActive,
     ] = await Promise.all([
-      this.aiQcQueue.getWaitingCount(),
-      this.aiQcQueue.getActiveCount(),
-      this.aiQcQueue.getCompletedCount(),
-      this.aiQcQueue.getFailedCount(),
       this.emailQueue.getWaitingCount(),
       this.emailQueue.getActiveCount(),
       this.calendarQueue.getWaitingCount(),
@@ -456,12 +342,6 @@ class QueueService {
     ]);
 
     return {
-      aiQc: {
-        waiting: aiQcWaiting,
-        active: aiQcActive,
-        completed: aiQcCompleted,
-        failed: aiQcFailed,
-      },
       email: {
         waiting: emailWaiting,
         active: emailActive,
@@ -475,8 +355,8 @@ class QueueService {
         active: reportActive,
       },
       document: {
-        waiting: arguments[10], // Result from Promise.all index 10
-        active: arguments[11], // Result from Promise.all index 11
+        waiting: documentWaiting,
+        active: documentActive,
       },
     };
   }
@@ -488,8 +368,6 @@ class QueueService {
     const grace = 7 * 24 * 3600 * 1000; // 7 days
 
     await Promise.all([
-      this.aiQcQueue.clean(grace, 'completed'),
-      this.aiQcQueue.clean(grace, 'failed'),
       this.emailQueue.clean(grace, 'completed'),
       this.emailQueue.clean(grace, 'failed'),
       this.calendarQueue.clean(grace, 'completed'),
@@ -508,7 +386,6 @@ class QueueService {
    */
   async pauseAll() {
     await Promise.all([
-      this.aiQcQueue.pause(),
       this.emailQueue.pause(),
       this.calendarQueue.pause(),
       this.reportQueue.pause(),
@@ -522,7 +399,6 @@ class QueueService {
    */
   async resumeAll() {
     await Promise.all([
-      this.aiQcQueue.resume(),
       this.emailQueue.resume(),
       this.calendarQueue.resume(),
       this.reportQueue.resume(),
@@ -536,7 +412,6 @@ class QueueService {
    */
   async closeAll() {
     await Promise.all([
-      this.aiQcQueue.close(),
       this.emailQueue.close(),
       this.calendarQueue.close(),
       this.reportQueue.close(),

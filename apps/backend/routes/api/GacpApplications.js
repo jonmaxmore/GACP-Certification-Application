@@ -6,7 +6,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const gacpService = require('../../services/gacp-application');
+const gacpService = require('../../services/ApplicationWorkflowService');
 
 const router = express.Router();
 

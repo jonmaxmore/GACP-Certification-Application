@@ -1,4 +1,4 @@
 {
   "success": false,
-  "error": "Invalid email or password"
+  "error": "jwtSecurity.generateToken is not a function"
 }

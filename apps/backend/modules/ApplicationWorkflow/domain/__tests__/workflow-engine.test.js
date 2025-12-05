@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const ApplicationWorkflowEngine = require('../workflow-engine');
-const Application = require('../../infrastructure/models/Application');
-const User = require('../../../auth-farmer/models/user.model');
+const Application = require('../../../../../models/ApplicationModel');
+const User = require('../../../../../models/UserModel');
 const DTAMStaff = require('../../../auth-dtam/models/DTAMStaff');
 
 // Mock Repositories (Simple wrappers for Mongoose models)

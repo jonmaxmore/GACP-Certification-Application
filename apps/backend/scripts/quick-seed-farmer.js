@@ -6,7 +6,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../models/user-model');
-const Application = require('../models/application');
+const Application = require('../models/ApplicationModel');
 
 const MONGODB_URI =
   process.env.MONGODB_URI ||

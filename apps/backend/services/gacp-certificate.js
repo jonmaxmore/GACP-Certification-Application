@@ -22,7 +22,7 @@ const crypto = require('crypto');
 const queueService = require('./queue/queueService');
 const cacheService = require('./cache/cacheService');
 
-const Application = require('../models/Application');
+const Application = require('../models/ApplicationModel');
 const _User = require('../models/User');
 const logger = require('../shared/logger');
 const { ValidationError, BusinessLogicError } = require('../shared/errors');
@@ -331,7 +331,7 @@ class GACPCertificateService {
       if (!complianceCheck.compliant) {
         throw new BusinessLogicError(
           'Certificate cannot be renewed due to compliance issues: ' +
-            complianceCheck.issues.join(', '),
+          complianceCheck.issues.join(', '),
         );
       }
 
@@ -447,15 +447,15 @@ class GACPCertificateService {
         result: verification,
         publicData: verification.valid
           ? {
-              farmName: verification.certificate.farmName,
-              farmerName: verification.certificate.farmerName,
-              province: verification.certificate.location.province,
-              cropTypes: verification.certificate.cropTypes,
-              issueDate: verification.certificate.issueDate,
-              expiryDate: verification.certificate.expiryDate,
-              certificationBody: 'กรมการปกครอง (DTAM)',
-              standards: ['WHO GACP', 'ASEAN GACP'],
-            }
+            farmName: verification.certificate.farmName,
+            farmerName: verification.certificate.farmerName,
+            province: verification.certificate.location.province,
+            cropTypes: verification.certificate.cropTypes,
+            issueDate: verification.certificate.issueDate,
+            expiryDate: verification.certificate.expiryDate,
+            certificationBody: 'กรมการปกครอง (DTAM)',
+            standards: ['WHO GACP', 'ASEAN GACP'],
+          }
           : null,
       };
 

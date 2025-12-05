@@ -4,7 +4,7 @@
  */
 
 const logger = require('../shared/logger');
-const Certificate = require('../models/Certificate');
+const Certificate = require('../models/CertificateModel');
 
 class CertificateRepository {
   constructor() {

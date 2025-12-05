@@ -8,7 +8,7 @@ const logger = require('../../shared/logger');
 const geminiService = require('../ai/geminiService');
 const notificationService = require('../notification/notificationService');
 const cacheService = require('../cache/cacheService');
-const DTAMApplication = require('../../modules/ApplicationWorkflow/infrastructure/models/Application');
+const DTAMApplication = require('../../models/ApplicationModel');
 
 class QueueService {
   constructor() {

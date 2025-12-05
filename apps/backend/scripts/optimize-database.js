@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const logger = require('../shared/logger');
 
 // Import models
-const DTAMApplication = require('../models/DTAMApplication');
+const DTAMApplication = require('../models/ApplicationModel');
 const User = require('../models/user-model');
 
 /**

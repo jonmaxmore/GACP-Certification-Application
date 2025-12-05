@@ -7,7 +7,7 @@
  */
 
 const logger = require('../shared/logger');
-const Application = require('../modules/ApplicationWorkflow/infrastructure/models/Application');
+const Application = require('../models/ApplicationModel');
 
 const ApplicationStatus = {
   DRAFT: 'draft',

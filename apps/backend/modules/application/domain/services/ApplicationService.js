@@ -3,7 +3,7 @@
  * Core service for managing GACP applications
  */
 
-const Application = require('../../../../../models/Application');
+const Application = require('../../../../../models/ApplicationModel');
 const ScoringService = require('./ScoringService');
 const LicenseGenerator = require('../../../certificate-management/domain/services/LicenseGenerator');
 

@@ -12,7 +12,7 @@ const cors = require('cors');
 const cron = require('node-cron');
 
 // Import MongoDB models
-const Application = require('../../../models/Application');
+const Application = require('../../../models/ApplicationModel');
 const User = require('../../../models/User');
 
 class AnalyticsEngine {

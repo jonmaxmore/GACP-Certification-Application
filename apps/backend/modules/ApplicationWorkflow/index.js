@@ -21,7 +21,7 @@ const ApplicationWorkflowEngine = require('./domain/WorkflowEngine');
 
 // Infrastructure Layer
 const ApplicationRepository = require('./infrastructure/repositories/ApplicationRepository');
-const Application = require('./infrastructure/models/Application');
+const Application = require('../../models/ApplicationModel');
 
 // Presentation Layer
 const ApplicationController = require('./presentation/controllers/ApplicationController');

@@ -4,7 +4,7 @@
  */
 
 const ComplianceReport = require('../models/ComplianceReport');
-const Application = require('../../../application/domain/models/Application'); // Assuming Application model is exported here or we use mongoose.model
+const Application = require('../../../../../models/ApplicationModel');
 
 class ComplianceService {
 

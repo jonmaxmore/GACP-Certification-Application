@@ -142,6 +142,10 @@ function loadConfig() {
       auth: {
         jwtSecret: process.env.JWT_SECRET || 'development_secret_change_in_production',
       },
+      storage: {
+        type: 'local',
+        localPath: process.env.STORAGE_LOCAL_PATH || './storage',
+      },
     };
 
     // Try to load environment-specific config file

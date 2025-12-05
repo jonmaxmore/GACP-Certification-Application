@@ -5,7 +5,7 @@
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const logger = require('../../../shared/logger');
+const logger = require('../shared/logger');
 
 const userSchema = new mongoose.Schema(
   {

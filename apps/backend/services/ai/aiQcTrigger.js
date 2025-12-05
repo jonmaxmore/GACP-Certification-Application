@@ -5,7 +5,7 @@
  */
 
 const queueService = require('../queue/queueService');
-const DTAMApplication = require('../../models/DTAMApplication');
+const DTAMApplication = require('../../models/ApplicationModel');
 const logger = require('../../utils/logger');
 
 /**

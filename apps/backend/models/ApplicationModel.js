@@ -18,7 +18,7 @@
  * @date 2025-10-18
  */
 
-const logger = require('../../../../shared/logger');
+const logger = require('../shared/logger');
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
@@ -503,15 +503,20 @@ const ApplicationSchema = new Schema(
     // Application Type & Context
     type: {
       type: String,
-      enum: ['NEW', 'RENEWAL', 'REPLACEMENT'],
+      enum: ['NEW', 'RENEWAL'],
       default: 'NEW',
       required: true,
       index: true,
     },
-    userType: {
+    applicantType: {
       type: String,
       enum: ['individual', 'community_enterprise', 'juristic'],
       required: true,
+    },
+    formType: {
+      type: String,
+      enum: ['FORM_09', 'FORM_10', 'FORM_11'],
+      default: 'FORM_09',
     },
     previousCertificateId: {
       type: Schema.Types.ObjectId,
@@ -541,22 +546,15 @@ const ApplicationSchema = new Schema(
       type: String,
       required: true,
       enum: [
-        'draft',
-        'submitted',
-        'under_review',
-        'revision_required',
-        'payment_pending',
-        'payment_verified',
-        'inspection_scheduled',
-        'inspection_completed',
-        'phase2_payment_pending',
-        'phase2_payment_verified',
-        'approved',
-        'certificate_issued',
-        'rejected',
-        'expired',
+        'REGISTERED',
+        'APPLICATION_SUBMITTED',
+        'AUDIT_PENDING',
+        'COMMITTEE_REVIEW',
+        'ACCREDITED',
+        'REJECTED',
+        'EXPIRED'
       ],
-      default: 'draft',
+      default: 'REGISTERED',
       index: true,
     },
 

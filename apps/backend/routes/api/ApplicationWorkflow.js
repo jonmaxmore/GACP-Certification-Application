@@ -335,7 +335,7 @@ module.exports = (dependencies = {}) => {
         updatedAt: new Date(),
       };
 
-      const Application = require('../../models/mongodb/Application');
+      const Application = require('../../models/ApplicationModel');
       const updatedApplication = await Application.findOneAndUpdate(
         { id: id },
         { $set: updateData },

@@ -13,7 +13,7 @@ const logger = require('./shared/logger');
 const databaseService = require('./services/production-database');
 
 // Import Modules
-const { createModule: createAuthFarmerModule } = require('./modules/AuthFarmer');
+const AuthFarmerRoutes = require('./routes/api/AuthFarmerRoutes');
 const v2Routes = require('./routes/v2');
 
 const app = express();
@@ -33,24 +33,16 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Connect to Database
-databaseService.connect().catch(err => {
-    logger.error('Failed to connect to database', err);
-    if (process.env.NODE_ENV !== 'test') {
+// Connect to Database
+if (process.env.NODE_ENV !== 'test') {
+    databaseService.connect().catch(err => {
+        logger.error('Failed to connect to database', err);
         process.exit(1);
-    }
-});
-
-// Initialize Modules
-// Auth Farmer Module
-const authFarmerModule = createAuthFarmerModule({
-    database: require('mongoose').connection,
-    jwtSecret: process.env.FARMER_JWT_SECRET || process.env.JWT_SECRET,
-    jwtExpiresIn: '24h',
-    bcryptSaltRounds: 12,
-});
+    });
+}
 
 // Mount Routes
-app.use('/api/auth-farmer', authFarmerModule.router);
+app.use('/api/auth-farmer', AuthFarmerRoutes);
 app.use('/api/v2', v2Routes);
 
 // Health Check

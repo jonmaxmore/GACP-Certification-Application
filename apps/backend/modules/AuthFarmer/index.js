@@ -15,7 +15,7 @@ const User = require('../../models/UserModel');
 const logger = require('../../shared/logger');
 
 // Import validators
-const validators = require('./validators/auth-validators');
+const validators = require('./validators/AuthValidators');
 
 /**
  * Module exports

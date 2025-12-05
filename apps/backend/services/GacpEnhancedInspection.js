@@ -18,12 +18,12 @@ const {
   GACPCriticalControlPoints,
   GACPScoringSystem,
   GACPApplicationStatus,
-} = require('../models/gacp-business-logic');
+} = require('../models/GacpBusinessLogic');
 const logger = require('../shared/logger');
 
 const {
   GACPWorkflowEngine,
-} = require('../modules/ApplicationWorkflow/domain/gacp-workflow-engine');
+} = require('../modules/ApplicationWorkflow/domain/GacpWorkflowEngine');
 
 class GACPEnhancedInspectionService {
   constructor(database = null) {

@@ -13,15 +13,15 @@ const CertificateNumber = require('./domain/value-objects/CertificateNumber'); /
 /* eslint-enable no-unused-vars */
 
 // Application Layer - Use Cases
-const GenerateCertificateUseCase = require('./application/use-cases/generate-certificate-usecase');
-const VerifyCertificateUseCase = require('./application/use-cases/verify-certificate-usecase');
-const RevokeCertificateUseCase = require('./application/use-cases/revoke-certificate-usecase');
+const GenerateCertificateUseCase = require('./application/use-cases/GenerateCertificateUsecase');
+const VerifyCertificateUseCase = require('./application/use-cases/VerifyCertificateUsecase');
+const RevokeCertificateUseCase = require('./application/use-cases/RevokeCertificateUsecase');
 
 // Infrastructure Layer
-const MongoDBCertificateRepository = require('./infrastructure/database/certificate-model');
+const MongoDBCertificateRepository = require('./infrastructure/database/CertificateModel');
 
 // Presentation Layer
-const CertificateController = require('./presentation/controllers/certificate-controller');
+const CertificateController = require('./presentation/controllers/CertificateController');
 const setupCertificateRoutes = require('./presentation/routes/certificate.routes');
 
 /**

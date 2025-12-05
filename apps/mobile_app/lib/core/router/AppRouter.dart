@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/GoRouter.dart';
+import 'package:flutter_riverpod/FlutterRiverpod.dart';
 import '../../presentation/navigation/AppShell.dart';
 import '../../presentation/features/establishment/screens/EstablishmentListScreen.dart';
 import '../../presentation/features/establishment/screens/EstablishmentFormScreen.dart';
@@ -8,7 +8,7 @@ import '../../presentation/features/dashboard/screens/DashboardScreen.dart';
 import '../../presentation/features/application/screens/ApplicationFormScreen.dart';
 import '../../presentation/features/application/screens/ApplicationTypeSelectionScreen.dart';
 import '../../presentation/features/admin/screens/AdminLoginScreen.dart';
-import '../../presentation/features/admin/screens/admin_DashboardScreen.dart';
+import '../../presentation/features/admin/screens/AdminDashboardScreen.dart';
 import '../../presentation/features/admin/screens/TaskQueueScreen.dart';
 import '../../presentation/features/auditor/screens/MyAssignmentsScreen.dart';
 import '../../presentation/features/auditor/screens/InspectionFormScreen.dart';

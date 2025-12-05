@@ -8,7 +8,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const cron = require('node-cron');
 const logger = require('../shared').logger;
-const mongoManager = require('../config/mongodb-manager');
+const mongoManager = require('../config/MongodbManager');
 
 const backupLogger = logger.createLogger('backup-service');
 

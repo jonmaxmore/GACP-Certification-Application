@@ -14,7 +14,7 @@ const {
   seedStandards,
   seedParameters,
   seedStandardValues,
-} = require('../data/compliance-seed-data');
+} = require('../data/ComplianceSeedData');
 
 class ComplianceSeeder {
   /**

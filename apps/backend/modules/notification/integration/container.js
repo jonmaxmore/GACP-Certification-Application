@@ -12,21 +12,21 @@ const mongoose = require('mongoose');
 // (No dependencies from domain - pure business logic)
 
 // Application - Use Cases
-const SendNotificationUseCase = require('../application/use-cases/send-notification-usecase');
-const SendBroadcastNotificationUseCase = require('../application/use-cases/send-broadcast-usecase');
-const GetUserNotificationsUseCase = require('../application/use-cases/get-user-notifications-usecase');
-const MarkNotificationAsReadUseCase = require('../application/use-cases/mark-as-read-usecase');
-const MarkAllAsReadUseCase = require('../application/use-cases/mark-all-read-usecase');
-const GetUnreadCountUseCase = require('../application/use-cases/get-unread-count-usecase');
-const DeleteNotificationUseCase = require('../application/use-cases/delete-notification-usecase');
-const GetNotificationStatisticsUseCase = require('../application/use-cases/get-notification-stats-usecase');
+const SendNotificationUseCase = require('../application/use-cases/SendNotificationUsecase');
+const SendBroadcastNotificationUseCase = require('../application/use-cases/SendBroadcastUsecase');
+const GetUserNotificationsUseCase = require('../application/use-cases/GetUserNotificationsUsecase');
+const MarkNotificationAsReadUseCase = require('../application/use-cases/MarkAsReadUsecase');
+const MarkAllAsReadUseCase = require('../application/use-cases/MarkAllReadUsecase');
+const GetUnreadCountUseCase = require('../application/use-cases/GetUnreadCountUsecase');
+const DeleteNotificationUseCase = require('../application/use-cases/DeleteNotificationUsecase');
+const GetNotificationStatisticsUseCase = require('../application/use-cases/GetNotificationStatsUsecase');
 
 // Infrastructure
-const MongoDBNotificationRepository = require('../infrastructure/database/notification-model');
-const EmailNotificationService = require('../infrastructure/services/email-service');
+const MongoDBNotificationRepository = require('../infrastructure/database/NotificationModel');
+const EmailNotificationService = require('../infrastructure/services/EmailService');
 
 // Presentation
-const NotificationController = require('../presentation/controllers/notification-controller');
+const NotificationController = require('../presentation/controllers/NotificationController');
 const createFarmerRoutes = require('../presentation/routes/notification.farmer.routes');
 const createDTAMRoutes = require('../presentation/routes/notification.dtam.routes');
 

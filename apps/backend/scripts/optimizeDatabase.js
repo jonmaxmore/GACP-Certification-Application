@@ -9,7 +9,7 @@ const logger = require('../shared/logger');
 
 // Import models
 const DTAMApplication = require('../models/ApplicationModel');
-const User = require('../models/user-model');
+const User = require('../models/UserModel');
 
 /**
  * Create indexes for optimal query performance

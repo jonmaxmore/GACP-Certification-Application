@@ -1,6 +1,6 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:connectivity_plus/ConnectivityPlus.dart';
+import 'package:hive_flutter/HiveFlutter.dart';
+import 'package:flutter_riverpod/FlutterRiverpod.dart';
 
 final offlineServiceProvider = Provider<OfflineService>((ref) {
   return OfflineService();

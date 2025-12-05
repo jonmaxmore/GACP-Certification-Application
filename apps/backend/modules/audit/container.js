@@ -7,7 +7,7 @@
  * @module module.container
  */
 
-const MongoDBAuditLogRepository = require('./infrastructure/database/audit-log-model');
+const MongoDBAuditLogRepository = require('./infrastructure/database/AuditLogModel');
 const { createLogger } = require('../../shared/logger');
 const logger = createLogger('audit-container');
 
@@ -27,7 +27,7 @@ const GetAuditStatisticsUseCase = require('./application/use-cases/GetAuditStati
 const GetUserActivityUseCase = require('./application/use-cases/GetUserActivityUseCase');
 
 // Presentation Layer
-const AuditController = require('./presentation/controllers/audit-controller');
+const AuditController = require('./presentation/controllers/AuditController');
 const createAuditRoutes = require('./presentation/routes/audit.routes');
 
 /**

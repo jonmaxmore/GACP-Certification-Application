@@ -8,7 +8,7 @@
  * - Role-based access control (DTAM)
  *
  * Usage:
- *   const auth = require('./middleware/auth-clean-middleware');
+ *   const auth = require('./middleware/AuthCleanMiddleware');
  *   router.get('/profile', auth.authenticateFarmer, controller.getProfile);
  *   router.post('/staff', auth.authenticateDTAMStaff, auth.requirePermission('create_staff'), controller.createStaff);
  */

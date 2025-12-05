@@ -1,8 +1,8 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../domain/entity/establishment_entity.dart';
+import 'package:freezed_annotation/FreezedAnnotation.dart';
+import '../../domain/entity/EstablishmentEntity.dart';
 
-part 'establishment_model.freezed.dart';
-part 'establishment_model.g.dart';
+part 'EstablishmentModel.freezed.dart';
+part 'EstablishmentModel.g.dart';
 
 @freezed
 class EstablishmentModel with _$EstablishmentModel {

@@ -4,10 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mobile_app/core/errors/Failures.dart';
 import 'package:mobile_app/core/network/DioClient.dart';
-import '../../domain/entity/establishment_entity.dart';
-import '../../domain/repository/establishment_repository.dart';
-import '../model/establishment_model.dart';
-import 'package:http_parser/http_parser.dart';
+import '../../domain/entity/EstablishmentEntity.dart';
+import '../../domain/repository/EstablishmentRepository.dart';
+import '../model/EstablishmentModel.dart';
+import 'package:http_parser/HttpParser.dart';
 
 class EstablishmentRepositoryImpl implements EstablishmentRepository {
   final DioClient _dioClient;

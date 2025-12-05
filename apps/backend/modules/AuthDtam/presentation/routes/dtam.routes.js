@@ -7,7 +7,7 @@
 
 const express = require('express');
 const dtamValidator = require('../validators/dtam.validator');
-const authMiddleware = require('../../../../middleware/auth-middleware');
+const authMiddleware = require('../../../../middleware/AuthMiddleware');
 
 /**
  * Create DTAM auth router

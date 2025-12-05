@@ -30,7 +30,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const EventEmitter = require('events');
 const zxcvbn = require('zxcvbn');
-const { JWTTokenManager } = require('../../../middleware/jwt-token-manager-middleware');
+const { JWTTokenManager } = require('../../../middleware/JwtTokenManagerMiddleware');
 
 class UserAuthenticationService extends EventEmitter {
   constructor(dependencies = {}) {

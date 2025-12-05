@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/FlutterRiverpod.dart';
 
-import 'package:google_fonts/google_fonts.dart';
+import 'package:google_fonts/GoogleFonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../domain/entities/ApplicationEntity.dart';
 import '../providers/AdminApplicationProvider.dart';

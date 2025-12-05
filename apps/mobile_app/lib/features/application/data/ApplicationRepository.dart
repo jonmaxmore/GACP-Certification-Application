@@ -1,13 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:flutter_riverpod/FlutterRiverpod.dart';
+import 'package:freezed_annotation/FreezedAnnotation.dart';
 import '../../../core/errors/Failures.dart'; // Note: Failures.dart is capitalized in file system
 import '../../../core/network/DioClient.dart'; // Note: DioClient.dart is capitalized
-import '../../../core/providers/core_providers.dart';
+import '../../../core/providers/CoreProviders.dart';
 
-part 'application_repository.freezed.dart';
-part 'application_repository.g.dart';
+part 'ApplicationRepository.freezed.dart';
+part 'ApplicationRepository.g.dart';
 
 // --- 1. Entity & Model ---
 @freezed

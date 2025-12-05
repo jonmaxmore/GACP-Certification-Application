@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
-import '../application_providers.dart';
-import '../../establishment/presentation/provider/establishment_provider.dart';
-import '../../establishment/domain/entity/establishment_entity.dart';
+import 'package:flutter_riverpod/FlutterRiverpod.dart';
+import 'package:go_router/GoRouter.dart';
+import 'package:lucide_icons/LucideIcons.dart';
+import '../ApplicationProviders.dart';
+import '../../establishment/presentation/provider/EstablishmentProvider.dart';
+import '../../establishment/domain/entity/EstablishmentEntity.dart';
 
 // Helper for Color
 Color _getColorForStatus(String status) {

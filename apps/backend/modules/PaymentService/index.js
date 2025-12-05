@@ -37,7 +37,7 @@
 const logger = require('../../shared/logger/logger');
 const PaymentService = require('./application/services/PaymentService');
 const PaymentController = require('./presentation/controllers/PaymentController');
-const PaymentRoutes = require('./presentation/routes/payment-routes.routes');
+const PaymentRoutes = require('./presentation/routes/PaymentRoutes.routes');
 const Payment = require('./domain/entities/Payment');
 
 class PaymentServiceModule {

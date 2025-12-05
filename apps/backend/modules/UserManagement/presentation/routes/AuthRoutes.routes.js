@@ -29,14 +29,14 @@
  */
 
 const express = require('express');
-const { createAuthRateLimiters } = require('../../../../middleware/auth-rate-limiters-middleware');
+const { createAuthRateLimiters } = require('../../../../middleware/AuthRateLimitersMiddleware');
 const { createLogger } = require('../../../../shared/logger');
 const logger = createLogger('user-management-authRoutes');
 
 const {
   checkTokenBlacklist,
   checkTokenVersion,
-} = require('../../../../middleware/jwt-token-manager-middleware');
+} = require('../../../../middleware/JwtTokenManagerMiddleware');
 const router = express.Router();
 
 function createAuthRoutes(dependencies = {}) {

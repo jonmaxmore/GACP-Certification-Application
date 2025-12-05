@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/FlutterRiverpod.dart';
 
 class TaskQueueScreen extends ConsumerStatefulWidget {
   const TaskQueueScreen({super.key});

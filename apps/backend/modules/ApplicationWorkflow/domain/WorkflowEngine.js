@@ -20,7 +20,7 @@
 
 const logger = require('../../../shared/logger');
 const EventEmitter = require('events');
-const ApplicationStateMachine = require('./state-machine');
+const ApplicationStateMachine = require('./StateMachine');
 
 class ApplicationWorkflowEngine extends EventEmitter {
   constructor(dependencies = {}) {

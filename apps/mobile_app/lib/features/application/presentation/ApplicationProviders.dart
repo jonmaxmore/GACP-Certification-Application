@@ -1,5 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/application_repository.dart';
+import 'package:flutter_riverpod/FlutterRiverpod.dart';
+import '../data/ApplicationRepository.dart';
 
 // 1. Fetch List Provider
 final myApplicationsProvider =

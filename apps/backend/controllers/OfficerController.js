@@ -1,6 +1,6 @@
-const Application = require('../models/Application'); // Assuming Model exists
-const User = require('../models/User'); // Assuming Model exists
-const logger = require('../utils/logger'); // Assuming logger exists
+const Application = require('../models/ApplicationModel'); // Assuming Model exists
+const User = require('../models/UserModel'); // Assuming Model exists
+const logger = require('../shared/logger'); // Assuming logger exists
 
 class OfficerController {
     /**

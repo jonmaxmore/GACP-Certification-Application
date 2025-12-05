@@ -6,7 +6,7 @@
 const logger = require('../../../shared/logger/logger');
 const express = require('express');
 const router = express.Router();
-const ApplicationWorkflowController = require('../controllers/application-workflow.controller');
+const ApplicationWorkflowController = require('../controllers/ApplicationWorkflow.controller');
 
 module.exports = (dependencies = {}) => {
   const { workflowService, auth } = dependencies;

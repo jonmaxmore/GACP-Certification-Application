@@ -1,12 +1,12 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_riverpod/FlutterRiverpod.dart';
+import 'package:flutter_secure_storage/FlutterSecureStorage.dart';
 import 'package:mobile_app/core/network/DioClient.dart';
-import '../../data/repository/establishment_repository_impl.dart';
-import '../../domain/entity/establishment_entity.dart';
-import '../../domain/repository/establishment_repository.dart';
+import '../../data/repository/EstablishmentRepositoryImpl.dart';
+import '../../domain/entity/EstablishmentEntity.dart';
+import '../../domain/repository/EstablishmentRepository.dart';
 import 'dart:io';
 
-import 'package:mobile_app/core/providers/core_providers.dart';
+import 'package:mobile_app/core/providers/CoreProviders.dart';
 
 final establishmentRepositoryProvider =
     Provider<EstablishmentRepository>((ref) {

@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/payment_repository.dart';
+import 'package:flutter_riverpod/FlutterRiverpod.dart';
+import '../data/PaymentRepository.dart';
 
 class PaymentState {
   final bool isLoading;

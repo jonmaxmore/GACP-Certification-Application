@@ -10,20 +10,20 @@ const logger = require('../../shared/logger/logger');
 const Farm = require('./domain/entities/Farm');
 
 // Application Use Cases
-const RegisterFarmUseCase = require('./application/use-cases/register-farm-usecase');
-const UpdateFarmUseCase = require('./application/use-cases/update-farm-usecase');
-const SubmitFarmForReviewUseCase = require('./application/use-cases/submit-farm-for-review-usecase');
-const GetFarmDetailsUseCase = require('./application/use-cases/get-farm-details-usecase');
-const ListFarmsUseCase = require('./application/use-cases/list-farms-usecase');
-const StartFarmReviewUseCase = require('./application/use-cases/start-farm-review-usecase');
-const ApproveFarmUseCase = require('./application/use-cases/approve-farm-usecase');
-const RejectFarmUseCase = require('./application/use-cases/reject-farm-usecase');
+const RegisterFarmUseCase = require('./application/use-cases/RegisterFarmUsecase');
+const UpdateFarmUseCase = require('./application/use-cases/UpdateFarmUsecase');
+const SubmitFarmForReviewUseCase = require('./application/use-cases/SubmitFarmForReviewUsecase');
+const GetFarmDetailsUseCase = require('./application/use-cases/GetFarmDetailsUsecase');
+const ListFarmsUseCase = require('./application/use-cases/ListFarmsUsecase');
+const StartFarmReviewUseCase = require('./application/use-cases/StartFarmReviewUsecase');
+const ApproveFarmUseCase = require('./application/use-cases/ApproveFarmUsecase');
+const RejectFarmUseCase = require('./application/use-cases/RejectFarmUsecase');
 
 // Infrastructure
-const MongoDBFarmRepository = require('./infrastructure/database/farm-model');
+const MongoDBFarmRepository = require('./infrastructure/database/FarmModel');
 
 // Presentation
-const FarmController = require('./presentation/controllers/farm-controller');
+const FarmController = require('./presentation/controllers/FarmController');
 const createFarmRoutes = require('./presentation/routes/farm.routes');
 const farmValidators = require('./presentation/validators/farm.validator');
 

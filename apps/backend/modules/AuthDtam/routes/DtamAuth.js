@@ -15,7 +15,7 @@ const shared = require('../../shared');
 const { config } = shared;
 
 // Import DTAM-specific middleware (not from shared)
-const dtamMiddleware = require('../middleware/dtam-auth-middleware');
+const dtamMiddleware = require('../middleware/DtamAuthMiddleware');
 
 // Import DTAM-specific models
 const DTAMStaff = require('../models/DTAMStaff');

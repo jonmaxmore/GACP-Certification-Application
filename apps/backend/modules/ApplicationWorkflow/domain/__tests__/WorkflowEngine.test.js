@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const ApplicationWorkflowEngine = require('../workflow-engine');
+const ApplicationWorkflowEngine = require('../WorkflowEngine');
 const Application = require('../../../../../models/ApplicationModel');
 const User = require('../../../../../models/UserModel');
 const DTAMStaff = require('../../../auth-dtam/models/DTAMStaff');

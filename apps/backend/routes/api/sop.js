@@ -27,8 +27,8 @@ const handleValidationErrors = (req, res, next) => {
 };
 
 // Authentication middleware (assuming it exists)
-const authenticate = require('../middleware/auth-middleware');
-const authorizeRoles = require('../middleware/rbac-middleware');
+const authenticate = require('../middleware/AuthMiddleware');
+const authorizeRoles = require('../middleware/RbacMiddleware');
 
 /**
  * @route GET /api/sop

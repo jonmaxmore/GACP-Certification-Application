@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/FlutterRiverpod.dart';
 import 'package:mobile_app/core/errors/Failures.dart';
 import 'package:mobile_app/core/network/DioClient.dart';
-import 'package:mobile_app/core/providers/core_providers.dart';
+import 'package:mobile_app/core/providers/CoreProviders.dart';
 
 abstract class PaymentRepository {
   Future<Either<Failure, bool>> confirmPayment({

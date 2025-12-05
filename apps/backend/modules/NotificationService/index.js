@@ -43,7 +43,7 @@
 const logger = require('../../shared/logger/logger');
 const NotificationService = require('./application/services/NotificationService');
 const NotificationController = require('./presentation/controllers/NotificationController');
-const NotificationRoutes = require('./presentation/routes/notification-routes.routes');
+const NotificationRoutes = require('./presentation/routes/NotificationRoutes.routes');
 const Notification = require('./domain/entities/Notification');
 
 class NotificationModule {

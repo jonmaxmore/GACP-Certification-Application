@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/FlutterRiverpod.dart';
 import '../../../../domain/entities/ApplicationEntity.dart';
 import '../../application/providers/ApplicationProvider.dart';
 

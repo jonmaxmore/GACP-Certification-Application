@@ -12,8 +12,8 @@ const _EnhancedCultivationRecord = require('../models/mongodb/_EnhancedCultivati
 const router = express.Router();
 
 // Middleware
-const authenticate = require('../middleware/auth-middleware');
-const authorizeRoles = require('../middleware/rbac-middleware');
+const authenticate = require('../middleware/AuthMiddleware');
+const authorizeRoles = require('../middleware/RbacMiddleware');
 const { createLogger } = require('../../shared/logger');
 const logger = createLogger('audit-calendar');
 

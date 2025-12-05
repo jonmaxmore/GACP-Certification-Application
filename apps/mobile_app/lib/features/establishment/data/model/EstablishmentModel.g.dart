@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'establishment_model.dart';
+part of 'EstablishmentModel.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

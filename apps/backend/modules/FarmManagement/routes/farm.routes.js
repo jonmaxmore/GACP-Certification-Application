@@ -6,7 +6,7 @@
 const logger = require('../../../shared/logger/logger');
 const express = require('express');
 const router = express.Router();
-const FarmManagementController = require('../controllers/farm-management.controller');
+const FarmManagementController = require('../controllers/FarmManagement.controller');
 
 module.exports = (dependencies = {}) => {
   const { farmService, auth } = dependencies;

@@ -1,5 +1,5 @@
 const gacpService = require('../services/ApplicationWorkflowService');
-const logger = require('../utils/logger'); // Assuming logger exists
+const logger = require('../shared/logger'); // Assuming logger exists
 
 class PaymentController {
     /**

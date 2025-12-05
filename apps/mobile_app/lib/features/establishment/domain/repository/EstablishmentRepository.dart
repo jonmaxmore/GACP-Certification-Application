@@ -1,6 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:mobile_app/core/errors/Failures.dart';
-import 'establishment_entity.dart';
+import 'EstablishmentEntity.dart';
 import 'dart:io';
 
 abstract class EstablishmentRepository {

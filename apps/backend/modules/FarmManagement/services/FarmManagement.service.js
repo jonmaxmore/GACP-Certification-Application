@@ -5,7 +5,7 @@
 
 const { v4: uuidv4 } = require('uuid');
 const CultivationCycle = require('../models/CultivationCycle');
-const { AppError } = require('../../shared/utils/error-handler-utils');
+const { AppError } = require('../../shared/utils/ErrorHandlerUtils');
 const logger = require('../../shared/utils/logger');
 
 class FarmManagementService {

@@ -17,24 +17,24 @@ const environment = require('./config/environment');
 const database = require('../../config/MongodbManager');
 
 // Middleware
-const errorHandler = require('./middleware/error-handler-middleware');
-const authMiddleware = require('./middleware/auth-middleware');
-const securityMiddleware = require('./middleware/security-middleware');
+const errorHandler = require('./middleware/ErrorHandlerMiddleware');
+const authMiddleware = require('./middleware/AuthMiddleware');
+const securityMiddleware = require('./middleware/SecurityMiddleware');
 
 // Utils
-const responseUtils = require('./utils/response-utils');
-const validationUtils = require('./utils/validation-utils');
-const cryptoUtils = require('./utils/crypto-utils');
-const dateUtils = require('./utils/date-utils');
+const responseUtils = require('./utils/ResponseUtils');
+const validationUtils = require('./utils/ValidationUtils');
+const cryptoUtils = require('./utils/CryptoUtils');
+const dateUtils = require('./utils/DateUtils');
 
 // Constants
-const statusCodes = require('./constants/status-codes');
-const userRoles = require('./constants/user-roles');
-const errorMessages = require('./constants/error-messages');
+const statusCodes = require('./constants/StatusCodes');
+const userRoles = require('./constants/UserRoles');
+const errorMessages = require('./constants/ErrorMessages');
 
 // Database
 const dbConnection = require('./database/connection');
-const mongoosePlugins = require('./database/mongoose-plugins');
+const mongoosePlugins = require('./database/MongoosePlugins');
 
 module.exports = {
   name: 'shared',

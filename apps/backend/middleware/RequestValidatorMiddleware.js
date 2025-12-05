@@ -4,7 +4,7 @@
  * Validates incoming requests against defined schemas to ensure
  * data integrity and consistency.
  */
-const { AppError } = require('./error-middleware');
+const { AppError } = require('./ErrorMiddleware');
 const logger = require('../shared/logger');
 const validatorLogger = logger.createLogger('validator');
 

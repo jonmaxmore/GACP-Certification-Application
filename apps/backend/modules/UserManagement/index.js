@@ -39,12 +39,12 @@
 
 const logger = require('../../shared/logger/logger');
 const UserAuthenticationService = require('./domain/UserAuthenticationService');
-const AuthenticationMiddleware = require('./presentation/middleware/AuthenticationMiddleware-middleware');
+const AuthenticationMiddleware = require('./presentation/middleware/AuthenticationMiddlewareMiddleware');
 const UserAuthenticationController = require('./presentation/controllers/UserAuthenticationController');
 const UserRepository = require('./infrastructure/repositories/UserRepository');
 const User = require('./infrastructure/models/User');
-const createAuthRoutes = require('./presentation/routes/auth-routes.routes');
-const { JWTTokenManager } = require('../../middleware/jwt-token-manager-middleware');
+const createAuthRoutes = require('./presentation/routes/AuthRoutes.routes');
+const { JWTTokenManager } = require('../../middleware/JwtTokenManagerMiddleware');
 
 class UserManagementModule {
   constructor(dependencies = {}) {
@@ -317,7 +317,7 @@ module.exports = {
 /**
  * Usage Example:
  *
- * const { createUserManagementModule } = require('./modules/user-management');
+ * const { createUserManagementModule } = require('./modules/UserManagement');
  *
  * const userModule = createUserManagementModule({
  *   cacheService: redisClient,

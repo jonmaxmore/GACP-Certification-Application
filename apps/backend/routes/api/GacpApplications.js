@@ -65,7 +65,7 @@ const upload = multer({
  *
  * /api/v2/applications/submit:
  *   post:
- *     summary: Submit a new application (Note: Maps to /applications in current API)
+ *     summary: "Submit a new application (Note: Maps to /applications in current API)"
  *     tags: [Applications]
  *     security:
  *       - BearerAuth: []

@@ -12,7 +12,7 @@
  *
  * Usage:
  * ```javascript
- * const cryptoService = require('./services/crypto-utils');
+ * const cryptoService = require('./services/CryptoUtils');
  *
  * // Initialize on app startup
  * await cryptoService.initialize({

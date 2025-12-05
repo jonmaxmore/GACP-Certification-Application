@@ -4,11 +4,11 @@
  */
 
 const logger = require('../../shared/logger/logger');
-const FarmManagementService = require('./services/farm-management.service');
-const FarmManagementController = require('./controllers/farm-management.controller');
+const FarmManagementService = require('./services/FarmManagement.service');
+const FarmManagementController = require('./controllers/FarmManagement.controller');
 const farmRoutes = require('./routes/farm.routes');
 const CultivationCycle = require('./models/CultivationCycle');
-const validators = require('./validators/farm-management.validators');
+const validators = require('./validators/FarmManagement.validators');
 
 /**
  * Initialize farm management module

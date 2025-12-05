@@ -12,23 +12,23 @@ const IDTAMStaffRepository = require('./domain/interfaces/IDTAMStaffRepository')
 /* eslint-enable no-unused-vars */
 
 // Infrastructure
-const MongoDBDTAMStaffRepository = require('./infrastructure/database/dtam-staff-model');
+const MongoDBDTAMStaffRepository = require('./infrastructure/database/DtamStaffModel');
 // Reuse security services from auth-farmer
 const BcryptPasswordHasher = require('../auth-farmer/infrastructure/security/password');
 const JWTService = require('../auth-farmer/infrastructure/security/token');
 
 // Application (Use Cases)
-const CreateDTAMStaffUseCase = require('./application/use-cases/create-dtam-staff-usecase');
-const LoginDTAMStaffUseCase = require('./application/use-cases/login-dtam-staff-usecase');
-const RequestDTAMStaffPasswordResetUseCase = require('./application/use-cases/request-dtam-staff-password-reset-usecase');
-const ResetDTAMStaffPasswordUseCase = require('./application/use-cases/reset-dtam-staff-password-usecase');
-const GetDTAMStaffProfileUseCase = require('./application/use-cases/get-dtam-staff-profile-usecase');
-const UpdateDTAMStaffProfileUseCase = require('./application/use-cases/update-dtam-staff-profile-usecase');
-const ListDTAMStaffUseCase = require('./application/use-cases/list-dtam-staff-usecase');
-const UpdateDTAMStaffRoleUseCase = require('./application/use-cases/update-dtam-staff-role-usecase');
+const CreateDTAMStaffUseCase = require('./application/use-cases/CreateDtamStaffUsecase');
+const LoginDTAMStaffUseCase = require('./application/use-cases/LoginDtamStaffUsecase');
+const RequestDTAMStaffPasswordResetUseCase = require('./application/use-cases/RequestDtamStaffPasswordResetUsecase');
+const ResetDTAMStaffPasswordUseCase = require('./application/use-cases/ResetDtamStaffPasswordUsecase');
+const GetDTAMStaffProfileUseCase = require('./application/use-cases/GetDtamStaffProfileUsecase');
+const UpdateDTAMStaffProfileUseCase = require('./application/use-cases/UpdateDtamStaffProfileUsecase');
+const ListDTAMStaffUseCase = require('./application/use-cases/ListDtamStaffUsecase');
+const UpdateDTAMStaffRoleUseCase = require('./application/use-cases/UpdateDtamStaffRoleUsecase');
 
 // Presentation
-const DTAMStaffAuthController = require('./presentation/controllers/dtam-auth-controller');
+const DTAMStaffAuthController = require('./presentation/controllers/DtamAuthController');
 const createDTAMAuthRouter = require('./presentation/routes/dtam.routes');
 
 /**

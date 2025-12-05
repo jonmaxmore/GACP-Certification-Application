@@ -26,11 +26,11 @@ const jwtSecurity = require(path.resolve(__dirname, '../../../../config/jwt-secu
 // Application (Use Cases) -> Services
 const RegisterUserUseCase = require('./services/register.service');
 const LoginUserUseCase = require('./services/login.service');
-const VerifyEmailUseCase = require('./services/verify-email.service');
-const RequestPasswordResetUseCase = require('./services/request-password-reset.service');
-const ResetPasswordUseCase = require('./services/reset-password.service');
-const GetUserProfileUseCase = require('./services/get-profile.service');
-const UpdateUserProfileUseCase = require('./services/update-profile.service');
+const VerifyEmailUseCase = require('./services/VerifyEmail.service');
+const RequestPasswordResetUseCase = require('./services/RequestPasswordReset.service');
+const ResetPasswordUseCase = require('./services/ResetPassword.service');
+const GetUserProfileUseCase = require('./services/GetProfile.service');
+const UpdateUserProfileUseCase = require('./services/UpdateProfile.service');
 
 // Presentation -> Controllers & Routes
 const AuthController = require('./controllers/auth.controller');

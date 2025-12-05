@@ -288,7 +288,7 @@ async function optimize() {
 
 // CLI execution helper
 async function runOptimization() {
-  const mongoManager = require('../config/mongodb-manager');
+  const mongoManager = require('../config/MongodbManager');
   try {
     // Connect to database
     await mongoManager.connect();

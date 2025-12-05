@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const AuthController = require('../../controllers/AuthController');
-const upload = require('../../middleware/upload');
+const upload = require('../../middleware/UploadMiddleware');
 
 // POST /api/auth/farmer/register
 router.post('/register', upload.single('idCardImage'), (req, res) => AuthController.register(req, res));

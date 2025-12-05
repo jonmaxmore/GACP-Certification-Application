@@ -5,7 +5,7 @@
 
 module.exports = async () => {
   try {
-    const mongoManager = require('./config/mongodb-manager');
+    const mongoManager = require('./config/MongodbManager');
     if (mongoManager && typeof mongoManager.reset === 'function') {
       await mongoManager.reset();
     } else if (mongoManager && typeof mongoManager.disconnect === 'function') {

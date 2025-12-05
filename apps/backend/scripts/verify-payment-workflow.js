@@ -6,7 +6,7 @@
  */
 
 const logger = require('../shared/logger');
-const { PAYMENT_FEES } = require('../config/payment-fees');
+const { PAYMENT_FEES } = require('../config/PaymentFees');
 
 class PaymentWorkflowVerifier {
   constructor() {
@@ -68,7 +68,7 @@ class PaymentWorkflowVerifier {
     logger.info('🔧 Verifying Helper Functions...');
 
     // Test getTotalFee
-    const totalFee = require('../config/payment-fees').getTotalFee();
+    const totalFee = require('../config/PaymentFees').getTotalFee();
     if (totalFee === 30000) {
       this.passed.push('✅ getTotalFee() returns correct amount');
     } else {
@@ -76,7 +76,7 @@ class PaymentWorkflowVerifier {
     }
 
     // Test getPhaseAmount
-    const getPhaseAmount = require('../config/payment-fees').getPhaseAmount;
+    const getPhaseAmount = require('../config/PaymentFees').getPhaseAmount;
 
     if (getPhaseAmount(1) === 5000) {
       this.passed.push('✅ getPhaseAmount(1) correct');
@@ -97,7 +97,7 @@ class PaymentWorkflowVerifier {
     }
 
     // Test isValidPhase
-    const isValidPhase = require('../config/payment-fees').isValidPhase;
+    const isValidPhase = require('../config/PaymentFees').isValidPhase;
 
     if (isValidPhase(1) && isValidPhase(2) && !isValidPhase(3)) {
       this.passed.push('✅ isValidPhase() correctly validates phases 1,2 only');
@@ -117,7 +117,7 @@ class PaymentWorkflowVerifier {
     phases.push(1); // Phase 1 payment
     phases.push(2); // Phase 2 payment
 
-    const calculateTotalPaid = require('../config/payment-fees').calculateTotalPaid;
+    const calculateTotalPaid = require('../config/PaymentFees').calculateTotalPaid;
     const totalPaid = calculateTotalPaid(phases);
 
     if (totalPaid === 30000) {
@@ -135,7 +135,7 @@ class PaymentWorkflowVerifier {
     }
 
     // Test next phase logic
-    const getNextPhase = require('../config/payment-fees').getNextPhase;
+    const getNextPhase = require('../config/PaymentFees').getNextPhase;
 
     if (getNextPhase(1) === 2) {
       this.passed.push('✅ Next phase logic correct (1→2)');

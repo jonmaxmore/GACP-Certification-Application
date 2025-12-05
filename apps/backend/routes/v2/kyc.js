@@ -5,7 +5,7 @@ const kycController = {
     getPendingKYC: (req, res) => res.json({ success: true, data: [] }),
     verifyUser: (req, res) => res.json({ success: true }),
 };
-const { requireRole } = require('../../middleware/roleMiddleware');
+const { requireRole } = require('../../middleware/RoleMiddleware');
 
 // Routes
 // GET /api/v2/kyc/pending - List pending verifications (Admin/Registrar only)

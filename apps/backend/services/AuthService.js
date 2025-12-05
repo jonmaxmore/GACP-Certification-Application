@@ -1,6 +1,6 @@
 const UserModel = require('../models/UserModel');
 const bcrypt = require('bcrypt');
-const jwtSecurity = require('../config/jwt-security');
+const jwtSecurity = require('../config/JwtSecurity');
 const { validateThaiID, validateLaserCode } = require('../utils/validators');
 const crypto = require('crypto');
 

@@ -7,7 +7,7 @@
 const logger = require('../shared/logger');
 const metrics = require('../shared/metrics');
 const errorLogger = logger.createLogger('error');
-const configManager = require('../config/config-manager');
+const configManager = require('../config/ConfigManager');
 
 /**
  * Custom error class for application errors

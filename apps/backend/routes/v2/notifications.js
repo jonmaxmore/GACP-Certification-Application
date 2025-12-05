@@ -15,7 +15,7 @@ const notificationController = {
     markAllAsRead: (req, res) => res.json({ success: true }),
     createNotification: (req, res) => res.status(201).json({ success: true }),
 };
-const { farmerOrStaff } = require('../../middleware/roleMiddleware');
+const { farmerOrStaff } = require('../../middleware/RoleMiddleware');
 
 // All routes require authentication
 router.use(farmerOrStaff);

@@ -9,7 +9,7 @@ const { createAdapter } = require('@socket.io/redis-adapter');
 const jwt = require('jsonwebtoken');
 const logger = require('../shared/logger');
 const metrics = require('../shared/metrics');
-const configManager = require('../config/config-manager');
+const configManager = require('../config/ConfigManager');
 const socketLogger = logger.createLogger('socket');
 
 let io;

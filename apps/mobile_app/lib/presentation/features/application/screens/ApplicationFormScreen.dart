@@ -262,7 +262,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
               TextFormField(controller: _totalAreaController, decoration: const InputDecoration(labelText: 'Total Area')),
               TextFormField(controller: _cultivatedAreaController, decoration: const InputDecoration(labelText: 'Cultivated Area')),
               DropdownButtonFormField<String>(
-                value: appState.formData['areaUnit'] ?? 'rai',
+                initialValue: appState.formData['areaUnit'] ?? 'rai',
                 decoration: const InputDecoration(labelText: 'Unit'),
                 items: ['rai', 'hectare', 'sqm'].map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
                 onChanged: (v) => notifier.updateFormData('areaUnit', v),
@@ -323,7 +323,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
           content: Column(
             children: [
               DropdownButtonFormField<String>(
-                value: appState.formData['dispensingMethod'] ?? 'pharmacy',
+                initialValue: appState.formData['dispensingMethod'] ?? 'pharmacy',
                 decoration: const InputDecoration(labelText: 'Dispensing Method'),
                 items: ['pharmacy', 'clinic', 'other'].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                 onChanged: (v) => notifier.updateFormData('dispensingMethod', v),
@@ -376,7 +376,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
           content: Column(
             children: [
               DropdownButtonFormField<String>(
-                value: appState.formData['importExportType'] ?? 'import',
+                initialValue: appState.formData['importExportType'] ?? 'import',
                 decoration: const InputDecoration(labelText: 'Type'),
                 items: ['import', 'export'].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                 onChanged: (v) => notifier.updateFormData('importExportType', v),
@@ -384,7 +384,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
               TextFormField(controller: _countryController, decoration: const InputDecoration(labelText: 'Country (Origin/Destination)')),
               TextFormField(controller: _portController, decoration: const InputDecoration(labelText: 'Port of Entry/Exit')),
               DropdownButtonFormField<String>(
-                value: appState.formData['transportMode'] ?? 'air',
+                initialValue: appState.formData['transportMode'] ?? 'air',
                 decoration: const InputDecoration(labelText: 'Transport Mode'),
                 items: ['air', 'sea', 'land'].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                 onChanged: (v) => notifier.updateFormData('transportMode', v),

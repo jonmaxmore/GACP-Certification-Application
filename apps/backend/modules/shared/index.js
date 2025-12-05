@@ -14,7 +14,7 @@
 // Config
 const environment = require('./config/environment');
 // Database - use mongodb-manager.js as the single source of truth
-const database = require('../../config/mongodb-manager');
+const database = require('../../config/MongodbManager');
 
 // Middleware
 const errorHandler = require('./middleware/error-handler-middleware');

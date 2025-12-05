@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/network/DioClient.dart';
 import '../../../../data/repositories/DashboardRepositoryImpl.dart';
 import '../../../../domain/entities/DashboardStatsEntity.dart';
 import '../../../../domain/repositories/DashboardRepository.dart';

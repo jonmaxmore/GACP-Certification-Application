@@ -105,7 +105,7 @@ class _EstablishmentFormScreenState extends ConsumerState<EstablishmentFormScree
 
                     // Type
                     DropdownButtonFormField<String>(
-                      value: _selectedType,
+                      initialValue: _selectedType,
                       decoration: const InputDecoration(
                         labelText: 'Type',
                         border: OutlineInputBorder(),

@@ -17,7 +17,7 @@ const ticketController = {
     resolveTicket: (req, res) => res.json({ success: true }),
     closeTicket: (req, res) => res.json({ success: true }),
 };
-const { farmerOrStaff, canAccessApplication } = require('../../middleware/roleMiddleware');
+const { farmerOrStaff, canAccessApplication } = require('../../middleware/RoleMiddleware');
 
 // All routes require authentication
 router.use(farmerOrStaff);

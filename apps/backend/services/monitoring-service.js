@@ -7,7 +7,7 @@ const os = require('os');
 const fs = require('fs').promises;
 const path = require('path');
 const logger = require('../shared').logger;
-const mongoManager = require('../config/mongodb-manager');
+const mongoManager = require('../config/MongodbManager');
 
 const monitorLogger = logger.createLogger('monitor-service');
 
@@ -95,8 +95,7 @@ class MonitoringService {
 
       // Log current status
       monitorLogger.debug(
-        `Metrics collected: CPU: ${cpuLoad.toFixed(2)}, Memory: ${memUsage.toFixed(2)}%, MongoDB: ${
-          mongoStatus.isConnected ? 'connected' : 'disconnected'
+        `Metrics collected: CPU: ${cpuLoad.toFixed(2)}, Memory: ${memUsage.toFixed(2)}%, MongoDB: ${mongoStatus.isConnected ? 'connected' : 'disconnected'
         }`,
       );
 

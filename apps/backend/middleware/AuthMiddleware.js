@@ -17,7 +17,7 @@
 
 const { createLogger } = require('../shared/logger');
 const logger = createLogger('auth-middleware');
-const jwtConfig = require('../config/jwt-security');
+const jwtConfig = require('../config/JwtSecurity');
 const jwt = require('jsonwebtoken');
 
 // ------------------------------------

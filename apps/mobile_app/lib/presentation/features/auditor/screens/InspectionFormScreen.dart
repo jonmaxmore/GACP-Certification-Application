@@ -1,42 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../../data/services/OfflineService.dart';
+import 'package:mobile_app/core/providers/core_providers.dart';
 
 class InspectionFormScreen extends ConsumerStatefulWidget {
   final String applicationId;
   const InspectionFormScreen({super.key, required this.applicationId});
 
   @override
-  ConsumerState<InspectionFormScreen> createState() => _InspectionFormScreenState();
+  ConsumerState<InspectionFormScreen> createState() =>
+      _InspectionFormScreenState();
 }
 
 class _InspectionFormScreenState extends ConsumerState<InspectionFormScreen> {
   int _currentStep = 0;
-  final _formKey = GlobalKey<FormState>();
+  bool _isSubmitting = false;
 
-  // Mock checklist data
-  final Map<String, bool?> _checklist = {
-    'Site is clean and free of waste': null,
-    'Water source is protected': null,
-    'Equipment is sanitized': null,
-    'Records are up to date': null,
+  // GACP 5 Categories
+  final Map<String, Map<String, bool?>> _checklist = {
+    '1. Site (สถานที่)': {
+      'Cleanliness (ความสะอาด)': null,
+      'Water Source (แหล่งน้ำ)': null,
+      'Waste Management (การจัดการขยะ)': null,
+    },
+    '2. Cultivation (การปลูก)': {
+      'Soil Quality (คุณภาพดิน)': null,
+      'Seeds Source (ที่มาเมล็ดพันธุ์)': null,
+      'Fertilizer Usage (การใช้ปุ๋ย)': null,
+    },
+    '3. Harvest (การเก็บเกี่ยว)': {
+      'Harvest Method (วิธีการเก็บเกี่ยว)': null,
+      'Tools Hygiene (ความสะอาดเครื่องมือ)': null,
+    },
+    '4. Processing (การแปรรูป)': {
+      'Drying Area (พื้นที่ตากแห้ง)': null,
+      'Packaging (บรรจุภัณฑ์)': null,
+    },
+    '5. Personnel (บุคลากร)': {
+      'Hygiene Training (การฝึกอบรมสุขลักษณะ)': null,
+      'Protective Gear (อุปกรณ์ป้องกัน)': null,
+    }
   };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inspection Form'),
+        title: const Text('Digital Audit Form'),
       ),
       body: Stepper(
         type: StepperType.vertical,
         currentStep: _currentStep,
         onStepContinue: () {
-          if (_currentStep < 2) {
+          if (_currentStep < 5) {
             setState(() => _currentStep += 1);
           } else {
-            // Submit form
             _submitInspection();
           }
         },
@@ -50,178 +68,157 @@ class _InspectionFormScreenState extends ConsumerState<InspectionFormScreen> {
             padding: const EdgeInsets.only(top: 20),
             child: Row(
               children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: details.onStepContinue,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
+                if (_currentStep < 5)
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: details.onStepContinue,
+                      child: const Text('Next'),
                     ),
-                    child: Text(_currentStep == 2 ? 'Submit' : 'Next'),
                   ),
-                ),
-                const SizedBox(width: 12),
-                if (_currentStep > 0)
+                if (_currentStep == 5)
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _isSubmitting ? null : details.onStepContinue,
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green),
+                      child: _isSubmitting
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text('Submit Audit Result'),
+                    ),
+                  ),
+                if (_currentStep > 0) ...[
+                  const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton(
                       onPressed: details.onStepCancel,
                       child: const Text('Back'),
                     ),
                   ),
+                ]
               ],
             ),
           );
         },
         steps: [
+          // Step 0: General
           Step(
-            title: const Text('General Information'),
+            title: const Text('General Info'),
             content: Column(
               children: [
-                TextFormField(
-                  initialValue: widget.applicationId,
-                  readOnly: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Application ID',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Inspector Name',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  initialValue: DateTime.now().toString().split(' ')[0],
-                  decoration: const InputDecoration(
-                    labelText: 'Inspection Date',
-                    border: OutlineInputBorder(),
-                    suffixIcon: Icon(LucideIcons.calendar),
-                  ),
-                ),
+                ListTile(
+                    title: Text('App ID: ${widget.applicationId}'),
+                    leading: const Icon(LucideIcons.fileText)),
+                ListTile(
+                    title: Text(
+                        'Date: ${DateTime.now().toString().split(' ')[0]}'),
+                    leading: const Icon(LucideIcons.calendar)),
               ],
             ),
             isActive: _currentStep >= 0,
           ),
-          Step(
-            title: const Text('Checklist'),
-            content: Column(
-              children: _checklist.keys.map((key) {
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+
+          // Steps 1-5: Categories
+          ..._checklist.entries.map((entry) {
+            int index = _checklist.keys.toList().indexOf(entry.key) + 1;
+            return Step(
+              title: Text(entry.key),
+              content: Column(
+                children: entry.value.entries.map((checkItem) {
+                  return Card(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(key, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        ListTile(title: Text(checkItem.key)),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Expanded(
-                              child: RadioListTile<bool?>(
-                                title: const Text('Pass'),
-                                value: true,
-                                groupValue: _checklist[key],
-                                onChanged: (val) => setState(() => _checklist[key] = val),
-                                contentPadding: EdgeInsets.zero,
-                                activeColor: Colors.green,
-                              ),
+                            TextButton.icon(
+                              icon: Icon(Icons.check_circle,
+                                  color: checkItem.value == true
+                                      ? Colors.green
+                                      : Colors.grey),
+                              label: const Text('Pass'),
+                              onPressed: () {
+                                setState(() {
+                                  entry.value[checkItem.key] = true;
+                                });
+                              },
                             ),
-                            Expanded(
-                              child: RadioListTile<bool?>(
-                                title: const Text('Fail'),
-                                value: false,
-                                groupValue: _checklist[key],
-                                onChanged: (val) => setState(() => _checklist[key] = val),
-                                contentPadding: EdgeInsets.zero,
-                                activeColor: Colors.red,
-                              ),
+                            TextButton.icon(
+                              icon: Icon(Icons.cancel,
+                                  color: checkItem.value == false
+                                      ? Colors.red
+                                      : Colors.grey),
+                              label: const Text('Fail'),
+                              onPressed: () {
+                                setState(() {
+                                  entry.value[checkItem.key] = false;
+                                });
+                              },
                             ),
                           ],
-                        ),
+                        )
                       ],
                     ),
-                  ),
-                );
-              }).toList(),
-            ),
-            isActive: _currentStep >= 1,
-          ),
-          Step(
-            title: const Text('Photos & Evidence'),
-            content: Column(
-              children: [
-                Container(
-                  height: 150,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey),
-                  ),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(LucideIcons.camera, size: 48, color: Colors.grey),
-                      SizedBox(height: 8),
-                      Text('Tap to add photos'),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Additional Comments',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ],
-            ),
-            isActive: _currentStep >= 2,
-          ),
+                  );
+                }).toList(),
+              ),
+              isActive: _currentStep >= index,
+            );
+          }).toList(),
         ],
       ),
     );
   }
 
   Future<void> _submitInspection() async {
-    // Validate checklist
-    if (_checklist.containsValue(null)) {
+    // Validate
+    bool allAnswered = true;
+    _checklist.forEach((cat, items) {
+      if (items.containsValue(null)) allAnswered = false;
+    });
+
+    if (!allAnswered) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please complete all checklist items')),
-      );
+          const SnackBar(content: Text('Please complete all items!')));
       return;
     }
 
-    final offlineService = ref.read(offlineServiceProvider);
-    final isConnected = await offlineService.isConnected();
+    setState(() => _isSubmitting = true);
 
-    final inspectionData = {
-      'applicationId': widget.applicationId,
-      'checklist': _checklist,
-      'comments': 'Inspection completed via mobile app',
-      'completedAt': DateTime.now().toIso8601String(),
-    };
+    try {
+      final dio = ref.read(dioClientProvider);
+      // Calculate Score logic (simple average)
+      int total = 0;
+      int passed = 0;
+      _checklist.forEach((cat, items) {
+        items.forEach((k, v) {
+          total++;
+          if (v == true) passed++;
+        });
+      });
+      double score = (passed / total) * 100;
+      String result = score >= 80 ? 'PASSED' : 'FAILED';
 
-    if (isConnected) {
-      // TODO: Call API to submit
-      // await api.submitInspection(inspectionData);
+      final response = await dio
+          .post('/v2/applications/${widget.applicationId}/audit-result', data: {
+        'result': result,
+        'score': score,
+        'checklistData': _checklist.toString(),
+      });
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Audit Submitted Successfully!'),
+            backgroundColor: Colors.green));
+      } else {
+        throw Exception('Failed to submit');
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Inspection submitted successfully')),
-      );
-    } else {
-      // Save locally
-      await offlineService.saveInspectionLocally(widget.applicationId, inspectionData);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No internet. Saved locally. Will sync when online.')),
-      );
-    }
-    
-    if (mounted) {
-      Navigator.pop(context);
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 }

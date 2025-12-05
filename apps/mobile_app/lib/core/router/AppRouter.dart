@@ -12,6 +12,7 @@ import '../../presentation/features/admin/screens/admin_DashboardScreen.dart';
 import '../../presentation/features/admin/screens/TaskQueueScreen.dart';
 import '../../presentation/features/auditor/screens/MyAssignmentsScreen.dart';
 import '../../presentation/features/auditor/screens/InspectionFormScreen.dart';
+import '../../presentation/features/auditor/screens/AuditorDashboardScreen.dart';
 import '../../presentation/features/admin/screens/ApplicationDetailScreen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -72,13 +73,31 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // Auditor Routes (Mobile)
-      GoRoute(
-        path: '/auditor/assignments',
-        builder: (context, state) => const MyAssignmentsScreen(),
+      // Auditor Shell
+      ShellRoute(
+        builder: (context, state, child) {
+          return AuditorDashboardScreen(child: child);
+        },
+        routes: [
+          GoRoute(
+            path: '/auditor/assignments',
+            builder: (context, state) =>
+                const MyAssignmentsScreen(), // Maps to "My Jobs"
+          ),
+          GoRoute(
+            path: '/auditor/history',
+            builder: (context, state) => const AuditorHistoryScreen(),
+          ),
+          GoRoute(
+            path: '/auditor/profile',
+            builder: (context, state) => const AuditorProfileScreen(),
+          ),
+        ],
       ),
       GoRoute(
-        path: '/auditor/inspection/:id',
+        path:
+            '/auditor/inspection/:id', // Keep inspection outside shell if desired, or inside? Usually checklist needs full screen. I'll make it outside or standard Push.
+        parentNavigatorKey: _rootNavigatorKey, // Push on top of shell
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return InspectionFormScreen(applicationId: id);

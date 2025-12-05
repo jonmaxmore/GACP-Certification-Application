@@ -18,14 +18,18 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      
+
       // TODO: Implement actual login logic with AuthProvider
       await Future.delayed(const Duration(seconds: 1)); // Mock delay
 
       if (mounted) {
         setState(() => _isLoading = false);
         // Navigate based on role (mock for now)
-        context.go('/admin/dashboard');
+        if (_emailController.text.contains('auditor')) {
+          context.go('/auditor/assignments');
+        } else {
+          context.go('/admin/dashboard');
+        }
       }
     }
   }

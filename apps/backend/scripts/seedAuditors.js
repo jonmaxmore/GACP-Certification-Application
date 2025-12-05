@@ -1,6 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const User = require('../models/User'); // Adjust path if needed
+const User = require('../models/UserModel'); // Adjusted path to UserModel
 const bcrypt = require('bcrypt');
 
 const auditors = [

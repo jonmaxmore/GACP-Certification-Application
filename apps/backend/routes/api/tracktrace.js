@@ -1,172 +1,21 @@
 const express = require('express');
 const router = express.Router();
-
-// Mock data for Track & Trace functionality
-const mockTrackingData = {
-  'OR2024-001': {
-    serial: 'OR2024-001',
-    product: {
-      name: 'Organic Rice',
-      type: 'GACP Certified',
-      batch: 'OR2024-001',
-      variety: 'Jasmine Rice',
-      grade: 'Grade A',
-      quantity: 1000,
-      unit: 'kg',
-    },
-    origin: {
-      farm: 'สวนข้าวอินทรีย์ บ้านนา',
-      farmer: 'นายสมชาย ใจดี',
-      location: 'ตำบลบ้านนา อำเภอเมือง จังหวัดเชียงใหม่',
-      coordinates: { lat: 18.7883, lng: 98.9853 },
-      certification: 'GACP-TH-2024-001',
-    },
-    timeline: [
-      {
-        date: '2024-01-15',
-        stage: 'Planting',
-        location: 'Farm Field A1',
-        description: 'Rice seeds planted according to GACP standards',
-        verifiedBy: 'Farm Manager',
-      },
-      {
-        date: '2024-04-15',
-        stage: 'Harvesting',
-        location: 'Farm Field A1',
-        description: 'Rice harvested at optimal maturity',
-        verifiedBy: 'Quality Inspector',
-      },
-      {
-        date: '2024-04-20',
-        stage: 'Processing',
-        location: 'Processing Facility',
-        description: 'Rice processed and packaged',
-        verifiedBy: 'Processing Manager',
-      },
-      {
-        date: '2024-04-25',
-        stage: 'Distribution',
-        location: 'Distribution Center',
-        description: 'Ready for distribution',
-        verifiedBy: 'Distribution Manager',
-      },
-    ],
-    certification: {
-      status: 'CERTIFIED',
-      number: 'GACP-TH-2024-001',
-      issuedDate: '2024-04-25',
-      expiryDate: '2025-04-25',
-      authority: 'GACP Thailand Authority',
-    },
-    qrData: {
-      url: 'https://gacp-platform.com/verify/OR2024-001',
-      generatedAt: '2024-04-25T10:00:00Z',
-    },
-  },
-  'TM2024-002': {
-    serial: 'TM2024-002',
-    product: {
-      name: 'Turmeric Powder',
-      type: 'GACP Certified',
-      batch: 'TM2024-002',
-      variety: 'Curcuma longa',
-      grade: 'Premium',
-      quantity: 500,
-      unit: 'kg',
-    },
-    origin: {
-      farm: 'สวนขมิ้นอินทรีย์ บ้านดอย',
-      farmer: 'นางสาวมณี ใจงาม',
-      location: 'ตำบลดอยสะเก็ด อำเภอดอยสะเก็ด จังหวัดเชียงใหม่',
-      coordinates: { lat: 18.8956, lng: 99.1234 },
-      certification: 'GACP-TH-2024-002',
-    },
-    timeline: [
-      {
-        date: '2024-01-10',
-        stage: 'Planting',
-        location: 'Farm Field B2',
-        description: 'Turmeric rhizomes planted in organic soil',
-        verifiedBy: 'Farm Manager',
-      },
-      {
-        date: '2024-10-10',
-        stage: 'Harvesting',
-        location: 'Farm Field B2',
-        description: 'Turmeric harvested after 9 months',
-        verifiedBy: 'Quality Inspector',
-      },
-      {
-        date: '2024-10-15',
-        stage: 'Processing',
-        location: 'Processing Facility',
-        description: 'Turmeric cleaned, dried, and ground to powder',
-        verifiedBy: 'Processing Manager',
-      },
-    ],
-    certification: {
-      status: 'CERTIFIED',
-      number: 'GACP-TH-2024-002',
-      issuedDate: '2024-10-15',
-      expiryDate: '2025-10-15',
-      authority: 'GACP Thailand Authority',
-    },
-    qrData: {
-      url: 'https://gacp-platform.com/verify/TM2024-002',
-      generatedAt: '2024-10-15T10:00:00Z',
-    },
-  },
-};
-
-// Mock farmer products data for dashboard
-const mockFarmerProducts = [
-  {
-    id: '1',
-    batchCode: 'OR2024-001',
-    productName: 'Organic Rice',
-    variety: 'Jasmine Rice',
-    quantity: 1000,
-    unit: 'kg',
-    stage: 'Distribution',
-    certificationStatus: 'CERTIFIED',
-    createdDate: '2024-01-15',
-    lastUpdated: '2024-04-25',
-  },
-  {
-    id: '2',
-    batchCode: 'TM2024-002',
-    productName: 'Turmeric Powder',
-    variety: 'Curcuma longa',
-    quantity: 500,
-    unit: 'kg',
-    stage: 'Processing',
-    certificationStatus: 'CERTIFIED',
-    createdDate: '2024-01-10',
-    lastUpdated: '2024-10-15',
-  },
-  {
-    id: '3',
-    batchCode: 'GB2024-003',
-    productName: 'Ginger Extract',
-    variety: 'Zingiber officinale',
-    quantity: 200,
-    unit: 'kg',
-    stage: 'Harvesting',
-    certificationStatus: 'PENDING',
-    createdDate: '2024-02-01',
-    lastUpdated: '2024-08-15',
-  },
-];
+const ProductBatch = require('../../models/ProductBatchModel');
+const { authenticate } = require('../../middleware/AuthMiddleware');
 
 /**
  * @route GET /api/track-trace/lookup/:productCode
  * @desc Lookup product by QR code or batch code
  * @access Public
  */
-router.get('/lookup/:productCode', (req, res) => {
+router.get('/lookup/:productCode', async (req, res) => {
   try {
     const { productCode } = req.params;
-    const product = mockTrackingData[productCode];
+
+    // Find product details with populated fields
+    const product = await ProductBatch.findOne({ batchCode: productCode })
+      .populate('farmer', 'name')
+      .populate('farm', 'name location'); // Assuming Farm has these fields or adjusting based on model
 
     if (!product) {
       return res.status(404).json({
@@ -175,6 +24,9 @@ router.get('/lookup/:productCode', (req, res) => {
         code: productCode,
       });
     }
+
+    // Format response to match expected public API structure with nested objects if needed
+    // Assuming simple mapping is sufficient or FE can handle the flat structure
 
     res.json({
       success: true,
@@ -194,12 +46,15 @@ router.get('/lookup/:productCode', (req, res) => {
  * @desc Get all products for farmer dashboard
  * @access Private (authenticated farmer)
  */
-router.get('/farmer/products', (req, res) => {
+router.get('/farmer/products', authenticate, async (req, res) => {
   try {
+    const products = await ProductBatch.find({ farmer: req.user.userId })
+      .sort({ createdAt: -1 });
+
     res.json({
       success: true,
-      data: mockFarmerProducts,
-      total: mockFarmerProducts.length,
+      data: products,
+      total: products.length,
     });
   } catch (error) {
     res.status(500).json({
@@ -215,27 +70,32 @@ router.get('/farmer/products', (req, res) => {
  * @desc Create new product batch
  * @access Private (authenticated farmer)
  */
-router.post('/farmer/products', (req, res) => {
+router.post('/farmer/products', authenticate, async (req, res) => {
   try {
-    const { productName, variety, quantity, unit } = req.body;
+    const { productName, variety, quantity, unit, farmId } = req.body;
 
     // Generate new batch code
-    const batchCode = `${productName.substr(0, 2).toUpperCase()}${new Date().getFullYear()}-${String(mockFarmerProducts.length + 1).padStart(3, '0')}`;
+    const count = await ProductBatch.countDocuments();
+    const batchCode = `${productName.substr(0, 2).toUpperCase()}${new Date().getFullYear()}-${String(count + 1).padStart(3, '0')}`;
 
-    const newProduct = {
-      id: String(mockFarmerProducts.length + 1),
+    const newProduct = new ProductBatch({
       batchCode,
       productName,
       variety,
       quantity: Number(quantity),
       unit,
-      stage: 'Planting',
+      farmer: req.user.userId,
+      farm: farmId,
+      currentStage: 'Planting',
       certificationStatus: 'PENDING',
-      createdDate: new Date().toISOString().split('T')[0],
-      lastUpdated: new Date().toISOString().split('T')[0],
-    };
+      timeline: [{
+        stage: 'Planting',
+        description: 'Initial planting',
+        date: new Date()
+      }]
+    });
 
-    mockFarmerProducts.push(newProduct);
+    await newProduct.save();
 
     res.status(201).json({
       success: true,
@@ -256,29 +116,43 @@ router.post('/farmer/products', (req, res) => {
  * @desc Update product batch
  * @access Private (authenticated farmer)
  */
-router.put('/farmer/products/:id', (req, res) => {
+router.put('/farmer/products/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
-    const productIndex = mockFarmerProducts.findIndex(p => p.id === id);
 
-    if (productIndex === -1) {
+    // Ensure the product belongs to the farmer
+    const product = await ProductBatch.findOne({ _id: id, farmer: req.user.userId });
+
+    if (!product) {
       return res.status(404).json({
         success: false,
         message: 'Product not found',
       });
     }
 
-    const updatedProduct = {
-      ...mockFarmerProducts[productIndex],
-      ...req.body,
-      lastUpdated: new Date().toISOString().split('T')[0],
-    };
+    // Update allowed fields
+    const updates = req.body;
+    Object.keys(updates).forEach(key => {
+      // Prevent updating critical fields like batchCode, farmer
+      if (!['batchCode', 'farmer', '_id', 'createdAt'].includes(key)) {
+        product[key] = updates[key];
+      }
+    });
 
-    mockFarmerProducts[productIndex] = updatedProduct;
+    // If stage changed, add to timeline
+    if (updates.currentStage && updates.currentStage !== product.currentStage) {
+      product.timeline.push({
+        stage: updates.currentStage,
+        date: new Date(),
+        description: `Stage updated to ${updates.currentStage}`
+      });
+    }
+
+    await product.save();
 
     res.json({
       success: true,
-      data: updatedProduct,
+      data: product,
       message: 'Product updated successfully',
     });
   } catch (error) {
@@ -295,19 +169,18 @@ router.put('/farmer/products/:id', (req, res) => {
  * @desc Delete product batch
  * @access Private (authenticated farmer)
  */
-router.delete('/farmer/products/:id', (req, res) => {
+router.delete('/farmer/products/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
-    const productIndex = mockFarmerProducts.findIndex(p => p.id === id);
 
-    if (productIndex === -1) {
+    const deletedProduct = await ProductBatch.findOneAndDelete({ _id: id, farmer: req.user.userId });
+
+    if (!deletedProduct) {
       return res.status(404).json({
         success: false,
         message: 'Product not found',
       });
     }
-
-    const deletedProduct = mockFarmerProducts.splice(productIndex, 1)[0];
 
     res.json({
       success: true,
@@ -328,15 +201,16 @@ router.delete('/farmer/products/:id', (req, res) => {
  * @desc Get farmer dashboard statistics
  * @access Private (authenticated farmer)
  */
-router.get('/farmer/stats', (req, res) => {
+router.get('/farmer/stats', authenticate, async (req, res) => {
   try {
     const stats = {
-      totalProducts: mockFarmerProducts.length,
-      certified: mockFarmerProducts.filter(p => p.certificationStatus === 'CERTIFIED').length,
-      pending: mockFarmerProducts.filter(p => p.certificationStatus === 'PENDING').length,
-      inProgress: mockFarmerProducts.filter(p =>
-        ['Planting', 'Harvesting', 'Processing'].includes(p.stage),
-      ).length,
+      totalProducts: await ProductBatch.countDocuments({ farmer: req.user.userId }),
+      certified: await ProductBatch.countDocuments({ farmer: req.user.userId, certificationStatus: 'CERTIFIED' }),
+      pending: await ProductBatch.countDocuments({ farmer: req.user.userId, certificationStatus: 'PENDING' }),
+      inProgress: await ProductBatch.countDocuments({
+        farmer: req.user.userId,
+        currentStage: { $in: ['Planting', 'Harvesting', 'Processing'] }
+      }),
     };
 
     res.json({
@@ -362,6 +236,7 @@ router.get('/health', (req, res) => {
     status: 'ok',
     service: 'track-trace',
     timestamp: new Date().toISOString(),
+    dbConnection: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     endpoints: [
       'GET /api/track-trace/lookup/:productCode',
       'GET /api/track-trace/farmer/products',

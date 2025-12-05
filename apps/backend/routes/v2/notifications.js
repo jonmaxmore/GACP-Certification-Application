@@ -7,15 +7,84 @@
 
 const express = require('express');
 const router = express.Router();
-// Mock controller for cleanup
-const notificationController = {
-    getNotifications: (req, res) => res.json({ success: true, data: [] }),
-    getUnreadCount: (req, res) => res.json({ success: true, count: 0 }),
-    markAsRead: (req, res) => res.json({ success: true }),
-    markAllAsRead: (req, res) => res.json({ success: true }),
-    createNotification: (req, res) => res.status(201).json({ success: true }),
-};
+const Notification = require('../../models/NotificationModel');
 const { authenticate, checkPermission } = require('../../middleware/AuthMiddleware');
+
+// Real implementation
+const notificationController = {
+    getNotifications: async (req, res) => {
+        try {
+            const notifications = await Notification.find({ recipient: req.user.userId })
+                .sort({ createdAt: -1 })
+                .limit(50); // Limit to last 50 notifications
+
+            res.json({ success: true, data: notifications });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    },
+
+    getUnreadCount: async (req, res) => {
+        try {
+            const count = await Notification.countDocuments({
+                recipient: req.user.userId,
+                read: false
+            });
+            res.json({ success: true, count });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    },
+
+    markAsRead: async (req, res) => {
+        try {
+            const notification = await Notification.findOneAndUpdate(
+                { _id: req.params.id, recipient: req.user.userId },
+                { read: true },
+                { new: true }
+            );
+
+            if (!notification) {
+                return res.status(404).json({ success: false, message: 'Notification not found' });
+            }
+
+            res.json({ success: true });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    },
+
+    markAllAsRead: async (req, res) => {
+        try {
+            await Notification.updateMany(
+                { recipient: req.user.userId, read: false },
+                { read: true }
+            );
+            res.json({ success: true });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    },
+
+    createNotification: async (req, res) => {
+        try {
+            const { recipient, title, message, type, data } = req.body;
+
+            const notification = new Notification({
+                recipient,
+                title,
+                message,
+                type: type || 'info', // 'info', 'success', 'warning', 'error'
+                data
+            });
+
+            await notification.save();
+            res.status(201).json({ success: true, data: notification });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    },
+};
 
 // All routes require authentication
 router.use(authenticate);

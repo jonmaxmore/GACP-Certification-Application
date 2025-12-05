@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "message": "User registered successfully. Please verify your email.",
+  "data": {
+    "user": {
+      "id": "69321ef9bc8045741c64e2dd",
+      "email": "farmer@gacp.test",
+      "firstName": "Somchai",
+      "lastName": "Jaidee",
+      "status": "PENDING_VERIFICATION",
+      "isEmailVerified": false
+    }
+  },
+  "verificationToken": "18fafa4d0a75ee04f9d95be3edd9a8a84a9c4d4265a00bc7b1af66bf3a4503e6"
+}

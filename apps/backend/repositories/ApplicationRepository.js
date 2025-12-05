@@ -7,8 +7,24 @@
  */
 
 const logger = require('../shared/logger');
-const Application = require('../models/Application');
-const { ApplicationStatus } = require('../models/Application');
+const Application = require('../modules/ApplicationWorkflow/infrastructure/models/Application');
+
+const ApplicationStatus = {
+  DRAFT: 'draft',
+  SUBMITTED: 'submitted',
+  UNDER_REVIEW: 'under_review',
+  REVISION_REQUIRED: 'revision_required',
+  PAYMENT_PENDING: 'payment_pending',
+  PAYMENT_VERIFIED: 'payment_verified',
+  INSPECTION_SCHEDULED: 'inspection_scheduled',
+  INSPECTION_COMPLETED: 'inspection_completed',
+  PHASE2_PAYMENT_PENDING: 'phase2_payment_pending',
+  PHASE2_PAYMENT_VERIFIED: 'phase2_payment_verified',
+  APPROVED: 'approved',
+  CERTIFICATE_ISSUED: 'certificate_issued',
+  REJECTED: 'rejected',
+  EXPIRED: 'expired'
+};
 
 class ApplicationRepository {
   constructor() {

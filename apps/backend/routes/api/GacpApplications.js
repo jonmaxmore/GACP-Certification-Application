@@ -6,10 +6,9 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const GACPApplicationService = require('../../services/gacp-application');
+const gacpService = require('../../services/gacp-application');
 
 const router = express.Router();
-const gacpService = new GACPApplicationService();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -37,11 +36,14 @@ const upload = multer({
   },
 });
 
+const { authenticate } = require('../../middleware/auth-middleware');
+
 // Create new application
-router.post('/applications', async (req, res) => {
+router.post('/applications', authenticate, async (req, res) => {
   try {
-    const { farmerData } = req.body;
-    const application = await gacpService.createApplication(farmerData);
+    const farmerId = req.user.id || req.user._id;
+    const applicationData = req.body;
+    const application = await gacpService.createApplication(farmerId, applicationData);
 
     res.json({
       success: true,

@@ -31,19 +31,41 @@ describe('🎯 GACP Golden Loop (Corrected Workflow)', () => {
     beforeAll(async () => {
         // Start in-memory MongoDB
         mongod = await MongoMemoryServer.create();
-        const uri = mongod.getUri();
+        const baseUri = mongod.getUri();
+        const dbName = 'gacp_golden_loop_correct';
+        const uri = `${baseUri}${dbName}`;
+
         client = new MongoClient(uri);
         await client.connect();
-        db = client.db('gacp_golden_loop_correct');
+        db = client.db(dbName);
 
         // Set environment variables
         process.env.NODE_ENV = 'test';
         process.env.MONGODB_URI = uri;
-        process.env.JWT_SECRET = 'golden-loop-test-secret';
-        process.env.FARMER_JWT_SECRET = 'golden-loop-farmer-secret';
+        process.env.JWT_SECRET = 'test-public-jwt-secret-for-jest';
+        process.env.FARMER_JWT_SECRET = 'test-public-jwt-secret-for-jest';
 
         // Import app after setting env vars
         jest.resetModules();
+
+        // Mock Bull to prevent Redis connection
+        jest.doMock('bull', () => {
+            return class MockQueue {
+                constructor() { }
+                process() { }
+                on() { }
+                add() { return Promise.resolve({ id: 'mock-job-id' }); }
+                clean() { return Promise.resolve(); }
+                pause() { return Promise.resolve(); }
+                resume() { return Promise.resolve(); }
+                close() { return Promise.resolve(); }
+                getWaitingCount() { return Promise.resolve(0); }
+                getActiveCount() { return Promise.resolve(0); }
+                getCompletedCount() { return Promise.resolve(0); }
+                getFailedCount() { return Promise.resolve(0); }
+            };
+        });
+
         app = require('../../server');
 
         // Ensure database is connected before running tests
@@ -87,7 +109,7 @@ describe('🎯 GACP Golden Loop (Corrected Workflow)', () => {
                 password: 'Password123!',
                 firstName: 'Somchai',
                 lastName: 'Jaidee',
-                idCard: '1234567890123',
+                idCard: '1234567890121',
                 phoneNumber: '+66812345678',
                 address: '123 Farm Rd',
                 province: 'Chiang Mai',
@@ -96,20 +118,31 @@ describe('🎯 GACP Golden Loop (Corrected Workflow)', () => {
                 postalCode: '50180',
                 laserCode: 'ME1234567890'
             });
+        if (registerRes.status !== 201) {
+            console.error('Registration Failed:', JSON.stringify(registerRes.body, null, 2));
+        }
         expect(registerRes.status).toBe(201);
-        userId = registerRes.body.id;
+        userId = registerRes.body.data.user.id;
+        require('fs').writeFileSync('register_success.json', JSON.stringify(registerRes.body, null, 2));
 
         // Verify Email
-        await db.collection('users').updateOne(
+        const updateResult = await db.collection('users').updateOne(
             { _id: new ObjectId(userId) },
             { $set: { isEmailVerified: true, status: 'ACTIVE' } }
         );
+        require('fs').writeFileSync('update_result.json', JSON.stringify(updateResult, null, 2));
 
         // 2. Login
         const loginRes = await request(app)
             .post('/api/auth-farmer/login')
             .send({ email: 'farmer@gacp.test', password: 'Password123!' });
-        authToken = loginRes.body.token;
+
+        if (loginRes.status !== 200) {
+            console.error('Login Failed:', JSON.stringify(loginRes.body, null, 2));
+            require('fs').writeFileSync('login_failure.json', JSON.stringify(loginRes.body, null, 2));
+        }
+        expect(loginRes.status).toBe(200);
+        authToken = loginRes.body.data ? loginRes.body.data.token : loginRes.body.token;
 
         // 3. Create Establishment
         const farmRes = await request(app)
@@ -149,6 +182,10 @@ describe('🎯 GACP Golden Loop (Corrected Workflow)', () => {
                 status: 'DRAFT' // Explicitly draft
             });
 
+        if (draftRes.status !== 201) {
+            console.error('Draft Application Failed:', JSON.stringify(draftRes.body, null, 2));
+            require('fs').writeFileSync('draft_failure.json', JSON.stringify(draftRes.body, null, 2));
+        }
         expect(draftRes.status).toBe(201);
         applicationId = draftRes.body.data.id || draftRes.body.data._id || draftRes.body.data.applicationId;
         console.log(`✅ Application Drafted: ${applicationId}`);

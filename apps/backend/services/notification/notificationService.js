@@ -10,7 +10,7 @@
 
 const nodemailer = require('nodemailer');
 const logger = require('../../shared/logger');
-const DTAMStaff = require('../../models/User');
+const DTAMStaff = require('../../modules/UserManagement/infrastructure/models/User');
 
 // Phase 2 Services Integration
 const queueService = require('../queue/queueService');
@@ -127,13 +127,12 @@ class NotificationService {
             <p><strong>เกษตรกร:</strong> ${application.farmer.name}</p>
             <p><strong>แปลง:</strong> ${application.farmer.farmName}</p>
             <p><strong>Lot ID:</strong> ${application.lotId}</p>
-            ${
-              application.aiQc
-                ? `
+            ${application.aiQc
+              ? `
               <p><strong>คะแนน AI QC:</strong> ${application.aiQc.overallScore}/10</p>
               <p><strong>ประเภทการตรวจ:</strong> ${application.inspectionType}</p>
             `
-                : ''
+              : ''
             }
             <p><a href="${process.env.FRONTEND_URL}/reviewer/dashboard">ตรวจสอบใบสมัคร</a></p>
           `,
@@ -192,19 +191,17 @@ class NotificationService {
           <p><strong>แปลง:</strong> ${application.farmer.farmName}</p>
           <p><strong>Lot ID:</strong> ${application.lotId}</p>
           <p><strong>ประเภทการตรวจ:</strong> ${application.inspectionType}</p>
-          ${
-            application.inspectionSchedule
-              ? `
+          ${application.inspectionSchedule
+            ? `
             <p><strong>วันที่นัดหมาย:</strong> ${new Date(application.inspectionSchedule.scheduledDate).toLocaleDateString('th-TH')}</p>
-            ${
-              application.inspectionSchedule.meetLink
-                ? `
+            ${application.inspectionSchedule.meetLink
+              ? `
               <p><strong>Video Call Link (Daily.co):</strong> <a href="${application.inspectionSchedule.meetLink}">${application.inspectionSchedule.meetLink}</a></p>
             `
-                : ''
+              : ''
             }
           `
-              : ''
+            : ''
           }
           <p><a href="${process.env.FRONTEND_URL}/inspector/dashboard">ดูรายละเอียดงาน</a></p>
         `,
@@ -281,33 +278,29 @@ class NotificationService {
           <p><strong>เลขที่ใบสมัคร:</strong> ${application.applicationNumber}</p>
           <p><strong>Lot ID:</strong> ${application.lotId}</p>
           <p><strong>สถานะใหม่:</strong> ${statusMessages[newStatus]}</p>
-          ${
-            application.inspectionSchedule && newStatus === 'INSPECTION_SCHEDULED'
-              ? `
+          ${application.inspectionSchedule && newStatus === 'INSPECTION_SCHEDULED'
+            ? `
             <p><strong>วันที่นัดหมาย:</strong> ${new Date(application.inspectionSchedule.scheduledDate).toLocaleDateString('th-TH')}</p>
-            ${
-              application.inspectionSchedule.meetLink
-                ? `
+            ${application.inspectionSchedule.meetLink
+              ? `
               <p><strong>Video Call Link (Daily.co):</strong> <a href="${application.inspectionSchedule.meetLink}">${application.inspectionSchedule.meetLink}</a></p>
             `
-                : ''
+              : ''
             }
           `
-              : ''
+            : ''
           }
-          ${
-            application.rejectionReason
-              ? `
+          ${application.rejectionReason
+            ? `
             <p><strong>เหตุผล:</strong> ${application.rejectionReason}</p>
           `
-              : ''
+            : ''
           }
-          ${
-            application.sendBackReason
-              ? `
+          ${application.sendBackReason
+            ? `
             <p><strong>รายละเอียด:</strong> ${application.sendBackReason}</p>
           `
-              : ''
+            : ''
           }
           <p><a href="${process.env.FRONTEND_URL}/farmer/applications/${application._id}">ดูรายละเอียด</a></p>
         `,
@@ -344,12 +337,11 @@ class NotificationService {
             <p><strong>แปลง:</strong> ${farmer.farmName}</p>
             <p><strong>วันที่:</strong> ${new Date(application.inspectionSchedule.scheduledDate).toLocaleDateString('th-TH')}</p>
             <p><strong>เวลา:</strong> ${application.inspectionSchedule.scheduledTime}</p>
-            ${
-              application.inspectionSchedule.meetLink
-                ? `
+            ${application.inspectionSchedule.meetLink
+              ? `
               <p><strong>Video Call Link (Daily.co):</strong> <a href="${application.inspectionSchedule.meetLink}">${application.inspectionSchedule.meetLink}</a></p>
             `
-                : `
+              : `
               <p><strong>สถานที่:</strong> ${farmer.farmLocation}</p>
             `
             }
@@ -369,13 +361,12 @@ class NotificationService {
             <p><strong>วันที่:</strong> ${new Date(application.inspectionSchedule.scheduledDate).toLocaleDateString('th-TH')}</p>
             <p><strong>เวลา:</strong> ${application.inspectionSchedule.scheduledTime}</p>
             <p><strong>ผู้ตรวจประเมิน:</strong> ${inspector?.name || 'N/A'}</p>
-            ${
-              application.inspectionSchedule.meetLink
-                ? `
+            ${application.inspectionSchedule.meetLink
+              ? `
               <p><strong>Video Call Link (Daily.co):</strong> <a href="${application.inspectionSchedule.meetLink}">${application.inspectionSchedule.meetLink}</a></p>
               <p>กรุณาเตรียมความพร้อม: กล้อง, ไมโครโฟน, และการเชื่อมต่ออินเทอร์เน็ต</p>
             `
-                : `
+              : `
               <p>กรุณาเตรียมความพร้อมและรอรับเจ้าหน้าที่ที่แปลง</p>
             `
             }

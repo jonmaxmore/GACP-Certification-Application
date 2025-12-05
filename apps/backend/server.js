@@ -13,7 +13,7 @@ const logger = require('./shared/logger');
 const databaseService = require('./services/production-database');
 
 // Import Modules
-const { createModule: createAuthFarmerModule } = require('./modules/auth-farmer');
+const { createModule: createAuthFarmerModule } = require('./modules/AuthFarmer');
 const v2Routes = require('./routes/v2');
 
 const app = express();

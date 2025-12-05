@@ -20,10 +20,10 @@ const cacheService = require('./cache/cacheService');
 // Import Models (User still needed for farmer/officer checks)
 let User, mongoose;
 try {
-  User = require('../models/user-model');
+  User = require('../modules/UserManagement/infrastructure/models/User');
   mongoose = require('mongoose');
 } catch (error) {
-  logger.warn('[GACPApplicationService] Models not available');
+  logger.warn('[GACPApplicationService] Models not available:', error.message);
 }
 const { ValidationError, BusinessLogicError } = require('../shared/errors');
 

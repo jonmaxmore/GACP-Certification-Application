@@ -35,7 +35,7 @@ class StandaloneApplicationValidator {
       errors: [],
     };
 
-    this.moduleBasePath = path.join(__dirname, '../modules/application');
+    this.moduleBasePath = path.join(__dirname, '../modules/Application');
 
     // Expected files และ business logic requirements
     this.expectedStructure = {

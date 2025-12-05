@@ -15,6 +15,7 @@
         "flutter_map",
         "flutter_riverpod",
         "flutter_secure_storage",
+        "fpdart",
         "freezed_annotation",
         "geolocator",
         "go_router",
@@ -152,6 +153,11 @@
         "test_api",
         "vector_math"
       ]
+    },
+    {
+      "name": "fpdart",
+      "version": "1.2.0",
+      "dependencies": []
     },
     {
       "name": "equatable",

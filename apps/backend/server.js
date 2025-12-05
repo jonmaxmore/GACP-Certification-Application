@@ -21,6 +21,8 @@ const v2Routes = require('./routes/v2');
 const app = express();
 const port = process.env.PORT || 3000;
 
+const path = require('path');
+
 // Security & Performance Middleware
 app.use(helmet());
 app.use(cors({
@@ -29,6 +31,9 @@ app.use(cors({
 }));
 app.use(compression());
 app.use(morgan('combined'));
+
+// Serve Static Files (Uploads)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Body Parsing
 app.use(express.json({ limit: '10mb' }));

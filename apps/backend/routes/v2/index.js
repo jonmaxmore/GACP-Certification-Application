@@ -20,6 +20,7 @@ router.use('/kyc', kycRouter);
 router.use('/', applicationsRouter); // GacpApplications defines /applications internally
 router.use('/establishments', establishmentsRouter);
 router.use('/payments', require('../api/PaymentRoutes'));
+router.use('/officer', require('../api/OfficerRoutes'));
 
 // Health check
 router.get('/health', (req, res) => {

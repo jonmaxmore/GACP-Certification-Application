@@ -5,36 +5,19 @@
 
 const express = require('express');
 const router = express.Router();
-const gacpService = require('../../services/ApplicationWorkflowService');
+// const gacpService = require('../../services/ApplicationWorkflowService'); // Moved to Controller
 const { authenticate, checkPermission } = require('../../middleware/AuthMiddleware');
 
-// Process payment
-router.post('/', authenticate, checkPermission('payment.process', 'payment'), async (req, res) => {
-    try {
-        const { applicationId, phase, paymentDetails } = req.body;
+const upload = require('../../middleware/uploadMiddleware');
+const paymentController = require('../../controllers/PaymentController');
 
-        if (!applicationId || !phase) {
-            return res.status(400).json({
-                success: false,
-                error: 'Application ID and phase are required'
-            });
-        }
-
-        const application = await gacpService.processPayment(applicationId, phase, paymentDetails || {});
-
-        res.json({
-            success: true,
-            data: {
-                applicationId: application.id,
-                payment: application.payment[phase]
-            }
-        });
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
+// Process payment (Confirm)
+router.post(
+    ['/', '/confirm'],
+    authenticate,
+    checkPermission('payment.process', 'payment'),
+    upload.single('slipImage'), // Handle file upload
+    paymentController.confirmPayment
+);
 
 module.exports = router;

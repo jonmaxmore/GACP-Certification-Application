@@ -31,8 +31,8 @@
  * @module services/crypto
  */
 
-const { initializeSignatureService } = require('./signature-service');
-const { getTimestampService } = require('./timestamp-service');
+const { initializeSignatureService } = require('./SignatureService');
+const { getTimestampService } = require('./TimestampService');
 
 /**
  * Unified Crypto Service

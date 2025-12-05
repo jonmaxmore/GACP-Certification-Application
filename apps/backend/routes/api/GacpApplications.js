@@ -38,6 +38,49 @@ const upload = multer({
 });
 
 // Create new application
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Application:
+ *       type: object
+ *       properties:
+ *         formType:
+ *           type: string
+ *           enum: ['09', '10', '11']
+ *           description: Form 9, 10, or 11
+ *         applicantType:
+ *           type: string
+ *           description: Individual or Corporate
+ *         establishmentId:
+ *           type: string
+ *           description: ID of related establishment
+ *         serviceType:
+ *           type: string
+ *           enum: [NEW, RENEW]
+ *           description: New application or renewal
+ *         status:
+ *           type: string
+ *           readOnly: true
+ *
+ * /api/v2/applications/submit:
+ *   post:
+ *     summary: Submit a new application (Note: Maps to /applications in current API)
+ *     tags: [Applications]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Application'
+ *     responses:
+ *       201:
+ *         description: Application created/submitted successfully
+ *       400:
+ *         description: Validation error
+ */
 router.post(
   '/applications',
   authenticate,
@@ -414,6 +457,55 @@ router.use((error, req, res, _next) => {
     success: false,
     error: error.message || 'Internal server error',
   });
+});
+
+/**
+ * @swagger
+ * /api/v2/applications/my-applications:
+ *   get:
+ *     summary: View my application status (List)
+ *     tags: [Applications]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of my applications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Application'
+ */
+router.get('/my-applications', authenticate, async (req, res) => {
+  // Stub: Get applications for current user
+  try {
+    // const apps = await gacpService.findByFarmer(req.user.id);
+    res.json({ success: true, data: [] });
+  } catch (err) { res.status(500).json({ error: err.message }) }
+});
+
+/**
+ * @swagger
+ * /api/v2/applications/{id}/cancel:
+ *   post:
+ *     summary: Cancel an application
+ *     tags: [Applications]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Application cancelled
+ */
+router.post('/:id/cancel', authenticate, async (req, res) => {
+  // Stub
+  res.json({ success: true, message: 'Application cancelled' });
 });
 
 module.exports = router;

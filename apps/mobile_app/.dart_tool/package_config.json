@@ -320,6 +320,12 @@
       "languageVersion": "3.8"
     },
     {
+      "name": "fpdart",
+      "rootUri": "file:///C:/Users/usEr/AppData/Local/Pub/Cache/hosted/pub.dev/fpdart-1.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "freezed",
       "rootUri": "file:///C:/Users/usEr/AppData/Local/Pub/Cache/hosted/pub.dev/freezed-2.5.8",
       "packageUri": "lib/",

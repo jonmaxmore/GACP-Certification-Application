@@ -3,36 +3,39 @@ const path = require('path');
 const fs = require('fs');
 
 // Ensure upload directory exists
-const uploadDir = 'uploads/id-cards';
+const uploadDir = path.join(__dirname, '../uploads/slips');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Storage configuration
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: (req, file, cb) => {
     cb(null, uploadDir);
   },
-  filename: function (req, file, cb) {
-    // Rename file to avoid conflicts: timestamp-random-originalName
+  filename: (req, file, cb) => {
+    // Timestamp + Original Name (sanitized)
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
   }
 });
 
+// File filter
 const fileFilter = (req, file, cb) => {
-  // Accept images only
-  if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-    return cb(new Error('Only image files are allowed!'), false);
+  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+    cb(null, true);
+  } else {
+    cb(new Error('Only .jpeg and .png formats allowed!'), false);
   }
-  cb(null, true);
 };
 
 const upload = multer({
   storage: storage,
-  fileFilter: fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
+  },
+  fileFilter: fileFilter
 });
 
 module.exports = upload;

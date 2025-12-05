@@ -11,6 +11,8 @@ const compression = require('compression');
 const morgan = require('morgan');
 const logger = require('./shared/logger');
 const databaseService = require('./services/ProductionDatabase');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 
 // Import Modules
 const AuthFarmerRoutes = require('./routes/api/AuthFarmerRoutes');
@@ -44,6 +46,7 @@ if (process.env.NODE_ENV !== 'test') {
 // Mount Routes
 app.use('/api/auth-farmer', AuthFarmerRoutes);
 app.use('/api/v2', v2Routes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Health Check
 app.get('/health', async (req, res) => {

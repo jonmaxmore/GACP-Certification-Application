@@ -1,6 +1,8 @@
 const { ValidationError, BusinessLogicError } = require('../../shared/errors');
 const logger = require('../../shared/logger');
 
+const SystemConfig = require('../../config/SystemConfig');
+
 class PaymentProcessor {
     /**
      * Calculate fees for application phases
@@ -8,22 +10,22 @@ class PaymentProcessor {
      */
     calculateFees(application) {
         // Fee calculation for 5-Stage Workflow
-        const phase1Fee = 5000; // Application Fee
-        const phase2Fee = 30000; // Inspection & Certification Fee
+        const phase1Fee = SystemConfig.FEES.PHASE1_APPLICATION;
+        const phase2Fee = SystemConfig.FEES.PHASE2_INSPECTION;
 
         // Initialize payment structures if they don't exist
         if (!application.payment) application.payment = {};
 
         application.payment.phase1 = {
             amount: phase1Fee,
-            currency: 'THB',
+            currency: SystemConfig.FEES.CURRENCY,
             status: 'pending',
-            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days to pay
+            dueDate: new Date(Date.now() + SystemConfig.FEES.PAYMENT_DUE_DAYS * 24 * 60 * 60 * 1000)
         };
 
         application.payment.phase2 = {
             amount: phase2Fee,
-            currency: 'THB',
+            currency: SystemConfig.FEES.CURRENCY,
             status: 'pending',
             dueDate: null // Will be set when Phase 1 is approved
         };

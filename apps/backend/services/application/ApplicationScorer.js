@@ -1,3 +1,5 @@
+const SystemConfig = require('../../config/SystemConfig');
+
 class ApplicationScorer {
     /**
      * Assess farm information accuracy
@@ -6,25 +8,26 @@ class ApplicationScorer {
      */
     assessFarmInformation(farmInfo) {
         let score = 0;
+        const pts = SystemConfig.SCORING.FARM_INFO_POINTS;
 
-        // Location completeness (25%)
+        // Location completeness
         if (farmInfo.location && farmInfo.location.coordinates) {
-            score += 25;
+            score += pts.LOCATION;
         }
 
-        // Land ownership documentation (25%)
+        // Land ownership documentation
         if (farmInfo.landOwnership && farmInfo.landOwnership.documents.length > 0) {
-            score += 25;
+            score += pts.OWNERSHIP;
         }
 
-        // Water source quality (25%)
+        // Water source quality
         if (farmInfo.waterSource && farmInfo.waterSource.quality === 'good') {
-            score += 25;
+            score += pts.WATER;
         }
 
-        // Soil information (25%)
+        // Soil information
         if (farmInfo.soilType && farmInfo.soilType.ph) {
-            score += 25;
+            score += pts.SOIL;
         }
 
         return score;
@@ -52,24 +55,20 @@ class ApplicationScorer {
      * @returns {number} Final preliminary score
      */
     calculatePreliminaryScore({ documentValidation, farmInfoScore, practiceScore, riskLevel }) {
-        const documentWeight = 0.3;
-        const farmInfoWeight = 0.3;
-        const practiceWeight = 0.4;
+        const weights = SystemConfig.SCORING.WEIGHTS;
 
         const baseScore =
-            documentValidation.score * documentWeight +
-            farmInfoScore * farmInfoWeight +
-            practiceScore * practiceWeight;
+            documentValidation.score * weights.DOCUMENT +
+            farmInfoScore * weights.FARM_INFO +
+            practiceScore * weights.PRACTICE;
 
         // Risk level adjustment
-        const riskAdjustments = {
-            low: 0,
-            medium: -5,
-            high: -10,
-            critical: -20,
-        };
+        const riskAdjustments = SystemConfig.SCORING.RISK_ADJUSTMENTS;
 
-        return Math.max(0, baseScore + (riskAdjustments[riskLevel] || 0));
+        // Map riskLevel string to constant key case if needed, assuming lowercase input match
+        const adjustment = riskAdjustments[riskLevel.toUpperCase()] || riskAdjustments[riskLevel] || 0;
+
+        return Math.max(0, baseScore + adjustment);
     }
 
     /**
@@ -78,20 +77,11 @@ class ApplicationScorer {
      * @returns {Array} Array of score objects
      */
     calculateComplianceScores(inspectionResults) {
-        const categories = [
-            'seed_planting_material',
-            'soil_management',
-            'pest_disease_management',
-            'harvesting_practices',
-            'post_harvest_handling',
-            'storage_transportation',
-            'record_keeping',
-            'worker_training',
-        ];
+        const categories = SystemConfig.SCORING.COMPLIANCE.CATEGORIES;
 
         return categories.map(category => ({
             category,
-            maxScore: 15, // Each category worth 15 points (total 120, normalized to 100)
+            maxScore: SystemConfig.SCORING.COMPLIANCE.MAX_CATEGORY_SCORE, // Each category worth 15 points (total 120, normalized to 100)
             achievedScore: inspectionResults.scores[category] || 0,
             notes: inspectionResults.notes[category] || '',
             recommendations: inspectionResults.recommendations[category] || [],

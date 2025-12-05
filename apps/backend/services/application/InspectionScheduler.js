@@ -7,6 +7,8 @@ try {
     logger.warn('[InspectionScheduler] User model not available:', error.message);
 }
 
+const SystemConfig = require('../../config/SystemConfig');
+
 class InspectionScheduler {
     /**
      * Schedule field inspection
@@ -17,9 +19,9 @@ class InspectionScheduler {
      */
     async scheduleInspection(repository, application, preferredDate = null) {
         try {
-            // 1. Check Phase 2 payment status (30,000 THB)
+            // 1. Check Phase 2 payment status
             if (application.payment.phase2.status !== 'completed') {
-                throw new BusinessLogicError('Phase 2 inspection fee (30,000 THB) must be paid before auditor assignment');
+                throw new BusinessLogicError(`Phase 2 inspection fee (${SystemConfig.FEES.PHASE2_INSPECTION} ${SystemConfig.FEES.CURRENCY}) must be paid before auditor assignment`);
             }
 
             // 2. Find available auditor based on location and expertise
@@ -34,8 +36,8 @@ class InspectionScheduler {
                 );
             }
 
-            // 2. Calculate inspection date (minimum 14 days notice)
-            const minDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+            // 2. Calculate inspection date (minimum notice)
+            const minDate = new Date(Date.now() + SystemConfig.SCHEDULING.NOTICE_PERIOD_DAYS * 24 * 60 * 60 * 1000);
             const inspectionDate =
                 preferredDate && new Date(preferredDate) > minDate ? new Date(preferredDate) : minDate;
 
@@ -89,9 +91,9 @@ class InspectionScheduler {
      */
     calculateInspectionDuration(application) {
         // Calculate estimated inspection duration based on farm size and crops
-        const baseHours = 4;
-        const sizeHours = Math.ceil(application.farmInformation.farmSize.totalArea / 5);
-        const cropHours = application.cropInformation.length;
+        const baseHours = SystemConfig.SCHEDULING.ESTIMATION.BASE_HOURS;
+        const sizeHours = Math.ceil(application.farmInformation.farmSize.totalArea / 5) * SystemConfig.SCHEDULING.ESTIMATION.HOURS_PER_5_AREA_UNIT;
+        const cropHours = application.cropInformation.length * SystemConfig.SCHEDULING.ESTIMATION.HOURS_PER_CROP;
 
         return baseHours + sizeHours + cropHours;
     }

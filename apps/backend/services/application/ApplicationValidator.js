@@ -1,4 +1,5 @@
 const { ValidationError } = require('../../shared/errors');
+const SystemConfig = require('../../config/SystemConfig');
 
 class ApplicationValidator {
     /**
@@ -17,17 +18,13 @@ class ApplicationValidator {
         // Additional validation rules can be added here
     }
 
+
     /**
      * Validate application completeness for submission
      * @param {Object} application - Application object
      */
     validateApplicationCompleteness(application) {
-        const requiredDocuments = [
-            'application_form',
-            'farm_management_plan',
-            'cultivation_records',
-            'land_rights_certificate',
-        ];
+        const requiredDocuments = SystemConfig.VALIDATION.REQUIRED_DOCUMENTS;
 
         const submittedDocuments = application.documents.map(doc => doc.documentType);
         const missingDocuments = requiredDocuments.filter(doc => !submittedDocuments.includes(doc));

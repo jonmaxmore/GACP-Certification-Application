@@ -17,7 +17,7 @@
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix",
     "type-check": "tsc --noEmit",
-    "db:manager": "node scripts/db-manager.js"
+    "db:manager": "node scripts/dbManager.js"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.700.0",
@@ -47,6 +47,7 @@
     "qrcode": "^1.5.3",
     "redis": "^5.8.3",
     "socket.io": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^9.0.1",
     "winston": "^3.11.0",

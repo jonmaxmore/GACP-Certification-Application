@@ -47,6 +47,13 @@ const WorkflowHistorySchema = new Schema(
         'certificate_issued',
         'rejected',
         'expired',
+        'REGISTERED',
+        'APPLICATION_SUBMITTED',
+        'AUDIT_PENDING',
+        'COMMITTEE_REVIEW',
+        'ACCREDITED',
+        'REJECTED',
+        'EXPIRED'
       ],
     },
     enteredAt: {
@@ -603,6 +610,25 @@ const ApplicationSchema = new Schema(
       default: null,
     },
 
+    // Risk Assessment
+    riskAssessment: {
+      level: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'low' },
+      score: { type: Number, default: 0 },
+      assessedAt: { type: Date },
+      factors: [String]
+    },
+
+    // Assessment Scores
+    assessmentScores: [{
+      category: String,
+      maxScore: Number,
+      achievedScore: Number,
+      assessor: { type: Schema.Types.ObjectId, ref: 'User' },
+      notes: String,
+      recommendations: [String],
+      assessmentDate: { type: Date, default: Date.now }
+    }],
+
     // Expiration and SLA
     expiresAt: {
       type: Date,
@@ -758,6 +784,58 @@ ApplicationSchema.methods.isReadyForSubmission = function () {
     this.farm.address &&
     this.farm.coordinates
   );
+};
+
+// Instance Methods
+ApplicationSchema.methods.assessRisk = function () {
+  // Simple risk assessment logic
+  let riskScore = 0;
+
+  // Check farm size
+  if (this.farm && this.farm.area && this.farm.area.total > 50) {
+    riskScore += 10;
+  }
+
+  // Check water source
+  if (this.farm && this.farm.waterSource === 'river') {
+    riskScore += 5;
+  }
+
+  // Determine level
+  let level = 'low';
+  if (riskScore >= 20) level = 'high';
+  else if (riskScore >= 10) level = 'medium';
+
+  this.riskAssessment = {
+    level,
+    score: riskScore,
+    assessedAt: new Date(),
+    factors: ['farm_size', 'water_source']
+  };
+
+  return this.riskAssessment;
+};
+
+ApplicationSchema.methods.calculateTotalScore = function () {
+  if (!this.assessmentScores || this.assessmentScores.length === 0) {
+    return 0;
+  }
+
+  // Sum up scores from latest assessments
+  // This is a simplified implementation
+  return this.assessmentScores.reduce((total, score) => total + (score.achievedScore || 0), 0);
+};
+
+ApplicationSchema.methods.updateStatus = async function (status, actorId, notes) {
+  this.status = status;
+  this.workflowHistory.push({
+    state: status,
+    actor: actorId,
+    actorRole: 'SYSTEM', // simplified
+    notes: notes,
+    enteredAt: new Date()
+  });
+  return this.save();
 };
 
 // Static Methods

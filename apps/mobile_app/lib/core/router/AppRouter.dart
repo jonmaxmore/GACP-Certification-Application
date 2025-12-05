@@ -12,6 +12,7 @@ import '../../presentation/features/admin/screens/admin_DashboardScreen.dart';
 import '../../presentation/features/admin/screens/TaskQueueScreen.dart';
 import '../../presentation/features/auditor/screens/MyAssignmentsScreen.dart';
 import '../../presentation/features/auditor/screens/InspectionFormScreen.dart';
+import '../../presentation/features/admin/screens/ApplicationDetailScreen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -31,7 +32,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) {
           // Check if we are in admin mode
           if (state.fullPath?.startsWith('/admin') ?? false) {
-             return AdminDashboardScreen(child: child);
+            return AdminDashboardScreen(child: child);
           }
           return AppShell(child: child);
         },
@@ -45,7 +46,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/admin/tasks',
             builder: (context, state) => const TaskQueueScreen(),
           ),
-          
+          GoRoute(
+            path: '/admin/application/:id',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return ApplicationDetailScreen(applicationId: id);
+            },
+          ),
+
           // Original Farmer Routes (kept for reference/future use)
           GoRoute(
             path: '/dashboard',
@@ -72,8 +80,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/auditor/inspection/:id',
         builder: (context, state) {
-           final id = state.pathParameters['id']!;
-           return InspectionFormScreen(applicationId: id);
+          final id = state.pathParameters['id']!;
+          return InspectionFormScreen(applicationId: id);
         },
       ),
     ],

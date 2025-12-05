@@ -11,4 +11,8 @@ abstract class ApplicationRepository {
     required Map<String, dynamic> formData,
     required Map<String, File> documents, // key: document_type, value: file
   });
+  Future<Either<Failure, ApplicationEntity>> getApplicationById(String id);
+  Future<Either<Failure, ApplicationEntity>> updateApplicationStatus(
+      String id, String status,
+      {String? notes});
 }

@@ -321,6 +321,36 @@ class RBACService {
         ],
         inheritFrom: [],
       },
+
+      dtam_admin: {
+        name: 'DTAM Admin',
+        description: 'System Administrator',
+        permissions: [
+          'user.create',
+          'user.read',
+          'user.update',
+          'user.delete',
+          'user.list',
+          'application.create',
+          'application.read',
+          'application.update',
+          'application.delete',
+          'application.review',
+          'application.approve',
+          'certificate.create',
+          'certificate.read',
+          'certificate.update',
+          'certificate.delete',
+          'payment.process',
+          'audit.read',
+          'audit.export',
+          'report.generate',
+          'report.export',
+          'dashboard.view',
+          'system.manage',
+        ],
+        inheritFrom: [],
+      },
     };
 
     Object.entries(roles).forEach(([roleName, role]) => {

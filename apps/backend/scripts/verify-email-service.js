@@ -1,4 +1,4 @@
-const EmailService = require('../services/email/EmailService');
+const EmailService = require('../services/EmailService');
 const logger = require('../shared/logger');
 require('dotenv').config(); // Load env vars
 
@@ -13,9 +13,9 @@ async function verify() {
     console.log('Email Service Connection:', isConnected ? 'SUCCESS' : 'FAILED');
 
     if (isConnected) {
-        // Try to send a test email if connected?
-        // Maybe not, to avoid spamming real addresses if configured.
-        // But verifyConnection checks the transporter.
+      // Try to send a test email if connected?
+      // Maybe not, to avoid spamming real addresses if configured.
+      // But verifyConnection checks the transporter.
     }
 
   } catch (error) {

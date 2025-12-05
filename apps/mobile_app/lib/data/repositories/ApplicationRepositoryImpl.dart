@@ -18,62 +18,58 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
-        final apps = data.map((item) {
-          final formData = item['data'] ?? {};
-          return ApplicationEntity(
-            id: item['_id'] ?? item['id'],
-            type: item['type'] ?? 'Unknown',
-            status: item['status'] ?? 'Draft',
-            establishmentId:
-                item['establishment']?['_id'] ?? item['establishment'] ?? '',
-            establishmentName: item['establishment']?['name'] ?? 'Unknown Farm',
-            // Map form data fields
-            totalArea: formData['totalArea']?.toDouble(),
-            cultivatedArea: formData['cultivatedArea']?.toDouble(),
-            areaUnit: formData['areaUnit'] ?? 'rai',
-            landOwnershipType: formData['landOwnershipType'] ?? 'owned',
-            landDocumentId: formData['landDocumentId'] ?? '',
-            waterSourceType: formData['waterSourceType'] ?? 'well',
-            soilType: formData['soilType'] ?? 'loam',
-            plantingSystem: formData['plantingSystem'] ?? 'soil',
-            cropName: formData['cropName'] ?? '',
-            cropVariety: formData['cropVariety'] ?? '',
-            cropSource: formData['cropSource'] ?? '',
-            plantingMethod: formData['plantingMethod'] ?? 'seeds',
-            fenceDescription: formData['fenceDescription'] ?? '',
-            cctvCount: formData['cctvCount'],
-            guardCount: formData['guardCount'],
-            accessControl: formData['accessControl'] ?? '',
-            storageLocation: formData['storageLocation'] ?? '',
-            storageSecurity: formData['storageSecurity'] ?? '',
-            tempControl: formData['tempControl'] ?? false,
-            dispensingMethod: formData['dispensingMethod'] ?? 'pharmacy',
-            pharmacistName: formData['pharmacistName'] ?? '',
-            pharmacistLicense: formData['pharmacistLicense'] ?? '',
-            operatingHours: formData['operatingHours'] ?? '',
-            commercialRegNumber: formData['commercialRegNumber'] ?? '',
-            importExportType: formData['importExportType'] ?? 'import',
-            country: formData['country'] ?? '',
-            portOfEntryExit: formData['portOfEntryExit'] ?? '',
-            transportMode: formData['transportMode'] ?? 'air',
-            carrierName: formData['carrierName'] ?? '',
-            expectedDate: formData['expectedDate'] != null
-                ? DateTime.tryParse(formData['expectedDate'])
-                : null,
-            plantParts: formData['plantParts'] ?? '',
-            quantity: formData['quantity']?.toDouble(),
-            purpose: formData['purpose'] ?? '',
-            documents: (item['documents'] as List?)
-                    ?.map((d) => d.toString())
-                    .toList() ??
-                [],
-            createdAt: DateTime.tryParse(item['createdAt']) ?? DateTime.now(),
-          );
-        }).toList();
+        final apps = data.map((item) => _mapToEntity(item)).toList();
         return Right(apps);
       } else {
         return const Left(
             ServerFailure(message: 'Failed to fetch applications'));
+      }
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: e.message ?? 'Network Error'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ApplicationEntity>> getApplicationById(
+      String id) async {
+    try {
+      final response = await _dioClient.get('/applications/$id');
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        return Right(_mapToEntity(data));
+      } else {
+        return const Left(
+            ServerFailure(message: 'Failed to fetch application details'));
+      }
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: e.message ?? 'Network Error'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ApplicationEntity>> updateApplicationStatus(
+      String id, String status,
+      {String? notes}) async {
+    try {
+      final body = {
+        'status': status,
+        if (notes != null) 'notes': notes,
+      };
+
+      final response =
+          await _dioClient.patch('/applications/$id/status', data: body);
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        return Right(_mapToEntity(data));
+      } else {
+        return const Left(
+            ServerFailure(message: 'Failed to update application status'));
       }
     } on DioException catch (e) {
       return Left(ServerFailure(message: e.message ?? 'Network Error'));
@@ -109,6 +105,8 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
           await _uploadDocument(applicationId, entry.key, entry.value);
         }
 
+        // Return a constructed entity (or fetch fresh)
+        // For now, constructing locally to save a call
         return Right(ApplicationEntity(
           id: applicationId,
           type: type,
@@ -181,5 +179,56 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
       print('Failed to upload document $docType: $e');
       // Continue uploading other documents even if one fails
     }
+  }
+
+  ApplicationEntity _mapToEntity(Map<String, dynamic> item) {
+    final formData = item['data'] ?? {};
+    return ApplicationEntity(
+      id: item['_id'] ?? item['id'],
+      type: item['type'] ?? 'Unknown',
+      status: item['status'] ?? 'Draft',
+      establishmentId:
+          item['establishment']?['_id'] ?? item['establishment'] ?? '',
+      establishmentName: item['establishment']?['name'] ?? 'Unknown Farm',
+      // Map form data fields
+      totalArea: formData['totalArea']?.toDouble(),
+      cultivatedArea: formData['cultivatedArea']?.toDouble(),
+      areaUnit: formData['areaUnit'] ?? 'rai',
+      landOwnershipType: formData['landOwnershipType'] ?? 'owned',
+      landDocumentId: formData['landDocumentId'] ?? '',
+      waterSourceType: formData['waterSourceType'] ?? 'well',
+      soilType: formData['soilType'] ?? 'loam',
+      plantingSystem: formData['plantingSystem'] ?? 'soil',
+      cropName: formData['cropName'] ?? '',
+      cropVariety: formData['cropVariety'] ?? '',
+      cropSource: formData['cropSource'] ?? '',
+      plantingMethod: formData['plantingMethod'] ?? 'seeds',
+      fenceDescription: formData['fenceDescription'] ?? '',
+      cctvCount: formData['cctvCount'],
+      guardCount: formData['guardCount'],
+      accessControl: formData['accessControl'] ?? '',
+      storageLocation: formData['storageLocation'] ?? '',
+      storageSecurity: formData['storageSecurity'] ?? '',
+      tempControl: formData['tempControl'] ?? false,
+      dispensingMethod: formData['dispensingMethod'] ?? 'pharmacy',
+      pharmacistName: formData['pharmacistName'] ?? '',
+      pharmacistLicense: formData['pharmacistLicense'] ?? '',
+      operatingHours: formData['operatingHours'] ?? '',
+      commercialRegNumber: formData['commercialRegNumber'] ?? '',
+      importExportType: formData['importExportType'] ?? 'import',
+      country: formData['country'] ?? '',
+      portOfEntryExit: formData['portOfEntryExit'] ?? '',
+      transportMode: formData['transportMode'] ?? 'air',
+      carrierName: formData['carrierName'] ?? '',
+      expectedDate: formData['expectedDate'] != null
+          ? DateTime.tryParse(formData['expectedDate'])
+          : null,
+      plantParts: formData['plantParts'] ?? '',
+      quantity: formData['quantity']?.toDouble(),
+      purpose: formData['purpose'] ?? '',
+      documents:
+          (item['documents'] as List?)?.map((d) => d.toString()).toList() ?? [],
+      createdAt: DateTime.tryParse(item['createdAt'] ?? '') ?? DateTime.now(),
+    );
   }
 }

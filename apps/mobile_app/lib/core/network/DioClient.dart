@@ -38,7 +38,7 @@ class DioClient {
         },
       ),
     );
-    
+
     // Log Interceptor
     _dio.interceptors.add(LogInterceptor(
       requestBody: true,
@@ -46,7 +46,8 @@ class DioClient {
     ));
   }
 
-  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) async {
+  Future<Response> get(String path,
+      {Map<String, dynamic>? queryParameters}) async {
     return await _dio.get(path, queryParameters: queryParameters);
   }
 
@@ -60,5 +61,9 @@ class DioClient {
 
   Future<Response> delete(String path, {dynamic data}) async {
     return await _dio.delete(path, data: data);
+  }
+
+  Future<Response> patch(String path, {dynamic data}) async {
+    return await _dio.patch(path, data: data);
   }
 }

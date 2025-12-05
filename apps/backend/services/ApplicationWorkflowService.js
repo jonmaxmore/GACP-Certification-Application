@@ -51,7 +51,7 @@ class ApplicationWorkflowService {
     try {
       // 1. Validate farmer eligibility
       const farmer = await User.findById(farmerId);
-      if (!farmer || farmer.role !== 'farmer') {
+      if (!farmer || farmer.role.toLowerCase() !== 'farmer') {
         throw new ValidationError('Invalid farmer ID or insufficient permissions');
       }
 
@@ -68,12 +68,18 @@ class ApplicationWorkflowService {
 
       // 4. Create application
       const application = await this.repository.create({
-        applicant: farmerId,
-        farmInformation: applicationData.farmInformation,
+        farmerId: farmerId,
+        farmerEmail: farmer.email,
+        type: applicationData.type || 'NEW',
+        applicantType: applicationData.applicantType || 'individual',
+        formType: applicationData.formType || 'FORM_09',
+        farm: applicationData.farmInformation, // Map farmInformation to farm
+        farmInformation: applicationData.farmInformation, // Keep for backward compatibility if needed
         cropInformation: applicationData.cropInformation,
         formSpecificData: applicationData.formSpecificData,
         documents: applicationData.documents || [],
         currentStatus: 'draft',
+        applicationNumber: this.generateApplicationNumber(),
       }, session);
 
       // 5. Perform initial risk assessment
@@ -102,7 +108,7 @@ class ApplicationWorkflowService {
       }
 
       // 9. Invalidate applications list cache
-      await cacheService.invalidatePattern('applications:list:*');
+      await cacheService.deletePattern('applications:list:*');
 
       // 10. Log creation
       logger.info('GACP application created', {
@@ -162,7 +168,7 @@ class ApplicationWorkflowService {
             type: 'application-submitted',
             applicationId,
             data: {
-              farmerEmail: application.applicant.email,
+              farmerEmail: application.farmerEmail,
               applicationNumber: application.applicationNumber,
             },
           },
@@ -282,7 +288,7 @@ class ApplicationWorkflowService {
             type: `application-review-${decision}`,
             applicationId,
             data: {
-              farmerEmail: application.applicant.email,
+              farmerEmail: application.farmerEmail,
               decision,
               preliminaryScore,
               reviewerNotes: reviewData.notes,
@@ -494,6 +500,15 @@ class ApplicationWorkflowService {
   }
 
   // === PRIVATE METHODS ===
+
+  generateApplicationNumber() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const random = Math.floor(1000 + Math.random() * 9000);
+    return `APP-${year}${month}${day}-${random}`;
+  }
 
   validateApplicationData(data) {
     // Implement comprehensive validation logic
@@ -845,6 +860,38 @@ class ApplicationWorkflowService {
     }
 
     await cacheService.set(cacheKey, application, 1800);
+    return application;
+  }
+
+  /**
+   * Update application status
+   */
+  async updateApplicationStatus(applicationId, status, notes, userId) {
+    const application = await this.repository.findById(applicationId);
+    if (!application) {
+      throw new Error('Application not found');
+    }
+
+    // Update status using model method if available, otherwise manual update
+    if (typeof application.updateStatus === 'function') {
+      await application.updateStatus(status, userId, notes);
+    } else {
+      logger.warn('application.updateStatus is not a function, using direct update');
+      application.status = status;
+      application.workflowHistory.push({
+        state: status,
+        actor: userId,
+        actorRole: 'SYSTEM',
+        notes: notes,
+        enteredAt: new Date()
+      });
+      await application.save();
+    }
+
+    // Invalidate cache
+    await cacheService.deletePattern(`application:${applicationId}`);
+    await cacheService.deletePattern('applications:list:*');
+
     return application;
   }
 

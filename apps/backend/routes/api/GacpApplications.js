@@ -164,7 +164,7 @@ router.get(
   async (req, res) => {
     try {
       const { applicationId } = req.params;
-      const application = gacpService.getApplication(applicationId);
+      const application = await gacpService.getApplicationById(applicationId);
 
       if (!application) {
         return res.status(404).json({
@@ -287,6 +287,41 @@ router.get(
       res.json({
         success: true,
         data: report,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+);
+
+// Update application status
+router.patch(
+  '/applications/:applicationId/status',
+  authenticate,
+  checkPermission('application.update', 'application'),
+  async (req, res) => {
+    try {
+      const { applicationId } = req.params;
+      const { status, notes } = req.body;
+      const userId = req.user.id || req.user._id;
+
+      const application = await gacpService.updateApplicationStatus(
+        applicationId,
+        status,
+        notes,
+        userId
+      );
+
+      res.json({
+        success: true,
+        data: {
+          applicationId: application.id,
+          status: application.status,
+          updatedAt: application.updatedAt,
+        },
       });
     } catch (error) {
       res.status(400).json({

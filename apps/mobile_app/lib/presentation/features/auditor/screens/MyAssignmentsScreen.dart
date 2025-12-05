@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/FlutterRiverpod.dart';
-import 'package:go_router/GoRouter.dart';
-import 'package:lucide_icons/LucideIcons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class MyAssignmentsScreen extends ConsumerStatefulWidget {
   const MyAssignmentsScreen({super.key});

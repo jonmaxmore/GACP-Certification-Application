@@ -1,5 +1,5 @@
-import 'package:flutter_riverpod/FlutterRiverpod.dart';
-import 'package:flutter_secure_storage/FlutterSecureStorage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobile_app/core/network/DioClient.dart';
 import '../../data/repository/EstablishmentRepositoryImpl.dart';
 import '../../domain/entity/EstablishmentEntity.dart';

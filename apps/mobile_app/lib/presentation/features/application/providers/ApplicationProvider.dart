@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:flutter_riverpod/FlutterRiverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/repositories/ApplicationRepositoryImpl.dart';
 import '../../../../domain/entities/ApplicationEntity.dart';
 import '../../../../domain/repositories/ApplicationRepository.dart';

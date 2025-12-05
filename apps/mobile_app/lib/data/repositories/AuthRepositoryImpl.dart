@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/FlutterSecureStorage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../core/errors/Failures.dart';
 import '../../core/network/DioClient.dart';
 import '../../domain/entities/UserEntity.dart';

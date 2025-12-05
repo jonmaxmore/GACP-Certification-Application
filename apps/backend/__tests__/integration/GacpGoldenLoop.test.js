@@ -34,9 +34,11 @@ describe('🎯 GACP Golden Loop (Corrected Workflow)', () => {
         const baseUri = mongod.getUri();
         const dbName = 'gacp_golden_loop_correct';
         const uri = `${baseUri}${dbName}`;
+        console.log('DEBUG: Mongo URI:', uri);
 
         client = new MongoClient(uri);
         await client.connect();
+        console.log('DEBUG: MongoClient connected');
         db = client.db(dbName);
 
         // Ensure clean state
@@ -179,6 +181,7 @@ describe('🎯 GACP Golden Loop (Corrected Workflow)', () => {
             .set('Authorization', `Bearer ${authToken}`)
             .send({
                 establishmentId: establishmentId,
+                farmInformation: farmRes.body.data,
                 type: 'GACP_FORM_9',
                 farmerData: {
                     cropName: 'Cannabis',

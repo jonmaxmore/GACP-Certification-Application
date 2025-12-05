@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/GoRouter.dart';
-import 'package:lucide_icons/LucideIcons.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class AuditorDashboardScreen extends StatefulWidget {
   final Widget child;

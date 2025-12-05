@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/FlutterRiverpod.dart';
-import 'package:flutter_map/FlutterMap.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:image_picker/ImagePicker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:lucide_icons/LucideIcons.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/EstablishmentProvider.dart';
 
 class EstablishmentFormScreen extends ConsumerStatefulWidget {

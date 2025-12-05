@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/FlutterRiverpod.dart';
-import 'package:lucide_icons/LucideIcons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:mobile_app/core/providers/CoreProviders.dart';
 
 class InspectionFormScreen extends ConsumerStatefulWidget {

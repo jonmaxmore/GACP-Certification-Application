@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/FlutterRiverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/repositories/DashboardRepositoryImpl.dart';
 import '../../../../domain/entities/DashboardStatsEntity.dart';
 import '../../../../domain/repositories/DashboardRepository.dart';

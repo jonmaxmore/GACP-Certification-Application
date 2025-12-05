@@ -1,4 +1,4 @@
-import 'package:freezed_annotation/FreezedAnnotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entity/EstablishmentEntity.dart';
 
 part 'EstablishmentModel.freezed.dart';

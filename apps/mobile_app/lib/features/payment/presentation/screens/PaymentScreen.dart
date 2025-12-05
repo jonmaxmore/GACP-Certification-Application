@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/FlutterRiverpod.dart';
-import 'package:go_router/GoRouter.dart';
-import 'package:image_picker/ImagePicker.dart';
-import 'package:lucide_icons/LucideIcons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../PaymentProviders.dart';
 
 class PaymentScreen extends ConsumerStatefulWidget {

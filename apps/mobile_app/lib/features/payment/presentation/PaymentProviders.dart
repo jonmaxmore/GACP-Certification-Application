@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter_riverpod/FlutterRiverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/PaymentRepository.dart';
 
 class PaymentState {

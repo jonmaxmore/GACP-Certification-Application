@@ -1,4 +1,4 @@
 {
   "success": false,
-  "error": "Farm information is required"
+  "error": "At least one crop must be specified"
 }

@@ -26,7 +26,7 @@ class InspectionScheduler {
 
             // 2. Find available auditor based on location and expertise
             const availableAuditor = await this.findAvailableAuditor(
-                application.farmInformation.location.province,
+                application.farm.address.province,
                 application.cropInformation.map(crop => crop.cropType),
             );
 
@@ -92,7 +92,7 @@ class InspectionScheduler {
     calculateInspectionDuration(application) {
         // Calculate estimated inspection duration based on farm size and crops
         const baseHours = SystemConfig.SCHEDULING.ESTIMATION.BASE_HOURS;
-        const sizeHours = Math.ceil(application.farmInformation.farmSize.totalArea / 5) * SystemConfig.SCHEDULING.ESTIMATION.HOURS_PER_5_AREA_UNIT;
+        const sizeHours = Math.ceil(application.farm.area.total / 5) * SystemConfig.SCHEDULING.ESTIMATION.HOURS_PER_5_AREA_UNIT;
         const cropHours = application.cropInformation.length * SystemConfig.SCHEDULING.ESTIMATION.HOURS_PER_CROP;
 
         return baseHours + sizeHours + cropHours;

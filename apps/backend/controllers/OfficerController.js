@@ -1,6 +1,7 @@
-const Application = require('../models/ApplicationModel'); // Assuming Model exists
-const User = require('../models/UserModel'); // Assuming Model exists
-const logger = require('../shared/logger'); // Assuming logger exists
+const ApplicationWorkflowService = require('../services/ApplicationWorkflowService');
+const User = require('../models/UserModel');
+const Application = require('../models/ApplicationModel');
+const logger = require('../shared/logger');
 
 class OfficerController {
     /**
@@ -10,33 +11,36 @@ class OfficerController {
     async reviewDocs(req, res) {
         try {
             const { id } = req.params;
-            const { status, comment } = req.body; // status: 'APPROVED' | 'REJECTED'
+            const { status, comment } = req.body; // status: 'approved' | 'rejected' (lowercase from frontend)
+            const officerId = req.user ? req.user.id : null;
 
-            const application = await Application.findOne({ $or: [{ _id: id }, { id: id }] });
-            if (!application) {
-                return res.status(404).json({ success: false, error: 'Application not found' });
-            }
+            if (status === 'approved') {
+                // Move to inspection_scheduled? Or keep in under_review?
+                // For simplified flow: Approve Docs -> Ready for Inspection.
+                // Using 'inspection_scheduled' as the state for "Waiting for Audit/Inspection"
+                await ApplicationWorkflowService.updateApplicationStatus(
+                    id,
+                    'inspection_scheduled',
+                    comment || 'Documents approved by officer',
+                    officerId
+                );
 
-            if (status === 'APPROVED') {
-                application.workflowState = 'WAITING_PAYMENT_2';
-                application.logs.push({
-                    action: 'DOCS_APPROVED',
-                    note: comment || 'Documents approved by officer',
-                    timestamp: new Date()
-                });
-            } else if (status === 'REJECTED') {
-                application.workflowState = 'DOCS_REJECTED';
-                application.officerNote = comment;
-                application.logs.push({
-                    action: 'DOCS_REJECTED',
-                    note: comment,
-                    timestamp: new Date()
-                });
+                // We might also want to mark specific documents as verified?
+                // Keeping it simple as per "Golden Loop".
+            } else if (status === 'rejected') {
+                // Return to revision_required or rejected?
+                // If doc issues, usually revision_required.
+                await ApplicationWorkflowService.updateApplicationStatus(
+                    id,
+                    'revision_required',
+                    comment || 'Please revise documents',
+                    officerId
+                );
             } else {
                 return res.status(400).json({ success: false, error: 'Invalid status' });
             }
 
-            await application.save();
+            const application = await ApplicationWorkflowService.getApplicationById(id);
             res.json({ success: true, data: application });
 
         } catch (error) {
@@ -69,26 +73,37 @@ class OfficerController {
         try {
             const { id } = req.params;
             const { auditorId } = req.body;
+            const officerId = req.user ? req.user.id : null;
 
             const application = await Application.findOne({ $or: [{ _id: id }, { id: id }] });
             if (!application) {
                 return res.status(404).json({ success: false, error: 'Application not found' });
             }
 
+            // Validate Auditor
             const auditor = await User.findOne({ $or: [{ _id: auditorId }, { id: auditorId }], role: 'auditor' });
             if (!auditor) {
                 return res.status(400).json({ success: false, error: 'Invalid auditor ID' });
             }
 
-            application.auditorId = auditor.id || auditor._id; // Store consistent ID
-            application.workflowState = 'AUDIT_IN_PROGRESS';
-            application.logs.push({
-                action: 'AUDITOR_ASSIGNED',
-                note: `Assigned to ${auditor.firstName} ${auditor.lastName}`,
-                timestamp: new Date()
-            });
+            // Update V2 Schema Fields
+            // Use 'inspection.inspectorId'
+            if (!application.inspection) application.inspection = {};
+            application.inspection.inspectorId = auditor.id || auditor._id;
 
+            // Log history
+            await ApplicationWorkflowService.updateApplicationStatus(
+                id,
+                'inspection_scheduled', // Re-affirm status or move to next?
+                `Auditor assigned: ${auditor.firstName} ${auditor.lastName}`,
+                officerId
+            );
+
+            // Need to save the inspectorId explicitly if updateStatus didn't (it accepts notes but not arbitrary fields)
+            // ApplicationWorkflowService.updateApplicationStatus saves the doc, but we modified execution flow.
+            // Let's modify app then use service for status update.
             await application.save();
+
             res.json({ success: true, data: application });
 
         } catch (error) {

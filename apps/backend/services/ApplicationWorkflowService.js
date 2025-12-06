@@ -227,7 +227,7 @@ class ApplicationWorkflowService {
       const documentValidation = this.validator.validateDocuments(application);
 
       // 3. Assess farm information accuracy (Delegated)
-      const farmInfoScore = this.scorer.assessFarmInformation(application.farmInformation);
+      const farmInfoScore = this.scorer.assessFarmInformation(application.farm);
 
       // 4. Evaluate farming experience and practices (Delegated)
       const practiceScore = this.scorer.assessFarmingPractices(reviewData.practicesData);
@@ -405,7 +405,7 @@ class ApplicationWorkflowService {
   // --- Helper Methods ---
 
   async assignOfficer(application) {
-    const province = application.farmInformation.location.province;
+    const province = application.farm.address.province;
     const officers = await User.find({
       role: 'officer',
       'workLocation.provinces': province,
@@ -628,7 +628,7 @@ class ApplicationWorkflowService {
       query.currentStatus = filters.status;
     }
     if (filters.farmerId) {
-      query.applicant = filters.farmerId;
+      query.farmerId = filters.farmerId;
     }
     if (filters.assignedOfficer) {
       query.assignedOfficer = filters.assignedOfficer;

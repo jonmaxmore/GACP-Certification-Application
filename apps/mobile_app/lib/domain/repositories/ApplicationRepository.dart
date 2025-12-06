@@ -15,4 +15,5 @@ abstract class ApplicationRepository {
   Future<Either<Failure, ApplicationEntity>> updateApplicationStatus(
       String id, String status,
       {String? notes});
+  Future<Either<Failure, ApplicationEntity>> submitApplication(String id);
 }

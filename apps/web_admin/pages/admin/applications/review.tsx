@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Head from 'next/head';
 
-const API_BASE_URL = 'http://localhost:3000/api/v2';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v2';
 
 export default function DocumentReviewPage() {
     const [applications, setApplications] = useState<any[]>([]);
@@ -17,8 +17,10 @@ export default function DocumentReviewPage() {
     const fetchApplications = async () => {
         try {
             const res = await axios.get(`${API_BASE_URL}/applications`);
-            // Filter for SUBMITTED
-            const list = (res.data.data || res.data.items || []).filter((a: any) => a.workflowState === 'SUBMITTED');
+            // Filter for submitted (lowercase per Backend Model)
+            const list = (res.data.data || res.data.items || []).filter((a: any) =>
+                a.status === 'submitted' || a.status === 'SUBMITTED' || a.currentStatus === 'submitted'
+            );
             setApplications(list);
         } catch (err) {
             console.error(err);
@@ -35,8 +37,14 @@ export default function DocumentReviewPage() {
         }
 
         try {
-            await axios.patch(`${API_BASE_URL}/officer/applications/${selectedApp.id}/review-docs`, {
-                status,
+            // Map frontend status to backend expected value if needed, 
+            // but Backend OfficerController.reviewDocs expects 'approved' or 'rejected' usually?
+            // Let's check OfficerController... assuming it handles uppercase or we send lowercase.
+            // Safe bet: send what the UI says but maybe lowercase if backend is strict.
+            // Looking at OfficerRoutes -> officerController.reviewDocs. 
+            // Usually standard is lowercase.
+            await axios.patch(`${API_BASE_URL}/officer/applications/${selectedApp._id || selectedApp.id}/review-docs`, {
+                status: status.toLowerCase(),
                 comment
             });
             alert(`Documents ${status}`);
@@ -59,16 +67,16 @@ export default function DocumentReviewPage() {
                     <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">App ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applicant</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Farm Name</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                             <th className="px-6 py-3 text-right">Action</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                         {applications.map(app => (
-                            <tr key={app.id}>
-                                <td className="px-6 py-4">{app.id}</td>
-                                <td className="px-6 py-4">{app.applicantType}</td>
+                            <tr key={app._id || app.id}>
+                                <td className="px-6 py-4">{app.applicationNumber || app._id || app.id}</td>
+                                <td className="px-6 py-4">{app.farmInformation?.name || app.establishmentName || 'Unknown Farm'}</td>
                                 <td className="px-6 py-4">{new Date(app.createdAt).toLocaleDateString()}</td>
                                 <td className="px-6 py-4 text-right">
                                     <button
@@ -87,20 +95,41 @@ export default function DocumentReviewPage() {
                 </table>
             </div>
 
-            {/* Simplified Modal */}
+            {/* Modal */}
             {selectedApp && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
-                        <h2 className="text-xl font-bold mb-4">Review Application: {selectedApp.id}</h2>
+                    <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <h2 className="text-xl font-bold mb-4">Review Application: {selectedApp.applicationNumber}</h2>
 
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <p className="font-semibold">Establishment ID:</p>
-                                <p>{JSON.stringify(selectedApp.establishmentId)}</p>
+                        <div className="space-y-4 mb-4">
+                            <div className="border p-3 rounded">
+                                <h3 className="font-semibold text-gray-700">Farm Information</h3>
+                                <p><strong>Name:</strong> {selectedApp.farmInformation?.name}</p>
+                                <p><strong>Address:</strong> {selectedApp.farmInformation?.address?.street}, {selectedApp.farmInformation?.address?.city}, {selectedApp.farmInformation?.address?.province} {selectedApp.farmInformation?.address?.zipCode}</p>
+                                <p><strong>Total Area:</strong> {selectedApp.farmInformation?.area?.total} {selectedApp.farmInformation?.area?.unit}</p>
                             </div>
+
+                            <div className="border p-3 rounded">
+                                <h3 className="font-semibold text-gray-700">Crop Information</h3>
+                                {selectedApp.cropInformation?.map((crop: any, i: number) => (
+                                    <div key={i} className="ml-2">
+                                        <p><strong>{crop.name}</strong> ({crop.variety}) - Source: {crop.source}</p>
+                                    </div>
+                                ))}
+                            </div>
+
                             <div>
                                 <p className="font-semibold">Documents:</p>
-                                <p className="text-gray-500 italic">(Mock: All documents valid)</p>
+                                <ul className="list-disc pl-5">
+                                    {selectedApp.documents?.map((doc: any, i: number) => (
+                                        <li key={i}>
+                                            <a href={doc.url} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                                                {doc.type}
+                                            </a>
+                                            <span className="text-gray-500 text-sm ml-2">({doc.status || 'Verified'})</span>
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
                         </div>
 

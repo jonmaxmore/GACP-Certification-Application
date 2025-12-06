@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +13,8 @@ class ApplicationFormScreen extends ConsumerStatefulWidget {
   const ApplicationFormScreen({super.key, required this.formType});
 
   @override
-  ConsumerState<ApplicationFormScreen> createState() => _ApplicationFormScreenState();
+  ConsumerState<ApplicationFormScreen> createState() =>
+      _ApplicationFormScreenState();
 }
 
 class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
@@ -20,7 +22,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
   final _totalAreaController = TextEditingController();
   final _cultivatedAreaController = TextEditingController();
   final _landDocIdController = TextEditingController();
-  
+
   // Form 9 Controllers
   final _cropNameController = TextEditingController();
   final _varietyController = TextEditingController();
@@ -88,7 +90,9 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source, imageQuality: 80);
     if (pickedFile != null) {
-      ref.read(applicationProvider.notifier).addDocument(key, File(pickedFile.path));
+      ref
+          .read(applicationProvider.notifier)
+          .addDocument(key, File(pickedFile.path));
     }
   }
 
@@ -104,7 +108,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
           const SnackBar(content: Text('Application submitted successfully!')),
         );
         // Pop back to list, skipping selection screen if possible, or just pop once
-        Navigator.pop(context); 
+        Navigator.pop(context);
         notifier.resetForm();
       }
       if (next.error != null && !next.isLoading) {
@@ -136,8 +140,9 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                     _handleForm11Steps(appState, notifier);
                   }
                 }
-                
-                int totalSteps = _getSteps(appState, establishmentState, notifier).length;
+
+                int totalSteps =
+                    _getSteps(appState, establishmentState, notifier).length;
                 if (appState.currentStep < totalSteps - 1) {
                   notifier.setStep(appState.currentStep + 1);
                 }
@@ -150,16 +155,18 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                 }
               },
               controlsBuilder: (context, details) {
-                int totalSteps = _getSteps(appState, establishmentState, notifier).length;
+                int totalSteps =
+                    _getSteps(appState, establishmentState, notifier).length;
                 bool isLastStep = appState.currentStep == totalSteps - 1;
-                
+
                 return Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: Row(
                     children: [
                       ElevatedButton(
                         onPressed: details.onStepContinue,
-                        child: Text(isLastStep ? 'Submit Application' : 'Continue'),
+                        child: Text(
+                            isLastStep ? 'Submit Application' : 'Continue'),
                       ),
                       const SizedBox(width: 12),
                       TextButton(
@@ -177,60 +184,76 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
   String _getTitle(String type) {
     switch (type) {
-      case 'GACP_FORM_9': return 'Form 9 (Production)';
-      case 'GACP_FORM_10': return 'Form 10 (Sale)';
-      case 'GACP_FORM_11': return 'Form 11 (Import/Export)';
-      default: return 'New Application';
+      case 'GACP_FORM_9':
+        return 'Form 9 (Production)';
+      case 'GACP_FORM_10':
+        return 'Form 10 (Sale)';
+      case 'GACP_FORM_11':
+        return 'Form 11 (Import/Export)';
+      default:
+        return 'New Application';
     }
   }
 
   void _handleForm9Steps(ApplicationState state, ApplicationNotifier notifier) {
     if (state.currentStep == 1) {
-       notifier.updateFormData('totalArea', double.tryParse(_totalAreaController.text));
-       notifier.updateFormData('cultivatedArea', double.tryParse(_cultivatedAreaController.text));
-       notifier.updateFormData('landDocumentId', _landDocIdController.text);
+      notifier.updateFormData(
+          'totalArea', double.tryParse(_totalAreaController.text));
+      notifier.updateFormData(
+          'cultivatedArea', double.tryParse(_cultivatedAreaController.text));
+      notifier.updateFormData('landDocumentId', _landDocIdController.text);
     } else if (state.currentStep == 2) {
-       notifier.updateFormData('cropName', _cropNameController.text);
-       notifier.updateFormData('cropVariety', _varietyController.text);
-       notifier.updateFormData('cropSource', _sourceController.text);
+      notifier.updateFormData('cropName', _cropNameController.text);
+      notifier.updateFormData('cropVariety', _varietyController.text);
+      notifier.updateFormData('cropSource', _sourceController.text);
     } else if (state.currentStep == 3) {
-       notifier.updateFormData('fenceDescription', _fenceController.text);
-       notifier.updateFormData('cctvCount', int.tryParse(_cctvController.text));
-       notifier.updateFormData('guardCount', int.tryParse(_guardController.text));
-       notifier.updateFormData('accessControl', _accessControlController.text);
-       notifier.updateFormData('storageLocation', _storageLocationController.text);
-       notifier.updateFormData('storageSecurity', _storageSecurityController.text);
+      notifier.updateFormData('fenceDescription', _fenceController.text);
+      notifier.updateFormData('cctvCount', int.tryParse(_cctvController.text));
+      notifier.updateFormData(
+          'guardCount', int.tryParse(_guardController.text));
+      notifier.updateFormData('accessControl', _accessControlController.text);
+      notifier.updateFormData(
+          'storageLocation', _storageLocationController.text);
+      notifier.updateFormData(
+          'storageSecurity', _storageSecurityController.text);
     } else if (state.currentStep == 4) {
       notifier.submitApplication();
     }
   }
 
-  void _handleForm10Steps(ApplicationState state, ApplicationNotifier notifier) {
+  void _handleForm10Steps(
+      ApplicationState state, ApplicationNotifier notifier) {
     if (state.currentStep == 1) {
       notifier.updateFormData('pharmacistName', _pharmacistNameController.text);
-      notifier.updateFormData('pharmacistLicense', _pharmacistLicenseController.text);
-      notifier.updateFormData('saleStorageDetails', _saleStorageDetailsController.text);
+      notifier.updateFormData(
+          'pharmacistLicense', _pharmacistLicenseController.text);
+      notifier.updateFormData(
+          'saleStorageDetails', _saleStorageDetailsController.text);
       notifier.updateFormData('operatingHours', _operatingHoursController.text);
-      notifier.updateFormData('commercialRegNumber', _commercialRegController.text);
+      notifier.updateFormData(
+          'commercialRegNumber', _commercialRegController.text);
     } else if (state.currentStep == 2) {
       notifier.submitApplication();
     }
   }
 
-  void _handleForm11Steps(ApplicationState state, ApplicationNotifier notifier) {
+  void _handleForm11Steps(
+      ApplicationState state, ApplicationNotifier notifier) {
     if (state.currentStep == 1) {
       notifier.updateFormData('country', _countryController.text);
       notifier.updateFormData('portOfEntryExit', _portController.text);
       notifier.updateFormData('carrierName', _carrierController.text);
       notifier.updateFormData('plantParts', _plantPartsController.text);
-      notifier.updateFormData('quantity', double.tryParse(_quantityController.text));
+      notifier.updateFormData(
+          'quantity', double.tryParse(_quantityController.text));
       notifier.updateFormData('purpose', _purposeController.text);
     } else if (state.currentStep == 2) {
       notifier.submitApplication();
     }
   }
 
-  List<Step> _getSteps(ApplicationState appState, dynamic establishmentState, ApplicationNotifier notifier) {
+  List<Step> _getSteps(ApplicationState appState, dynamic establishmentState,
+      ApplicationNotifier notifier) {
     List<Step> steps = [
       // Step 0: Select Establishment (Common)
       Step(
@@ -239,6 +262,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
             ? const Text('No establishments found. Please create one first.')
             : Column(
                 children: establishmentState.establishments.map<Widget>((farm) {
+
                   return RadioListTile<String>(
                     title: Text(farm.name),
                     subtitle: Text(farm.address),
@@ -249,7 +273,8 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                 }).toList(),
               ),
         isActive: appState.currentStep >= 0,
-        state: appState.currentStep > 0 ? StepState.complete : StepState.editing,
+        state:
+            appState.currentStep > 0 ? StepState.complete : StepState.editing,
       ),
     ];
 
@@ -259,12 +284,19 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
           title: const Text('Farm Details'),
           content: Column(
             children: [
-              TextFormField(controller: _totalAreaController, decoration: const InputDecoration(labelText: 'Total Area')),
-              TextFormField(controller: _cultivatedAreaController, decoration: const InputDecoration(labelText: 'Cultivated Area')),
+              TextFormField(
+                  controller: _totalAreaController,
+                  decoration: const InputDecoration(labelText: 'Total Area')),
+              TextFormField(
+                  controller: _cultivatedAreaController,
+                  decoration:
+                      const InputDecoration(labelText: 'Cultivated Area')),
               DropdownButtonFormField<String>(
                 initialValue: appState.formData['areaUnit'] ?? 'rai',
                 decoration: const InputDecoration(labelText: 'Unit'),
-                items: ['rai', 'hectare', 'sqm'].map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
+                items: ['rai', 'hectare', 'sqm']
+                    .map((u) => DropdownMenuItem(value: u, child: Text(u)))
+                    .toList(),
                 onChanged: (v) => notifier.updateFormData('areaUnit', v),
               ),
               // ... other farm fields
@@ -276,9 +308,15 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
           title: const Text('Crop Info'),
           content: Column(
             children: [
-              TextFormField(controller: _cropNameController, decoration: const InputDecoration(labelText: 'Crop Name')),
-              TextFormField(controller: _varietyController, decoration: const InputDecoration(labelText: 'Variety')),
-              TextFormField(controller: _sourceController, decoration: const InputDecoration(labelText: 'Source')),
+              TextFormField(
+                  controller: _cropNameController,
+                  decoration: const InputDecoration(labelText: 'Crop Name')),
+              TextFormField(
+                  controller: _varietyController,
+                  decoration: const InputDecoration(labelText: 'Variety')),
+              TextFormField(
+                  controller: _sourceController,
+                  decoration: const InputDecoration(labelText: 'Source')),
             ],
           ),
           isActive: appState.currentStep >= 2,
@@ -287,8 +325,14 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
           title: const Text('Production'),
           content: Column(
             children: [
-              TextFormField(controller: _fenceController, decoration: const InputDecoration(labelText: 'Fence Description')),
-              TextFormField(controller: _storageLocationController, decoration: const InputDecoration(labelText: 'Storage Location')),
+              TextFormField(
+                  controller: _fenceController,
+                  decoration:
+                      const InputDecoration(labelText: 'Fence Description')),
+              TextFormField(
+                  controller: _storageLocationController,
+                  decoration:
+                      const InputDecoration(labelText: 'Storage Location')),
             ],
           ),
           isActive: appState.currentStep >= 3,
@@ -301,14 +345,16 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                 label: 'Land Title (ภ.ท.2)',
                 docKey: 'land_title_deed',
                 file: appState.documents['land_title_deed'],
-                onUpload: () => _pickDocument('land_title_deed', ImageSource.gallery),
+                onUpload: () =>
+                    _pickDocument('land_title_deed', ImageSource.gallery),
                 onRemove: () => notifier.removeDocument('land_title_deed'),
               ),
               _DocumentUploadField(
                 label: 'SOP Manual',
                 docKey: 'sop_manual',
                 file: appState.documents['sop_manual'],
-                onUpload: () => _pickDocument('sop_manual', ImageSource.gallery),
+                onUpload: () =>
+                    _pickDocument('sop_manual', ImageSource.gallery),
                 onRemove: () => notifier.removeDocument('sop_manual'),
               ),
             ],
@@ -323,18 +369,39 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
           content: Column(
             children: [
               DropdownButtonFormField<String>(
-                initialValue: appState.formData['dispensingMethod'] ?? 'pharmacy',
-                decoration: const InputDecoration(labelText: 'Dispensing Method'),
-                items: ['pharmacy', 'clinic', 'other'].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-                onChanged: (v) => notifier.updateFormData('dispensingMethod', v),
+                initialValue:
+                    appState.formData['dispensingMethod'] ?? 'pharmacy',
+                decoration:
+                    const InputDecoration(labelText: 'Dispensing Method'),
+                items: ['pharmacy', 'clinic', 'other']
+                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                    .toList(),
+                onChanged: (v) =>
+                    notifier.updateFormData('dispensingMethod', v),
               ),
-              TextFormField(controller: _commercialRegController, decoration: const InputDecoration(labelText: 'Commercial Registration No.')),
-              TextFormField(controller: _operatingHoursController, decoration: const InputDecoration(labelText: 'Operating Hours')),
+              TextFormField(
+                  controller: _commercialRegController,
+                  decoration: const InputDecoration(
+                      labelText: 'Commercial Registration No.')),
+              TextFormField(
+                  controller: _operatingHoursController,
+                  decoration:
+                      const InputDecoration(labelText: 'Operating Hours')),
               const SizedBox(height: 16),
-              const Text('Pharmacist Information', style: TextStyle(fontWeight: FontWeight.bold)),
-              TextFormField(controller: _pharmacistNameController, decoration: const InputDecoration(labelText: 'Pharmacist Name')),
-              TextFormField(controller: _pharmacistLicenseController, decoration: const InputDecoration(labelText: 'License Number')),
-              TextFormField(controller: _saleStorageDetailsController, decoration: const InputDecoration(labelText: 'Storage Details')),
+              const Text('Pharmacist Information',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextFormField(
+                  controller: _pharmacistNameController,
+                  decoration:
+                      const InputDecoration(labelText: 'Pharmacist Name')),
+              TextFormField(
+                  controller: _pharmacistLicenseController,
+                  decoration:
+                      const InputDecoration(labelText: 'License Number')),
+              TextFormField(
+                  controller: _saleStorageDetailsController,
+                  decoration:
+                      const InputDecoration(labelText: 'Storage Details')),
             ],
           ),
           isActive: appState.currentStep >= 1,
@@ -347,21 +414,24 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                 label: 'Pharmacist License',
                 docKey: 'pharmacist_license',
                 file: appState.documents['pharmacist_license'],
-                onUpload: () => _pickDocument('pharmacist_license', ImageSource.gallery),
+                onUpload: () =>
+                    _pickDocument('pharmacist_license', ImageSource.gallery),
                 onRemove: () => notifier.removeDocument('pharmacist_license'),
               ),
               _DocumentUploadField(
                 label: 'Commercial Registration',
                 docKey: 'commercial_reg',
                 file: appState.documents['commercial_reg'],
-                onUpload: () => _pickDocument('commercial_reg', ImageSource.gallery),
+                onUpload: () =>
+                    _pickDocument('commercial_reg', ImageSource.gallery),
                 onRemove: () => notifier.removeDocument('commercial_reg'),
               ),
               _DocumentUploadField(
                 label: 'Location Map',
                 docKey: 'location_map',
                 file: appState.documents['location_map'],
-                onUpload: () => _pickDocument('location_map', ImageSource.gallery),
+                onUpload: () =>
+                    _pickDocument('location_map', ImageSource.gallery),
                 onRemove: () => notifier.removeDocument('location_map'),
               ),
             ],
@@ -378,23 +448,46 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
               DropdownButtonFormField<String>(
                 initialValue: appState.formData['importExportType'] ?? 'import',
                 decoration: const InputDecoration(labelText: 'Type'),
-                items: ['import', 'export'].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-                onChanged: (v) => notifier.updateFormData('importExportType', v),
+                items: ['import', 'export']
+                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                    .toList(),
+                onChanged: (v) =>
+                    notifier.updateFormData('importExportType', v),
               ),
-              TextFormField(controller: _countryController, decoration: const InputDecoration(labelText: 'Country (Origin/Destination)')),
-              TextFormField(controller: _portController, decoration: const InputDecoration(labelText: 'Port of Entry/Exit')),
+              TextFormField(
+                  controller: _countryController,
+                  decoration: const InputDecoration(
+                      labelText: 'Country (Origin/Destination)')),
+              TextFormField(
+                  controller: _portController,
+                  decoration:
+                      const InputDecoration(labelText: 'Port of Entry/Exit')),
               DropdownButtonFormField<String>(
                 initialValue: appState.formData['transportMode'] ?? 'air',
                 decoration: const InputDecoration(labelText: 'Transport Mode'),
-                items: ['air', 'sea', 'land'].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+                items: ['air', 'sea', 'land']
+                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                    .toList(),
                 onChanged: (v) => notifier.updateFormData('transportMode', v),
               ),
-              TextFormField(controller: _carrierController, decoration: const InputDecoration(labelText: 'Carrier Name')),
+              TextFormField(
+                  controller: _carrierController,
+                  decoration: const InputDecoration(labelText: 'Carrier Name')),
               const SizedBox(height: 16),
-              const Text('Consignment Details', style: TextStyle(fontWeight: FontWeight.bold)),
-              TextFormField(controller: _plantPartsController, decoration: const InputDecoration(labelText: 'Plant Parts (e.g., Flower, Seed)')),
-              TextFormField(controller: _quantityController, decoration: const InputDecoration(labelText: 'Quantity (kg)')),
-              TextFormField(controller: _purposeController, decoration: const InputDecoration(labelText: 'Purpose (e.g., Medical)')),
+              const Text('Consignment Details',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextFormField(
+                  controller: _plantPartsController,
+                  decoration: const InputDecoration(
+                      labelText: 'Plant Parts (e.g., Flower, Seed)')),
+              TextFormField(
+                  controller: _quantityController,
+                  decoration:
+                      const InputDecoration(labelText: 'Quantity (kg)')),
+              TextFormField(
+                  controller: _purposeController,
+                  decoration: const InputDecoration(
+                      labelText: 'Purpose (e.g., Medical)')),
             ],
           ),
           isActive: appState.currentStep >= 1,
@@ -414,7 +507,8 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                 label: 'Phytosanitary Certificate',
                 docKey: 'phyto_cert',
                 file: appState.documents['phyto_cert'],
-                onUpload: () => _pickDocument('phyto_cert', ImageSource.gallery),
+                onUpload: () =>
+                    _pickDocument('phyto_cert', ImageSource.gallery),
                 onRemove: () => notifier.removeDocument('phyto_cert'),
               ),
             ],
@@ -428,7 +522,8 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.red));
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red));
   }
 }
 
@@ -453,14 +548,19 @@ class _DocumentUploadField extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        subtitle: file != null ? Text('Selected: ${file!.path.split('/').last}') : const Text('No file selected'),
+        subtitle: file != null
+            ? Text('Selected: ${file!.path.split('/').last}')
+            : const Text('No file selected'),
         leading: Icon(
           file != null ? LucideIcons.fileCheck : LucideIcons.file,
           color: file != null ? Colors.green : Colors.grey,
         ),
         trailing: file != null
-            ? IconButton(icon: const Icon(LucideIcons.trash, color: Colors.red), onPressed: onRemove)
-            : IconButton(icon: const Icon(LucideIcons.upload), onPressed: onUpload),
+            ? IconButton(
+                icon: const Icon(LucideIcons.trash, color: Colors.red),
+                onPressed: onRemove)
+            : IconButton(
+                icon: const Icon(LucideIcons.upload), onPressed: onUpload),
       ),
     );
   }

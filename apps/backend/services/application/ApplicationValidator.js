@@ -26,7 +26,7 @@ class ApplicationValidator {
     validateApplicationCompleteness(application) {
         const requiredDocuments = SystemConfig.VALIDATION.REQUIRED_DOCUMENTS;
 
-        const submittedDocuments = application.documents.map(doc => doc.documentType);
+        const submittedDocuments = application.documents.map(doc => doc.type);
         const missingDocuments = requiredDocuments.filter(doc => !submittedDocuments.includes(doc));
 
         if (missingDocuments.length > 0) {

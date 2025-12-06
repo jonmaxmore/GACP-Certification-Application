@@ -272,7 +272,7 @@ router.post(
   async (req, res) => {
     try {
       const { applicationId } = req.params;
-      const receipt = await gacpService.submitApplication(applicationId);
+      const receipt = await gacpService.submitApplication(applicationId, req.user.id || req.user._id);
 
       res.json({
         success: true,
@@ -478,11 +478,13 @@ router.use((error, req, res, _next) => {
  *                 $ref: '#/components/schemas/Application'
  */
 router.get('/my-applications', authenticate, async (req, res) => {
-  // Stub: Get applications for current user
   try {
-    // const apps = await gacpService.findByFarmer(req.user.id);
-    res.json({ success: true, data: [] });
-  } catch (err) { res.status(500).json({ error: err.message }) }
+    const farmerId = req.user.id || req.user._id;
+    const result = await gacpService.getApplications({ farmerId });
+    res.json({ success: true, data: result.applications });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 /**

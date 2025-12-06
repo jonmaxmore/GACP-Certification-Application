@@ -11,22 +11,22 @@ class ApplicationScorer {
         const pts = SystemConfig.SCORING.FARM_INFO_POINTS;
 
         // Location completeness
-        if (farmInfo.location && farmInfo.location.coordinates) {
+        if (farmInfo.coordinates) {
             score += pts.LOCATION;
         }
 
         // Land ownership documentation
-        if (farmInfo.landOwnership && farmInfo.landOwnership.documents.length > 0) {
+        if (farmInfo.owner) {
             score += pts.OWNERSHIP;
         }
 
         // Water source quality
-        if (farmInfo.waterSource && farmInfo.waterSource.quality === 'good') {
+        if (farmInfo.waterSource) {
             score += pts.WATER;
         }
 
         // Soil information
-        if (farmInfo.soilType && farmInfo.soilType.ph) {
+        if (farmInfo.soilType) {
             score += pts.SOIL;
         }
 

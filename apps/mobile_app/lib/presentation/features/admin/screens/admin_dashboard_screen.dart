@@ -8,7 +8,8 @@ class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({super.key, required this.child});
 
   @override
-  ConsumerState<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+  ConsumerState<AdminDashboardScreen> createState() =>
+      _AdminDashboardScreenState();
 }
 
 class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
@@ -25,7 +26,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     ),
     NavigationDestination(
       icon: Icon(LucideIcons.users),
-      label: 'Auditors',
+      label: 'Dispatcher',
     ),
   ];
 
@@ -39,7 +40,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         context.go('/admin/tasks');
         break;
       case 2:
-        context.go('/admin/auditors'); // Placeholder
+        context.go('/admin/auditors'); // Dispatcher View
         break;
     }
   }

@@ -25,8 +25,11 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         // Navigate based on role (mock for now)
-        if (_emailController.text.contains('auditor')) {
+        if (_emailController.text.contains('auditor') ||
+            _emailController.text.contains('inspector')) {
           context.go('/auditor/assignments');
+        } else if (_emailController.text.contains('farmer')) {
+          context.go('/dashboard');
         } else {
           context.go('/admin/dashboard');
         }

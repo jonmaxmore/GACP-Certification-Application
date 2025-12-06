@@ -33,6 +33,8 @@ abstract class ApplicationRepository {
     required String establishmentId,
     required String applicantType,
   });
+  Future<Either<Failure, Map<String, dynamic>>> payPhase1(String appId);
+  Future<Either<Failure, Map<String, dynamic>>> payPhase2(String appId);
 }
 
 // --- 3. Repository Implementation ---
@@ -103,6 +105,37 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
       return Left(ServerFailure(
           message: response.data['error'] ??
               'Submit failed')); // 'message' -> 'error'
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> payPhase1(String appId) async {
+    try {
+      final response =
+          await _dioClient.post('/v2/applications/$appId/pay-phase1');
+      if (response.statusCode == 200 && response.data['success']) {
+        return Right(response
+            .data['data']); // Returns { transactionId, paymentUrl, qrCode }
+      }
+      return Left(
+          ServerFailure(message: response.data['error'] ?? 'Payment 1 Failed'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> payPhase2(String appId) async {
+    try {
+      final response =
+          await _dioClient.post('/v2/applications/$appId/pay-phase2');
+      if (response.statusCode == 200 && response.data['success']) {
+        return Right(response.data['data']);
+      }
+      return Left(
+          ServerFailure(message: response.data['error'] ?? 'Payment 2 Failed'));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

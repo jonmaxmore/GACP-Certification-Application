@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:mobile_app/core/providers/core_providers.dart';
+import '../../application/providers/application_provider.dart';
 
 class InspectionFormScreen extends ConsumerStatefulWidget {
   final String applicationId;
@@ -13,212 +14,149 @@ class InspectionFormScreen extends ConsumerStatefulWidget {
 }
 
 class _InspectionFormScreenState extends ConsumerState<InspectionFormScreen> {
-  int _currentStep = 0;
-  bool _isSubmitting = false;
-
-  // GACP 5 Categories
-  final Map<String, Map<String, bool?>> _checklist = {
-    '1. Site (สถานที่)': {
-      'Cleanliness (ความสะอาด)': null,
-      'Water Source (แหล่งน้ำ)': null,
-      'Waste Management (การจัดการขยะ)': null,
-    },
-    '2. Cultivation (การปลูก)': {
-      'Soil Quality (คุณภาพดิน)': null,
-      'Seeds Source (ที่มาเมล็ดพันธุ์)': null,
-      'Fertilizer Usage (การใช้ปุ๋ย)': null,
-    },
-    '3. Harvest (การเก็บเกี่ยว)': {
-      'Harvest Method (วิธีการเก็บเกี่ยว)': null,
-      'Tools Hygiene (ความสะอาดเครื่องมือ)': null,
-    },
-    '4. Processing (การแปรรูป)': {
-      'Drying Area (พื้นที่ตากแห้ง)': null,
-      'Packaging (บรรจุภัณฑ์)': null,
-    },
-    '5. Personnel (บุคลากร)': {
-      'Hygiene Training (การฝึกอบรมสุขลักษณะ)': null,
-      'Protective Gear (อุปกรณ์ป้องกัน)': null,
-    }
+  // Mock Checklist
+  final Map<String, bool> _checklist = {
+    '1. พื้นที่ปลูกปลอดภัย (Safety Area)': false,
+    '2. แหล่งน้ำสะอาด (Clean Water)': false,
+    '3. การจัดการศัตรูพืช (Pest Control)': false,
+    '4. การเก็บเกี่ยวถูกสุขลักษณะ (Harvest Hygiene)': false,
   };
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Digital Audit Form'),
-      ),
-      body: Stepper(
-        type: StepperType.vertical,
-        currentStep: _currentStep,
-        onStepContinue: () {
-          if (_currentStep < 5) {
-            setState(() => _currentStep += 1);
-          } else {
-            _submitInspection();
-          }
-        },
-        onStepCancel: () {
-          if (_currentStep > 0) {
-            setState(() => _currentStep -= 1);
-          }
-        },
-        controlsBuilder: (context, details) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: Row(
-              children: [
-                if (_currentStep < 5)
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: details.onStepContinue,
-                      child: const Text('Next'),
-                    ),
-                  ),
-                if (_currentStep == 5)
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _isSubmitting ? null : details.onStepContinue,
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green),
-                      child: _isSubmitting
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Submit Audit Result'),
-                    ),
-                  ),
-                if (_currentStep > 0) ...[
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: details.onStepCancel,
-                      child: const Text('Back'),
-                    ),
-                  ),
-                ]
-              ],
-            ),
-          );
-        },
-        steps: [
-          // Step 0: General
-          Step(
-            title: const Text('General Info'),
-            content: Column(
-              children: [
-                ListTile(
-                    title: Text('App ID: ${widget.applicationId}'),
-                    leading: const Icon(LucideIcons.fileText)),
-                ListTile(
-                    title: Text(
-                        'Date: ${DateTime.now().toString().split(' ')[0]}'),
-                    leading: const Icon(LucideIcons.calendar)),
-              ],
-            ),
-            isActive: _currentStep >= 0,
-          ),
-
-          // Steps 1-5: Categories
-          ..._checklist.entries.map((entry) {
-            int index = _checklist.keys.toList().indexOf(entry.key) + 1;
-            return Step(
-              title: Text(entry.key),
-              content: Column(
-                children: entry.value.entries.map((checkItem) {
-                  return Card(
-                    child: Column(
-                      children: [
-                        ListTile(title: Text(checkItem.key)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            TextButton.icon(
-                              icon: Icon(Icons.check_circle,
-                                  color: checkItem.value == true
-                                      ? Colors.green
-                                      : Colors.grey),
-                              label: const Text('Pass'),
-                              onPressed: () {
-                                setState(() {
-                                  entry.value[checkItem.key] = true;
-                                });
-                              },
-                            ),
-                            TextButton.icon(
-                              icon: Icon(Icons.cancel,
-                                  color: checkItem.value == false
-                                      ? Colors.red
-                                      : Colors.grey),
-                              label: const Text('Fail'),
-                              onPressed: () {
-                                setState(() {
-                                  entry.value[checkItem.key] = false;
-                                });
-                              },
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-              isActive: _currentStep >= index,
-            );
-          }).toList(),
-        ],
-      ),
-    );
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(applicationProvider.notifier)
+          .fetchApplicationById(widget.applicationId);
+    });
   }
 
-  Future<void> _submitInspection() async {
-    // Validate
-    bool allAnswered = true;
-    _checklist.forEach((cat, items) {
-      if (items.containsValue(null)) allAnswered = false;
-    });
+  Future<void> _submitResult(bool pass) async {
+    final success = await ref
+        .read(applicationProvider.notifier)
+        .submitAudit(pass: pass, notes: 'Inspection Completed via Mobile App');
 
-    if (!allAnswered) {
+    if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please complete all items!')));
-      return;
+        SnackBar(
+          content: Text(pass ? 'Certified ✅' : 'Audit Failed ❌'),
+          backgroundColor: pass ? Colors.green : Colors.red,
+        ),
+      );
+      context.pop();
     }
+  }
 
-    setState(() => _isSubmitting = true);
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(applicationProvider);
+    final app = state.currentApplication;
 
-    try {
-      final dio = ref.read(dioClientProvider);
-      // Calculate Score logic (simple average)
-      int total = 0;
-      int passed = 0;
-      _checklist.forEach((cat, items) {
-        items.forEach((k, v) {
-          total++;
-          if (v == true) passed++;
-        });
-      });
-      double score = (passed / total) * 100;
-      String result = score >= 80 ? 'PASSED' : 'FAILED';
+    // Calculate Score
+    final checkedCount = _checklist.values.where((v) => v).length;
+    final progress = checkedCount / _checklist.length;
 
-      final response = await dio
-          .post('/v2/applications/${widget.applicationId}/audit-result', data: {
-        'result': result,
-        'score': score,
-        'checklistData': _checklist.toString(),
-      });
+    return Scaffold(
+      appBar: AppBar(title: const Text('แบบประเมิน GACP (Checklist)')),
+      body: state.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : app == null
+              ? const Center(child: Text('Data Not Found'))
+              : Column(
+                  children: [
+                    // Header
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      color: Colors.blue[50],
+                      child: Row(
+                        children: [
+                          const Icon(LucideIcons.clipboardList,
+                              size: 32, color: Colors.blue),
+                          const SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                  'App ID: ${widget.applicationId.substring(0, 6)}...',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              Text('Result: ${app['status']}'),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Audit Submitted Successfully!'),
-            backgroundColor: Colors.green));
-      } else {
-        throw Exception('Failed to submit');
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red));
-    } finally {
-      if (mounted) setState(() => _isSubmitting = false);
-    }
+                    // Checklist
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: _checklist.keys.map((key) {
+                          return CheckboxListTile(
+                            title: Text(key),
+                            value: _checklist[key],
+                            onChanged: (val) {
+                              setState(() {
+                                _checklist[key] = val!;
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                    // Actions
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 4,
+                              offset: Offset(0, -2))
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          LinearProgressIndicator(
+                              value: progress, minHeight: 8),
+                          const SizedBox(height: 8),
+                          Text('${(progress * 100).toInt()}% Completed'),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () => _submitResult(false), // Fail
+                                  icon: const Icon(LucideIcons.x),
+                                  label: const Text('ไม่ผ่าน (Fail)'),
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: progress == 1.0
+                                      ? () => _submitResult(true)
+                                      : null, // Pass only if full
+                                  icon: const Icon(LucideIcons.check),
+                                  label: const Text('ผ่านการรับรอง (Certify)'),
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+    );
   }
 }

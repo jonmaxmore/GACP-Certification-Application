@@ -106,9 +106,62 @@ const service = new EstablishmentService();
  *       500:
  *         description: Server error
  */
-router.post('/', async (req, res) => {
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+
+// Configure Multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadDir = 'uploads/establishments';
+        // Create dir if not exists
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`);
+    }
+});
+
+const upload = multer({ storage });
+
+// ... (Service Logic remains same)
+
+// Routes
+// ...
+
+router.post('/', upload.single('evidence_photo'), async (req, res) => {
     try {
-        const establishment = await service.create(req.body);
+        console.log('Create Est Body:', req.body); // Debug
+        console.log('Create Est File:', req.file); // Debug
+
+        const establishmentData = { ...req.body };
+
+        // Handle file
+        if (req.file) {
+            // Convert to relative path for URL
+            const imageUrl = `/uploads/establishments/${req.file.filename}`;
+            establishmentData.images = [imageUrl];
+            establishmentData.imageUrl = imageUrl; // For backward compatibility / simplified view
+        }
+
+        // Parse coordinates if sent as string (Multipart often sends numbers as strings)
+        if (establishmentData.latitude && establishmentData.longitude) {
+            establishmentData.location = {
+                type: 'Point',
+                coordinates: [
+                    parseFloat(establishmentData.longitude),
+                    parseFloat(establishmentData.latitude)
+                ]
+            };
+            // Clean up flat fields
+            delete establishmentData.latitude;
+            delete establishmentData.longitude;
+        }
+
+        const establishment = await service.create(establishmentData);
         res.status(201).json({
             success: true,
             data: establishment

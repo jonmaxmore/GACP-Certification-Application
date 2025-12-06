@@ -16,6 +16,7 @@ const swaggerSpec = require('./config/swagger');
 
 // Import Modules
 const AuthFarmerRoutes = require('./routes/api/AuthFarmerRoutes');
+const EstablishmentRoutes = require('./modules/Establishment');
 const v2Routes = require('./routes/v2');
 
 const app = express();
@@ -50,6 +51,8 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Mount Routes
 app.use('/api/auth-farmer', AuthFarmerRoutes);
+app.use('/api/establishments', EstablishmentRoutes); // Fix 404
+app.use('/api/v2/establishments', EstablishmentRoutes); // Dual mount for V2 compatibility
 app.use('/api/v2', v2Routes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

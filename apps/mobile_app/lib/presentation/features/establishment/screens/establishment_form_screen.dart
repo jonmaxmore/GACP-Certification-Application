@@ -21,9 +21,22 @@ class _EstablishmentFormScreenState
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
-  String _selectedType = 'Cultivation';
 
-  final List<String> _types = ['Cultivation', 'Processing', 'Distribution'];
+  // Mapping Display Text (Thai) -> Backend Value
+  final Map<String, String> _typeMap = {
+    'เพาะปลูก (Cultivation)': 'farm',
+    'แปรรูป (Processing)': 'processing',
+    'จำหน่าย (Distribution)': 'shop',
+  };
+
+  late String _selectedType;
+
+  @override
+  void initState() {
+    super.initState();
+    // Default to first value
+    _selectedType = _typeMap.values.first;
+  }
 
   @override
   void dispose() {
@@ -47,9 +60,11 @@ class _EstablishmentFormScreenState
             LatLng(position.latitude, position.longitude),
           );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error getting location: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('เกิดข้อผิดพลาดในการดึงตำแหน่ง: $e')),
+        );
+      }
     }
   }
 
@@ -70,7 +85,7 @@ class _EstablishmentFormScreenState
     ref.listen(establishmentProvider, (previous, next) {
       if (next.isSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Establishment created successfully!')),
+          const SnackBar(content: Text('บันทึกข้อมูลแปลงปลูกสำเร็จ!')),
         );
         Navigator.pop(context);
         notifier.resetForm();
@@ -83,7 +98,7 @@ class _EstablishmentFormScreenState
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('New Establishment')),
+      appBar: AppBar(title: const Text('ลงทะเบียนแปลงปลูก')),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -97,25 +112,28 @@ class _EstablishmentFormScreenState
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
-                        labelText: 'Establishment Name',
+                        labelText: 'ชื่อแปลงปลูก / สถานที่',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(LucideIcons.building),
                       ),
-                      validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                      validator: (v) =>
+                          v?.isEmpty == true ? 'กรุณาระบุข้อมูล' : null,
                     ),
                     const SizedBox(height: 16),
 
-                    // Type
+                    // Type Dropdown (Thai)
                     DropdownButtonFormField<String>(
                       initialValue: _selectedType,
                       decoration: const InputDecoration(
-                        labelText: 'Type',
+                        labelText: 'ประเภท',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(LucideIcons.tag),
                       ),
-                      items: _types
-                          .map(
-                              (t) => DropdownMenuItem(value: t, child: Text(t)))
+                      items: _typeMap.entries
+                          .map((e) => DropdownMenuItem(
+                                value: e.value,
+                                child: Text(e.key),
+                              ))
                           .toList(),
                       onChanged: (v) => setState(() => _selectedType = v!),
                     ),
@@ -125,22 +143,23 @@ class _EstablishmentFormScreenState
                     TextFormField(
                       controller: _addressController,
                       decoration: const InputDecoration(
-                        labelText: 'Address',
+                        labelText: 'ที่อยู่',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(LucideIcons.mapPin),
                       ),
                       maxLines: 2,
-                      validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                      validator: (v) =>
+                          v?.isEmpty == true ? 'กรุณาระบุข้อมูล' : null,
                     ),
                     const SizedBox(height: 24),
 
                     // Location Map
-                    const Text('Location',
+                    const Text('ตำแหน่งพิกัด (ปักหมุด)',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     Container(
-                      height: 200,
+                      height: 300,
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey),
                         borderRadius: BorderRadius.circular(8),
@@ -150,15 +169,22 @@ class _EstablishmentFormScreenState
                               child: TextButton.icon(
                                 onPressed: _getCurrentLocation,
                                 icon: const Icon(LucideIcons.locate),
-                                label: const Text('Get Current Location'),
+                                label: const Text('ค้นหาตำแหน่งปัจจุบัน'),
                               ),
                             )
                           : Stack(
                               children: [
                                 FlutterMap(
+                                  // Use Key to prevent unnecessary full-map rebuilds if possible
+                                  key: ValueKey(state.selectedLocation),
                                   options: MapOptions(
                                     initialCenter: state.selectedLocation!,
                                     initialZoom: 15,
+                                    onTap: (tapPosition, point) {
+                                      ref
+                                          .read(establishmentProvider.notifier)
+                                          .setLocation(point);
+                                    },
                                   ),
                                   children: [
                                     TileLayer(
@@ -183,6 +209,7 @@ class _EstablishmentFormScreenState
                                   right: 8,
                                   bottom: 8,
                                   child: FloatingActionButton.small(
+                                    heroTag: 'locate_btn',
                                     onPressed: _getCurrentLocation,
                                     child: const Icon(LucideIcons.locate),
                                   ),
@@ -193,7 +220,7 @@ class _EstablishmentFormScreenState
                     const SizedBox(height: 24),
 
                     // Image Picker
-                    const Text('Evidence Photo',
+                    const Text('รูปถ่ายประกอบ',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
@@ -223,7 +250,7 @@ class _EstablishmentFormScreenState
                             child: OutlinedButton.icon(
                               onPressed: () => _pickImage(ImageSource.camera),
                               icon: const Icon(LucideIcons.camera),
-                              label: const Text('Camera'),
+                              label: const Text('กล้องถ่ายรูป'),
                               style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.all(16)),
                             ),
@@ -233,7 +260,7 @@ class _EstablishmentFormScreenState
                             child: OutlinedButton.icon(
                               onPressed: () => _pickImage(ImageSource.gallery),
                               icon: const Icon(LucideIcons.image),
-                              label: const Text('Gallery'),
+                              label: const Text('อัลบั้มภาพ'),
                               style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.all(16)),
                             ),
@@ -249,7 +276,8 @@ class _EstablishmentFormScreenState
                         if (_formKey.currentState!.validate()) {
                           notifier.createEstablishment(
                             name: _nameController.text,
-                            type: _selectedType,
+                            type:
+                                _selectedType, // Sends 'farm', 'processing', etc.
                             address: _addressController.text,
                           );
                         }
@@ -259,7 +287,7 @@ class _EstablishmentFormScreenState
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.all(16),
                       ),
-                      child: const Text('Submit Establishment'),
+                      child: const Text('บันทึกข้อมูล'),
                     ),
                   ],
                 ),

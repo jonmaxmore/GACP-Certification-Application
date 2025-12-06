@@ -54,10 +54,9 @@ module.exports = {
     },
     VALIDATION: {
         REQUIRED_DOCUMENTS: [
-            'application_form',
-            'farm_management_plan',
-            'cultivation_records',
-            'land_rights_certificate',
+            'sop_manual',
+            'production_plan',
+            'land_title_deed',
         ],
     },
 };

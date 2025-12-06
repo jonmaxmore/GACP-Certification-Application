@@ -12,6 +12,8 @@ import '../../presentation/features/auditor/screens/my_assignments_screen.dart';
 import '../../presentation/features/auditor/screens/inspection_form_screen.dart';
 import '../../presentation/features/auditor/screens/auditor_dashboard_screen.dart';
 import '../../presentation/features/admin/screens/application_detail_screen.dart';
+import '../../presentation/features/application/screens/application_form_screen.dart';
+import '../../presentation/features/application/screens/notification_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -31,7 +33,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) {
           // Check if we are in admin mode
           if (state.fullPath?.startsWith('/admin') ?? false) {
-            return AdminDashboardScreen(child: child);
+            return AdminShell(child: child); // Use new Shell
           }
           return AppShell(child: child);
         },
@@ -39,7 +41,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           // Admin Dashboard Routes
           GoRoute(
             path: '/admin/dashboard',
-            builder: (context, state) => const DashboardOverview(),
+            builder: (context, state) =>
+                const DashboardOverview(), // Correct Widget from admin_dashboard_screen.dart
           ),
           GoRoute(
             path: '/admin/tasks',
@@ -57,6 +60,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/dashboard',
             builder: (context, state) => const DashboardScreen(),
+          ),
+          GoRoute(
+            path: '/applications/new',
+            builder: (context, state) => const ApplicationFormScreen(),
+          ),
+          GoRoute(
+            path: '/notifications',
+            builder: (context, state) => const NotificationScreen(),
+          ),
+          GoRoute(
+            path: '/applications',
+            redirect: (context, state) => '/applications/new',
           ),
           GoRoute(
             path: '/establishments',
@@ -104,3 +119,38 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+// Simple Admin Shell for Layout
+class AdminShell extends StatelessWidget {
+  final Widget child;
+  const AdminShell({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          NavigationRail(
+            selectedIndex: 0,
+            onDestinationSelected: (int index) {
+              // Navigation logic here
+            },
+            labelType: NavigationRailLabelType.all,
+            destinations: const [
+              NavigationRailDestination(
+                icon: Icon(Icons.dashboard),
+                label: Text('Dashboard'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.list),
+                label: Text('Applications'),
+              ),
+            ],
+          ),
+          const VerticalDivider(thickness: 1, width: 1),
+          Expanded(child: child),
+        ],
+      ),
+    );
+  }
+}

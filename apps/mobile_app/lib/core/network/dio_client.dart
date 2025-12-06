@@ -10,8 +10,9 @@ class DioClient {
   static String get _baseUrl {
     if (kIsWeb) return 'http://localhost:5000/api';
     try {
-      if (defaultTargetPlatform == TargetPlatform.android)
+      if (defaultTargetPlatform == TargetPlatform.android) {
         return 'http://10.0.2.2:5000/api';
+      }
     } catch (_) {}
     return 'http://localhost:5000/api'; // iOS / Desktop / Fallback
   }

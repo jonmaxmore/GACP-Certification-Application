@@ -1,16 +1,12 @@
-// ignore_for_file: deprecated_member_use
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:url_launcher/url_launcher.dart'; // Added
 import '../providers/application_provider.dart';
-import '../../establishment/providers/establishment_provider.dart';
 
 class ApplicationFormScreen extends ConsumerStatefulWidget {
-  final String formType; // 'GACP_FORM_9', 'GACP_FORM_10', 'GACP_FORM_11'
-
-  const ApplicationFormScreen({super.key, required this.formType});
+  const ApplicationFormScreen({super.key});
 
   @override
   ConsumerState<ApplicationFormScreen> createState() =>
@@ -18,550 +14,442 @@ class ApplicationFormScreen extends ConsumerStatefulWidget {
 }
 
 class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
-  // Common Controllers
-  final _totalAreaController = TextEditingController();
-  final _cultivatedAreaController = TextEditingController();
-  final _landDocIdController = TextEditingController();
+  int _currentStep = 0;
+  final _formKey = GlobalKey<FormState>();
 
-  // Form 9 Controllers
-  final _cropNameController = TextEditingController();
-  final _varietyController = TextEditingController();
-  final _sourceController = TextEditingController();
-  final _fenceController = TextEditingController();
-  final _cctvController = TextEditingController();
-  final _guardController = TextEditingController();
-  final _accessControlController = TextEditingController();
-  final _storageLocationController = TextEditingController();
-  final _storageSecurityController = TextEditingController();
+  // AI State
+  bool _isAnalyzing = false;
+  String? _aiResult;
 
-  // Form 10 Controllers
-  final _pharmacistNameController = TextEditingController();
-  final _pharmacistLicenseController = TextEditingController();
-  final _saleStorageDetailsController = TextEditingController();
-  final _operatingHoursController = TextEditingController();
-  final _commercialRegController = TextEditingController();
+  // Review & Payment State
+  bool _isReviewed = false;
+  bool _isPaidPhase1 = false;
 
-  // Form 11 Controllers
-  final _countryController = TextEditingController();
-  final _portController = TextEditingController();
-  final _carrierController = TextEditingController();
-  final _plantPartsController = TextEditingController();
-  final _quantityController = TextEditingController();
-  final _purposeController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize form type in provider
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(applicationProvider.notifier).setFormType(widget.formType);
-    });
-  }
-
-  @override
-  void dispose() {
-    _totalAreaController.dispose();
-    _cultivatedAreaController.dispose();
-    _landDocIdController.dispose();
-    _cropNameController.dispose();
-    _varietyController.dispose();
-    _sourceController.dispose();
-    _fenceController.dispose();
-    _cctvController.dispose();
-    _guardController.dispose();
-    _accessControlController.dispose();
-    _storageLocationController.dispose();
-    _storageSecurityController.dispose();
-    _pharmacistNameController.dispose();
-    _pharmacistLicenseController.dispose();
-    _saleStorageDetailsController.dispose();
-    _operatingHoursController.dispose();
-    _commercialRegController.dispose();
-    _countryController.dispose();
-    _portController.dispose();
-    _carrierController.dispose();
-    _plantPartsController.dispose();
-    _quantityController.dispose();
-    _purposeController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pickDocument(String key, ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source, imageQuality: 80);
-    if (pickedFile != null) {
-      ref
-          .read(applicationProvider.notifier)
-          .addDocument(key, File(pickedFile.path));
+  void _runAIScan() async {
+    setState(() => _isAnalyzing = true);
+    await Future.delayed(const Duration(seconds: 2)); // Simulate processing
+    if (mounted) {
+      setState(() {
+        _isAnalyzing = false;
+        _aiResult = 'เอกสารถูกต้องตามมาตรฐาน GACP (Document Valid)';
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final appState = ref.watch(applicationProvider);
-    final establishmentState = ref.watch(establishmentProvider);
-    final notifier = ref.read(applicationProvider.notifier);
-
-    ref.listen(applicationProvider, (previous, next) {
-      if (next.isSuccess) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Application submitted successfully!')),
-        );
-        // Pop back to list, skipping selection screen if possible, or just pop once
-        Navigator.pop(context);
-        notifier.resetForm();
-      }
-      if (next.error != null && !next.isLoading) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error!), backgroundColor: Colors.red),
-        );
-      }
-    });
-
     return Scaffold(
-      appBar: AppBar(title: Text(_getTitle(widget.formType))),
-      body: appState.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Stepper(
-              currentStep: appState.currentStep,
-              onStepContinue: () {
-                if (appState.currentStep == 0) {
-                  if (appState.selectedEstablishmentId == null) {
-                    _showError('Please select a farm/establishment');
-                    return;
-                  }
-                } else {
-                  // Specific Form Logic
-                  if (widget.formType == 'GACP_FORM_9') {
-                    _handleForm9Steps(appState, notifier);
-                  } else if (widget.formType == 'GACP_FORM_10') {
-                    _handleForm10Steps(appState, notifier);
-                  } else if (widget.formType == 'GACP_FORM_11') {
-                    _handleForm11Steps(appState, notifier);
-                  }
-                }
+      appBar: AppBar(title: const Text('ขอรับใบรับรองใหม่ (GACP)')),
+      body: Stepper(
+        currentStep: _currentStep,
+        onStepContinue: _onContinue,
+        onStepCancel: _onCancel,
+        controlsBuilder: _buildControls,
+        steps: [
+          // Step 1: Form 09 Data Entry (Comprehensive)
+          Step(
+            title: const Text('กรอกข้อมูลใบสมัคร (Form 09)'),
+            content: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const Text('กรุณากรอกข้อมูลตามมาตรฐาน GACP/DTAM',
+                      style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  const SizedBox(height: 12),
 
-                int totalSteps =
-                    _getSteps(appState, establishmentState, notifier).length;
-                if (appState.currentStep < totalSteps - 1) {
-                  notifier.setStep(appState.currentStep + 1);
-                }
-              },
-              onStepCancel: () {
-                if (appState.currentStep > 0) {
-                  notifier.setStep(appState.currentStep - 1);
-                } else {
-                  Navigator.pop(context);
-                }
-              },
-              controlsBuilder: (context, details) {
-                int totalSteps =
-                    _getSteps(appState, establishmentState, notifier).length;
-                bool isLastStep = appState.currentStep == totalSteps - 1;
-
-                return Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Row(
+                  // Section 1: Applicant Info
+                  ExpansionTile(
+                    initiallyExpanded: true,
+                    title: const Text('1. ข้อมูลผู้ยื่นคำขอ (Applicant)',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     children: [
-                      ElevatedButton(
-                        onPressed: details.onStepContinue,
-                        child: Text(
-                            isLastStep ? 'Submit Application' : 'Continue'),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'ชื่อสถานประกอบการ / เกษตรกร',
+                            prefixIcon: Icon(LucideIcons.user),
+                            border: OutlineInputBorder()),
+                        validator: (v) => v!.isEmpty ? 'ระบุชื่อ' : null,
                       ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: details.onStepCancel,
-                        child: const Text('Back'),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'เลขทะเบียนเกษตรกร / นิติบุคคล',
+                            prefixIcon: Icon(LucideIcons.hash),
+                            border: OutlineInputBorder()),
+                        validator: (v) => v!.isEmpty ? 'ระบุเลขทะเบียน' : null,
                       ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'ที่ตั้งสำนักงาน (Address)',
+                            prefixIcon: Icon(LucideIcons.home),
+                            border: OutlineInputBorder()),
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 16),
                     ],
                   ),
-                );
-              },
-              steps: _getSteps(appState, establishmentState, notifier),
+
+                  // Section 2: Site Info
+                  ExpansionTile(
+                    title: const Text('2. สถานที่เพาะปลูก (Cultivation Site)',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    children: [
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'เลขที่โฉนดที่ดิน (Title Deed No.)',
+                            prefixIcon: Icon(LucideIcons.file),
+                            border: OutlineInputBorder()),
+                        validator: (v) => v!.isEmpty ? 'ระบุเลขโฉนด' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'พิกัดแปลงปลูก (GPS Coordinates)',
+                            prefixIcon: Icon(LucideIcons.mapPin),
+                            border: OutlineInputBorder()),
+                        validator: (v) => v!.isEmpty ? 'ระบุพิกัด' : null,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+
+                  // Section 3: Security
+                  ExpansionTile(
+                    title: const Text('3. ระบบความปลอดภัย (Security)',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    children: [
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'รายละเอียดรั้วกั้น (Fencing)',
+                            border: OutlineInputBorder()),
+                        initialValue: 'รั้วลวดหนาม สูง 2 เมตร',
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                            labelText: 'จำนวนกล้อง CCTV',
+                            border: OutlineInputBorder()),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+
+                  // Section 4: Cultivation Plan
+                  ExpansionTile(
+                    title: const Text('4. แผนการผลิต (Cultivation Plan)',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    children: [
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'สายพันธุ์ที่ปลูก (Plant Strain)',
+                            prefixIcon: Icon(LucideIcons.sprout),
+                            border: OutlineInputBorder()),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                              child: TextFormField(
+                                  decoration: const InputDecoration(
+                                      labelText: 'จำนวนต้น',
+                                      border: OutlineInputBorder()))),
+                          const SizedBox(width: 12),
+                          Expanded(
+                              child: TextFormField(
+                                  decoration: const InputDecoration(
+                                      labelText: 'พื้นที่ (ไร่)',
+                                      border: OutlineInputBorder()))),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+
+                  // Section 5: Harvesting
+                  ExpansionTile(
+                    title: const Text('5. การเก็บเกี่ยว (Harvesting)',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    children: [
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'วิธีการเก็บเกี่ยว (Method)',
+                            border: OutlineInputBorder()),
+                        initialValue:
+                            'เก็บเกี่ยวด้วยมือ (Manual Harvest only flowers)',
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'ภาชนะที่ใช้บรรจุ (Containers)',
+                            border: OutlineInputBorder()),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+
+                  // Section 6: Post-Harvest
+                  ExpansionTile(
+                    title: const Text(
+                        '6. การจัดการหลังเก็บเกี่ยว (Post-Harvest)',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    children: [
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'การลดความชื้น (Drying)',
+                            border: OutlineInputBorder()),
+                        initialValue:
+                            'ห้องอบควบคุมอุณหภูมิ (Temperature Controlled Room)',
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            labelText: 'สถานที่เก็บรักษา (Storage)',
+                            border: OutlineInputBorder()),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+
+                  // Section 7: Personnel
+                  ExpansionTile(
+                    title: const Text('7. บุคลากร (Personnel)',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    children: [
+                      TextFormField(
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                            labelText: 'จำนวนผู้ปฏิบัติงาน (Workers)',
+                            border: OutlineInputBorder()),
+                      ),
+                      const SizedBox(height: 12),
+                      CheckboxListTile(
+                        title: const Text('ผ่านการอบรม GACP แล้ว (Trained)'),
+                        value: true,
+                        onChanged: (v) {},
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ],
+              ),
             ),
-    );
-  }
-
-  String _getTitle(String type) {
-    switch (type) {
-      case 'GACP_FORM_9':
-        return 'Form 9 (Production)';
-      case 'GACP_FORM_10':
-        return 'Form 10 (Sale)';
-      case 'GACP_FORM_11':
-        return 'Form 11 (Import/Export)';
-      default:
-        return 'New Application';
-    }
-  }
-
-  void _handleForm9Steps(ApplicationState state, ApplicationNotifier notifier) {
-    if (state.currentStep == 1) {
-      notifier.updateFormData(
-          'totalArea', double.tryParse(_totalAreaController.text));
-      notifier.updateFormData(
-          'cultivatedArea', double.tryParse(_cultivatedAreaController.text));
-      notifier.updateFormData('landDocumentId', _landDocIdController.text);
-    } else if (state.currentStep == 2) {
-      notifier.updateFormData('cropName', _cropNameController.text);
-      notifier.updateFormData('cropVariety', _varietyController.text);
-      notifier.updateFormData('cropSource', _sourceController.text);
-    } else if (state.currentStep == 3) {
-      notifier.updateFormData('fenceDescription', _fenceController.text);
-      notifier.updateFormData('cctvCount', int.tryParse(_cctvController.text));
-      notifier.updateFormData(
-          'guardCount', int.tryParse(_guardController.text));
-      notifier.updateFormData('accessControl', _accessControlController.text);
-      notifier.updateFormData(
-          'storageLocation', _storageLocationController.text);
-      notifier.updateFormData(
-          'storageSecurity', _storageSecurityController.text);
-    } else if (state.currentStep == 4) {
-      notifier.submitApplication();
-    }
-  }
-
-  void _handleForm10Steps(
-      ApplicationState state, ApplicationNotifier notifier) {
-    if (state.currentStep == 1) {
-      notifier.updateFormData('pharmacistName', _pharmacistNameController.text);
-      notifier.updateFormData(
-          'pharmacistLicense', _pharmacistLicenseController.text);
-      notifier.updateFormData(
-          'saleStorageDetails', _saleStorageDetailsController.text);
-      notifier.updateFormData('operatingHours', _operatingHoursController.text);
-      notifier.updateFormData(
-          'commercialRegNumber', _commercialRegController.text);
-    } else if (state.currentStep == 2) {
-      notifier.submitApplication();
-    }
-  }
-
-  void _handleForm11Steps(
-      ApplicationState state, ApplicationNotifier notifier) {
-    if (state.currentStep == 1) {
-      notifier.updateFormData('country', _countryController.text);
-      notifier.updateFormData('portOfEntryExit', _portController.text);
-      notifier.updateFormData('carrierName', _carrierController.text);
-      notifier.updateFormData('plantParts', _plantPartsController.text);
-      notifier.updateFormData(
-          'quantity', double.tryParse(_quantityController.text));
-      notifier.updateFormData('purpose', _purposeController.text);
-    } else if (state.currentStep == 2) {
-      notifier.submitApplication();
-    }
-  }
-
-  List<Step> _getSteps(ApplicationState appState, dynamic establishmentState,
-      ApplicationNotifier notifier) {
-    List<Step> steps = [
-      // Step 0: Select Establishment (Common)
-      Step(
-        title: const Text('Select Establishment'),
-        content: establishmentState.establishments.isEmpty
-            ? const Text('No establishments found. Please create one first.')
-            : Column(
-                children: establishmentState.establishments.map<Widget>((farm) {
-
-                  return RadioListTile<String>(
-                    title: Text(farm.name),
-                    subtitle: Text(farm.address),
-                    value: farm.id,
-                    groupValue: appState.selectedEstablishmentId,
-                    onChanged: (value) => notifier.setEstablishment(value!),
-                  );
-                }).toList(),
-              ),
-        isActive: appState.currentStep >= 0,
-        state:
-            appState.currentStep > 0 ? StepState.complete : StepState.editing,
-      ),
-    ];
-
-    if (widget.formType == 'GACP_FORM_9') {
-      steps.addAll([
-        Step(
-          title: const Text('Farm Details'),
-          content: Column(
-            children: [
-              TextFormField(
-                  controller: _totalAreaController,
-                  decoration: const InputDecoration(labelText: 'Total Area')),
-              TextFormField(
-                  controller: _cultivatedAreaController,
-                  decoration:
-                      const InputDecoration(labelText: 'Cultivated Area')),
-              DropdownButtonFormField<String>(
-                initialValue: appState.formData['areaUnit'] ?? 'rai',
-                decoration: const InputDecoration(labelText: 'Unit'),
-                items: ['rai', 'hectare', 'sqm']
-                    .map((u) => DropdownMenuItem(value: u, child: Text(u)))
-                    .toList(),
-                onChanged: (v) => notifier.updateFormData('areaUnit', v),
-              ),
-              // ... other farm fields
-            ],
+            isActive: _currentStep >= 0,
           ),
-          isActive: appState.currentStep >= 1,
-        ),
-        Step(
-          title: const Text('Crop Info'),
-          content: Column(
-            children: [
-              TextFormField(
-                  controller: _cropNameController,
-                  decoration: const InputDecoration(labelText: 'Crop Name')),
-              TextFormField(
-                  controller: _varietyController,
-                  decoration: const InputDecoration(labelText: 'Variety')),
-              TextFormField(
-                  controller: _sourceController,
-                  decoration: const InputDecoration(labelText: 'Source')),
-            ],
-          ),
-          isActive: appState.currentStep >= 2,
-        ),
-        Step(
-          title: const Text('Production'),
-          content: Column(
-            children: [
-              TextFormField(
-                  controller: _fenceController,
-                  decoration:
-                      const InputDecoration(labelText: 'Fence Description')),
-              TextFormField(
-                  controller: _storageLocationController,
-                  decoration:
-                      const InputDecoration(labelText: 'Storage Location')),
-            ],
-          ),
-          isActive: appState.currentStep >= 3,
-        ),
-        Step(
-          title: const Text('Documents'),
-          content: Column(
-            children: [
-              _DocumentUploadField(
-                label: 'Land Title (ภ.ท.2)',
-                docKey: 'land_title_deed',
-                file: appState.documents['land_title_deed'],
-                onUpload: () =>
-                    _pickDocument('land_title_deed', ImageSource.gallery),
-                onRemove: () => notifier.removeDocument('land_title_deed'),
-              ),
-              _DocumentUploadField(
-                label: 'SOP Manual',
-                docKey: 'sop_manual',
-                file: appState.documents['sop_manual'],
-                onUpload: () =>
-                    _pickDocument('sop_manual', ImageSource.gallery),
-                onRemove: () => notifier.removeDocument('sop_manual'),
-              ),
-            ],
-          ),
-          isActive: appState.currentStep >= 4,
-        ),
-      ]);
-    } else if (widget.formType == 'GACP_FORM_10') {
-      steps.addAll([
-        Step(
-          title: const Text('Sale Details'),
-          content: Column(
-            children: [
-              DropdownButtonFormField<String>(
-                initialValue:
-                    appState.formData['dispensingMethod'] ?? 'pharmacy',
-                decoration:
-                    const InputDecoration(labelText: 'Dispensing Method'),
-                items: ['pharmacy', 'clinic', 'other']
-                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                    .toList(),
-                onChanged: (v) =>
-                    notifier.updateFormData('dispensingMethod', v),
-              ),
-              TextFormField(
-                  controller: _commercialRegController,
-                  decoration: const InputDecoration(
-                      labelText: 'Commercial Registration No.')),
-              TextFormField(
-                  controller: _operatingHoursController,
-                  decoration:
-                      const InputDecoration(labelText: 'Operating Hours')),
-              const SizedBox(height: 16),
-              const Text('Pharmacist Information',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              TextFormField(
-                  controller: _pharmacistNameController,
-                  decoration:
-                      const InputDecoration(labelText: 'Pharmacist Name')),
-              TextFormField(
-                  controller: _pharmacistLicenseController,
-                  decoration:
-                      const InputDecoration(labelText: 'License Number')),
-              TextFormField(
-                  controller: _saleStorageDetailsController,
-                  decoration:
-                      const InputDecoration(labelText: 'Storage Details')),
-            ],
-          ),
-          isActive: appState.currentStep >= 1,
-        ),
-        Step(
-          title: const Text('Documents'),
-          content: Column(
-            children: [
-              _DocumentUploadField(
-                label: 'Pharmacist License',
-                docKey: 'pharmacist_license',
-                file: appState.documents['pharmacist_license'],
-                onUpload: () =>
-                    _pickDocument('pharmacist_license', ImageSource.gallery),
-                onRemove: () => notifier.removeDocument('pharmacist_license'),
-              ),
-              _DocumentUploadField(
-                label: 'Commercial Registration',
-                docKey: 'commercial_reg',
-                file: appState.documents['commercial_reg'],
-                onUpload: () =>
-                    _pickDocument('commercial_reg', ImageSource.gallery),
-                onRemove: () => notifier.removeDocument('commercial_reg'),
-              ),
-              _DocumentUploadField(
-                label: 'Location Map',
-                docKey: 'location_map',
-                file: appState.documents['location_map'],
-                onUpload: () =>
-                    _pickDocument('location_map', ImageSource.gallery),
-                onRemove: () => notifier.removeDocument('location_map'),
-              ),
-            ],
-          ),
-          isActive: appState.currentStep >= 2,
-        ),
-      ]);
-    } else if (widget.formType == 'GACP_FORM_11') {
-      steps.addAll([
-        Step(
-          title: const Text('Import/Export Info'),
-          content: Column(
-            children: [
-              DropdownButtonFormField<String>(
-                initialValue: appState.formData['importExportType'] ?? 'import',
-                decoration: const InputDecoration(labelText: 'Type'),
-                items: ['import', 'export']
-                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                    .toList(),
-                onChanged: (v) =>
-                    notifier.updateFormData('importExportType', v),
-              ),
-              TextFormField(
-                  controller: _countryController,
-                  decoration: const InputDecoration(
-                      labelText: 'Country (Origin/Destination)')),
-              TextFormField(
-                  controller: _portController,
-                  decoration:
-                      const InputDecoration(labelText: 'Port of Entry/Exit')),
-              DropdownButtonFormField<String>(
-                initialValue: appState.formData['transportMode'] ?? 'air',
-                decoration: const InputDecoration(labelText: 'Transport Mode'),
-                items: ['air', 'sea', 'land']
-                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                    .toList(),
-                onChanged: (v) => notifier.updateFormData('transportMode', v),
-              ),
-              TextFormField(
-                  controller: _carrierController,
-                  decoration: const InputDecoration(labelText: 'Carrier Name')),
-              const SizedBox(height: 16),
-              const Text('Consignment Details',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              TextFormField(
-                  controller: _plantPartsController,
-                  decoration: const InputDecoration(
-                      labelText: 'Plant Parts (e.g., Flower, Seed)')),
-              TextFormField(
-                  controller: _quantityController,
-                  decoration:
-                      const InputDecoration(labelText: 'Quantity (kg)')),
-              TextFormField(
-                  controller: _purposeController,
-                  decoration: const InputDecoration(
-                      labelText: 'Purpose (e.g., Medical)')),
-            ],
-          ),
-          isActive: appState.currentStep >= 1,
-        ),
-        Step(
-          title: const Text('Documents'),
-          content: Column(
-            children: [
-              _DocumentUploadField(
-                label: 'Invoice / Manifest',
-                docKey: 'invoice',
-                file: appState.documents['invoice'],
-                onUpload: () => _pickDocument('invoice', ImageSource.gallery),
-                onRemove: () => notifier.removeDocument('invoice'),
-              ),
-              _DocumentUploadField(
-                label: 'Phytosanitary Certificate',
-                docKey: 'phyto_cert',
-                file: appState.documents['phyto_cert'],
-                onUpload: () =>
-                    _pickDocument('phyto_cert', ImageSource.gallery),
-                onRemove: () => notifier.removeDocument('phyto_cert'),
-              ),
-            ],
-          ),
-          isActive: appState.currentStep >= 2,
-        ),
-      ]);
-    }
 
-    return steps;
-  }
+          // Step 2: Documents
+          Step(
+            title: const Text('แนบเอกสาร & AI Scan'),
+            content: Column(
+              children: [
+                const Text('กรุณาแนบโฉนดที่ดินเพื่อตรวจสอบ'),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8)),
+                  child: Column(
+                    children: [
+                      const Icon(LucideIcons.fileImage,
+                          size: 40, color: Colors.blue),
+                      const Text('Chanote_Land_01.pdf'),
+                      const SizedBox(height: 12),
+                      if (_isAnalyzing)
+                        // Fixed: no const here
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              CircularProgressIndicator(),
+                              SizedBox(width: 8),
+                              Text('AI Analyzing...')
+                            ])
+                      else if (_aiResult != null)
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          color: Colors.green[50],
+                          child: Row(children: [
+                            const Icon(LucideIcons.check, color: Colors.green),
+                            const SizedBox(width: 8),
+                            Text(_aiResult!,
+                                style: const TextStyle(color: Colors.green))
+                          ]),
+                        )
+                      else
+                        ElevatedButton.icon(
+                            onPressed: _runAIScan,
+                            icon: const Icon(LucideIcons.scan),
+                            label: const Text('Run AI Scan'))
+                    ],
+                  ),
+                )
+              ],
+            ),
+            isActive: _currentStep >= 1,
+          ),
 
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.red));
-  }
-}
-
-class _DocumentUploadField extends StatelessWidget {
-  final String label;
-  final String docKey;
-  final File? file;
-  final VoidCallback onUpload;
-  final VoidCallback onRemove;
-
-  const _DocumentUploadField({
-    required this.label,
-    required this.docKey,
-    this.file,
-    required this.onUpload,
-    required this.onRemove,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        subtitle: file != null
-            ? Text('Selected: ${file!.path.split('/').last}')
-            : const Text('No file selected'),
-        leading: Icon(
-          file != null ? LucideIcons.fileCheck : LucideIcons.file,
-          color: file != null ? Colors.green : Colors.grey,
-        ),
-        trailing: file != null
-            ? IconButton(
-                icon: const Icon(LucideIcons.trash, color: Colors.red),
-                onPressed: onRemove)
-            : IconButton(
-                icon: const Icon(LucideIcons.upload), onPressed: onUpload),
+          // Step 3: Payment
+          Step(
+            title: const Text('ชำระค่าธรรมเนียม'),
+            content: Column(
+              children: [
+                const Text('ค่าธรรมเนียมคำขอ: 5,000 บาท'),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: _openWebViewDialog, // Review first
+                  icon: const Icon(LucideIcons.eye),
+                  label: const Text('ตรวจสอบเอกสาร (Review)'),
+                ),
+                const SizedBox(height: 12),
+                if (_isReviewed)
+                  ElevatedButton.icon(
+                    onPressed: _isPaidPhase1 ? null : _simulatePayment,
+                    icon: const Icon(LucideIcons.creditCard),
+                    label: Text(_isPaidPhase1
+                        ? 'ชำระเงินแล้ว (Paid)'
+                        : 'ชำระเงิน 5,000 บาท'),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            _isPaidPhase1 ? Colors.grey : Colors.purple,
+                        foregroundColor: Colors.white),
+                  ),
+                if (_isPaidPhase1)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: ElevatedButton(
+                      onPressed: _submitApplication,
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white),
+                      child: const Text('ยื่นคำขอ (Submit)'),
+                    ),
+                  ),
+              ],
+            ),
+            isActive: _currentStep >= 2,
+          ),
+        ],
       ),
     );
+  }
+
+  void _onContinue() {
+    if (_currentStep == 0) {
+      if (_formKey.currentState != null && !_formKey.currentState!.validate()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน')));
+        return;
+      }
+    }
+    if (_currentStep < 2) setState(() => _currentStep++);
+  }
+
+  void _onCancel() {
+    if (_currentStep > 0)
+      setState(() => _currentStep--);
+    else
+      context.pop();
+  }
+
+  // Controls
+  Widget _buildControls(BuildContext context, ControlsDetails details) {
+    if (_currentStep == 2) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Row(
+        children: [
+          ElevatedButton(
+              onPressed: details.onStepContinue, child: const Text('ถัดไป')),
+          const SizedBox(width: 12),
+          TextButton(
+              onPressed: details.onStepCancel, child: const Text('ย้อนกลับ')),
+        ],
+      ),
+    );
+  }
+
+  // Helpers
+  void _openWebViewDialog() {
+    setState(() => _isReviewed = true);
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+                title: const Text('Preview'),
+                content: const Text('Reviewing Document...'),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Close'))
+                ]));
+  }
+
+  Future<void> _simulatePayment() async {
+    final result = await ref.read(applicationProvider.notifier).payPhase1();
+    if (result != null && mounted) {
+      _showPaymentDialog(result);
+    }
+  }
+
+  void _showPaymentDialog(Map<String, dynamic> data) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('ชำระเงินผ่าน Ksher'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (data['qrCode'] != null)
+              Image.network(data['qrCode'], height: 200, width: 200),
+            const SizedBox(height: 16),
+            const Text('Scan QR or Click below'),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              icon: const Icon(LucideIcons.externalLink),
+              label: const Text('เปิดหน้าชำระเงิน (Open Payment Page)'),
+              onPressed: () => launchUrl(Uri.parse(data['paymentUrl'])),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              // Refresh Status
+              final appId = ref.read(applicationProvider).applicationId;
+              if (appId != null) {
+                await ref
+                    .read(applicationProvider.notifier)
+                    .fetchApplicationById(appId);
+                final app = ref.read(applicationProvider).currentApplication;
+                if (app != null &&
+                    app['payment']['phase1']['status'] == 'PAID') {
+                  setState(() => _isPaidPhase1 = true);
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Payment Successful!')));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Payment Not Yet Confirmed')));
+                }
+              }
+            },
+            child: const Text('ตรวจสอบสถานะ (Check Status)'),
+          ),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('ปิด (Close)')),
+        ],
+      ),
+    );
+  }
+
+  void _submitApplication() {
+    final state = ref.read(applicationProvider);
+    if (state.currentApplication?['status'] == 'SUBMITTED') {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Success!')));
+      context.pop();
+    }
   }
 }

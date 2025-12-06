@@ -14,7 +14,7 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Workspace'),
+        title: const Text('พื้นที่ทำงานของฉัน'),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.bell),
@@ -25,7 +25,7 @@ class DashboardScreen extends ConsumerWidget {
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : state.error != null
-              ? Center(child: Text('Error: ${state.error}'))
+              ? Center(child: Text('เกิดข้อผิดพลาด: ${state.error}'))
               : SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
                   child: ResponsiveLayout(
@@ -38,7 +38,7 @@ class DashboardScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/applications/new'),
         icon: const Icon(LucideIcons.plus),
-        label: const Text('New Application'),
+        label: const Text('สร้างคำขอใหม่'),
       ),
     );
   }
@@ -59,7 +59,7 @@ class _DashboardContent extends StatelessWidget {
       children: [
         // Quick Actions Section (Google Drive Style)
         const Text(
-          'Quick Actions',
+          'เมนูด่วน',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
@@ -67,13 +67,13 @@ class _DashboardContent extends StatelessWidget {
           children: [
             _QuickActionButton(
               icon: LucideIcons.filePlus,
-              label: 'New Application',
+              label: 'สร้างคำขอใหม่',
               onTap: () => context.push('/applications/new'),
             ),
             const SizedBox(width: 12),
             _QuickActionButton(
               icon: LucideIcons.mapPin,
-              label: 'Add Site',
+              label: 'เพิ่มแปลงปลูก',
               onTap: () => context.push('/establishments/new'),
             ),
           ],
@@ -82,7 +82,7 @@ class _DashboardContent extends StatelessWidget {
 
         // Overview Section
         const Text(
-          'Overview',
+          'ภาพรวม',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
@@ -94,25 +94,25 @@ class _DashboardContent extends StatelessWidget {
           mainAxisSpacing: 16,
           children: [
             _StatCard(
-              title: 'Total Applications',
+              title: 'คำขอทั้งหมด',
               value: stats.totalApplications.toString(),
               icon: LucideIcons.fileText,
               color: Colors.blue,
             ),
             _StatCard(
-              title: 'Pending Review',
+              title: 'รอตรวจสอบ',
               value: stats.pendingApplications.toString(),
               icon: LucideIcons.clock,
               color: Colors.orange,
             ),
             _StatCard(
-              title: 'Approved',
+              title: 'อนุมัติแล้ว',
               value: stats.approvedApplications.toString(),
               icon: LucideIcons.checkCircle,
               color: Colors.green,
             ),
             _StatCard(
-              title: 'My Sites',
+              title: 'แปลงปลูกของฉัน',
               value: stats.totalEstablishments.toString(),
               icon: LucideIcons.sprout,
               color: Colors.purple,

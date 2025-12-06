@@ -1,170 +1,198 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-
-class AdminDashboardScreen extends ConsumerStatefulWidget {
-  final Widget child;
-  const AdminDashboardScreen({super.key, required this.child});
-
-  @override
-  ConsumerState<AdminDashboardScreen> createState() =>
-      _AdminDashboardScreenState();
-}
-
-class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
-  int _selectedIndex = 0;
-
-  final List<NavigationDestination> _destinations = const [
-    NavigationDestination(
-      icon: Icon(LucideIcons.layoutDashboard),
-      label: 'Overview',
-    ),
-    NavigationDestination(
-      icon: Icon(LucideIcons.clipboardList),
-      label: 'Task Queue',
-    ),
-    NavigationDestination(
-      icon: Icon(LucideIcons.users),
-      label: 'Dispatcher',
-    ),
-  ];
-
-  void _onDestinationSelected(int index) {
-    setState(() => _selectedIndex = index);
-    switch (index) {
-      case 0:
-        context.go('/admin/dashboard');
-        break;
-      case 1:
-        context.go('/admin/tasks');
-        break;
-      case 2:
-        context.go('/admin/auditors'); // Dispatcher View
-        break;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isWeb = MediaQuery.of(context).size.width > 800;
-
-    if (isWeb) {
-      return Scaffold(
-        body: Row(
-          children: [
-            NavigationRail(
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: _onDestinationSelected,
-              labelType: NavigationRailLabelType.all,
-              leading: const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'GACP Admin',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              destinations: _destinations.map((d) {
-                return NavigationRailDestination(
-                  icon: d.icon,
-                  label: Text(d.label),
-                );
-              }).toList(),
-            ),
-            const VerticalDivider(thickness: 1, width: 1),
-            Expanded(child: widget.child),
-          ],
-        ),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('GACP Admin'),
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.green),
-              child: Text(
-                'GACP Admin Portal',
-                style: TextStyle(color: Colors.white, fontSize: 24),
-              ),
-            ),
-            ..._destinations.asMap().entries.map((entry) {
-              return ListTile(
-                leading: entry.value.icon,
-                title: Text(entry.value.label),
-                selected: _selectedIndex == entry.key,
-                onTap: () {
-                  _onDestinationSelected(entry.key);
-                  Navigator.pop(context); // Close drawer
-                },
-              );
-            }),
-          ],
-        ),
-      ),
-      body: widget.child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onDestinationSelected,
-        destinations: _destinations,
-      ),
-    );
-  }
-}
 
 class DashboardOverview extends StatelessWidget {
   const DashboardOverview({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        const Text(
-          'Dashboard Overview',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 16,
-          runSpacing: 16,
+    return Scaffold(
+      appBar: AppBar(title: const Text('ภาพรวมระบบ (System Overview)')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildStatCard('Total Applications', '120', Colors.blue),
-            _buildStatCard('Pending Review', '15', Colors.orange),
-            _buildStatCard('Unassigned Inspections', '8', Colors.purple),
-            _buildStatCard('Completed', '85', Colors.green),
+            const Text(
+              'สถานะใบสมัคร (Application Status)',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            // Stat Cards Grid
+            // Responsive Stat Cards Grid
+            LayoutBuilder(
+              builder: (context, constraints) {
+                // Determine columns based on width
+                int columns = 1;
+                if (constraints.maxWidth > 900) {
+                  columns = 4;
+                } else if (constraints.maxWidth > 600) {
+                  columns = 2;
+                }
+
+                return GridView.count(
+                  crossAxisCount: columns,
+                  childAspectRatio:
+                      columns == 1 ? 2.5 : 1.5, // Taller on PC, wider on Mobile
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  children: [
+                    _buildStatCard('ทั้งหมด (Total)', '125', Colors.blue,
+                        LucideIcons.fileText),
+                    _buildStatCard('รอตรวจ (Pending)', '12', Colors.orange,
+                        LucideIcons.clock),
+                    _buildStatCard('อนุมัติแล้ว (Approved)', '45', Colors.green,
+                        LucideIcons.checkCircle),
+                    _buildStatCard('รายได้ (Revenue)', '฿625,000',
+                        Colors.purple, LucideIcons.coins),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              'สถิติรายเดือน (Monthly Trend)',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            // Bar Chart
+            Container(
+              height: 300,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black.withOpacity(0.05), blurRadius: 10),
+                  ]),
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: 100,
+                  barTouchData: BarTouchData(enabled: false),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          const titles = [
+                            'ม.ค.',
+                            'ก.พ.',
+                            'มี.ค.',
+                            'เม.ย.',
+                            'พ.ค.'
+                          ];
+                          if (value.toInt() < titles.length) {
+                            return Text(titles[value.toInt()]);
+                          }
+                          return const Text('');
+                        },
+                      ),
+                    ),
+                    leftTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
+                  ),
+                  borderData: FlBorderData(show: false),
+                  barGroups: [
+                    _makeBarGroup(0, 30, Colors.blue),
+                    _makeBarGroup(1, 50, Colors.blue),
+                    _makeBarGroup(2, 40, Colors.blue),
+                    _makeBarGroup(3, 80, Colors.orange), // High season
+                    _makeBarGroup(4, 60, Colors.blue),
+                  ],
+                ),
+              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  BarChartGroupData _makeBarGroup(int x, double y, Color color) {
+    return BarChartGroupData(
+      x: x,
+      barRods: [
+        BarChartRodData(
+          toY: y,
+          color: color,
+          width: 20,
+          borderRadius: BorderRadius.circular(4),
         ),
       ],
     );
   }
 
-  Widget _buildStatCard(String title, String value, Color color) {
-    return Card(
-      elevation: 2,
-      child: Container(
-        width: 200,
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(color: Colors.grey)),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-          ],
+  Widget _buildStatCard(
+      String title, String value, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [color, color.withOpacity(0.8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.4),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distribute space
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: Colors.white, size: 24),
+              ),
+              const Icon(LucideIcons.trendingUp,
+                  color: Colors.white70, size: 16),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: -1,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                title,
+                style: TextStyle(
+                    color: Colors.white.withOpacity(0.9), fontSize: 14),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          )
+        ],
       ),
     );
   }

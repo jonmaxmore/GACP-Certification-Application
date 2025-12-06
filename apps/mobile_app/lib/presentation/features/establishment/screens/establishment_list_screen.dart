@@ -15,7 +15,7 @@ class EstablishmentListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Sites'),
+        title: const Text('แปลงปลูกของฉัน'),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.plus),
@@ -28,10 +28,11 @@ class EstablishmentListScreen extends ConsumerWidget {
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : state.error != null
-              ? Center(child: Text('Error: ${state.error}'))
+              ? Center(child: Text('เกิดข้อผิดพลาด: ${state.error}'))
               : ResponsiveLayout(
                   mobileBody: _MobileList(establishments: state.establishments),
-                  desktopBody: _DesktopTable(establishments: state.establishments),
+                  desktopBody:
+                      _DesktopTable(establishments: state.establishments),
                 ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go('/establishments/new'),
@@ -48,7 +49,7 @@ class _MobileList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (establishments.isEmpty) {
-      return const Center(child: Text('No establishments found.'));
+      return const Center(child: Text('ไม่พบข้อมูลแปลงปลูก'));
     }
 
     return ListView.builder(
@@ -61,8 +62,11 @@ class _MobileList extends StatelessWidget {
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: Colors.green.shade100,
-              backgroundImage: item.imageUrl != null ? NetworkImage(item.imageUrl!) : null,
-              child: item.imageUrl == null ? Icon(LucideIcons.sprout, color: Colors.green.shade800) : null,
+              backgroundImage:
+                  item.imageUrl != null ? NetworkImage(item.imageUrl!) : null,
+              child: item.imageUrl == null
+                  ? Icon(LucideIcons.sprout, color: Colors.green.shade800)
+                  : null,
             ),
             title: Text(item.name),
             subtitle: Text(item.type),
@@ -81,7 +85,7 @@ class _DesktopTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (establishments.isEmpty) {
-      return const Center(child: Text('No establishments found.'));
+      return const Center(child: Text('ไม่พบข้อมูลแปลงปลูก'));
     }
 
     return SingleChildScrollView(
@@ -91,11 +95,11 @@ class _DesktopTable extends StatelessWidget {
           width: double.infinity,
           child: DataTable(
             columns: const [
-              DataColumn(label: Text('Name')),
-              DataColumn(label: Text('Type')),
-              DataColumn(label: Text('Address')),
-              DataColumn(label: Text('Status')),
-              DataColumn(label: Text('Actions')),
+              DataColumn(label: Text('ชื่อ')),
+              DataColumn(label: Text('ประเภท')),
+              DataColumn(label: Text('ที่อยู่')),
+              DataColumn(label: Text('สถานะ')),
+              DataColumn(label: Text('จัดการ')),
             ],
             rows: establishments.map((item) {
               return DataRow(cells: [
@@ -106,8 +110,12 @@ class _DesktopTable extends StatelessWidget {
                 DataCell(Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(icon: const Icon(LucideIcons.pencil, size: 18), onPressed: () {}),
-                    IconButton(icon: const Icon(LucideIcons.trash, size: 18), onPressed: () {}),
+                    IconButton(
+                        icon: const Icon(LucideIcons.pencil, size: 18),
+                        onPressed: () {}),
+                    IconButton(
+                        icon: const Icon(LucideIcons.trash, size: 18),
+                        onPressed: () {}),
                   ],
                 )),
               ]);
@@ -125,7 +133,7 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = status == 'Active';
+    final isActive = status == 'Active' || status == 'active';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -133,7 +141,7 @@ class _StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        status,
+        isActive ? 'ใช้งานปกติ' : status,
         style: TextStyle(
           color: isActive ? Colors.green.shade800 : Colors.orange.shade800,
           fontSize: 12,

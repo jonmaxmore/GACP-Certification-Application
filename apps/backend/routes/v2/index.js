@@ -10,14 +10,14 @@ const router = express.Router();
 const notificationsRouter = require('./notifications');
 const ticketsRouter = require('./tickets');
 const kycRouter = require('./kyc');
-const applicationsRouter = require('../api/GacpApplications');
-const establishmentsRouter = require('../../modules/Establishment'); // Will create this next
+const applicationsRouter = require('../api/ApplicationRoutes');
+const establishmentsRouter = require('../../modules/Establishment');
 
 // Mount V2 routes
 router.use('/notifications', notificationsRouter);
 router.use('/tickets', ticketsRouter);
 router.use('/kyc', kycRouter);
-router.use('/', applicationsRouter); // GacpApplications defines /applications internally
+router.use('/applications', applicationsRouter);
 router.use('/establishments', establishmentsRouter);
 router.use('/payments', require('../api/PaymentRoutes'));
 router.use('/officer', require('../api/OfficerRoutes'));

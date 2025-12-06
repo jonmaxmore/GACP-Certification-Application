@@ -1,277 +1,223 @@
-import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../data/repositories/application_repository_impl.dart';
-import '../../../../domain/entities/application_entity.dart';
-import '../../../../domain/repositories/application_repository.dart';
-import '../../auth/providers/auth_provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../../../core/network/dio_client.dart';
 
-// 1. Repository Provider
-final applicationRepositoryProvider = Provider<ApplicationRepository>((ref) {
-  final dioClient = ref.watch(dioClientProvider);
-  return ApplicationRepositoryImpl(dioClient);
-});
-
-// 2. State Class
 class ApplicationState {
   final bool isLoading;
-  final List<ApplicationEntity> applications;
   final String? error;
-  
-  // Form State
-  final String selectedFormType; // 'GACP_FORM_9', 'GACP_FORM_10', 'GACP_FORM_11'
-  final int currentStep;
-  final String? selectedEstablishmentId;
-  final Map<String, dynamic> formData;
-  final Map<String, File> documents;
-  final bool isSuccess;
+  final String? applicationId;
+  final Map<String, dynamic>? currentApplication;
+  final List<dynamic> pendingReviews;
 
-  const ApplicationState({
+  ApplicationState({
     this.isLoading = false,
-    this.applications = const [],
     this.error,
-    this.selectedFormType = 'GACP_FORM_9',
-    this.currentStep = 0,
-    this.selectedEstablishmentId,
-    this.formData = const {
-      // Form 9 Defaults
-      'areaUnit': 'rai',
-      'landOwnershipType': 'owned',
-      'waterSourceType': 'well',
-      'soilType': 'loam',
-      'plantingSystem': 'soil',
-      'plantingMethod': 'seeds',
-      'tempControl': false,
-      // Form 10 Defaults
-      'dispensingMethod': 'pharmacy',
-      // Form 11 Defaults
-      'importExportType': 'import',
-      'transportMode': 'air',
-    },
-    this.documents = const {},
-    this.isSuccess = false,
+    this.applicationId,
+    this.currentApplication,
+    this.pendingReviews = const [],
   });
 
   ApplicationState copyWith({
     bool? isLoading,
-    List<ApplicationEntity>? applications,
     String? error,
-    String? selectedFormType,
-    int? currentStep,
-    String? selectedEstablishmentId,
-    Map<String, dynamic>? formData,
-    Map<String, File>? documents,
-    bool? isSuccess,
+    String? applicationId,
+    Map<String, dynamic>? currentApplication,
+    List<dynamic>? pendingReviews,
   }) {
     return ApplicationState(
       isLoading: isLoading ?? this.isLoading,
-      applications: applications ?? this.applications,
       error: error,
-      selectedFormType: selectedFormType ?? this.selectedFormType,
-      currentStep: currentStep ?? this.currentStep,
-      selectedEstablishmentId: selectedEstablishmentId ?? this.selectedEstablishmentId,
-      formData: formData ?? this.formData,
-      documents: documents ?? this.documents,
-      isSuccess: isSuccess ?? this.isSuccess,
+      applicationId: applicationId ?? this.applicationId,
+      currentApplication: currentApplication ?? this.currentApplication,
+      pendingReviews: pendingReviews ?? this.pendingReviews,
     );
   }
 }
 
-// 3. Notifier
 class ApplicationNotifier extends StateNotifier<ApplicationState> {
-  final ApplicationRepository _repository;
+  final DioClient _dio;
+  DioClient get dio => _dio; // Expose for other providers
 
-  ApplicationNotifier(this._repository) : super(const ApplicationState()) {
-    loadApplications();
-  }
+  ApplicationNotifier(this._dio) : super(ApplicationState());
 
-  Future<void> loadApplications() async {
-    state = state.copyWith(isLoading: true, error: null);
-    final result = await _repository.getMyApplications();
-    result.fold(
-      (failure) => state = state.copyWith(isLoading: false, error: failure.message),
-      (data) => state = state.copyWith(isLoading: false, applications: data),
-    );
-  }
+  // ... (Previous methods: createDraft, confirmPreReview, payPhase1, simulateOfficerReview, payPhase2, assignAuditor, submitAudit)
 
-  void setFormType(String type) {
-    state = state.copyWith(selectedFormType: type, currentStep: 0);
-  }
-
-  void setStep(int step) {
-    state = state.copyWith(currentStep: step);
-  }
-
-  void setEstablishment(String id) {
-    state = state.copyWith(selectedEstablishmentId: id);
-  }
-
-  void updateFormData(String key, dynamic value) {
-    final newFormData = Map<String, dynamic>.from(state.formData);
-    newFormData[key] = value;
-    state = state.copyWith(formData: newFormData);
-  }
-
-  void addDocument(String key, File file) {
-    final newDocs = Map<String, File>.from(state.documents);
-    newDocs[key] = file;
-    state = state.copyWith(documents: newDocs);
-  }
-
-  void removeDocument(String key) {
-    final newDocs = Map<String, File>.from(state.documents);
-    newDocs.remove(key);
-    state = state.copyWith(documents: newDocs);
-  }
-
-  Future<void> submitApplication() async {
-    if (state.selectedEstablishmentId == null) {
-      state = state.copyWith(error: 'Please select an establishment');
-      return;
+  // Stage 3: Fetch Pending Reviews (Officer Dashboard)
+  Future<void> fetchPendingReviews() async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final response = await _dio.get('/v2/applications/pending-reviews');
+      state = state.copyWith(
+        isLoading: false,
+        pendingReviews: response.data['data'] ?? [],
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
-
-    state = state.copyWith(isLoading: true, error: null, isSuccess: false);
-
-    // Construct nested JSON based on Form Type
-    Map<String, dynamic> backendData = {};
-
-    if (state.selectedFormType == 'GACP_FORM_9') {
-      backendData = {
-        'farmInformation': {
-          'farmSize': {
-            'totalArea': state.formData['totalArea'],
-            'cultivatedArea': state.formData['cultivatedArea'],
-            'unit': state.formData['areaUnit'],
-          },
-          'landOwnership': {
-            'type': state.formData['landOwnershipType'],
-            'documentId': state.formData['landDocumentId'],
-          },
-          'waterSource': {
-            'type': state.formData['waterSourceType'],
-          },
-          'soilType': {
-            'type': state.formData['soilType'],
-          },
-          'plantingSystem': state.formData['plantingSystem'],
-        },
-        'cropInformation': [
-          {
-            'strainName': state.formData['cropName'],
-            'variety': state.formData['cropVariety'],
-            'sourceOrigin': state.formData['cropSource'],
-            'plantingMethod': state.formData['plantingMethod'],
-          }
-        ],
-        'formSpecificData': {
-          'production': {
-            'securityMeasures': {
-              'fenceDescription': state.formData['fenceDescription'],
-              'cctvCount': state.formData['cctvCount'],
-              'guardCount': state.formData['guardCount'],
-              'accessControl': state.formData['accessControl'],
-            },
-            'storageFacility': {
-              'location': state.formData['storageLocation'],
-              'security': state.formData['storageSecurity'],
-              'temperatureControl': state.formData['tempControl'],
-            }
-          }
-        }
-      };
-    } else if (state.selectedFormType == 'GACP_FORM_10') {
-      backendData = {
-        'formSpecificData': {
-          'sale': {
-            'dispensingMethod': state.formData['dispensingMethod'],
-            'pharmacist': {
-              'name': state.formData['pharmacistName'],
-              'licenseNumber': state.formData['pharmacistLicense'],
-            },
-            'storageDetails': state.formData['saleStorageDetails'],
-            'operatingHours': state.formData['operatingHours'],
-            'commercialRegNumber': state.formData['commercialRegNumber'],
-          }
-        }
-      };
-    } else if (state.selectedFormType == 'GACP_FORM_11') {
-      backendData = {
-        'formSpecificData': {
-          'importExport': {
-            'type': state.formData['importExportType'],
-            'country': state.formData['country'],
-            'portOfEntryExit': state.formData['portOfEntryExit'],
-            'transportMode': state.formData['transportMode'],
-            'carrierName': state.formData['carrierName'],
-            'expectedDate': state.formData['expectedDate']?.toIso8601String(),
-            'plantParts': state.formData['plantParts'],
-            'quantity': state.formData['quantity'],
-            'purpose': state.formData['purpose'],
-          }
-        }
-      };
-    }
-
-    final result = await _repository.createApplication(
-      establishmentId: state.selectedEstablishmentId!,
-      type: state.selectedFormType,
-      formData: backendData,
-      documents: state.documents,
-    );
-
-    result.fold(
-      (failure) => state = state.copyWith(isLoading: false, error: failure.message),
-      (newItem) {
-        final newList = [...state.applications, newItem];
-        state = state.copyWith(
-          isLoading: false,
-          applications: newList,
-          isSuccess: true,
-          currentStep: 0,
-          formData: {
-             'areaUnit': 'rai',
-             'landOwnershipType': 'owned',
-             'waterSourceType': 'well',
-             'soilType': 'loam',
-             'plantingSystem': 'soil',
-             'plantingMethod': 'seeds',
-             'tempControl': false,
-             'dispensingMethod': 'pharmacy',
-             'importExportType': 'import',
-             'transportMode': 'air',
-          },
-          documents: {},
-          selectedEstablishmentId: null,
-        );
-      },
-    );
   }
 
-  void resetForm() {
-    state = state.copyWith(
-      isSuccess: false,
-      error: null,
-      currentStep: 0,
-      selectedFormType: 'GACP_FORM_9',
-      formData: {
-         'areaUnit': 'rai',
-         'landOwnershipType': 'owned',
-         'waterSourceType': 'well',
-         'soilType': 'loam',
-         'plantingSystem': 'soil',
-         'plantingMethod': 'seeds',
-         'tempControl': false,
-         'dispensingMethod': 'pharmacy',
-         'importExportType': 'import',
-         'transportMode': 'air',
-      },
-      documents: {},
-      selectedEstablishmentId: null,
-    );
+  // Fetch Single Application by ID
+  Future<void> fetchApplicationById(String id) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final response = await _dio.get('/v2/applications/$id');
+      state = state.copyWith(
+        isLoading: false,
+        currentApplication: response.data['data'],
+        applicationId: id,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  // Stage 1: Create Draft
+  Future<void> createDraft({required String farmId}) async {
+    if (state.isLoading) return; // Prevent double submission
+    state = state.copyWith(isLoading: true);
+    try {
+      // NOTE: In a real app, 'farmId' comes from the user selection
+      // For Demo/Dev, we might need a fallback if not provided or handle 400
+      final response = await _dio.post(
+        '/v2/applications/draft',
+        data: {'farmId': farmId},
+      );
+      // Backend returns { success: true, data: { ... } }
+      final data = response.data['data'];
+      state = state.copyWith(
+        isLoading: false,
+        applicationId: data['_id'],
+        currentApplication: data,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  // Stage 3: Pre-Review Confirm (Unlock Payment)
+  Future<bool> confirmPreReview() async {
+    if (state.applicationId == null) return false;
+    state = state.copyWith(isLoading: true);
+    try {
+      await _dio.post(
+        '/v2/applications/${state.applicationId}/confirm-review',
+      );
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  // Stage 2: Payment Phase 1 (Unlock Submit)
+  Future<Map<String, dynamic>?> payPhase1() async {
+    if (state.applicationId == null) return null;
+    state = state.copyWith(isLoading: true);
+    try {
+      final response =
+          await _dio.post('/v2/applications/${state.applicationId}/pay-phase1');
+      state = state.copyWith(isLoading: false);
+      if (response.statusCode == 200 && response.data['success']) {
+        return response.data['data']; // { transactionId, paymentUrl, qrCode }
+      }
+      return null;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return null;
+    }
+  }
+
+  // Stage 3: Officer Review (Simulated for Demo)
+  Future<bool> simulateOfficerReview({required bool approve}) async {
+    if (state.applicationId == null) return false;
+    state = state.copyWith(isLoading: true);
+    try {
+      await _dio.post(
+        '/v2/applications/${state.applicationId}/review',
+        data: {'action': approve ? 'APPROVE' : 'REJECT'},
+      );
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  // Stage 4: Payment Phase 2 (25,000 THB)
+  Future<Map<String, dynamic>?> payPhase2() async {
+    if (state.applicationId == null) return null;
+    state = state.copyWith(isLoading: true);
+    try {
+      final response =
+          await _dio.post('/v2/applications/${state.applicationId}/pay-phase2');
+      state = state.copyWith(isLoading: false);
+      if (response.statusCode == 200 && response.data['success']) {
+        return response.data['data'];
+      }
+      return null;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return null;
+    }
+  }
+
+  // Stage 5: Scheduling
+  Future<bool> assignAuditor(
+      {required String auditorId, required String date}) async {
+    if (state.applicationId == null) return false;
+    state = state.copyWith(isLoading: true);
+    try {
+      await _dio.post(
+        '/v2/applications/${state.applicationId}/assign-auditor',
+        data: {'auditorId': auditorId, 'date': date},
+      );
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  // Stage 6: Audit Result
+  Future<bool> submitAudit({required bool pass, String notes = ''}) async {
+    if (state.applicationId == null) return false;
+    state = state.copyWith(isLoading: true);
+    try {
+      await _dio.post(
+        '/v2/applications/${state.applicationId}/audit-result',
+        data: {'result': pass ? 'PASS' : 'FAIL', 'notes': notes},
+      );
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  // Fetch Assignments for Auditor (Mock: All 'AUDIT_SCHEDULED')
+  Future<void> fetchMyAssignments() async {
+    state = state.copyWith(isLoading: true);
+    try {
+      // In real app, filter by auditorId from auth token
+      final response = await _dio.get('/v2/applications/pending-reviews');
+      // For Demo: Reuse pending-reviews endpoint but filter in UI or here if needed
+      // Actually, let's just return all for demo
+      state = state.copyWith(
+        isLoading: false,
+        pendingReviews: response.data['data'] ?? [],
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
   }
 }
 
-// 4. Provider
-final applicationProvider = StateNotifierProvider<ApplicationNotifier, ApplicationState>((ref) {
-  final repository = ref.watch(applicationRepositoryProvider);
-  return ApplicationNotifier(repository);
+final applicationProvider =
+    StateNotifierProvider<ApplicationNotifier, ApplicationState>((ref) {
+  const storage = FlutterSecureStorage();
+  return ApplicationNotifier(DioClient(storage));
 });

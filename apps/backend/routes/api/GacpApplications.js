@@ -141,6 +141,39 @@ router.put(
   }
 );
 
+// List all applications (Admin/Officer)
+router.get(
+  '/applications',
+  authenticate,
+  checkPermission('application.read', 'application'),
+  async (req, res) => {
+    try {
+      // Officers/Admins can see all (or filtered by province if we implement strict scopes)
+      // For now, allow filtering via query params
+      const filters = {
+        status: req.query.status,
+        farmerId: req.query.farmerId,
+        assignedOfficer: req.query.assignedOfficer
+      };
+
+      const result = await gacpService.getApplications(filters, {
+        page: req.query.page,
+        limit: req.query.limit
+      });
+
+      res.json({
+        success: true,
+        data: result // result { applications, pagination }
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  }
+);
+
 // Upload document
 router.post(
   '/applications/:applicationId/documents/:documentType',

@@ -1,9 +1,0 @@
-import 'package:dartz/dartz.dart';
-import '../../core/errors/Failures.dart';
-import '../entities/UserEntity.dart';
-
-abstract class AuthRepository {
-  Future<Either<Failure, UserEntity>> login(String email, String password);
-  Future<Either<Failure, void>> logout();
-  Future<Either<Failure, UserEntity>> getCurrentUser();
-}

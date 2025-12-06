@@ -32,4 +32,12 @@ router.patch(
     officerController.assignAuditor
 );
 
+// 4. Submit Inspection Result
+router.post(
+    '/applications/:id/inspection',
+    authenticate,
+    checkPermission('inspection.conduct', 'inspection'),
+    officerController.submitInspectionResult
+);
+
 module.exports = router;

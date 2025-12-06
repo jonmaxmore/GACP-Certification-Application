@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -5,10 +6,15 @@ class DioClient {
   final Dio _dio;
   final FlutterSecureStorage _storage;
 
-  // Base URL for Android Emulator (10.0.2.2 maps to localhost)
-  // For Web, it should be http://localhost:3000/api
-  // TODO: Use environment variables for this
-  static const String _baseUrl = 'http://10.0.2.2:3000/api';
+  // Dynamic Base URL based on platform
+  static String get _baseUrl {
+    if (kIsWeb) return 'http://localhost:5000/api';
+    try {
+      if (defaultTargetPlatform == TargetPlatform.android)
+        return 'http://10.0.2.2:5000/api';
+    } catch (_) {}
+    return 'http://localhost:5000/api'; // iOS / Desktop / Fallback
+  }
 
   DioClient(this._storage)
       : _dio = Dio(

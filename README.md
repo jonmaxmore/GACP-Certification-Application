@@ -49,12 +49,18 @@ Botanical-Audit-Framework/
 - **Node.js:** v18+
 - **MongoDB:** Local or Atlas Connection
 
-### Running the Backend
+### Running the Backend (Containerized)
+```bash
+docker-compose up --build
+# Backend: http://localhost:5000 | Mongo: 27017
+```
+
+### Running the Backend (Local)
 ```bash
 cd apps/backend
 npm install
 npm run dev
-# Server runs on http://localhost:3000
+# Server runs on http://localhost:5000
 ```
 
 ### Running the App
@@ -63,6 +69,7 @@ cd apps/mobile_app
 flutter pub get
 flutter run
 # Select Chrome (Web) or Emulator (Mobile)
+# Note: Web/Desktop uses localhost:5000, Android uses 10.0.2.2:5000
 ```
 
 ## 📝 Features & Status

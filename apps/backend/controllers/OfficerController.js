@@ -81,7 +81,15 @@ class OfficerController {
             }
 
             // Validate Auditor
-            const auditor = await User.findOne({ $or: [{ _id: auditorId }, { id: auditorId }], role: 'auditor' });
+            const mongoose = require('mongoose');
+            const query = { role: 'auditor' };
+            if (mongoose.Types.ObjectId.isValid(auditorId)) {
+                query.$or = [{ _id: auditorId }, { id: auditorId }];
+            } else {
+                query.id = auditorId;
+            }
+
+            const auditor = await User.findOne(query);
             if (!auditor) {
                 return res.status(400).json({ success: false, error: 'Invalid auditor ID' });
             }
@@ -91,6 +99,10 @@ class OfficerController {
             if (!application.inspection) application.inspection = {};
             application.inspection.inspectorId = auditor.id || auditor._id;
 
+            // Also update legacy/root 'assignedOfficer' for backward compatibility and list queries
+            application.assignedOfficer = auditor.id || auditor._id;
+            application.markModified('inspection');
+
             // Log history
             await ApplicationWorkflowService.updateApplicationStatus(
                 id,
@@ -99,15 +111,43 @@ class OfficerController {
                 officerId
             );
 
-            // Need to save the inspectorId explicitly if updateStatus didn't (it accepts notes but not arbitrary fields)
-            // ApplicationWorkflowService.updateApplicationStatus saves the doc, but we modified execution flow.
-            // Let's modify app then use service for status update.
+            // Force save to ensure fields are persisted despite Service saving history
+            // We need to fetch/save again or rely on the fact that updateApplicationStatus saves the doc?
+            // updateApplicationStatus re-fetches. So our changes to 'application' instance here are LOST unless we save THIS instance.
+            // BUT saving THIS instance might overwrite status change if concurrency issue exists.
+            // BETTER: Load app, update fields, SAVE, THEN updateStatus.
+            // Actually, updateStatus logic is: fetch -> update status -> save.
+            // If we save 'application' (v1 modified) first, it's fine.
             await application.save();
 
             res.json({ success: true, data: application });
 
         } catch (error) {
             logger.error('Assign auditor error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    /**
+     * Submit Inspection Result
+     * POST /api/v2/officer/applications/:id/inspection
+     */
+    async submitInspectionResult(req, res) {
+        try {
+            const { id } = req.params;
+            const inspectionData = req.body;
+            const auditorId = req.user ? req.user.id : null;
+
+            // Delegate to Workflow Service
+            const result = await ApplicationWorkflowService.processInspectionResults(
+                id,
+                inspectionData,
+                auditorId
+            );
+
+            res.json({ success: true, data: result });
+        } catch (error) {
+            logger.error('Submit inspection result error:', error);
             res.status(500).json({ success: false, error: error.message });
         }
     }

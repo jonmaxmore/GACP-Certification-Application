@@ -153,6 +153,7 @@ class RBACService {
       'application.update': 'Update applications',
       'application.delete': 'Delete applications',
       'application.review': 'Review applications',
+      'application.assign': 'Assign officer/auditor to application',
       'application.approve': 'Approve applications',
       'application.reject': 'Reject applications',
 

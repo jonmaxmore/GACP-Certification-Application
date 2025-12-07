@@ -84,4 +84,20 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> deleteEstablishment(String id) async {
+    try {
+      final response = await _dioClient.delete('/v2/establishments/$id');
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return const Right(null);
+      } else {
+        return Left(
+            ServerFailure(message: response.data['error'] ?? 'Delete failed'));
+      }
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }

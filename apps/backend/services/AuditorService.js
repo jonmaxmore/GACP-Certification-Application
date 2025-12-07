@@ -3,14 +3,14 @@
  * Handles auditor-specific operations and inspection management
  */
 
-const ApplicationWorkflowService = require('./ApplicationWorkflowService');
+// const ApplicationWorkflowService = require('./ApplicationWorkflowService');
 const ApplicationRepository = require('../repositories/ApplicationRepository');
 const logger = require('../shared/logger');
 const { ValidationError, BusinessLogicError } = require('../shared/errors');
 
 class AuditorService {
     constructor() {
-        this.applicationService = new ApplicationWorkflowService();
+        this.applicationService = null; // new ApplicationWorkflowService();
         this.repository = new ApplicationRepository();
     }
 
@@ -67,7 +67,8 @@ class AuditorService {
             }
 
             // Delegate to workflow service for processing and state transition
-            return await this.applicationService.processInspectionResults(applicationId, results, auditorId);
+            // return await this.applicationService.processInspectionResults(applicationId, results, auditorId);
+            throw new Error('ApplicationWorkflowService is missing');
         } catch (error) {
             logger.error('Error submitting inspection results', { auditorId, applicationId, error: error.message });
             throw error;

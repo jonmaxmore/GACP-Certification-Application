@@ -120,6 +120,26 @@ class EstablishmentNotifier extends StateNotifier<EstablishmentState> {
     );
   }
 
+  Future<void> deleteEstablishment(String id) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    final result = await _repository.deleteEstablishment(id);
+
+    result.fold(
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
+      (_) {
+        final newList =
+            state.establishments.where((item) => item.id != id).toList();
+        state = state.copyWith(
+          isLoading: false,
+          establishments: newList,
+          isSuccess: true,
+        );
+      },
+    );
+  }
+
   void resetForm() {
     state = state.copyWith(
       isSuccess: false,

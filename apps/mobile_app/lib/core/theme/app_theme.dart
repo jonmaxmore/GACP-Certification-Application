@@ -27,7 +27,6 @@ class AppTheme {
         primary: primary,
         secondary: secondary,
         surface: surface,
-        background: background,
         error: error,
       ),
       scaffoldBackgroundColor: background,
@@ -56,7 +55,7 @@ class AppTheme {
         foregroundColor: textMain,
         elevation: 0,
         scrolledUnderElevation: 2,
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: Colors.black.withValues(alpha: 0.1),
         centerTitle: false,
         titleTextStyle: GoogleFonts.kanit(
           color: textMain,
@@ -69,10 +68,10 @@ class AppTheme {
       // -------------------------------------------------------------------------
       // Cards
       // -------------------------------------------------------------------------
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: surface,
         elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.08),
+        shadowColor: Colors.black.withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: const EdgeInsets.symmetric(vertical: 8),
       ),
@@ -113,7 +112,7 @@ class AppTheme {
           backgroundColor: primary,
           foregroundColor: Colors.white,
           elevation: 4,
-          shadowColor: primary.withOpacity(0.4),
+          shadowColor: primary.withValues(alpha: 0.4),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -148,8 +147,8 @@ class AppTheme {
       // Checkbox
       // -------------------------------------------------------------------------
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return primary;
           }
           return null;

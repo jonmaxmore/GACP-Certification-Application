@@ -16,6 +16,9 @@ class EstablishmentEntity extends Equatable {
   final List<String> images;
   final String titleDeedNo; // New
   final String security; // New
+  final DateTime? updatedAt;
+  final DateTime? licenseExpiredAt;
+  final String? licenseNumber;
 
   const EstablishmentEntity({
     this.id,
@@ -26,11 +29,25 @@ class EstablishmentEntity extends Equatable {
     required this.images,
     required this.titleDeedNo,
     required this.security,
+    this.updatedAt,
+    this.licenseExpiredAt,
+    this.licenseNumber,
   });
 
   @override
-  List<Object?> get props =>
-      [id, name, type, address, coordinates, images, titleDeedNo, security];
+  List<Object?> get props => [
+        id,
+        name,
+        type,
+        address,
+        coordinates,
+        images,
+        titleDeedNo,
+        security,
+        updatedAt,
+        licenseExpiredAt,
+        licenseNumber
+      ];
 }
 
 class EstablishmentAddress extends Equatable {

@@ -30,9 +30,14 @@ class EstablishmentListScreen extends ConsumerWidget {
           : state.error != null
               ? Center(child: Text('เกิดข้อผิดพลาด: ${state.error}'))
               : ResponsiveLayout(
-                  mobileBody: _MobileList(establishments: state.establishments),
-                  desktopBody:
-                      _DesktopTable(establishments: state.establishments),
+                  mobileBody: _MobileList(
+                    establishments: state.establishments,
+                    onDelete: (id) => _confirmDelete(context, ref, id),
+                  ),
+                  desktopBody: _DesktopTable(
+                    establishments: state.establishments,
+                    onDelete: (id) => _confirmDelete(context, ref, id),
+                  ),
                 ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go('/establishments/new'),
@@ -40,16 +45,44 @@ class EstablishmentListScreen extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _confirmDelete(
+      BuildContext context, WidgetRef ref, String id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('ยืนยันการลบ'),
+        content: const Text('คุณต้องการลบแปลงปลูกนี้ใช่หรือไม่?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('ยกเลิก'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('ลบ'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      ref.read(establishmentProvider.notifier).deleteEstablishment(id);
+    }
+  }
 }
 
 class _MobileList extends StatelessWidget {
   final List<EstablishmentEntity> establishments;
-  const _MobileList({required this.establishments});
+  final Function(String) onDelete;
+
+  const _MobileList({required this.establishments, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
     if (establishments.isEmpty) {
-      return const Center(child: Text('ไม่พบข้อมูลแปลงปลูก'));
+      return const _CuteFarmEmptyState();
     }
 
     return ListView.builder(
@@ -70,7 +103,17 @@ class _MobileList extends StatelessWidget {
             ),
             title: Text(item.name),
             subtitle: Text(item.type),
-            trailing: _StatusBadge(status: item.status),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _StatusBadge(item: item),
+                IconButton(
+                  icon: const Icon(LucideIcons.trash,
+                      size: 18, color: Colors.red),
+                  onPressed: () => onDelete(item.id),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -80,12 +123,14 @@ class _MobileList extends StatelessWidget {
 
 class _DesktopTable extends StatelessWidget {
   final List<EstablishmentEntity> establishments;
-  const _DesktopTable({required this.establishments});
+  final Function(String) onDelete;
+
+  const _DesktopTable({required this.establishments, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
     if (establishments.isEmpty) {
-      return const Center(child: Text('ไม่พบข้อมูลแปลงปลูก'));
+      return const _CuteFarmEmptyState();
     }
 
     return SingleChildScrollView(
@@ -94,19 +139,29 @@ class _DesktopTable extends StatelessWidget {
         child: SizedBox(
           width: double.infinity,
           child: DataTable(
+            columnSpacing: 24, // Add spacing
             columns: const [
+              DataColumn(label: Text('License No.')), // New
               DataColumn(label: Text('ชื่อ')),
               DataColumn(label: Text('ประเภท')),
-              DataColumn(label: Text('ที่อยู่')),
+              DataColumn(label: Text('แก้ไขล่าสุด')), // New
               DataColumn(label: Text('สถานะ')),
               DataColumn(label: Text('จัดการ')),
             ],
             rows: establishments.map((item) {
+              final updatedDate = item.updatedAt != null
+                  ? "${item.updatedAt!.day}/${item.updatedAt!.month}/${item.updatedAt!.year}"
+                  : "-";
+
               return DataRow(cells: [
+                DataCell(Text(
+                  item.licenseNumber ?? "-",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                )),
                 DataCell(Text(item.name)),
-                DataCell(Text(item.type)),
-                DataCell(Text(item.address)),
-                DataCell(_StatusBadge(status: item.status)),
+                DataCell(Text(item.type)), // String, not Enum
+                DataCell(Text(updatedDate)),
+                DataCell(_StatusBadge(item: item)), // Pass whole item
                 DataCell(Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -114,8 +169,12 @@ class _DesktopTable extends StatelessWidget {
                         icon: const Icon(LucideIcons.pencil, size: 18),
                         onPressed: () {}),
                     IconButton(
-                        icon: const Icon(LucideIcons.trash, size: 18),
-                        onPressed: () {}),
+                      icon: const Icon(LucideIcons.trash,
+                          size: 18, color: Colors.red),
+                      onPressed: () {
+                        onDelete(item.id);
+                      },
+                    ),
                   ],
                 )),
               ]);
@@ -128,25 +187,111 @@ class _DesktopTable extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  final String status;
-  const _StatusBadge({required this.status});
+  final EstablishmentEntity item; // Changed to accept entity
+  const _StatusBadge({required this.item});
 
   @override
   Widget build(BuildContext context) {
-    final isActive = status == 'Active' || status == 'active';
+    // Logic for status
+    bool isExpired = item.licenseExpiredAt != null &&
+        item.licenseExpiredAt!.isBefore(DateTime.now());
+
+    String label = 'ใช้งานปกติ';
+    Color color = Colors.green;
+
+    if (isExpired) {
+      label = 'หมดอายุ';
+      color = Colors.red;
+    } else {
+      label = 'ใช้งานปกติ';
+      color = Colors.green;
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.shade100 : Colors.orange.shade100,
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.5)),
       ),
-      child: Text(
-        isActive ? 'ใช้งานปกติ' : status,
-        style: TextStyle(
-          color: isActive ? Colors.green.shade800 : Colors.orange.shade800,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isExpired ? LucideIcons.alertCircle : LucideIcons.checkCircle2,
+            size: 12,
+            color: color,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CuteFarmEmptyState extends StatelessWidget {
+  const _CuteFarmEmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              LucideIcons.sprout,
+              size: 64,
+              color: Colors.green.shade400,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'แปลงปลูกของฉัน',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF047857), // Emerald 700
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'เริ่มต้นปลูกกัญชงคุณภาพได้ที่นี่',
+            style: TextStyle(
+              fontSize: 16,
+              color: Color(0xFF64748B), // Slate 500
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () => context.go('/establishments/new'),
+            icon: const Icon(LucideIcons.plus),
+            label: const Text('เพิ่มแปลงปลูกใหม่'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981), // Emerald 500
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              elevation: 4,
+              shadowColor: const Color(0xFF10B981).withValues(alpha: 0.4),
+            ),
+          ),
+        ],
       ),
     );
   }

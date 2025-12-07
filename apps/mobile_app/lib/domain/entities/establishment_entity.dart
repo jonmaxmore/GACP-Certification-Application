@@ -13,6 +13,11 @@ class EstablishmentEntity extends Equatable {
   final String titleDeedNo;
   final String security;
 
+  // Credibility Fields
+  final DateTime? updatedAt;
+  final DateTime? licenseExpiredAt;
+  final String? licenseNumber;
+
   const EstablishmentEntity({
     required this.id,
     required this.name,
@@ -24,6 +29,9 @@ class EstablishmentEntity extends Equatable {
     this.imageUrl,
     this.titleDeedNo = '',
     this.security = '',
+    this.updatedAt,
+    this.licenseExpiredAt,
+    this.licenseNumber,
   });
 
   @override
@@ -37,6 +45,9 @@ class EstablishmentEntity extends Equatable {
         longitude,
         imageUrl,
         titleDeedNo,
-        security
+        security,
+        updatedAt,
+        licenseExpiredAt,
+        licenseNumber,
       ];
 }

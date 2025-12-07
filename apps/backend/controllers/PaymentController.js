@@ -1,4 +1,4 @@
-const gacpService = require('../services/ApplicationWorkflowService');
+// const gacpService = require('../services/ApplicationWorkflowService');
 const logger = require('../shared/logger'); // Assuming logger exists
 
 class PaymentController {
@@ -30,7 +30,8 @@ class PaymentController {
             };
 
             // Call service
-            const application = await gacpService.processPayment(applicationId, phase, paymentDetails);
+            // const application = await gacpService.processPayment(applicationId, phase, paymentDetails);
+            throw new Error('ApplicationWorkflowService is missing');
 
             res.json({
                 success: true,

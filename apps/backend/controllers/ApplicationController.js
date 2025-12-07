@@ -343,6 +343,16 @@ class ApplicationController {
             res.status(500).json({ success: false, error: error.message });
         }
     }
+
+    // Fetch Notifications
+    async getNotifications(req, res) {
+        try {
+            const notifications = await Notification.find({ recipientId: req.user.id }).sort({ createdAt: -1 });
+            res.json({ success: true, data: notifications });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
 }
 
 module.exports = new ApplicationController();

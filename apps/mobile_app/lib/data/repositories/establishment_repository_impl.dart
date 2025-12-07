@@ -30,6 +30,12 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
                   imageUrl: item['imageUrl'],
                   titleDeedNo: item['titleDeedNo'] ?? '',
                   security: item['security'] ?? '',
+                  // Mock Data
+                  updatedAt: DateTime.now().subtract(const Duration(days: 3)),
+                  licenseExpiredAt:
+                      DateTime.now().add(const Duration(days: 365)),
+                  licenseNumber:
+                      'GACP-2025-${(item['_id'] ?? item['id']).toString().substring(0, 4).toUpperCase()}',
                 ))
             .toList();
 
@@ -94,6 +100,24 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
       }
     } on DioException catch (e) {
       return Left(ServerFailure(message: e.message ?? 'Network Error'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteEstablishment(String id) async {
+    try {
+      final response = await _dioClient.delete('/establishments/$id');
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return const Right(null);
+      } else {
+        return Left(
+            ServerFailure(message: response.data['error'] ?? 'Delete failed'));
+      }
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: e.message ?? 'Delete Failed'));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

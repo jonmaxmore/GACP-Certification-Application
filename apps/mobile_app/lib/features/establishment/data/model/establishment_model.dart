@@ -32,6 +32,10 @@ class EstablishmentModel with _$EstablishmentModel {
       images: images,
       titleDeedNo: titleDeedNo,
       security: security,
+      // Mock Data for UI Demonstration
+      updatedAt: DateTime.now().subtract(Duration(days: id?.length ?? 1)),
+      licenseExpiredAt: DateTime.now().add(const Duration(days: 365)),
+      licenseNumber: 'GACP-2024-${id?.substring(0, 4).toUpperCase() ?? "TEST"}',
     );
   }
 }

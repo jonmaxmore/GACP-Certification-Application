@@ -31,19 +31,19 @@ class _MobileShell extends StatelessWidget {
         destinations: const [
           NavigationDestination(
             icon: Icon(LucideIcons.layoutDashboard),
-            label: 'Dashboard',
+            label: 'ภาพรวม (Dashboard)',
           ),
           NavigationDestination(
             icon: Icon(LucideIcons.sprout),
-            label: 'My Sites',
+            label: 'แปลงปลูก (Establishments)',
           ),
           NavigationDestination(
             icon: Icon(LucideIcons.fileText),
-            label: 'Applications',
+            label: 'รายการคำขอ (Applications)',
           ),
           NavigationDestination(
             icon: Icon(LucideIcons.user),
-            label: 'Profile',
+            label: 'ข้อมูลส่วนตัว (Profile)',
           ),
         ],
       ),
@@ -93,19 +93,19 @@ class _DesktopShell extends StatelessWidget {
             destinations: const [
               NavigationRailDestination(
                 icon: Icon(LucideIcons.layoutDashboard),
-                label: Text('Dashboard'),
+                label: Text('ภาพรวม (Dashboard)'),
               ),
               NavigationRailDestination(
                 icon: Icon(LucideIcons.sprout),
-                label: Text('Establishments'),
+                label: Text('แปลงปลูก (Establishments)'),
               ),
               NavigationRailDestination(
                 icon: Icon(LucideIcons.fileText),
-                label: Text('Applications'),
+                label: Text('รายการคำขอ (Applications)'),
               ),
               NavigationRailDestination(
                 icon: Icon(LucideIcons.user),
-                label: Text('Profile'),
+                label: Text('ข้อมูลส่วนตัว (Profile)'),
               ),
             ],
           ),

@@ -1,4 +1,4 @@
-const ApplicationWorkflowService = require('../services/ApplicationWorkflowService');
+// const ApplicationWorkflowService = require('../services/ApplicationWorkflowService');
 const User = require('../models/UserModel');
 const Application = require('../models/ApplicationModel');
 const logger = require('../shared/logger');
@@ -18,29 +18,30 @@ class OfficerController {
                 // Move to inspection_scheduled? Or keep in under_review?
                 // For simplified flow: Approve Docs -> Ready for Inspection.
                 // Using 'inspection_scheduled' as the state for "Waiting for Audit/Inspection"
-                await ApplicationWorkflowService.updateApplicationStatus(
+                // Using 'inspection_scheduled' as the state for "Waiting for Audit/Inspection"
+                /* await ApplicationWorkflowService.updateApplicationStatus(
                     id,
                     'inspection_scheduled',
                     comment || 'Documents approved by officer',
                     officerId
-                );
+                ); */
 
                 // We might also want to mark specific documents as verified?
                 // Keeping it simple as per "Golden Loop".
             } else if (status === 'rejected') {
                 // Return to revision_required or rejected?
                 // If doc issues, usually revision_required.
-                await ApplicationWorkflowService.updateApplicationStatus(
+                /* await ApplicationWorkflowService.updateApplicationStatus(
                     id,
                     'revision_required',
                     comment || 'Please revise documents',
                     officerId
-                );
+                ); */
             } else {
                 return res.status(400).json({ success: false, error: 'Invalid status' });
             }
 
-            const application = await ApplicationWorkflowService.getApplicationById(id);
+            const application = await Application.findById(id); // await ApplicationWorkflowService.getApplicationById(id);
             res.json({ success: true, data: application });
 
         } catch (error) {
@@ -104,12 +105,12 @@ class OfficerController {
             application.markModified('inspection');
 
             // Log history
-            await ApplicationWorkflowService.updateApplicationStatus(
+            /* await ApplicationWorkflowService.updateApplicationStatus(
                 id,
                 'inspection_scheduled', // Re-affirm status or move to next?
                 `Auditor assigned: ${auditor.firstName} ${auditor.lastName}`,
                 officerId
-            );
+            ); */
 
             // Force save to ensure fields are persisted despite Service saving history
             // We need to fetch/save again or rely on the fact that updateApplicationStatus saves the doc?
@@ -139,11 +140,12 @@ class OfficerController {
             const auditorId = req.user ? req.user.id : null;
 
             // Delegate to Workflow Service
-            const result = await ApplicationWorkflowService.processInspectionResults(
+            /* const result = await ApplicationWorkflowService.processInspectionResults(
                 id,
                 inspectionData,
                 auditorId
-            );
+            ); */
+            throw new Error('ApplicationWorkflowService is missing');
 
             res.json({ success: true, data: result });
         } catch (error) {

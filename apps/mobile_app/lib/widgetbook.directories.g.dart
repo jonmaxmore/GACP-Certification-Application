@@ -12,10 +12,14 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:mobile_app/presentation/features/application/screens/application_form_screen.dart'
     as _mobile_app_presentation_features_application_screens_application_form_screen;
+import 'package:mobile_app/presentation/features/application/screens/application_tracking_screen.dart'
+    as _mobile_app_presentation_features_application_screens_application_tracking_screen;
 import 'package:mobile_app/presentation/features/application/screens/guidelines_screen.dart'
     as _mobile_app_presentation_features_application_screens_guidelines_screen;
 import 'package:mobile_app/presentation/features/application/screens/service_selection_screen.dart'
     as _mobile_app_presentation_features_application_screens_service_selection_screen;
+import 'package:mobile_app/presentation/features/dashboard/screens/user_profile_screen.dart'
+    as _mobile_app_presentation_features_dashboard_screens_user_profile_screen;
 import 'package:widgetbook/widgetbook.dart' as _widgetbook;
 
 final directories = <_widgetbook.WidgetbookNode>[
@@ -35,6 +39,12 @@ final directories = <_widgetbook.WidgetbookNode>[
                     name: 'ApplicationFormScreen',
                     useCases: [
                       _widgetbook.WidgetbookUseCase(
+                        name: 'Amendment',
+                        builder:
+                            _mobile_app_presentation_features_application_screens_application_form_screen
+                                .applicationFormAmendmentUseCase,
+                      ),
+                      _widgetbook.WidgetbookUseCase(
                         name: 'New Application',
                         builder:
                             _mobile_app_presentation_features_application_screens_application_form_screen
@@ -53,6 +63,15 @@ final directories = <_widgetbook.WidgetbookNode>[
                                 .applicationFormSubstituteUseCase,
                       ),
                     ],
+                  ),
+                  _widgetbook.WidgetbookLeafComponent(
+                    name: 'ApplicationTrackingScreen',
+                    useCase: _widgetbook.WidgetbookUseCase(
+                      name: 'Tracking Timeline',
+                      builder:
+                          _mobile_app_presentation_features_application_screens_application_tracking_screen
+                              .trackingTimelineUseCase,
+                    ),
                   ),
                   _widgetbook.WidgetbookLeafComponent(
                     name: 'GuidelinesScreen',
@@ -75,7 +94,26 @@ final directories = <_widgetbook.WidgetbookNode>[
                 ],
               )
             ],
-          )
+          ),
+          _widgetbook.WidgetbookFolder(
+            name: 'dashboard',
+            children: [
+              _widgetbook.WidgetbookFolder(
+                name: 'screens',
+                children: [
+                  _widgetbook.WidgetbookLeafComponent(
+                    name: 'UserProfileScreen',
+                    useCase: _widgetbook.WidgetbookUseCase(
+                      name: 'User Profile',
+                      builder:
+                          _mobile_app_presentation_features_dashboard_screens_user_profile_screen
+                              .userProfileUseCase,
+                    ),
+                  )
+                ],
+              )
+            ],
+          ),
         ],
       )
     ],

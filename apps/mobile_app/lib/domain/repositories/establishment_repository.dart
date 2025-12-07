@@ -15,4 +15,6 @@ abstract class EstablishmentRepository {
     required String security,
     File? image,
   });
+
+  Future<Either<Failure, void>> deleteEstablishment(String id);
 }

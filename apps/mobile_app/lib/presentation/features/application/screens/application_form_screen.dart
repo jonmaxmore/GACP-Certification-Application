@@ -111,6 +111,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
   Set<String> _certificationTypes = {'CULTIVATION'};
   Set<String> _objectives = {'COMMERCIAL_DOMESTIC'};
   String _applicantType = 'INDIVIDUAL';
+  String? _herbType; // New: Herb Type
   Set<String> _areaTypes = {'OUTDOOR'}; // New: Site Area Type
   // Enums from Backend:
   // certificationType: ['CULTIVATION', 'PROCESSING']
@@ -1197,6 +1198,39 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       style: TextStyle(color: Colors.grey, fontSize: 12)),
                   const SizedBox(height: 12),
 
+                  // Herb Type Selection (New Request)
+                  DropdownButtonFormField<String>(
+                    value: _herbType,
+                    decoration: const InputDecoration(
+                      labelText: 'ชนิดพืชสมุนไพร (Herb Type)',
+                      border: OutlineInputBorder(),
+                      helperText: 'เลือกพืชที่ต้องการขอการรับรอง',
+                      prefixIcon: Icon(LucideIcons.sprout),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                          value: 'CANNABIS',
+                          child: Text('กัญชง/กัญชา (Cannabis/Hemp)')),
+                      DropdownMenuItem(
+                          value: 'TURMERIC',
+                          child: Text('ขมิ้นชัน (Turmeric)')),
+                      DropdownMenuItem(
+                          value: 'GINGER', child: Text('ขิง (Ginger)')),
+                      DropdownMenuItem(
+                          value: 'BLACK_GALINGALE',
+                          child: Text('กระชายดำ (Black Galingale)')),
+                      DropdownMenuItem(
+                          value: 'PLAI', child: Text('ไพล (Plai)')),
+                      DropdownMenuItem(
+                          value: 'KRATOM', child: Text('กระท่อม (Kratom)')),
+                    ],
+                    onChanged: (v) => setState(() => _herbType = v),
+                    validator: (v) => v == null
+                        ? 'กรุณาเลือกชนิดพืช (Please select herb type)'
+                        : null,
+                  ),
+                  const SizedBox(height: 24),
+
                   // Replacement Section (Conditional)
                   if (widget.requestType == 'SUBSTITUTE' ||
                       widget.requestType == 'REPLACEMENT') ...[
@@ -1255,7 +1289,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.amber.withOpacity(0.1),
+                              color: Colors.amber.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: Colors.amber),
                             ),
@@ -1273,7 +1307,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.1),
+                              color: Colors.blue.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: Colors.blue),
                             ),

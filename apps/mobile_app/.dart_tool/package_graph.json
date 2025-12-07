@@ -28,7 +28,9 @@
         "latlong2",
         "lucide_icons",
         "riverpod_annotation",
-        "url_launcher"
+        "url_launcher",
+        "widgetbook",
+        "widgetbook_annotation"
       ],
       "devDependencies": [
         "build_runner",
@@ -36,7 +38,24 @@
         "flutter_test",
         "freezed",
         "json_serializable",
-        "riverpod_generator"
+        "riverpod_generator",
+        "widgetbook_generator"
+      ]
+    },
+    {
+      "name": "widgetbook_generator",
+      "version": "3.14.0",
+      "dependencies": [
+        "analyzer",
+        "build",
+        "code_builder",
+        "collection",
+        "crypto",
+        "glob",
+        "meta",
+        "path",
+        "source_gen",
+        "widgetbook_annotation"
       ]
     },
     {
@@ -154,6 +173,29 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "widgetbook_annotation",
+      "version": "3.9.0",
+      "dependencies": [
+        "meta"
+      ]
+    },
+    {
+      "name": "widgetbook",
+      "version": "3.20.2",
+      "dependencies": [
+        "accessibility_tools",
+        "collection",
+        "device_frame_plus",
+        "flutter",
+        "inspector",
+        "meta",
+        "nested",
+        "resizable_widget",
+        "url_launcher",
+        "widgetbook_annotation"
       ]
     },
     {
@@ -377,20 +419,6 @@
       ]
     },
     {
-      "name": "dart_style",
-      "version": "3.1.1",
-      "dependencies": [
-        "analyzer",
-        "args",
-        "collection",
-        "package_config",
-        "path",
-        "pub_semver",
-        "source_span",
-        "yaml"
-      ]
-    },
-    {
       "name": "source_gen",
       "version": "2.0.0",
       "dependencies": [
@@ -406,9 +434,32 @@
       ]
     },
     {
+      "name": "path",
+      "version": "1.9.1",
+      "dependencies": []
+    },
+    {
       "name": "meta",
       "version": "1.17.0",
       "dependencies": []
+    },
+    {
+      "name": "glob",
+      "version": "2.1.3",
+      "dependencies": [
+        "async",
+        "collection",
+        "file",
+        "path",
+        "string_scanner"
+      ]
+    },
+    {
+      "name": "crypto",
+      "version": "3.0.7",
+      "dependencies": [
+        "typed_data"
+      ]
     },
     {
       "name": "collection",
@@ -416,14 +467,14 @@
       "dependencies": []
     },
     {
-      "name": "build_config",
-      "version": "1.1.2",
+      "name": "code_builder",
+      "version": "4.11.0",
       "dependencies": [
-        "checked_yaml",
-        "json_annotation",
-        "path",
-        "pubspec_parse",
-        "yaml"
+        "built_collection",
+        "built_value",
+        "collection",
+        "matcher",
+        "meta"
       ]
     },
     {
@@ -465,6 +516,31 @@
       ]
     },
     {
+      "name": "dart_style",
+      "version": "3.1.1",
+      "dependencies": [
+        "analyzer",
+        "args",
+        "collection",
+        "package_config",
+        "path",
+        "pub_semver",
+        "source_span",
+        "yaml"
+      ]
+    },
+    {
+      "name": "build_config",
+      "version": "1.1.2",
+      "dependencies": [
+        "checked_yaml",
+        "json_annotation",
+        "path",
+        "pubspec_parse",
+        "yaml"
+      ]
+    },
+    {
       "name": "source_helper",
       "version": "1.3.7",
       "dependencies": [
@@ -491,11 +567,6 @@
       ]
     },
     {
-      "name": "path",
-      "version": "1.9.1",
-      "dependencies": []
-    },
-    {
       "name": "async",
       "version": "2.13.0",
       "dependencies": [
@@ -515,13 +586,6 @@
         "meta",
         "path",
         "source_span"
-      ]
-    },
-    {
-      "name": "crypto",
-      "version": "3.0.7",
-      "dependencies": [
-        "typed_data"
       ]
     },
     {
@@ -663,33 +727,11 @@
       ]
     },
     {
-      "name": "glob",
-      "version": "2.1.3",
-      "dependencies": [
-        "async",
-        "collection",
-        "file",
-        "path",
-        "string_scanner"
-      ]
-    },
-    {
       "name": "frontend_server_client",
       "version": "4.0.0",
       "dependencies": [
         "async",
         "path"
-      ]
-    },
-    {
-      "name": "code_builder",
-      "version": "4.11.0",
-      "dependencies": [
-        "built_collection",
-        "built_value",
-        "collection",
-        "matcher",
-        "meta"
       ]
     },
     {
@@ -828,6 +870,43 @@
         "stream_channel",
         "string_scanner",
         "term_glyph"
+      ]
+    },
+    {
+      "name": "resizable_widget",
+      "version": "1.0.5",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "nested",
+      "version": "1.0.0",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "inspector",
+      "version": "3.1.0",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "device_frame_plus",
+      "version": "1.5.0",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "accessibility_tools",
+      "version": "2.8.0",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "flutter_test"
       ]
     },
     {
@@ -1178,19 +1257,25 @@
       ]
     },
     {
-      "name": "checked_yaml",
-      "version": "2.0.4",
+      "name": "string_scanner",
+      "version": "1.4.1",
       "dependencies": [
-        "json_annotation",
-        "source_span",
-        "yaml"
+        "source_span"
       ]
     },
     {
-      "name": "convert",
-      "version": "3.1.2",
+      "name": "file",
+      "version": "7.0.1",
       "dependencies": [
-        "typed_data"
+        "meta",
+        "path"
+      ]
+    },
+    {
+      "name": "typed_data",
+      "version": "1.4.0",
+      "dependencies": [
+        "collection"
       ]
     },
     {
@@ -1209,10 +1294,26 @@
       "dependencies": []
     },
     {
+      "name": "convert",
+      "version": "3.1.2",
+      "dependencies": [
+        "typed_data"
+      ]
+    },
+    {
       "name": "_fe_analyzer_shared",
       "version": "85.0.0",
       "dependencies": [
         "meta"
+      ]
+    },
+    {
+      "name": "checked_yaml",
+      "version": "2.0.4",
+      "dependencies": [
+        "json_annotation",
+        "source_span",
+        "yaml"
       ]
     },
     {
@@ -1235,32 +1336,10 @@
       ]
     },
     {
-      "name": "typed_data",
-      "version": "1.4.0",
-      "dependencies": [
-        "collection"
-      ]
-    },
-    {
-      "name": "string_scanner",
-      "version": "1.4.1",
-      "dependencies": [
-        "source_span"
-      ]
-    },
-    {
       "name": "web_socket",
       "version": "1.0.1",
       "dependencies": [
         "web"
-      ]
-    },
-    {
-      "name": "file",
-      "version": "7.0.1",
-      "dependencies": [
-        "meta",
-        "path"
       ]
     },
     {

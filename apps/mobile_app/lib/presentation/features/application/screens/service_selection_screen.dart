@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
+
+@widgetbook.UseCase(name: 'Default', type: ServiceSelectionScreen)
+Widget serviceSelectionScreenUseCase(BuildContext context) {
+  return const ServiceSelectionScreen();
+}
 
 class ServiceSelectionScreen extends StatefulWidget {
   const ServiceSelectionScreen({super.key});
@@ -143,8 +149,8 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                   onPressed: _selectedService == null
                       ? null
                       : () {
-                          // Pass service type if needed, or just go to form
-                          context.push('/applications/form',
+                          // Navigate to Guidelines first
+                          context.push('/applications/guidelines',
                               extra: _selectedService);
                         },
                   style: FilledButton.styleFrom(

@@ -15,6 +15,7 @@ import '../../presentation/features/admin/screens/application_detail_screen.dart
 import '../../presentation/features/application/screens/application_form_screen.dart';
 import '../../presentation/features/application/screens/notification_screen.dart';
 import '../../presentation/features/application/screens/service_selection_screen.dart';
+import '../../presentation/features/application/screens/guidelines_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -73,6 +74,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/applications/form',
             builder: (context, state) => ApplicationFormScreen(
               requestType: state.extra as String?,
+            ),
+          ),
+          GoRoute(
+            path: '/applications/guidelines',
+            builder: (context, state) => GuidelinesScreen(
+              requestType: state.extra as String,
             ),
           ),
           GoRoute(

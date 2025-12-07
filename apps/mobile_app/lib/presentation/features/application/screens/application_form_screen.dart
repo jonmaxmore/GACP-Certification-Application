@@ -6,6 +6,28 @@ import 'package:url_launcher/url_launcher.dart';
 import '../providers/application_provider.dart';
 import 'package:mobile_app/presentation/features/establishment/providers/establishment_provider.dart';
 import 'package:mobile_app/domain/entities/establishment_entity.dart'; // Correct Import
+import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
+
+@widgetbook.UseCase(name: 'New Application', type: ApplicationFormScreen)
+Widget applicationFormUseCase(BuildContext context) {
+  return const ProviderScope(
+    child: ApplicationFormScreen(requestType: 'NEW'),
+  );
+}
+
+@widgetbook.UseCase(name: 'Renewal', type: ApplicationFormScreen)
+Widget applicationFormRenewUseCase(BuildContext context) {
+  return const ProviderScope(
+    child: ApplicationFormScreen(requestType: 'RENEW'),
+  );
+}
+
+@widgetbook.UseCase(name: 'Replacement', type: ApplicationFormScreen)
+Widget applicationFormSubstituteUseCase(BuildContext context) {
+  return const ProviderScope(
+    child: ApplicationFormScreen(requestType: 'SUBSTITUTE'),
+  );
+}
 
 class ApplicationFormScreen extends ConsumerStatefulWidget {
   final String? requestType;
@@ -41,6 +63,10 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
   final _securityFencingController =
       TextEditingController(text: 'รั้วลวดหนาม สูง 2 เมตร');
   final _securityCCTVController = TextEditingController();
+
+  // Renewal Fields
+  final _oldCertificateController = TextEditingController();
+  final _yearController = TextEditingController();
 
   // New: Dropdown Values
   String _certificationType = 'CULTIVATION';
@@ -96,6 +122,201 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
     }
   }
 
+  // Helper for Renewal Documents
+  List<Map<String, dynamic>> _getRenewalDocumentList() {
+    return [
+      {
+        'title': 'ต้นฉบับใบรับรองเก่า (Original Old Certificate)',
+        'required': true,
+        'maxSize': '10 MB',
+        'types': ['PDF', 'Image']
+      },
+      {
+        'title': 'แผนการปลูกและการเก็บเกี่ยว/แปรรูป (Planting/Harvesting Plan)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': 'แผนการใช้ประโยชน์ (Utilization Plan)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': 'รายงานสรุปผลการดำเนินการ (Performance Report)',
+        'required': true,
+        'maxSize': '1 GB',
+        'types': ['PDF']
+      },
+      {
+        'title': 'เอกสาร SOP (SOP Document)',
+        'required': true,
+        'maxSize': '10 MB',
+        'types': ['PDF']
+      },
+      // Numbered List
+      {
+        'title': '1. แบบลงทะเบียนยื่นคำขอ',
+        'subtitle': 'ดาวน์โหลดแบบฟอร์มและแนบกลับ',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF'],
+        'hasDownload': true,
+        'hasVideo': true,
+        'videoLink': 'https://youtu.be/example'
+      },
+      {
+        'title': '2. สำเนาหนังสือแสดงกรรมสิทธิ์ที่ดิน (Title Deed)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '3. หนังสือยินยอมใช้ที่ดิน (Consent Letter)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '4. แผนที่แสดงที่ตั้งและพิกัด (Map & Coordinates)',
+        'description': 'เส้นทางการเข้าถึง, ขนาดแปลง, สิ่งปลูกสร้างข้างเคียง',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '5. แบบแปลนอาคาร/โรงเรือน (Building Plan)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '6. ภาพถ่ายภายนอกอาคาร/โรงเรือน (Exterior Photos)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF', 'Image']
+      },
+      {
+        'title': '7. แผนการผลิตและใช้ประโยชน์ (Production Plan)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '8. มาตรการรักษาความปลอดภัย (Security Protocol)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '9. ภาพถ่ายภายในสถานที่ผลิต (Interior Photos)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF', 'Image']
+      },
+      {
+        'title': '10. คู่มือมาตรฐานการปฏิบัติงาน (SOP - Full)',
+        'description':
+            'ฉบับภาษาไทยเท่านั้น, ระบุละเอียดทุกขั้นตอน (เพาะ, เก็บเกี่ยว, ทำแห้ง, ฯลฯ)',
+        'required': true,
+        'maxSize': '1 GB',
+        'types': ['PDF']
+      },
+      {
+        'title': '11. สำเนาหนังสือจดทะเบียนวิสาหกิจชุมชน',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '12. หนังสือมอบอำนาจ (สวช.01)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '13. เอกสารแสดงการดำเนินกิจการ (ท.ว.ช.3)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '14. ใบรับรองการอบรม (GACP Training)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF', 'Image']
+      },
+      {
+        'title': '15. หนังสือรับรองสายพันธุ์ (Strain Certificate)',
+        'required': true,
+        'maxSize': '10 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '16. เอกสารการอบรมพนักงานภายใน',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '17. แบบทดสอบพนักงานและผลการทดสอบ',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '18. ผลตรวจวัสดุปลูก (Soil/Substrate Test)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '19. ผลตรวจน้ำ (Water Test)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '20. ผลตรวจช่อดอก (Flower Test)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '21. รายงานปัจจัยการผลิต (Inputs Report)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF', 'Image']
+      },
+      {
+        'title': '22. ตารางแผนควบคุมการผลิต CP/CCP',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF']
+      },
+      {
+        'title': '23. ใบสอบเทียบเครื่องมือ (Calibration Cert)',
+        'required': true,
+        'maxSize': '100 MB',
+        'types': ['PDF', 'Image']
+      },
+      {
+        'title': '24. วิดีโอแสดงสถานที่การปฏิบัติงาน',
+        'description': 'กรุณาแนบลิงค์วิดีโอ',
+        'required': true,
+        'maxSize': 'N/A',
+        'isLink': true
+      },
+      {
+        'title': '25. เอกสารเพิ่มเติม (Additional)',
+        'required': false,
+        'maxSize': '100 MB',
+        'types': ['PDF', 'Image']
+      },
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,6 +341,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                   // Section 1: Applicant Info
                   ExpansionTile(
                     initiallyExpanded: true,
+                    childrenPadding: const EdgeInsets.symmetric(horizontal: 16),
                     title: const Text('1. ข้อมูลผู้ยื่นคำขอ (Applicant)',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     children: [
@@ -233,6 +455,34 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                           ],
                         ),
 
+                      // RENEWAL SPECIFIC FIELDS
+                      if (widget.requestType == 'RENEW')
+                        Column(
+                          children: [
+                            TextFormField(
+                              controller: _oldCertificateController,
+                              decoration: const InputDecoration(
+                                labelText: 'ใบรับรองเลขที่ (Certificate No.)',
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (v) =>
+                                  v!.isEmpty ? 'กรุณาระบุเลขใบรับรอง' : null,
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _yearController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'ประจำปี พ.ศ. (Year)',
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (v) =>
+                                  v!.isEmpty ? 'กรุณาระบุปี' : null,
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                        ),
+
                       TextFormField(
                         controller: _applicantNameController,
                         decoration: const InputDecoration(
@@ -291,6 +541,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
                   // Section 2: Site Info
                   ExpansionTile(
+                    childrenPadding: const EdgeInsets.symmetric(horizontal: 16),
                     title: const Text('2. สถานที่เพาะปลูก (Cultivation Site)',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     children: [
@@ -337,6 +588,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
                   // Section 3: Security
                   ExpansionTile(
+                    childrenPadding: const EdgeInsets.symmetric(horizontal: 16),
                     title: const Text('3. ระบบความปลอดภัย (Security)',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     children: [
@@ -360,6 +612,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
                   // Section 4: Cultivation Plan
                   ExpansionTile(
+                    childrenPadding: const EdgeInsets.symmetric(horizontal: 16),
                     title: const Text('4. แผนการผลิต (Cultivation Plan)',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     children: [
@@ -391,6 +644,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
                   // Section 5: Harvesting
                   ExpansionTile(
+                    childrenPadding: const EdgeInsets.symmetric(horizontal: 16),
                     title: const Text('5. การเก็บเกี่ยว (Harvesting)',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     children: [
@@ -413,6 +667,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
                   // Section 6: Post-Harvest
                   ExpansionTile(
+                    childrenPadding: const EdgeInsets.symmetric(horizontal: 16),
                     title: const Text(
                         '6. การจัดการหลังเก็บเกี่ยว (Post-Harvest)',
                         style: TextStyle(fontWeight: FontWeight.bold)),
@@ -436,6 +691,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
                   // Section 7: Personnel
                   ExpansionTile(
+                    childrenPadding: const EdgeInsets.symmetric(horizontal: 16),
                     title: const Text('7. บุคลากร (Personnel)',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     children: [
@@ -465,21 +721,105 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
             title: const Text('แนบเอกสาร & AI Scan'),
             content: Column(
               children: [
-                const Text('กรุณาแนบโฉนดที่ดินเพื่อตรวจสอบ'),
+                const Text('กรุณาแนบเอกสารหลักฐานประกอบคำขอ (Documents)'),
                 const SizedBox(height: 12),
+                ..._getRenewalDocumentList().map((doc) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              doc['isLink'] == true
+                                  ? LucideIcons.video
+                                  : LucideIcons.fileText,
+                              color: Colors.blue[700],
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                doc['title'],
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            if (doc['required'] == true)
+                              const Text('*',
+                                  style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                        if (doc['subtitle'] != null)
+                          Text(doc['subtitle'],
+                              style: TextStyle(
+                                  color: Colors.grey[600], fontSize: 12)),
+                        if (doc['description'] != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(doc['description'],
+                                style: TextStyle(
+                                    fontStyle: FontStyle.italic,
+                                    color: Colors.grey[700],
+                                    fontSize: 12)),
+                          ),
+                        const SizedBox(height: 8),
+                        if (doc['isLink'] == true)
+                          TextFormField(
+                            decoration: const InputDecoration(
+                              hintText: 'วางลิงค์วิดีโอ (Paste Video Link)',
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                            ),
+                          )
+                        else
+                          Row(
+                            children: [
+                              OutlinedButton.icon(
+                                onPressed: () {}, // TODO: Implement Upload
+                                icon: const Icon(LucideIcons.uploadCloud,
+                                    size: 16),
+                                label: const Text('New Upload'),
+                              ),
+                              const Spacer(),
+                              Text(
+                                'Max: ${doc['maxSize']}',
+                                style: const TextStyle(
+                                    color: Colors.grey, fontSize: 10),
+                              ),
+                            ],
+                          ),
+                        if (doc['hasDownload'] == true)
+                          TextButton.icon(
+                            onPressed: () {},
+                            icon: const Icon(LucideIcons.download, size: 16),
+                            label: const Text('ดาวน์โหลดแบบฟอร์ม'),
+                            style: TextButton.styleFrom(
+                                visualDensity: VisualDensity.compact),
+                          )
+                      ],
+                    ),
+                  );
+                }).toList(),
+                const SizedBox(height: 16),
+                // AI Scan Section (Bottom)
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8)),
+                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.blue[50]),
                   child: Column(
                     children: [
-                      const Icon(LucideIcons.fileImage,
-                          size: 40, color: Colors.blue),
-                      const Text('Chanote_Land_01.pdf'),
-                      const SizedBox(height: 12),
+                      const Text('ระบบตรวจสอบความถูกต้องเบื้องต้น (AI Scan)'),
+                      const SizedBox(height: 8),
                       if (_isAnalyzing)
-                        // Fixed: no const here
                         const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -494,15 +834,17 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                           child: Row(children: [
                             const Icon(LucideIcons.check, color: Colors.green),
                             const SizedBox(width: 8),
-                            Text(_aiResult!,
-                                style: const TextStyle(color: Colors.green))
+                            Expanded(
+                                child: Text(_aiResult!,
+                                    style:
+                                        const TextStyle(color: Colors.green)))
                           ]),
                         )
                       else
                         ElevatedButton.icon(
                             onPressed: _runAIScan,
                             icon: const Icon(LucideIcons.scan),
-                            label: const Text('Run AI Scan'))
+                            label: const Text('ตรวจสอบเอกสารทั้งหมด'))
                     ],
                   ),
                 )
@@ -596,6 +938,12 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
             'mobile': _mobileController.text,
             'email': _emailController.text,
             'lineId': _lineIdController.text,
+            // RENEWAL DATA
+            if (widget.requestType == 'RENEW') ...{
+              'oldCertificateId': _oldCertificateController.text,
+              'year': _yearController.text,
+            },
+            // Use 'entityName' if Juristic/Community, but map to name for simplicity or separate if needed
             // Use 'entityName' if Juristic/Community, but map to name for simplicity or separate if needed
             'entityName': _applicantNameController.text,
           },

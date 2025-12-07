@@ -16,6 +16,8 @@ import '../../presentation/features/application/screens/application_form_screen.
 import '../../presentation/features/application/screens/notification_screen.dart';
 import '../../presentation/features/application/screens/service_selection_screen.dart';
 import '../../presentation/features/application/screens/guidelines_screen.dart';
+import '../../presentation/features/dashboard/screens/user_profile_screen.dart';
+import '../../presentation/features/application/screens/application_tracking_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -99,6 +101,14 @@ final routerProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) => const EstablishmentFormScreen(),
               ),
             ],
+          ),
+          GoRoute(
+            path: '/profile',
+            builder: (context, state) => const UserProfileScreen(),
+          ),
+          GoRoute(
+            path: '/application/tracking',
+            builder: (context, state) => const ApplicationTrackingScreen(),
           ),
         ],
       ),

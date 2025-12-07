@@ -140,10 +140,13 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              const CircleAvatar(
-                backgroundImage:
-                    AssetImage('assets/images/user_avatar.png'), // Mock
-                radius: 24,
+              GestureDetector(
+                onTap: () => context.push('/profile'),
+                child: const CircleAvatar(
+                  backgroundImage:
+                      AssetImage('assets/images/user_avatar.png'), // Mock
+                  radius: 24,
+                ),
               ),
             ],
           ),
@@ -174,7 +177,7 @@ class DashboardScreen extends ConsumerWidget {
           label: 'ติดตามสถานะ',
           icon: LucideIcons.activity,
           color: Colors.blue,
-          onTap: () {}, // Go to Application List
+          onTap: () => context.push('/application/tracking'),
         ),
         QuickActionCard(
           label: 'แจ้งเตือน',

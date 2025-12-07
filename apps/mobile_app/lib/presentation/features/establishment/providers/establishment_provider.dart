@@ -82,6 +82,8 @@ class EstablishmentNotifier extends StateNotifier<EstablishmentState> {
     required String name,
     required String type,
     required String address,
+    required String titleDeedNo,
+    required String security,
   }) async {
     if (state.selectedLocation == null) {
       state = state.copyWith(error: 'Please select a location');
@@ -96,7 +98,9 @@ class EstablishmentNotifier extends StateNotifier<EstablishmentState> {
       address: address,
       latitude: state.selectedLocation!.latitude,
       longitude: state.selectedLocation!.longitude,
-      image: state.selectedImage,
+      titleDeedNo: titleDeedNo,
+      security: security,
+      image: state.selectedImage, // Singular
     );
 
     result.fold(

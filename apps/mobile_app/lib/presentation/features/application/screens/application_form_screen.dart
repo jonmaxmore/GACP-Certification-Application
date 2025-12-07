@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:url_launcher/url_launcher.dart'; // Added
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/application_provider.dart';
+import 'package:mobile_app/presentation/features/establishment/providers/establishment_provider.dart';
+import 'package:mobile_app/domain/entities/establishment_entity.dart'; // Correct Import
 
 class ApplicationFormScreen extends ConsumerStatefulWidget {
-  const ApplicationFormScreen({super.key});
+  final String? requestType;
+  const ApplicationFormScreen({super.key, this.requestType});
 
   @override
   ConsumerState<ApplicationFormScreen> createState() =>
@@ -24,6 +27,63 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
   // Review & Payment State
   bool _isReviewed = false;
   bool _isPaidPhase1 = false;
+
+  // Controllers
+  final _applicantNameController = TextEditingController();
+  final _idCardController = TextEditingController();
+  final _mobileController = TextEditingController(); // New
+  final _emailController = TextEditingController(); // New
+  final _lineIdController = TextEditingController(); // New
+  final _regNoController = TextEditingController();
+  final _officeAddressController = TextEditingController();
+  final _titleDeedController = TextEditingController();
+  final _gpsController = TextEditingController();
+  final _securityFencingController =
+      TextEditingController(text: 'รั้วลวดหนาม สูง 2 เมตร');
+  final _securityCCTVController = TextEditingController();
+
+  // New: Dropdown Values
+  String _certificationType = 'CULTIVATION';
+  String _objective = 'COMMERCIAL_DOMESTIC';
+  String _applicantType = 'INDIVIDUAL';
+  String _areaType = 'OUTDOOR'; // New: Site Area Type
+  // Enums from Backend:
+  // certificationType: ['CULTIVATION', 'PROCESSING']
+  // objective: ['RESEARCH', 'COMMERCIAL_DOMESTIC', 'COMMERCIAL_EXPORT', 'OTHER']
+  // applicantType: ['COMMUNITY', 'INDIVIDUAL', 'JURISTIC']
+
+  // Selected Establishment
+  EstablishmentEntity? _selectedEstablishment;
+
+  @override
+  void dispose() {
+    _applicantNameController.dispose();
+    _regNoController.dispose();
+    _officeAddressController.dispose();
+    _titleDeedController.dispose();
+    _gpsController.dispose();
+    _securityFencingController.dispose();
+    _securityCCTVController.dispose();
+    super.dispose();
+  }
+
+  void _onEstablishmentSelected(EstablishmentEntity? establishment) {
+    setState(() {
+      _selectedEstablishment = establishment;
+    });
+    if (establishment != null) {
+      _applicantNameController.text = establishment.name;
+      _officeAddressController.text =
+          establishment.address; // Simple String Link
+      _titleDeedController.text = establishment.titleDeedNo;
+      _gpsController.text =
+          '${establishment.latitude}, ${establishment.longitude}';
+      _securityFencingController.text = establishment.security;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Auto-filled from ${establishment.name}')));
+    }
+  }
 
   void _runAIScan() async {
     setState(() => _isAnalyzing = true);
@@ -63,7 +123,118 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                     title: const Text('1. ข้อมูลผู้ยื่นคำขอ (Applicant)',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     children: [
+                      // Establishment Selector (Auto-fill)
+                      Consumer(builder: (context, ref, child) {
+                        final estState = ref.watch(establishmentProvider);
+                        return DropdownButtonFormField<EstablishmentEntity>(
+                          decoration: const InputDecoration(
+                            labelText: 'เลือกแปลงปลูกเพื่อระบุข้อมูล',
+                            prefixIcon: Icon(LucideIcons.sprout),
+                            border: OutlineInputBorder(),
+                            helperText: 'ข้อมูลจะถูกเติมอัตโนมัติ (Auto-fill)',
+                          ),
+                          initialValue: _selectedEstablishment,
+                          items: estState.establishments.map((e) {
+                            return DropdownMenuItem(
+                              value: e,
+                              child: Text(e.name),
+                            );
+                          }).toList(),
+                          onChanged: _onEstablishmentSelected,
+                        );
+                      }),
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 16),
+
+                      // New: GACP Service Details
+                      DropdownButtonFormField<String>(
+                        value: _certificationType,
+                        decoration: const InputDecoration(
+                            labelText: 'ประเภทการรับรอง (Certification Type)',
+                            border: OutlineInputBorder()),
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'CULTIVATION',
+                              child: Text('การเพาะปลูก (Cultivation)')),
+                          DropdownMenuItem(
+                              value: 'PROCESSING',
+                              child: Text('การแปรรูป (Processing)')),
+                        ],
+                        onChanged: (v) =>
+                            setState(() => _certificationType = v!),
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        value: _objective,
+                        decoration: const InputDecoration(
+                            labelText: 'วัตถุประสงค์ (Objective)',
+                            border: OutlineInputBorder()),
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'RESEARCH',
+                              child: Text('วิจัย (Research)')),
+                          DropdownMenuItem(
+                              value: 'COMMERCIAL_DOMESTIC',
+                              child: Text(
+                                  'จำหน่ายในประเทศ (Commercial Domestic)')),
+                          DropdownMenuItem(
+                              value: 'COMMERCIAL_EXPORT',
+                              child: Text('ส่งออก (Commercial Export)')),
+                          DropdownMenuItem(
+                              value: 'OTHER', child: Text('อื่นๆ (Other)')),
+                        ],
+                        onChanged: (v) => setState(() => _objective = v!),
+                      ),
+                      const SizedBox(height: 12),
+                      const Divider(),
+                      const SizedBox(height: 12),
+
+                      DropdownButtonFormField<String>(
+                        value: _applicantType,
+                        decoration: const InputDecoration(
+                            labelText: 'ประเภทผู้ยื่น (Applicant Type)',
+                            border: OutlineInputBorder()),
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'INDIVIDUAL',
+                              child: Text('บุคคลธรรมดา (Individual)')),
+                          DropdownMenuItem(
+                              value: 'COMMUNITY',
+                              child:
+                                  Text('วิสาหกิจชุมชน (Community Enterprise)')),
+                          DropdownMenuItem(
+                              value: 'JURISTIC',
+                              child: Text('นิติบุคคล (Juristic)')),
+                        ],
+                        onChanged: (v) => setState(() => _applicantType = v!),
+                      ),
+                      const SizedBox(height: 12),
+
+                      const SizedBox(height: 12),
+
+                      // Conditional: ID Card
+                      if (_applicantType == 'INDIVIDUAL')
+                        Column(
+                          children: [
+                            TextFormField(
+                              controller: _idCardController,
+                              decoration: const InputDecoration(
+                                  labelText: 'เลขบัตรประชาชน (ID Card)',
+                                  prefixIcon: Icon(LucideIcons.contact),
+                                  border: OutlineInputBorder()),
+                              validator: (v) => v!.length != 13
+                                  ? 'ระบุเลขบัตรฯ 13 หลัก'
+                                  : null,
+                              keyboardType: TextInputType.number,
+                              maxLength: 13,
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                        ),
+
                       TextFormField(
+                        controller: _applicantNameController,
                         decoration: const InputDecoration(
                             labelText: 'ชื่อสถานประกอบการ / เกษตรกร',
                             prefixIcon: Icon(LucideIcons.user),
@@ -72,6 +243,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
+                        controller: _regNoController,
                         decoration: const InputDecoration(
                             labelText: 'เลขทะเบียนเกษตรกร / นิติบุคคล',
                             prefixIcon: Icon(LucideIcons.hash),
@@ -80,11 +252,38 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
+                        controller: _officeAddressController,
                         decoration: const InputDecoration(
                             labelText: 'ที่ตั้งสำนักงาน (Address)',
                             prefixIcon: Icon(LucideIcons.home),
                             border: OutlineInputBorder()),
                         maxLines: 2,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _mobileController,
+                        decoration: const InputDecoration(
+                            labelText: 'เบอร์โทรศัพท์ (Mobile)',
+                            prefixIcon: Icon(LucideIcons.phone),
+                            border: OutlineInputBorder()),
+                        keyboardType: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                            labelText: 'อีเมล (Email)',
+                            prefixIcon: Icon(LucideIcons.mail),
+                            border: OutlineInputBorder()),
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _lineIdController,
+                        decoration: const InputDecoration(
+                            labelText: 'Line ID',
+                            prefixIcon: Icon(LucideIcons.messageCircle),
+                            border: OutlineInputBorder()),
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -95,7 +294,28 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                     title: const Text('2. สถานที่เพาะปลูก (Cultivation Site)',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     children: [
+                      DropdownButtonFormField<String>(
+                        value: _areaType,
+                        decoration: const InputDecoration(
+                            labelText: 'ประเภทพื้นที่ (Area Type)',
+                            border: OutlineInputBorder()),
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'OUTDOOR',
+                              child: Text('กลางแจ้ง (Outdoor)')),
+                          DropdownMenuItem(
+                              value: 'INDOOR', child: Text('ในร่ม (Indoor)')),
+                          DropdownMenuItem(
+                              value: 'GREENHOUSE',
+                              child: Text('โรงเรือน (Greenhouse)')),
+                          DropdownMenuItem(
+                              value: 'OTHER', child: Text('อื่นๆ (Other)')),
+                        ],
+                        onChanged: (v) => setState(() => _areaType = v!),
+                      ),
+                      const SizedBox(height: 12),
                       TextFormField(
+                        controller: _titleDeedController,
                         decoration: const InputDecoration(
                             labelText: 'เลขที่โฉนดที่ดิน (Title Deed No.)',
                             prefixIcon: Icon(LucideIcons.file),
@@ -104,6 +324,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
+                        controller: _gpsController,
                         decoration: const InputDecoration(
                             labelText: 'พิกัดแปลงปลูก (GPS Coordinates)',
                             prefixIcon: Icon(LucideIcons.mapPin),
@@ -120,10 +341,11 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     children: [
                       TextFormField(
+                        controller: _securityFencingController,
                         decoration: const InputDecoration(
                             labelText: 'รายละเอียดรั้วกั้น (Fencing)',
                             border: OutlineInputBorder()),
-                        initialValue: 'รั้วลวดหนาม สูง 2 เมตร',
+                        // Initial Value removed because Controller has it
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -258,9 +480,9 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       const SizedBox(height: 12),
                       if (_isAnalyzing)
                         // Fixed: no const here
-                        Row(
+                        const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               CircularProgressIndicator(),
                               SizedBox(width: 8),
                               Text('AI Analyzing...')
@@ -334,22 +556,83 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
     );
   }
 
-  void _onContinue() {
+  void _onContinue() async {
     if (_currentStep == 0) {
       if (_formKey.currentState != null && !_formKey.currentState!.validate()) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน')));
         return;
       }
+
+      // Create Draft Application (if not exists)
+      final appState = ref.read(applicationProvider);
+      if (appState.applicationId == null) {
+        if (_selectedEstablishment == null) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('กรุณาเลือกแปลงปลูก (Select Establishment)')));
+          return;
+        }
+
+        // Show Loading
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (ctx) => const Center(child: CircularProgressIndicator()));
+
+        final success =
+            await ref.read(applicationProvider.notifier).createApplication(
+          establishmentId: _selectedEstablishment!.id,
+          requestType: widget.requestType ?? 'NEW',
+          // Structured Data Payload (GACP V2)
+          certificationType: _certificationType,
+          objective: _objective,
+          applicantType: _applicantType,
+          applicantInfo: {
+            'name': _applicantNameController.text,
+            'address': _officeAddressController.text,
+            'idCard': _idCardController.text,
+            'registrationCode': _regNoController.text,
+            // Contact Info
+            'mobile': _mobileController.text,
+            'email': _emailController.text,
+            'lineId': _lineIdController.text,
+            // Use 'entityName' if Juristic/Community, but map to name for simplicity or separate if needed
+            'entityName': _applicantNameController.text,
+          },
+          siteInfo: {
+            'areaType': _areaType,
+            'titleDeedNo': _titleDeedController.text,
+            'coordinates': _gpsController.text,
+            'address': _officeAddressController
+                .text, // Fallback if site address same as office make explicit if needed
+          },
+          // Flexible/Legacy Data
+          formData: {
+            'securityFencing': _securityFencingController.text,
+            'securityCCTV': _securityCCTVController.text,
+            // ... other loose fields
+          },
+          documents: {}, // Attachments handled in next step
+        );
+
+        Navigator.pop(context); // Hide Loading
+
+        if (!success) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Failed to create application draft')));
+          return;
+        }
+      }
     }
     if (_currentStep < 2) setState(() => _currentStep++);
   }
 
   void _onCancel() {
-    if (_currentStep > 0)
+    if (_currentStep > 0) {
       setState(() => _currentStep--);
-    else
+    } else {
       context.pop();
+    }
   }
 
   // Controls

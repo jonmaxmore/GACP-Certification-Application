@@ -12,10 +12,30 @@ class ApplicationController {
     // Stage 1: Create Draft (Auto-select Form 09/10)
     async createDraft(req, res) {
         try {
-            const { farmId } = req.body;
+            // Updated to accept GACP V2 Data Payload
+            const {
+                farmId,
+                formData,
+                requestType,
+                certificationType,
+                objective,
+                applicantType,
+                applicantInfo,
+                siteInfo
+            } = req.body;
+
             const application = await Application.create({
                 farmerId: req.user.id,
-                data: { farmId },
+                data: {
+                    farmId,
+                    requestType,
+                    certificationType,
+                    objective,
+                    applicantType,
+                    applicantInfo,
+                    siteInfo,
+                    formData: formData || {} // Save the snapshot of form data
+                },
                 forms: { form09: true, form10: true, form11: false } // Default Logic
             });
             res.status(201).json({ success: true, data: application });

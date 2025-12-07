@@ -35,11 +35,57 @@ const ApplicationSchema = new Schema({
         form11: { type: Boolean, default: false } // Optional Self-Assessment
     },
 
-    // Data payload
+    // Data payload (GACP Application Details)
     data: {
         farmId: { type: Schema.Types.ObjectId, ref: 'Establishment' },
-        cropDetails: { type: Map, of: String }, // Flexible crop info
-        formData: { type: Map, of: Schema.Types.Mixed } // Form 09/10 inputs
+
+        // 1. Request Info
+        requestType: {
+            type: String,
+            enum: ['NEW', 'RENEW', 'SUBSTITUTE'],
+            default: 'NEW'
+        },
+        certificationType: {
+            type: String,
+            enum: ['CULTIVATION', 'PROCESSING'], // GACP vs Processing
+            default: 'CULTIVATION'
+        },
+        objective: {
+            type: String,
+            enum: ['RESEARCH', 'COMMERCIAL_DOMESTIC', 'COMMERCIAL_EXPORT', 'OTHER']
+        },
+
+        // 2. Applicant Info (Polymorphic)
+        applicantType: {
+            type: String,
+            enum: ['COMMUNITY', 'INDIVIDUAL', 'JURISTIC'],
+            required: true
+        },
+        applicantInfo: {
+            // Common
+            name: String, // President Name / Owner Name / Auth Person
+            idCard: String,
+            address: String,
+            mobile: String,
+            email: String,
+            lineId: String,
+
+            // Enterprise / Juristic Specific
+            entityName: String, // Community Name / Company Name
+            registrationCode: String, // SorWorChor.01 / Juristic ID
+            registrationCode2: String, // ThorWorChor.3
+        },
+
+        // 3. Site Info (Merged from Establishment or Overridden)
+        siteInfo: {
+            areaType: { type: String, enum: ['OUTDOOR', 'INDOOR', 'GREENHOUSE', 'OTHER'] },
+            address: String,
+            titleDeedNo: String,
+            coordinates: String, // GPS
+        },
+
+        // Legacy / Flexible
+        formData: { type: Map, of: Schema.Types.Mixed }
     },
 
     // Attachments (22 Slots)

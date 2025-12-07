@@ -10,6 +10,9 @@ class EstablishmentEntity extends Equatable {
   final double? longitude;
   final String? imageUrl;
 
+  final String titleDeedNo;
+  final String security;
+
   const EstablishmentEntity({
     required this.id,
     required this.name,
@@ -19,8 +22,21 @@ class EstablishmentEntity extends Equatable {
     this.latitude,
     this.longitude,
     this.imageUrl,
+    this.titleDeedNo = '',
+    this.security = '',
   });
 
   @override
-  List<Object?> get props => [id, name, type, address, status, latitude, longitude, imageUrl];
+  List<Object?> get props => [
+        id,
+        name,
+        type,
+        address,
+        status,
+        latitude,
+        longitude,
+        imageUrl,
+        titleDeedNo,
+        security
+      ];
 }

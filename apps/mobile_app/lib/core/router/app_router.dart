@@ -14,6 +14,7 @@ import '../../presentation/features/auditor/screens/auditor_dashboard_screen.dar
 import '../../presentation/features/admin/screens/application_detail_screen.dart';
 import '../../presentation/features/application/screens/application_form_screen.dart';
 import '../../presentation/features/application/screens/notification_screen.dart';
+import '../../presentation/features/application/screens/service_selection_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -61,9 +62,18 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/dashboard',
             builder: (context, state) => const DashboardScreen(),
           ),
+
+// ...
+
           GoRoute(
             path: '/applications/new',
-            builder: (context, state) => const ApplicationFormScreen(),
+            builder: (context, state) => const ServiceSelectionScreen(),
+          ),
+          GoRoute(
+            path: '/applications/form',
+            builder: (context, state) => ApplicationFormScreen(
+              requestType: state.extra as String?,
+            ),
           ),
           GoRoute(
             path: '/notifications',

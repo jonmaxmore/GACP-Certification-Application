@@ -14,6 +14,8 @@ class EstablishmentEntity extends Equatable {
   final EstablishmentAddress address;
   final EstablishmentCoordinates coordinates;
   final List<String> images;
+  final String titleDeedNo; // New
+  final String security; // New
 
   const EstablishmentEntity({
     this.id,
@@ -22,10 +24,13 @@ class EstablishmentEntity extends Equatable {
     required this.address,
     required this.coordinates,
     required this.images,
+    required this.titleDeedNo,
+    required this.security,
   });
 
   @override
-  List<Object?> get props => [id, name, type, address, coordinates, images];
+  List<Object?> get props =>
+      [id, name, type, address, coordinates, images, titleDeedNo, security];
 }
 
 class EstablishmentAddress extends Equatable {

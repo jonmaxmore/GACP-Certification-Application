@@ -38,6 +38,8 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
     required EstablishmentType type,
     required EstablishmentAddress address,
     required EstablishmentCoordinates coordinates,
+    required String titleDeedNo,
+    required String security,
     List<File>? images,
   }) async {
     try {
@@ -49,6 +51,8 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
         'address[zipCode]': address.zipCode,
         'coordinates[lat]': coordinates.lat,
         'coordinates[lng]': coordinates.lng,
+        'titleDeedNo': titleDeedNo,
+        'security': security,
       };
 
       final formData = FormData.fromMap(fields);

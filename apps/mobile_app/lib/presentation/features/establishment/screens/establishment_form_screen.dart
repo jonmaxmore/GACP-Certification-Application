@@ -21,6 +21,8 @@ class _EstablishmentFormScreenState
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
+  final _titleDeedController = TextEditingController(); // New
+  final _securityController = TextEditingController(); // New
 
   // Mapping Display Text (Thai) -> Backend Value
   final Map<String, String> _typeMap = {
@@ -42,6 +44,8 @@ class _EstablishmentFormScreenState
   void dispose() {
     _nameController.dispose();
     _addressController.dispose();
+    _titleDeedController.dispose();
+    _securityController.dispose();
     super.dispose();
   }
 
@@ -151,6 +155,36 @@ class _EstablishmentFormScreenState
                       validator: (v) =>
                           v?.isEmpty == true ? 'กรุณาระบุข้อมูล' : null,
                     ),
+                    const SizedBox(height: 16),
+
+                    // Title Deed No (GACP)
+                    TextFormField(
+                      controller: _titleDeedController,
+                      decoration: const InputDecoration(
+                        labelText: 'เลขที่โฉนด (Title Deed No.)',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(LucideIcons.fileText),
+                      ),
+                      validator: (v) =>
+                          v?.isEmpty == true ? 'กรุณาระบุเลขโฉนด' : null,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Security (GACP)
+                    TextFormField(
+                      controller: _securityController,
+                      decoration: const InputDecoration(
+                        labelText: 'ระบบความปลอดภัย (Security)',
+                        hintText: 'e.g. รั้วลวดหนาม 2m, กล้อง CCTV 4 ตัว',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(LucideIcons.shield),
+                      ),
+                      maxLines: 2,
+                      validator: (v) => v?.isEmpty == true
+                          ? 'กรุณาระบุระบบรักษาความปลอดภัย'
+                          : null,
+                    ),
+
                     const SizedBox(height: 24),
 
                     // Location Map
@@ -276,9 +310,10 @@ class _EstablishmentFormScreenState
                         if (_formKey.currentState!.validate()) {
                           notifier.createEstablishment(
                             name: _nameController.text,
-                            type:
-                                _selectedType, // Sends 'farm', 'processing', etc.
+                            type: _selectedType,
                             address: _addressController.text,
+                            titleDeedNo: _titleDeedController.text,
+                            security: _securityController.text,
                           );
                         }
                       },

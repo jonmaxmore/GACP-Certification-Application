@@ -11,6 +11,8 @@ abstract class EstablishmentRepository {
     required EstablishmentType type,
     required EstablishmentAddress address,
     required EstablishmentCoordinates coordinates,
+    required String titleDeedNo,
+    required String security,
     List<File>? images,
   });
 }

@@ -15,6 +15,8 @@ class EstablishmentModel with _$EstablishmentModel {
     required EstablishmentAddressModel address,
     required EstablishmentCoordinatesModel coordinates,
     @Default([]) List<String> images,
+    @Default('') String titleDeedNo, // Default empty for backward compat
+    @Default('') String security,
   }) = _EstablishmentModel;
 
   factory EstablishmentModel.fromJson(Map<String, dynamic> json) =>
@@ -28,6 +30,8 @@ class EstablishmentModel with _$EstablishmentModel {
       address: address.toEntity(),
       coordinates: coordinates.toEntity(),
       images: images,
+      titleDeedNo: titleDeedNo,
+      security: security,
     );
   }
 }

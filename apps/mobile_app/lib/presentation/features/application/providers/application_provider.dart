@@ -71,26 +71,55 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
     }
   }
 
-  // Stage 1: Create Draft
-  Future<void> createDraft({required String farmId}) async {
-    if (state.isLoading) return; // Prevent double submission
+  // Stage 1: Create Draft (v2)
+  Future<bool> createApplication({
+    required String establishmentId,
+    required String requestType,
+    // New Structured Fields
+    required String certificationType,
+    required String objective,
+    required String applicantType,
+    required Map<String, dynamic> applicantInfo,
+    required Map<String, dynamic> siteInfo,
+    // Legacy/Flexible
+    required Map<String, dynamic> formData,
+    required Map<String, dynamic> documents,
+  }) async {
+    if (state.isLoading) return false;
     state = state.copyWith(isLoading: true);
     try {
-      // NOTE: In a real app, 'farmId' comes from the user selection
-      // For Demo/Dev, we might need a fallback if not provided or handle 400
       final response = await _dio.post(
         '/v2/applications/draft',
-        data: {'farmId': farmId},
+        data: {
+          'farmId': establishmentId,
+          'requestType': requestType,
+          // Pass Structured Data
+          'certificationType': certificationType,
+          'objective': objective,
+          'applicantType': applicantType,
+          'applicantInfo': applicantInfo,
+          'siteInfo': siteInfo,
+          'formData': formData,
+          // 'documents': documents // Handle separate upload if needed, or send here if backend supports.
+          // Current Backend createDraft only checks farmId and formData.
+        },
       );
-      // Backend returns { success: true, data: { ... } }
-      final data = response.data['data'];
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final data = response.data['data'];
+        state = state.copyWith(
+          isLoading: false,
+          applicationId: data['_id'],
+          currentApplication: data,
+        );
+        return true;
+      }
       state = state.copyWith(
-        isLoading: false,
-        applicationId: data['_id'],
-        currentApplication: data,
-      );
+          isLoading: false, error: 'Failed to create application');
+      return false;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
     }
   }
 

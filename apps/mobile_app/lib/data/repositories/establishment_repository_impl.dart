@@ -15,23 +15,28 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
   Future<Either<Failure, List<EstablishmentEntity>>> getEstablishments() async {
     try {
       final response = await _dioClient.get('/establishments');
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
-        final establishments = data.map((item) => EstablishmentEntity(
-          id: item['_id'] ?? item['id'],
-          name: item['name'],
-          type: item['type'],
-          address: item['address'] ?? '',
-          status: item['status'] ?? 'Pending',
-          latitude: item['location']?['coordinates']?[1],
-          longitude: item['location']?['coordinates']?[0],
-          imageUrl: item['imageUrl'],
-        )).toList();
-        
+        final establishments = data
+            .map((item) => EstablishmentEntity(
+                  id: item['_id'] ?? item['id'],
+                  name: item['name'] ?? 'Unknown Farm',
+                  type: item['type'] ?? 'Outdoor',
+                  address: item['address']?.toString() ?? '',
+                  status: item['status'] ?? 'Pending',
+                  latitude: item['location']?['coordinates']?[1],
+                  longitude: item['location']?['coordinates']?[0],
+                  imageUrl: item['imageUrl'],
+                  titleDeedNo: item['titleDeedNo'] ?? '',
+                  security: item['security'] ?? '',
+                ))
+            .toList();
+
         return Right(establishments);
       } else {
-        return const Left(ServerFailure(message: 'Failed to fetch establishments'));
+        return const Left(
+            ServerFailure(message: 'Failed to fetch establishments'));
       }
     } on DioException catch (e) {
       return Left(ServerFailure(message: e.message ?? 'Network Error'));
@@ -47,6 +52,8 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
     required String address,
     required double latitude,
     required double longitude,
+    required String titleDeedNo,
+    required String security,
     File? image,
   }) async {
     try {
@@ -56,6 +63,8 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
         'address': address,
         'latitude': latitude,
         'longitude': longitude,
+        'titleDeedNo': titleDeedNo,
+        'security': security,
         if (image != null)
           'evidence_photo': await MultipartFile.fromFile(
             image.path,
@@ -69,16 +78,19 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
         final item = response.data['data'];
         return Right(EstablishmentEntity(
           id: item['_id'] ?? item['id'],
-          name: item['name'],
-          type: item['type'],
-          address: item['address'] ?? '',
+          name: item['name'] ?? 'Unknown Farm',
+          type: item['type'] ?? 'Outdoor',
+          address: item['address']?.toString() ?? '',
           status: item['status'] ?? 'Pending',
           latitude: item['location']?['coordinates']?[1],
           longitude: item['location']?['coordinates']?[0],
           imageUrl: item['imageUrl'],
+          titleDeedNo: item['titleDeedNo'] ?? '',
+          security: item['security'] ?? '',
         ));
       } else {
-        return const Left(ServerFailure(message: 'Failed to create establishment'));
+        return const Left(
+            ServerFailure(message: 'Failed to create establishment'));
       }
     } on DioException catch (e) {
       return Left(ServerFailure(message: e.message ?? 'Network Error'));

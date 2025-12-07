@@ -95,53 +95,26 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
         estData = estResponse.data['data'] ?? {};
       }
 
-      // Step 1: Construct Structured Payload for V2 Backend
+      // Step 1: Construct Structured Payload for GACP V2 Backend
       final body = {
         'establishmentId': establishmentId,
-        'type': type, // 'NEW'
-        'formType': 'FORM_09', // Default for now
-        'applicantType': 'individual', // Default
+        'farmId': establishmentId, // Redundant but safe
+        'type': type,
 
-        // Farm Information (Required by ApplicationModel & Workflow)
-        'farmInformation': {
-          'name': estData['name'] ?? 'Unknown Farm',
-          'address':
-              estData['address'] ?? {}, // { street, city, province, zipCode }
-          'coordinates': estData['coordinates'] ?? {},
-          'area': {
-            'total': formData['totalArea']?.toDouble() ?? 0,
-            'cultivated': formData['cultivatedArea']?.toDouble() ?? 0,
-            'unit': formData['areaUnit'] ?? 'rai'
-          },
-          'ownership': {
-            'type': formData['landOwnershipType'] ?? 'owned',
-            'documentId': formData['landDocumentId']
-          },
-          'waterSource': {
-            'type': formData['waterSourceType'],
-            // Add defaults to pass scoring if needed
-            'quality': 'good'
-          },
-          'soil': {
-            'type': formData['soilType'],
-            // Add defaults
-            'ph': 7.0
-          }
+        // Pass through structured GACP Data
+        'requestType': formData['requestType'],
+        'certificationType': formData['certificationType'],
+        'objective': formData['objective'],
+        'applicantType': formData['applicantType'],
+        'applicantInfo': formData['applicantInfo'],
+        'siteInfo': {
+          ...(formData['siteInfo'] ?? {}),
+          'name': estData['name'], // Fallback/Enrich
+          'coordinates': estData['coordinates'],
         },
 
-        // Crop Information (Required Array)
-        'cropInformation': [
-          {
-            'name': formData['cropName'] ?? 'Cannabis',
-            'variety': formData['cropVariety'] ?? 'Unknown',
-            'source': formData['cropSource'] ?? 'Local',
-            'plantingDate': formData['plantingDate'],
-            'harvestDate': formData['harvestDate']
-          }
-        ],
-
-        // Legacy/Specific Data
-        'formSpecificData': formData,
+        // Legacy/Generic Data
+        'formData': formData['formData'] ?? {},
       };
 
       final response = await _dioClient.post('/applications', data: body);

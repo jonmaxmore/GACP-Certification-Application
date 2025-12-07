@@ -11,6 +11,8 @@ abstract class EstablishmentRepository {
     required String address,
     required double latitude,
     required double longitude,
+    required String titleDeedNo,
+    required String security,
     File? image,
   });
 }

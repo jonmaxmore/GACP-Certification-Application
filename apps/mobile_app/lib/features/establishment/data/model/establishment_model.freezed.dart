@@ -27,6 +27,9 @@ mixin _$EstablishmentModel {
   EstablishmentCoordinatesModel get coordinates =>
       throw _privateConstructorUsedError;
   List<String> get images => throw _privateConstructorUsedError;
+  String get titleDeedNo =>
+      throw _privateConstructorUsedError; // Default empty for backward compat
+  String get security => throw _privateConstructorUsedError;
 
   /// Serializes this EstablishmentModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -50,7 +53,9 @@ abstract class $EstablishmentModelCopyWith<$Res> {
       EstablishmentType type,
       EstablishmentAddressModel address,
       EstablishmentCoordinatesModel coordinates,
-      List<String> images});
+      List<String> images,
+      String titleDeedNo,
+      String security});
 
   $EstablishmentAddressModelCopyWith<$Res> get address;
   $EstablishmentCoordinatesModelCopyWith<$Res> get coordinates;
@@ -77,6 +82,8 @@ class _$EstablishmentModelCopyWithImpl<$Res, $Val extends EstablishmentModel>
     Object? address = null,
     Object? coordinates = null,
     Object? images = null,
+    Object? titleDeedNo = null,
+    Object? security = null,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -103,6 +110,14 @@ class _$EstablishmentModelCopyWithImpl<$Res, $Val extends EstablishmentModel>
           ? _value.images
           : images // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      titleDeedNo: null == titleDeedNo
+          ? _value.titleDeedNo
+          : titleDeedNo // ignore: cast_nullable_to_non_nullable
+              as String,
+      security: null == security
+          ? _value.security
+          : security // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 
@@ -142,7 +157,9 @@ abstract class _$$EstablishmentModelImplCopyWith<$Res>
       EstablishmentType type,
       EstablishmentAddressModel address,
       EstablishmentCoordinatesModel coordinates,
-      List<String> images});
+      List<String> images,
+      String titleDeedNo,
+      String security});
 
   @override
   $EstablishmentAddressModelCopyWith<$Res> get address;
@@ -169,6 +186,8 @@ class __$$EstablishmentModelImplCopyWithImpl<$Res>
     Object? address = null,
     Object? coordinates = null,
     Object? images = null,
+    Object? titleDeedNo = null,
+    Object? security = null,
   }) {
     return _then(_$EstablishmentModelImpl(
       id: freezed == id
@@ -195,6 +214,14 @@ class __$$EstablishmentModelImplCopyWithImpl<$Res>
           ? _value._images
           : images // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      titleDeedNo: null == titleDeedNo
+          ? _value.titleDeedNo
+          : titleDeedNo // ignore: cast_nullable_to_non_nullable
+              as String,
+      security: null == security
+          ? _value.security
+          : security // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -208,7 +235,9 @@ class _$EstablishmentModelImpl extends _EstablishmentModel {
       required this.type,
       required this.address,
       required this.coordinates,
-      final List<String> images = const []})
+      final List<String> images = const [],
+      this.titleDeedNo = '',
+      this.security = ''})
       : _images = images,
         super._();
 
@@ -235,8 +264,16 @@ class _$EstablishmentModelImpl extends _EstablishmentModel {
   }
 
   @override
+  @JsonKey()
+  final String titleDeedNo;
+// Default empty for backward compat
+  @override
+  @JsonKey()
+  final String security;
+
+  @override
   String toString() {
-    return 'EstablishmentModel(id: $id, name: $name, type: $type, address: $address, coordinates: $coordinates, images: $images)';
+    return 'EstablishmentModel(id: $id, name: $name, type: $type, address: $address, coordinates: $coordinates, images: $images, titleDeedNo: $titleDeedNo, security: $security)';
   }
 
   @override
@@ -250,13 +287,25 @@ class _$EstablishmentModelImpl extends _EstablishmentModel {
             (identical(other.address, address) || other.address == address) &&
             (identical(other.coordinates, coordinates) ||
                 other.coordinates == coordinates) &&
-            const DeepCollectionEquality().equals(other._images, _images));
+            const DeepCollectionEquality().equals(other._images, _images) &&
+            (identical(other.titleDeedNo, titleDeedNo) ||
+                other.titleDeedNo == titleDeedNo) &&
+            (identical(other.security, security) ||
+                other.security == security));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, type, address,
-      coordinates, const DeepCollectionEquality().hash(_images));
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      name,
+      type,
+      address,
+      coordinates,
+      const DeepCollectionEquality().hash(_images),
+      titleDeedNo,
+      security);
 
   /// Create a copy of EstablishmentModel
   /// with the given fields replaced by the non-null parameter values.
@@ -282,7 +331,9 @@ abstract class _EstablishmentModel extends EstablishmentModel {
       required final EstablishmentType type,
       required final EstablishmentAddressModel address,
       required final EstablishmentCoordinatesModel coordinates,
-      final List<String> images}) = _$EstablishmentModelImpl;
+      final List<String> images,
+      final String titleDeedNo,
+      final String security}) = _$EstablishmentModelImpl;
   const _EstablishmentModel._() : super._();
 
   factory _EstablishmentModel.fromJson(Map<String, dynamic> json) =
@@ -300,6 +351,10 @@ abstract class _EstablishmentModel extends EstablishmentModel {
   EstablishmentCoordinatesModel get coordinates;
   @override
   List<String> get images;
+  @override
+  String get titleDeedNo; // Default empty for backward compat
+  @override
+  String get security;
 
   /// Create a copy of EstablishmentModel
   /// with the given fields replaced by the non-null parameter values.

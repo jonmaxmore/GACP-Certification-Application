@@ -20,6 +20,8 @@ _$EstablishmentModelImpl _$$EstablishmentModelImplFromJson(
               ?.map((e) => e as String)
               .toList() ??
           const [],
+      titleDeedNo: json['titleDeedNo'] as String? ?? '',
+      security: json['security'] as String? ?? '',
     );
 
 Map<String, dynamic> _$$EstablishmentModelImplToJson(
@@ -31,6 +33,8 @@ Map<String, dynamic> _$$EstablishmentModelImplToJson(
       'address': instance.address,
       'coordinates': instance.coordinates,
       'images': instance.images,
+      'titleDeedNo': instance.titleDeedNo,
+      'security': instance.security,
     };
 
 const _$EstablishmentTypeEnumMap = {

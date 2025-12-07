@@ -7,8 +7,12 @@ import '../providers/application_provider.dart';
 final notificationListProvider =
     FutureProvider.autoDispose<List<dynamic>>((ref) async {
   final dio = ref.watch(applicationProvider.notifier).dio;
-  final response = await dio.get('/v2/notifications');
-  return response.data['data'] ?? [];
+  try {
+    final response = await dio.get('/v2/notifications');
+    return response.data['data'] ?? [];
+  } catch (e) {
+    return []; // Fail gracefully
+  }
 });
 
 class NotificationScreen extends ConsumerWidget {
@@ -18,108 +22,173 @@ class NotificationScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notificationsAsync = ref.watch(notificationListProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('การแจ้งเตือน (Notifications)')),
-      body: notificationsAsync.when(
-        data: (notifications) => notifications.isEmpty
-            ? const Center(child: Text('ไม่มีการแจ้งเตือนใหม่'))
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: notifications.length,
-                itemBuilder: (context, index) {
-                  final note = notifications[index];
-                  final isRead = note['isRead'] ?? false;
-                  return Card(
-                    // Theme handles shadow and rounded corners
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('การแจ้งเตือน (Notifications)'),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'ทั้งหมด'),
+              Tab(text: 'ต้องทำทันที'),
+              Tab(text: 'ข่าวสาร'),
+            ],
+          ),
+        ),
+        body: notificationsAsync.when(
+          data: (notifications) {
+            if (notifications.isEmpty) {
+              return const Center(child: Text('ไม่มีการแจ้งเตือน'));
+            }
+
+            // Filter Logic (Mocked based on keywords or status)
+            final actionItems = notifications
+                .where((n) =>
+                    (n['title'] ?? '').toString().contains('Action') ||
+                    (n['title'] ?? '').toString().contains('ชำระ') ||
+                    (n['title'] ?? '').toString().contains('แก้ไข'))
+                .toList();
+
+            final infoItems =
+                notifications.where((n) => !actionItems.contains(n)).toList();
+
+            return TabBarView(
+              children: [
+                _buildNotificationList(notifications),
+                _buildNotificationList(actionItems,
+                    emptyMessage: 'ไม่มีรายการที่ต้องทำ'),
+                _buildNotificationList(infoItems,
+                    emptyMessage: 'ไม่มีข่าวสารใหม่'),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(child: Text('Error: $err')),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationList(List<dynamic> items, {String? emptyMessage}) {
+    if (items.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(LucideIcons.inbox, size: 48, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text(emptyMessage ?? 'ไม่มีข้อมูล',
+                style: TextStyle(color: Colors.grey[500])),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final note = items[index];
+        final isRead = note['isRead'] ?? false;
+        final title = note['title'] ?? 'System Message';
+
+        // Determine Type/Color
+        Color typeColor = Colors.blue;
+        IconData typeIcon = LucideIcons.info;
+
+        if (title.contains('อนุมัติ') || title.contains('Approved')) {
+          typeColor = Colors.green;
+          typeIcon = LucideIcons.checkCircle;
+        } else if (title.contains('แก้ไข') ||
+            title.contains('ชำระ') ||
+            title.contains('Rejected')) {
+          typeColor = Colors.red;
+          typeIcon = LucideIcons.alertCircle;
+        }
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  // Color Strip
+                  Container(width: 6, color: typeColor),
+
+                  // Content
+                  Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Row(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color:
-                                  isRead ? Colors.grey[100] : Colors.blue[50],
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              LucideIcons.bell,
-                              color: isRead ? Colors.grey : Colors.blue,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        note['title'] ?? 'System Message',
-                                        style: TextStyle(
-                                          fontWeight: isRead
-                                              ? FontWeight.normal
-                                              : FontWeight.bold,
-                                          fontSize: 16,
-                                          color: const Color(0xFF0F172A),
-                                        ),
-                                      ),
-                                    ),
-                                    if (!isRead)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red[100],
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        child: const Text('New',
-                                            style: TextStyle(
-                                                color: Colors.red,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold)),
-                                      ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  note['message'] ?? '',
+                          Row(
+                            children: [
+                              Icon(typeIcon, size: 20, color: typeColor),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  title,
                                   style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 14,
-                                      height: 1.4),
-                                ),
-                                const SizedBox(height: 12),
-                                Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: Text(
-                                    note['createdAt'] != null
-                                        ? note['createdAt']
-                                            .toString()
-                                            .substring(0, 10)
-                                        : '',
-                                    style: TextStyle(
-                                        fontSize: 12, color: Colors.grey[400]),
+                                    fontWeight: isRead
+                                        ? FontWeight.normal
+                                        : FontWeight.bold,
+                                    fontSize: 16,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              if (!isRead)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red[50],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text('NEW',
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            note['message'] ?? '',
+                            style:
+                                TextStyle(color: Colors.grey[700], height: 1.4),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            note['createdAt'] != null
+                                ? note['createdAt'].toString().substring(0, 10)
+                                : 'Recently',
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[400]),
                           ),
                         ],
                       ),
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

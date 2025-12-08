@@ -6,7 +6,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mobile_app/presentation/features/application/screens/map_picker_screen.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:image_picker/image_picker.dart';
 import '../providers/application_provider.dart';
+import '../../auth/providers/auth_provider.dart'; // Added Import
 import 'package:mobile_app/presentation/features/establishment/providers/establishment_provider.dart';
 import 'package:mobile_app/domain/entities/establishment_entity.dart'; // Correct Import
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
@@ -63,7 +65,10 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
   // Review & Payment State
   bool _isReviewed = false;
+  bool _isConfirmed = false; // New: Strict Review Confirmation
   bool _isPaidPhase1 = false;
+  Map<String, XFile> _uploadedFiles = {}; // New: Track uploaded files (XFile)
+  Map<String, String> _videoLinks = {}; // New: Track video links
 
   // Controllers
   final _applicantNameController = TextEditingController();
@@ -140,6 +145,20 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    // Check Auth Status on Load (Fix for 401 Issue)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = ref.read(authProvider).user;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Session Expired. Please Login.')));
+        context.go('/login'); // Redirect to Login
+      }
+    });
+  }
+
   void _onEstablishmentSelected(EstablishmentEntity? establishment) {
     setState(() {
       _selectedEstablishment = establishment;
@@ -166,6 +185,31 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
         _isAnalyzing = false;
         _aiResult = 'เอกสารถูกต้องตามมาตรฐาน GACP (Document Valid)';
       });
+    }
+  }
+
+  Future<void> _pickFile(String docId) async {
+    final picker = ImagePicker();
+    try {
+      // Pick an image (or we could use FilePicker for PDFs if we add that package)
+      // For now, GACP V2 requirements mention PDF/Image. ImagePicker handles images.
+      // If PDF is required, we really should use file_picker, but sticking to instructions:
+      // "ensure image and document handling is compatible... use XFile".
+      // ImagePicker returns XFile.
+      final XFile? file = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+
+      if (file != null) {
+        setState(() {
+          _uploadedFiles[docId] = file;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking file: $e')),
+      );
     }
   }
 
@@ -1975,24 +2019,22 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       widget.requestType == 'REPLACEMENT') {
                     return _getReplacementDocumentList();
                   }
-                  // Default to Renewal for now or handle NEW elsewhere if needed
-                  // Assuming this block originally was just for Renewal or mixed.
-                  // Since the existing code called _getRenewalDocumentList(), we default to that or check for RENEW.
-                  // But wait, what if it's NEW? Does NEW use _getRenewalDocumentList?
-                  // The existing code at 1525 was `..._getRenewalDocumentList().map((doc) {`.
-                  // If requestType is NEW, it might have been showing Renewal docs incorrectly?
-                  // No, usually NEW has a different Step 2 or list.
-                  // For now, I will preserve existing behavior for non-replacement types.
                   return _getRenewalDocumentList();
                 }()
                     .map((doc) {
+                  final isUploaded = _uploadedFiles.containsKey(doc['id']);
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                      border: Border.all(
+                          color: isUploaded
+                              ? Colors.green
+                              : Colors.grey.withOpacity(0.3)),
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.white,
+                      color: isUploaded
+                          ? Colors.green.withOpacity(0.05)
+                          : Colors.white,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2000,10 +2042,13 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         Row(
                           children: [
                             Icon(
-                              doc['isLink'] == true
-                                  ? LucideIcons.video
-                                  : LucideIcons.fileText,
-                              color: Colors.blue[700],
+                              isUploaded
+                                  ? LucideIcons.checkCircle
+                                  : (doc['isLink'] == true
+                                      ? LucideIcons.video
+                                      : LucideIcons.fileText),
+                              color:
+                                  isUploaded ? Colors.green : Colors.blue[700],
                             ),
                             const SizedBox(width: 8),
                             Expanded(
@@ -2022,15 +2067,6 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                           Text(doc['subtitle'],
                               style: TextStyle(
                                   color: Colors.grey[600], fontSize: 12)),
-                        if (doc['description'] != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
-                            child: Text(doc['description'],
-                                style: TextStyle(
-                                    fontStyle: FontStyle.italic,
-                                    color: Colors.grey[700],
-                                    fontSize: 12)),
-                          ),
                         const SizedBox(height: 8),
                         if (doc['isLink'] == true)
                           TextFormField(
@@ -2039,32 +2075,74 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                               border: OutlineInputBorder(),
                               isDense: true,
                             ),
+                            // Create a dummy XFile for links? No, simpler to just store links in a separate map if possible,
+                            // OR just create a text file with the link?
+                            // The repository expects Map<String, XFile> documents.
+                            // If we have links, we can't easily pass them as XFiles.
+                            // BUT, the previous implementation of _uploadedFiles was String/String.
+                            // Now it's String/XFile.
+                            // Links are text.
+                            // For now, I'll Skip links in _uploadedFiles (XFiles map) and maybe pass them in formData?
+                            // Or, I can ignore the XFile requirement for links?
+                            // Issue: current implementation changed _uploadedFiles to Map<String, XFile>.
+                            // I should change _uploadedFiles back to dynamic or handle links separately.
+                            // Let's create `Map<String, String> _videoLinks = {};` and pass them in formData.
+                            // Let's create `Map<String, String> _videoLinks = {};` and pass them in formData.
+                            onChanged: (val) {
+                              setState(() {
+                                if (val.isNotEmpty) {
+                                  _videoLinks[doc['id']] = val;
+                                } else {
+                                  _videoLinks.remove(doc['id']);
+                                }
+                              });
+                            },
                           )
                         else
                           Row(
                             children: [
                               OutlinedButton.icon(
-                                onPressed: () {}, // TODO: Implement Upload
-                                icon: const Icon(LucideIcons.uploadCloud,
-                                    size: 16),
-                                label: const Text('New Upload'),
+                                onPressed: () {
+                                  if (isUploaded) {
+                                    setState(
+                                        () => _uploadedFiles.remove(doc['id']));
+                                  } else {
+                                    _pickFile(doc['id']);
+                                  }
+                                },
+                                icon: Icon(
+                                    isUploaded
+                                        ? LucideIcons.trash
+                                        : LucideIcons.uploadCloud,
+                                    size: 16,
+                                    color: isUploaded ? Colors.red : null),
+                                label: Text(isUploaded
+                                    ? 'ลบไฟล์ (Remove)'
+                                    : 'เลือกไฟล์ (Upload)'),
+                                style: isUploaded
+                                    ? OutlinedButton.styleFrom(
+                                        foregroundColor: Colors.red)
+                                    : null,
                               ),
                               const Spacer(),
-                              Text(
-                                'Max: ${doc['maxSize']}',
-                                style: const TextStyle(
-                                    color: Colors.grey, fontSize: 10),
-                              ),
+                              if (isUploaded)
+                                Expanded(
+                                  child: Text(
+                                    _uploadedFiles[doc['id']]!.name,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.right,
+                                    style: const TextStyle(
+                                        color: Colors.green, fontSize: 12),
+                                  ),
+                                )
+                              else
+                                Text(
+                                  'Max: ${doc['maxSize']}',
+                                  style: const TextStyle(
+                                      color: Colors.grey, fontSize: 10),
+                                ),
                             ],
                           ),
-                        if (doc['hasDownload'] == true)
-                          TextButton.icon(
-                            onPressed: () {},
-                            icon: const Icon(LucideIcons.download, size: 16),
-                            label: const Text('ดาวน์โหลดแบบฟอร์ม'),
-                            style: TextButton.styleFrom(
-                                visualDensity: VisualDensity.compact),
-                          )
                       ],
                     ),
                   );
@@ -2115,6 +2193,52 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
             isActive: _currentStep >= 1,
           ),
 
+          // Step 2: Review & Confirm
+          Step(
+            title: const Text('ตรวจสอบข้อมูล (Review)'),
+            content: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.white,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('ผู้ยื่นคำขอ: ${_applicantNameController.text}',
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Text('ประเภท: $_applicantType'),
+                  const SizedBox(height: 8),
+                  Text('แปลง: ${_selectedEstablishment?.name ?? '-'}'),
+                  const Divider(),
+                  Text('ข้อมูลการผลิต:',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[700])),
+                  Text('มาตรฐาน: ${_certificationTypes.join(', ')}'),
+                  Text('วัตถุประสงค์: ${_objectives.join(', ')}'),
+                  const Divider(),
+                  Text('เอกสารที่แนบ: ${_uploadedFiles.length} รายการ',
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  CheckboxListTile(
+                    title: const Text(
+                        'ข้าพเจ้าขอรับรองว่าข้อมูลและเอกสารที่แนบมาถูกต้องและเป็นความจริงทุกประการ (I certify that all information is true)'),
+                    value: _isConfirmed,
+                    onChanged: (val) =>
+                        setState(() => _isConfirmed = val ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                  )
+                ],
+              ),
+            ),
+            isActive: _currentStep >= 2,
+          ),
+
           // Step 3: Payment
           Step(
             title: const Text('ชำระค่าธรรมเนียม'),
@@ -2122,24 +2246,21 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
               children: [
                 const Text('ค่าธรรมเนียมคำขอ: 5,000 บาท'),
                 const SizedBox(height: 12),
+                // Review button removed as we have a dedicated step now
+                if (_isReviewed) // Keep for backward compatibility or remove? Better remove _isReviewed usage since we have Step 2
+                  Container(),
+
                 ElevatedButton.icon(
-                  onPressed: _openWebViewDialog, // Review first
-                  icon: const Icon(LucideIcons.eye),
-                  label: const Text('ตรวจสอบเอกสาร (Review)'),
+                  onPressed: _isPaidPhase1 ? null : _simulatePayment,
+                  icon: const Icon(LucideIcons.creditCard),
+                  label: Text(_isPaidPhase1
+                      ? 'ชำระเงินแล้ว (Paid)'
+                      : 'ชำระเงิน 5,000 บาท'),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          _isPaidPhase1 ? Colors.grey : Colors.purple,
+                      foregroundColor: Colors.white),
                 ),
-                const SizedBox(height: 12),
-                if (_isReviewed)
-                  ElevatedButton.icon(
-                    onPressed: _isPaidPhase1 ? null : _simulatePayment,
-                    icon: const Icon(LucideIcons.creditCard),
-                    label: Text(_isPaidPhase1
-                        ? 'ชำระเงินแล้ว (Paid)'
-                        : 'ชำระเงิน 5,000 บาท'),
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            _isPaidPhase1 ? Colors.grey : Colors.purple,
-                        foregroundColor: Colors.white),
-                  ),
                 if (_isPaidPhase1)
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
@@ -2153,7 +2274,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                   ),
               ],
             ),
-            isActive: _currentStep >= 2,
+            isActive: _currentStep >= 3,
           ),
         ],
       ),
@@ -2161,6 +2282,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
   }
 
   void _onContinue() async {
+    // Step 0: Applicant Info & Establishment
     if (_currentStep == 0) {
       if (_formKey.currentState != null && !_formKey.currentState!.validate()) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -2168,15 +2290,60 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
         return;
       }
 
-      // Create Draft Application (if not exists)
+      if (_selectedEstablishment == null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('กรุณาเลือกแปลงปลูก (Select Establishment)')));
+        return;
+      }
+
+      // Strict Validation: Multi-Select
+      if (_certificationTypes.isEmpty || _objectives.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content:
+                Text('กรุณาเลือกมาตราฐานและวัตถุประสงค์อย่างน้อย 1 รายการ')));
+        return;
+      }
+      // Moved createApplication to Step 1 to include documents
+    }
+
+    // Step 1: Document Validation (Strict) & Creation
+    if (_currentStep == 1) {
+      final requiredDocs = _isReplacement
+          ? _getReplacementDocumentList().where((d) => d['required'] == true)
+          : _getRenewalDocumentList().where((d) => d['required'] == true);
+
+      List<String> missing = [];
+      for (var doc in requiredDocs) {
+        if (!_uploadedFiles.containsKey(doc['id'])) {
+          missing.add(doc['title']);
+        }
+      }
+
+      if (missing.isNotEmpty) {
+        showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                  title: const Text('เอกสารไม่ครบถ้วน (Missing Documents)'),
+                  content: SingleChildScrollView(
+                    child: ListBody(
+                      children: missing
+                          .map((e) => Text('- $e',
+                              style: const TextStyle(color: Colors.red)))
+                          .toList(),
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('ตกลง'))
+                  ],
+                ));
+        return;
+      }
+
+      // Create Draft Application NOW with documents
       final appState = ref.read(applicationProvider);
       if (appState.applicationId == null) {
-        if (_selectedEstablishment == null) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('กรุณาเลือกแปลงปลูก (Select Establishment)')));
-          return;
-        }
-
         // Show Loading
         showDialog(
             context: context,
@@ -2185,78 +2352,117 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
         final success =
             await ref.read(applicationProvider.notifier).createApplication(
-          establishmentId: _selectedEstablishment!.id,
-          requestType: widget.requestType ?? 'NEW',
-          // Structured Data Payload (GACP V2)
-          certificationType: _certificationTypes.join(','),
-          objective: _objectives.join(','),
-          applicantType: _applicantType,
-          applicantInfo: {
-            'name': _applicantNameController.text,
-            'address': _officeAddressController.text,
-            'idCard': _idCardController.text,
-            'registrationCode': _regNoController.text,
-            // Contact Info
-            'mobile': _mobileController.text,
-            'email': _emailController.text,
-            'lineId': _lineIdController.text,
-            // RENEWAL DATA
-            if (widget.requestType == 'RENEW') ...{
-              'oldCertificateId': _oldCertificateController.text,
-              'year': _yearController.text,
-            },
-            // REPLACEMENT DATA
-            if (widget.requestType == 'SUBSTITUTE' ||
-                widget.requestType == 'REPLACEMENT') ...{
-              'oldCertificateId': _oldCertificateController.text,
-              'replacementReason': _replacementReason,
-              'replacementOtherReason': _replacementReasonOtherController.text,
-            },
-            // Juristic / Community Specific
-            'authorizedDirector': _authorizedDirectorController.text,
-            'officePhone': _officePhoneController.text,
-            'directorMobile': _directorMobileController.text,
-            'coordinator': {
-              'name': _coordinatorNameController.text,
-              'phone': _coordinatorPhoneController.text,
-              'lineId': _coordinatorLineController.text,
-            },
-            'communityReg01': _communityReg01Controller.text,
-            'communityReg03': _communityReg03Controller.text,
-            'houseId': _houseIdController.text,
+                  establishmentId: _selectedEstablishment!.id,
+                  requestType: widget.requestType ?? 'NEW',
+                  // Structured Data Payload (GACP V2)
+                  certificationType: _certificationTypes.toList(),
+                  objective: _objectives.toList(),
+                  applicantType: _applicantType,
+                  applicantInfo: {
+                    'name': _applicantNameController.text,
+                    'address': _officeAddressController.text,
+                    'idCard': _idCardController.text,
+                    'registrationCode': _regNoController.text,
+                    // Contact Info
+                    'mobile': _mobileController.text,
+                    'email': _emailController.text,
+                    'lineId': _lineIdController.text,
+                    // RENEWAL DATA
+                    if (widget.requestType == 'RENEW') ...{
+                      'oldCertificateId': _oldCertificateController.text,
+                      'year': _yearController.text,
+                    },
+                    // REPLACEMENT DATA
+                    if (widget.requestType == 'SUBSTITUTE' ||
+                        widget.requestType == 'REPLACEMENT') ...{
+                      'oldCertificateId': _oldCertificateController.text,
+                      'replacementReason': _replacementReason,
+                      'replacementOtherReason':
+                          _replacementReasonOtherController.text,
+                    },
+                    // Juristic / Community Specific
+                    'authorizedDirector': _authorizedDirectorController.text,
+                    'officePhone': _officePhoneController.text,
+                    'directorMobile': _directorMobileController.text,
+                    'coordinator': {
+                      'name': _coordinatorNameController.text,
+                      'phone': _coordinatorPhoneController.text,
+                      'lineId': _coordinatorLineController.text,
+                    },
+                    'communityReg01': _communityReg01Controller.text,
+                    'communityReg03': _communityReg03Controller.text,
+                    'houseId': _houseIdController.text,
 
-            'entityName': _applicantNameController.text,
-          },
-          siteInfo: {
-            'areaType': _areaTypes.join(','),
-            'titleDeedNo': _titleDeedController.text,
-            'coordinates': _gpsController.text,
-            'address': _officeAddressController
-                .text, // Fallback if site address same as office make explicit if needed
-          },
-          // Flexible/Legacy Data
-          formData: {
-            'securityFencing': _securityFencingController.text,
-            // 'securityCCTV': _securityCCTVController.text, // Commented out likely causing error if not defined
-            // New Cultivation Data
-            'plantParts': _plantPartsController.text,
-            'strainSource': _strainSourceController.text,
-            'expectedQty': _expectedQtyController.text,
-            // ... other loose fields
-          },
-          documents: {}, // Attachments handled in next step
-        );
+                    'entityName': _applicantNameController.text,
+                  },
+                  siteInfo: {
+                    'areaType': _areaTypes.toList(),
+                    'titleDeedNo': _titleDeedController.text,
+                    'coordinates': _gpsController.text,
+                    'address': _officeAddressController
+                        .text, // Fallback if site address same as office make explicit if needed
+                  },
+                  // Flexible/Legacy Data
+                  formData: {
+                    'securityFencing': _securityFencingController.text,
+                    // 'securityCCTV': _securityCCTVController.text, // Commented out likely causing error if not defined
+                    // New Cultivation Data
+                    'plantParts': _plantPartsController.text,
+                    'strainSource': _strainSourceController.text,
+                    'expectedQty': _expectedQtyController.text,
+                    // Video Links
+                    'videoLinks': _videoLinks,
+                    // ... other loose fields
+                  },
+                  documents: _uploadedFiles, // Pass the real XFiles
+                );
 
-        Navigator.pop(context); // Hide Loading
+        if (mounted) Navigator.pop(context); // Hide Loading
 
         if (!success) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('Failed to create application draft')));
+          final error = ref.read(applicationProvider).error;
+          if (error == 'Unauthorized' ||
+              (error != null && error.contains('401'))) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('Session Expired. Please Login again.'),
+                  backgroundColor: Colors.red));
+              context.go('/login');
+            }
+            return;
+          }
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text('Failed to create application draft')));
+          }
           return;
         }
       }
     }
-    if (_currentStep < 2) setState(() => _currentStep++);
+
+    // Step 2: Review & Confirm (Strict)
+    if (_currentStep == 2) {
+      if (!_isConfirmed) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'กรุณายืนยันความถูกต้องของข้อมูล (Please confirm data correctness)')));
+        return;
+      }
+    }
+
+    // Step 3: Payment Check (Strict)
+    if (_currentStep == 3) {
+      // Final Submit is handled by specific button in Step 3 content, but if we had a "Next" here:
+      if (!_isPaidPhase1) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'กรุณาชำระค่าธรรมเนียมก่อนยื่นคำขอ (Please pay fee first)')));
+        return;
+      }
+    }
+
+    if (_currentStep < 3) setState(() => _currentStep++);
   }
 
   void _onCancel() {
@@ -2269,7 +2475,8 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
   // Controls
   Widget _buildControls(BuildContext context, ControlsDetails details) {
-    if (_currentStep == 2) return const SizedBox.shrink();
+    // Hide standard controls on Payment Step (Index 3)
+    if (_currentStep == 3) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 20),
       child: Row(
@@ -2285,19 +2492,6 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
   }
 
   // Helpers
-  void _openWebViewDialog() {
-    setState(() => _isReviewed = true);
-    showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-                title: const Text('Preview'),
-                content: const Text('Reviewing Document...'),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Close'))
-                ]));
-  }
 
   Future<void> _simulatePayment() async {
     final result = await ref.read(applicationProvider.notifier).payPhase1();

@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../../data/repositories/establishment_repository_impl.dart';
@@ -20,7 +20,7 @@ class EstablishmentState {
   final String? error;
 
   // Form State
-  final File? selectedImage;
+  final XFile? selectedImage;
   final LatLng? selectedLocation;
   final bool isSuccess;
 
@@ -37,7 +37,7 @@ class EstablishmentState {
     bool? isLoading,
     List<EstablishmentEntity>? establishments,
     String? error,
-    File? selectedImage,
+    XFile? selectedImage,
     LatLng? selectedLocation,
     bool? isSuccess,
   }) {
@@ -70,7 +70,7 @@ class EstablishmentNotifier extends StateNotifier<EstablishmentState> {
     );
   }
 
-  void setImage(File? image) {
+  void setImage(XFile? image) {
     state = state.copyWith(selectedImage: image);
   }
 

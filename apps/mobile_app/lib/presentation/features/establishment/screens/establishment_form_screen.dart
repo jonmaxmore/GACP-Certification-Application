@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -76,7 +77,7 @@ class _EstablishmentFormScreenState
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source, imageQuality: 80);
     if (pickedFile != null) {
-      ref.read(establishmentProvider.notifier).setImage(File(pickedFile.path));
+      ref.read(establishmentProvider.notifier).setImage(pickedFile);
     }
   }
 
@@ -261,11 +262,18 @@ class _EstablishmentFormScreenState
                     if (state.selectedImage != null)
                       Stack(
                         children: [
-                          Image.file(
-                            state.selectedImage!,
+                          Container(
                             height: 200,
                             width: double.infinity,
-                            fit: BoxFit.cover,
+                            child: kIsWeb
+                                ? Image.network(
+                                    state.selectedImage!.path,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.file(
+                                    File(state.selectedImage!.path),
+                                    fit: BoxFit.cover,
+                                  ),
                           ),
                           Positioned(
                             right: 0,

@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import '../../core/errors/failures.dart';
@@ -83,7 +83,7 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
     required String establishmentId,
     required String type,
     required Map<String, dynamic> formData,
-    required Map<String, File> documents,
+    required Map<String, XFile> documents,
   }) async {
     try {
       // Step 0: Fetch Establishment Details (Required for backend 'farm' address)
@@ -147,6 +147,9 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
             ServerFailure(message: 'Failed to submit application'));
       }
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        return const Left(ServerFailure(message: 'Unauthorized'));
+      }
       return Left(ServerFailure(message: e.message ?? 'Network Error'));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
@@ -174,11 +177,11 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
   }
 
   Future<void> _uploadDocument(
-      String applicationId, String docType, File file) async {
+      String applicationId, String docType, XFile file) async {
     try {
-      String fileName = file.path.split('/').last;
+      final bytes = await file.readAsBytes();
       FormData formData = FormData.fromMap({
-        'document': await MultipartFile.fromFile(file.path, filename: fileName),
+        'document': MultipartFile.fromBytes(bytes, filename: file.name),
       });
 
       await _dioClient.post(
@@ -240,5 +243,45 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
           (item['documents'] as List?)?.map((d) => d.toString()).toList() ?? [],
       createdAt: DateTime.tryParse(item['createdAt'] ?? '') ?? DateTime.now(),
     );
+  }
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getDashboardStats() async {
+    try {
+      final response = await _dioClient.get('/applications/stats');
+
+      if (response.statusCode == 200) {
+        return Right(response.data['data']);
+      } else {
+        return const Left(
+            ServerFailure(message: 'Failed to fetch dashboard stats'));
+      }
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: e.message ?? 'Network Error'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ApplicationEntity>>>
+      getAuditorAssignments() async {
+    try {
+      final response =
+          await _dioClient.get('/applications/auditor/assignments');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        final apps = data.map((item) => _mapToEntity(item)).toList();
+        return Right(apps);
+      } else {
+        return const Left(
+            ServerFailure(message: 'Failed to fetch auditor assignments'));
+      }
+    } on DioException catch (e) {
+      return Left(ServerFailure(message: e.message ?? 'Network Error'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
   }
 }

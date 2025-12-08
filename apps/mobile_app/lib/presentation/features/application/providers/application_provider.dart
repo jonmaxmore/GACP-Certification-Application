@@ -1,20 +1,30 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../data/repositories/application_repository_impl.dart';
+import '../../../../domain/entities/application_entity.dart';
+import '../../../../domain/repositories/application_repository.dart';
+import '../../auth/providers/auth_provider.dart';
 
+// State Class
 class ApplicationState {
   final bool isLoading;
   final String? error;
   final String? applicationId;
+  // Use Entity for consistent parts, but Map for flexible parts (legacy)
   final Map<String, dynamic>? currentApplication;
+  final List<ApplicationEntity> myApplications;
   final List<dynamic> pendingReviews;
+  final List<ApplicationEntity> auditorAssignments; // New typed list
 
   ApplicationState({
     this.isLoading = false,
     this.error,
     this.applicationId,
     this.currentApplication,
+    this.myApplications = const [],
     this.pendingReviews = const [],
+    this.auditorAssignments = const [],
   });
 
   ApplicationState copyWith({
@@ -22,27 +32,76 @@ class ApplicationState {
     String? error,
     String? applicationId,
     Map<String, dynamic>? currentApplication,
+    List<ApplicationEntity>? myApplications,
     List<dynamic>? pendingReviews,
+    List<ApplicationEntity>? auditorAssignments,
   }) {
     return ApplicationState(
       isLoading: isLoading ?? this.isLoading,
       error: error,
       applicationId: applicationId ?? this.applicationId,
       currentApplication: currentApplication ?? this.currentApplication,
+      myApplications: myApplications ?? this.myApplications,
       pendingReviews: pendingReviews ?? this.pendingReviews,
+      auditorAssignments: auditorAssignments ?? this.auditorAssignments,
     );
   }
 }
 
+// Notifier
 class ApplicationNotifier extends StateNotifier<ApplicationState> {
-  final DioClient _dio;
-  DioClient get dio => _dio; // Expose for other providers
+  final ApplicationRepository _repository;
+  final DioClient _dio; // Keep direct Dio access for legacy methods if needed
 
-  ApplicationNotifier(this._dio) : super(ApplicationState());
+  ApplicationNotifier(this._repository, this._dio) : super(ApplicationState());
 
-  // ... (Previous methods: createDraft, confirmPreReview, payPhase1, simulateOfficerReview, payPhase2, assignAuditor, submitAudit)
+  // Expose dio for screens that might access it directly (bad pattern but legacy support)
+  DioClient get dio => _dio;
 
-  // Stage 3: Fetch Pending Reviews (Officer Dashboard)
+  // --- New Methods (Repository Pattern) ---
+
+  Future<void> fetchMyApplications() async {
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await _repository.getMyApplications();
+    result.fold(
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
+      (apps) => state = state.copyWith(isLoading: false, myApplications: apps),
+    );
+  }
+
+  Future<void> fetchApplicationById(String id) async {
+    state = state.copyWith(isLoading: true, error: null);
+    // Try Repository first
+    final result = await _repository.getApplicationById(id);
+
+    result.fold(
+      (failure) async {
+        // Fallback to old Dio method if Repo fails or not fully implemented for full details
+        // But actually, let's trust the logic.
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
+      (app) => state = state.copyWith(isLoading: false, applicationId: id),
+      // Note: currentApplication is Map<String, dynamic>, app is Entity.
+      // We might need to fetch raw JSON if screens depend on Map.
+      // For now, let's keep the OLD logic for `fetchApplicationById` to match `currentApplication` type
+    );
+
+    // Legacy fetch to populate `currentApplication` Map
+    try {
+      final response = await _dio.get('/v2/applications/$id');
+      state = state.copyWith(
+        isLoading: false,
+        currentApplication: response.data['data'],
+        applicationId: id,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  // --- Legacy / Existing Methods (Restored) ---
+
   Future<void> fetchPendingReviews() async {
     state = state.copyWith(isLoading: true);
     try {
@@ -56,74 +115,59 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
     }
   }
 
-  // Fetch Single Application by ID
-  Future<void> fetchApplicationById(String id) async {
-    state = state.copyWith(isLoading: true);
-    try {
-      final response = await _dio.get('/v2/applications/$id');
-      state = state.copyWith(
-        isLoading: false,
-        currentApplication: response.data['data'],
-        applicationId: id,
-      );
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
-    }
-  }
-
-  // Stage 1: Create Draft (v2)
+  // Stage 1: Create Draft (v2) - Refactored to use Repository and XFile
   Future<bool> createApplication({
     required String establishmentId,
-    required String requestType,
-    // New Structured Fields
-    required String certificationType,
-    required String objective,
-    required String applicantType,
-    required Map<String, dynamic> applicantInfo,
-    required Map<String, dynamic> siteInfo,
-    // Legacy/Flexible
+    // Provide defaults or optional for new fields if not passed
+    String requestType = 'NEW',
+    dynamic
+        certificationType, // Changed from String to dynamic to support List<String>
+    dynamic objective, // Changed from String to dynamic
+    String applicantType = '',
+    Map<String, dynamic> applicantInfo = const {},
+    Map<String, dynamic> siteInfo = const {},
     required Map<String, dynamic> formData,
-    required Map<String, dynamic> documents,
+    required Map<String, XFile> documents, // Changed to XFile
   }) async {
     if (state.isLoading) return false;
     state = state.copyWith(isLoading: true);
-    try {
-      final response = await _dio.post(
-        '/v2/applications/draft',
-        data: {
-          'farmId': establishmentId,
-          'requestType': requestType,
-          // Pass Structured Data
-          'certificationType': certificationType,
-          'objective': objective,
-          'applicantType': applicantType,
-          'applicantInfo': applicantInfo,
-          'siteInfo': siteInfo,
-          'formData': formData,
-          // 'documents': documents // Handle separate upload if needed, or send here if backend supports.
-          // Current Backend createDraft only checks farmId and formData.
-        },
-      );
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        final data = response.data['data'];
+    // Construct the payload for the repository
+    final fullFormData = {
+      'requestType': requestType,
+      'certificationType': certificationType,
+      'objective': objective,
+      'applicantType': applicantType,
+      'applicantInfo': applicantInfo,
+      'siteInfo': siteInfo,
+      'formData': formData,
+    };
+
+    final result = await _repository.createApplication(
+      establishmentId: establishmentId,
+      type: 'GACP',
+      formData: fullFormData,
+      documents: documents,
+    );
+
+    return result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, error: failure.message);
+        return false;
+      },
+      (app) {
         state = state.copyWith(
           isLoading: false,
-          applicationId: data['_id'],
-          currentApplication: data,
+          applicationId: app.id,
+          // We don't have the full map here, but we have the ID.
+          // The UI typically navigates away or fetches details.
+          // For consistency with legacy cache, we could fetch, but let's trust the ID for now.
         );
         return true;
-      }
-      state = state.copyWith(
-          isLoading: false, error: 'Failed to create application');
-      return false;
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
-      return false;
-    }
+      },
+    );
   }
 
-  // Stage 3: Pre-Review Confirm (Unlock Payment)
   Future<bool> confirmPreReview() async {
     if (state.applicationId == null) return false;
     state = state.copyWith(isLoading: true);
@@ -139,7 +183,6 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
     }
   }
 
-  // Stage 2: Payment Phase 1 (Unlock Submit)
   Future<Map<String, dynamic>?> payPhase1() async {
     if (state.applicationId == null) return null;
     state = state.copyWith(isLoading: true);
@@ -148,7 +191,7 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
           await _dio.post('/v2/applications/${state.applicationId}/pay-phase1');
       state = state.copyWith(isLoading: false);
       if (response.statusCode == 200 && response.data['success']) {
-        return response.data['data']; // { transactionId, paymentUrl, qrCode }
+        return response.data['data'];
       }
       return null;
     } catch (e) {
@@ -157,7 +200,6 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
     }
   }
 
-  // Stage 3: Officer Review (Simulated for Demo)
   Future<bool> simulateOfficerReview({required bool approve}) async {
     if (state.applicationId == null) return false;
     state = state.copyWith(isLoading: true);
@@ -174,7 +216,6 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
     }
   }
 
-  // Stage 4: Payment Phase 2 (25,000 THB)
   Future<Map<String, dynamic>?> payPhase2() async {
     if (state.applicationId == null) return null;
     state = state.copyWith(isLoading: true);
@@ -192,7 +233,6 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
     }
   }
 
-  // Stage 5: Scheduling
   Future<bool> assignAuditor(
       {required String auditorId, required String date}) async {
     if (state.applicationId == null) return false;
@@ -210,7 +250,6 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
     }
   }
 
-  // Stage 6: Audit Result
   Future<bool> submitAudit({required bool pass, String notes = ''}) async {
     if (state.applicationId == null) return false;
     state = state.copyWith(isLoading: true);
@@ -227,26 +266,24 @@ class ApplicationNotifier extends StateNotifier<ApplicationState> {
     }
   }
 
-  // Fetch Assignments for Auditor (Mock: All 'AUDIT_SCHEDULED')
-  Future<void> fetchMyAssignments() async {
-    state = state.copyWith(isLoading: true);
-    try {
-      // In real app, filter by auditorId from auth token
-      final response = await _dio.get('/v2/applications/pending-reviews');
-      // For Demo: Reuse pending-reviews endpoint but filter in UI or here if needed
-      // Actually, let's just return all for demo
-      state = state.copyWith(
-        isLoading: false,
-        pendingReviews: response.data['data'] ?? [],
-      );
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
-    }
+  // Auditor/Officer Assignment Fetch
+  // Auditor assignment fetch
+  Future<void> fetchAuditorAssignments() async {
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await _repository.getAuditorAssignments();
+    result.fold(
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
+      (apps) =>
+          state = state.copyWith(isLoading: false, auditorAssignments: apps),
+    );
   }
 }
 
+// Provider
 final applicationProvider =
     StateNotifierProvider<ApplicationNotifier, ApplicationState>((ref) {
-  const storage = FlutterSecureStorage();
-  return ApplicationNotifier(DioClient(storage));
+  final dioClient = ref.watch(dioClientProvider);
+  final repository = ApplicationRepositoryImpl(dioClient);
+  return ApplicationNotifier(repository, dioClient);
 });

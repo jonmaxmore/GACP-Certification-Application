@@ -17,16 +17,14 @@ class _MyAssignmentsScreenState extends ConsumerState<MyAssignmentsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(applicationProvider.notifier).fetchMyAssignments();
+      ref.read(applicationProvider.notifier).fetchAuditorAssignments();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(applicationProvider);
-    // Filter locally for demo if needed, or just show all
-    final myJobs =
-        state.pendingReviews; // Assuming backend returns relevant list
+    final myJobs = state.auditorAssignments;
 
     return Scaffold(
       appBar: AppBar(
@@ -34,8 +32,9 @@ class _MyAssignmentsScreenState extends ConsumerState<MyAssignmentsScreen> {
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.refreshCw),
-            onPressed: () =>
-                ref.read(applicationProvider.notifier).fetchMyAssignments(),
+            onPressed: () => ref
+                .read(applicationProvider.notifier)
+                .fetchAuditorAssignments(),
           ),
         ],
       ),
@@ -57,13 +56,13 @@ class _MyAssignmentsScreenState extends ConsumerState<MyAssignmentsScreen> {
                               color: Colors.white),
                         ),
                         title: Text(
-                            'Inspection #${app['applicationNumber'] ?? 'Unknown'}'),
-                        subtitle:
-                            Text('Farm: ${app['farmId']}\nDate: 2025-12-25'),
+                            'Inspection #${app.id.substring(0, 8).toUpperCase()}'), // Entity ID
+                        subtitle: Text(
+                            'Farm: ${app.establishmentName}\nStatus: ${app.status}'),
                         trailing: const Icon(LucideIcons.chevronRight),
                         onTap: () {
                           // Navigate to Inspection Form
-                          context.push('/auditor/inspection/${app['_id']}');
+                          context.push('/auditor/inspection/${app.id}');
                         },
                       ),
                     );

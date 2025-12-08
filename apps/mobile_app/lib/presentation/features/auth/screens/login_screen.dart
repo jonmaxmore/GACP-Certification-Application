@@ -1,32 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../providers/auth_provider.dart';
 
-class AdminLoginScreen extends StatefulWidget {
-  const AdminLoginScreen({super.key});
+class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<AdminLoginScreen> createState() => _AdminLoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _AdminLoginScreenState extends State<AdminLoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
-  String _selectedRole = 'admin'; // 'admin' or 'farmer'
 
   void _handleLogin() async {
     setState(() => _isLoading = true);
-    // Mock Login Delay
-    await Future.delayed(const Duration(seconds: 1));
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter email and password')));
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    await ref.read(authProvider.notifier).login(email, password);
+
     setState(() => _isLoading = false);
 
-    if (mounted) {
-      if (_selectedRole == 'farmer') {
-        context.go('/dashboard'); // Go to FARMER Dashboard
+    // Check Result
+    final authState = ref.read(authProvider);
+    if (authState.user != null) {
+      if (authState.user!.role == 'admin') {
+        context.go('/admin/dashboard');
       } else {
-        context.go('/admin/dashboard'); // Go to ADMIN/OFFICER Dashboard
+        context.go('/dashboard');
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(authState.error ?? 'Login Failed'),
+          backgroundColor: Colors.red));
     }
   }
 
@@ -131,79 +149,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // Role Selection
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () =>
-                                  setState(() => _selectedRole = 'farmer'),
-                              child: Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: _selectedRole == 'farmer'
-                                      ? Colors.green
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(11),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  'เกษตรกร (Farmer)',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: _selectedRole == 'farmer'
-                                        ? Colors.white
-                                        : Colors.grey.shade600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () =>
-                                  setState(() => _selectedRole = 'admin'),
-                              child: Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: _selectedRole == 'admin'
-                                      ? const Color(0xFF0F172A)
-                                      : Colors.transparent, // Navy for Admin
-                                  borderRadius: BorderRadius.circular(11),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  'เจ้าหน้าที่ (Admin)',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: _selectedRole == 'admin'
-                                        ? Colors.white
-                                        : Colors.grey.shade600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
                     // Login Button
                     ElevatedButton(
                       onPressed: _isLoading ? null : _handleLogin,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _selectedRole == 'farmer'
-                            ? Colors.green
-                            : const Color(0xFF0F172A),
+                        backgroundColor: const Color(0xFF0F172A),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         shape: RoundedRectangleBorder(
@@ -219,6 +169,28 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                           : const Text('Sign In',
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Register Link
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Don't have an account? ",
+                            style: TextStyle(color: Colors.blueGrey[600])),
+                        GestureDetector(
+                          onTap: () => context.push(
+                              '/register'), // Use Push so they can go back
+                          child: Text(
+                            'Register here (Farmer)',
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

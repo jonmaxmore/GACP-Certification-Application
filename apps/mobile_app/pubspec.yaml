@@ -54,6 +54,9 @@ dev_dependencies:
   json_serializable: ^6.9.5
   freezed: ^2.5.8
   widgetbook_generator: ^3.14.0
+  integration_test:
+    sdk: flutter
+  mocktail: ^1.0.4
 
 flutter:
   uses-material-design: true

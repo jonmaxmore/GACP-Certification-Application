@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:dartz/dartz.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/errors/failures.dart';
 import '../entities/establishment_entity.dart';
 
@@ -13,7 +13,7 @@ abstract class EstablishmentRepository {
     required double longitude,
     required String titleDeedNo,
     required String security,
-    File? image,
+    XFile? image, // Changed from File to XFile
   });
 
   Future<Either<Failure, void>> deleteEstablishment(String id);

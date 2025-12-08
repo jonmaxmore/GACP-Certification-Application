@@ -56,26 +56,3 @@ class _AuditorDashboardScreenState extends State<AuditorDashboardScreen> {
     );
   }
 }
-
-// Placeholder Screens
-class AuditorHistoryScreen extends StatelessWidget {
-  const AuditorHistoryScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Audit History')),
-      body: const Center(child: Text('History Functionality Coming Soon')),
-    );
-  }
-}
-
-class AuditorProfileScreen extends StatelessWidget {
-  const AuditorProfileScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Auditor Profile')),
-      body: const Center(child: Text('Profile Settings')),
-    );
-  }
-}

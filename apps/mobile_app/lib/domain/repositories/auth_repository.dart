@@ -1,8 +1,11 @@
 import 'package:dartz/dartz.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/errors/failures.dart';
 import '../entities/user_entity.dart';
 
 abstract class AuthRepository {
+  Future<Either<Failure, void>> register(
+      Map<String, dynamic> data, XFile image);
   Future<Either<Failure, UserEntity>> login(String email, String password);
   Future<Either<Failure, void>> logout();
   Future<Either<Failure, UserEntity>> getCurrentUser();

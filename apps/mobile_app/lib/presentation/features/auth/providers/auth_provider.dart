@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/network/dio_client.dart';
@@ -43,9 +45,24 @@ class AuthState {
 // 3. Auth Notifier
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
+  // Stream controller to notify GoRouter of auth changes
+  final _streamController = StreamController<AuthState>.broadcast();
+  Stream<AuthState> get stream => _streamController.stream;
 
   AuthNotifier(this._repository) : super(const AuthState()) {
     checkAuthStatus();
+  }
+
+  @override
+  set state(AuthState value) {
+    super.state = value;
+    _streamController.add(value);
+  }
+
+  @override
+  void dispose() {
+    _streamController.close();
+    super.dispose();
   }
 
   Future<void> checkAuthStatus() async {
@@ -61,8 +78,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
     final result = await _repository.login(email, password);
     result.fold(
-      (failure) => state = state.copyWith(isLoading: false, error: failure.message),
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
       (user) => state = state.copyWith(isLoading: false, user: user),
+    );
+  }
+
+  Future<void> register(Map<String, dynamic> data, XFile image) async {
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await _repository.register(data, image);
+    result.fold(
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
+      (_) => state = state.copyWith(isLoading: false),
     );
   }
 

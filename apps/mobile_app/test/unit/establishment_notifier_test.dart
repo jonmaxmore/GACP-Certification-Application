@@ -19,6 +19,7 @@ void main() {
 
   setUp(() {
     mockRepo = MockEstablishmentRepository();
+    when(() => mockRepo.getEstablishments()).thenAnswer((_) async => Right([]));
     notifier = EstablishmentNotifier(mockRepo);
   });
 

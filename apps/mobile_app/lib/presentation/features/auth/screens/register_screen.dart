@@ -16,11 +16,16 @@ class RegisterScreen extends ConsumerStatefulWidget {
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  // Controllers (V2 Standard)
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _idCardController = TextEditingController();
+  final _laserCodeController = TextEditingController();
 
   XFile? _idCardImage;
   bool _isLoading = false;
@@ -29,16 +34,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      setState(() {
-        _idCardImage = image;
-      });
+      setState(() => _idCardImage = image);
     }
   }
 
   void _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Optional Image Check
     if (_idCardImage == null) {
+      // For V2, we might want to allow without image or enforce it.
+      // Current Schema says optional, but logic says strict. Let's warn but allow?
+      // No, UI should probably enforce it for "KYC" feel.
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please upload your ID Card image')),
       );
@@ -47,36 +54,47 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     setState(() => _isLoading = true);
 
+    // V2 Data Payload - Matches Backend Schema Strictly
     final data = {
       'firstName': _firstNameController.text.trim(),
       'lastName': _lastNameController.text.trim(),
       'email': _emailController.text.trim(),
+      'phoneNumber': _phoneNumberController.text.trim(),
       'password': _passwordController.text.trim(),
+      'idCard': _idCardController.text.trim(),
+      'laserCode': _laserCodeController.text.trim(),
+      'farmerType': 'INDIVIDUAL' // Default
     };
 
-    await ref.read(authProvider.notifier).register(data, _idCardImage!);
+    try {
+      await ref.read(authProvider.notifier).register(data, _idCardImage!);
 
-    setState(() => _isLoading = false);
+      if (!mounted) return;
+      setState(() => _isLoading = false);
 
-    // Check Result
-    final authState = ref.read(authProvider);
-    if (authState.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(authState.error!), backgroundColor: Colors.red));
-    } else {
-      if (mounted) {
+      final authState = ref.read(authProvider);
+
+      if (authState.error != null) {
+        // Show EXACT error from backend
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(authState.error!), backgroundColor: Colors.red));
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Registration Successful! Please Login.'),
             backgroundColor: Colors.green));
-        context.pop(); // Go back to Login
+        context.pop(); // Return to Login
       }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('System Error: $e'), backgroundColor: Colors.red));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Farmer Registration')),
+      appBar: AppBar(title: const Text('Farmer Registration V2')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -85,112 +103,123 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Create Account',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
+                const Text('New Account',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center),
+                const SizedBox(height: 24),
 
-                // Name Fields
+                // Name
                 Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
-                        controller: _firstNameController,
-                        decoration: const InputDecoration(
-                            labelText: 'First Name',
-                            prefixIcon: Icon(LucideIcons.user)),
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
-                      ),
-                    ),
+                        child: TextFormField(
+                            controller: _firstNameController,
+                            decoration: const InputDecoration(
+                                labelText: 'First Name',
+                                prefixIcon: Icon(LucideIcons.user)),
+                            validator: (v) => v!.isEmpty ? 'Required' : null)),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: TextFormField(
-                        controller: _lastNameController,
-                        decoration: const InputDecoration(
-                            labelText: 'Last Name',
-                            prefixIcon: Icon(LucideIcons.user)),
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
-                      ),
-                    ),
+                        child: TextFormField(
+                            controller: _lastNameController,
+                            decoration: const InputDecoration(
+                                labelText: 'Last Name',
+                                prefixIcon: Icon(LucideIcons.user)),
+                            validator: (v) => v!.isEmpty ? 'Required' : null)),
                   ],
                 ),
                 const SizedBox(height: 16),
 
-                // Email
+                // Contact
                 TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                      labelText: 'Email', prefixIcon: Icon(LucideIcons.mail)),
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
-                ),
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                        labelText: 'Email', prefixIcon: Icon(LucideIcons.mail)),
+                    validator: (v) =>
+                        v!.contains('@') ? null : 'Invalid Email'),
+                const SizedBox(height: 16),
+                TextFormField(
+                    controller: _phoneNumberController,
+                    decoration: const InputDecoration(
+                        labelText: 'Mobile Number',
+                        prefixIcon: Icon(LucideIcons.phone)),
+                    validator: (v) =>
+                        v!.length >= 10 ? null : 'Invalid Mobile'),
                 const SizedBox(height: 16),
 
-                // Password
+                // Security
                 TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: Icon(LucideIcons.lock)),
-                  validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
-                ),
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                        labelText: 'Password',
+                        prefixIcon: Icon(LucideIcons.lock)),
+                    validator: (v) => v!.length >= 6 ? null : 'Min 6 Chars'),
+                const SizedBox(height: 16),
+                TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                        labelText: 'Confirm Password',
+                        prefixIcon: Icon(LucideIcons.lock)),
+                    validator: (v) =>
+                        v == _passwordController.text ? null : 'Mismatch'),
                 const SizedBox(height: 16),
 
-                // Confirm Password
+                // Identity (Strict)
                 TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                      labelText: 'Confirm Password',
-                      prefixIcon: Icon(LucideIcons.lock)),
-                  validator: (v) => v != _passwordController.text
-                      ? 'Passwords do not match'
-                      : null,
-                ),
+                    controller: _idCardController,
+                    maxLength: 13,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                        labelText: 'ID Card (13 Digits)',
+                        prefixIcon: Icon(LucideIcons.creditCard),
+                        counterText: ""),
+                    validator: (v) =>
+                        v!.length == 13 ? null : 'Must be 13 Digits'),
+                const SizedBox(height: 16),
+                TextFormField(
+                    controller: _laserCodeController,
+                    decoration: const InputDecoration(
+                        labelText: 'Laser Code (Back)',
+                        prefixIcon: Icon(LucideIcons.scanLine)),
+                    validator: (v) => v!.isEmpty ? 'Required' : null),
                 const SizedBox(height: 24),
 
-                // ID Card Upload
+                // Upload
                 GestureDetector(
                   onTap: _pickImage,
                   child: Container(
                     height: 150,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade400),
-                    ),
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey)),
                     child: _idCardImage == null
-                        ? const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(LucideIcons.upload,
-                                  size: 40, color: Colors.grey),
-                              Text('Tap to upload ID Card Image'),
-                            ],
-                          )
+                        ? const Center(
+                            child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                Icon(LucideIcons.upload),
+                                Text('Upload ID Card')
+                              ]))
                         : kIsWeb
-                            ? Image.network(_idCardImage!.path,
-                                fit: BoxFit.cover)
-                            : Image.file(File(_idCardImage!.path),
-                                fit: BoxFit.cover),
+                            ? Image.network(_idCardImage!.path)
+                            : Image.file(File(_idCardImage!.path)),
                   ),
                 ),
                 const SizedBox(height: 32),
 
-                // Submit Button
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleRegister,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
-                  ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.green.shade700,
+                      foregroundColor: Colors.white),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Register'),
-                ),
+                      : const Text('Register Now'),
+                )
               ],
             ),
           ),

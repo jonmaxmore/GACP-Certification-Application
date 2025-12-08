@@ -168,7 +168,8 @@ class _ApplicationDetailScreenState
                   ),
                 ),
               ),
-            ]
+            ],
+          ],
         ),
       ),
     );
@@ -233,8 +234,8 @@ class _ApplicationDetailScreenState
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content:
-                Text('Assignment Failed: ${ref.read(applicationProvider).error}')),
+            content: Text(
+                'Assignment Failed: ${ref.read(applicationProvider).error}')),
       );
     }
   }

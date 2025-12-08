@@ -1,37 +1,32 @@
 const AuthService = require('../services/AuthService');
 
 class AuthController {
+
     async register(req, res) {
         try {
-            const result = await AuthService.register({
+            console.log('[AuthController] Register Request Recieved');
+
+            // Extract file path if present
+            const idCardImage = req.file ? req.file.path : null;
+
+            const userData = {
                 ...req.body,
-                idCardImage: req.file ? req.file.path : null
-            });
+                idCardImage // Add image path to body
+            };
+
+            const user = await AuthService.register(userData);
 
             res.status(201).json({
                 success: true,
-                message: 'User registered successfully. Please verify your email.',
-                data: {
-                    user: {
-                        id: result.user._id,
-                        email: result.user.email,
-                        firstName: result.user.firstName,
-                        lastName: result.user.lastName,
-                        status: result.user.status,
-                        isEmailVerified: result.user.isEmailVerified,
-                        phoneNumber: result.user.phoneNumber,
-                        address: result.user.address,
-                        province: result.user.province,
-                        district: result.user.district,
-                        subdistrict: result.user.subdistrict,
-                        zipCode: result.user.zipCode,
-                        registeredAt: result.user.createdAt,
-                    }
-                },
-                verificationToken: result.verificationToken
+                message: 'Registration Successful',
+                data: { user }
             });
+
         } catch (error) {
-            console.error('Registration Error:', error);
+            console.error('[AuthController] Register Error:', error.message);
+            // Log stack trace only if strictly needed, keeping logs clean for now
+            // console.error(error.stack);
+
             res.status(400).json({
                 success: false,
                 error: error.message
@@ -46,55 +41,33 @@ class AuthController {
 
             res.status(200).json({
                 success: true,
-                message: 'Login successful',
                 data: {
                     token: result.token,
-                    user: {
-                        id: result.user._id,
-                        email: result.user.email,
-                        firstName: result.user.firstName,
-                        lastName: result.user.lastName,
-                        status: result.user.status,
-                        role: result.user.role,
-                        phoneNumber: result.user.phoneNumber,
-                        address: result.user.address,
-                        province: result.user.province,
-                        district: result.user.district,
-                        subdistrict: result.user.subdistrict,
-                        zipCode: result.user.zipCode,
-                        registeredAt: result.user.createdAt,
-                    }
+                    user: result.user
                 }
             });
+
         } catch (error) {
-            console.error('Login Error:', error);
-            const status = error.message === 'Invalid email or password' ? 401 : 400;
-            res.status(status).json({
+            console.error('[AuthController] Login Error:', error.message);
+            res.status(401).json({
                 success: false,
                 error: error.message
             });
         }
     }
 
-    async verifyEmail(req, res) {
+    async getMe(req, res) {
         try {
-            const { token } = req.params;
-            const user = await AuthService.verifyEmail(token);
-
+            if (!req.user || !req.user.id) {
+                return res.status(401).json({ success: false, error: 'Unauthorized' });
+            }
+            const user = await AuthService.getProfile(req.user.id);
             res.status(200).json({
                 success: true,
-                message: 'Email verified successfully',
-                data: {
-                    userId: user._id,
-                    email: user.email
-                }
+                data: { user }
             });
         } catch (error) {
-            console.error('Verify Email Error:', error);
-            res.status(400).json({
-                success: false,
-                error: error.message
-            });
+            res.status(500).json({ success: false, error: 'Server Error' });
         }
     }
 }

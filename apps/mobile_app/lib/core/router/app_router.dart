@@ -12,7 +12,7 @@ import '../../presentation/features/admin/screens/application_detail_screen.dart
 import '../../presentation/features/auth/screens/login_screen.dart';
 import '../../presentation/features/auth/screens/register_screen.dart';
 import '../../presentation/features/dashboard/screens/user_profile_screen.dart';
-import '../../presentation/features/application/screens/application_form_screen.dart';
+
 import '../../presentation/features/application/screens/notification_screen.dart';
 import '../../presentation/features/application/screens/service_selection_screen.dart';
 import '../../presentation/features/application/screens/guidelines_screen.dart';
@@ -25,10 +25,11 @@ import '../../presentation/features/auditor/screens/my_assignments_screen.dart';
 import '../../presentation/features/auditor/screens/inspection_form_screen.dart';
 import '../../presentation/features/auth/providers/auth_provider.dart';
 import '../../presentation/features/application/screens/application_list_screen.dart';
-import '../../presentation/features/application/screens/create_application_screen.dart';
+
 import '../../presentation/features/application/screens/payment_screen.dart';
-import '../../presentation/features/auditor/screens/auditor_job_screen.dart'; // Import Added
-import '../../presentation/features/auditor/screens/audit_form_screen.dart'; // Import Added
+import '../../presentation/features/auditor/screens/auditor_job_screen.dart';
+import '../../presentation/features/auditor/screens/audit_form_screen.dart';
+import '../../presentation/features/application/screens/application_wizard_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -114,11 +115,13 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
               GoRoute(
                 path: 'create',
-                builder: (context, state) => const CreateApplicationScreen(),
+                builder: (context, state) => ApplicationWizardScreen(
+                  requestType: state.extra as String?,
+                ),
               ),
               GoRoute(
                 path: 'form',
-                builder: (context, state) => ApplicationFormScreen(
+                builder: (context, state) => ApplicationWizardScreen(
                   requestType: state.extra as String?,
                 ),
               ),

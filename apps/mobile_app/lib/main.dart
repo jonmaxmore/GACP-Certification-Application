@@ -3,7 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart'; // Import AppTheme
 
-void main() {
+import 'package:hive_flutter/hive_flutter.dart';
+import 'core/managers/lifecycle_manager.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox('application_drafts');
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -14,11 +21,13 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
 
-    return MaterialApp.router(
-      title: 'GACP Certification',
-      theme: AppTheme.light,
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
+    return LifecycleManager(
+      child: MaterialApp.router(
+        title: 'GACP Certification',
+        theme: AppTheme.light,
+        routerConfig: router,
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }

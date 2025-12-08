@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'app_exception.dart';
 
 class DioClient {
   final Dio _dio;
@@ -8,13 +9,13 @@ class DioClient {
 
   // Dynamic Base URL based on platform
   static String get _baseUrl {
-    if (kIsWeb) return 'http://localhost:5000/api';
+    if (kIsWeb) return 'http://localhost:3000/api';
     try {
       if (defaultTargetPlatform == TargetPlatform.android) {
-        return 'http://10.0.2.2:5000/api';
+        return 'http://10.0.2.2:3000/api'; // Android Emulator
       }
     } catch (_) {}
-    return 'http://localhost:5000/api'; // iOS / Desktop / Fallback
+    return 'http://localhost:3000/api'; // iOS / Desktop / Fallback
   }
 
   DioClient(this._storage)
@@ -39,8 +40,28 @@ class DioClient {
         onError: (DioException e, handler) async {
           // Handle 401 Unauthorized
           if (e.response?.statusCode == 401) {
-            // TODO: Trigger logout or refresh token
+            return handler.reject(DioException(
+                requestOptions: e.requestOptions,
+                error: UnauthorizedException()));
           }
+
+          // Handle Timeouts
+          if (e.type == DioExceptionType.connectionTimeout ||
+              e.type == DioExceptionType.receiveTimeout ||
+              e.type == DioExceptionType.sendTimeout) {
+            return handler.reject(DioException(
+                requestOptions: e.requestOptions,
+                error: NetworkException(
+                    'Connection timed out. Please check your internet.')));
+          }
+
+          // Handle No Internet
+          if (e.type == DioExceptionType.connectionError) {
+            return handler.reject(DioException(
+                requestOptions: e.requestOptions,
+                error: NetworkException('No internet connection.')));
+          }
+
           return handler.next(e);
         },
       ),

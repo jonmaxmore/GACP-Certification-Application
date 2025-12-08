@@ -1,6 +1,7 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:equatable/equatable.dart';
 import '../../../../data/repositories/establishment_repository_impl.dart';
 import '../../../../domain/entities/establishment_entity.dart';
 import '../../../../domain/repositories/establishment_repository.dart';
@@ -14,7 +15,7 @@ final establishmentRepositoryProvider =
 });
 
 // 2. State Class
-class EstablishmentState {
+class EstablishmentState extends Equatable {
   final bool isLoading;
   final List<EstablishmentEntity> establishments;
   final String? error;
@@ -50,6 +51,16 @@ class EstablishmentState {
       isSuccess: isSuccess ?? this.isSuccess,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        isLoading,
+        establishments,
+        error,
+        selectedImage,
+        selectedLocation,
+        isSuccess,
+      ];
 }
 
 // 3. Notifier

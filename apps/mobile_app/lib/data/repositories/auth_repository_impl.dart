@@ -60,9 +60,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        final token = data['token'];
-        final user =
-            data['data']['user']; // Fixed path based on controller structure
+        final token = data['data']['token']; // Corrected path nesting
+        final user = data['data']['user'];
 
         // Save token
         await _storage.write(key: 'auth_token', value: token);

@@ -279,7 +279,12 @@ router.get('/:id', async (req, res) => {
  */
 router.put('/:id', async (req, res) => {
     try {
-        await service.collection.updateOne({ id: req.params.id }, { $set: { ...req.body, updatedAt: new Date() } });
+        const result = await service.collection.updateOne({ id: req.params.id }, { $set: { ...req.body, updatedAt: new Date() } });
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ success: false, error: 'Establishment not found or ID mismatch' });
+        }
+
         res.json({ success: true, message: 'Establishment updated' });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -306,7 +311,12 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
     try {
-        await service.collection.deleteOne({ id: req.params.id });
+        const result = await service.collection.deleteOne({ id: req.params.id });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ success: false, error: 'Establishment not found or ID mismatch' });
+        }
+
         res.json({ success: true, message: 'Establishment deleted' });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });

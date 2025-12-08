@@ -242,6 +242,20 @@ class ApplicationController {
         }
     }
 
+    // Auditor: Get Assigned Inspections
+    async getAuditorAssignments(req, res) {
+        try {
+            // Find apps where audit.auditorId matches current user
+            const applications = await Application.find({
+                'audit.auditorId': req.user.id,
+                status: { $in: ['AUDIT_SCHEDULED', 'AUDIT_PENDING'] } // Broaden match if needed
+            });
+            res.json({ success: true, data: applications });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
     // Get Single Application by ID
     async getApplicationById(req, res) {
         try {
@@ -349,6 +363,32 @@ class ApplicationController {
         try {
             const notifications = await Notification.find({ recipientId: req.user.id }).sort({ createdAt: -1 });
             res.json({ success: true, data: notifications });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // Admin/Officer Dashboard Stats
+    async getDashboardStats(req, res) {
+        try {
+            const total = await Application.countDocuments({});
+            const pending = await Application.countDocuments({ status: { $in: ['SUBMITTED', 'AUDIT_PENDING', 'PAYMENT_1_PENDING'] } });
+            const approved = await Application.countDocuments({ status: 'CERTIFIED' });
+
+            // Simple Revenue Aggregation
+            const paidPhase1 = await Application.countDocuments({ 'payment.phase1.status': 'PAID' });
+            const paidPhase2 = await Application.countDocuments({ 'payment.phase2.status': 'PAID' });
+            const revenue = (paidPhase1 * 5000) + (paidPhase2 * 25000);
+
+            res.json({
+                success: true,
+                data: {
+                    total,
+                    pending,
+                    approved,
+                    revenue
+                }
+            });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }

@@ -19,6 +19,13 @@ class AuthController {
                         lastName: result.user.lastName,
                         status: result.user.status,
                         isEmailVerified: result.user.isEmailVerified,
+                        phoneNumber: result.user.phoneNumber,
+                        address: result.user.address,
+                        province: result.user.province,
+                        district: result.user.district,
+                        subdistrict: result.user.subdistrict,
+                        zipCode: result.user.zipCode,
+                        registeredAt: result.user.createdAt,
                     }
                 },
                 verificationToken: result.verificationToken
@@ -49,6 +56,13 @@ class AuthController {
                         lastName: result.user.lastName,
                         status: result.user.status,
                         role: result.user.role,
+                        phoneNumber: result.user.phoneNumber,
+                        address: result.user.address,
+                        province: result.user.province,
+                        district: result.user.district,
+                        subdistrict: result.user.subdistrict,
+                        zipCode: result.user.zipCode,
+                        registeredAt: result.user.createdAt,
                     }
                 }
             });

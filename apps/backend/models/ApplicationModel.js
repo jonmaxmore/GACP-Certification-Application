@@ -45,15 +45,14 @@ const ApplicationSchema = new Schema({
             enum: ['NEW', 'RENEW', 'SUBSTITUTE'],
             default: 'NEW'
         },
-        certificationType: {
+        certificationType: [{
             type: String,
-            enum: ['CULTIVATION', 'PROCESSING'], // GACP vs Processing
-            default: 'CULTIVATION'
-        },
-        objective: {
+            enum: ['CULTIVATION', 'PROCESSING']
+        }],
+        objective: [{
             type: String,
             enum: ['RESEARCH', 'COMMERCIAL_DOMESTIC', 'COMMERCIAL_EXPORT', 'OTHER']
-        },
+        }],
 
         // 2. Applicant Info (Polymorphic)
         applicantType: {
@@ -78,7 +77,7 @@ const ApplicationSchema = new Schema({
 
         // 3. Site Info (Merged from Establishment or Overridden)
         siteInfo: {
-            areaType: { type: String, enum: ['OUTDOOR', 'INDOOR', 'GREENHOUSE', 'OTHER'] },
+            areaType: [{ type: String, enum: ['OUTDOOR', 'INDOOR', 'GREENHOUSE', 'OTHER'] }],
             address: String,
             titleDeedNo: String,
             coordinates: String, // GPS

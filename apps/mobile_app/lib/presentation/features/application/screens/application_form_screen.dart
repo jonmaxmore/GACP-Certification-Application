@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
@@ -10,7 +10,11 @@ import 'package:image_picker/image_picker.dart';
 import '../providers/application_provider.dart';
 import '../../auth/providers/auth_provider.dart'; // Added Import
 import 'package:mobile_app/presentation/features/establishment/providers/establishment_provider.dart';
-import 'package:mobile_app/domain/entities/establishment_entity.dart'; // Correct Import
+import 'package:mobile_app/domain/entities/establishment_entity.dart';
+import 'package:mobile_app/presentation/features/application/widgets/herb_type_selector.dart'; // Import Added
+import 'package:mobile_app/presentation/features/application/widgets/replacement_info_section.dart'; // Import Added
+import 'package:mobile_app/presentation/features/application/widgets/document_upload_section.dart'; // Import Added
+import 'package:mobile_app/presentation/features/application/services/form_config_service.dart'; // Import Added
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 @widgetbook.UseCase(name: 'New Application', type: ApplicationFormScreen)
@@ -83,18 +87,18 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
   final _plantStrainController = TextEditingController(); // Strain
   final _plantPartsController = TextEditingController();
   final _strainSourceController =
-      TextEditingController(); // แหล่งที่มาสายพันธุ์ (บริษัท)
-  final _expectedQtyController = TextEditingController(); // ปริมาณ
+      TextEditingController(); // เนเธซเธฅเนเธเธ—เธตเนเธกเธฒเธชเธฒเธขเธเธฑเธเธเธธเน (เธเธฃเธดเธฉเธฑเธ—)
+  final _expectedQtyController = TextEditingController(); // เธเธฃเธดเธกเธฒเธ“
 
   // Juristic / Community Specific
   final _authorizedDirectorController =
-      TextEditingController(); // ชื่อประธาน/กรรมการ
+      TextEditingController(); // เธเธทเนเธญเธเธฃเธฐเธเธฒเธ/เธเธฃเธฃเธกเธเธฒเธฃ
   final _officePhoneController =
-      TextEditingController(); // โทรศัพท์สถานที่จัดตั้ง
-  final _directorMobileController = TextEditingController(); // มือถือประธาน
-  final _communityReg01Controller = TextEditingController(); // สวช.01
-  final _communityReg03Controller = TextEditingController(); // ท.ว.ช.3
-  final _houseIdController = TextEditingController(); // เลขรหัสประจำบ้าน
+      TextEditingController(); // เนเธ—เธฃเธจเธฑเธเธ—เนเธชเธ–เธฒเธเธ—เธตเนเธเธฑเธ”เธ•เธฑเนเธ
+  final _directorMobileController = TextEditingController(); // เธกเธทเธญเธ–เธทเธญเธเธฃเธฐเธเธฒเธ
+  final _communityReg01Controller = TextEditingController(); // เธชเธงเธ.01
+  final _communityReg03Controller = TextEditingController(); // เธ—.เธง.เธ.3
+  final _houseIdController = TextEditingController(); // เน€เธฅเธเธฃเธซเธฑเธชเธเธฃเธฐเธเธณเธเนเธฒเธ
 
   // Coordinator (Juristic)
   final _coordinatorNameController = TextEditingController();
@@ -103,7 +107,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
   final _titleDeedController = TextEditingController();
   final _gpsController = TextEditingController();
   final _securityFencingController =
-      TextEditingController(text: 'รั้วลวดหนาม สูง 2 เมตร');
+      TextEditingController(text: 'เธฃเธฑเนเธงเธฅเธงเธ”เธซเธเธฒเธก เธชเธนเธ 2 เน€เธกเธ•เธฃ');
   final _securityCCTVController = TextEditingController();
 
   // Renewal Fields
@@ -183,7 +187,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
     if (mounted) {
       setState(() {
         _isAnalyzing = false;
-        _aiResult = 'เอกสารถูกต้องตามมาตรฐาน GACP (Document Valid)';
+        _aiResult = 'เน€เธญเธเธชเธฒเธฃเธ–เธนเธเธ•เนเธญเธเธ•เธฒเธกเธกเธฒเธ•เธฃเธเธฒเธ GACP (Document Valid)';
       });
     }
   }
@@ -213,890 +217,6 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
     }
   }
 
-  // Helper for Replacement Documents
-  List<Map<String, dynamic>> _getReplacementDocumentList() {
-    final commonDocs = [
-      {
-        'id': 'REQ_FORM',
-        'title': '1. แบบลงทะเบียนยื่นคำขอ',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'hasDownload': true,
-        'isLink': false
-      },
-      {
-        'id': 'LAND_TITLE',
-        'title': '2. สำเนาหนังสือแสดงกรรมสิทธิ์ในที่ดิน',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'LAND_CONSENT',
-        'title': '3. หนังสือให้ความยินยอม (กรณีเช่า)',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': false, // Conditional
-        'isLink': false
-      },
-      {
-        'id': 'MAP_GPS',
-        'title': '4. แผนที่แสดงที่ตั้งและพิกัด',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'BUILDING_PLAN',
-        'title': '5. แบบแปลนอาคารหรือโรงเรือน',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'EXTERIOR_PHOTO',
-        'title': '6. ภาพถ่ายบริเวณภายนอกอาคาร',
-        'description': 'Upload 1 supported file: PDF or Image.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'PROD_PLAN',
-        'title': '7. แผนการผลิตกัญชาแต่ละรอบ/ปี',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'SECURITY_PLAN',
-        'title': '8. มาตรการรักษาความปลอดภัย',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'INTERIOR_PHOTO',
-        'title': '9. ภาพถ่ายภายในสถานที่ผลิต',
-        'description': 'Upload 1 supported file: PDF or Image.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'SOP',
-        'title': '10. คู่มือมาตรฐานการปฏิบัติงาน (SOP)',
-        'description': 'ฉบับภาษาไทยเท่านั้น. Upload 1 supported file: PDF.',
-        'maxSize': '1 GB',
-        'required': true,
-        'isLink': false
-      },
-    ];
-
-    final individualDocs = [
-      {
-        'id': 'TRAINING_CERT',
-        'title': '11. หนังสือรับรองการฝึกอบรม (E-learning)',
-        'description': 'Upload 1 supported file.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'STRAIN_CERT',
-        'title': '12. หนังสือรับรองสายพันธ์ุ',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'INTERNAL_TRAINING',
-        'title': '13. เอกสารการอบรมพนักงานภายใน',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'STAFF_TEST',
-        'title': '14. แบบทดสอบพนักงานและผลการทดสอบ',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'SUBSTRATE_TEST',
-        'title': '15. ผลตรวจวัสดุปลูก',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'WATER_TEST',
-        'title': '16. ผลตรวจน้ำ',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '10 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'FLOWER_TEST',
-        'title': '17. ผลตรวจช่อดอก',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'INPUTS_REPORT',
-        'title': '18. รายงานปัจจัยการผลิตและสารชีวภัณฑ์',
-        'description': 'Upload 1 supported file.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'CP_CCP',
-        'title': '19. ตารางแผนควบคุมการผลิต CP/CCP',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'CALIBRATION',
-        'title': '20. ใบสอบเทียบเครื่องมือ (ตราชั่ง)',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'VIDEO_LINK',
-        'title': '21. วิดีโอแสดงสถานที่การปฏิบัติงาน',
-        'description': 'กรุณาแนบลิงค์วิดีโอ',
-        'maxSize': 'Link',
-        'required': true,
-        'isLink': true
-      },
-      {
-        'id': 'ADDITIONAL_DOCS',
-        'title': '22. เอกสารเพิ่มเติม',
-        'description': 'Upload up to 5 supported files: PDF or image.',
-        'maxSize': '1 GB',
-        'required': false,
-        'isLink': false
-      },
-    ];
-
-    final communityDocs = [
-      {
-        'id': 'REG_SMCE',
-        'title': '11. สำเนาหนังสือสำคัญแสดงการจดทะเบียนวิสาหกิจ',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'AUTH_DOC_01',
-        'title': '12. หนังสือผู้ได้รับมอบหมาย (สวช.01)',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'OPERATION_DOC_03',
-        'title': '13. เอกสารการดําเนินกิจการ (ท.ว.ช.3)',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'TRAINING_CERT',
-        'title': '14. หนังสือรับรองการฝึกอบรม (E-learning)',
-        'description': 'Upload 1 supported file: PDF or image.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'STRAIN_CERT',
-        'title': '15. หนังสือรับรองสายพันธ์ุ',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '10 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'INTERNAL_TRAINING',
-        'title': '16. เอกสารการอบรมพนักงานภายใน',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'STAFF_TEST',
-        'title': '17. แบบทดสอบพนักงานและผลการทดสอบ',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'SUBSTRATE_TEST',
-        'title': '18. ผลตรวจวัสดุปลูก',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'WATER_TEST',
-        'title': '19. ผลตรวจน้ำ',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'FLOWER_TEST',
-        'title': '20. ผลตรวจช่อดอก',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'INPUTS_REPORT',
-        'title': '21. รายงานปัจจัยการผลิตและสารชีวภัณฑ์',
-        'description': 'Upload 1 supported file: PDF or image.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'CP_CCP',
-        'title': '22. ตารางแผนควบคุมการผลิต CP/CCP',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'CALIBRATION',
-        'title': '23. ใบสอบเทียบเครื่องมือ (ตราชั่ง)',
-        'description': 'Upload 1 supported file: PDF or image.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'VIDEO_LINK',
-        'title': '24. วิดีโอแสดงสถานที่การปฏิบัติงาน',
-        'description': 'กรุณาแนบลิงค์วิดีโอ',
-        'maxSize': 'Link',
-        'required': true,
-        'isLink': true
-      },
-      {
-        'id': 'ADDITIONAL_DOCS',
-        'title': '25. เอกสารเพิ่มเติม',
-        'description': 'Upload up to 5 supported files.',
-        'maxSize': '100 MB',
-        'required': false,
-        'isLink': false
-      },
-    ];
-
-    final juristicDocs = [
-      {
-        'id': 'JURISTIC_CERT',
-        'title': '11. สำเนาหนังสือรับรองการจดทะเบียนนิติบุคคล',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'SHAREHOLDER_LIST',
-        'title': '12. บัญชีรายชื่อกรรมการผู้จัดการ/หุ้นส่วน',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'AUTH_REP',
-        'title': '13. หนังสือแสดงว่าผู้ขอใบรับรองเป็นผู้แทน',
-        'description': 'Upload 1 supported file.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'TRAINING_CERT',
-        'title': '14. หนังสือรับรองการฝึกอบรม (E-learning)',
-        'description': 'Upload 1 supported file: PDF or image.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'STRAIN_CERT',
-        'title': '15. หนังสือรับรองสายพันธ์ุ',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'INTERNAL_TRAINING',
-        'title': '16. เอกสารการอบรมพนักงานภายใน',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'STAFF_TEST',
-        'title': '17. แบบทดสอบพนักงานและผลการทดสอบ',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'SUBSTRATE_TEST',
-        'title': '18. ผลตรวจวัสดุปลูก',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'WATER_TEST',
-        'title': '19. ผลตรวจน้ำ',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'FLOWER_TEST',
-        'title': '20. ผลตรวจช่อดอก',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'INPUTS_REPORT',
-        'title': '21. รายงานปัจจัยการผลิตและสารชีวภัณฑ์',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'CP_CCP',
-        'title': '22. ตารางแผนควบคุมการผลิต CP/CCP',
-        'description': 'Upload 1 supported file: PDF.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'CALIBRATION',
-        'title': '23. ใบสอบเทียบเครื่องมือ (ตราชั่ง)',
-        'description': 'Upload 1 supported file.',
-        'maxSize': '100 MB',
-        'required': true,
-        'isLink': false
-      },
-      {
-        'id': 'VIDEO_LINK',
-        'title': '24. วิดีโอแสดงสถานที่ปฏิบัติงาน',
-        'description': 'กรุณาแนบลิงค์วิดีโอ',
-        'maxSize': 'Link',
-        'required': true,
-        'isLink': true
-      },
-      {
-        'id': 'ADDITIONAL_DOCS',
-        'title': '25. เอกสารเพิ่มเติม',
-        'description': 'Upload up to 5 supported files.',
-        'maxSize': '100 MB',
-        'required': false,
-        'isLink': false
-      },
-    ];
-
-    List<Map<String, dynamic>> specialDocs = [];
-    if (_replacementReason == 'LOST') {
-      specialDocs.add({
-        'id': 'POLICE_REPORT',
-        'title': 'ใบแจ้งความ (Police Report)',
-        'description': 'กรณีใบรับรองสูญหาย. Upload 1 supported file.',
-        'maxSize': '10 MB',
-        'required': true,
-        'isLink': false
-      });
-    } else if (_replacementReason == 'DAMAGED') {
-      specialDocs.add({
-        'id': 'ORIGINAL_CERT_PHYSICAL',
-        'title': 'ใบรับรองฉบับเดิม (Original Certificate)',
-        'description': 'กรณีชำรุด. Upload 1 supported file.',
-        'maxSize': '10 MB',
-        'required': true,
-        'isLink': false
-      });
-    }
-
-    if (_applicantType == 'COMMUNITY') {
-      return [...specialDocs, ...commonDocs, ...communityDocs];
-    } else if (_applicantType == 'JURISTIC') {
-      return [...specialDocs, ...commonDocs, ...juristicDocs];
-    } else {
-      // Individual
-      return [...specialDocs, ...commonDocs, ...individualDocs];
-    }
-  }
-
-  // Renewal helper remains...
-  List<Map<String, dynamic>> _getRenewalDocumentList() {
-    // 1-10 are common for all
-    final commonDocs = [
-      {
-        'id': 'REQ_FORM',
-        'title': '1. แบบลงทะเบียนยื่นคำขอ',
-        'description':
-            'ดาวน์โหลดแบบฟอร์มและแนบกลับ (Upload PDF). ตัวอย่างวิดีโอ (แนบลิงค์)',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF'],
-        'hasDownload': true,
-        'hasVideo': true,
-        'videoLink': 'https://youtu.be/example'
-      },
-      {
-        'id': 'LAND_TITLE',
-        'title': '2. สำเนาหนังสือแสดงกรรมสิทธิ์ในที่ดิน/สิทธิครอบครอง',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'LAND_CONSENT',
-        'title': '3. หนังสือให้ความยินยอม (กรณีเช่า/ใช้ที่ดินผู้อื่น)',
-        'required': false, // Contextual
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'MAP_GPS',
-        'title': '4. แผนที่แสดงที่ตั้งและพิกัด (Map & Coordinates)',
-        'description':
-            'เส้นทางเข้าถึง, พิกัดแปลง, ขนาดแปลง, สิ่งปลูกสร้างใกล้เคียง',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF', 'Image']
-      },
-      {
-        'id': 'BUILDING_PLAN',
-        'title': '5. แบบแปลนอาคารหรือโรงเรือน',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'EXTERIOR_PHOTO',
-        'title': '6. ภาพถ่ายบริเวณภายนอกอาคาร/โรงเรือน',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF', 'Image']
-      },
-      {
-        'id': 'PROD_PLAN_DOC',
-        'title': '7. แผนการผลิตกัญชาแต่ละรอบ/ปี และแผนการใช้ประโยชน์',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'SECURITY_PLAN_DOC',
-        'title': '8. มาตรการรักษาความปลอดภัย และการจัดการส่วนที่เหลือ',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'INTERIOR_PHOTO',
-        'title': '9. ภาพถ่ายภายในสถานที่ผลิตและเก็บเกี่ยว',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF', 'Image']
-      },
-      {
-        'id': 'SOP_FULL',
-        'title': '10. คู่มือมาตรฐานการปฏิบัติงาน (SOP) ฉบับภาษาไทย',
-        'description':
-            'ระบุละเอียดทุกขั้นตอน (เพาะ, เก็บเกี่ยว, ตาก, ทริม, บ่ม, บรรจุ, ขนย้าย, กำจัดของเสีย, อบรม, เอกสารแนบ, บันทึกผล). Upload PDF.',
-        'required': true,
-        'maxSize': '1 GB',
-        'types': ['PDF']
-      },
-    ];
-
-    // Individual Specific
-    final individualDocs = [
-      {
-        'id': 'TRAINING_CERT',
-        'title': '11. หนังสือรับรองการฝึกอบรม (E-learning GACP)',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF', 'Image']
-      },
-      {
-        'id': 'STRAIN_CERT',
-        'title': '12. หนังสือรับรองสายพันธุ์',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'INTERNAL_TRAINING',
-        'title': '13. เอกสารการอบรมพนักงานภายใน',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'STAFF_TEST',
-        'title': '14. แบบทดสอบพนักงานและผลการทดสอบ (ก่อน/หลัง)',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'SUBSTRATE_TEST',
-        'title': '15. ผลตรวจวัสดุปลูก',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'WATER_TEST',
-        'title': '16. ผลตรวจน้ำ',
-        'required': true,
-        'maxSize': '10 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'FLOWER_TEST',
-        'title': '17. ผลตรวจช่อดอก',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'INPUTS_REPORT',
-        'title': '18. รายงานปัจจัยการผลิตและสารชีวภัณฑ์',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF', 'Image']
-      },
-      {
-        'id': 'CP_CCP',
-        'title': '19. ตารางแผนควบคุมการผลิต CP/CCP',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'CALIBRATION',
-        'title': '20. ใบสอบเทียบเครื่องมือ (ตราชั่ง)',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'VIDEO_LINK',
-        'title': '21. วิดีโอแสดงสถานที่การปฏิบัติงาน (แนบลิงค์)',
-        'required': true,
-        'maxSize': 'Link',
-        'isLink': true
-      },
-      {
-        'id': 'ADDITIONAL_DOCS',
-        'title': '22. เอกสารเพิ่มเติม (Additional)',
-        'required': false,
-        'maxSize': '1 GB',
-        'types': ['PDF', 'Image']
-      },
-    ];
-
-    // Community Specific
-    final communityDocs = [
-      {
-        'id': 'COMMUNITY_REG',
-        'title': '11. สำเนาหนังสือจดทะเบียนวิสาหกิจชุมชน',
-        'description': 'แสดงวัตถุประสงค์สอดคล้องและบัญชีรายชื่อสมาชิก',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'AUTH_REP_01',
-        'title': '12. หนังสือผู้ได้รับมอบหมาย (สวช.01)',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'OPERATION_03',
-        'title': '13. เอกสารแสดงการดำเนินกิจการ (ท.ว.ช.3)',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'TRAINING_CERT',
-        'title': '14. หนังสือรับรองการฝึกอบรม (E-learning GACP)',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF', 'Image']
-      },
-      {
-        'id': 'STRAIN_CERT',
-        'title': '15. หนังสือรับรองสายพันธุ์',
-        'required': true,
-        'maxSize': '10 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'INTERNAL_TRAINING',
-        'title': '16. เอกสารการอบรมพนักงานภายใน',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'STAFF_TEST',
-        'title': '17. แบบทดสอบพนักงานและผลการทดสอบ (ก่อน/หลัง)',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'SUBSTRATE_TEST',
-        'title': '18. ผลตรวจวัสดุปลูก',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'WATER_TEST',
-        'title': '19. ผลตรวจน้ำ',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'FLOWER_TEST',
-        'title': '20. ผลตรวจช่อดอก',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'INPUTS_REPORT',
-        'title': '21. รายงานปัจจัยการผลิตและสารชีวภัณฑ์',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF', 'Image']
-      },
-      {
-        'id': 'CP_CCP',
-        'title': '22. ตารางแผนควบคุมการผลิต CP/CCP',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'CALIBRATION',
-        'title': '23. ใบสอบเทียบเครื่องมือ (ตราชั่ง)',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF', 'Image']
-      },
-      {
-        'id': 'VIDEO_LINK',
-        'title': '24. วิดีโอแสดงสถานที่การปฏิบัติงาน (แนบลิงค์)',
-        'required': true,
-        'maxSize': 'Link',
-        'isLink': true
-      },
-      {
-        'id': 'ADDITIONAL_DOCS',
-        'title': '25. เอกสารเพิ่มเติม (Additional)',
-        'required': false,
-        'maxSize': '100 MB',
-        'types': ['PDF', 'Image']
-      },
-    ];
-
-    // Juristic Specific
-    final juristicDocs = [
-      {
-        'id': 'JURISTIC_CERT',
-        'title': '11. สำเนาหนังสือรับรองการจดทะเบียนนิติบุคคล',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'SHAREHOLDER_LIST',
-        'title': '12. บัญชีรายชื่อกรรมการผู้จัดการ/หุ้นส่วน',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'AUTH_REP_LETTER',
-        'title': '13. หนังสือแสดงผู้มีอำนาจทำการแทนนิติบุคคล',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'TRAINING_CERT',
-        'title': '14. หนังสือรับรองการฝึกอบรม (E-learning GACP)',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF', 'Image']
-      },
-      {
-        'id': 'STRAIN_CERT',
-        'title': '15. หนังสือรับรองสายพันธุ์',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'INTERNAL_TRAINING',
-        'title': '16. เอกสารการอบรมพนักงานภายใน',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'STAFF_TEST',
-        'title': '17. แบบทดสอบพนักงานและผลการทดสอบ (ก่อน/หลัง)',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'SUBSTRATE_TEST',
-        'title': '18. ผลตรวจวัสดุปลูก',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'WATER_TEST',
-        'title': '19. ผลตรวจน้ำ',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'FLOWER_TEST',
-        'title': '20. ผลตรวจช่อดอก',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'INPUTS_REPORT',
-        'title': '21. รายงานปัจจัยการผลิตและสารชีวภัณฑ์',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'CP_CCP',
-        'title': '22. ตารางแผนควบคุมการผลิต CP/CCP',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'CALIBRATION',
-        'title': '23. ใบสอบเทียบเครื่องมือ (ตราชั่ง)',
-        'required': true,
-        'maxSize': '100 MB',
-        'types': ['PDF']
-      },
-      {
-        'id': 'VIDEO_LINK',
-        'title': '24. วิดีโอแสดงสถานที่การปฏิบัติงาน (แนบลิงค์)',
-        'required': true,
-        'maxSize': 'Link',
-        'isLink': true
-      },
-      {
-        'id': 'ADDITIONAL_DOCS',
-        'title': '25. เอกสารเพิ่มเติม (Additional)',
-        'required': false,
-        'maxSize': '100 MB',
-        'types': ['PDF', 'Image']
-      },
-    ];
-
-    // Prepend 'OLD_CERT' if needed or keep it in the list.
-    // The user request puts 'Original Certificate' at the top of the renewal form fields, not necessarily doc list.
-    // But logically it's a doc. Let's add it as item 0 or handle in form.
-    // User request: "ต้นฉบับใบรับรองเก่า" is listed in the top section with upload constraint.
-    // Let's ensure it's in the list if not in the form body.
-
-    // Combining..
-    List<Map<String, dynamic>> selectedList;
-    if (_applicantType == 'COMMUNITY') {
-      selectedList = [...commonDocs, ...communityDocs];
-    } else if (_applicantType == 'JURISTIC') {
-      selectedList = [...commonDocs, ...juristicDocs];
-    } else {
-      selectedList = [...commonDocs, ...individualDocs];
-    }
-
-    // Add the specific "Original Certificate" which was requested at the very top
-    // The user prompt lists it separately before the numbered list.
-    // So we add it to the start.
-    return [
-      {
-        'id': 'ORIGINAL_OLD_CERT',
-        'title': '0. ต้นฉบับใบรับรองเก่า (Original Old Certificate)',
-        'required': true,
-        'maxSize': '10 MB',
-        'types': ['PDF', 'Image']
-      },
-      ...selectedList
-    ];
-  }
 
   // ... existing controllers
 
@@ -1224,7 +344,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ขอรับใบรับรองใหม่ (GACP)')),
+      appBar: AppBar(title: const Text('เธเธญเธฃเธฑเธเนเธเธฃเธฑเธเธฃเธญเธเนเธซเธกเน (GACP)')),
       body: Stepper(
         currentStep: _currentStep,
         onStepContinue: _onContinue,
@@ -1233,143 +353,33 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
         steps: [
           // Step 1: Form 09 Data Entry (Comprehensive)
           Step(
-            title: const Text('กรอกข้อมูลใบสมัคร (Form 09)'),
+            title: const Text('เธเธฃเธญเธเธเนเธญเธกเธนเธฅเนเธเธชเธกเธฑเธเธฃ (Form 09)'),
             content: Form(
               key: _formKey,
               child: Column(
                 children: [
-                  const Text('กรุณากรอกข้อมูลตามมาตรฐาน GACP/DTAM',
+                  const Text('เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธเนเธญเธกเธนเธฅเธ•เธฒเธกเธกเธฒเธ•เธฃเธเธฒเธ GACP/DTAM',
                       style: TextStyle(color: Colors.grey, fontSize: 12)),
                   const SizedBox(height: 12),
 
                   // Herb Type Selection (New Request)
-                  DropdownButtonFormField<String>(
+                  // Herb Type Selection (Refactored)
+                  HerbTypeSelector(
                     value: _herbType,
-                    decoration: const InputDecoration(
-                      labelText: 'ชนิดพืชสมุนไพร (Herb Type)',
-                      border: OutlineInputBorder(),
-                      helperText: 'เลือกพืชที่ต้องการขอการรับรอง',
-                      prefixIcon: Icon(LucideIcons.sprout),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                          value: 'CANNABIS',
-                          child: Text('กัญชง/กัญชา (Cannabis/Hemp)')),
-                      DropdownMenuItem(
-                          value: 'TURMERIC',
-                          child: Text('ขมิ้นชัน (Turmeric)')),
-                      DropdownMenuItem(
-                          value: 'GINGER', child: Text('ขิง (Ginger)')),
-                      DropdownMenuItem(
-                          value: 'BLACK_GALINGALE',
-                          child: Text('กระชายดำ (Black Galingale)')),
-                      DropdownMenuItem(
-                          value: 'PLAI', child: Text('ไพล (Plai)')),
-                      DropdownMenuItem(
-                          value: 'KRATOM', child: Text('กระท่อม (Kratom)')),
-                    ],
                     onChanged: (v) => setState(() => _herbType = v),
-                    validator: (v) => v == null
-                        ? 'กรุณาเลือกชนิดพืช (Please select herb type)'
-                        : null,
                   ),
                   const SizedBox(height: 24),
 
-                  // Replacement Section (Conditional)
+                  // Replacement Section (Refactored)
                   if (widget.requestType == 'SUBSTITUTE' ||
-                      widget.requestType == 'REPLACEMENT') ...[
-                    ExpansionTile(
-                      initiallyExpanded: true,
-                      childrenPadding:
-                          const EdgeInsets.symmetric(horizontal: 16),
-                      title: const Text(
-                          '0. ข้อมูลการขอใบแทน (Replacement Info)',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      children: [
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          value: _replacementReason,
-                          decoration: const InputDecoration(
-                            labelText: 'เหตุผลในการขอใบแทน (Reason)',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: const [
-                            DropdownMenuItem(
-                                value: 'LOST', child: Text('สูญหาย (Lost)')),
-                            DropdownMenuItem(
-                                value: 'DAMAGED',
-                                child:
-                                    Text('ชำรุด/ลบเลือน (Damaged/Illegible)')),
-                            DropdownMenuItem(
-                                value: 'OTHER', child: Text('อื่นๆ (Other)')),
-                          ],
-                          onChanged: (v) {
-                            setState(() {
-                              _replacementReason = v!;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        if (_replacementReason == 'OTHER')
-                          TextFormField(
-                            controller: _replacementReasonOtherController,
-                            decoration: const InputDecoration(
-                              labelText: 'ระบุเหตุผล (Other Reason)',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        if (_replacementReason == 'OTHER')
-                          const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _oldCertificateController,
-                          decoration: const InputDecoration(
-                            labelText:
-                                'เลขที่ใบรับรองเดิม (Original Certificate No.)',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        if (_replacementReason == 'LOST')
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.amber.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.amber),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(Icons.info, color: Colors.amber),
-                                SizedBox(width: 12),
-                                Expanded(
-                                    child: Text(
-                                        'กรุณาแนบใบแจ้งความในขั้นตอนถัดไป (Please attach Police Report in next step)')),
-                              ],
-                            ),
-                          ),
-                        if (_replacementReason == 'DAMAGED')
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.blue),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(Icons.info, color: Colors.blue),
-                                SizedBox(width: 12),
-                                Expanded(
-                                    child: Text(
-                                        'กรุณาส่งคืนใบรับรองเดิม (Please return the original certificate)')),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(height: 16),
-                      ],
+                      widget.requestType == 'REPLACEMENT')
+                    ReplacementInfoSection(
+                      selectedReason: _replacementReason,
+                      onReasonChanged: (v) =>
+                          setState(() => _replacementReason = v!),
+                      otherReasonController: _replacementReasonOtherController,
+                      oldCertController: _oldCertificateController,
                     ),
-                    const SizedBox(height: 16),
-                  ],
 
                   // Amendment Section (Conditional)
                   if (widget.requestType == 'AMENDMENT') ...[
@@ -1377,7 +387,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       initiallyExpanded: true,
                       childrenPadding:
                           const EdgeInsets.symmetric(horizontal: 16),
-                      title: const Text('0. ข้อมูลการขอแก้ไข (Amendment Info)',
+                      title: const Text('0. เธเนเธญเธกเธนเธฅเธเธฒเธฃเธเธญเนเธเนเนเธ (Amendment Info)',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       children: [
                         const SizedBox(height: 16),
@@ -1385,7 +395,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                           controller: _oldCertificateController,
                           decoration: const InputDecoration(
                             labelText:
-                                'เลขที่ใบรับรองเดิม (Original Certificate No.)',
+                                'เน€เธฅเธเธ—เธตเนเนเธเธฃเธฑเธเธฃเธญเธเน€เธ”เธดเธก (Original Certificate No.)',
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -1393,8 +403,8 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         TextFormField(
                           decoration: const InputDecoration(
                             labelText:
-                                'รายการที่ต้องการแก้ไข (Item to Correct)',
-                            hintText: 'e.g. เปลี่ยนชื่อผู้ดำเนินกิจการ',
+                                'เธฃเธฒเธขเธเธฒเธฃเธ—เธตเนเธ•เนเธญเธเธเธฒเธฃเนเธเนเนเธ (Item to Correct)',
+                            hintText: 'e.g. เน€เธเธฅเธตเนเธขเธเธเธทเนเธญเธเธนเนเธ”เธณเน€เธเธดเธเธเธดเธเธเธฒเธฃ',
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -1402,7 +412,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         TextFormField(
                           maxLines: 2,
                           decoration: const InputDecoration(
-                            labelText: 'รายละเอียดการแก้ไข (Detail)',
+                            labelText: 'เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธเธฒเธฃเนเธเนเนเธ (Detail)',
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -1421,10 +431,10 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       final estState = ref.watch(establishmentProvider);
                       return DropdownButtonFormField<EstablishmentEntity>(
                         decoration: const InputDecoration(
-                          labelText: 'เลือกแปลงปลูกเพื่อระบุข้อมูล',
+                          labelText: 'เน€เธฅเธทเธญเธเนเธเธฅเธเธเธฅเธนเธเน€เธเธทเนเธญเธฃเธฐเธเธธเธเนเธญเธกเธนเธฅ',
                           prefixIcon: Icon(LucideIcons.sprout),
                           border: OutlineInputBorder(),
-                          helperText: 'ข้อมูลจะถูกเติมอัตโนมัติ (Auto-fill)',
+                          helperText: 'เธเนเธญเธกเธนเธฅเธเธฐเธ–เธนเธเน€เธ•เธดเธกเธญเธฑเธ•เนเธเธกเธฑเธ•เธด (Auto-fill)',
                         ),
                         initialValue: _selectedEstablishment,
                         items: estState.establishments.map((e) {
@@ -1441,22 +451,22 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                     const SizedBox(height: 16),
                   ],
 
-                  // Section 2: Production Info (ข้อมูลการผลิตและการรับรอง)
+                  // Section 2: Production Info (เธเนเธญเธกเธนเธฅเธเธฒเธฃเธเธฅเธดเธ•เนเธฅเธฐเธเธฒเธฃเธฃเธฑเธเธฃเธญเธ)
                   if (!_isReplacement && !_isAmendment)
                     ExpansionTile(
                       initiallyExpanded: true,
                       childrenPadding:
                           const EdgeInsets.symmetric(horizontal: 16),
                       title: const Text(
-                          '1. ข้อมูลการผลิตและการรับรอง (Production Info)',
+                          '1. เธเนเธญเธกเธนเธฅเธเธฒเธฃเธเธฅเธดเธ•เนเธฅเธฐเธเธฒเธฃเธฃเธฑเธเธฃเธญเธ (Production Info)',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       children: [
                         const SizedBox(height: 16),
                         _buildMultiSelect(
-                          'ประเภทการรับรอง (Certification Type)',
+                          'เธเธฃเธฐเน€เธ เธ—เธเธฒเธฃเธฃเธฑเธเธฃเธญเธ (Certification Type)',
                           {
-                            'CULTIVATION': 'การเพาะปลูก (Cultivation)',
-                            'PROCESSING': 'การแปรรูป (Processing)',
+                            'CULTIVATION': 'เธเธฒเธฃเน€เธเธฒเธฐเธเธฅเธนเธ (Cultivation)',
+                            'PROCESSING': 'เธเธฒเธฃเนเธเธฃเธฃเธนเธ (Processing)',
                           },
                           _certificationTypes,
                           (newSet) =>
@@ -1466,21 +476,21 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         TextFormField(
                           controller: _plantPartsController,
                           decoration: const InputDecoration(
-                              labelText: 'ส่วนที่ใช้ (Parts Used)',
+                              labelText: 'เธชเนเธงเธเธ—เธตเนเนเธเน (Parts Used)',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _plantStrainController,
                           decoration: const InputDecoration(
-                              labelText: 'ชื่อสายพันธุ์ (Strain Name)',
+                              labelText: 'เธเธทเนเธญเธชเธฒเธขเธเธฑเธเธเธธเน (Strain Name)',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _strainSourceController,
                           decoration: const InputDecoration(
-                              labelText: 'แหล่งที่มาของสายพันธุ์ (Source)',
+                              labelText: 'เนเธซเธฅเนเธเธ—เธตเนเธกเธฒเธเธญเธเธชเธฒเธขเธเธฑเธเธเธธเน (Source)',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 12),
@@ -1490,13 +500,13 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                                 child: TextFormField(
                                     controller: _expectedQtyController,
                                     decoration: const InputDecoration(
-                                        labelText: 'ปริมาณ (Quantity)',
+                                        labelText: 'เธเธฃเธดเธกเธฒเธ“ (Quantity)',
                                         border: OutlineInputBorder()))),
                             const SizedBox(width: 12),
                             Expanded(
                                 child: TextFormField(
                                     decoration: const InputDecoration(
-                                        labelText: 'หน่วย (Unit)',
+                                        labelText: 'เธซเธเนเธงเธข (Unit)',
                                         border: OutlineInputBorder()))),
                           ],
                         ),
@@ -1504,25 +514,25 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       ],
                     ),
 
-                  // Section 3: Objective & Permit (วัตถุประสงค์ & พื้นที่)
+                  // Section 3: Objective & Permit (เธงเธฑเธ•เธ–เธธเธเธฃเธฐเธชเธเธเน & เธเธทเนเธเธ—เธตเน)
                   if (!_isReplacement && !_isAmendment)
                     ExpansionTile(
                       initiallyExpanded: true,
                       childrenPadding:
                           const EdgeInsets.symmetric(horizontal: 16),
                       title: const Text(
-                          '2. วัตถุประสงค์และพื้นที่ (Objective & Site)',
+                          '2. เธงเธฑเธ•เธ–เธธเธเธฃเธฐเธชเธเธเนเนเธฅเธฐเธเธทเนเธเธ—เธตเน (Objective & Site)',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       children: [
                         const SizedBox(height: 16),
                         _buildMultiSelect(
-                          'วัตถุประสงค์ (Objective)',
+                          'เธงเธฑเธ•เธ–เธธเธเธฃเธฐเธชเธเธเน (Objective)',
                           {
-                            'RESEARCH': 'วิจัย (Research)',
+                            'RESEARCH': 'เธงเธดเธเธฑเธข (Research)',
                             'COMMERCIAL_DOMESTIC':
-                                'จำหน่ายในประเทศ (Commercial Domestic)',
-                            'COMMERCIAL_EXPORT': 'ส่งออก (Commercial Export)',
-                            'OTHER': 'อื่นๆ (Other)',
+                                'เธเธณเธซเธเนเธฒเธขเนเธเธเธฃเธฐเน€เธ—เธจ (Commercial Domestic)',
+                            'COMMERCIAL_EXPORT': 'เธชเนเธเธญเธญเธ (Commercial Export)',
+                            'OTHER': 'เธญเธทเนเธเน (Other)',
                           },
                           _objectives,
                           (newSet) => setState(() => _objectives = newSet),
@@ -1535,7 +545,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                             readOnly: true,
                             decoration: const InputDecoration(
                                 labelText:
-                                    'แนบใบอนุญาต (Permit File) - Upload Later',
+                                    'เนเธเธเนเธเธญเธเธธเธเธฒเธ• (Permit File) - Upload Later',
                                 prefixIcon: Icon(LucideIcons.file),
                                 border: OutlineInputBorder()),
                           ),
@@ -1543,12 +553,12 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         const Divider(),
                         const SizedBox(height: 12),
                         _buildMultiSelect(
-                          'ลักษณะพื้นที่ (Area Type)',
+                          'เธฅเธฑเธเธฉเธ“เธฐเธเธทเนเธเธ—เธตเน (Area Type)',
                           {
-                            'OUTDOOR': 'กลางแจ้ง (Outdoor)',
-                            'INDOOR': 'ในร่ม (Indoor)',
-                            'GREENHOUSE': 'โรงเรือน (Greenhouse)',
-                            'OTHER': 'อื่นๆ (Other)',
+                            'OUTDOOR': 'เธเธฅเธฒเธเนเธเนเธ (Outdoor)',
+                            'INDOOR': 'เนเธเธฃเนเธก (Indoor)',
+                            'GREENHOUSE': 'เนเธฃเธเน€เธฃเธทเธญเธ (Greenhouse)',
+                            'OTHER': 'เธญเธทเนเธเน (Other)',
                           },
                           _areaTypes,
                           (newSet) => setState(() => _areaTypes = newSet),
@@ -1557,20 +567,20 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         TextFormField(
                           controller: _titleDeedController,
                           decoration: const InputDecoration(
-                              labelText: 'เลขที่โฉนดที่ดิน (Title Deed No.)',
+                              labelText: 'เน€เธฅเธเธ—เธตเนเนเธเธเธ”เธ—เธตเนเธ”เธดเธ (Title Deed No.)',
                               prefixIcon: Icon(LucideIcons.file),
                               border: OutlineInputBorder()),
-                          validator: (v) => v!.isEmpty ? 'ระบุเลขโฉนด' : null,
+                          validator: (v) => v!.isEmpty ? 'เธฃเธฐเธเธธเน€เธฅเธเนเธเธเธ”' : null,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _gpsController,
                           decoration: InputDecoration(
-                            labelText: 'พิกัดแปลงปลูก (GPS Coordinates)',
+                            labelText: 'เธเธดเธเธฑเธ”เนเธเธฅเธเธเธฅเธนเธ (GPS Coordinates)',
                             prefixIcon: IconButton(
                               icon: const Icon(LucideIcons.mapPin),
                               onPressed: _openGoogleMaps,
-                              tooltip: 'ดูใน Google Maps',
+                              tooltip: 'เธ”เธนเนเธ Google Maps',
                             ),
                             suffixIcon: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1578,47 +588,47 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                                 IconButton(
                                   icon: const Icon(Icons.my_location),
                                   onPressed: _getCurrentLocation,
-                                  tooltip: 'ตำแหน่งปัจจุบัน',
+                                  tooltip: 'เธ•เธณเนเธซเธเนเธเธเธฑเธเธเธธเธเธฑเธ',
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.map),
                                   onPressed: _pickLocationOnMap,
-                                  tooltip: 'เลือกจากแผนที่',
+                                  tooltip: 'เน€เธฅเธทเธญเธเธเธฒเธเนเธเธเธ—เธตเน',
                                 ),
                               ],
                             ),
                             border: const OutlineInputBorder(),
                           ),
-                          validator: (v) => v!.isEmpty ? 'ระบุพิกัด' : null,
+                          validator: (v) => v!.isEmpty ? 'เธฃเธฐเธเธธเธเธดเธเธฑเธ”' : null,
                         ),
                         const SizedBox(height: 16),
                       ],
                     ),
 
-                  // Section 3: Applicant Info (ข้อมูลผู้ขอใบรับรอง)
+                  // Section 3: Applicant Info (เธเนเธญเธกเธนเธฅเธเธนเนเธเธญเนเธเธฃเธฑเธเธฃเธญเธ)
                   ExpansionTile(
                     initiallyExpanded: true,
                     childrenPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    title: const Text('3. ข้อมูลผู้ขอใบรับรอง (Applicant Info)',
+                    title: const Text('3. เธเนเธญเธกเธนเธฅเธเธนเนเธเธญเนเธเธฃเธฑเธเธฃเธญเธ (Applicant Info)',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     children: [
                       const SizedBox(height: 16),
                       DropdownButtonFormField<String>(
                         value: _applicantType,
                         decoration: const InputDecoration(
-                            labelText: 'ประเภทผู้ขอใบรับรอง (Applicant Type)',
+                            labelText: 'เธเธฃเธฐเน€เธ เธ—เธเธนเนเธเธญเนเธเธฃเธฑเธเธฃเธญเธ (Applicant Type)',
                             border: OutlineInputBorder()),
                         items: const [
                           DropdownMenuItem(
                               value: 'COMMUNITY',
                               child:
-                                  Text('วิสาหกิจชุมชน (Community Enterprise)')),
+                                  Text('เธงเธดเธชเธฒเธซเธเธดเธเธเธธเธกเธเธ (Community Enterprise)')),
                           DropdownMenuItem(
                               value: 'INDIVIDUAL',
-                              child: Text('บุคคลธรรมดา (Individual)')),
+                              child: Text('เธเธธเธเธเธฅเธเธฃเธฃเธกเธ”เธฒ (Individual)')),
                           DropdownMenuItem(
                               value: 'JURISTIC',
-                              child: Text('นิติบุคคล (Juristic)')),
+                              child: Text('เธเธดเธ•เธดเธเธธเธเธเธฅ (Juristic)')),
                         ],
                         onChanged: (v) => setState(() => _applicantType = v!),
                       ),
@@ -1629,20 +639,20 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         TextFormField(
                           controller: _applicantNameController,
                           decoration: const InputDecoration(
-                              labelText: 'ชื่อเจ้าของแปลงปลูก (Owner Name)',
+                              labelText: 'เธเธทเนเธญเน€เธเนเธฒเธเธญเธเนเธเธฅเธเธเธฅเธนเธ (Owner Name)',
                               prefixIcon: Icon(LucideIcons.user),
                               border: OutlineInputBorder()),
-                          validator: (v) => v!.isEmpty ? 'ระบุชื่อ' : null,
+                          validator: (v) => v!.isEmpty ? 'เธฃเธฐเธเธธเธเธทเนเธญ' : null,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _idCardController,
                           decoration: const InputDecoration(
-                              labelText: 'เลขบัตรประชาชน (ID Card)',
+                              labelText: 'เน€เธฅเธเธเธฑเธ•เธฃเธเธฃเธฐเธเธฒเธเธ (ID Card)',
                               prefixIcon: Icon(LucideIcons.contact),
                               border: OutlineInputBorder()),
                           validator: (v) =>
-                              v!.length != 13 ? 'ระบุเลขบัตรฯ 13 หลัก' : null,
+                              v!.length != 13 ? 'เธฃเธฐเธเธธเน€เธฅเธเธเธฑเธ•เธฃเธฏ 13 เธซเธฅเธฑเธ' : null,
                           keyboardType: TextInputType.number,
                           maxLength: 13,
                         ),
@@ -1652,37 +662,37 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                           controller: _applicantNameController,
                           decoration: const InputDecoration(
                               labelText:
-                                  'ชื่อสถานประกอบการ/บริษัท (Company Name)',
+                                  'เธเธทเนเธญเธชเธ–เธฒเธเธเธฃเธฐเธเธญเธเธเธฒเธฃ/เธเธฃเธดเธฉเธฑเธ— (Company Name)',
                               prefixIcon: Icon(LucideIcons.building),
                               border: OutlineInputBorder()),
-                          validator: (v) => v!.isEmpty ? 'ระบุชื่อ' : null,
+                          validator: (v) => v!.isEmpty ? 'เธฃเธฐเธเธธเธเธทเนเธญ' : null,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _authorizedDirectorController,
                           decoration: const InputDecoration(
                               labelText:
-                                  'ชื่อประธานกรรมการ/ผู้มีอำนาจลงนาม (Authorized Director)',
+                                  'เธเธทเนเธญเธเธฃเธฐเธเธฒเธเธเธฃเธฃเธกเธเธฒเธฃ/เธเธนเนเธกเธตเธญเธณเธเธฒเธเธฅเธเธเธฒเธก (Authorized Director)',
                               border: OutlineInputBorder()),
                           validator: (v) =>
-                              v!.isEmpty ? 'ระบุชื่อประธาน' : null,
+                              v!.isEmpty ? 'เธฃเธฐเธเธธเธเธทเนเธญเธเธฃเธฐเธเธฒเธ' : null,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _regNoController, // Reg ID / Tax ID
                           decoration: const InputDecoration(
-                              labelText: 'เลขทะเบียนนิติบุคคล/ผู้เสียภาษี',
+                              labelText: 'เน€เธฅเธเธ—เธฐเน€เธเธตเธขเธเธเธดเธ•เธดเธเธธเธเธเธฅ/เธเธนเนเน€เธชเธตเธขเธ เธฒเธฉเธต',
                               prefixIcon: Icon(LucideIcons.hash),
                               border: OutlineInputBorder()),
                           validator: (v) =>
-                              v!.isEmpty ? 'ระบุเลขทะเบียน' : null,
+                              v!.isEmpty ? 'เธฃเธฐเธเธธเน€เธฅเธเธ—เธฐเน€เธเธตเธขเธ' : null,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _officePhoneController,
                           decoration: const InputDecoration(
                               labelText:
-                                  'โทรศัพท์สถานที่จัดตั้ง (Office Phone)',
+                                  'เนเธ—เธฃเธจเธฑเธเธ—เนเธชเธ–เธฒเธเธ—เธตเนเธเธฑเธ”เธ•เธฑเนเธ (Office Phone)',
                               border: OutlineInputBorder()),
                           keyboardType: TextInputType.phone,
                         ),
@@ -1691,26 +701,26 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                           controller: _directorMobileController,
                           decoration: const InputDecoration(
                               labelText:
-                                  'โทรศัพท์มือถือประธานกรรมการ (Director Mobile)',
+                                  'เนเธ—เธฃเธจเธฑเธเธ—เนเธกเธทเธญเธ–เธทเธญเธเธฃเธฐเธเธฒเธเธเธฃเธฃเธกเธเธฒเธฃ (Director Mobile)',
                               border: OutlineInputBorder()),
                           keyboardType: TextInputType.phone,
                         ),
                         const SizedBox(height: 12),
                         const Divider(),
-                        const Text('ผู้ประสานงาน (Coordinator)',
+                        const Text('เธเธนเนเธเธฃเธฐเธชเธฒเธเธเธฒเธ (Coordinator)',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _coordinatorNameController,
                           decoration: const InputDecoration(
-                              labelText: 'ชื่อผู้ประสานงาน',
+                              labelText: 'เธเธทเนเธญเธเธนเนเธเธฃเธฐเธชเธฒเธเธเธฒเธ',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _coordinatorPhoneController,
                           decoration: const InputDecoration(
-                              labelText: 'โทรศัพท์มือถือผู้ประสานงาน',
+                              labelText: 'เนเธ—เธฃเธจเธฑเธเธ—เนเธกเธทเธญเธ–เธทเธญเธเธนเนเธเธฃเธฐเธชเธฒเธเธเธฒเธ',
                               border: OutlineInputBorder()),
                           keyboardType: TextInputType.phone,
                         ),
@@ -1718,7 +728,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         TextFormField(
                           controller: _coordinatorLineController,
                           decoration: const InputDecoration(
-                              labelText: 'Line ID ผู้ประสานงาน',
+                              labelText: 'Line ID เธเธนเนเธเธฃเธฐเธชเธฒเธเธเธฒเธ',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 12),
@@ -1726,16 +736,16 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         TextFormField(
                           controller: _applicantNameController,
                           decoration: const InputDecoration(
-                              labelText: 'ชื่อวิสาหกิจชุมชน (Community Name)',
+                              labelText: 'เธเธทเนเธญเธงเธดเธชเธฒเธซเธเธดเธเธเธธเธกเธเธ (Community Name)',
                               prefixIcon: Icon(LucideIcons.users),
                               border: OutlineInputBorder()),
-                          validator: (v) => v!.isEmpty ? 'ระบุชื่อ' : null,
+                          validator: (v) => v!.isEmpty ? 'เธฃเธฐเธเธธเธเธทเนเธญ' : null,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _authorizedDirectorController,
                           decoration: const InputDecoration(
-                              labelText: 'ชื่อประธาน (President Name)',
+                              labelText: 'เธเธทเนเธญเธเธฃเธฐเธเธฒเธ (President Name)',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 12),
@@ -1743,7 +753,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                           controller:
                               _idCardController, // Reuse for President ID
                           decoration: const InputDecoration(
-                              labelText: 'เลขที่บัตรประจำตัวประชาชน (ID Card)',
+                              labelText: 'เน€เธฅเธเธ—เธตเนเธเธฑเธ•เธฃเธเธฃเธฐเธเธณเธ•เธฑเธงเธเธฃเธฐเธเธฒเธเธ (ID Card)',
                               border: OutlineInputBorder()),
                           maxLength: 13,
                           keyboardType: TextInputType.number,
@@ -1752,21 +762,21 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         TextFormField(
                           controller: _communityReg01Controller,
                           decoration: const InputDecoration(
-                              labelText: 'รหัสทะเบียน สวช.01',
+                              labelText: 'เธฃเธซเธฑเธชเธ—เธฐเน€เธเธตเธขเธ เธชเธงเธ.01',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _communityReg03Controller,
                           decoration: const InputDecoration(
-                              labelText: 'รหัสทะเบียน ท.ว.ช.3',
+                              labelText: 'เธฃเธซเธฑเธชเธ—เธฐเน€เธเธตเธขเธ เธ—.เธง.เธ.3',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _houseIdController,
                           decoration: const InputDecoration(
-                              labelText: 'เลขรหัสประจำบ้าน',
+                              labelText: 'เน€เธฅเธเธฃเธซเธฑเธชเธเธฃเธฐเธเธณเธเนเธฒเธ',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 12),
@@ -1776,7 +786,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       TextFormField(
                         controller: _officeAddressController,
                         decoration: const InputDecoration(
-                            labelText: 'ที่อยู่ (Address)',
+                            labelText: 'เธ—เธตเนเธญเธขเธนเน (Address)',
                             prefixIcon: Icon(LucideIcons.home),
                             border: OutlineInputBorder()),
                         maxLines: 2,
@@ -1785,7 +795,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       TextFormField(
                         controller: _mobileController,
                         decoration: const InputDecoration(
-                            labelText: 'โทรศัพท์มือถือ (Mobile)',
+                            labelText: 'เนเธ—เธฃเธจเธฑเธเธ—เนเธกเธทเธญเธ–เธทเธญ (Mobile)',
                             prefixIcon: Icon(LucideIcons.phone),
                             border: OutlineInputBorder()),
                         keyboardType: TextInputType.phone,
@@ -1794,7 +804,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       TextFormField(
                         controller: _emailController,
                         decoration: const InputDecoration(
-                            labelText: 'อีเมล (Email)',
+                            labelText: 'เธญเธตเน€เธกเธฅ (Email)',
                             prefixIcon: Icon(LucideIcons.mail),
                             border: OutlineInputBorder()),
                         keyboardType: TextInputType.emailAddress,
@@ -1814,28 +824,28 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         Column(
                           children: [
                             const Divider(),
-                            const Text('สำหรับการต่ออายุ (Renewal Only)',
+                            const Text('เธชเธณเธซเธฃเธฑเธเธเธฒเธฃเธ•เนเธญเธญเธฒเธขเธธ (Renewal Only)',
                                 style: TextStyle(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 8),
                             TextFormField(
                               controller: _oldCertificateController,
                               decoration: const InputDecoration(
-                                labelText: 'ใบรับรองเลขที่ (Certificate No.)',
+                                labelText: 'เนเธเธฃเธฑเธเธฃเธญเธเน€เธฅเธเธ—เธตเน (Certificate No.)',
                                 border: OutlineInputBorder(),
                               ),
                               validator: (v) =>
-                                  v!.isEmpty ? 'กรุณาระบุเลขใบรับรอง' : null,
+                                  v!.isEmpty ? 'เธเธฃเธธเธ“เธฒเธฃเธฐเธเธธเน€เธฅเธเนเธเธฃเธฑเธเธฃเธญเธ' : null,
                             ),
                             const SizedBox(height: 12),
                             TextFormField(
                               controller: _yearController,
                               keyboardType: TextInputType.number,
                               decoration: const InputDecoration(
-                                labelText: 'ประจำปี พ.ศ. (Year)',
+                                labelText: 'เธเธฃเธฐเธเธณเธเธต เธ.เธจ. (Year)',
                                 border: OutlineInputBorder(),
                               ),
                               validator: (v) =>
-                                  v!.isEmpty ? 'กรุณาระบุปี' : null,
+                                  v!.isEmpty ? 'เธเธฃเธธเธ“เธฒเธฃเธฐเธเธธเธเธต' : null,
                             ),
                             const SizedBox(height: 12),
                             TextFormField(
@@ -1843,9 +853,9 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                               maxLines: 4,
                               decoration: const InputDecoration(
                                 labelText:
-                                    'แผนการปลูกและการเก็บเกี่ยว/แปรรูป\n(Planting/Harvesting Plan)',
+                                    'เนเธเธเธเธฒเธฃเธเธฅเธนเธเนเธฅเธฐเธเธฒเธฃเน€เธเนเธเน€เธเธตเนเธขเธง/เนเธเธฃเธฃเธนเธ\n(Planting/Harvesting Plan)',
                                 hintText:
-                                    'ระบุรายละเอียดสังเขป:\n1. สายพันธุ์ที่ปลูก (Variety)\n2. จำนวนต้น และระยะเวลาเพาะปลูก (Qty & Schedule)\n3. ผลผลิตที่คาดการณ์ (Expected Yield)',
+                                    'เธฃเธฐเธเธธเธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธชเธฑเธเน€เธเธ:\n1. เธชเธฒเธขเธเธฑเธเธเธธเนเธ—เธตเนเธเธฅเธนเธ (Variety)\n2. เธเธณเธเธงเธเธ•เนเธ เนเธฅเธฐเธฃเธฐเธขเธฐเน€เธงเธฅเธฒเน€เธเธฒเธฐเธเธฅเธนเธ (Qty & Schedule)\n3. เธเธฅเธเธฅเธดเธ•เธ—เธตเนเธเธฒเธ”เธเธฒเธฃเธ“เน (Expected Yield)',
                                 border: OutlineInputBorder(),
                                 alignLabelWithHint: true,
                               ),
@@ -1856,9 +866,9 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                               maxLines: 4,
                               decoration: const InputDecoration(
                                 labelText:
-                                    'แผนการใช้ประโยชน์ (Utilization Plan)',
+                                    'เนเธเธเธเธฒเธฃเนเธเนเธเธฃเธฐเนเธขเธเธเน (Utilization Plan)',
                                 hintText:
-                                    'ระบุรายละเอียดสังเขป:\n1. รูปแบบผลิตภัณฑ์ (Product Form)\n2. กลุ่มเป้าหมาย (Target Market)\n3. การนำไปใช้ (Medical/Research)',
+                                    'เธฃเธฐเธเธธเธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธชเธฑเธเน€เธเธ:\n1. เธฃเธนเธเนเธเธเธเธฅเธดเธ•เธ เธฑเธ“เธ‘เน (Product Form)\n2. เธเธฅเธธเนเธกเน€เธเนเธฒเธซเธกเธฒเธข (Target Market)\n3. เธเธฒเธฃเธเธณเนเธเนเธเน (Medical/Research)',
                                 border: OutlineInputBorder(),
                                 alignLabelWithHint: true,
                               ),
@@ -1869,19 +879,19 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                     ],
                   ),
 
-                  // Section 4: Security (ความปลอดภัย)
+                  // Section 4: Security (เธเธงเธฒเธกเธเธฅเธญเธ”เธ เธฑเธข)
                   if (!_isReplacement && !_isAmendment)
                     ExpansionTile(
                       childrenPadding:
                           const EdgeInsets.symmetric(horizontal: 16),
-                      title: const Text('4. ระบบความปลอดภัย (Security)',
+                      title: const Text('4. เธฃเธฐเธเธเธเธงเธฒเธกเธเธฅเธญเธ”เธ เธฑเธข (Security)',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       children: [
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _securityFencingController,
                           decoration: const InputDecoration(
-                              labelText: 'รายละเอียดรั้วกั้น (Fencing)',
+                              labelText: 'เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธฃเธฑเนเธงเธเธฑเนเธ (Fencing)',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 12),
@@ -1889,7 +899,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                           controller: _securityCCTVController,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                              labelText: 'จำนวนกล้อง CCTV',
+                              labelText: 'เธเธณเธเธงเธเธเธฅเนเธญเธ CCTV',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 16),
@@ -1901,21 +911,21 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                     ExpansionTile(
                       childrenPadding:
                           const EdgeInsets.symmetric(horizontal: 16),
-                      title: const Text('5. การเก็บเกี่ยว (Harvesting)',
+                      title: const Text('5. เธเธฒเธฃเน€เธเนเธเน€เธเธตเนเธขเธง (Harvesting)',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       children: [
                         const SizedBox(height: 16),
                         TextFormField(
                           decoration: const InputDecoration(
-                              labelText: 'วิธีการเก็บเกี่ยว (Method)',
+                              labelText: 'เธงเธดเธเธตเธเธฒเธฃเน€เธเนเธเน€เธเธตเนเธขเธง (Method)',
                               border: OutlineInputBorder()),
                           initialValue:
-                              'เก็บเกี่ยวด้วยมือ (Manual Harvest only flowers)',
+                              'เน€เธเนเธเน€เธเธตเนเธขเธงเธ”เนเธงเธขเธกเธทเธญ (Manual Harvest only flowers)',
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           decoration: const InputDecoration(
-                              labelText: 'ภาชนะที่ใช้บรรจุ (Containers)',
+                              labelText: 'เธ เธฒเธเธเธฐเธ—เธตเนเนเธเนเธเธฃเธฃเธเธธ (Containers)',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 16),
@@ -1928,21 +938,21 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       childrenPadding:
                           const EdgeInsets.symmetric(horizontal: 16),
                       title: const Text(
-                          '6. การจัดการหลังเก็บเกี่ยว (Post-Harvest)',
+                          '6. เธเธฒเธฃเธเธฑเธ”เธเธฒเธฃเธซเธฅเธฑเธเน€เธเนเธเน€เธเธตเนเธขเธง (Post-Harvest)',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       children: [
                         const SizedBox(height: 16),
                         TextFormField(
                           decoration: const InputDecoration(
-                              labelText: 'การลดความชื้น (Drying)',
+                              labelText: 'เธเธฒเธฃเธฅเธ”เธเธงเธฒเธกเธเธทเนเธ (Drying)',
                               border: OutlineInputBorder()),
                           initialValue:
-                              'ห้องอบควบคุมอุณหภูมิ (Temperature Controlled Room)',
+                              'เธซเนเธญเธเธญเธเธเธงเธเธเธธเธกเธญเธธเธ“เธซเธ เธนเธกเธด (Temperature Controlled Room)',
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           decoration: const InputDecoration(
-                              labelText: 'สถานที่เก็บรักษา (Storage)',
+                              labelText: 'เธชเธ–เธฒเธเธ—เธตเนเน€เธเนเธเธฃเธฑเธเธฉเธฒ (Storage)',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 16),
@@ -1954,19 +964,19 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                     ExpansionTile(
                       childrenPadding:
                           const EdgeInsets.symmetric(horizontal: 16),
-                      title: const Text('7. บุคลากร (Personnel)',
+                      title: const Text('7. เธเธธเธเธฅเธฒเธเธฃ (Personnel)',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       children: [
                         const SizedBox(height: 16),
                         TextFormField(
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                              labelText: 'จำนวนผู้ปฏิบัติงาน (Workers)',
+                              labelText: 'เธเธณเธเธงเธเธเธนเนเธเธเธดเธเธฑเธ•เธดเธเธฒเธ (Workers)',
                               border: OutlineInputBorder()),
                         ),
                         const SizedBox(height: 12),
                         CheckboxListTile(
-                          title: const Text('ผ่านการอบรม GACP แล้ว (Trained)'),
+                          title: const Text('เธเนเธฒเธเธเธฒเธฃเธญเธเธฃเธก GACP เนเธฅเนเธง (Trained)'),
                           value: true,
                           onChanged: (v) {},
                         ),
@@ -1974,26 +984,26 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       ],
                     ),
 
-                  // Section 8: Delivery Method (ช่องทางการรับใบอนุญาต)
+                  // Section 8: Delivery Method (เธเนเธญเธเธ—เธฒเธเธเธฒเธฃเธฃเธฑเธเนเธเธญเธเธธเธเธฒเธ•)
                   // Visible for ALL types
                   ExpansionTile(
                     initiallyExpanded: true,
                     childrenPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    title: const Text('8. ช่องทางการรับใบอนุญาต (Delivery)',
+                    title: const Text('8. เธเนเธญเธเธ—เธฒเธเธเธฒเธฃเธฃเธฑเธเนเธเธญเธเธธเธเธฒเธ• (Delivery)',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     children: [
                       const SizedBox(height: 16),
                       RadioListTile<String>(
-                        title: const Text('รับด้วยตนเอง (Self Pickup)'),
-                        subtitle: const Text('ณ ศูนย์บริการ OSSC'),
+                        title: const Text('เธฃเธฑเธเธ”เนเธงเธขเธ•เธเน€เธญเธ (Self Pickup)'),
+                        subtitle: const Text('เธ“ เธจเธนเธเธขเนเธเธฃเธดเธเธฒเธฃ OSSC'),
                         value: 'PICKUP',
                         groupValue: 'MAIL',
                         onChanged: (v) {},
                       ),
                       RadioListTile<String>(
-                        title: const Text('จัดส่งทางไปรษณีย์ (By Mail)'),
+                        title: const Text('เธเธฑเธ”เธชเนเธเธ—เธฒเธเนเธเธฃเธฉเธ“เธตเธขเน (By Mail)'),
                         subtitle: const Text(
-                            'ตามที่อยู่ที่ระบุไว้ (Registered Address)'),
+                            'เธ•เธฒเธกเธ—เธตเนเธญเธขเธนเนเธ—เธตเนเธฃเธฐเธเธธเนเธงเน (Registered Address)'),
                         value: 'MAIL',
                         groupValue: 'MAIL',
                         onChanged: (v) {},
@@ -2009,144 +1019,34 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
           // Step 2: Documents
           Step(
-            title: const Text('แนบเอกสาร & AI Scan'),
+            title: const Text('เนเธเธเน€เธญเธเธชเธฒเธฃ & AI Scan'),
             content: Column(
               children: [
-                const Text('กรุณาแนบเอกสารหลักฐานประกอบคำขอ (Documents)'),
+                const Text('เธเธฃเธธเธ“เธฒเนเธเธเน€เธญเธเธชเธฒเธฃเธซเธฅเธฑเธเธเธฒเธเธเธฃเธฐเธเธญเธเธเธณเธเธญ (Documents)'),
                 const SizedBox(height: 12),
-                ...() {
-                  if (widget.requestType == 'SUBSTITUTE' ||
-                      widget.requestType == 'REPLACEMENT') {
-                    return _getReplacementDocumentList();
-                  }
-                  return _getRenewalDocumentList();
-                }()
-                    .map((doc) {
-                  final isUploaded = _uploadedFiles.containsKey(doc['id']);
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: isUploaded
-                              ? Colors.green
-                              : Colors.grey.withOpacity(0.3)),
-                      borderRadius: BorderRadius.circular(8),
-                      color: isUploaded
-                          ? Colors.green.withOpacity(0.05)
-                          : Colors.white,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              isUploaded
-                                  ? LucideIcons.checkCircle
-                                  : (doc['isLink'] == true
-                                      ? LucideIcons.video
-                                      : LucideIcons.fileText),
-                              color:
-                                  isUploaded ? Colors.green : Colors.blue[700],
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                doc['title'],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            if (doc['required'] == true)
-                              const Text('*',
-                                  style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
-                        if (doc['subtitle'] != null)
-                          Text(doc['subtitle'],
-                              style: TextStyle(
-                                  color: Colors.grey[600], fontSize: 12)),
-                        const SizedBox(height: 8),
-                        if (doc['isLink'] == true)
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              hintText: 'วางลิงค์วิดีโอ (Paste Video Link)',
-                              border: OutlineInputBorder(),
-                              isDense: true,
-                            ),
-                            // Create a dummy XFile for links? No, simpler to just store links in a separate map if possible,
-                            // OR just create a text file with the link?
-                            // The repository expects Map<String, XFile> documents.
-                            // If we have links, we can't easily pass them as XFiles.
-                            // BUT, the previous implementation of _uploadedFiles was String/String.
-                            // Now it's String/XFile.
-                            // Links are text.
-                            // For now, I'll Skip links in _uploadedFiles (XFiles map) and maybe pass them in formData?
-                            // Or, I can ignore the XFile requirement for links?
-                            // Issue: current implementation changed _uploadedFiles to Map<String, XFile>.
-                            // I should change _uploadedFiles back to dynamic or handle links separately.
-                            // Let's create `Map<String, String> _videoLinks = {};` and pass them in formData.
-                            // Let's create `Map<String, String> _videoLinks = {};` and pass them in formData.
-                            onChanged: (val) {
-                              setState(() {
-                                if (val.isNotEmpty) {
-                                  _videoLinks[doc['id']] = val;
-                                } else {
-                                  _videoLinks.remove(doc['id']);
-                                }
-                              });
-                            },
-                          )
-                        else
-                          Row(
-                            children: [
-                              OutlinedButton.icon(
-                                onPressed: () {
-                                  if (isUploaded) {
-                                    setState(
-                                        () => _uploadedFiles.remove(doc['id']));
-                                  } else {
-                                    _pickFile(doc['id']);
-                                  }
-                                },
-                                icon: Icon(
-                                    isUploaded
-                                        ? LucideIcons.trash
-                                        : LucideIcons.uploadCloud,
-                                    size: 16,
-                                    color: isUploaded ? Colors.red : null),
-                                label: Text(isUploaded
-                                    ? 'ลบไฟล์ (Remove)'
-                                    : 'เลือกไฟล์ (Upload)'),
-                                style: isUploaded
-                                    ? OutlinedButton.styleFrom(
-                                        foregroundColor: Colors.red)
-                                    : null,
-                              ),
-                              const Spacer(),
-                              if (isUploaded)
-                                Expanded(
-                                  child: Text(
-                                    _uploadedFiles[doc['id']]!.name,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.right,
-                                    style: const TextStyle(
-                                        color: Colors.green, fontSize: 12),
-                                  ),
-                                )
-                              else
-                                Text(
-                                  'Max: ${doc['maxSize']}',
-                                  style: const TextStyle(
-                                      color: Colors.grey, fontSize: 10),
-                                ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                DocumentUploadSection(
+                  documents: (widget.requestType == 'SUBSTITUTE' ||
+                          widget.requestType == 'REPLACEMENT')
+                      ? FormConfigService.getReplacementDocumentList(
+                          reason: _replacementReason,
+                          applicantType: _applicantType)
+                      : FormConfigService.getRenewalDocumentList(
+                          applicantType: _applicantType),
+                  uploadedFiles: _uploadedFiles,
+                  videoLinks: _videoLinks,
+                  onPickFile: _pickFile,
+                  onViewFile: _viewFile,
+                  onDeleteFile: _deleteFile,
+                  onLinkChanged: (docId, link) {
+                    setState(() {
+                      if (link.isEmpty) {
+                        _videoLinks.remove(docId);
+                      } else {
+                        _videoLinks[docId] = link;
+                      }
+                    });
+                  },
+                ),
                 const SizedBox(height: 16),
                 // AI Scan Section (Bottom)
                 Container(
@@ -2157,7 +1057,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       color: Colors.blue[50]),
                   child: Column(
                     children: [
-                      const Text('ระบบตรวจสอบความถูกต้องเบื้องต้น (AI Scan)'),
+                      const Text('เธฃเธฐเธเธเธ•เธฃเธงเธเธชเธญเธเธเธงเธฒเธกเธ–เธนเธเธ•เนเธญเธเน€เธเธทเนเธญเธเธ•เนเธ (AI Scan)'),
                       const SizedBox(height: 8),
                       if (_isAnalyzing)
                         const Row(
@@ -2184,7 +1084,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                         ElevatedButton.icon(
                             onPressed: _runAIScan,
                             icon: const Icon(LucideIcons.scan),
-                            label: const Text('ตรวจสอบเอกสารทั้งหมด'))
+                            label: const Text('เธ•เธฃเธงเธเธชเธญเธเน€เธญเธเธชเธฒเธฃเธ—เธฑเนเธเธซเธกเธ”'))
                     ],
                   ),
                 )
@@ -2195,7 +1095,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
           // Step 2: Review & Confirm
           Step(
-            title: const Text('ตรวจสอบข้อมูล (Review)'),
+            title: const Text('เธ•เธฃเธงเธเธชเธญเธเธเนเธญเธกเธนเธฅ (Review)'),
             content: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -2207,26 +1107,26 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('ผู้ยื่นคำขอ: ${_applicantNameController.text}',
+                  Text('เธเธนเนเธขเธทเนเธเธเธณเธเธญ: ${_applicantNameController.text}',
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
-                  Text('ประเภท: $_applicantType'),
+                  Text('เธเธฃเธฐเน€เธ เธ—: $_applicantType'),
                   const SizedBox(height: 8),
-                  Text('แปลง: ${_selectedEstablishment?.name ?? '-'}'),
+                  Text('เนเธเธฅเธ: ${_selectedEstablishment?.name ?? '-'}'),
                   const Divider(),
-                  Text('ข้อมูลการผลิต:',
+                  Text('เธเนเธญเธกเธนเธฅเธเธฒเธฃเธเธฅเธดเธ•:',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.grey[700])),
-                  Text('มาตรฐาน: ${_certificationTypes.join(', ')}'),
-                  Text('วัตถุประสงค์: ${_objectives.join(', ')}'),
+                  Text('เธกเธฒเธ•เธฃเธเธฒเธ: ${_certificationTypes.join(', ')}'),
+                  Text('เธงเธฑเธ•เธ–เธธเธเธฃเธฐเธชเธเธเน: ${_objectives.join(', ')}'),
                   const Divider(),
-                  Text('เอกสารที่แนบ: ${_uploadedFiles.length} รายการ',
+                  Text('เน€เธญเธเธชเธฒเธฃเธ—เธตเนเนเธเธ: ${_uploadedFiles.length} เธฃเธฒเธขเธเธฒเธฃ',
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
                   CheckboxListTile(
                     title: const Text(
-                        'ข้าพเจ้าขอรับรองว่าข้อมูลและเอกสารที่แนบมาถูกต้องและเป็นความจริงทุกประการ (I certify that all information is true)'),
+                        'เธเนเธฒเธเน€เธเนเธฒเธเธญเธฃเธฑเธเธฃเธญเธเธงเนเธฒเธเนเธญเธกเธนเธฅเนเธฅเธฐเน€เธญเธเธชเธฒเธฃเธ—เธตเนเนเธเธเธกเธฒเธ–เธนเธเธ•เนเธญเธเนเธฅเธฐเน€เธเนเธเธเธงเธฒเธกเธเธฃเธดเธเธ—เธธเธเธเธฃเธฐเธเธฒเธฃ (I certify that all information is true)'),
                     value: _isConfirmed,
                     onChanged: (val) =>
                         setState(() => _isConfirmed = val ?? false),
@@ -2241,10 +1141,10 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
 
           // Step 3: Payment
           Step(
-            title: const Text('ชำระค่าธรรมเนียม'),
+            title: const Text('เธเธณเธฃเธฐเธเนเธฒเธเธฃเธฃเธกเน€เธเธตเธขเธก'),
             content: Column(
               children: [
-                const Text('ค่าธรรมเนียมคำขอ: 5,000 บาท'),
+                const Text('เธเนเธฒเธเธฃเธฃเธกเน€เธเธตเธขเธกเธเธณเธเธญ: 5,000 เธเธฒเธ—'),
                 const SizedBox(height: 12),
                 // Review button removed as we have a dedicated step now
                 if (_isReviewed) // Keep for backward compatibility or remove? Better remove _isReviewed usage since we have Step 2
@@ -2254,8 +1154,8 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                   onPressed: _isPaidPhase1 ? null : _simulatePayment,
                   icon: const Icon(LucideIcons.creditCard),
                   label: Text(_isPaidPhase1
-                      ? 'ชำระเงินแล้ว (Paid)'
-                      : 'ชำระเงิน 5,000 บาท'),
+                      ? 'เธเธณเธฃเธฐเน€เธเธดเธเนเธฅเนเธง (Paid)'
+                      : 'เธเธณเธฃเธฐเน€เธเธดเธ 5,000 เธเธฒเธ—'),
                   style: ElevatedButton.styleFrom(
                       backgroundColor:
                           _isPaidPhase1 ? Colors.grey : Colors.purple,
@@ -2269,7 +1169,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white),
-                      child: const Text('ยื่นคำขอ (Submit)'),
+                      child: const Text('เธขเธทเนเธเธเธณเธเธญ (Submit)'),
                     ),
                   ),
               ],
@@ -2286,13 +1186,13 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
     if (_currentStep == 0) {
       if (_formKey.currentState != null && !_formKey.currentState!.validate()) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน')));
+            const SnackBar(content: Text('เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธเนเธญเธกเธนเธฅเนเธซเนเธเธฃเธเธ–เนเธงเธ')));
         return;
       }
 
       if (_selectedEstablishment == null) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('กรุณาเลือกแปลงปลูก (Select Establishment)')));
+            content: Text('เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเนเธเธฅเธเธเธฅเธนเธ (Select Establishment)')));
         return;
       }
 
@@ -2300,7 +1200,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
       if (_certificationTypes.isEmpty || _objectives.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content:
-                Text('กรุณาเลือกมาตราฐานและวัตถุประสงค์อย่างน้อย 1 รายการ')));
+                Text('เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเธกเธฒเธ•เธฃเธฒเธเธฒเธเนเธฅเธฐเธงเธฑเธ•เธ–เธธเธเธฃเธฐเธชเธเธเนเธญเธขเนเธฒเธเธเนเธญเธข 1 เธฃเธฒเธขเธเธฒเธฃ')));
         return;
       }
       // Moved createApplication to Step 1 to include documents
@@ -2309,8 +1209,12 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
     // Step 1: Document Validation (Strict) & Creation
     if (_currentStep == 1) {
       final requiredDocs = _isReplacement
-          ? _getReplacementDocumentList().where((d) => d['required'] == true)
-          : _getRenewalDocumentList().where((d) => d['required'] == true);
+          ? FormConfigService.getReplacementDocumentList(
+                  reason: _replacementReason, applicantType: _applicantType)
+              .where((d) => d['required'] == true)
+          : FormConfigService.getRenewalDocumentList(
+                  applicantType: _applicantType)
+              .where((d) => d['required'] == true);
 
       List<String> missing = [];
       for (var doc in requiredDocs) {
@@ -2323,7 +1227,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
         showDialog(
             context: context,
             builder: (ctx) => AlertDialog(
-                  title: const Text('เอกสารไม่ครบถ้วน (Missing Documents)'),
+                  title: const Text('เน€เธญเธเธชเธฒเธฃเนเธกเนเธเธฃเธเธ–เนเธงเธ (Missing Documents)'),
                   content: SingleChildScrollView(
                     child: ListBody(
                       children: missing
@@ -2335,7 +1239,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                   actions: [
                     TextButton(
                         onPressed: () => Navigator.pop(ctx),
-                        child: const Text('ตกลง'))
+                        child: const Text('เธ•เธเธฅเธ'))
                   ],
                 ));
         return;
@@ -2446,7 +1350,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
       if (!_isConfirmed) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text(
-                'กรุณายืนยันความถูกต้องของข้อมูล (Please confirm data correctness)')));
+                'เธเธฃเธธเธ“เธฒเธขเธทเธเธขเธฑเธเธเธงเธฒเธกเธ–เธนเธเธ•เนเธญเธเธเธญเธเธเนเธญเธกเธนเธฅ (Please confirm data correctness)')));
         return;
       }
     }
@@ -2457,7 +1361,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
       if (!_isPaidPhase1) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text(
-                'กรุณาชำระค่าธรรมเนียมก่อนยื่นคำขอ (Please pay fee first)')));
+                'เธเธฃเธธเธ“เธฒเธเธณเธฃเธฐเธเนเธฒเธเธฃเธฃเธกเน€เธเธตเธขเธกเธเนเธญเธเธขเธทเนเธเธเธณเธเธญ (Please pay fee first)')));
         return;
       }
     }
@@ -2482,16 +1386,33 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
       child: Row(
         children: [
           ElevatedButton(
-              onPressed: details.onStepContinue, child: const Text('ถัดไป')),
+              onPressed: details.onStepContinue, child: const Text('เธ–เธฑเธ”เนเธ')),
           const SizedBox(width: 12),
           TextButton(
-              onPressed: details.onStepCancel, child: const Text('ย้อนกลับ')),
+              onPressed: details.onStepCancel, child: const Text('เธขเนเธญเธเธเธฅเธฑเธ')),
         ],
       ),
     );
   }
 
   // Helpers
+
+  void _viewFile(String docId) {
+    // Open file viewer
+    final file = _uploadedFiles[docId];
+    if (file != null) {
+      // Logic to view file (e.g. OpenFile.open(file.path))
+      // For now show snackbar
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Viewing ${file.name}')));
+    }
+  }
+
+  void _deleteFile(String docId) {
+    setState(() {
+      _uploadedFiles.remove(docId);
+    });
+  }
 
   Future<void> _simulatePayment() async {
     final result = await ref.read(applicationProvider.notifier).payPhase1();
@@ -2505,7 +1426,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('ชำระเงินผ่าน Ksher'),
+        title: const Text('เธเธณเธฃเธฐเน€เธเธดเธเธเนเธฒเธ Ksher'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -2516,7 +1437,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               icon: const Icon(LucideIcons.externalLink),
-              label: const Text('เปิดหน้าชำระเงิน (Open Payment Page)'),
+              label: const Text('เน€เธเธดเธ”เธซเธเนเธฒเธเธณเธฃเธฐเน€เธเธดเธ (Open Payment Page)'),
               onPressed: () => launchUrl(Uri.parse(data['paymentUrl'])),
             ),
           ],
@@ -2543,11 +1464,11 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                 }
               }
             },
-            child: const Text('ตรวจสอบสถานะ (Check Status)'),
+            child: const Text('เธ•เธฃเธงเธเธชเธญเธเธชเธ–เธฒเธเธฐ (Check Status)'),
           ),
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('ปิด (Close)')),
+              child: const Text('เธเธดเธ” (Close)')),
         ],
       ),
     );

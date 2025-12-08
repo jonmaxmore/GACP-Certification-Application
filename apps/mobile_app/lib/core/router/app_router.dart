@@ -24,6 +24,11 @@ import '../../presentation/features/auditor/screens/auditor_dashboard_screen.dar
 import '../../presentation/features/auditor/screens/my_assignments_screen.dart';
 import '../../presentation/features/auditor/screens/inspection_form_screen.dart';
 import '../../presentation/features/auth/providers/auth_provider.dart';
+import '../../presentation/features/application/screens/application_list_screen.dart';
+import '../../presentation/features/application/screens/create_application_screen.dart';
+import '../../presentation/features/application/screens/payment_screen.dart';
+import '../../presentation/features/auditor/screens/auditor_job_screen.dart'; // Import Added
+import '../../presentation/features/auditor/screens/audit_form_screen.dart'; // Import Added
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -96,29 +101,53 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const DashboardScreen(),
           ),
           GoRoute(
-            path: '/applications/new',
-            builder: (context, state) => const ServiceSelectionScreen(),
-          ),
-          GoRoute(
-            path: '/applications/form',
-            builder: (context, state) => ApplicationFormScreen(
-              requestType: state.extra as String?,
-            ),
-          ),
-          GoRoute(
-            path: '/applications/guidelines',
-            builder: (context, state) => GuidelinesScreen(
-              requestType: state.extra as String,
-            ),
-          ),
-          GoRoute(
             path: '/notifications',
             builder: (context, state) => const NotificationScreen(),
           ),
           GoRoute(
             path: '/applications',
-            redirect: (context, state) => '/applications/new',
+            builder: (context, state) => const ApplicationListScreen(),
+            routes: [
+              GoRoute(
+                path: 'new',
+                builder: (context, state) => const ServiceSelectionScreen(),
+              ),
+              GoRoute(
+                path: 'create',
+                builder: (context, state) => const CreateApplicationScreen(),
+              ),
+              GoRoute(
+                path: 'form',
+                builder: (context, state) => ApplicationFormScreen(
+                  requestType: state.extra as String?,
+                ),
+              ),
+              GoRoute(
+                path: 'guidelines',
+                builder: (context, state) => GuidelinesScreen(
+                  requestType: state.extra as String,
+                ),
+              ),
+              GoRoute(
+                path: ':id/pay1',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return PaymentScreen(applicationId: id);
+                },
+              ),
+            ],
           ),
+          GoRoute(
+              path: '/auditor',
+              builder: (context, state) => const AuditorJobScreen(),
+              routes: [
+                GoRoute(
+                    path: 'job/:id',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return AuditFormScreen(applicationId: id);
+                    })
+              ]),
           GoRoute(
             path: '/establishments',
             builder: (context, state) => const EstablishmentListScreen(),

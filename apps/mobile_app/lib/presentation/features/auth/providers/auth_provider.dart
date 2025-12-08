@@ -47,6 +47,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
   // Stream controller to notify GoRouter of auth changes
   final _streamController = StreamController<AuthState>.broadcast();
+  @override
   Stream<AuthState> get stream => _streamController.stream;
 
   AuthNotifier(this._repository) : super(const AuthState()) {

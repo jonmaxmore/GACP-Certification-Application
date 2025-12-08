@@ -50,4 +50,4 @@ This integration test will act as a harness for our "Chaos Squads".
   - Verify state (e.g., Form text) is still there.
 
 ## Execution
-Run with: `flutter test integration_test/fuzz_stress_test.dart`
+Run with: `flutter test test/widget/fuzz_stress_test.dart`

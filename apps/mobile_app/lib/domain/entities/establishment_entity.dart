@@ -50,4 +50,38 @@ class EstablishmentEntity extends Equatable {
         licenseExpiredAt,
         licenseNumber,
       ];
+
+  factory EstablishmentEntity.fromJson(Map<String, dynamic> json) {
+    // GeoJSON handling: location.coordinates is complex
+    double? lat;
+    double? lng;
+    if (json['location'] != null && json['location']['coordinates'] != null) {
+      final coords = json['location']['coordinates'] as List;
+      if (coords.length >= 2) {
+        lng = (coords[0] as num).toDouble();
+        lat = (coords[1] as num).toDouble();
+      }
+    }
+
+    return EstablishmentEntity(
+      id: json['id'] ?? json['_id'] ?? '',
+      name: json['name'] ?? '',
+      type: json['type'] ?? '',
+      address: json['address'] ??
+          (json['location'] != null ? json['location']['address'] : ''),
+      status: json['status'] ?? 'ACTIVE',
+      latitude: lat,
+      longitude: lng,
+      imageUrl: json['imageUrl'] ?? json['image'],
+      titleDeedNo: json['titleDeedNo'] ?? '',
+      security: json['security'] ?? '',
+      licenseNumber: json['licenseNumber'],
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'])
+          : null,
+      licenseExpiredAt: json['licenseExpiredAt'] != null
+          ? DateTime.tryParse(json['licenseExpiredAt'])
+          : null,
+    );
+  }
 }

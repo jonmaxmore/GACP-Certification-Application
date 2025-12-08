@@ -26,7 +26,7 @@ class ReplacementInfoSection extends StatelessWidget {
       children: [
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          value: selectedReason,
+          initialValue: selectedReason,
           decoration: const InputDecoration(
             labelText: 'เหตุผลในการขอใบแทน (Reason)',
             border: OutlineInputBorder(),

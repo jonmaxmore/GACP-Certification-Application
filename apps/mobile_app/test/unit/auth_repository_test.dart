@@ -43,7 +43,7 @@ void main() {
       'province': 'BKK',
     };
 
-    final tUserEntity = UserEntity(
+    const tUserEntity = UserEntity(
       id: '123',
       email: tEmail,
       firstName: 'Test',

@@ -15,7 +15,7 @@ class HerbTypeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       decoration: const InputDecoration(
         labelText: 'ชนิดพืชสมุนไพร (Herb Type)',
         border: OutlineInputBorder(),

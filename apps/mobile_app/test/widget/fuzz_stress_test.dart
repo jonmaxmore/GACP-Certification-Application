@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mobile_app/presentation/features/application/screens/application_form_screen.dart';
@@ -39,7 +38,7 @@ class MutableMockApplicationRepository extends Mock
 }
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  // IntegrationTestWidgetsFlutterBinding.ensureInitialized(); // Not needed for Widget Test
 
   final rnd = Random(); // Random Seed
   late MockAuthRepository mockAuthRepo;

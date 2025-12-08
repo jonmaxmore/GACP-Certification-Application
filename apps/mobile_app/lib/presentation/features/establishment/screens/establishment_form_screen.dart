@@ -262,7 +262,7 @@ class _EstablishmentFormScreenState
                     if (state.selectedImage != null)
                       Stack(
                         children: [
-                          Container(
+                          SizedBox(
                             height: 200,
                             width: double.infinity,
                             child: kIsWeb

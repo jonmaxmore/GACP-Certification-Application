@@ -33,7 +33,7 @@ void main() {
       test('should update state with list on success', () async {
         // Arrange
         final tList = [
-          EstablishmentEntity(
+          const EstablishmentEntity(
               id: '1',
               name: 'Farm 1',
               type: 'farm',
@@ -71,7 +71,7 @@ void main() {
       test('should call repo and update state on success', () async {
         // Arrange
         notifier.setLocation(const LatLng(10, 20));
-        final tEst = EstablishmentEntity(
+        const tEst = EstablishmentEntity(
             id: 'new',
             name: 'n',
             type: 't',

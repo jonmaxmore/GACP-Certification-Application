@@ -44,7 +44,7 @@ void main() {
   testWidgets('ApplicationFormScreen loads and navigates steps',
       (tester) async {
     // Arrange
-    final tEst = EstablishmentEntity(
+    const tEst = EstablishmentEntity(
       id: 'est_1',
       name: 'Test Farm',
       type: 'farm',

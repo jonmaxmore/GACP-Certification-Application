@@ -82,7 +82,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               // Login Card
               Container(
-                width: 400, // Fixed width for desktop/web look
+                constraints: const BoxConstraints(
+                    maxWidth: 400), // Responsive Constraint
                 padding: const EdgeInsets.all(40),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -136,6 +137,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     TextField(
                       controller: _passwordController,
                       obscureText: true,
+                      textInputAction: TextInputAction.done, // Explicit Action
+                      onSubmitted: (_) => _handleLogin(), // Handle Enter Key
                       decoration: InputDecoration(
                         labelText: 'Password',
                         prefixIcon: const Icon(LucideIcons.lock),
@@ -178,15 +181,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       children: [
                         Text("Don't have an account? ",
                             style: TextStyle(color: Colors.blueGrey[600])),
-                        GestureDetector(
-                          onTap: () => context.push(
-                              '/register'), // Use Push so they can go back
-                          child: Text(
-                            'Register here (Farmer)',
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline,
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click, // Hand Cursor
+                          child: GestureDetector(
+                            onTap: () => context.push(
+                                '/register'), // Use Push so they can go back
+                            child: Text(
+                              'Register here (Farmer)',
+                              style: TextStyle(
+                                color: primaryColor,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                              ),
                             ),
                           ),
                         ),

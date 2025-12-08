@@ -95,12 +95,12 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.orange.withOpacity(0.5)),
                     ),
-                    child: Row(
+                    child: const Row(
                       children: [
-                        const Icon(LucideIcons.alertTriangle,
+                        Icon(LucideIcons.alertTriangle,
                             color: Colors.orange),
-                        const SizedBox(width: 12),
-                        const Expanded(
+                        SizedBox(width: 12),
+                        Expanded(
                           child: Text(
                             'โปรดอ่านให้ครบถ้วน เลื่อนลงจนสุดเพื่อยอมรับ',
                             style: TextStyle(

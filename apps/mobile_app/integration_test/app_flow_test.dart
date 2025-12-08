@@ -6,13 +6,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:mobile_app/presentation/features/application/screens/application_form_screen.dart';
 import 'package:mobile_app/presentation/features/auth/providers/auth_provider.dart';
 import 'package:mobile_app/presentation/features/establishment/providers/establishment_provider.dart';
-import 'package:mobile_app/presentation/features/application/providers/application_provider.dart'; // Ensure correct path
+// Ensure correct path
 import 'package:mobile_app/domain/repositories/auth_repository.dart';
 import 'package:mobile_app/domain/repositories/establishment_repository.dart';
 import 'package:mobile_app/domain/repositories/application_repository.dart';
 import 'package:mobile_app/domain/entities/user_entity.dart';
-import 'package:mobile_app/domain/entities/establishment_entity.dart';
-import 'package:mobile_app/domain/entities/application_entity.dart';
 import 'package:dartz/dartz.dart';
 
 // Mocks

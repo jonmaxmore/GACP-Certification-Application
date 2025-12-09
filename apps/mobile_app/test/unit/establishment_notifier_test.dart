@@ -19,7 +19,7 @@ void main() {
 
   setUp(() {
     mockRepo = MockEstablishmentRepository();
-    when(() => mockRepo.getEstablishments()).thenAnswer((_) async => Right([]));
+    when(() => mockRepo.getEstablishments()).thenAnswer((_) async => const Right([]));
     notifier = EstablishmentNotifier(mockRepo);
   });
 
@@ -90,7 +90,7 @@ void main() {
               titleDeedNo: '1',
               security: 's',
               image: null,
-            )).thenAnswer((_) async => Right(tEst));
+            )).thenAnswer((_) async => const Right(tEst));
 
         // Act
         await notifier.createEstablishment(

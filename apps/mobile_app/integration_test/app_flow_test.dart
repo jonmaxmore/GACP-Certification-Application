@@ -49,7 +49,7 @@ void main() {
         registeredAt: DateTime.now());
 
     // Establishments
-    final tEst = EstablishmentEntity(
+    const tEst = EstablishmentEntity(
       id: 'e1',
       name: 'Apple Farm',
       address: 'Cupertino, California',

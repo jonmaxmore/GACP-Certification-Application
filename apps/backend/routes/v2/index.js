@@ -21,6 +21,7 @@ router.use('/applications', applicationsRouter);
 router.use('/establishments', establishmentsRouter);
 router.use('/payments', require('../api/PaymentRoutes'));
 router.use('/officer', require('../api/OfficerRoutes'));
+router.use('/auth', require('../api/AuthFarmerRoutes')); // Added for V2 Consistency
 
 // Health check
 router.get('/health', (req, res) => {

@@ -13,9 +13,11 @@ class DioClient {
     try {
       if (defaultTargetPlatform == TargetPlatform.android) {
         return 'http://10.0.2.2:3000/api'; // Android Emulator
+      } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+        return 'http://localhost:3000/api'; // iOS Simulator
       }
     } catch (_) {}
-    return 'http://localhost:3000/api'; // iOS / Desktop / Fallback
+    return 'http://localhost:3000/api'; // Fallback
   }
 
   DioClient(this._storage)
@@ -24,7 +26,9 @@ class DioClient {
             baseUrl: _baseUrl,
             connectTimeout: const Duration(seconds: 15),
             receiveTimeout: const Duration(seconds: 15),
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+              'Accept': 'application/json',
+            },
           ),
         ) {
     _dio.interceptors.add(

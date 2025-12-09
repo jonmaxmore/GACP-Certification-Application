@@ -24,7 +24,7 @@ class AuthRepositoryImpl implements AuthRepository {
       });
 
       final response = await _dioClient.post(
-        '/auth-farmer/register',
+        '/v2/auth/register',
         data: formData,
       );
 
@@ -54,7 +54,7 @@ class AuthRepositoryImpl implements AuthRepository {
       String email, String password) async {
     try {
       final response = await _dioClient.post(
-        '/auth-farmer/login',
+        '/v2/auth/login',
         data: {'email': email, 'password': password},
       );
 
@@ -115,7 +115,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
     try {
-      final response = await _dioClient.get('/auth/me');
+      final response = await _dioClient.get('/v2/auth/me');
 
       if (response.statusCode == 200) {
         final user = response.data[

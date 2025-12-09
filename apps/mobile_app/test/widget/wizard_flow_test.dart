@@ -45,7 +45,7 @@ void main() {
         zipCode: '95014',
         registeredAt: DateTime.now());
 
-    final tEst = EstablishmentEntity(
+    const tEst = EstablishmentEntity(
       id: 'e1',
       name: 'Apple Farm',
       type: 'Outdoor',

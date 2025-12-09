@@ -173,7 +173,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
             file != null ? LucideIcons.checkCircle : LucideIcons.upload,
             color: file != null ? Colors.green : Colors.grey),
         title: Text(label),
-        subtitle: file != null ? Text('Uploaded') : const Text('Tap to upload'),
+        subtitle: file != null ? const Text('Uploaded') : const Text('Tap to upload'),
         onTap: () async {
           final ImagePicker picker = ImagePicker();
           final XFile? image =

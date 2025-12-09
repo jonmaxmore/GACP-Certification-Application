@@ -155,7 +155,7 @@ class _ApplicationWizardScreenState
               border: OutlineInputBorder(),
               prefixIcon: Icon(LucideIcons.warehouse),
             ),
-            value: state.formData['establishmentId'],
+            initialValue: state.formData['establishmentId'],
             hint: const Text('Choose your farm...'),
             items: establishments.map((e) {
               return DropdownMenuItem(
@@ -375,12 +375,12 @@ class _ApplicationWizardScreenState
                     'Files', '${state.attachedFiles.length} Attached'),
                 const Divider(),
                 const SizedBox(height: 8),
-                Row(
+                const Row(
                   children: [
-                    const Icon(LucideIcons.fileCheck,
+                    Icon(LucideIcons.fileCheck,
                         size: 16, color: Colors.green),
-                    const SizedBox(width: 8),
-                    const Expanded(
+                    SizedBox(width: 8),
+                    Expanded(
                         child: Text(
                             'Please verify all information before submitting.',
                             style:

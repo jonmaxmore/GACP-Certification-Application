@@ -28,7 +28,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
           return Right(url);
         }
       }
-      return Left(ServerFailure('Failed to get payment URL'));
+      return const Left(ServerFailure('Failed to get payment URL'));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

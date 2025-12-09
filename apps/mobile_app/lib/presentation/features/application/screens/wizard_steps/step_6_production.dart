@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../providers/form_state_provider.dart';
 import '../../models/gacp_application_models.dart';
 import '../wizard_common.dart';
@@ -29,7 +30,7 @@ class Step6Production extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 content: Text(
-                    "กรุณาระบุส่วนที่ใช้และแหล่งที่มา (Please specify plant parts & source)")),
+                    "กรุณากรอกข้อมูลให้ครบถ้วน รวมถึงการจัดการหลังเก็บเกี่ยว (Please fill all fields)")),
           );
         }
       },
@@ -37,14 +38,14 @@ class Step6Production extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Plant Parts (Dynamic Multi-Select)
+            // 1. Plant Parts
             WizardSectionTitle(title: "1. ส่วนของพืชที่ใช้ (Plant Parts Used)"),
             _buildPlantPartsSelector(
                 isGroupA, state.production.plantParts, notifier),
 
             const SizedBox(height: 24),
 
-            // 2. Production Plan (Dynamic Units)
+            // 2. Production Plan
             WizardSectionTitle(title: "2. แผนการผลิต (Production Plan)"),
             if (isTreeUnit) ...[
               WizardTextInput(
@@ -109,6 +110,16 @@ class Step6Production extends ConsumerWidget {
                 title: "3. แหล่งที่มา (Seed/Source Origin)"),
             _buildOriginSource(state.production.sourceType,
                 state.production.sourceDetail, notifier),
+
+            const SizedBox(height: 24),
+
+            // 4. Farm Inputs (New Module)
+            _buildFarmInputs(context, state.production.farmInputs, notifier),
+
+            const SizedBox(height: 24),
+
+            // 5. Post Harvest (New Module)
+            _buildPostHarvest(state.production.postHarvest, notifier),
           ],
         ),
       ),
@@ -195,6 +206,155 @@ class Step6Production extends ConsumerWidget {
                   "เลข Lot เดิมที่อ้างอิง (Previous Lot No)",
                   currentDetail,
                   (v) => notifier.updateProduction(sourceDetail: v))),
+      ],
+    );
+  }
+
+  // 4. Farm Inputs Widget
+  Widget _buildFarmInputs(BuildContext context, List<FarmInputItem> inputs,
+      ApplicationFormNotifier notifier) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const WizardSectionTitle(title: "4. ปัจจัยการผลิต (Farm Inputs)"),
+            IconButton(
+              icon: const Icon(Icons.add_circle, color: Colors.green),
+              onPressed: () => _showAddInputDialog(context, notifier),
+            )
+          ],
+        ),
+        const Text("ระบุปุ๋ย ยา หรือสารเคมีที่ใช้ (List fertilizers/chemicals)",
+            style: TextStyle(color: Colors.grey)),
+        const SizedBox(height: 8),
+        if (inputs.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8)),
+            child: const Center(
+                child: Text("ยังไม่มีข้อมูล (No entries)",
+                    style: TextStyle(color: Colors.grey))),
+          )
+        else
+          ...inputs.asMap().entries.map((entry) {
+            final i = entry.key;
+            final item = entry.value;
+            return Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: ListTile(
+                leading:
+                    const Icon(LucideIcons.flaskConical, color: Colors.orange),
+                title: Text(item.name),
+                subtitle: Text("${item.type} - Reg:${item.regNo}"),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => notifier.removeFarmInput(i),
+                ),
+              ),
+            );
+          }).toList()
+      ],
+    );
+  }
+
+  void _showAddInputDialog(
+      BuildContext context, ApplicationFormNotifier notifier) {
+    String type = 'Organic Fertilizer';
+    String name = '';
+    String regNo = '';
+
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              title: const Text("เพิ่มปัจจัยการผลิต (Add Input)"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: type,
+                    items: const [
+                      DropdownMenuItem(
+                          value: "Organic Fertilizer",
+                          child: Text("ปุ๋ยอินทรีย์")),
+                      DropdownMenuItem(
+                          value: "Chemical Fertilizer",
+                          child: Text("ปุ๋ยเคมี")),
+                      DropdownMenuItem(
+                          value: "Bio Control", child: Text("สารชีวภัณฑ์")),
+                      DropdownMenuItem(
+                          value: "Hormone", child: Text("ฮอร์โมน/อาหารเสริม")),
+                    ],
+                    onChanged: (v) => type = v!,
+                    decoration:
+                        const InputDecoration(labelText: "ประเภท (Type)"),
+                  ),
+                  TextField(
+                    decoration: const InputDecoration(
+                        labelText: "ชื่อการค้า (Trade Name)"),
+                    onChanged: (v) => name = v,
+                  ),
+                  TextField(
+                    decoration:
+                        const InputDecoration(labelText: "เลขทะเบียน (Reg No)"),
+                    onChanged: (v) => regNo = v,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text("ยกเลิก (Cancel)"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (name.isNotEmpty) {
+                      notifier.addFarmInput(
+                          FarmInputItem(type: type, name: name, regNo: regNo));
+                      Navigator.pop(ctx);
+                    }
+                  },
+                  child: const Text("เพิ่ม (Add)"),
+                )
+              ],
+            ));
+  }
+
+  // 5. Post Harvest Widget
+  Widget _buildPostHarvest(
+      PostHarvestPlan plan, ApplicationFormNotifier notifier) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const WizardSectionTitle(
+            title: "5. การจัดการหลังเก็บเกี่ยว (Post-Harvest)"),
+        const Text("วิธีการลดความชื้น (Drying Method):",
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        RadioListTile<String>(
+          title: const Text("ตากแดดบนแคร่ (Sun Dry)"),
+          value: "Sun Dry",
+          groupValue: plan.dryingMethod,
+          onChanged: (v) => notifier.updatePostHarvest(drying: v),
+        ),
+        RadioListTile<String>(
+          title: const Text("ตู้อบความร้อน (Hot Air Oven)"),
+          value: "Hot Air Oven",
+          groupValue: plan.dryingMethod,
+          onChanged: (v) => notifier.updatePostHarvest(drying: v),
+        ),
+        RadioListTile<String>(
+          title: const Text("โรงเรือนพลังงานแสงอาทิตย์ (Solar Dome)"),
+          value: "Solar Dome",
+          groupValue: plan.dryingMethod,
+          onChanged: (v) => notifier.updatePostHarvest(drying: v),
+        ),
+        WizardTextInput("ภาชนะบรรจุ (Packaging)", plan.packaging,
+            (v) => notifier.updatePostHarvest(packaging: v)),
+        WizardTextInput("สถานที่เก็บรักษา (Storage)", plan.storage,
+            (v) => notifier.updatePostHarvest(storage: v)),
       ],
     );
   }

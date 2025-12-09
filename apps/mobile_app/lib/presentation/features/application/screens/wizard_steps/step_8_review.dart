@@ -29,22 +29,27 @@ class Step8Review extends ConsumerWidget {
             const WizardSectionTitle(
                 title: "สรุปข้อมูลใบสมัคร (Application Summary)"),
             _buildSummaryCard("1. ประเภทคำขอ (Service)",
-                "${state.type?.name.toUpperCase()} - ${plantConfig?.nameTh}"),
+                "${state.type?.name.toUpperCase()} - ${plantConfig?.nameTH}"),
             if (state.type == ServiceType.replacement)
               _buildSummaryCard("เหตุผล (Reason)",
                   "${state.replacementReason?.reason} - ${state.replacementReason?.policeReportNo}"),
             _buildSummaryCard("2. ผู้ยื่น (Applicant)",
-                "${state.profile.name} (${state.profile.applicantType})"),
+                "${state.profile.name} (${state.profile.applicantType})\nResp: ${state.profile.responsibleName}"),
             _buildSummaryCard("3. สถานที่ (Site)",
-                "${state.location.name}\n${state.location.address}"),
+                "${state.location.name}\n${state.location.address}\nAudit: ${state.location.north}/${state.location.south}"),
             if (isGroupA)
               _buildSummaryCard("4. ใบอนุญาต (License)",
                   "${state.licenseInfo?.plantingStatus} - ${state.licenseInfo?.notifyNumber ?? state.licenseInfo?.licenseNumber}"),
             _buildSummaryCard("5. ความปลอดภัย (Security)",
                 "Fence: ${state.securityMeasures.hasFence}\nCCTV: ${state.securityMeasures.hasCCTV}\nZoning: ${state.securityMeasures.hasZoning}"),
-            if (state.type != ServiceType.replacement)
+            if (state.type != ServiceType.replacement) ...[
               _buildSummaryCard("6. การผลิต (Production)",
                   "Parts: ${state.production.plantParts.join(', ')}\nSource: ${state.production.sourceType}\nYield: ${state.production.estimatedYield}"),
+              _buildSummaryCard("6.1 ปัจจัยการผลิต (Inputs)",
+                  "Items: ${state.production.farmInputs.length} รายการ (See list below)"),
+              _buildSummaryCard("6.2 หลังเก็บเกี่ยว (Post-Harvest)",
+                  "Drying: ${state.production.postHarvest.dryingMethod}\nPkg: ${state.production.postHarvest.packaging}\nStorage: ${state.production.postHarvest.storage}"),
+            ],
             const SizedBox(height: 24),
             const Divider(),
             const Text("ลงลายมือชื่อ (E-Signature)",

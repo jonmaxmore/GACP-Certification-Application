@@ -362,6 +362,44 @@ class SecurityChecklist {
   }
 }
 
+// Model for 6.4 Farm Inputs
+class FarmInputItem {
+  final String type; // ปุ๋ยอินทรีย์, ปุ๋ยเคมี, ฮอร์โมน, etc.
+  final String name; // Trade Name
+  final String regNo; // Registration Number
+
+  const FarmInputItem({
+    this.type = 'Organic Fertilizer',
+    this.name = '',
+    this.regNo = '',
+  });
+}
+
+// Model for 6.5 Post-Harvest
+class PostHarvestPlan {
+  final String dryingMethod; // Sun Dry, Oven, Solar Dome
+  final String packaging; // Vacuum, Foil, Plastic Box
+  final String storage; // Room 25C, Warehouse
+
+  const PostHarvestPlan({
+    this.dryingMethod = 'Sun Dry',
+    this.packaging = '',
+    this.storage = '',
+  });
+
+  PostHarvestPlan copyWith({
+    String? dryingMethod,
+    String? packaging,
+    String? storage,
+  }) {
+    return PostHarvestPlan(
+      dryingMethod: dryingMethod ?? this.dryingMethod,
+      packaging: packaging ?? this.packaging,
+      storage: storage ?? this.storage,
+    );
+  }
+}
+
 // 3.2 Production Plan (Adaptive)
 class ProductionPlan {
   final List<String> plantParts; // Flower, Leaf, etc.
@@ -376,6 +414,10 @@ class ProductionPlan {
   final double estimatedYield; // Kg or Ton based on context
   final String productionCycle; // 3-4 months, etc.
 
+  // New Modules 6.4 & 6.5
+  final List<FarmInputItem> farmInputs;
+  final PostHarvestPlan postHarvest;
+
   const ProductionPlan({
     this.plantParts = const [],
     this.sourceType = 'Self',
@@ -385,6 +427,8 @@ class ProductionPlan {
     this.treeCount,
     this.estimatedYield = 0.0,
     this.productionCycle = '',
+    this.farmInputs = const [],
+    this.postHarvest = const PostHarvestPlan(),
   });
 
   ProductionPlan copyWith({
@@ -396,6 +440,8 @@ class ProductionPlan {
     int? treeCount,
     double? estimatedYield,
     String? productionCycle,
+    List<FarmInputItem>? farmInputs,
+    PostHarvestPlan? postHarvest,
   }) {
     return ProductionPlan(
       plantParts: plantParts ?? this.plantParts,
@@ -406,6 +452,8 @@ class ProductionPlan {
       treeCount: treeCount ?? this.treeCount,
       estimatedYield: estimatedYield ?? this.estimatedYield,
       productionCycle: productionCycle ?? this.productionCycle,
+      farmInputs: farmInputs ?? this.farmInputs,
+      postHarvest: postHarvest ?? this.postHarvest,
     );
   }
 }
@@ -450,9 +498,15 @@ class FormValidator {
     if (plan.plantParts.isEmpty) return false;
 
     if (config.productionUnit == 'Tree') {
-      return (plan.treeCount ?? 0) > 0;
+      if ((plan.treeCount ?? 0) <= 0) return false;
     } else {
-      return (plan.areaSizeRai ?? 0.0) > 0;
+      if ((plan.areaSizeRai ?? 0.0) <= 0) return false;
     }
+
+    // Post Harvest Required?
+    if (plan.postHarvest.packaging.isEmpty || plan.postHarvest.storage.isEmpty)
+      return false;
+
+    return true;
   }
 }

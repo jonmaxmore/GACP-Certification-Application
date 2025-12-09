@@ -1,11 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/gacp_application_models.dart';
-
-// State Provider
-final applicationFormProvider =
-    StateNotifierProvider<ApplicationFormNotifier, GACPApplication>((ref) {
-  return ApplicationFormNotifier();
-});
+import '../../models/gacp_application_models.dart';
 
 class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
   ApplicationFormNotifier()
@@ -16,9 +10,14 @@ class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
           production: ProductionPlan(),
         ));
 
-  // --- Step 0: Plant Selection ---
+  // --- Step 0: Plant Config ---
   void setPlant(String plantId) {
     state = state.copyWith(plantId: plantId);
+  }
+
+  // --- Step 1: Standards ---
+  void acceptStandards(bool isAccepted) {
+    state = state.copyWith(acceptedStandards: isAccepted);
   }
 
   // --- Step 2: Request Type ---
@@ -26,13 +25,9 @@ class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
     state = state.copyWith(type: type);
   }
 
-  // --- Step 1 & 3: Consents ---
-  void acceptStandards(bool accepted) {
-    state = state.copyWith(acceptedStandards: accepted);
-  }
-
-  void consentPDPA(bool consented) {
-    state = state.copyWith(consentedPDPA: consented);
+  // --- Step 3: Terms ---
+  void consentPDPA(bool isConsented) {
+    state = state.copyWith(consentedPDPA: isConsented);
   }
 
   // --- Step 4: Profile & License ---
@@ -94,12 +89,10 @@ class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
     );
   }
 
-  // --- Step 5: Site & Security ---
+  // --- Step 5: Location & Security ---
   void updateLocation({
     String? name,
     String? address,
-    double? lat,
-    double? lng,
     String? north,
     String? south,
     String? east,
@@ -109,8 +102,6 @@ class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
       location: state.location.copyWith(
         name: name,
         address: address,
-        lat: lat,
-        lng: lng,
         north: north,
         south: south,
         east: east,
@@ -162,15 +153,30 @@ class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
     );
   }
 
-  // --- Step 8: Signature ---
-  void updateSignature(String base64) {
-    state = state.copyWith(signatureBase64: base64);
+  // New methods for Farm Inputs & Post Harvest
+  void addFarmInput(FarmInputItem item) {
+    final newInputs = List<FarmInputItem>.from(state.production.farmInputs)
+      ..add(item);
+    state = state.copyWith(
+        production: state.production.copyWith(farmInputs: newInputs));
   }
 
-  // --- Submit ---
-  Future<String?> submit() async {
-    // Mock API Call
-    await Future.delayed(const Duration(seconds: 2));
-    return "APP-${DateTime.now().millisecondsSinceEpoch}";
+  void removeFarmInput(int index) {
+    final newInputs = List<FarmInputItem>.from(state.production.farmInputs)
+      ..removeAt(index);
+    state = state.copyWith(
+        production: state.production.copyWith(farmInputs: newInputs));
+  }
+
+  void updatePostHarvest({String? drying, String? packaging, String? storage}) {
+    state = state.copyWith(
+        production: state.production.copyWith(
+            postHarvest: state.production.postHarvest.copyWith(
+                dryingMethod: drying, packaging: packaging, storage: storage)));
   }
 }
+
+final applicationFormProvider =
+    StateNotifierProvider<ApplicationFormNotifier, GACPApplication>((ref) {
+  return ApplicationFormNotifier();
+});

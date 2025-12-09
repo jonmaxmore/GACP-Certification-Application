@@ -42,7 +42,7 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/applications/create/start'),
+        onPressed: () => context.push('/applications/create/step1'),
         icon: const Icon(LucideIcons.plus),
         label: const Text('New Application'),
         backgroundColor: AppTheme.primary,
@@ -79,7 +79,7 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
           ),
           const SizedBox(height: 8),
           ElevatedButton(
-            onPressed: () => context.push('/applications/create/start'),
+            onPressed: () => context.push('/applications/create/step1'),
             child: const Text('Create your first application'),
           ),
         ],

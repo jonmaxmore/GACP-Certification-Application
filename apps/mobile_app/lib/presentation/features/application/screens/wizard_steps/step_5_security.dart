@@ -1,0 +1,148 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../providers/form_state_provider.dart';
+import '../../models/gacp_application_models.dart';
+import '../wizard_common.dart';
+
+class Step5Security extends ConsumerWidget {
+  const Step5Security({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(applicationFormProvider);
+    final notifier = ref.read(applicationFormProvider.notifier);
+
+    // Adaptive Logic
+    final plantId = state.plantId;
+    final plantConfig = plantConfigs[plantId] ?? plantConfigs.values.first;
+    final isStrict = plantConfig.security == SecurityLevel.strict;
+
+    return WizardScaffold(
+      title: "5. สถานที่ & ความปลอดภัย (Site & Security)",
+      onBack: () => context.go('/applications/create/step4'),
+      onNext: () {
+        if (FormValidator.validateStep5(state.securityMeasures, plantConfig)) {
+          context.go('/applications/create/step6');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(isStrict
+                    ? "Group A ต้องมีรั้ว, CCTV, และการควบคุมการเข้าออก (Must have Fence, CCTV, Access Control)"
+                    : "Group B ต้องมีการจัดการสัตว์และการแบ่งโซน (Must have Animal Barrier & Zoning)")),
+          );
+        }
+      },
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Risk Assessment
+            const WizardSectionTitle(
+                title: "1. การประเมินความเสี่ยง (Risk Assessment)"),
+            const Text("โปรดระบุสภาพแวดล้อมรอบแปลงปลูก (Surroundings)",
+                style: TextStyle(color: Colors.grey)),
+            const SizedBox(height: 8),
+            WizardTextInput("ทิศเหนือ (North) ติดกับ...", state.location.north,
+                (v) => notifier.updateLocation(north: v)),
+            WizardTextInput("ทิศใต้ (South) ติดกับ...", state.location.south,
+                (v) => notifier.updateLocation(south: v)),
+            WizardTextInput("ทิศตะวันออก (East) ติดกับ...", state.location.east,
+                (v) => notifier.updateLocation(east: v)),
+            WizardTextInput("ทิศตะวันตก (West) ติดกับ...", state.location.west,
+                (v) => notifier.updateLocation(west: v)),
+
+            const SizedBox(height: 24),
+
+            // 2. Security Checklist
+            WizardSectionTitle(
+                title:
+                    "2. มาตรการความปลอดภัย (${isStrict ? 'High Control' : 'Standard'})"),
+            if (isStrict) ...[
+              _buildCheckItem(
+                  "มีรั้วรอบขอบชิด (Secure Fence)",
+                  state.securityMeasures.hasFence,
+                  (v) => notifier.updateSecurity(hasFence: v),
+                  isRequired: true),
+              _buildCheckItem(
+                  "มีกล้องวงจรปิด (CCTV Medical Grade)",
+                  state.securityMeasures.hasCCTV,
+                  (v) => notifier.updateSecurity(hasCCTV: v),
+                  isRequired: true),
+              _buildCheckItem(
+                  "มีการควบคุมการเข้า-ออก (Access Control)",
+                  state.securityMeasures.hasAccessControl,
+                  (v) => notifier.updateSecurity(hasAccessControl: v),
+                  isRequired: true),
+              _buildCheckItem(
+                  "การแบ่งโซนพื้นที่ (Zoning)",
+                  state.securityMeasures.hasZoning,
+                  (v) => notifier.updateSecurity(hasZoning: v),
+                  isRequired: false),
+            ] else ...[
+              _buildCheckItem(
+                  "มีมาตรการป้องกันสัตว์ (Animal Barrier)",
+                  state.securityMeasures.hasAnimalBarrier,
+                  (v) => notifier.updateSecurity(hasAnimalBarrier: v),
+                  isRequired: true),
+              _buildCheckItem(
+                  "การแบ่งโซนพื้นที่ (Zoning)",
+                  state.securityMeasures.hasZoning,
+                  (v) => notifier.updateSecurity(hasZoning: v),
+                  isRequired: true),
+              _buildCheckItem(
+                  "มีรั้ว (Optional)",
+                  state.securityMeasures.hasFence,
+                  (v) => notifier.updateSecurity(hasFence: v),
+                  isRequired: false),
+            ],
+
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isStrict ? Colors.red.shade50 : Colors.green.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                    color:
+                        isStrict ? Colors.red.shade200 : Colors.green.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(isStrict ? Icons.security : Icons.eco,
+                      color: isStrict ? Colors.red : Colors.green),
+                  const SizedBox(width: 10),
+                  Expanded(
+                      child: Text(
+                          isStrict
+                              ? "มาตรการเข้มงวด: ต้องมีหลักฐานภาพถ่าย Fence/CCTV ใน Step 7"
+                              : "มาตรการพื้นฐาน: เน้นการป้องกันการปนเปื้อนจากสัตว์และแบ่งโซนชัดเจน",
+                          style: TextStyle(
+                              color: isStrict
+                                  ? Colors.red.shade900
+                                  : Colors.green.shade900,
+                              fontSize: 13))),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCheckItem(String title, bool value, Function(bool) onChanged,
+      {bool isRequired = false}) {
+    return CheckboxListTile(
+      title: Row(
+        children: [
+          Text(title),
+          if (isRequired) const Text(" *", style: TextStyle(color: Colors.red)),
+        ],
+      ),
+      value: value,
+      onChanged: (v) => onChanged(v ?? false),
+      activeColor: Colors.green,
+    );
+  }
+}

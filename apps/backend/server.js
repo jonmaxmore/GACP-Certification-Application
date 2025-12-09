@@ -85,7 +85,7 @@ app.use((err, req, res, next) => {
 
 // Start Server
 if (require.main === module) {
-    app.listen(port, () => {
+    app.listen(port, '0.0.0.0', () => {
         logger.info(`✅ Production Server running on port ${port}`);
     });
 }

@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../core/errors/failures.dart';
 import '../../core/network/dio_client.dart';
+import '../../core/network/app_exception.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 
@@ -36,13 +37,23 @@ class AuthRepositoryImpl implements AuthRepository {
       }
     } on DioException catch (e) {
       String errorMessage = e.message ?? 'Network Error';
+
+      // 1. Check for Backend Error Response (JSON)
       if (e.response?.data != null) {
         if (e.response!.data is Map) {
-          errorMessage = e.response!.data['message'] ?? errorMessage;
+          // Check 'error' first (Backend Standard), then 'message'
+          errorMessage = e.response!.data['error'] ??
+              e.response!.data['message'] ??
+              errorMessage;
         } else if (e.response!.data is String) {
           errorMessage = e.response!.data;
         }
       }
+      // 2. Check for Custom NetworkException (Timeout/No Internet)
+      else if (e.error is NetworkException) {
+        errorMessage = (e.error as NetworkException).message;
+      }
+
       return Left(ServerFailure(message: errorMessage));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));

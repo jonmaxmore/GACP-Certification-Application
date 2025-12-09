@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+// GACP Application Models - V2 Master Spec
 
 // 1. Enums & Constants
 enum PlantGroup {

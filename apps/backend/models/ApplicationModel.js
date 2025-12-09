@@ -37,7 +37,7 @@ const ApplicationSchema = new Schema({
 
     // Data payload (GACP Application Details)
     data: {
-        farmId: { type: Schema.Types.ObjectId, ref: 'Establishment' },
+        farmId: { type: String, ref: 'Establishment' },
 
         // 1. Request Info
         requestType: {

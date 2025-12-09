@@ -6,6 +6,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const logger = require('../shared/logger');
+const { encrypt, decrypt } = require('../shared/encryption');
 
 const userSchema = new mongoose.Schema(
   {
@@ -49,6 +50,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      select: false,
     },
     corporateId: {
       type: String,
@@ -138,8 +140,20 @@ userSchema.virtual('fullName').get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 
-// Pre-save middleware to hash password
+// Pre-save middleware to hash password and encrypt laserCode
 userSchema.pre('save', async function (next) {
+  // Encrypt laserCode if modified
+  if (this.isModified('laserCode') && this.laserCode) {
+    // Check if not already encrypted (naive check usually, strict usage assumes clean input)
+    // If we have a colon, it might be encrypted, but valid laser code might have colon? 
+    // Laser Code is typically letters+digits. e.g. "ME1-1234567-89" (dashes).
+    // AES output is hex:hex so no dashes unless I added them in my format? 
+    // My format is "hex:hex". Laser code "ME0-1051595-99". No colon.
+    if (!this.laserCode.includes(':')) {
+      this.laserCode = encrypt(this.laserCode);
+    }
+  }
+
   if (!this.isModified('password')) {
     return next();
   }
@@ -171,6 +185,12 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
     logger.error('Password comparison error:', error);
     return false;
   }
+};
+
+// Decrypt laser code method
+userSchema.methods.getDecryptedLaserCode = function () {
+  if (!this.laserCode) return null;
+  return decrypt(this.laserCode);
 };
 
 // Create model

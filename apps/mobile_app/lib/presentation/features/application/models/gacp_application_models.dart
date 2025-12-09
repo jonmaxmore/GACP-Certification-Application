@@ -73,10 +73,7 @@ final Map<String, PlantConfig> plantConfigs = {
     requiresLicense: false,
     security: SecurityLevel.basic,
     productionUnit: 'Rai',
-    requiredDocs: [
-      'doc_gap_cert',
-      'doc_soil_analysis'
-    ], // Tuber needs Arsenic test
+    requiredDocs: ['doc_gap_cert', 'doc_soil_analysis'],
   ),
   'GIN': const PlantConfig(
     id: 'GIN',
@@ -113,6 +110,7 @@ final Map<String, PlantConfig> plantConfigs = {
 // 3. Application Data Model (The Payload)
 class GACPApplication {
   final String? applicationId;
+  final String? establishmentId; // Selected Farm ID
   final String? plantId; // Selected in Step 0
   final ServiceType? type; // Selected in Step 2
 
@@ -137,6 +135,7 @@ class GACPApplication {
 
   const GACPApplication({
     this.applicationId,
+    this.establishmentId,
     this.plantId,
     this.type,
     required this.profile,
@@ -152,6 +151,7 @@ class GACPApplication {
 
   GACPApplication copyWith({
     String? applicationId,
+    String? establishmentId,
     String? plantId,
     ServiceType? type,
     ApplicantProfile? profile,
@@ -166,6 +166,7 @@ class GACPApplication {
   }) {
     return GACPApplication(
       applicationId: applicationId ?? this.applicationId,
+      establishmentId: establishmentId ?? this.establishmentId,
       plantId: plantId ?? this.plantId,
       type: type ?? this.type,
       profile: profile ?? this.profile,
@@ -177,6 +178,49 @@ class GACPApplication {
       acceptedStandards: acceptedStandards ?? this.acceptedStandards,
       consentedPDPA: consentedPDPA ?? this.consentedPDPA,
       signatureBase64: signatureBase64 ?? this.signatureBase64,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'applicationId': applicationId,
+      'establishmentId': establishmentId,
+      'plantId': plantId,
+      'type': type?.name,
+      'profile': profile.toMap(),
+      'licenseInfo': licenseInfo?.toMap(),
+      'replacementReason': replacementReason?.toMap(),
+      'location': location.toMap(),
+      'securityMeasures': securityMeasures.toMap(),
+      'production': production.toMap(),
+      'acceptedStandards': acceptedStandards,
+      'consentedPDPA': consentedPDPA,
+      'signatureBase64': signatureBase64,
+    };
+  }
+
+  factory GACPApplication.fromMap(Map<String, dynamic> map) {
+    return GACPApplication(
+      applicationId: map['applicationId'],
+      establishmentId: map['establishmentId'],
+      plantId: map['plantId'],
+      type: map['type'] != null
+          ? ServiceType.values.firstWhere((e) => e.name == map['type'])
+          : null,
+      profile: ApplicantProfile.fromMap(map['profile'] ?? {}),
+      licenseInfo: map['licenseInfo'] != null
+          ? LegalLicense.fromMap(map['licenseInfo'])
+          : null,
+      replacementReason: map['replacementReason'] != null
+          ? ReplacementReason.fromMap(map['replacementReason'])
+          : null,
+      location: SiteLocation.fromMap(map['location'] ?? {}),
+      securityMeasures:
+          SecurityChecklist.fromMap(map['securityMeasures'] ?? {}),
+      production: ProductionPlan.fromMap(map['production'] ?? {}),
+      acceptedStandards: map['acceptedStandards'] ?? false,
+      consentedPDPA: map['consentedPDPA'] ?? false,
+      signatureBase64: map['signatureBase64'],
     );
   }
 }
@@ -226,6 +270,32 @@ class ApplicantProfile {
       qualification: qualification ?? this.qualification,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'applicantType': applicantType,
+      'name': name,
+      'idCard': idCard,
+      'address': address,
+      'mobile': mobile,
+      'email': email,
+      'responsibleName': responsibleName,
+      'qualification': qualification,
+    };
+  }
+
+  factory ApplicantProfile.fromMap(Map<String, dynamic> map) {
+    return ApplicantProfile(
+      applicantType: map['applicantType'] ?? 'Individual',
+      name: map['name'] ?? '',
+      idCard: map['idCard'] ?? '',
+      address: map['address'] ?? '',
+      mobile: map['mobile'] ?? '',
+      email: map['email'] ?? '',
+      responsibleName: map['responsibleName'] ?? '',
+      qualification: map['qualification'] ?? 'Through Training',
+    );
+  }
 }
 
 // 3.1 License Info (Adaptive for Group A)
@@ -255,6 +325,24 @@ class LegalLicense {
       licenseNumber: licenseNumber ?? this.licenseNumber,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'plantingStatus': plantingStatus,
+      'notifyNumber': notifyNumber,
+      'licenses': licenses,
+      'licenseNumber': licenseNumber,
+    };
+  }
+
+  factory LegalLicense.fromMap(Map<String, dynamic> map) {
+    return LegalLicense(
+      plantingStatus: map['plantingStatus'] ?? 'Notify',
+      notifyNumber: map['notifyNumber'] ?? '',
+      licenses: List<String>.from(map['licenses'] ?? []),
+      licenseNumber: map['licenseNumber'] ?? '',
+    );
+  }
 }
 
 class ReplacementReason {
@@ -281,6 +369,26 @@ class ReplacementReason {
       policeReportNo: policeReportNo ?? this.policeReportNo,
       policeStation: policeStation ?? this.policeStation,
       reportDate: reportDate ?? this.reportDate,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'reason': reason,
+      'policeReportNo': policeReportNo,
+      'policeStation': policeStation,
+      'reportDate': reportDate?.toIso8601String(),
+    };
+  }
+
+  factory ReplacementReason.fromMap(Map<String, dynamic> map) {
+    return ReplacementReason(
+      reason: map['reason'] ?? 'Lost',
+      policeReportNo: map['policeReportNo'] ?? '',
+      policeStation: map['policeStation'] ?? '',
+      reportDate: map['reportDate'] != null
+          ? DateTime.tryParse(map['reportDate'])
+          : null,
     );
   }
 }
@@ -328,6 +436,32 @@ class SiteLocation {
       west: west ?? this.west,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'address': address,
+      'lat': lat,
+      'lng': lng,
+      'north': north,
+      'south': south,
+      'east': east,
+      'west': west,
+    };
+  }
+
+  factory SiteLocation.fromMap(Map<String, dynamic> map) {
+    return SiteLocation(
+      name: map['name'] ?? '',
+      address: map['address'] ?? '',
+      lat: map['lat'],
+      lng: map['lng'],
+      north: map['north'] ?? '',
+      south: map['south'] ?? '',
+      east: map['east'] ?? '',
+      west: map['west'] ?? '',
+    );
+  }
 }
 
 class SecurityChecklist {
@@ -360,6 +494,26 @@ class SecurityChecklist {
       hasZoning: hasZoning ?? this.hasZoning,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'hasFence': hasFence,
+      'hasCCTV': hasCCTV,
+      'hasAccessControl': hasAccessControl,
+      'hasAnimalBarrier': hasAnimalBarrier,
+      'hasZoning': hasZoning,
+    };
+  }
+
+  factory SecurityChecklist.fromMap(Map<String, dynamic> map) {
+    return SecurityChecklist(
+      hasFence: map['hasFence'] ?? false,
+      hasCCTV: map['hasCCTV'] ?? false,
+      hasAccessControl: map['hasAccessControl'] ?? false,
+      hasAnimalBarrier: map['hasAnimalBarrier'] ?? false,
+      hasZoning: map['hasZoning'] ?? false,
+    );
+  }
 }
 
 // Model for 6.4 Farm Inputs
@@ -373,6 +527,22 @@ class FarmInputItem {
     this.name = '',
     this.regNo = '',
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'type': type,
+      'name': name,
+      'regNo': regNo,
+    };
+  }
+
+  factory FarmInputItem.fromMap(Map<String, dynamic> map) {
+    return FarmInputItem(
+      type: map['type'] ?? '',
+      name: map['name'] ?? '',
+      regNo: map['regNo'] ?? '',
+    );
+  }
 }
 
 // Model for 6.5 Post-Harvest
@@ -396,6 +566,22 @@ class PostHarvestPlan {
       dryingMethod: dryingMethod ?? this.dryingMethod,
       packaging: packaging ?? this.packaging,
       storage: storage ?? this.storage,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'dryingMethod': dryingMethod,
+      'packaging': packaging,
+      'storage': storage,
+    };
+  }
+
+  factory PostHarvestPlan.fromMap(Map<String, dynamic> map) {
+    return PostHarvestPlan(
+      dryingMethod: map['dryingMethod'] ?? 'Sun Dry',
+      packaging: map['packaging'] ?? '',
+      storage: map['storage'] ?? '',
     );
   }
 }
@@ -454,6 +640,39 @@ class ProductionPlan {
       productionCycle: productionCycle ?? this.productionCycle,
       farmInputs: farmInputs ?? this.farmInputs,
       postHarvest: postHarvest ?? this.postHarvest,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'plantParts': plantParts,
+      'sourceType': sourceType,
+      'sourceDetail': sourceDetail,
+      'areaSizeRai': areaSizeRai,
+      'areaSizeUnit': areaSizeUnit,
+      'treeCount': treeCount,
+      'estimatedYield': estimatedYield,
+      'productionCycle': productionCycle,
+      'farmInputs': farmInputs.map((e) => e.toMap()).toList(),
+      'postHarvest': postHarvest.toMap(),
+    };
+  }
+
+  factory ProductionPlan.fromMap(Map<String, dynamic> map) {
+    return ProductionPlan(
+      plantParts: List<String>.from(map['plantParts'] ?? []),
+      sourceType: map['sourceType'] ?? 'Self',
+      sourceDetail: map['sourceDetail'] ?? '',
+      areaSizeRai: map['areaSizeRai']?.toDouble(),
+      areaSizeUnit: map['areaSizeUnit'],
+      treeCount: map['treeCount']?.toInt(),
+      estimatedYield: map['estimatedYield']?.toDouble() ?? 0.0,
+      productionCycle: map['productionCycle'] ?? '',
+      farmInputs: (map['farmInputs'] as List<dynamic>?)
+              ?.map((e) => FarmInputItem.fromMap(e))
+              .toList() ??
+          [],
+      postHarvest: PostHarvestPlan.fromMap(map['postHarvest'] ?? {}),
     );
   }
 }

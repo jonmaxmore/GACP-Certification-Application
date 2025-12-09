@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/form_state_provider.dart';
 import '../../models/gacp_application_models.dart';
-import '../wizard_common.dart';
+import 'wizard_common.dart';
 
 class Step4ApplicationData extends ConsumerStatefulWidget {
   const Step4ApplicationData({super.key});

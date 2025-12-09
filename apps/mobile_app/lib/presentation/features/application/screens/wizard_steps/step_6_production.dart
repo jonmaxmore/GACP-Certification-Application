@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../providers/form_state_provider.dart';
 import '../../models/gacp_application_models.dart';
-import '../wizard_common.dart';
+import 'wizard_common.dart';
+import '../../../../../core/strategies/plant_strategy.dart';
 
 class Step6Production extends ConsumerWidget {
   const Step6Production({super.key});
@@ -14,11 +15,15 @@ class Step6Production extends ConsumerWidget {
     final state = ref.watch(applicationFormProvider);
     final notifier = ref.read(applicationFormProvider.notifier);
 
-    // Adaptive Logic
-    final plantId = state.plantId;
+    // Adaptive Logic: Strategy Pattern
+    final plantId = state.plantId ?? '';
+    final strategy = PlantStrategyFactory.getStrategy(plantId);
+    final isTreeUnit = strategy.usesTreeUnit;
+
+    // We still need plantConfig for validation or we delegate validation to strategy later.
+    // For now, keep plantConfig for validation compatibility if needed,
+    // but prefer strategy for UI flags.
     final plantConfig = plantConfigs[plantId] ?? plantConfigs.values.first;
-    final isTreeUnit = plantConfig.productionUnit == 'Tree';
-    final isGroupA = plantConfig.group == PlantGroup.highControl;
 
     return WizardScaffold(
       title: "6. ข้อมูลการผลิต (Production Plan)",
@@ -41,7 +46,7 @@ class Step6Production extends ConsumerWidget {
             // 1. Plant Parts
             WizardSectionTitle(title: "1. ส่วนของพืชที่ใช้ (Plant Parts Used)"),
             _buildPlantPartsSelector(
-                isGroupA, state.production.plantParts, notifier),
+                strategy, state.production.plantParts, notifier),
 
             const SizedBox(height: 24),
 
@@ -87,9 +92,7 @@ class Step6Production extends ConsumerWidget {
 
             const SizedBox(height: 12),
             WizardTextInput(
-              isGroupA
-                  ? "ผลผลิตคาดการณ์ (Dried Flower Kg)"
-                  : "ผลผลิตคาดการณ์ (Fresh Tuber Ton/Kg)",
+              strategy.getYieldLabel(),
               state.production.estimatedYield.toString() == "0.0"
                   ? ""
                   : state.production.estimatedYield.toString(),
@@ -126,18 +129,9 @@ class Step6Production extends ConsumerWidget {
     );
   }
 
-  Widget _buildPlantPartsSelector(bool isGroupA, List<String> currentSelected,
-      ApplicationFormNotifier notifier) {
-    final options = isGroupA
-        ? [
-            "Inflorescence (ช่อดอกแห้ง)",
-            "Fresh Flower (ดอกสด)",
-            "Leaf (ใบ)",
-            "Seed (เมล็ด)",
-            "Stem (ลำต้น)",
-            "Root (ราก)"
-          ]
-        : ["Rhizome (เหง้า)", "Tuber (หัว)", "Rootlet (รากฝอย)", "Leaf (ใบ)"];
+  Widget _buildPlantPartsSelector(PlantStrategy strategy,
+      List<String> currentSelected, ApplicationFormNotifier notifier) {
+    final options = strategy.getPlantPartsOptions();
 
     return Wrap(
       spacing: 8.0,

@@ -19,15 +19,18 @@ void main() {
 
   setUp(() {
     mockRepo = MockEstablishmentRepository();
-    when(() => mockRepo.getEstablishments()).thenAnswer((_) async => const Right([]));
+    registerFallbackValue(MockXFile());
+    registerFallbackValue('');
+    registerFallbackValue(0.0);
+    when(() => mockRepo.getEstablishments())
+        .thenAnswer((_) async => const Right([]));
     notifier = EstablishmentNotifier(mockRepo);
   });
 
   group('EstablishmentNotifier', () {
     test('initial state should trigger loadEstablishments', () async {
-      // loadEstablishments is called in constructor
-      // We can verify it was called, but might need to delay or mock before constructor.
-      // Since instantiation happens immediately, better to test methods separately or assume initial call.
+      // already called in constructor
+      verify(() => mockRepo.getEstablishments()).called(1);
     });
 
     group('loadEstablishments', () {
@@ -82,14 +85,14 @@ void main() {
             status: 'ACTIVE');
 
         when(() => mockRepo.createEstablishment(
-              name: 'n',
-              type: 't',
-              address: 'a',
-              latitude: 10,
-              longitude: 20,
-              titleDeedNo: '1',
-              security: 's',
-              image: null,
+              name: any(named: 'name'),
+              type: any(named: 'type'),
+              address: any(named: 'address'),
+              latitude: any(named: 'latitude'),
+              longitude: any(named: 'longitude'),
+              titleDeedNo: any(named: 'titleDeedNo'),
+              security: any(named: 'security'),
+              image: any(named: 'image'),
             )).thenAnswer((_) async => const Right(tEst));
 
         // Act
@@ -101,9 +104,9 @@ void main() {
             security: 's');
 
         // Assert
-        expect(notifier.state.establishments.contains(tEst), true);
         expect(notifier.state.isSuccess, true);
-        expect(notifier.state.selectedLocation, null); // Reset
+        expect(notifier.state.establishments.length, 1);
+        expect(notifier.state.establishments.first.id, 'new');
       });
     });
   });

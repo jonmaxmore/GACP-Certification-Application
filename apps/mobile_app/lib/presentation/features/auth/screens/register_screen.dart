@@ -32,7 +32,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+        maxWidth: 1024,
+        maxHeight: 1024);
     if (image != null) {
       setState(() => _idCardImage = image);
     }
@@ -185,18 +189,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     controller: _idCardController,
                     maxLength: 13,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                         labelText: 'ID Card (13 Digits)',
-                        prefixIcon: Icon(LucideIcons.creditCard),
+                        prefixIcon: const Icon(LucideIcons.creditCard),
+                        suffixIcon: IconButton(
+                          icon: const Icon(LucideIcons.scan),
+                          onPressed: () => ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                                  content: Text('OCR Scanning Coming Soon'))),
+                        ),
                         counterText: ""),
                     validator: (v) =>
                         v!.length == 13 ? null : 'Must be 13 Digits'),
                 const SizedBox(height: 16),
                 TextFormField(
                     controller: _laserCodeController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                         labelText: 'Laser Code (Back)',
-                        prefixIcon: Icon(LucideIcons.scanLine)),
+                        prefixIcon: const Icon(LucideIcons.scanLine),
+                        suffixIcon: IconButton(
+                          icon: const Icon(LucideIcons.helpCircle),
+                          onPressed: () => showDialog(
+                            context: context,
+                            builder: (c) => const AlertDialog(
+                              title: Text('Laser Code'),
+                              content: Text(
+                                  'The code on the back of your ID card (e.g., ME0-xxxxxxx-xx).'),
+                            ),
+                          ),
+                        )),
                     validator: (v) => v!.isEmpty ? 'Required' : null),
                 const SizedBox(height: 24),
 

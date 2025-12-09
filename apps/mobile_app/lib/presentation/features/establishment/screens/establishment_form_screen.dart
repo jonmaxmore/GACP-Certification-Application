@@ -70,7 +70,8 @@ class _EstablishmentFormScreenState
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source, imageQuality: 80);
+    final pickedFile = await picker.pickImage(
+        source: source, imageQuality: 80, maxWidth: 1024, maxHeight: 1024);
     if (pickedFile != null) {
       ref.read(establishmentProvider.notifier).setImage(pickedFile);
     }

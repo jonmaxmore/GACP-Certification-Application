@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../providers/form_state_provider.dart';
 import '../../models/gacp_application_models.dart';
-import '../wizard_common.dart';
+import 'wizard_common.dart';
 
 class Step7Documents extends ConsumerWidget {
   const Step7Documents({super.key});

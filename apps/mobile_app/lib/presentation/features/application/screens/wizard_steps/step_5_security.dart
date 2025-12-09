@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/form_state_provider.dart';
 import '../../models/gacp_application_models.dart';
-import '../wizard_common.dart';
+import 'wizard_common.dart';
+import '../../../../../core/strategies/plant_strategy.dart';
 
 class Step5Security extends ConsumerWidget {
   const Step5Security({super.key});
@@ -13,16 +14,17 @@ class Step5Security extends ConsumerWidget {
     final state = ref.watch(applicationFormProvider);
     final notifier = ref.read(applicationFormProvider.notifier);
 
-    // Adaptive Logic
-    final plantId = state.plantId;
-    final plantConfig = plantConfigs[plantId] ?? plantConfigs.values.first;
-    final isStrict = plantConfig.security == SecurityLevel.strict;
+    // Architecture Refinement: Strategy Pattern
+    final plantId = state.plantId ?? '';
+    final strategy = PlantStrategyFactory.getStrategy(plantId);
+    final isStrict = strategy.requiresStrictLicense;
 
     return WizardScaffold(
       title: "5. สถานที่ & ความปลอดภัย (Site & Security)",
       onBack: () => context.go('/applications/create/step4'),
       onNext: () {
-        if (FormValidator.validateStep5(state.securityMeasures, plantConfig)) {
+        // Use Strategy for Validation
+        if (strategy.validateSecurity(state.securityMeasures)) {
           context.go('/applications/create/step6');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -54,48 +56,13 @@ class Step5Security extends ConsumerWidget {
 
             const SizedBox(height: 24),
 
-            // 2. Security Checklist
+            // 2. Security Checklist (Strategy Pattern)
             WizardSectionTitle(
                 title:
                     "2. มาตรการความปลอดภัย (${isStrict ? 'High Control' : 'Standard'})"),
-            if (isStrict) ...[
-              _buildCheckItem(
-                  "มีรั้วรอบขอบชิด (Secure Fence)",
-                  state.securityMeasures.hasFence,
-                  (v) => notifier.updateSecurity(hasFence: v),
-                  isRequired: true),
-              _buildCheckItem(
-                  "มีกล้องวงจรปิด (CCTV Medical Grade)",
-                  state.securityMeasures.hasCCTV,
-                  (v) => notifier.updateSecurity(hasCCTV: v),
-                  isRequired: true),
-              _buildCheckItem(
-                  "มีการควบคุมการเข้า-ออก (Access Control)",
-                  state.securityMeasures.hasAccessControl,
-                  (v) => notifier.updateSecurity(hasAccessControl: v),
-                  isRequired: true),
-              _buildCheckItem(
-                  "การแบ่งโซนพื้นที่ (Zoning)",
-                  state.securityMeasures.hasZoning,
-                  (v) => notifier.updateSecurity(hasZoning: v),
-                  isRequired: false),
-            ] else ...[
-              _buildCheckItem(
-                  "มีมาตรการป้องกันสัตว์ (Animal Barrier)",
-                  state.securityMeasures.hasAnimalBarrier,
-                  (v) => notifier.updateSecurity(hasAnimalBarrier: v),
-                  isRequired: true),
-              _buildCheckItem(
-                  "การแบ่งโซนพื้นที่ (Zoning)",
-                  state.securityMeasures.hasZoning,
-                  (v) => notifier.updateSecurity(hasZoning: v),
-                  isRequired: true),
-              _buildCheckItem(
-                  "มีรั้ว (Optional)",
-                  state.securityMeasures.hasFence,
-                  (v) => notifier.updateSecurity(hasFence: v),
-                  isRequired: false),
-            ],
+
+            // Render widgets from strategy
+            ...strategy.buildSecurityWidgets(context, notifier, state),
 
             const SizedBox(height: 16),
             Container(
@@ -128,21 +95,6 @@ class Step5Security extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildCheckItem(String title, bool value, Function(bool) onChanged,
-      {bool isRequired = false}) {
-    return CheckboxListTile(
-      title: Row(
-        children: [
-          Text(title),
-          if (isRequired) const Text(" *", style: TextStyle(color: Colors.red)),
-        ],
-      ),
-      value: value,
-      onChanged: (v) => onChanged(v ?? false),
-      activeColor: Colors.green,
     );
   }
 }

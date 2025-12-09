@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/gacp_application_models.dart';
+import '../models/gacp_application_models.dart';
 
 class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
   ApplicationFormNotifier()
@@ -13,6 +13,10 @@ class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
   // --- Step 0: Plant Config ---
   void setPlant(String plantId) {
     state = state.copyWith(plantId: plantId);
+  }
+
+  void setEstablishmentId(String id) {
+    state = state.copyWith(establishmentId: id);
   }
 
   // --- Step 1: Standards ---

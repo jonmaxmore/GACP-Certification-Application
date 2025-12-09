@@ -60,14 +60,14 @@ void main() {
           () async {
         // Arrange
         when(() => mockDioClient.post(
-              '/auth-farmer/login',
+              '/v2/auth/login',
               data: any(named: 'data'),
             )).thenAnswer((_) async => Response(
               requestOptions: RequestOptions(path: '/'),
               statusCode: 200,
               data: {
-                'token': 'fake_token',
-                'data': {'user': tUserJson}
+                'success': true,
+                'data': {'token': 'fake_token', 'user': tUserJson}
               },
             ));
         when(() => mockStorage.write(key: 'auth_token', value: 'fake_token'))
@@ -85,7 +85,7 @@ void main() {
       test('should return ServerFailure on failure (401)', () async {
         // Arrange
         when(() => mockDioClient.post(
-              '/auth-farmer/login',
+              '/v2/auth/login',
               data: any(named: 'data'),
             )).thenAnswer((_) async => Response(
               requestOptions: RequestOptions(path: '/'),

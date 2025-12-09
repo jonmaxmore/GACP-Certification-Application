@@ -1,47 +1,37 @@
 import '../../../../core/network/dio_client.dart';
-import '../providers/form_state_provider.dart';
+import '../models/gacp_application_models.dart';
 
 class ApplicationService {
   final DioClient _client;
 
   ApplicationService(this._client);
 
-  Future<String?> submitApplication(ApplicationFormData formData) async {
+  Future<String?> submitApplication(GACPApplication appData) async {
     try {
-      // Map flat ApplicationFormData to Nested Backend Schema
+      // Map GACPApplication to Backend Schema (ApplicationModel.js)
+      // Backend expects 'data' object with specific fields and a generic 'formData' map
       final payload = {
-        'farmId': formData.establishmentId.isNotEmpty
-            ? formData.establishmentId
-            : throw Exception(
-                'Establishment ID is missing. Please select a farm in Step 3.'),
-        'requestType': formData.requestCategory.toUpperCase(), // 'NEW'
-        'applicantType': formData.applicantType.toUpperCase(),
+        'farmId': appData.establishmentId,
+        'requestType': appData.type?.name.toUpperCase() ?? 'NEW',
         'certificationType': ['CULTIVATION'],
-        'objective': ['COMMERCIAL_DOMESTIC'],
-        'formData': {
-          'entityName': formData.entityName,
-          'presidentName': formData.presidentName,
-          'regCode1': formData.regCode1,
-          'idCard': formData.idCard,
-          'phone': formData.phone,
-          'email': formData.email,
-          'salesChannels': formData.salesChannels,
-          'isExportEnabled': formData.isExportEnabled,
-          'exportDestination': formData.exportDestination,
-          'transportMethod': formData.transportMethod,
-          'strainName': formData.strainName,
-          'sourceName': formData.sourceName,
-          'quantity': formData.quantity,
-          'sopChecklist': formData.sopChecklist,
-          'productionPlanDetails': formData.productionPlanDetails,
-          'videoLink': formData.videoLink,
-        },
+        'applicantType': appData.profile.applicantType.toUpperCase(),
         'applicantInfo': {
-          'name': formData.presidentName,
-          'idCard': formData.idCard,
-          'entityName': formData.entityName,
-          'registrationCode': formData.regCode1,
-        }
+          'name': appData.profile.name,
+          'idCard': appData.profile.idCard,
+          'address': appData.profile.address,
+          'mobile': appData.profile.mobile,
+          'email': appData.profile.email,
+          'entityName': appData.profile.applicantType != 'Individual'
+              ? appData.profile.name
+              : '',
+        },
+        'siteInfo': {
+          'address': appData.location.address,
+          'coordinates':
+              "${appData.location.lat ?? 0},${appData.location.lng ?? 0}",
+        },
+        // All specific GACP data goes into the flexible 'formData' map
+        'formData': appData.toMap(),
       };
 
       // DioClient wrappers return Response
@@ -62,35 +52,20 @@ class ApplicationService {
     }
   }
 
-  Future<ApplicationFormData> getApplication(String id) async {
+  Future<GACPApplication?> getApplication(String id) async {
     try {
       final response = await _client.get('/applications/$id');
 
       if (response.statusCode == 200 && response.data != null) {
-        final data = response.data['data'];
+        final data = response.data['data']; // The Application Object
+        final appData = data['data']; // The 'data' field in schema
+        final formData = appData['formData']; // The GACPApplication map
 
-        // Map Backend Data to Mobile Form Data (Reverse Mapping)
-        // This is a simplified mapper. In real world, this needs detailed field mapping.
-        final backendForm = data['data']['formData'] ?? {};
-
-        return ApplicationFormData(
-          // Basic Info
-          formType: 'FORM_10', // Derived or Default
-          establishmentId: data['data']['farmId'] ?? '',
-
-          // Mapped Fields
-          entityName: backendForm['entityName'] ?? '',
-          presidentName: backendForm['presidentName'] ?? '',
-          regCode1: backendForm['regCode1'] ?? '',
-          idCard: backendForm['idCard'] ?? '',
-          phone: backendForm['phone'] ?? '',
-          email: backendForm['email'] ?? '',
-
-          // ... Map other fields as needed ...
-          // For Prototype, specific fields are usually enough to demonstrate
-        );
+        if (formData != null) {
+          return GACPApplication.fromMap(formData);
+        }
       }
-      throw Exception('Application not found');
+      return null;
     } catch (e) {
       throw Exception('Error fetching application: $e');
     }

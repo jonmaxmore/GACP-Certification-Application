@@ -36,6 +36,19 @@ jest.mock('bull', () => {
     };
 });
 
+// Mock KsherService
+jest.mock('../../services/KsherService', () => ({
+    createOrder: jest.fn().mockResolvedValue({
+        ok: true,
+        data: {
+            prepay_id: 'mock-prepay-id',
+            order_content: 'http://mock-payment.url',
+            code_url: 'http://mock-qr.code'
+        }
+    }),
+    verifySignature: jest.fn().mockReturnValue(true) // Always pass verification
+}));
+
 describe('🎯 GACP Golden Loop (Verified Flow)', () => {
     jest.setTimeout(60000);
     let mongod;
@@ -94,7 +107,7 @@ describe('🎯 GACP Golden Loop (Verified Flow)', () => {
         // Register Farmer
         const registerRes = await request(app).post('/api/auth-farmer/register').send({
             email: 'farmer@test.com', password: 'Password123!', firstName: 'Somchai', lastName: 'Farm',
-            idCard: '1234567890123', phoneNumber: '0812345678', address: 'Chiang Mai'
+            idCard: '1111111111119', laserCode: 'ME0123456789', phoneNumber: '0812345678', address: 'Chiang Mai'
         });
         userId = registerRes.body.data.user.id;
         await db.collection('users').updateOne({ _id: new ObjectId(userId) }, { $set: { isEmailVerified: true, status: 'ACTIVE' } });
@@ -104,7 +117,8 @@ describe('🎯 GACP Golden Loop (Verified Flow)', () => {
 
         // Create Officer (Direct DB)
         const officer = await db.collection('users').insertOne({
-            email: 'officer@test.com', password: 'hashed', role: 'officer', firstName: 'Officer', lastName: 'A', isActive: true
+            email: 'officer@test.com', password: 'hashed', role: 'officer', firstName: 'Officer', lastName: 'A', isActive: true,
+            idCard: 'OFFICER_ID_CARD'
         });
         officerId = officer.insertedId;
         // Mock Officer Login (Generate Token manually or use generic auth bypass if implemented, but here we assume generic JWT works if secret matches)
@@ -114,7 +128,8 @@ describe('🎯 GACP Golden Loop (Verified Flow)', () => {
 
         // Create Auditor
         const auditor = await db.collection('users').insertOne({
-            email: 'auditor@test.com', password: 'hashed', role: 'auditor', firstName: 'Auditor', lastName: 'B', isActive: true
+            email: 'auditor@test.com', password: 'hashed', role: 'auditor', firstName: 'Auditor', lastName: 'B', isActive: true,
+            idCard: 'AUDITOR_ID_CARD'
         });
         auditorId = auditor.insertedId;
 
@@ -131,8 +146,26 @@ describe('🎯 GACP Golden Loop (Verified Flow)', () => {
         const draftRes = await request(app).post('/api/v2/applications/draft').set('Authorization', `Bearer ${authToken}`).send({
             farmId: establishmentId,
             requestType: 'NEW',
+            applicantType: 'INDIVIDUAL',
+            applicantInfo: {
+                name: 'Somchai Farm',
+                idCard: '1111111111119',
+                mobile: '0812345678',
+                address: 'Chiang Mai',
+                email: 'farmer@test.com'
+            },
+            siteInfo: {
+                areaType: ['OUTDOOR'],
+                address: 'Chiang Mai',
+                coordinates: '18.7,98.9'
+            },
             formData: { cropName: 'Cannabis' }
         });
+        if (draftRes.status !== 201) {
+            const fs = require('fs');
+            fs.writeFileSync('golden_draft_error.json', JSON.stringify(draftRes.body, null, 2));
+            console.error('Draft Error Body Written to File');
+        }
         expect(draftRes.status).toBe(201);
         applicationId = draftRes.body.data._id || draftRes.body.data.id;
 

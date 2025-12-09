@@ -1,46 +1,72 @@
 import 'package:flutter/material.dart';
-
-import '../../providers/form_state_provider.dart';
+import '../../models/gacp_application_models.dart';
 
 // Common Widgets for Wizard Steps
 
 class WizardScaffold extends StatelessWidget {
   final Widget child;
+  final String? title;
   final VoidCallback? onBack;
   final VoidCallback? onNext;
   final String nextLabel;
+  final bool isNextEnabled;
 
   const WizardScaffold(
       {super.key,
       required this.child,
+      this.title,
       this.onBack,
       this.onNext,
-      this.nextLabel = "ถัดไป"});
+      this.nextLabel = "ถัดไป",
+      this.isNextEnabled = true});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          child,
-          const SizedBox(height: 30),
-          Row(
-            children: [
-              if (onBack != null)
-                Expanded(
-                    child: OutlinedButton(
-                        onPressed: onBack, child: const Text("ย้อนกลับ"))),
-              if (onBack != null && onNext != null) const SizedBox(width: 16),
-              if (onNext != null)
-                Expanded(
-                    child: FilledButton(
-                        onPressed: onNext, child: Text(nextLabel))),
-            ],
-          ),
-          const SizedBox(height: 50),
-        ],
+    return Scaffold(
+      appBar: title != null
+          ? AppBar(
+              title: Text(title!, style: const TextStyle(fontSize: 16)),
+              centerTitle: true)
+          : null,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            child,
+            const SizedBox(height: 30),
+            Row(
+              children: [
+                if (onBack != null)
+                  Expanded(
+                      child: OutlinedButton(
+                          onPressed: onBack, child: const Text("ย้อนกลับ"))),
+                if (onBack != null && onNext != null) const SizedBox(width: 16),
+                if (onNext != null)
+                  Expanded(
+                      child: FilledButton(
+                          onPressed: isNextEnabled ? onNext : null,
+                          child: Text(nextLabel))),
+              ],
+            ),
+            const SizedBox(height: 50),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class WizardSectionTitle extends StatelessWidget {
+  final String title;
+  const WizardSectionTitle({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Text(title,
+          style: const TextStyle(
+              fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green)),
     );
   }
 }
@@ -50,9 +76,10 @@ class WizardTextInput extends StatelessWidget {
   final String? value;
   final Function(String) onChanged;
   final int maxLines;
+  final TextInputType? keyboardType;
 
   const WizardTextInput(this.label, this.value, this.onChanged,
-      {super.key, this.maxLines = 1});
+      {super.key, this.maxLines = 1, this.keyboardType});
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +88,7 @@ class WizardTextInput extends StatelessWidget {
       child: TextFormField(
         initialValue: value,
         maxLines: maxLines,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
             labelText: label, border: const OutlineInputBorder()),
         onChanged: onChanged,
@@ -91,28 +119,32 @@ class WizardRadioTile extends StatelessWidget {
   }
 }
 
+// Updated to use Map<String, dynamic> or check strict models?
+// For now Step 7 uses its own UI logic, this helps legacy steps or mixed usage.
 class WizardDocTile extends StatelessWidget {
   final String title;
-  final String keyName;
-  final ApplicationFormState state;
-  final Function(String) onTap;
+  final bool isUploaded;
+  final VoidCallback onTap;
 
-  const WizardDocTile(this.title, this.keyName, this.state, this.onTap,
-      {super.key});
+  const WizardDocTile(
+      {super.key,
+      required this.title,
+      required this.isUploaded,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    // state.attachments is Map<String, File>
-    final file = state.attachments[keyName];
     return Card(
       child: ListTile(
-        leading: Icon(file != null ? Icons.check_circle : Icons.cloud_upload,
-            color: file != null ? Colors.green : Colors.grey),
+        leading: Icon(isUploaded ? Icons.check_circle : Icons.cloud_upload,
+            color: isUploaded ? Colors.green : Colors.grey),
         title: Text(title, style: const TextStyle(fontSize: 14)),
-        subtitle: file != null
-            ? const Text("แนบแล้ว", style: TextStyle(color: Colors.green))
-            : null,
-        onTap: () => onTap(keyName),
+        subtitle: isUploaded
+            ? const Text("แนบแล้ว (Uploaded)",
+                style: TextStyle(color: Colors.green))
+            : const Text("แตะเพื่ออัพโหลด (Tap to Upload)",
+                style: TextStyle(color: Colors.grey)),
+        onTap: onTap,
       ),
     );
   }
@@ -128,11 +160,17 @@ class WizardSummaryRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
-          Text(value ?? "-",
-              style: const TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(
+              flex: 2,
+              child: Text(label, style: const TextStyle(color: Colors.grey))),
+          Expanded(
+              flex: 3,
+              child: Text(value ?? "-",
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(fontWeight: FontWeight.bold))),
         ],
       ),
     );

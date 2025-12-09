@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Head from 'next/head';
+import Link from 'next/link';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v2';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v2';
 
 export default function DocumentReviewPage() {
     const [applications, setApplications] = useState<any[]>([]);
@@ -37,14 +38,11 @@ export default function DocumentReviewPage() {
         }
 
         try {
-            // Map frontend status to backend expected value if needed, 
-            // but Backend OfficerController.reviewDocs expects 'approved' or 'rejected' usually?
-            // Let's check OfficerController... assuming it handles uppercase or we send lowercase.
-            // Safe bet: send what the UI says but maybe lowercase if backend is strict.
-            // Looking at OfficerRoutes -> officerController.reviewDocs. 
-            // Usually standard is lowercase.
+            // Backend OfficerController.reviewDocs expects 'APPROVE' or 'REJECT'
+            const actionMap: Record<string, string> = { 'APPROVED': 'APPROVE', 'REJECTED': 'REJECT' };
+
             await axios.patch(`${API_BASE_URL}/officer/applications/${selectedApp._id || selectedApp.id}/review-docs`, {
-                status: status.toLowerCase(),
+                action: actionMap[status],
                 comment
             });
             alert(`Documents ${status}`);
@@ -60,7 +58,14 @@ export default function DocumentReviewPage() {
     return (
         <div className="p-8 bg-gray-50 min-h-screen">
             <Head><title>Document Review</title></Head>
-            <h1 className="text-2xl font-bold mb-6">Document Review Queue</h1>
+
+            <div className="mb-6">
+                <Link href="/admin/dashboard" className="text-blue-600 hover:underline flex items-center gap-2">
+                    &larr; Back to Dashboard
+                </Link>
+            </div>
+
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">Application Review Queue</h1>
 
             <div className="bg-white shadow rounded-lg overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -129,8 +134,97 @@ export default function DocumentReviewPage() {
                                             <span className="text-gray-500 text-sm ml-2">({doc.status || 'Verified'})</span>
                                         </li>
                                     ))}
+                                    {/* Legacy Attachments mapping fallback */}
+                                    {selectedApp.attachments?.map((att: any, i: number) => (
+                                        <li key={`att-${i}`}>
+                                            <a href={att.fileUrl} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                                                {att.fileName || att.slotId}
+                                            </a>
+                                        </li>
+                                    ))}
                                 </ul>
                             </div>
+
+                            {/* National Standard Data (V2) */}
+                            {selectedApp.data?.formData && (
+                                <div className="border p-3 rounded bg-blue-50">
+                                    <h3 className="font-semibold text-blue-800">National Standard Info (V2)</h3>
+
+                                    {/* Video Evidence */}
+                                    {selectedApp.data.formData.videoLink && (
+                                        <div className="mt-2">
+                                            <p className="font-semibold text-sm text-gray-700">Video Evidence:</p>
+                                            <a
+                                                href={selectedApp.data.formData.videoLink}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="text-blue-600 underline break-all"
+                                            >
+                                                {selectedApp.data.formData.videoLink}
+                                            </a>
+                                        </div>
+                                    )}
+
+                                    {/* Business Scope (Sales & Export) */}
+                                    <div className="mt-4 border-t pt-2">
+                                        <p className="font-semibold text-sm text-gray-700">Business Scope:</p>
+                                        <ul className="list-inside list-disc text-sm text-gray-600">
+                                            {selectedApp.data.formData.salesChannels && selectedApp.data.formData.salesChannels.length > 0 && (
+                                                <li><strong>Sales Channels:</strong> {Array.isArray(selectedApp.data.formData.salesChannels) ? selectedApp.data.formData.salesChannels.join(', ') : 'None'}</li>
+                                            )}
+                                            {selectedApp.data.formData.isExportEnabled && (
+                                                <>
+                                                    <li><strong>Export Enabled:</strong> Yes</li>
+                                                    <li><strong>Destination:</strong> {selectedApp.data.formData.exportDestination || 'N/A'}</li>
+                                                    <li><strong>Transport:</strong> {selectedApp.data.formData.transportMethod || 'N/A'}</li>
+                                                </>
+                                            )}
+                                            {!selectedApp.data.formData.isExportEnabled && (
+                                                <li><strong>Export Enabled:</strong> No</li>
+                                            )}
+                                        </ul>
+                                    </div>
+
+                                    {/* Facility Standards (Text Areas) */}
+                                    <div className="mt-4 border-t pt-2">
+                                        <p className="font-semibold text-sm text-gray-700">Facility Standards:</p>
+                                        <div className="text-sm text-gray-600 space-y-2 mt-1">
+                                            {selectedApp.data.formData.productionPlanDetails && (
+                                                <div>
+                                                    <strong>Production Plan:</strong>
+                                                    <p className="pl-2 border-l-2 border-gray-300">{selectedApp.data.formData.productionPlanDetails}</p>
+                                                </div>
+                                            )}
+                                            {selectedApp.data.formData.securityMeasures && (
+                                                <div>
+                                                    <strong>Security Measures:</strong>
+                                                    <p className="pl-2 border-l-2 border-gray-300">{selectedApp.data.formData.securityMeasures}</p>
+                                                </div>
+                                            )}
+                                            {selectedApp.data.formData.wasteManagement && (
+                                                <div>
+                                                    <strong>Waste Management:</strong>
+                                                    <p className="pl-2 border-l-2 border-gray-300">{selectedApp.data.formData.wasteManagement}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* SOP Checklist */}
+                                    {selectedApp.data.formData.sopChecklist && (
+                                        <div className="mt-2">
+                                            <p className="font-semibold text-sm text-gray-700">SOP Checklist:</p>
+                                            <ul className="list-disc pl-5 text-sm">
+                                                {Object.entries(selectedApp.data.formData.sopChecklist).map(([key, val]) => (
+                                                    <li key={key} className={val ? "text-green-700" : "text-red-700"}>
+                                                        {key}: {val ? "Passed" : "Failed"}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <textarea

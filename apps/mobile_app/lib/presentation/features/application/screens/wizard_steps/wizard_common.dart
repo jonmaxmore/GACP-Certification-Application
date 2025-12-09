@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../providers/form_state_provider.dart';
 
 // Common Widgets for Wizard Steps
@@ -8,9 +8,14 @@ class WizardScaffold extends StatelessWidget {
   final Widget child;
   final VoidCallback? onBack;
   final VoidCallback? onNext;
+  final String nextLabel;
 
   const WizardScaffold(
-      {super.key, required this.child, this.onBack, this.onNext});
+      {super.key,
+      required this.child,
+      this.onBack,
+      this.onNext,
+      this.nextLabel = "ถัดไป"});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +35,7 @@ class WizardScaffold extends StatelessWidget {
               if (onNext != null)
                 Expanded(
                     child: FilledButton(
-                        onPressed: onNext, child: const Text("ถัดไป"))),
+                        onPressed: onNext, child: Text(nextLabel))),
             ],
           ),
           const SizedBox(height: 50),

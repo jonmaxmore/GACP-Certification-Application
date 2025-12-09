@@ -1,6 +1,7 @@
 // const ApplicationWorkflowService = require('../services/ApplicationWorkflowService');
 const User = require('../models/UserModel');
 const Application = require('../models/ApplicationModel');
+const Notification = require('../models/Notification');
 const logger = require('../shared/logger');
 
 class OfficerController {
@@ -14,34 +15,40 @@ class OfficerController {
             const { status, comment } = req.body; // status: 'approved' | 'rejected' (lowercase from frontend)
             const officerId = req.user ? req.user.id : null;
 
-            if (status === 'approved') {
-                // Move to inspection_scheduled? Or keep in under_review?
-                // For simplified flow: Approve Docs -> Ready for Inspection.
-                // Using 'inspection_scheduled' as the state for "Waiting for Audit/Inspection"
-                // Using 'inspection_scheduled' as the state for "Waiting for Audit/Inspection"
-                /* await ApplicationWorkflowService.updateApplicationStatus(
-                    id,
-                    'inspection_scheduled',
-                    comment || 'Documents approved by officer',
-                    officerId
-                ); */
+            const application = await Application.findById(id);
+            if (!application) {
+                return res.status(404).json({ success: false, error: 'Application not found' });
+            }
 
-                // We might also want to mark specific documents as verified?
-                // Keeping it simple as per "Golden Loop".
+            if (status === 'approved') {
+                // Golden Loop Logic: Approve Docs -> Payment 2 (Certification Fee)
+                application.status = 'PAYMENT_2_PENDING';
+
+                // Optional: Log history or notify
+                Notification.create({
+                    recipientId: application.farmerId,
+                    role: 'FARMER',
+                    title: 'เอกสารผ่านการตรวจสอบ (Documents Approved)',
+                    message: `เจ้าหน้าที่อนุมัติเอกสารแล้ว กรุณาชำระค่าธรรมเนียม Phase 2 (${comment || '-'})`,
+                    applicationId: application._id
+                });
+
             } else if (status === 'rejected') {
-                // Return to revision_required or rejected?
-                // If doc issues, usually revision_required.
-                /* await ApplicationWorkflowService.updateApplicationStatus(
-                    id,
-                    'revision_required',
-                    comment || 'Please revise documents',
-                    officerId
-                ); */
+                application.status = 'REVISION_REQ';
+                application.rejectCount = (application.rejectCount || 0) + 1;
+
+                Notification.create({
+                    recipientId: application.farmerId,
+                    role: 'FARMER',
+                    title: 'เอกสารต้องแก้ไข (Revision Required)',
+                    message: `เหตุผล: ${comment || 'กรุณาตรวจสอบเอกสาร'}`,
+                    applicationId: application._id
+                });
             } else {
                 return res.status(400).json({ success: false, error: 'Invalid status' });
             }
 
-            const application = await Application.findById(id); // await ApplicationWorkflowService.getApplicationById(id);
+            await application.save();
             res.json({ success: true, data: application });
 
         } catch (error) {

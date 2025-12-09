@@ -76,11 +76,17 @@ async function request(url, method, body = null, token = null) {
     };
 
     const res = await fetch(url, options);
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try {
+        data = text ? JSON.parse(text) : {};
+    } catch (e) {
+        throw new Error(`Failed to parse JSON: ${text.substring(0, 200)}... Status: ${res.status}`);
+    }
 
     if (!res.ok) {
         const error = new Error(`Request failed: ${res.status} ${res.statusText}`);
-        error.response = { data };
+        error.response = { data, text };
         throw error;
     }
     return { data, status: res.status };
@@ -207,7 +213,7 @@ async function runGoldenLoop() {
         // 5. Admin Approve
         console.log('\n--- Step 5: Admin Approve ---');
         await request(`${baseUrl}/v2/applications/${applicationId}/status`, 'PATCH', {
-            status: 'ACCREDITED',
+            status: 'CERTIFIED',
             notes: 'Golden Loop Verified'
         }, adminToken);
         console.log('✅ Application Approved');
@@ -215,8 +221,8 @@ async function runGoldenLoop() {
         // 6. Verify Status
         console.log('\n--- Step 6: Final Verification ---');
         const finalRes = await request(`${baseUrl}/v2/applications/${applicationId}`, 'GET', null, farmerToken);
-        if (finalRes.data.data.status === 'ACCREDITED') {
-            console.log('✅ Status Verified as ACCREDITED');
+        if (finalRes.data.data.status === 'CERTIFIED') {
+            console.log('✅ Status Verified as CERTIFIED');
         } else {
             throw new Error('Status mismatch: ' + finalRes.data.data.status);
         }

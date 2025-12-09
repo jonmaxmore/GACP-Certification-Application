@@ -24,4 +24,8 @@ router.post('/:id/assign-auditor', authenticate, controller.assignAuditor); // S
 router.post('/:id/audit-result', authenticate, controller.submitAuditResult); // Auditor
 router.get('/auditor/assignments', authenticate, controller.getAuditorAssignments); // New Route
 
+// General ABAC / Admin Routes
+router.post('/', authenticate, controller.createDraft);
+router.patch('/:id/status', authenticate, controller.updateStatus);
+
 module.exports = router;

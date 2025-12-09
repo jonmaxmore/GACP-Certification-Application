@@ -19,9 +19,8 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
-        final establishments = data
-            .map((item) => EstablishmentEntity.fromJson(item))
-            .toList();
+        final establishments =
+            data.map((item) => EstablishmentEntity.fromJson(item)).toList();
 
         return Right(establishments);
       } else {
@@ -34,6 +33,7 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
   @override
   Future<Either<Failure, EstablishmentEntity>> createEstablishment({
     required String name,
@@ -49,10 +49,12 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
       final data = {
         'name': name,
         'type': type,
-        'location': {
-          'address': address,
-          'coordinates': [longitude, latitude], // GeoJSON order
-        },
+        'address':
+            address, // Backend expects top-level address or location.address? Swagger says top-level object. Let's send top-level string to be safe based on 'index.js' line 151 logic.
+        // Backend 'index.js' (Line 151) manually constructs location from latitude/longitude.
+        // So we MUST send flattened lat/long.
+        'latitude': latitude,
+        'longitude': longitude,
         'titleDeedNo': titleDeedNo,
         'security': security,
       };

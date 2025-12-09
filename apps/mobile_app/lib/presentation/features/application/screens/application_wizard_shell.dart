@@ -15,9 +15,9 @@ class ApplicationWizardShell extends StatelessWidget {
     final path = state.uri.toString();
 
     // Simple path matching
-    if (path.contains('/start'))
+    if (path.contains('/start')) {
       currentStep = 0;
-    else if (path.contains('/applicant-info'))
+    } else if (path.contains('/applicant-info'))
       currentStep = 1;
     else if (path.contains('/objective'))
       currentStep = 2;

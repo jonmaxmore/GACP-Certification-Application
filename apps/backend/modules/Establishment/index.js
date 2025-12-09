@@ -129,15 +129,36 @@ const upload = multer({ storage });
 
 // ... (Service Logic remains same)
 
+const { authenticate } = require('../../middleware/AuthMiddleware');
+
+// ... (Service Logic remains same)
+
 // Routes
-// ...
+// Apply Authentication to all routes
+router.use(authenticate);
+
+// 1. Get MY Establishments (Mobile App Route)
+router.get('/my-establishments', async (req, res) => {
+    try {
+        // Filter by Owner
+        const establishments = await service.collection.find({ owner: req.user.id }).toArray();
+        res.json({
+            success: true,
+            data: establishments
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 
 router.post('/', upload.single('evidence_photo'), async (req, res) => {
     try {
         console.log('Create Est Body:', req.body); // Debug
-        console.log('Create Est File:', req.file); // Debug
 
-        const establishmentData = { ...req.body };
+        const establishmentData = {
+            ...req.body,
+            owner: req.user.id // Assign Owner
+        };
 
         // Handle file
         if (req.file) {
@@ -179,24 +200,17 @@ router.post('/', upload.single('evidence_photo'), async (req, res) => {
  * @swagger
  * /api/v2/establishments:
  *   get:
- *     summary: Get list of my establishments
- *     tags: [Establishments]
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: List of establishments
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Establishment'
+ *     summary: List all establishments (Admin Only)
  */
 router.get('/', async (req, res) => {
-    // Stub implementation for list
     try {
-        // In real app: service.findAll({ owner: req.user.id })
+        // Restrict to Admin/Officer
+        if (!['admin', 'officer', 'dtam_staff'].includes(req.user.role?.toLowerCase())) {
+            // Fallback for user: return own
+            const establishments = await service.collection.find({ owner: req.user.id }).toArray();
+            return res.json({ success: true, data: establishments });
+        }
+
         const establishments = await service.collection.find().toArray();
         res.json({
             success: true,

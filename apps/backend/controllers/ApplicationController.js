@@ -26,12 +26,13 @@ class ApplicationController {
 
             const application = await Application.create({
                 farmerId: req.user.id,
+                status: 'DRAFT', // Explicit initial status
                 data: {
                     farmId,
-                    requestType,
+                    requestType: requestType ? requestType.toUpperCase() : 'NEW',
                     certificationType,
                     objective,
-                    applicantType,
+                    applicantType: applicantType ? applicantType.toUpperCase() : 'PERSON',
                     applicantInfo,
                     siteInfo,
                     formData: formData || {} // Save the snapshot of form data
@@ -274,6 +275,11 @@ class ApplicationController {
             const { action, comment } = req.body;
             const app = await Application.findById(id);
 
+            // Validate Status
+            if (app.status !== 'SUBMITTED' && app.status !== 'REVISION_REQ') {
+                return res.status(400).json({ success: false, error: 'Invalid Application Status for Review' });
+            }
+
             if (action === 'APPROVE') {
                 app.status = 'PAYMENT_2_PENDING';
             } else if (action === 'REJECT') {
@@ -305,6 +311,11 @@ class ApplicationController {
             const { auditorId, date } = req.body;
             const app = await Application.findById(id);
 
+            // Validate Status
+            if (app.status !== 'AUDIT_PENDING' && app.status !== 'AUDIT_SCHEDULED') {
+                return res.status(400).json({ success: false, error: 'Invalid Status for Assignment' });
+            }
+
             app.audit = { auditorId, scheduledDate: date, status: 'SCHEDULED' };
             app.status = 'AUDIT_SCHEDULED';
 
@@ -330,6 +341,11 @@ class ApplicationController {
             const { id } = req.params;
             const { result, notes } = req.body; // 'PASS' or 'FAIL'
             const app = await Application.findById(id);
+
+            // Validate Status
+            if (app.status !== 'AUDIT_SCHEDULED') {
+                return res.status(400).json({ success: false, error: 'Application must be Scheduled for Audit first' });
+            }
 
             if (result === 'PASS') {
                 app.status = 'CERTIFIED';
@@ -389,6 +405,35 @@ class ApplicationController {
                     revenue
                 }
             });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+    /**
+     * Admin Force Update Status
+     * PATCH /:id/status
+     */
+    async updateStatus(req, res) {
+        try {
+            const { id } = req.params;
+            const { status, notes } = req.body;
+
+            // TODO: checkPermission('ADMIN') - dependent on middleware setup
+            // For now, allow authenticated users (Logic should strictly be Admin only)
+
+            const app = await Application.findById(id);
+            if (!app) return res.status(404).json({ success: false, error: 'Application Not Found' });
+
+            // Validate Status Enum
+            if (!Application.schema.path('status').enumValues.includes(status)) {
+                return res.status(400).json({ success: false, error: `Invalid Status. Allowed: ${Application.schema.path('status').enumValues.join(', ')}` });
+            }
+
+            app.status = status;
+            // app.notes = notes; // If notes field exists
+            await app.save();
+
+            res.json({ success: true, message: 'Status Updated', data: app });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }

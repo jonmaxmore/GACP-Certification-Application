@@ -127,7 +127,7 @@ const ApplicationSchema = new Schema({
 }, { timestamps: true });
 
 // Auto-generate App Number
-ApplicationSchema.pre('save', async function (next) {
+ApplicationSchema.pre('validate', async function (next) {
     if (!this.applicationNumber) {
         const date = new Date();
         const year = date.getFullYear() + 543; // Thai Year

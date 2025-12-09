@@ -101,7 +101,7 @@ class ApplicationWizardScreen extends StatelessWidget {
               if (isCurrent) // Only show label for current step to keep it clean? Or all? User said "Icons small".
                 Text(
                   steps[index]['label'] as String,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                       color: Colors.green),

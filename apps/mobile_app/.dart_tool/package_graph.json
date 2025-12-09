@@ -266,14 +266,16 @@
     },
     {
       "name": "file_picker",
-      "version": "6.2.1",
+      "version": "8.3.7",
       "dependencies": [
+        "cross_file",
         "ffi",
         "flutter",
         "flutter_plugin_android_lifecycle",
         "flutter_web_plugins",
         "path",
         "plugin_platform_interface",
+        "web",
         "win32"
       ]
     },
@@ -1084,6 +1086,14 @@
       ]
     },
     {
+      "name": "cross_file",
+      "version": "0.3.5+1",
+      "dependencies": [
+        "meta",
+        "web"
+      ]
+    },
+    {
       "name": "win32",
       "version": "5.15.0",
       "dependencies": [
@@ -1628,14 +1638,6 @@
         "flutter",
         "http",
         "plugin_platform_interface"
-      ]
-    },
-    {
-      "name": "cross_file",
-      "version": "0.3.5+1",
-      "dependencies": [
-        "meta",
-        "web"
       ]
     },
     {

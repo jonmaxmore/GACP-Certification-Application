@@ -166,7 +166,8 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
 
               // Action Button if Action Needed
               if (app.status == 'WAITING_PAYMENT_1' ||
-                  app.status == 'WAITING_PAYMENT_2') ...[
+                  app.status == 'WAITING_PAYMENT_2' ||
+                  app.status == 'PAYMENT_1_RETRY') ...[
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
@@ -175,7 +176,23 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
                     icon: const Icon(LucideIcons.creditCard, size: 16),
                     label: const Text('Pay Now'),
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
+                        backgroundColor: (app.status == 'PAYMENT_1_RETRY')
+                            ? Colors.red
+                            : Colors.orange,
+                        foregroundColor: Colors.white),
+                  ),
+                )
+              ] else if (app.status == 'REVISION_REQ') ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => context.push(
+                        '/applications/create/step1?id=${app.id}'), // Assume edit flow
+                    icon: const Icon(LucideIcons.edit, size: 16),
+                    label: const Text('Revise Application'),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber[700],
                         foregroundColor: Colors.white),
                   ),
                 )
@@ -253,6 +270,10 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
       case 'DRAFT':
         color = Colors.grey;
         break;
+      case 'REVISION_REQ':
+      case 'PAYMENT_1_RETRY':
+        color = Colors.red;
+        break;
       default:
         color = Colors.blue;
     }
@@ -273,8 +294,11 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
   }
 
   void _handleCardTap(ApplicationEntity app) {
-    if (app.status.contains('WAITING_PAYMENT')) {
+    if (app.status.contains('WAITING_PAYMENT') ||
+        app.status == 'PAYMENT_1_RETRY') {
       _goToPayment(app.id);
+    } else if (app.status == 'REVISION_REQ') {
+      context.push('/applications/create/step1?id=${app.id}');
     } else {
       context.push('/applications/${app.id}/status'); // Tracking
     }

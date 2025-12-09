@@ -30,12 +30,13 @@ import '../../presentation/features/application/screens/payment_screen.dart';
 import '../../presentation/features/auditor/screens/auditor_job_screen.dart';
 import '../../presentation/features/auditor/screens/audit_form_screen.dart';
 import '../../presentation/features/application/screens/application_wizard_screen.dart';
-import '../../presentation/features/application/screens/wizard_steps/step_1_composite.dart';
-import '../../presentation/features/application/screens/wizard_steps/step_2_composite.dart';
-import '../../presentation/features/application/screens/wizard_steps/step_3_composite.dart';
-import '../../presentation/features/application/screens/wizard_steps/step_4_composite.dart';
-import '../../presentation/features/application/screens/wizard_steps/step_5_composite.dart';
-import '../../presentation/features/application/screens/wizard_steps/step_6_composite.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_1_terms_and_conditions.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_2_applicant_info.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_3_site_and_scope.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_4_product_details.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_5_operation_sop.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_6_evidence.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_7_review.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -64,10 +65,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       // Authentication Routes (Outside Shell)
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
@@ -127,35 +125,40 @@ final routerProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: 'create/step1',
-                    builder: (context, state) => const Step1Composite(),
+                    builder: (context, state) => Step1Terms(
+                      applicationId: state.uri.queryParameters['id'],
+                    ),
                   ),
                   GoRoute(
                     path: 'create/step2',
-                    builder: (context, state) => const Step2Composite(),
+                    builder: (context, state) => const Step2ApplicantInfo(),
                   ),
                   GoRoute(
                     path: 'create/step3',
-                    builder: (context, state) => const Step3Composite(),
+                    builder: (context, state) => const Step3SiteAndScope(),
                   ),
                   GoRoute(
                     path: 'create/step4',
-                    builder: (context, state) => const Step4Composite(),
+                    builder: (context, state) => const Step4ProductDetails(),
                   ),
                   GoRoute(
                     path: 'create/step5',
-                    builder: (context, state) => const Step5Composite(),
+                    builder: (context, state) => const Step5OperationSOP(),
                   ),
                   GoRoute(
                     path: 'create/step6',
-                    builder: (context, state) => const Step6Composite(),
+                    builder: (context, state) => const Step6Evidence(),
+                  ),
+                  GoRoute(
+                    path: 'create/step7',
+                    builder: (context, state) => const Step7Review(),
                   ),
                 ],
               ),
               GoRoute(
                 path: 'guidelines',
-                builder: (context, state) => GuidelinesScreen(
-                  requestType: state.extra as String,
-                ),
+                builder: (context, state) =>
+                    GuidelinesScreen(requestType: state.extra as String),
               ),
               GoRoute(
                 path: ':id/pay1',
@@ -167,16 +170,18 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           GoRoute(
-              path: '/auditor',
-              builder: (context, state) => const AuditorJobScreen(),
-              routes: [
-                GoRoute(
-                    path: 'job/:id',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return AuditFormScreen(applicationId: id);
-                    })
-              ]),
+            path: '/auditor',
+            builder: (context, state) => const AuditorJobScreen(),
+            routes: [
+              GoRoute(
+                path: 'job/:id',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return AuditFormScreen(applicationId: id);
+                },
+              ),
+            ],
+          ),
           GoRoute(
             path: '/establishments',
             builder: (context, state) => const EstablishmentListScreen(),

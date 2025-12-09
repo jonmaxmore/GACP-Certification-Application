@@ -1,7 +1,9 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../services/application_service.dart';
+import '../../../../core/providers/core_providers.dart';
 
 // --- Strong-typed Data Model ---
 class ApplicationFormData {
@@ -29,6 +31,7 @@ class ApplicationFormData {
   // Step 2: Objective & Area
   final String objective; // medical, export
   final String areaType; // outdoor, indoor, greenhouse
+  final String establishmentId; // Added for Backend Link
   final String establishmentName;
   final String locationAddress;
   final String lat;
@@ -63,6 +66,9 @@ class ApplicationFormData {
   final String wasteManagement;
   final List<String> sopChecklist;
 
+  // Step 6: Evidence (Video Link)
+  final String videoLink;
+
   ApplicationFormData({
     this.formType = '',
     this.requestCategory = 'new',
@@ -79,6 +85,7 @@ class ApplicationFormData {
     this.lineId = '',
     this.objective = '',
     this.areaType = '',
+    this.establishmentId = '',
     this.establishmentName = '',
     this.locationAddress = '',
     this.lat = '',
@@ -103,6 +110,7 @@ class ApplicationFormData {
     this.securityMeasures = '',
     this.wasteManagement = '',
     this.sopChecklist = const [],
+    this.videoLink = '',
   });
 
   factory ApplicationFormData.fromJson(Map<String, dynamic> json) {
@@ -122,6 +130,7 @@ class ApplicationFormData {
       lineId: json['lineId'] ?? '',
       objective: json['objective'] ?? '',
       areaType: json['areaType'] ?? '',
+      establishmentId: json['establishmentId'] ?? '',
       establishmentName: json['establishmentName'] ?? '',
       locationAddress: json['locationAddress'] ?? '',
       lat: json['lat'] ?? '',
@@ -150,6 +159,7 @@ class ApplicationFormData {
       sopChecklist:
           (json['sopChecklist'] as List?)?.map((e) => e.toString()).toList() ??
               [],
+      videoLink: json['videoLink'] ?? '',
     );
   }
 
@@ -170,6 +180,7 @@ class ApplicationFormData {
       'lineId': lineId,
       'objective': objective,
       'areaType': areaType,
+      'establishmentId': establishmentId,
       'establishmentName': establishmentName,
       'locationAddress': locationAddress,
       'lat': lat,
@@ -194,6 +205,7 @@ class ApplicationFormData {
       'securityMeasures': securityMeasures,
       'wasteManagement': wasteManagement,
       'sopChecklist': sopChecklist,
+      'videoLink': videoLink,
     };
   }
 
@@ -213,6 +225,7 @@ class ApplicationFormData {
     String? lineId,
     String? objective,
     String? areaType,
+    String? establishmentId,
     String? establishmentName,
     String? locationAddress,
     String? lat,
@@ -237,6 +250,7 @@ class ApplicationFormData {
     String? securityMeasures,
     String? wasteManagement,
     List<String>? sopChecklist,
+    String? videoLink,
   }) {
     return ApplicationFormData(
       formType: formType ?? this.formType,
@@ -254,6 +268,7 @@ class ApplicationFormData {
       lineId: lineId ?? this.lineId,
       objective: objective ?? this.objective,
       areaType: areaType ?? this.areaType,
+      establishmentId: establishmentId ?? this.establishmentId,
       establishmentName: establishmentName ?? this.establishmentName,
       locationAddress: locationAddress ?? this.locationAddress,
       lat: lat ?? this.lat,
@@ -279,6 +294,7 @@ class ApplicationFormData {
       securityMeasures: securityMeasures ?? this.securityMeasures,
       wasteManagement: wasteManagement ?? this.wasteManagement,
       sopChecklist: sopChecklist ?? this.sopChecklist,
+      videoLink: videoLink ?? this.videoLink,
     );
   }
 }
@@ -302,6 +318,7 @@ class ApplicationFormState {
   }
 
   // Proxies for UI convenience
+  ApplicationFormData get formData => data;
   String get formType => data.formType;
   String get requestCategory => data.requestCategory;
   String get applicantType => data.applicantType;
@@ -317,6 +334,7 @@ class ApplicationFormState {
   String get lineId => data.lineId;
   String get objective => data.objective;
   String get areaType => data.areaType;
+  String get establishmentId => data.establishmentId;
   String get establishmentName => data.establishmentName;
   String get locationAddress => data.locationAddress;
   String get lat => data.lat;
@@ -341,6 +359,7 @@ class ApplicationFormState {
   String get securityMeasures => data.securityMeasures;
   String get wasteManagement => data.wasteManagement;
   List<String> get sopChecklist => data.sopChecklist;
+  String get videoLink => data.videoLink;
 
   ApplicationFormState copyWith({
     ApplicationFormData? data,
@@ -359,7 +378,10 @@ class ApplicationFormState {
 
 // --- Notifier ---
 class ApplicationFormNotifier extends StateNotifier<ApplicationFormState> {
-  ApplicationFormNotifier() : super(ApplicationFormState.initial());
+  final ApplicationService _service;
+
+  ApplicationFormNotifier(this._service)
+      : super(ApplicationFormState.initial());
 
   void update(String key, dynamic value) {
     ApplicationFormData newData = state.data;
@@ -408,6 +430,9 @@ class ApplicationFormNotifier extends StateNotifier<ApplicationFormState> {
         break;
       case 'areaType':
         newData = newData.copyWith(areaType: value);
+        break;
+      case 'establishmentId':
+        newData = newData.copyWith(establishmentId: value);
         break;
       case 'establishmentName':
         newData = newData.copyWith(establishmentName: value);
@@ -475,7 +500,14 @@ class ApplicationFormNotifier extends StateNotifier<ApplicationFormState> {
       case 'wasteManagement':
         newData = newData.copyWith(wasteManagement: value);
         break;
+      case 'videoLink':
+        newData = newData.copyWith(videoLink: value);
+        break;
     }
+    state = state.copyWith(data: newData);
+  }
+
+  void updateFormData(ApplicationFormData newData) {
     state = state.copyWith(data: newData);
   }
 
@@ -527,15 +559,44 @@ class ApplicationFormNotifier extends StateNotifier<ApplicationFormState> {
         return true;
       }
     } catch (e) {
-      print('Error loading draft: $e');
+      debugPrint('Error loading draft: $e');
       final box = Hive.box('application_drafts');
       await box.delete('current_draft');
     }
     return false;
   }
+
+  Future<void> loadApplication(String id) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final appData = await _service.getApplication(id);
+      // Map API Schema to Form Data
+      // This assumes _service.getApplication returns appropriate structure or we map it here
+      // For now, let's assume the service returns mapped ApplicationFormData or compatible JSON
+      // If service returns Entity, we need a mapper.
+      // Simplified: Assuming service handles mapping for this generic "Edit" purpose
+      state = state.copyWith(data: appData, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+          isLoading: false, error: 'Failed to load application: $e');
+    }
+  }
+
+  Future<String?> submit() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final id = await _service.submitApplication(state.data);
+      state = state.copyWith(isLoading: false);
+      return id;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
 }
 
 final applicationFormProvider = StateNotifierProvider.autoDispose<
     ApplicationFormNotifier, ApplicationFormState>((ref) {
-  return ApplicationFormNotifier();
+  final service = ApplicationService(ref.read(dioClientProvider));
+  return ApplicationFormNotifier(service);
 });

@@ -76,6 +76,45 @@ class DioClient {
       requestBody: true,
       responseBody: true,
     ));
+    // Retry Interceptor
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (DioException e, handler) async {
+          // Retry Logic for GET requests (Idempotent)
+          if (e.requestOptions.method == 'GET' && _shouldRetry(e)) {
+            int retries = e.requestOptions.extra['retries'] ?? 0;
+            if (retries < 3) {
+              e.requestOptions.extra['retries'] = retries + 1;
+              await Future.delayed(Duration(
+                  milliseconds: 1000 * (retries + 1))); // Exponential Backoff
+              try {
+                final response = await _dio.request(
+                  e.requestOptions.path,
+                  options: Options(
+                    method: e.requestOptions.method,
+                    headers: e.requestOptions.headers,
+                    extra: e.requestOptions.extra,
+                  ),
+                  queryParameters: e.requestOptions.queryParameters,
+                  data: e.requestOptions.data,
+                );
+                return handler.resolve(response);
+              } catch (_) {
+                // If retry fails, continue to normal error handling
+              }
+            }
+          }
+          return handler.next(e);
+        },
+      ),
+    );
+  }
+
+  bool _shouldRetry(DioException e) {
+    return e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout ||
+        e.type == DioExceptionType.connectionError;
   }
 
   Future<Response> get(String path,

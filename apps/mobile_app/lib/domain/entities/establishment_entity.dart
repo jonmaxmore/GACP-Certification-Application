@@ -58,8 +58,12 @@ class EstablishmentEntity extends Equatable {
     if (json['location'] != null && json['location']['coordinates'] != null) {
       final coords = json['location']['coordinates'] as List;
       if (coords.length >= 2) {
-        lng = (coords[0] as num).toDouble();
-        lat = (coords[1] as num).toDouble();
+        lng = coords[0] is num
+            ? (coords[0] as num).toDouble()
+            : double.tryParse(coords[0].toString());
+        lat = coords[1] is num
+            ? (coords[1] as num).toDouble()
+            : double.tryParse(coords[1].toString());
       }
     }
 

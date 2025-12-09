@@ -21,21 +21,22 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
   final List<Map<String, dynamic>> _services = [
     {
       'id': 'NEW',
-      'title': 'ยื่นคำขอใหม่ (Submission)',
+      'title':
+          'ขอรับใบรับรองแหล่งผลิต (ปลูก) เก็บเกี่ยวที่ดีและแปรรูป (กรณีรายใหม่)',
       'description': 'สำหรับผู้ที่ต้องการขอการรับรองครั้งแรก',
       'icon': LucideIcons.filePlus,
       'color': Colors.green,
     },
     {
       'id': 'RENEW',
-      'title': 'ต่ออายุใบรับรอง (Renewal)',
+      'title': 'ขอต่ออายุใบรับรอง',
       'description': 'สำหรับผู้ที่ใบรับรองใกล้หมดอายุ',
       'icon': LucideIcons.refreshCw,
       'color': Colors.blue,
     },
     {
       'id': 'SUBSTITUTE',
-      'title': 'ขอใบแทน (Replacement)',
+      'title': 'ขอรับใบแทนใบรับรอง',
       'description': 'กรณีใบรับรองสูญหายหรือชำรุด',
       'icon': LucideIcons.files,
       'color': Colors.orange,
@@ -46,14 +47,36 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('เลือกบริการที่ต้องการ'),
+        title: const Text('ประเภทคำขอใบรับรอง'), // Updated Title
       ),
       body: SafeArea(
         child: Column(
           children: [
+            // Added Header Text
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: const Text(
+                  'โปรดลงทะเบียนเพื่อขอรับการตรวจประเมินใบรับรองแหล่งผลิต (ปลูก) เก็บเกี่ยวที่ดีและแปรรูปของพืชกัญชา Thailand Cannabis GACP',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: _services.length,
                 itemBuilder: (context, index) {
                   final service = _services[index];
@@ -110,7 +133,8 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                                 Text(
                                   service['title'],
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    fontSize:
+                                        16, // Adjusted slightly for long text
                                     fontWeight: FontWeight.bold,
                                     color: isSelected
                                         ? service['color']
@@ -149,7 +173,8 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                   onPressed: _selectedService == null
                       ? null
                       : () {
-                          // Navigate to Guidelines first
+                          // Navigate to Guidelines first, or direct to Wizard based on flow
+                          // Current flow: Guidelines -> Wizard
                           context.push('/applications/guidelines',
                               extra: _selectedService);
                         },

@@ -79,10 +79,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(authState.error!), backgroundColor: Colors.red));
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Registration Successful! Please Login.'),
-            backgroundColor: Colors.green));
-        context.pop(); // Return to Login
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Registration Complete'),
+            content:
+                const Text('Your account has been created. Please log in.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop(); // Close Dialog
+                  context.pop(); // Back to Login
+                },
+                child: const Text('OK'),
+              )
+            ],
+          ),
+        );
       }
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);

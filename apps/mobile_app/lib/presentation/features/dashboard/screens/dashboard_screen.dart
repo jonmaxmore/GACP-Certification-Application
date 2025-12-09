@@ -186,10 +186,14 @@ class DashboardScreen extends ConsumerWidget {
           onTap: () => context.push('/notifications'),
         ),
         QuickActionCard(
-          label: 'คู่มือ GACP',
-          icon: LucideIcons.bookOpen,
+          label: 'ส่งออก (Export)',
+          icon: LucideIcons.share, // Or download
           color: Colors.purple,
-          onTap: () {},
+          onTap: () {
+            // Placeholder for Export action
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text('Export functionality coming soon!')));
+          },
         ),
       ],
     );

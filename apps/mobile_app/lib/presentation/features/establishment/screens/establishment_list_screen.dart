@@ -6,11 +6,27 @@ import '../../../../core/ui/responsive_layout.dart';
 import '../providers/establishment_provider.dart';
 import '../../../../domain/entities/establishment_entity.dart';
 
-class EstablishmentListScreen extends ConsumerWidget {
+class EstablishmentListScreen extends ConsumerStatefulWidget {
   const EstablishmentListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EstablishmentListScreen> createState() =>
+      _EstablishmentListScreenState();
+}
+
+class _EstablishmentListScreenState
+    extends ConsumerState<EstablishmentListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Ensure data is fetched when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(establishmentProvider.notifier).loadEstablishments();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(establishmentProvider);
 
     return Scaffold(

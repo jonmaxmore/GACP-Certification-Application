@@ -97,8 +97,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                     ),
                     child: const Row(
                       children: [
-                        Icon(LucideIcons.alertTriangle,
-                            color: Colors.orange),
+                        Icon(LucideIcons.alertTriangle, color: Colors.orange),
                         SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -150,7 +149,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                     child: FilledButton(
                       onPressed: _isAccepted
                           ? () {
-                              context.pushReplacement('/applications/form',
+                              context.go('/applications/create/1',
                                   extra: widget.requestType);
                             }
                           : null,

@@ -118,18 +118,9 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await _dioClient.get('/v2/auth/me');
 
       if (response.statusCode == 200) {
-        final user = response.data[
-            'user']; // This might need adjustment based on /auth/me payload
-        // Actually usually /auth/me returns directly or in data. Let's assume consistent with login if possible,
-        // but often /me is { success: true, user: {...} } or { data: { user: ... } }
-        // Checked AuthController: getCurrentUser (verifyEmail?)
-        // Wait, AuthController doesn't have a specific 'me' endpoint in the code I saw?
-        // It has register, login, verifyEmail.
-        // I should stick to the structure I saw or infer.
-        // If AuthController.js is the only controller, where is /me?
-        // It might be in another controller or I missed it.
-        // Assuming standard structure for now, but I will be careful.
-        // Let's assume the previous implementation was close to correct but lacked fields.
+        final data = response.data;
+        // Backend returns { success: true, data: { ...UserFields... } }
+        final user = data['data'];
 
         return Right(UserEntity(
           id: user['id'] ?? user['_id'],

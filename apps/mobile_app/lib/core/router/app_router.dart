@@ -30,6 +30,12 @@ import '../../presentation/features/application/screens/payment_screen.dart';
 import '../../presentation/features/auditor/screens/auditor_job_screen.dart';
 import '../../presentation/features/auditor/screens/audit_form_screen.dart';
 import '../../presentation/features/application/screens/application_wizard_screen.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_1_composite.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_2_composite.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_3_composite.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_4_composite.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_5_composite.dart';
+import '../../presentation/features/application/screens/wizard_steps/step_6_composite.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -113,17 +119,37 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: 'new',
                 builder: (context, state) => const ServiceSelectionScreen(),
               ),
-              GoRoute(
-                path: 'create',
-                builder: (context, state) => ApplicationWizardScreen(
-                  requestType: state.extra as String?,
-                ),
-              ),
-              GoRoute(
-                path: 'form',
-                builder: (context, state) => ApplicationWizardScreen(
-                  requestType: state.extra as String?,
-                ),
+              // Composite Wizard Route-Based
+              ShellRoute(
+                builder: (context, state, child) {
+                  return ApplicationWizardScreen(state: state, child: child);
+                },
+                routes: [
+                  GoRoute(
+                    path: 'create/step1',
+                    builder: (context, state) => const Step1Composite(),
+                  ),
+                  GoRoute(
+                    path: 'create/step2',
+                    builder: (context, state) => const Step2Composite(),
+                  ),
+                  GoRoute(
+                    path: 'create/step3',
+                    builder: (context, state) => const Step3Composite(),
+                  ),
+                  GoRoute(
+                    path: 'create/step4',
+                    builder: (context, state) => const Step4Composite(),
+                  ),
+                  GoRoute(
+                    path: 'create/step5',
+                    builder: (context, state) => const Step5Composite(),
+                  ),
+                  GoRoute(
+                    path: 'create/step6',
+                    builder: (context, state) => const Step6Composite(),
+                  ),
+                ],
               ),
               GoRoute(
                 path: 'guidelines',

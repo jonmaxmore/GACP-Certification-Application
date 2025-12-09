@@ -22,24 +22,18 @@ class _EstablishmentFormScreenState
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
-  final _titleDeedController = TextEditingController(); // New
-  final _securityController = TextEditingController(); // New
+  final _titleDeedController = TextEditingController();
+  final _securityController = TextEditingController();
 
-  // Mapping Display Text (Thai) -> Backend Value
   final Map<String, String> _typeMap = {
     'เพาะปลูก (Cultivation)': 'farm',
     'แปรรูป (Processing)': 'processing',
     'จำหน่าย (Distribution)': 'shop',
+    'ส่งออก (Export)': 'export',
   };
 
-  late String _selectedType;
-
-  @override
-  void initState() {
-    super.initState();
-    // Default to first value
-    _selectedType = _typeMap.values.first;
-  }
+  final List<String> _selectedTypes = [];
+  final MapController _mapController = MapController();
 
   @override
   void dispose() {
@@ -64,6 +58,7 @@ class _EstablishmentFormScreenState
       ref.read(establishmentProvider.notifier).setLocation(
             LatLng(position.latitude, position.longitude),
           );
+      // MapController move handled by ref.listen
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -86,8 +81,9 @@ class _EstablishmentFormScreenState
     final state = ref.watch(establishmentProvider);
     final notifier = ref.read(establishmentProvider.notifier);
 
-    // Listen for success
+    // Listen for changes
     ref.listen(establishmentProvider, (previous, next) {
+      // Success
       if (next.isSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('บันทึกข้อมูลแปลงปลูกสำเร็จ!')),
@@ -95,10 +91,19 @@ class _EstablishmentFormScreenState
         Navigator.pop(context);
         notifier.resetForm();
       }
+      // Error
       if (next.error != null && !next.isLoading) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(next.error!), backgroundColor: Colors.red),
         );
+      }
+      // Map Move Logic
+      if (previous?.selectedLocation != null &&
+          next.selectedLocation != null &&
+          next.selectedLocation != previous!.selectedLocation) {
+        try {
+          _mapController.move(next.selectedLocation!, 15);
+        } catch (_) {}
       }
     });
 
@@ -113,7 +118,6 @@ class _EstablishmentFormScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Name
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
@@ -125,26 +129,46 @@ class _EstablishmentFormScreenState
                           v?.isEmpty == true ? 'กรุณาระบุข้อมูล' : null,
                     ),
                     const SizedBox(height: 16),
-
-                    // Type Dropdown (Thai)
-                    DropdownButtonFormField<String>(
-                      initialValue: _selectedType,
-                      decoration: const InputDecoration(
-                        labelText: 'ประเภท',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(LucideIcons.tag),
+                    const Text('ประเภท (Type) - เลือกได้มากกว่า 1',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400),
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                      items: _typeMap.entries
-                          .map((e) => DropdownMenuItem(
-                                value: e.value,
-                                child: Text(e.key),
-                              ))
-                          .toList(),
-                      onChanged: (v) => setState(() => _selectedType = v!),
+                      child: Wrap(
+                        spacing: 8.0,
+                        runSpacing: 4.0,
+                        children: _typeMap.entries.map((e) {
+                          final isSelected = _selectedTypes.contains(e.value);
+                          return FilterChip(
+                            label: Text(e.key),
+                            selected: isSelected,
+                            onSelected: (bool selected) {
+                              setState(() {
+                                if (selected) {
+                                  _selectedTypes.add(e.value);
+                                } else {
+                                  _selectedTypes.remove(e.value);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
                     ),
+                    if (_selectedTypes.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          'กรุณาเลือกอย่างน้อย 1 ประเภท',
+                          style: TextStyle(color: Colors.red, fontSize: 12),
+                        ),
+                      ),
                     const SizedBox(height: 16),
-
-                    // Address
                     TextFormField(
                       controller: _addressController,
                       decoration: const InputDecoration(
@@ -157,8 +181,6 @@ class _EstablishmentFormScreenState
                           v?.isEmpty == true ? 'กรุณาระบุข้อมูล' : null,
                     ),
                     const SizedBox(height: 16),
-
-                    // Title Deed No (GACP)
                     TextFormField(
                       controller: _titleDeedController,
                       decoration: const InputDecoration(
@@ -170,8 +192,6 @@ class _EstablishmentFormScreenState
                           v?.isEmpty == true ? 'กรุณาระบุเลขโฉนด' : null,
                     ),
                     const SizedBox(height: 16),
-
-                    // Security (GACP)
                     TextFormField(
                       controller: _securityController,
                       decoration: const InputDecoration(
@@ -185,10 +205,7 @@ class _EstablishmentFormScreenState
                           ? 'กรุณาระบุระบบรักษาความปลอดภัย'
                           : null,
                     ),
-
                     const SizedBox(height: 24),
-
-                    // Location Map
                     const Text('ตำแหน่งพิกัด (ปักหมุด)',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold)),
@@ -210,8 +227,7 @@ class _EstablishmentFormScreenState
                           : Stack(
                               children: [
                                 FlutterMap(
-                                  // Use Key to prevent unnecessary full-map rebuilds if possible
-                                  key: ValueKey(state.selectedLocation),
+                                  mapController: _mapController,
                                   options: MapOptions(
                                     initialCenter: state.selectedLocation!,
                                     initialZoom: 15,
@@ -253,8 +269,6 @@ class _EstablishmentFormScreenState
                             ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Image Picker
                     const Text('รูปถ่ายประกอบ',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold)),
@@ -309,16 +323,23 @@ class _EstablishmentFormScreenState
                           ),
                         ],
                       ),
-
                     const SizedBox(height: 32),
-
-                    // Submit Button
                     ElevatedButton(
                       onPressed: () {
+                        if (_selectedTypes.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'กรุณาเลือกประเภทอย่างน้อย 1 รายการ (Please select at least 1 type)'),
+                                backgroundColor: Colors.red),
+                          );
+                          return;
+                        }
+
                         if (_formKey.currentState!.validate()) {
                           notifier.createEstablishment(
                             name: _nameController.text,
-                            type: _selectedType,
+                            type: _selectedTypes.join(','),
                             address: _addressController.text,
                             titleDeedNo: _titleDeedController.text,
                             security: _securityController.text,

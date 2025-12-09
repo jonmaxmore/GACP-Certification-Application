@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../features/auth/providers/auth_provider.dart';
+import '../features/establishment/providers/establishment_provider.dart';
 import '../../core/ui/responsive_layout.dart';
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   final Widget child;
 
   const AppShell({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Sustainable Solution: Auto-Fetch Data when Authenticated
+    ref.listen(authProvider, (previous, next) {
+      if ((previous?.isAuthenticated == false || previous == null) &&
+          next.isAuthenticated) {
+        // User logged in or session restored -> Fetch Data
+        ref.read(establishmentProvider.notifier).loadEstablishments();
+        // Add other providers here (e.g., Notifications, Applications)
+      }
+    });
+
     return ResponsiveLayout(
       mobileBody: _MobileShell(child: child),
       desktopBody: _DesktopShell(child: child),

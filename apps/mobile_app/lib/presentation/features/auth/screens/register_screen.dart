@@ -29,6 +29,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   XFile? _idCardImage;
   bool _isLoading = false;
+  bool _obscurePassword = true; // Password visibility toggle
+  bool _obscureConfirmPassword = true;
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage() async {
@@ -151,6 +153,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 // Contact
                 TextFormField(
                     controller: _emailController,
+                    keyboardType: TextInputType.emailAddress, // Apple QA Fix
                     decoration: const InputDecoration(
                         labelText: 'Email', prefixIcon: Icon(LucideIcons.mail)),
                     validator: (v) =>
@@ -158,6 +161,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                     controller: _phoneNumberController,
+                    keyboardType: TextInputType.phone, // Apple QA Fix
                     decoration: const InputDecoration(
                         labelText: 'Mobile Number',
                         prefixIcon: Icon(LucideIcons.phone)),
@@ -168,18 +172,34 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 // Security
                 TextFormField(
                     controller: _passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
                         labelText: 'Password',
-                        prefixIcon: Icon(LucideIcons.lock)),
+                        prefixIcon: const Icon(LucideIcons.lock),
+                        suffixIcon: IconButton(
+                          // Apple QA: Password visibility
+                          icon: Icon(_obscurePassword
+                              ? LucideIcons.eyeOff
+                              : LucideIcons.eye),
+                          onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword),
+                        )),
                     validator: (v) => v!.length >= 6 ? null : 'Min 6 Chars'),
                 const SizedBox(height: 16),
                 TextFormField(
                     controller: _confirmPasswordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
+                    obscureText: _obscureConfirmPassword,
+                    decoration: InputDecoration(
                         labelText: 'Confirm Password',
-                        prefixIcon: Icon(LucideIcons.lock)),
+                        prefixIcon: const Icon(LucideIcons.lock),
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscureConfirmPassword
+                              ? LucideIcons.eyeOff
+                              : LucideIcons.eye),
+                          onPressed: () => setState(() =>
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword),
+                        )),
                     validator: (v) =>
                         v == _passwordController.text ? null : 'Mismatch'),
                 const SizedBox(height: 16),

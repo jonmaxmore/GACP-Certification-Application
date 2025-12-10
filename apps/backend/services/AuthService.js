@@ -5,65 +5,149 @@ const { hash } = require('../shared/encryption');
 
 class AuthService {
     /**
-     * V2 Registration Logic
-     * strict validation, clear error messages
+     * V2 Registration Logic (Multi-Account Type Support)
+     * Supports: INDIVIDUAL, JURISTIC, COMMUNITY_ENTERPRISE
      */
     async register(data) {
-        console.log('[AuthService] Registering:', data.email);
+        const { accountType = 'INDIVIDUAL' } = data;
+        console.log('[AuthService] Registering:', accountType, data.firstName || data.companyName || data.communityName);
 
-        // 1. Validate ID Card Format
-        if (!validateThaiID(data.idCard)) {
-            throw new Error('Invalid ID Card Number (Checksum Failed)');
-        }
-
-        // 2. Validate Laser Code Format
-        if (!validateLaserCode(data.laserCode)) {
-            throw new Error('Invalid Laser Code Format (Must be 2 letters + 10 digits)');
-        }
-
-        // 3. Check Duplicates
-        const existingEmail = await UserModel.findOne({ email: data.email.toLowerCase() });
-        if (existingEmail) throw new Error('Email is already registered');
-
-        // Check idCard by hash (since idCard is encrypted in DB)
-        const idCardHashValue = hash(data.idCard);
-        const existingID = await UserModel.findOne({ idCardHash: idCardHashValue });
-        if (existingID) throw new Error('ID Card is already registered');
-
-        // 4. Create User
-        const user = new UserModel({
-            email: data.email,
+        let userData = {
+            accountType: accountType,
             password: data.password,
-            firstName: data.firstName,
-            lastName: data.lastName,
             phoneNumber: data.phoneNumber,
-            idCard: data.idCard,
-            laserCode: data.laserCode,
-            idCardImage: data.idCardImage, // Optional
+            email: data.email?.toLowerCase() || null,
             role: 'FARMER',
             status: 'PENDING_VERIFICATION'
-        });
+        };
 
+        // Check email duplicate if provided
+        if (data.email) {
+            const existingEmail = await UserModel.findOne({ email: data.email.toLowerCase() });
+            if (existingEmail) throw new Error('อีเมลนี้ถูกใช้งานแล้ว');
+        }
+
+        switch (accountType) {
+            case 'INDIVIDUAL':
+                // Validate Thai ID (optional strict validation)
+                const idCard = data.idCard || data.identifier;
+                if (idCard && !validateThaiID(idCard)) {
+                    throw new Error('เลขบัตรประชาชนไม่ถูกต้อง (Invalid Thai ID checksum)');
+                }
+
+                // Validate Laser Code if provided
+                if (data.laserCode && !validateLaserCode(data.laserCode)) {
+                    throw new Error('เลข Laser Code ไม่ถูกต้อง');
+                }
+
+                // Check ID duplicate
+                const idCardHashValue = hash(idCard);
+                const existingID = await UserModel.findOne({ idCardHash: idCardHashValue });
+                if (existingID) throw new Error('เลขบัตรประชาชนนี้ถูกลงทะเบียนแล้ว');
+
+                userData = {
+                    ...userData,
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    idCard: idCard,
+                    laserCode: data.laserCode,
+                    idCardImage: data.idCardImage,
+                    farmerType: 'INDIVIDUAL',
+                    address: data.address,
+                    province: data.province,
+                    district: data.district,
+                    subdistrict: data.subdistrict,
+                    zipCode: data.zipCode,
+                };
+                break;
+
+            case 'JURISTIC':
+                const taxId = data.taxId || data.identifier;
+
+                // Check Tax ID format (13 digits)
+                if (!/^\d{13}$/.test(taxId)) {
+                    throw new Error('เลขทะเบียนนิติบุคคลต้องมี 13 หลัก');
+                }
+
+                // Check Tax ID duplicate
+                const taxIdHashValue = hash(taxId);
+                const existingTax = await UserModel.findOne({ taxIdHash: taxIdHashValue });
+                if (existingTax) throw new Error('เลขทะเบียนนิติบุคคลนี้ถูกลงทะเบียนแล้ว');
+
+                userData = {
+                    ...userData,
+                    companyName: data.companyName,
+                    taxId: taxId,
+                    representativeName: data.representativeName,
+                    representativePosition: data.representativePosition,
+                    farmerType: 'CORPORATE',
+                    address: data.address,
+                    province: data.province,
+                };
+                break;
+
+            case 'COMMUNITY_ENTERPRISE':
+                const ceNo = data.communityRegistrationNo || data.identifier;
+
+                // Check CE No duplicate
+                const ceHashValue = hash(ceNo);
+                const existingCE = await UserModel.findOne({ communityRegistrationNoHash: ceHashValue });
+                if (existingCE) throw new Error('เลขทะเบียนวิสาหกิจชุมชนนี้ถูกลงทะเบียนแล้ว');
+
+                userData = {
+                    ...userData,
+                    communityName: data.communityName,
+                    communityRegistrationNo: ceNo,
+                    representativeName: data.representativeName,
+                    farmerType: 'COMMUNITY_ENTERPRISE',
+                    address: data.address,
+                    province: data.province,
+                };
+                break;
+
+            default:
+                throw new Error('ประเภทบัญชีไม่ถูกต้อง');
+        }
+
+        // Create User
+        const user = new UserModel(userData);
         await user.save();
-        console.log('[AuthService] Use Created:', user._id);
+        console.log('[AuthService] User Created:', user._id);
 
         return user;
     }
 
     /**
-     * V2 Login Logic
-     * Improved error messages per Apple QA feedback
+     * V2 Login Logic (Multi-Account Type Support)
      */
-    async login(email, password) {
-        // 1. Check if user exists
-        const user = await UserModel.findOne({ email: email.toLowerCase() }).select('+password');
+    async login(identifier, password, accountType = null) {
+        let user;
+
+        // Determine lookup method based on identifier format or accountType
+        if (accountType === 'STAFF' || identifier.includes('@')) {
+            // Email login
+            user = await UserModel.findOne({ email: identifier.toLowerCase() }).select('+password');
+        } else if (accountType === 'JURISTIC') {
+            // Tax ID lookup
+            const taxIdHashValue = hash(identifier);
+            user = await UserModel.findOne({ taxIdHash: taxIdHashValue }).select('+password');
+        } else if (accountType === 'COMMUNITY_ENTERPRISE') {
+            // CE No lookup
+            const ceHashValue = hash(identifier);
+            user = await UserModel.findOne({ communityRegistrationNoHash: ceHashValue }).select('+password');
+        } else {
+            // Thai ID lookup (INDIVIDUAL or auto-detect)
+            const idCardHashValue = hash(identifier);
+            user = await UserModel.findOne({ idCardHash: idCardHashValue }).select('+password');
+        }
+
         if (!user) {
-            const error = new Error('ไม่พบบัญชีผู้ใช้นี้ในระบบ (User not found)');
+            const error = new Error('ไม่พบบัญชีผู้ใช้นี้ในระบบ');
             error.code = 'USER_NOT_FOUND';
             throw error;
         }
 
-        // 2. Check account status
+        // Check account status
         if (user.status === 'SUSPENDED') {
             const error = new Error('บัญชีถูกระงับการใช้งาน กรุณาติดต่อเจ้าหน้าที่');
             error.code = 'ACCOUNT_SUSPENDED';
@@ -76,23 +160,23 @@ class AuthService {
             throw error;
         }
 
-        // 3. Check password
+        // Check password
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
-            const error = new Error('รหัสผ่านไม่ถูกต้อง (Incorrect password)');
+            const error = new Error('รหัสผ่านไม่ถูกต้อง');
             error.code = 'INVALID_PASSWORD';
             throw error;
         }
 
-        // 4. Update last login
+        // Update last login
         user.lastLoginAt = new Date();
-        user.loginAttempts = 0; // Reset on successful login
+        user.loginAttempts = 0;
         await user.save();
 
-        // 5. Generate token
+        // Generate token
         const token = jwtSecurity.generateToken({
             id: user._id,
-            email: user.email,
+            accountType: user.accountType,
             role: user.role
         });
 

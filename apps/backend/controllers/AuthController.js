@@ -16,13 +16,41 @@ class AuthController {
                 idCardImage // Add image path to body
             };
 
-            // Basic Validation
-            if (!req.body.email || !req.body.password || !req.body.firstName) {
+            const { accountType = 'INDIVIDUAL' } = req.body;
+
+            // Basic Validation based on account type
+            let isValid = false;
+            let errorMessage = 'Missing required fields';
+
+            switch (accountType) {
+                case 'INDIVIDUAL':
+                    isValid = req.body.password && req.body.phoneNumber &&
+                        (req.body.idCard || req.body.identifier) &&
+                        req.body.firstName && req.body.lastName;
+                    errorMessage = 'INDIVIDUAL requires: idCard/identifier, password, phoneNumber, firstName, lastName';
+                    break;
+                case 'JURISTIC':
+                    isValid = req.body.password && req.body.phoneNumber &&
+                        (req.body.taxId || req.body.identifier) &&
+                        req.body.companyName;
+                    errorMessage = 'JURISTIC requires: taxId/identifier, password, phoneNumber, companyName';
+                    break;
+                case 'COMMUNITY_ENTERPRISE':
+                    isValid = req.body.password && req.body.phoneNumber &&
+                        (req.body.communityRegistrationNo || req.body.identifier) &&
+                        req.body.communityName;
+                    errorMessage = 'COMMUNITY_ENTERPRISE requires: communityRegistrationNo/identifier, password, phoneNumber, communityName';
+                    break;
+                default:
+                    errorMessage = 'Invalid accountType: must be INDIVIDUAL, JURISTIC, or COMMUNITY_ENTERPRISE';
+            }
+
+            if (!isValid) {
                 // Cleanup file if validation fails early
                 if (req.file && req.file.path) fs.unlink(req.file.path, () => { });
                 return res.status(400).json({
                     success: false,
-                    error: 'Missing required fields'
+                    error: errorMessage
                 });
             }
 
@@ -30,7 +58,7 @@ class AuthController {
 
             res.status(201).json({
                 success: true,
-                message: 'Registration Successful',
+                message: 'ลงทะเบียนสำเร็จ',
                 data: { user }
             });
 
@@ -44,9 +72,6 @@ class AuthController {
                 });
             }
 
-            // Log stack trace only if strictly needed, keeping logs clean for now
-            // console.error(error.stack);
-
             res.status(400).json({
                 success: false,
                 error: error.message
@@ -56,16 +81,19 @@ class AuthController {
 
     async login(req, res) {
         try {
-            const { email, password } = req.body;
+            const { email, password, accountType, identifier } = req.body;
 
-            if (!email || !password) {
+            // Support both old email flow and new identifier flow
+            const loginId = identifier || email;
+
+            if (!loginId || !password) {
                 return res.status(400).json({
                     success: false,
-                    error: 'Email and password are required'
+                    error: 'Identifier and password are required'
                 });
             }
 
-            const result = await AuthService.login(email, password);
+            const result = await AuthService.login(loginId, password, accountType);
 
             res.status(200).json({
                 success: true,

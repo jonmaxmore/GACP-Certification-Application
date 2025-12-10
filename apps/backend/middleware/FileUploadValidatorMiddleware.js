@@ -45,6 +45,11 @@ const MAGIC_BYTES = {
   webp: [
     [0x52, 0x49, 0x46, 0x46], // Check first 4 bytes (RIFF), then check bytes 8-11 for WEBP
   ],
+  // HEIC/HEIF (iPhone): ftyp signature at offset 4
+  heic: [
+    // Check for ftyp box with heic, heix, hevc, hevx brands
+    // Format: ....ftypheic or ....ftypMIF1
+  ],
   // ZIP: PK (50 4B)
   zip: [
     [0x50, 0x4b, 0x03, 0x04], // ZIP local file header
@@ -87,6 +92,14 @@ const ALLOWED_FILE_TYPES = {
     maxSize: 50 * 1024 * 1024, // 50 MB
     category: 'archive',
   },
+  // HEIC/HEIF: iPhone High Efficiency Image Format (Apple QA Requirement)
+  heic: {
+    mimeTypes: ['image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence'],
+    extensions: ['.heic', '.heif'],
+    maxSize: 10 * 1024 * 1024, // 10 MB (iPhone photos can be larger)
+    category: 'image',
+    requiresConversion: true, // Flag for backend to convert to JPEG
+  },
 };
 
 /**
@@ -127,6 +140,19 @@ function detectFileType(buffer) {
         buffer[11] === 0x50
       ) {
         return 'webp';
+      }
+    } else if (fileType === 'heic') {
+      // HEIC/HEIF: Check for ftyp box at offset 4 with heic/mif1/msf1 brand
+      // Format: [size:4bytes][ftyp:4bytes][brand:4bytes]
+      if (buffer.length >= 12) {
+        const ftyp = buffer.toString('ascii', 4, 8);
+        if (ftyp === 'ftyp') {
+          const brand = buffer.toString('ascii', 8, 12).toLowerCase();
+          // Common HEIC brands: heic, heix, hevc, hevx, mif1, msf1
+          if (['heic', 'heix', 'hevc', 'hevx', 'mif1', 'msf1'].includes(brand)) {
+            return 'heic';
+          }
+        }
       }
     } else if (checkMagicBytes(buffer, magicBytesList)) {
       return fileType;

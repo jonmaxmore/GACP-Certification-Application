@@ -64,6 +64,8 @@ class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
     String? notifyNumber,
     List<String>? licenses,
     String? licenseNumber,
+    String? licenseType,
+    String? licenseExpiry,
   }) {
     final currentLicense = state.licenseInfo ?? const LegalLicense();
     state = state.copyWith(
@@ -72,8 +74,25 @@ class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
         notifyNumber: notifyNumber,
         licenses: licenses,
         licenseNumber: licenseNumber,
+        licenseType: licenseType,
+        licenseExpiry: licenseExpiry,
       ),
     );
+  }
+
+  /// Generic field update for dynamic form fields
+  void updateField(String fieldName, dynamic value) {
+    switch (fieldName) {
+      case 'hasGapHistory':
+        state = state.copyWith(hasGapHistory: value as bool?);
+        break;
+      case 'gapCertificateNumber':
+        state = state.copyWith(gapCertificateNumber: value as String?);
+        break;
+      default:
+        // For unknown fields, log a warning (could add more fields as needed)
+        break;
+    }
   }
 
   void updateReplacementReason({

@@ -133,6 +133,10 @@ class GACPApplication {
   // --- Step 8: signature ---
   final String? signatureBase64;
 
+  // --- Group B: GAP/Organic History ---
+  final bool? hasGapHistory;
+  final String? gapCertificateNumber;
+
   const GACPApplication({
     this.applicationId,
     this.establishmentId,
@@ -147,6 +151,8 @@ class GACPApplication {
     this.acceptedStandards = false,
     this.consentedPDPA = false,
     this.signatureBase64,
+    this.hasGapHistory,
+    this.gapCertificateNumber,
   });
 
   GACPApplication copyWith({
@@ -163,6 +169,8 @@ class GACPApplication {
     bool? acceptedStandards,
     bool? consentedPDPA,
     String? signatureBase64,
+    bool? hasGapHistory,
+    String? gapCertificateNumber,
   }) {
     return GACPApplication(
       applicationId: applicationId ?? this.applicationId,
@@ -178,6 +186,8 @@ class GACPApplication {
       acceptedStandards: acceptedStandards ?? this.acceptedStandards,
       consentedPDPA: consentedPDPA ?? this.consentedPDPA,
       signatureBase64: signatureBase64 ?? this.signatureBase64,
+      hasGapHistory: hasGapHistory ?? this.hasGapHistory,
+      gapCertificateNumber: gapCertificateNumber ?? this.gapCertificateNumber,
     );
   }
 
@@ -304,12 +314,16 @@ class LegalLicense {
   final String notifyNumber; // เลขจดแจ้ง
   final List<String> licenses; // PT11, PT13, PT16
   final String licenseNumber; // Number for the selected license
+  final String? licenseType; // BhT 11, BhT 13, BhT 16
+  final String? licenseExpiry; // Expiry date string
 
   const LegalLicense({
     this.plantingStatus = 'Notify',
     this.notifyNumber = '',
     this.licenses = const [],
     this.licenseNumber = '',
+    this.licenseType,
+    this.licenseExpiry,
   });
 
   LegalLicense copyWith({
@@ -317,12 +331,16 @@ class LegalLicense {
     String? notifyNumber,
     List<String>? licenses,
     String? licenseNumber,
+    String? licenseType,
+    String? licenseExpiry,
   }) {
     return LegalLicense(
       plantingStatus: plantingStatus ?? this.plantingStatus,
       notifyNumber: notifyNumber ?? this.notifyNumber,
       licenses: licenses ?? this.licenses,
       licenseNumber: licenseNumber ?? this.licenseNumber,
+      licenseType: licenseType ?? this.licenseType,
+      licenseExpiry: licenseExpiry ?? this.licenseExpiry,
     );
   }
 
@@ -332,6 +350,8 @@ class LegalLicense {
       'notifyNumber': notifyNumber,
       'licenses': licenses,
       'licenseNumber': licenseNumber,
+      'licenseType': licenseType,
+      'licenseExpiry': licenseExpiry,
     };
   }
 
@@ -341,6 +361,8 @@ class LegalLicense {
       notifyNumber: map['notifyNumber'] ?? '',
       licenses: List<String>.from(map['licenses'] ?? []),
       licenseNumber: map['licenseNumber'] ?? '',
+      licenseType: map['licenseType'],
+      licenseExpiry: map['licenseExpiry'],
     );
   }
 }

@@ -168,8 +168,8 @@ export default function StaffDashboardPage() {
                         <button
                             onClick={() => setActiveTab("documents")}
                             className={`px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === "documents"
-                                    ? "bg-slate-800 text-white"
-                                    : "bg-white text-slate-600 hover:bg-slate-100"
+                                ? "bg-slate-800 text-white"
+                                : "bg-white text-slate-600 hover:bg-slate-100"
                                 }`}
                         >
                             📄 รอตรวจเอกสาร ({pendingDocuments.length})
@@ -177,8 +177,8 @@ export default function StaffDashboardPage() {
                         <button
                             onClick={() => setActiveTab("audits")}
                             className={`px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === "audits"
-                                    ? "bg-slate-800 text-white"
-                                    : "bg-white text-slate-600 hover:bg-slate-100"
+                                ? "bg-slate-800 text-white"
+                                : "bg-white text-slate-600 hover:bg-slate-100"
                                 }`}
                         >
                             🔍 รอตรวจประเมิน ({pendingAudits.length})

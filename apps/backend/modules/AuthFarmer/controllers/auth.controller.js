@@ -39,42 +39,74 @@ class AuthController {
   }
 
   /**
-   * Register new farmer
+   * Register new farmer/company/community
    * POST /api/auth/farmer/register
+   * Supports: INDIVIDUAL (Thai ID), JURISTIC (Tax ID), COMMUNITY_ENTERPRISE
    * @param {import('express').Request} req
    * @param {import('express').Response} res
    */
   async register(req, res) {
     try {
+      const { accountType = 'INDIVIDUAL' } = req.body;
+
       const result = await this.registerUserUseCase.execute({
-        email: req.body.email,
+        // Account type
+        accountType: accountType,
+        identifier: req.body.identifier,
+
+        // Common fields
         password: req.body.password,
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
         phoneNumber: req.body.phoneNumber,
-        idCard: req.body.idCard,
-        idCardImage: req.file ? req.file.path : null,
-        laserCode: req.body.laserCode,
+        email: req.body.email,
         address: req.body.address,
         province: req.body.province,
         district: req.body.district,
         subdistrict: req.body.subDistrict,
         zipCode: req.body.postalCode || req.body.zipCode,
+
+        // INDIVIDUAL fields
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        idCard: req.body.idCard || req.body.identifier,
+        idCardImage: req.file ? req.file.path : null,
+        laserCode: req.body.laserCode,
+
+        // JURISTIC fields
+        companyName: req.body.companyName,
+        taxId: req.body.taxId || (accountType === 'JURISTIC' ? req.body.identifier : null),
+        representativeName: req.body.representativeName,
+        representativePosition: req.body.representativePosition,
+
+        // COMMUNITY_ENTERPRISE fields
+        communityName: req.body.communityName,
+        communityRegistrationNo: req.body.communityRegistrationNo || (accountType === 'COMMUNITY_ENTERPRISE' ? req.body.identifier : null),
+
         metadata: req.body.metadata,
       });
 
+      // Build response based on account type
+      const userData = {
+        id: result.user.id,
+        accountType: result.user.accountType || accountType,
+        status: result.user.status,
+        isEmailVerified: result.user.isEmailVerified,
+      };
+
+      // Add name based on account type
+      if (accountType === 'INDIVIDUAL') {
+        userData.firstName = result.user.firstName;
+        userData.lastName = result.user.lastName;
+      } else if (accountType === 'JURISTIC') {
+        userData.companyName = result.user.companyName;
+      } else if (accountType === 'COMMUNITY_ENTERPRISE') {
+        userData.communityName = result.user.communityName;
+      }
+
       return res.status(201).json({
         success: true,
-        message: 'User registered successfully. Please verify your email.',
+        message: 'ลงทะเบียนสำเร็จ กรุณายืนยันอีเมล (ถ้ามี)',
         data: {
-          user: {
-            id: result.user.id,
-            email: result.user.email,
-            firstName: result.user.firstName,
-            lastName: result.user.lastName,
-            status: result.user.status,
-            isEmailVerified: result.user.isEmailVerified,
-          },
+          user: userData,
         },
         verificationToken: result.verificationToken,
       });

@@ -1,6 +1,7 @@
 /**
  * Encryption Utilities
  * Uses AES-256-CBC for reversible encryption
+ * Uses SHA-256 for deterministic hashing (for lookups)
  */
 
 const crypto = require('crypto');
@@ -14,7 +15,7 @@ const SECRET = process.env.ENCRYPTION_KEY || 'default_secr_32_bytes_key_123456';
 const KEY = crypto.createHash('sha256').update(String(SECRET)).digest();
 
 /**
- * Encrypt text
+ * Encrypt text (reversible)
  * @param {string} text - Text to encrypt
  * @returns {string} Encrypted text in format iv:encryptedData
  */
@@ -60,7 +61,20 @@ function decrypt(text) {
     }
 }
 
+/**
+ * Hash text (deterministic, non-reversible)
+ * Used for duplicate detection where we need to compare without decryption
+ * @param {string} text - Text to hash
+ * @returns {string} SHA-256 hash of the text
+ */
+function hash(text) {
+    if (!text) return null;
+    return crypto.createHash('sha256').update(String(text)).digest('hex');
+}
+
 module.exports = {
     encrypt,
     decrypt,
+    hash,
 };
+

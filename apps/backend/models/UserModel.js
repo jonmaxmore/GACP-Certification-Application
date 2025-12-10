@@ -6,7 +6,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const logger = require('../shared/logger');
-const { encrypt, decrypt } = require('../shared/encryption');
+const { encrypt, decrypt, hash } = require('../shared/encryption');
 
 const userSchema = new mongoose.Schema(
   {
@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema(
       trim: true,
       length: 13,
       select: false, // Privacy: Exclude from default queries
+    },
+    idCardHash: {
+      type: String,
+      index: true, // Indexed for duplicate detection
     },
     idCardImage: {
       type: String,
@@ -145,7 +149,9 @@ userSchema.virtual('fullName').get(function () {
 userSchema.pre('save', async function (next) {
   // Encrypt idCard if modified (AES-256-CBC)
   if (this.isModified('idCard') && this.idCard) {
+    // Store hash BEFORE encryption for duplicate detection
     if (!this.idCard.includes(':')) {
+      this.idCardHash = hash(this.idCard);
       this.idCard = encrypt(this.idCard);
     }
   }

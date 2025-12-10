@@ -1,6 +1,7 @@
 const UserModel = require('../models/UserModel');
 const jwtSecurity = require('../config/JwtSecurity');
 const { validateThaiID, validateLaserCode } = require('../utils/validators');
+const { hash } = require('../shared/encryption');
 
 class AuthService {
     /**
@@ -24,7 +25,9 @@ class AuthService {
         const existingEmail = await UserModel.findOne({ email: data.email.toLowerCase() });
         if (existingEmail) throw new Error('Email is already registered');
 
-        const existingID = await UserModel.findOne({ idCard: data.idCard });
+        // Check idCard by hash (since idCard is encrypted in DB)
+        const idCardHashValue = hash(data.idCard);
+        const existingID = await UserModel.findOne({ idCardHash: idCardHashValue });
         if (existingID) throw new Error('ID Card is already registered');
 
         // 4. Create User

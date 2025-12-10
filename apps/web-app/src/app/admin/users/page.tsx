@@ -14,6 +14,12 @@ interface StaffUser {
     createdAt: string;
 }
 
+const STAFF_ROLES = [
+    { value: "REVIEWER_AUDITOR", label: "ผู้ตรวจเอกสาร/ตรวจประเมิน", icon: "📋", color: "blue" },
+    { value: "SCHEDULER", label: "เจ้าหน้าที่จัดคิว", icon: "📅", color: "purple" },
+    { value: "ADMIN", label: "ผู้ดูแลระบบ", icon: "⚙️", color: "amber" },
+];
+
 export default function AdminUsersPage() {
     const router = useRouter();
     const [currentUser, setCurrentUser] = useState<StaffUser | null>(null);
@@ -26,7 +32,7 @@ export default function AdminUsersPage() {
     const [newEmail, setNewEmail] = useState("");
     const [newFirstName, setNewFirstName] = useState("");
     const [newLastName, setNewLastName] = useState("");
-    const [newRole, setNewRole] = useState("DTAM_REVIEWER");
+    const [newRole, setNewRole] = useState("REVIEWER_AUDITOR");
     const [newPassword, setNewPassword] = useState("");
 
     useEffect(() => {
@@ -40,7 +46,7 @@ export default function AdminUsersPage() {
 
         try {
             const parsedUser = JSON.parse(userData);
-            if (!["DTAM_ADMIN", "SUPER_ADMIN"].includes(parsedUser.role)) {
+            if (!["ADMIN", "SUPER_ADMIN"].includes(parsedUser.role)) {
                 router.push("/staff/dashboard");
                 return;
             }
@@ -51,9 +57,9 @@ export default function AdminUsersPage() {
 
         // Mock users data
         setUsers([
-            { id: "1", email: "reviewer1@dtam.go.th", firstName: "สมชาย", lastName: "รักงาน", role: "DTAM_REVIEWER", status: "ACTIVE", createdAt: "2024-01-15" },
-            { id: "2", email: "inspector1@dtam.go.th", firstName: "สมหญิง", lastName: "ใจเย็น", role: "DTAM_INSPECTOR", status: "ACTIVE", createdAt: "2024-02-20" },
-            { id: "3", email: "admin@dtam.go.th", firstName: "ผู้ดูแล", lastName: "ระบบ", role: "DTAM_ADMIN", status: "ACTIVE", createdAt: "2024-01-01" },
+            { id: "1", email: "somchai@dtam.go.th", firstName: "สมชาย", lastName: "รักงาน", role: "REVIEWER_AUDITOR", status: "ACTIVE", createdAt: "2024-01-15" },
+            { id: "2", email: "somying@dtam.go.th", firstName: "สมหญิง", lastName: "ใจเย็น", role: "SCHEDULER", status: "ACTIVE", createdAt: "2024-02-20" },
+            { id: "3", email: "admin@dtam.go.th", firstName: "ผู้ดูแล", lastName: "ระบบ", role: "ADMIN", status: "ACTIVE", createdAt: "2024-01-01" },
         ]);
     }, [router]);
 
@@ -63,7 +69,7 @@ export default function AdminUsersPage() {
         setIsLoading(true);
 
         try {
-            // TODO: Call API to create staff user
+            // TODO: Call API
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api"}/v2/admin/users`,
                 {
@@ -88,7 +94,7 @@ export default function AdminUsersPage() {
                 throw new Error(data.message || "สร้างบัญชีไม่สำเร็จ");
             }
 
-            // Add to list (in real app, would refetch)
+            // Add to list
             setUsers([
                 ...users,
                 {
@@ -106,7 +112,7 @@ export default function AdminUsersPage() {
             setNewEmail("");
             setNewFirstName("");
             setNewLastName("");
-            setNewRole("DTAM_REVIEWER");
+            setNewRole("REVIEWER_AUDITOR");
             setNewPassword("");
             setShowCreateModal(false);
         } catch (err) {
@@ -117,18 +123,19 @@ export default function AdminUsersPage() {
     };
 
     const getRoleBadge = (role: string) => {
-        switch (role) {
-            case "DTAM_REVIEWER":
-                return <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">ผู้ตรวจสอบเอกสาร</span>;
-            case "DTAM_INSPECTOR":
-                return <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">ผู้ตรวจสอบพื้นที่</span>;
-            case "DTAM_ADMIN":
-                return <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs">ผู้ดูแลระบบ</span>;
-            case "SUPER_ADMIN":
-                return <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">ผู้ดูแลสูงสุด</span>;
-            default:
-                return <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">{role}</span>;
-        }
+        const roleInfo = STAFF_ROLES.find(r => r.value === role);
+        if (!roleInfo) return <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">{role}</span>;
+
+        const colors: Record<string, string> = {
+            blue: "bg-blue-100 text-blue-700",
+            purple: "bg-purple-100 text-purple-700",
+            amber: "bg-amber-100 text-amber-700",
+        };
+        return (
+            <span className={`px-2 py-1 ${colors[roleInfo.color]} rounded-full text-xs`}>
+                {roleInfo.icon} {roleInfo.label}
+            </span>
+        );
     };
 
     if (!currentUser) {
@@ -176,16 +183,16 @@ export default function AdminUsersPage() {
                         <p className="text-sm text-slate-500">เจ้าหน้าที่ทั้งหมด</p>
                     </div>
                     <div className="bg-white rounded-xl p-4 shadow">
-                        <p className="text-2xl font-bold text-blue-600">{users.filter(u => u.role === "DTAM_REVIEWER").length}</p>
-                        <p className="text-sm text-slate-500">ผู้ตรวจสอบเอกสาร</p>
+                        <p className="text-2xl font-bold text-blue-600">{users.filter(u => u.role === "REVIEWER_AUDITOR").length}</p>
+                        <p className="text-sm text-slate-500">📋 ผู้ตรวจเอกสาร/ประเมิน</p>
                     </div>
                     <div className="bg-white rounded-xl p-4 shadow">
-                        <p className="text-2xl font-bold text-purple-600">{users.filter(u => u.role === "DTAM_INSPECTOR").length}</p>
-                        <p className="text-sm text-slate-500">ผู้ตรวจสอบพื้นที่</p>
+                        <p className="text-2xl font-bold text-purple-600">{users.filter(u => u.role === "SCHEDULER").length}</p>
+                        <p className="text-sm text-slate-500">📅 เจ้าหน้าที่จัดคิว</p>
                     </div>
                     <div className="bg-white rounded-xl p-4 shadow">
-                        <p className="text-2xl font-bold text-amber-600">{users.filter(u => u.role === "DTAM_ADMIN").length}</p>
-                        <p className="text-sm text-slate-500">ผู้ดูแลระบบ</p>
+                        <p className="text-2xl font-bold text-amber-600">{users.filter(u => u.role === "ADMIN").length}</p>
+                        <p className="text-sm text-slate-500">⚙️ ผู้ดูแลระบบ</p>
                     </div>
                 </div>
 
@@ -210,9 +217,7 @@ export default function AdminUsersPage() {
                                             <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-lg">
                                                 👤
                                             </div>
-                                            <div>
-                                                <p className="font-medium text-slate-800">{user.firstName} {user.lastName}</p>
-                                            </div>
+                                            <p className="font-medium text-slate-800">{user.firstName} {user.lastName}</p>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-sm text-slate-600">{user.email}</td>
@@ -222,9 +227,7 @@ export default function AdminUsersPage() {
                                     </td>
                                     <td className="px-6 py-4 text-sm text-slate-500">{user.createdAt}</td>
                                     <td className="px-6 py-4">
-                                        <button className="text-slate-400 hover:text-slate-600">
-                                            ⚙️
-                                        </button>
+                                        <button className="text-slate-400 hover:text-slate-600">⚙️</button>
                                     </td>
                                 </tr>
                             ))}
@@ -239,15 +242,11 @@ export default function AdminUsersPage() {
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
                         <div className="px-6 py-4 border-b flex justify-between items-center">
                             <h3 className="text-lg font-semibold">สร้างบัญชีเจ้าหน้าที่ใหม่</h3>
-                            <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600">
-                                ✕
-                            </button>
+                            <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
                         </div>
                         <form onSubmit={handleCreateUser} className="p-6 space-y-4">
                             {error && (
-                                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                                    ⚠️ {error}
-                                </div>
+                                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">⚠️ {error}</div>
                             )}
 
                             <div className="grid grid-cols-2 gap-4">
@@ -292,9 +291,11 @@ export default function AdminUsersPage() {
                                     onChange={(e) => setNewRole(e.target.value)}
                                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500"
                                 >
-                                    <option value="DTAM_REVIEWER">ผู้ตรวจสอบเอกสาร</option>
-                                    <option value="DTAM_INSPECTOR">ผู้ตรวจสอบพื้นที่</option>
-                                    <option value="DTAM_ADMIN">ผู้ดูแลระบบ</option>
+                                    {STAFF_ROLES.map(role => (
+                                        <option key={role.value} value={role.value}>
+                                            {role.icon} {role.label}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 

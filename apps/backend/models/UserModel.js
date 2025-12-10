@@ -136,7 +136,20 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['FARMER', 'PREMIUM_FARMER', 'INSPECTOR', 'DTAM_ADMIN', 'OPERATOR', 'SUPER_ADMIN'],
+      enum: [
+        // Farmer roles
+        'FARMER',
+        'PREMIUM_FARMER',
+        // Staff roles (new)
+        'REVIEWER_AUDITOR',  // ผู้ตรวจเอกสาร + ผู้ตรวจประเมิน (คนเดียวกัน)
+        'SCHEDULER',         // เจ้าหน้าที่จัดคิว
+        'ADMIN',             // ผู้ดูแลระบบ
+        'SUPER_ADMIN',       // ผู้ดูแลสูงสุด
+        // Legacy (deprecated)
+        'INSPECTOR',
+        'DTAM_ADMIN',
+        'OPERATOR',
+      ],
       default: 'FARMER',
     },
     status: {

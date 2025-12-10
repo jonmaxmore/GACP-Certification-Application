@@ -37,9 +37,11 @@ export default function StaffLoginPage() {
                 throw new Error(data.message || "เข้าสู่ระบบไม่สำเร็จ");
             }
 
-            // Verify this is a staff account
             const user = data.data.user;
-            if (!["DTAM_REVIEWER", "DTAM_INSPECTOR", "DTAM_ADMIN", "SUPER_ADMIN"].includes(user.role)) {
+
+            // Verify staff role
+            const staffRoles = ['REVIEWER_AUDITOR', 'SCHEDULER', 'ADMIN', 'SUPER_ADMIN'];
+            if (!staffRoles.includes(user.role)) {
                 throw new Error("บัญชีนี้ไม่ใช่บัญชีเจ้าหน้าที่");
             }
 
@@ -48,7 +50,7 @@ export default function StaffLoginPage() {
             localStorage.setItem("staff_user", JSON.stringify(user));
 
             // Redirect based on role
-            if (user.role === "DTAM_ADMIN" || user.role === "SUPER_ADMIN") {
+            if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
                 router.push("/admin");
             } else {
                 router.push("/staff/dashboard");
@@ -94,7 +96,6 @@ export default function StaffLoginPage() {
 
                     {/* Login Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Email Input */}
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">
                                 อีเมลเจ้าหน้าที่
@@ -109,7 +110,6 @@ export default function StaffLoginPage() {
                             />
                         </div>
 
-                        {/* Password Input */}
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">
                                 รหัสผ่าน
@@ -133,7 +133,6 @@ export default function StaffLoginPage() {
                             </div>
                         </div>
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={isLoading}
@@ -153,20 +152,17 @@ export default function StaffLoginPage() {
                         </button>
                     </form>
 
-                    {/* Help Text */}
                     <div className="mt-6 text-center text-sm text-slate-400">
                         <p>หากยังไม่มีบัญชี กรุณาติดต่อผู้ดูแลระบบ</p>
                     </div>
                 </div>
 
-                {/* Back Link */}
                 <div className="mt-6 text-center">
                     <Link href="/" className="text-slate-400 hover:text-white transition-colors text-sm">
                         ← กลับหน้าหลัก
                     </Link>
                 </div>
 
-                {/* Footer */}
                 <div className="mt-8 text-center text-sm text-slate-500">
                     <p>🔒 ระบบรักษาความปลอดภัยระดับสูง</p>
                     <p className="mt-1">Staff Portal v2.6.0</p>

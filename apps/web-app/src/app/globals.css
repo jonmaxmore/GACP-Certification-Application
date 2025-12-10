@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #1B5E20;
+  --primary-light: #4CAF50;
+  --primary-dark: #0D3612;
+  --background: #F5F7FA;
+  --card: #FFFFFF;
+  --text: #1A1A1A;
+  --text-muted: #6B7280;
+  --border: #E5E7EB;
+}
+
+* {
+  font-family: var(--font-sarabun), system-ui, -apple-system, sans-serif;
+}
+
+body {
+  color: var(--text);
+  background: var(--background);
+}
+
+/* Thai-friendly input styling */
+input, select, textarea {
+  font-family: inherit;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}

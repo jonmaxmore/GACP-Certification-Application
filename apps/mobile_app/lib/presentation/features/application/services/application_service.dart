@@ -28,7 +28,7 @@ class ApplicationService {
         'siteInfo': {
           'address': appData.location.address,
           'coordinates':
-              "${appData.location.lat ?? 0},${appData.location.lng ?? 0}",
+              '${appData.location.lat ?? 0},${appData.location.lng ?? 0}',
         },
         // All specific GACP data goes into the flexible 'formData' map
         'formData': appData.toMap(),

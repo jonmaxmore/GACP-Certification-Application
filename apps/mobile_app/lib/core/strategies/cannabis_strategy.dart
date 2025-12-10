@@ -22,7 +22,7 @@ class CannabisStrategy implements PlantStrategy {
           labelText: 'ประเภทใบอนุญาต BhT*',
           border: OutlineInputBorder(),
         ),
-        value: state.licenseType,
+        initialValue: state.licenseType,
         items: ['BhT 11', 'BhT 13', 'BhT 16']
             .map((e) => DropdownMenuItem(value: e, child: Text(e)))
             .toList(),
@@ -69,18 +69,18 @@ class CannabisStrategy implements PlantStrategy {
       BuildContext context, ApplicationFormNotifier notifier, dynamic state) {
     final security = state.securityMeasures;
     return [
-      _buildCheckItem("มีรั้วรอบขอบชิด (Secure Fence)", security.hasFence,
+      _buildCheckItem('มีรั้วรอบขอบชิด (Secure Fence)', security.hasFence,
           (v) => notifier.updateSecurity(hasFence: v),
           isRequired: true),
-      _buildCheckItem("มีกล้องวงจรปิด (CCTV Medical Grade)", security.hasCCTV,
+      _buildCheckItem('มีกล้องวงจรปิด (CCTV Medical Grade)', security.hasCCTV,
           (v) => notifier.updateSecurity(hasCCTV: v),
           isRequired: true),
       _buildCheckItem(
-          "มีการควบคุมการเข้า-ออก (Access Control)",
+          'มีการควบคุมการเข้า-ออก (Access Control)',
           security.hasAccessControl,
           (v) => notifier.updateSecurity(hasAccessControl: v),
           isRequired: true),
-      _buildCheckItem("การแบ่งโซนพื้นที่ (Zoning)", security.hasZoning,
+      _buildCheckItem('การแบ่งโซนพื้นที่ (Zoning)', security.hasZoning,
           (v) => notifier.updateSecurity(hasZoning: v),
           isRequired: false),
     ];
@@ -103,17 +103,17 @@ class CannabisStrategy implements PlantStrategy {
   @override
   List<String> getPlantPartsOptions() {
     return [
-      "Inflorescence (ช่อดอกแห้ง)",
-      "Fresh Flower (ดอกสด)",
-      "Leaf (ใบ)",
-      "Seed (เมล็ด)",
-      "Stem (ลำต้น)",
-      "Root (ราก)"
+      'Inflorescence (ช่อดอกแห้ง)',
+      'Fresh Flower (ดอกสด)',
+      'Leaf (ใบ)',
+      'Seed (เมล็ด)',
+      'Stem (ลำต้น)',
+      'Root (ราก)'
     ];
   }
 
   @override
-  String getYieldLabel() => "ผลผลิตคาดการณ์ (Dried Flower Kg)";
+  String getYieldLabel() => 'ผลผลิตคาดการณ์ (Dried Flower Kg)';
 
   @override
   bool get usesTreeUnit => true;
@@ -181,7 +181,7 @@ class CannabisStrategy implements PlantStrategy {
       title: Row(
         children: [
           Expanded(child: Text(title)),
-          if (isRequired) const Text(" *", style: TextStyle(color: Colors.red)),
+          if (isRequired) const Text(' *', style: TextStyle(color: Colors.red)),
         ],
       ),
       value: value,

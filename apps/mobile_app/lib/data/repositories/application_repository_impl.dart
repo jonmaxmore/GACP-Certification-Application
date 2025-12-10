@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -180,7 +181,7 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
       String applicationId, String docType, XFile file) async {
     try {
       final bytes = await file.readAsBytes();
-      FormData formData = FormData.fromMap({
+      final FormData formData = FormData.fromMap({
         'document': MultipartFile.fromBytes(bytes, filename: file.name),
       });
 
@@ -189,7 +190,7 @@ class ApplicationRepositoryImpl implements ApplicationRepository {
         data: formData,
       );
     } catch (e) {
-      print('Failed to upload document $docType: $e');
+      debugPrint('Failed to upload document $docType: $e');
       // Continue uploading other documents even if one fails
     }
   }

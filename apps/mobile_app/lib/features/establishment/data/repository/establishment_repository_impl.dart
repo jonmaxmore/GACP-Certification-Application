@@ -59,7 +59,7 @@ class EstablishmentRepositoryImpl implements EstablishmentRepository {
 
       if (images != null && images.isNotEmpty) {
         for (var file in images) {
-          String fileName = file.path.split('/').last;
+          final String fileName = file.path.split('/').last;
           formData.files.add(MapEntry(
             'images',
             await MultipartFile.fromFile(

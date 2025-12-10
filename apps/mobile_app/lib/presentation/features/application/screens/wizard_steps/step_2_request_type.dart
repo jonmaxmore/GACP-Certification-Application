@@ -20,31 +20,31 @@ class Step2RequestType extends ConsumerWidget {
           context.go('/applications/create/step3');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("กรุณาเลือกประเภทคำขอ")),
+            const SnackBar(content: Text('กรุณาเลือกประเภทคำขอ')),
           );
         }
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("2. ประเภทคำขอ (Request Type)",
+          const Text('2. ประเภทคำขอ (Request Type)',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           const SizedBox(height: 20),
           _TypeOption(
-            title: "คำขอรายใหม่ (New Application)",
-            subtitle: "สำหรับผู้ที่ไม่เคยมีใบรับรอง หรือใบเก่าขาดอายุเกินกำหนด",
+            title: 'คำขอรายใหม่ (New Application)',
+            subtitle: 'สำหรับผู้ที่ไม่เคยมีใบรับรอง หรือใบเก่าขาดอายุเกินกำหนด',
             isSelected: state.type == ServiceType.newApplication,
             onTap: () => notifier.setServiceType(ServiceType.newApplication),
           ),
           _TypeOption(
-            title: "ขอต่ออายุใขรับรอง (Renewal)",
-            subtitle: "สำหรับผู้ที่ใบรับรองใกล้หมดอายุ (ยื่นก่อน 90 วัน)",
+            title: 'ขอต่ออายุใขรับรอง (Renewal)',
+            subtitle: 'สำหรับผู้ที่ใบรับรองใกล้หมดอายุ (ยื่นก่อน 90 วัน)',
             isSelected: state.type == ServiceType.renewal,
             onTap: () => notifier.setServiceType(ServiceType.renewal),
           ),
           _TypeOption(
-            title: "ขอใบแทนใบรับรอง (Replacement)",
-            subtitle: "กรณีใบรับรองสูญหาย หรือชำรุด",
+            title: 'ขอใบแทนใบรับรอง (Replacement)',
+            subtitle: 'กรณีใบรับรองสูญหาย หรือชำรุด',
             isSelected: state.type == ServiceType.replacement,
             onTap: () => notifier.setServiceType(ServiceType.replacement),
           ),

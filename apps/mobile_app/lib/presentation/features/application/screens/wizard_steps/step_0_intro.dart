@@ -15,13 +15,13 @@ class Step0PlantSelection extends ConsumerWidget {
     final plants = plantConfigs.values.toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("เลือกพืชที่ขอรับรอง (Select Plant)")),
+      appBar: AppBar(title: const Text('เลือกพืชที่ขอรับรอง (Select Plant)')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             const Text(
-              "กรุณาเลือกพืชที่ท่านต้องการขอรับรอง GACP",
+              'กรุณาเลือกพืชที่ท่านต้องการขอรับรอง GACP',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 16),
@@ -95,8 +95,8 @@ class _PlantCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4)),
               child: Text(
                 isHighControl
-                    ? "ควบคุมพิเศษ (High)"
-                    : "สมุนไพรทั่วไป (General)",
+                    ? 'ควบคุมพิเศษ (High)'
+                    : 'สมุนไพรทั่วไป (General)',
                 style: TextStyle(
                     fontSize: 10,
                     color: isHighControl

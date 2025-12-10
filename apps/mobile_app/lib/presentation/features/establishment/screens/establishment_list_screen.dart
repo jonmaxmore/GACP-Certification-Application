@@ -83,7 +83,7 @@ class _EstablishmentListScreenState
       ),
     );
 
-    if (confirm == true) {
+    if (confirm ?? false) {
       ref.read(establishmentProvider.notifier).deleteEstablishment(id);
     }
   }
@@ -166,12 +166,12 @@ class _DesktopTable extends StatelessWidget {
             ],
             rows: establishments.map((item) {
               final updatedDate = item.updatedAt != null
-                  ? "${item.updatedAt!.day}/${item.updatedAt!.month}/${item.updatedAt!.year}"
-                  : "-";
+                  ? '${item.updatedAt!.day}/${item.updatedAt!.month}/${item.updatedAt!.year}'
+                  : '-';
 
               return DataRow(cells: [
                 DataCell(Text(
-                  item.licenseNumber ?? "-",
+                  item.licenseNumber ?? '-',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 )),
                 DataCell(Text(item.name)),
@@ -209,7 +209,7 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Logic for status
-    bool isExpired = item.licenseExpiredAt != null &&
+    final bool isExpired = item.licenseExpiredAt != null &&
         item.licenseExpiredAt!.isBefore(DateTime.now());
 
     String label = 'ใช้งานปกติ';

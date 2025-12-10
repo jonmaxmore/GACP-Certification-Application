@@ -49,6 +49,7 @@ dependencies:
   widgetbook: ^3.20.2
   widgetbook_annotation: ^3.9.0
 
+  cross_file: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

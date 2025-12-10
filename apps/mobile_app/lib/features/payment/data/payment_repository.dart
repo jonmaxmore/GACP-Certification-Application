@@ -38,7 +38,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
       final formData = FormData.fromMap(data);
 
       if (slipImage != null) {
-        String fileName = slipImage.path.split('/').last;
+        final String fileName = slipImage.path.split('/').last;
         formData.files.add(MapEntry(
           'slipImage',
           await MultipartFile.fromFile(

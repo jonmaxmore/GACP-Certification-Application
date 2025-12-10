@@ -26,7 +26,7 @@ class _AuditFormScreenState extends ConsumerState<AuditFormScreen> {
   bool _isSubmitting = false;
 
   int get _score {
-    int checked = _checklist.values.where((v) => v).length;
+    final int checked = _checklist.values.where((v) => v).length;
     return ((checked / _checklist.length) * 100).round();
   }
 

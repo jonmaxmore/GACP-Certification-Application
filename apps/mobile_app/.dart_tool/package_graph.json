@@ -8,6 +8,7 @@
       "version": "1.0.0+1",
       "dependencies": [
         "connectivity_plus",
+        "cross_file",
         "dartz",
         "dio",
         "equatable",
@@ -199,6 +200,14 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "cross_file",
+      "version": "0.3.5+1",
+      "dependencies": [
+        "meta",
+        "web"
       ]
     },
     {
@@ -1083,14 +1092,6 @@
         "crypto",
         "path",
         "posix"
-      ]
-    },
-    {
-      "name": "cross_file",
-      "version": "0.3.5+1",
-      "dependencies": [
-        "meta",
-        "web"
       ]
     },
     {

@@ -82,7 +82,7 @@ class DioClient {
         onError: (DioException e, handler) async {
           // Retry Logic for GET requests (Idempotent)
           if (e.requestOptions.method == 'GET' && _shouldRetry(e)) {
-            int retries = e.requestOptions.extra['retries'] ?? 0;
+            final int retries = (e.requestOptions.extra['retries'] as int?) ?? 0;
             if (retries < 3) {
               e.requestOptions.extra['retries'] = retries + 1;
               await Future.delayed(Duration(

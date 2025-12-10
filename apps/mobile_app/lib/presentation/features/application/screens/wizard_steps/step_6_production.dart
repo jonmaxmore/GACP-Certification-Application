@@ -26,7 +26,7 @@ class Step6Production extends ConsumerWidget {
     final plantConfig = plantConfigs[plantId] ?? plantConfigs.values.first;
 
     return WizardScaffold(
-      title: "6. ข้อมูลการผลิต (Production Plan)",
+      title: '6. ข้อมูลการผลิต (Production Plan)',
       onBack: () => context.go('/applications/create/step5'),
       onNext: () {
         if (FormValidator.validateStep6(state.production, plantConfig)) {
@@ -35,7 +35,7 @@ class Step6Production extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 content: Text(
-                    "กรุณากรอกข้อมูลให้ครบถ้วน รวมถึงการจัดการหลังเก็บเกี่ยว (Please fill all fields)")),
+                    'กรุณากรอกข้อมูลให้ครบถ้วน รวมถึงการจัดการหลังเก็บเกี่ยว (Please fill all fields)')),
           );
         }
       },
@@ -44,17 +44,17 @@ class Step6Production extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. Plant Parts
-            const WizardSectionTitle(title: "1. ส่วนของพืชที่ใช้ (Plant Parts Used)"),
+            const WizardSectionTitle(title: '1. ส่วนของพืชที่ใช้ (Plant Parts Used)'),
             _buildPlantPartsSelector(
                 strategy, state.production.plantParts, notifier),
 
             const SizedBox(height: 24),
 
             // 2. Production Plan
-            const WizardSectionTitle(title: "2. แผนการผลิต (Production Plan)"),
+            const WizardSectionTitle(title: '2. แผนการผลิต (Production Plan)'),
             if (isTreeUnit) ...[
               WizardTextInput(
-                  "จำนวนต้นที่ปลูก (Tree Count)",
+                  'จำนวนต้นที่ปลูก (Tree Count)',
                   state.production.treeCount?.toString() ?? '',
                   (v) => notifier.updateProduction(treeCount: int.tryParse(v)),
                   keyboardType: TextInputType.number),
@@ -64,7 +64,7 @@ class Step6Production extends ConsumerWidget {
                   Expanded(
                       flex: 2,
                       child: WizardTextInput(
-                          "ขนาดพื้นที่ (Area Size)",
+                          'ขนาดพื้นที่ (Area Size)',
                           state.production.areaSizeRai?.toString() ?? '',
                           (v) => notifier.updateProduction(
                               areaSizeRai: double.tryParse(v)),
@@ -75,12 +75,12 @@ class Step6Production extends ConsumerWidget {
                     child: DropdownButtonFormField<String>(
                       initialValue: state.production.areaSizeUnit ?? 'Rai',
                       decoration: const InputDecoration(
-                          labelText: "หน่วย (Unit)",
+                          labelText: 'หน่วย (Unit)',
                           border: OutlineInputBorder()),
                       items: const [
-                        DropdownMenuItem(value: "Rai", child: Text("ไร่")),
-                        DropdownMenuItem(value: "Ngan", child: Text("งาน")),
-                        DropdownMenuItem(value: "Wah", child: Text("ตร.วา")),
+                        DropdownMenuItem(value: 'Rai', child: Text('ไร่')),
+                        DropdownMenuItem(value: 'Ngan', child: Text('งาน')),
+                        DropdownMenuItem(value: 'Wah', child: Text('ตร.วา')),
                       ],
                       onChanged: (v) =>
                           notifier.updateProduction(areaSizeUnit: v),
@@ -93,15 +93,15 @@ class Step6Production extends ConsumerWidget {
             const SizedBox(height: 12),
             WizardTextInput(
               strategy.getYieldLabel(),
-              state.production.estimatedYield.toString() == "0.0"
-                  ? ""
+              state.production.estimatedYield.toString() == '0.0'
+                  ? ''
                   : state.production.estimatedYield.toString(),
               (v) =>
                   notifier.updateProduction(estimatedYield: double.tryParse(v)),
               keyboardType: TextInputType.number,
             ),
             WizardTextInput(
-              "รอบการผลิต (Production Cycle - e.g. 3-4 months)",
+              'รอบการผลิต (Production Cycle - e.g. 3-4 months)',
               state.production.productionCycle,
               (v) => notifier.updateProduction(cycle: v),
             ),
@@ -110,7 +110,7 @@ class Step6Production extends ConsumerWidget {
 
             // 3. Traceability / Origin
             const WizardSectionTitle(
-                title: "3. แหล่งที่มา (Seed/Source Origin)"),
+                title: '3. แหล่งที่มา (Seed/Source Origin)'),
             _buildOriginSource(state.production.sourceType,
                 state.production.sourceDetail, notifier),
 
@@ -162,42 +162,42 @@ class Step6Production extends ConsumerWidget {
     return Column(
       children: [
         RadioListTile<String>(
-          title: const Text("นำเข้า (Import)"),
-          value: "Import",
+          title: const Text('นำเข้า (Import)'),
+          value: 'Import',
           groupValue: currentType,
           onChanged: (v) => notifier.updateProduction(sourceType: v),
         ),
-        if (currentType == "Import")
+        if (currentType == 'Import')
           Padding(
               padding: const EdgeInsets.only(left: 32, bottom: 8),
               child: WizardTextInput(
-                  "เลขที่ใบอนุญาตนำเข้า (Import License No)",
+                  'เลขที่ใบอนุญาตนำเข้า (Import License No)',
                   currentDetail,
                   (v) => notifier.updateProduction(sourceDetail: v))),
         RadioListTile<String>(
-          title: const Text("ซื้อจากผู้มีใบอนุญาต (Buy from Licensed Seller)"),
-          value: "Buy",
+          title: const Text('ซื้อจากผู้มีใบอนุญาต (Buy from Licensed Seller)'),
+          value: 'Buy',
           groupValue: currentType,
           onChanged: (v) => notifier.updateProduction(sourceType: v),
         ),
-        if (currentType == "Buy")
+        if (currentType == 'Buy')
           Padding(
               padding: const EdgeInsets.only(left: 32, bottom: 8),
               child: WizardTextInput(
-                  "ชื่อผู้ขาย/เลขใบอนุญาต (Seller Name/License)",
+                  'ชื่อผู้ขาย/เลขใบอนุญาต (Seller Name/License)',
                   currentDetail,
                   (v) => notifier.updateProduction(sourceDetail: v))),
         RadioListTile<String>(
-          title: const Text("เก็บเมล็ด/หัวพันธุ์เอง (Self-Sourced)"),
-          value: "Self",
+          title: const Text('เก็บเมล็ด/หัวพันธุ์เอง (Self-Sourced)'),
+          value: 'Self',
           groupValue: currentType,
           onChanged: (v) => notifier.updateProduction(sourceType: v),
         ),
-        if (currentType == "Self")
+        if (currentType == 'Self')
           Padding(
               padding: const EdgeInsets.only(left: 32, bottom: 8),
               child: WizardTextInput(
-                  "เลข Lot เดิมที่อ้างอิง (Previous Lot No)",
+                  'เลข Lot เดิมที่อ้างอิง (Previous Lot No)',
                   currentDetail,
                   (v) => notifier.updateProduction(sourceDetail: v))),
       ],
@@ -213,14 +213,14 @@ class Step6Production extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const WizardSectionTitle(title: "4. ปัจจัยการผลิต (Farm Inputs)"),
+            const WizardSectionTitle(title: '4. ปัจจัยการผลิต (Farm Inputs)'),
             IconButton(
               icon: const Icon(Icons.add_circle, color: Colors.green),
               onPressed: () => _showAddInputDialog(context, notifier),
             )
           ],
         ),
-        const Text("ระบุปุ๋ย ยา หรือสารเคมีที่ใช้ (List fertilizers/chemicals)",
+        const Text('ระบุปุ๋ย ยา หรือสารเคมีที่ใช้ (List fertilizers/chemicals)',
             style: TextStyle(color: Colors.grey)),
         const SizedBox(height: 8),
         if (inputs.isEmpty)
@@ -230,7 +230,7 @@ class Step6Production extends ConsumerWidget {
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(8)),
             child: const Center(
-                child: Text("ยังไม่มีข้อมูล (No entries)",
+                child: Text('ยังไม่มีข้อมูล (No entries)',
                     style: TextStyle(color: Colors.grey))),
           )
         else
@@ -243,7 +243,7 @@ class Step6Production extends ConsumerWidget {
                 leading:
                     const Icon(LucideIcons.flaskConical, color: Colors.orange),
                 title: Text(item.name),
-                subtitle: Text("${item.type} - Reg:${item.regNo}"),
+                subtitle: Text('${item.type} - Reg:${item.regNo}'),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () => notifier.removeFarmInput(i),
@@ -264,7 +264,7 @@ class Step6Production extends ConsumerWidget {
     showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-              title: const Text("เพิ่มปัจจัยการผลิต (Add Input)"),
+              title: const Text('เพิ่มปัจจัยการผลิต (Add Input)'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -272,28 +272,28 @@ class Step6Production extends ConsumerWidget {
                     initialValue: type,
                     items: const [
                       DropdownMenuItem(
-                          value: "Organic Fertilizer",
-                          child: Text("ปุ๋ยอินทรีย์")),
+                          value: 'Organic Fertilizer',
+                          child: Text('ปุ๋ยอินทรีย์')),
                       DropdownMenuItem(
-                          value: "Chemical Fertilizer",
-                          child: Text("ปุ๋ยเคมี")),
+                          value: 'Chemical Fertilizer',
+                          child: Text('ปุ๋ยเคมี')),
                       DropdownMenuItem(
-                          value: "Bio Control", child: Text("สารชีวภัณฑ์")),
+                          value: 'Bio Control', child: Text('สารชีวภัณฑ์')),
                       DropdownMenuItem(
-                          value: "Hormone", child: Text("ฮอร์โมน/อาหารเสริม")),
+                          value: 'Hormone', child: Text('ฮอร์โมน/อาหารเสริม')),
                     ],
                     onChanged: (v) => type = v!,
                     decoration:
-                        const InputDecoration(labelText: "ประเภท (Type)"),
+                        const InputDecoration(labelText: 'ประเภท (Type)'),
                   ),
                   TextField(
                     decoration: const InputDecoration(
-                        labelText: "ชื่อการค้า (Trade Name)"),
+                        labelText: 'ชื่อการค้า (Trade Name)'),
                     onChanged: (v) => name = v,
                   ),
                   TextField(
                     decoration:
-                        const InputDecoration(labelText: "เลขทะเบียน (Reg No)"),
+                        const InputDecoration(labelText: 'เลขทะเบียน (Reg No)'),
                     onChanged: (v) => regNo = v,
                   ),
                 ],
@@ -301,7 +301,7 @@ class Step6Production extends ConsumerWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text("ยกเลิก (Cancel)"),
+                  child: const Text('ยกเลิก (Cancel)'),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -311,7 +311,7 @@ class Step6Production extends ConsumerWidget {
                       Navigator.pop(ctx);
                     }
                   },
-                  child: const Text("เพิ่ม (Add)"),
+                  child: const Text('เพิ่ม (Add)'),
                 )
               ],
             ));
@@ -324,30 +324,30 @@ class Step6Production extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const WizardSectionTitle(
-            title: "5. การจัดการหลังเก็บเกี่ยว (Post-Harvest)"),
-        const Text("วิธีการลดความชื้น (Drying Method):",
+            title: '5. การจัดการหลังเก็บเกี่ยว (Post-Harvest)'),
+        const Text('วิธีการลดความชื้น (Drying Method):',
             style: TextStyle(fontWeight: FontWeight.bold)),
         RadioListTile<String>(
-          title: const Text("ตากแดดบนแคร่ (Sun Dry)"),
-          value: "Sun Dry",
+          title: const Text('ตากแดดบนแคร่ (Sun Dry)'),
+          value: 'Sun Dry',
           groupValue: plan.dryingMethod,
           onChanged: (v) => notifier.updatePostHarvest(drying: v),
         ),
         RadioListTile<String>(
-          title: const Text("ตู้อบความร้อน (Hot Air Oven)"),
-          value: "Hot Air Oven",
+          title: const Text('ตู้อบความร้อน (Hot Air Oven)'),
+          value: 'Hot Air Oven',
           groupValue: plan.dryingMethod,
           onChanged: (v) => notifier.updatePostHarvest(drying: v),
         ),
         RadioListTile<String>(
-          title: const Text("โรงเรือนพลังงานแสงอาทิตย์ (Solar Dome)"),
-          value: "Solar Dome",
+          title: const Text('โรงเรือนพลังงานแสงอาทิตย์ (Solar Dome)'),
+          value: 'Solar Dome',
           groupValue: plan.dryingMethod,
           onChanged: (v) => notifier.updatePostHarvest(drying: v),
         ),
-        WizardTextInput("ภาชนะบรรจุ (Packaging)", plan.packaging,
+        WizardTextInput('ภาชนะบรรจุ (Packaging)', plan.packaging,
             (v) => notifier.updatePostHarvest(packaging: v)),
-        WizardTextInput("สถานที่เก็บรักษา (Storage)", plan.storage,
+        WizardTextInput('สถานที่เก็บรักษา (Storage)', plan.storage,
             (v) => notifier.updatePostHarvest(storage: v)),
       ],
     );

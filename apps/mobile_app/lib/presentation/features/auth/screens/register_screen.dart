@@ -218,7 +218,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               .showSnackBar(const SnackBar(
                                   content: Text('OCR Scanning Coming Soon'))),
                         ),
-                        counterText: ""),
+                        counterText: ''),
                     validator: (v) =>
                         v!.length == 13 ? null : 'Must be 13 Digits'),
                 const SizedBox(height: 16),

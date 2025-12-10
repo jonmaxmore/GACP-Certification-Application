@@ -54,7 +54,7 @@ class _EstablishmentFormScreenState
         }
       }
 
-      Position position = await Geolocator.getCurrentPosition();
+      final Position position = await Geolocator.getCurrentPosition();
       ref.read(establishmentProvider.notifier).setLocation(
             LatLng(position.latitude, position.longitude),
           );
@@ -127,7 +127,7 @@ class _EstablishmentFormScreenState
                         prefixIcon: Icon(LucideIcons.building),
                       ),
                       validator: (v) =>
-                          v?.isEmpty == true ? 'กรุณาระบุข้อมูล' : null,
+                          v?.isEmpty ?? false ? 'กรุณาระบุข้อมูล' : null,
                     ),
                     const SizedBox(height: 16),
                     const Text('ประเภท (Type) - เลือกได้มากกว่า 1',
@@ -179,7 +179,7 @@ class _EstablishmentFormScreenState
                       ),
                       maxLines: 2,
                       validator: (v) =>
-                          v?.isEmpty == true ? 'กรุณาระบุข้อมูล' : null,
+                          v?.isEmpty ?? false ? 'กรุณาระบุข้อมูล' : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -190,7 +190,7 @@ class _EstablishmentFormScreenState
                         prefixIcon: Icon(LucideIcons.fileText),
                       ),
                       validator: (v) =>
-                          v?.isEmpty == true ? 'กรุณาระบุเลขโฉนด' : null,
+                          v?.isEmpty ?? false ? 'กรุณาระบุเลขโฉนด' : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -202,7 +202,7 @@ class _EstablishmentFormScreenState
                         prefixIcon: Icon(LucideIcons.shield),
                       ),
                       maxLines: 2,
-                      validator: (v) => v?.isEmpty == true
+                      validator: (v) => v?.isEmpty ?? false
                           ? 'กรุณาระบุระบบรักษาความปลอดภัย'
                           : null,
                     ),

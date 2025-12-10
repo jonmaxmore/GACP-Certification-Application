@@ -14,7 +14,9 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch Providers
-    final dashboardState = ref.watch(dashboardProvider);
+    // ignore: unused_local_variable
+    final dashboardState =
+        ref.watch(dashboardProvider); // Reserved for future stats
     final establishmentState = ref.watch(establishmentProvider);
 
     return Scaffold(
@@ -135,7 +137,8 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     'วันนี้อากาศเป็นใจแก่การเพาะปลูก',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
+                    style:
+                        TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                   ),
                 ],
               ),

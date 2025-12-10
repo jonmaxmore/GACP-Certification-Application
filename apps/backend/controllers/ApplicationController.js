@@ -438,6 +438,71 @@ class ApplicationController {
             res.status(500).json({ success: false, error: error.message });
         }
     }
+
+    // Document Upload Handler
+    // POST /applications/:id/documents/:docType
+    async uploadDocument(req, res) {
+        try {
+            const { id, docType } = req.params;
+            const app = await Application.findById(id);
+
+            if (!app) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Application not found'
+                });
+            }
+
+            // Check ownership
+            if (app.farmerId.toString() !== req.user.id.toString()) {
+                return res.status(403).json({
+                    success: false,
+                    error: 'Unauthorized'
+                });
+            }
+
+            // Handle file upload (multer middleware should process this)
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'No file uploaded'
+                });
+            }
+
+            // Store document reference in application
+            if (!app.documents) {
+                app.documents = [];
+            }
+
+            // Add or update document entry
+            const docEntry = {
+                type: docType,
+                filename: req.file.filename || req.file.originalname,
+                path: req.file.path || `/uploads/${req.file.filename}`,
+                mimetype: req.file.mimetype,
+                size: req.file.size,
+                uploadedAt: new Date()
+            };
+
+            // Replace if same type exists
+            const existingIndex = app.documents.findIndex(d => d.type === docType);
+            if (existingIndex >= 0) {
+                app.documents[existingIndex] = docEntry;
+            } else {
+                app.documents.push(docEntry);
+            }
+
+            await app.save();
+
+            res.json({
+                success: true,
+                message: 'Document uploaded successfully',
+                data: docEntry
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
 }
 
 module.exports = new ApplicationController();

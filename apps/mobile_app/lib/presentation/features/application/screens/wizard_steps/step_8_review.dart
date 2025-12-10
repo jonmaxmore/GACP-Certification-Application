@@ -17,7 +17,7 @@ class Step8Review extends ConsumerWidget {
     final isGroupA = plantConfig?.group == PlantGroup.highControl;
 
     return WizardScaffold(
-      title: "8. ตรวจสอบและยืนยัน (Review & Submit)",
+      title: '8. ตรวจสอบและยืนยัน (Review & Submit)',
       onBack: () => context.go('/applications/create/step7'),
       onNext: () {
         // Trigger Payment / Submit
@@ -27,39 +27,39 @@ class Step8Review extends ConsumerWidget {
         child: Column(
           children: [
             const WizardSectionTitle(
-                title: "สรุปข้อมูลใบสมัคร (Application Summary)"),
-            _buildSummaryCard("1. ประเภทคำขอ (Service)",
-                "${state.type?.name.toUpperCase()} - ${plantConfig?.nameTH}"),
+                title: 'สรุปข้อมูลใบสมัคร (Application Summary)'),
+            _buildSummaryCard('1. ประเภทคำขอ (Service)',
+                '${state.type?.name.toUpperCase()} - ${plantConfig?.nameTH}'),
             if (state.type == ServiceType.replacement)
-              _buildSummaryCard("เหตุผล (Reason)",
-                  "${state.replacementReason?.reason} - ${state.replacementReason?.policeReportNo}"),
-            _buildSummaryCard("2. ผู้ยื่น (Applicant)",
-                "${state.profile.name} (${state.profile.applicantType})\nResp: ${state.profile.responsibleName}"),
-            _buildSummaryCard("3. สถานที่ (Site)",
-                "${state.location.name}\n${state.location.address}\nAudit: ${state.location.north}/${state.location.south}"),
+              _buildSummaryCard('เหตุผล (Reason)',
+                  '${state.replacementReason?.reason} - ${state.replacementReason?.policeReportNo}'),
+            _buildSummaryCard('2. ผู้ยื่น (Applicant)',
+                '${state.profile.name} (${state.profile.applicantType})\nResp: ${state.profile.responsibleName}'),
+            _buildSummaryCard('3. สถานที่ (Site)',
+                '${state.location.name}\n${state.location.address}\nAudit: ${state.location.north}/${state.location.south}'),
             if (isGroupA)
-              _buildSummaryCard("4. ใบอนุญาต (License)",
-                  "${state.licenseInfo?.plantingStatus} - ${state.licenseInfo?.notifyNumber ?? state.licenseInfo?.licenseNumber}"),
-            _buildSummaryCard("5. ความปลอดภัย (Security)",
-                "Fence: ${state.securityMeasures.hasFence}\nCCTV: ${state.securityMeasures.hasCCTV}\nZoning: ${state.securityMeasures.hasZoning}"),
+              _buildSummaryCard('4. ใบอนุญาต (License)',
+                  '${state.licenseInfo?.plantingStatus} - ${state.licenseInfo?.notifyNumber ?? state.licenseInfo?.licenseNumber}'),
+            _buildSummaryCard('5. ความปลอดภัย (Security)',
+                'Fence: ${state.securityMeasures.hasFence}\nCCTV: ${state.securityMeasures.hasCCTV}\nZoning: ${state.securityMeasures.hasZoning}'),
             if (state.type != ServiceType.replacement) ...[
-              _buildSummaryCard("6. การผลิต (Production)",
+              _buildSummaryCard('6. การผลิต (Production)',
                   "Parts: ${state.production.plantParts.join(', ')}\nSource: ${state.production.sourceType}\nYield: ${state.production.estimatedYield}"),
-              _buildSummaryCard("6.1 ปัจจัยการผลิต (Inputs)",
-                  "Items: ${state.production.farmInputs.length} รายการ (See list below)"),
-              _buildSummaryCard("6.2 หลังเก็บเกี่ยว (Post-Harvest)",
-                  "Drying: ${state.production.postHarvest.dryingMethod}\nPkg: ${state.production.postHarvest.packaging}\nStorage: ${state.production.postHarvest.storage}"),
+              _buildSummaryCard('6.1 ปัจจัยการผลิต (Inputs)',
+                  'Items: ${state.production.farmInputs.length} รายการ (See list below)'),
+              _buildSummaryCard('6.2 หลังเก็บเกี่ยว (Post-Harvest)',
+                  'Drying: ${state.production.postHarvest.dryingMethod}\nPkg: ${state.production.postHarvest.packaging}\nStorage: ${state.production.postHarvest.storage}'),
             ],
             const SizedBox(height: 24),
             const Divider(),
-            const Text("ลงลายมือชื่อ (E-Signature)",
+            const Text('ลงลายมือชื่อ (E-Signature)',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             Container(
               height: 150,
               width: double.infinity,
               color: Colors.grey[200],
               child: const Center(
-                  child: Text("[Signature Pad Placeholder]",
+                  child: Text('[Signature Pad Placeholder]',
                       style: TextStyle(color: Colors.grey))),
             ),
             const SizedBox(height: 10),
@@ -67,7 +67,7 @@ class Step8Review extends ConsumerWidget {
               Checkbox(value: true, onChanged: (v) {}),
               const Expanded(
                   child: Text(
-                      "ข้าพเจ้ายืนยันว่าข้อมูลถูกต้อง (I confirm the data is correct)"))
+                      'ข้าพเจ้ายืนยันว่าข้อมูลถูกต้อง (I confirm the data is correct)'))
             ])
           ],
         ),
@@ -91,21 +91,21 @@ class Step8Review extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("ชำระเงิน (Payment)"),
+        title: const Text('ชำระเงิน (Payment)'),
         content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(LucideIcons.qrCode, size: 100),
             SizedBox(height: 10),
-            Text("PromptPay QR Code"),
-            Text("ยอดชำระ: 500.00 THB",
+            Text('PromptPay QR Code'),
+            Text('ยอดชำระ: 500.00 THB',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                     color: Colors.green)),
             SizedBox(height: 20),
             LinearProgressIndicator(),
-            Text("กำลังตรวจสอบการโอน... (Polling)",
+            Text('กำลังตรวจสอบการโอน... (Polling)',
                 style: TextStyle(fontSize: 12)),
           ],
         ),
@@ -115,7 +115,7 @@ class Step8Review extends ConsumerWidget {
               Navigator.pop(ctx);
               context.go('/applications'); // Finish
             },
-            child: const Text("จำลองจ่ายสำเร็จ (Simulate Success)"),
+            child: const Text('จำลองจ่ายสำเร็จ (Simulate Success)'),
           )
         ],
       ),

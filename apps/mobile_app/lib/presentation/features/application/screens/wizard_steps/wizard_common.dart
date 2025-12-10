@@ -16,7 +16,7 @@ class WizardScaffold extends StatelessWidget {
       this.title,
       this.onBack,
       this.onNext,
-      this.nextLabel = "ถัดไป",
+      this.nextLabel = 'ถัดไป',
       this.isNextEnabled = true});
 
   @override
@@ -38,7 +38,7 @@ class WizardScaffold extends StatelessWidget {
                 if (onBack != null)
                   Expanded(
                       child: OutlinedButton(
-                          onPressed: onBack, child: const Text("ย้อนกลับ"))),
+                          onPressed: onBack, child: const Text('ย้อนกลับ'))),
                 if (onBack != null && onNext != null) const SizedBox(width: 16),
                 if (onNext != null)
                   Expanded(
@@ -139,9 +139,9 @@ class WizardDocTile extends StatelessWidget {
             color: isUploaded ? Colors.green : Colors.grey),
         title: Text(title, style: const TextStyle(fontSize: 14)),
         subtitle: isUploaded
-            ? const Text("แนบแล้ว (Uploaded)",
+            ? const Text('แนบแล้ว (Uploaded)',
                 style: TextStyle(color: Colors.green))
-            : const Text("แตะเพื่ออัพโหลด (Tap to Upload)",
+            : const Text('แตะเพื่ออัพโหลด (Tap to Upload)',
                 style: TextStyle(color: Colors.grey)),
         onTap: onTap,
       ),
@@ -167,7 +167,7 @@ class WizardSummaryRow extends StatelessWidget {
               child: Text(label, style: const TextStyle(color: Colors.grey))),
           Expanded(
               flex: 3,
-              child: Text(value ?? "-",
+              child: Text(value ?? '-',
                   textAlign: TextAlign.right,
                   style: const TextStyle(fontWeight: FontWeight.bold))),
         ],

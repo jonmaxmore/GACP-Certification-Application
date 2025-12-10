@@ -55,14 +55,14 @@ class GeneralStrategy implements PlantStrategy {
     final security = state.securityMeasures;
     return [
       _buildCheckItem(
-          "มีมาตรการป้องกันสัตว์ (Animal Barrier)",
+          'มีมาตรการป้องกันสัตว์ (Animal Barrier)',
           security.hasAnimalBarrier,
           (v) => notifier.updateSecurity(hasAnimalBarrier: v),
           isRequired: true),
-      _buildCheckItem("การแบ่งโซนพื้นที่ (Zoning)", security.hasZoning,
+      _buildCheckItem('การแบ่งโซนพื้นที่ (Zoning)', security.hasZoning,
           (v) => notifier.updateSecurity(hasZoning: v),
           isRequired: true),
-      _buildCheckItem("มีรั้ว (Optional)", security.hasFence,
+      _buildCheckItem('มีรั้ว (Optional)', security.hasFence,
           (v) => notifier.updateSecurity(hasFence: v),
           isRequired: false),
     ];
@@ -82,11 +82,11 @@ class GeneralStrategy implements PlantStrategy {
 
   @override
   List<String> getPlantPartsOptions() {
-    return ["Rhizome (เหง้า)", "Tuber (หัว)", "Rootlet (รากฝอย)", "Leaf (ใบ)"];
+    return ['Rhizome (เหง้า)', 'Tuber (หัว)', 'Rootlet (รากฝอย)', 'Leaf (ใบ)'];
   }
 
   @override
-  String getYieldLabel() => "ผลผลิตคาดการณ์ (Fresh Tuber Ton/Kg)";
+  String getYieldLabel() => 'ผลผลิตคาดการณ์ (Fresh Tuber Ton/Kg)';
 
   @override
   bool get usesTreeUnit => false;
@@ -138,7 +138,7 @@ class GeneralStrategy implements PlantStrategy {
       title: Row(
         children: [
           Expanded(child: Text(title)),
-          if (isRequired) const Text(" *", style: TextStyle(color: Colors.red)),
+          if (isRequired) const Text(' *', style: TextStyle(color: Colors.red)),
         ],
       ),
       value: value,

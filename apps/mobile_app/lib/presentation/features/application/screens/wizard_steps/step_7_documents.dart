@@ -22,7 +22,7 @@ class Step7Documents extends ConsumerWidget {
     final docList = _generateDocList(state, isGroupA, isReplacement);
 
     return WizardScaffold(
-      title: "7. เอกสารแนบ (Document Uploads)",
+      title: '7. เอกสารแนบ (Document Uploads)',
       onBack: () {
         if (isReplacement) {
           context.go('/applications/create/step4'); // Back to Reason Form
@@ -32,7 +32,7 @@ class Step7Documents extends ConsumerWidget {
       },
       onNext: () {
         // Validation: Check if all required docs are uploaded (Mock check)
-        bool allUploaded = true;
+        const bool allUploaded = true;
         // Real implementation would check state.documents maps
 
         if (allUploaded) {
@@ -42,12 +42,12 @@ class Step7Documents extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("รายการเอกสารที่ต้องใช้ (Generated Document List)",
+          const Text('รายการเอกสารที่ต้องใช้ (Generated Document List)',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           Text(
               isReplacement
-                  ? "เอกสารสำหรับขอใบแทน (Replacement Docs)"
-                  : "ระบบวิเคราะห์เอกสารที่จำเป็นตามข้อมูลที่กรอก",
+                  ? 'เอกสารสำหรับขอใบแทน (Replacement Docs)'
+                  : 'ระบบวิเคราะห์เอกสารที่จำเป็นตามข้อมูลที่กรอก',
               style: const TextStyle(color: Colors.grey)),
           const SizedBox(height: 20),
           Expanded(
@@ -72,55 +72,55 @@ class Step7Documents extends ConsumerWidget {
     // CASE: REPLACEMENT
     if (isReplacement) {
       if (state.replacementReason?.reason == 'Lost') {
-        list.add(DocRequirement("สำเนาใบแจ้งความ (Police Report Copy)", true));
+        list.add(DocRequirement('สำเนาใบแจ้งความ (Police Report Copy)', true));
       } else {
         list.add(DocRequirement(
-            "รูปถ่ายใบรับรองที่ชำรุด (Photo of Damaged Cert)", true));
+            'รูปถ่ายใบรับรองที่ชำรุด (Photo of Damaged Cert)', true));
       }
-      list.add(DocRequirement("สำเนาบัตรประชาชน (ID Card Copy)", true));
+      list.add(DocRequirement('สำเนาบัตรประชาชน (ID Card Copy)', true));
       return list;
     }
 
     // CASE: NEW / RENEWAL
     // 1. Mandatory (All)
-    list.add(DocRequirement("สำเนาบัตรประชาชน (ID Card Copy)", true));
-    list.add(DocRequirement("เอกสารสิทธิ์ที่ดิน (Land Title Deed)", true));
-    list.add(DocRequirement("รูปถ่ายแปลงปลูก (Site Photos)", true));
-    list.add(DocRequirement("แผนที่การเดินทาง (Map)", true));
+    list.add(DocRequirement('สำเนาบัตรประชาชน (ID Card Copy)', true));
+    list.add(DocRequirement('เอกสารสิทธิ์ที่ดิน (Land Title Deed)', true));
+    list.add(DocRequirement('รูปถ่ายแปลงปลูก (Site Photos)', true));
+    list.add(DocRequirement('แผนที่การเดินทาง (Map)', true));
     list.add(
-        DocRequirement("ผลวิเคราะห์คุณภาพดิน/น้ำ (Soil/Water Analysis)", true));
+        DocRequirement('ผลวิเคราะห์คุณภาพดิน/น้ำ (Soil/Water Analysis)', true));
 
     // 2. Group Specific
     if (isGroupA) {
       // License Docs based on Status
       if (state.licenseInfo?.plantingStatus == 'Notify') {
-        list.add(DocRequirement("ใบรับจดแจ้ง (Notification Receipt)", true));
+        list.add(DocRequirement('ใบรับจดแจ้ง (Notification Receipt)', true));
       } else {
-        list.add(DocRequirement("ใบอนุญาต (License Copy)", true));
+        list.add(DocRequirement('ใบอนุญาต (License Copy)', true));
       }
 
       // Security
       if (state.securityMeasures.hasCCTV) {
-        list.add(DocRequirement("ผังการติดตั้งกล้องวงจรปิด (CCTV Plan)", true));
+        list.add(DocRequirement('ผังการติดตั้งกล้องวงจรปิด (CCTV Plan)', true));
       }
     } else {
       // Group B
-      list.add(DocRequirement("ใบรับรอง GAP (ถ้ามี)", false));
+      list.add(DocRequirement('ใบรับรอง GAP (ถ้ามี)', false));
       // Tuber Check
       final hasTuber = state.production.plantParts
-          .any((p) => p.contains("Tuber") || p.contains("หัว"));
+          .any((p) => p.contains('Tuber') || p.contains('หัว'));
       if (hasTuber) {
         list.add(DocRequirement(
-            "ผลวิเคราะห์สารหนู (Arsenic Test Requirement)", true));
+            'ผลวิเคราะห์สารหนู (Arsenic Test Requirement)', true));
       }
     }
 
     // 3. Sourcing
     if (state.production.sourceType == 'Buy') {
       list.add(
-          DocRequirement("ใบเสร็จรับเงินค่าเมล็ดพันธุ์ (Seed Receipt)", true));
+          DocRequirement('ใบเสร็จรับเงินค่าเมล็ดพันธุ์ (Seed Receipt)', true));
     } else if (state.production.sourceType == 'Import') {
-      list.add(DocRequirement("ใบอนุญาตนำเข้า (Import License)", true));
+      list.add(DocRequirement('ใบอนุญาตนำเข้า (Import License)', true));
     }
 
     return list;
@@ -149,7 +149,7 @@ class _UploadItemState extends State<_UploadItem> {
   void _pickFile() async {
     await Future.delayed(const Duration(milliseconds: 500));
     setState(() {
-      _fileName = "doc_${DateTime.now().millisecond}.pdf";
+      _fileName = 'doc_${DateTime.now().millisecond}.pdf';
     });
   }
 
@@ -164,7 +164,7 @@ class _UploadItemState extends State<_UploadItem> {
         ),
         title: Text(widget.title),
         subtitle: Text(
-            widget.isRequired ? "* จำเป็น (Required)" : "ไม่บังคับ (Optional)",
+            widget.isRequired ? '* จำเป็น (Required)' : 'ไม่บังคับ (Optional)',
             style:
                 TextStyle(color: widget.isRequired ? Colors.red : Colors.grey)),
         trailing: IconButton(

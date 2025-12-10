@@ -19,7 +19,7 @@ class Step5Security extends ConsumerWidget {
     final isStrict = strategy.requiresStrictLicense;
 
     return WizardScaffold(
-      title: "5. สถานที่ & ความปลอดภัย (Site & Security)",
+      title: '5. สถานที่ & ความปลอดภัย (Site & Security)',
       onBack: () => context.go('/applications/create/step4'),
       onNext: () {
         // Use Strategy for Validation
@@ -29,8 +29,8 @@ class Step5Security extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
                 content: Text(isStrict
-                    ? "Group A ต้องมีรั้ว, CCTV, และการควบคุมการเข้าออก (Must have Fence, CCTV, Access Control)"
-                    : "Group B ต้องมีการจัดการสัตว์และการแบ่งโซน (Must have Animal Barrier & Zoning)")),
+                    ? 'Group A ต้องมีรั้ว, CCTV, และการควบคุมการเข้าออก (Must have Fence, CCTV, Access Control)'
+                    : 'Group B ต้องมีการจัดการสัตว์และการแบ่งโซน (Must have Animal Barrier & Zoning)')),
           );
         }
       },
@@ -40,17 +40,17 @@ class Step5Security extends ConsumerWidget {
           children: [
             // 1. Risk Assessment
             const WizardSectionTitle(
-                title: "1. การประเมินความเสี่ยง (Risk Assessment)"),
-            const Text("โปรดระบุสภาพแวดล้อมรอบแปลงปลูก (Surroundings)",
+                title: '1. การประเมินความเสี่ยง (Risk Assessment)'),
+            const Text('โปรดระบุสภาพแวดล้อมรอบแปลงปลูก (Surroundings)',
                 style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 8),
-            WizardTextInput("ทิศเหนือ (North) ติดกับ...", state.location.north,
+            WizardTextInput('ทิศเหนือ (North) ติดกับ...', state.location.north,
                 (v) => notifier.updateLocation(north: v)),
-            WizardTextInput("ทิศใต้ (South) ติดกับ...", state.location.south,
+            WizardTextInput('ทิศใต้ (South) ติดกับ...', state.location.south,
                 (v) => notifier.updateLocation(south: v)),
-            WizardTextInput("ทิศตะวันออก (East) ติดกับ...", state.location.east,
+            WizardTextInput('ทิศตะวันออก (East) ติดกับ...', state.location.east,
                 (v) => notifier.updateLocation(east: v)),
-            WizardTextInput("ทิศตะวันตก (West) ติดกับ...", state.location.west,
+            WizardTextInput('ทิศตะวันตก (West) ติดกับ...', state.location.west,
                 (v) => notifier.updateLocation(west: v)),
 
             const SizedBox(height: 24),
@@ -81,8 +81,8 @@ class Step5Security extends ConsumerWidget {
                   Expanded(
                       child: Text(
                           isStrict
-                              ? "มาตรการเข้มงวด: ต้องมีหลักฐานภาพถ่าย Fence/CCTV ใน Step 7"
-                              : "มาตรการพื้นฐาน: เน้นการป้องกันการปนเปื้อนจากสัตว์และแบ่งโซนชัดเจน",
+                              ? 'มาตรการเข้มงวด: ต้องมีหลักฐานภาพถ่าย Fence/CCTV ใน Step 7'
+                              : 'มาตรการพื้นฐาน: เน้นการป้องกันการปนเปื้อนจากสัตว์และแบ่งโซนชัดเจน',
                           style: TextStyle(
                               color: isStrict
                                   ? Colors.red.shade900

@@ -96,7 +96,7 @@ class FormConfigService {
       },
     ];
 
-    List<Map<String, dynamic>> specialDocs = [];
+    final List<Map<String, dynamic>> specialDocs = [];
     if (reason == 'LOST') {
       specialDocs.add({
         'id': 'POLICE_REPORT',

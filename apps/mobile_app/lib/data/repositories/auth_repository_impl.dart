@@ -19,7 +19,7 @@ class AuthRepositoryImpl implements AuthRepository {
       Map<String, dynamic> data, XFile image) async {
     try {
       final bytes = await image.readAsBytes();
-      FormData formData = FormData.fromMap({
+      final FormData formData = FormData.fromMap({
         ...data,
         'idCardImage': MultipartFile.fromBytes(bytes, filename: image.name),
       });

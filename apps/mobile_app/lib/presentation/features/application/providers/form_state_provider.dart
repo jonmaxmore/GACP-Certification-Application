@@ -11,8 +11,25 @@ class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
         ));
 
   // --- Step 0: Plant Config ---
+  /// When plant changes, sanitize all context-dependent state
+  /// Apple QA Requirement: "When the context changes, the state must be sanitized"
   void setPlant(String plantId) {
-    state = state.copyWith(plantId: plantId);
+    // Detect if plant is actually changing (not initial set)
+    final isPlantChanging = state.plantId != null && state.plantId != plantId;
+
+    if (isPlantChanging) {
+      // CRITICAL: Clear security and production state to prevent Zombie Data
+      state = state.copyWith(
+        plantId: plantId,
+        securityMeasures: const SecurityChecklist(), // Reset to default
+        production: const ProductionPlan(), // Reset to default
+        licenseInfo: null, // Clear license (Group A vs B different)
+        hasGapHistory: null, // Clear GAP history
+        gapCertificateNumber: null,
+      );
+    } else {
+      state = state.copyWith(plantId: plantId);
+    }
   }
 
   void setEstablishmentId(String id) {

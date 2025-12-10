@@ -123,8 +123,22 @@ const ApplicationSchema = new Schema({
         scheduledDate: Date,
         result: { type: String, enum: ['PASS', 'MINOR', 'MAJOR'], default: null },
         notes: String
-    }
-}, { timestamps: true });
+    },
+
+    // Concurrency Control (Apple QA Requirement)
+    idempotencyKey: {
+        type: String,
+        sparse: true,
+        unique: true, // Prevents double submission
+    },
+    lastModifiedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+    },
+}, {
+    timestamps: true,
+    optimisticConcurrency: true, // Mongoose built-in version conflict detection
+});
 
 // Auto-generate App Number
 ApplicationSchema.pre('validate', async function (next) {

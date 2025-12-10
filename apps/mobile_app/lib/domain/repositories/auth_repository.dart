@@ -7,6 +7,14 @@ abstract class AuthRepository {
   Future<Either<Failure, void>> register(
       Map<String, dynamic> data, XFile image);
   Future<Either<Failure, UserEntity>> login(String email, String password);
+
+  /// Login with specific account type (INDIVIDUAL, JURISTIC, COMMUNITY_ENTERPRISE)
+  Future<Either<Failure, UserEntity>> loginWithAccountType(
+    String accountType,
+    String identifier,
+    String password,
+  );
+
   Future<Either<Failure, void>> logout();
   Future<Either<Failure, UserEntity>> getCurrentUser();
 }

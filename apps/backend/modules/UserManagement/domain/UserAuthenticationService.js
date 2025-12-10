@@ -139,24 +139,60 @@ class UserAuthenticationService extends EventEmitter {
     try {
       // Input validation
       if (!identifier || !password) {
-        throw new Error('Email/Thai ID and password are required');
+        throw new Error('Identifier and password are required');
       }
 
-      // Detect if identifier is Thai ID (13 digits) or Email
+      const accountType = context.accountType || this._detectAccountType(identifier);
       const cleanIdentifier = identifier.replace(/-/g, '');
-      const isThaiId = /^\d{13}$/.test(cleanIdentifier);
 
-      // Find user by email or Thai ID
+      // Find user based on account type
       let user;
-      if (isThaiId) {
-        user = await this.userRepository.findOne({ idCard: cleanIdentifier });
-      } else {
-        user = await this.userRepository.findByEmail(identifier.toLowerCase());
+      const { hash } = require('../../../shared/encryption');
+
+      switch (accountType) {
+        case 'INDIVIDUAL':
+          // Farmer login with Thai ID (13 digits)
+          user = await this.userRepository.findOne({
+            idCardHash: hash(cleanIdentifier),
+            accountType: 'INDIVIDUAL'
+          });
+          break;
+
+        case 'JURISTIC':
+          // Company login with Tax ID
+          user = await this.userRepository.findOne({
+            taxIdHash: hash(cleanIdentifier),
+            accountType: 'JURISTIC'
+          });
+          break;
+
+        case 'COMMUNITY_ENTERPRISE':
+          // Community Enterprise login with Registration No
+          user = await this.userRepository.findOne({
+            communityRegistrationNoHash: hash(cleanIdentifier),
+            accountType: 'COMMUNITY_ENTERPRISE'
+          });
+          break;
+
+        case 'STAFF':
+          // Staff login with email only
+          user = await this.userRepository.findByEmail(identifier.toLowerCase());
+          if (user && user.accountType !== 'STAFF') {
+            user = null; // Staff must have STAFF account type
+          }
+          break;
+
+        default:
+          // Fallback: try email first, then ID
+          user = await this.userRepository.findByEmail(identifier.toLowerCase());
+          if (!user) {
+            user = await this.userRepository.findOne({ idCardHash: hash(cleanIdentifier) });
+          }
       }
 
       if (!user) {
         await this._logSecurityEvent('LOGIN_FAILED', {
-          identifier: isThaiId ? 'THAI_ID' : identifier,
+          accountType,
           reason: 'USER_NOT_FOUND',
           ...context,
         });
@@ -685,6 +721,36 @@ class UserAuthenticationService extends EventEmitter {
     }
     const expiryDate = new Date(passwordUpdatedAt.getTime() + this.config.password.maxAge);
     return new Date() > expiryDate;
+  }
+
+  /**
+   * Detect account type from identifier format
+   * @private
+   */
+  _detectAccountType(identifier) {
+    const clean = identifier.replace(/-/g, '');
+
+    // 13-digit numeric = Thai ID (Individual) or Tax ID (Juristic)
+    if (/^\d{13}$/.test(clean)) {
+      // Tax IDs typically start with 0 (for juristic persons)
+      if (clean.startsWith('0')) {
+        return 'JURISTIC';
+      }
+      return 'INDIVIDUAL';
+    }
+
+    // Contains @ = Email (Staff)
+    if (identifier.includes('@')) {
+      return 'STAFF';
+    }
+
+    // Other patterns = Community Enterprise
+    if (/^[A-Z0-9]{6,15}$/i.test(clean)) {
+      return 'COMMUNITY_ENTERPRISE';
+    }
+
+    // Default to individual
+    return 'INDIVIDUAL';
   }
 
   /**

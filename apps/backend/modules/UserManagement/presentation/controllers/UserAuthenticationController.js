@@ -56,29 +56,30 @@ class UserAuthenticationController {
         });
       }
 
-      const { email, idCard, password } = req.body;
+      const { email, idCard, password, accountType, identifier } = req.body;
 
-      // Support login via Thai ID (13 digits) or Email
-      // At least one identifier must be provided
-      const identifier = email || idCard;
-      if (!identifier) {
+      // New unified format: accountType + identifier
+      // OR legacy format: email/idCard
+      const loginIdentifier = identifier || email || idCard;
+      if (!loginIdentifier) {
         return res.status(400).json({
           success: false,
           error: 'VALIDATION_ERROR',
-          message: 'Email or Thai ID is required',
+          message: 'Email, Thai ID, or identifier is required',
         });
       }
 
-      // Build request context
+      // Build request context with account type
       const context = {
         ip: req.ip || req.connection.remoteAddress,
         userAgent: req.get('User-Agent'),
         timestamp: new Date(),
-        loginMethod: idCard ? 'THAI_ID' : 'EMAIL', // Track login method
+        accountType: accountType || (idCard ? 'INDIVIDUAL' : 'STAFF'),
+        loginMethod: accountType || (idCard ? 'THAI_ID' : 'EMAIL'),
       };
 
-      // Authenticate user (service handles both email and idCard lookup)
-      const result = await this.authService.authenticateUser(identifier, password, context);
+      // Authenticate user (service handles lookup by accountType)
+      const result = await this.authService.authenticateUser(loginIdentifier, password, context);
 
       if (!result.success) {
         return res.status(401).json({
@@ -524,9 +525,16 @@ class UserAuthenticationController {
   static getValidationRules() {
     return {
       login: [
-        // Either email or idCard is required (validated in controller)
-        body('email').optional().isEmail().normalizeEmail().withMessage('Valid email is required'),
-        body('idCard').optional().isLength({ min: 13, max: 13 }).isNumeric().withMessage('Valid 13-digit Thai ID is required'),
+        // Unified format: accountType + identifier
+        // OR legacy format: email/idCard (all optional, validated in controller)
+        body('accountType').optional().isIn(['INDIVIDUAL', 'JURISTIC', 'COMMUNITY_ENTERPRISE', 'STAFF'])
+          .withMessage('Valid account type is required'),
+        body('identifier').optional().isLength({ min: 6, max: 20 })
+          .withMessage('Valid identifier is required'),
+        body('email').optional().isEmail().normalizeEmail()
+          .withMessage('Valid email is required'),
+        body('idCard').optional().isLength({ min: 13, max: 13 }).isNumeric()
+          .withMessage('Valid 13-digit Thai ID is required'),
         body('password').isLength({ min: 1 }).withMessage('Password is required'),
       ],
 

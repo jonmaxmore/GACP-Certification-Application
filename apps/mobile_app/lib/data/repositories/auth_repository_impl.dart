@@ -133,6 +133,70 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, UserEntity>> loginWithAccountType(
+    String accountType,
+    String identifier,
+    String password,
+  ) async {
+    try {
+      final response = await _dioClient.post(
+        '/v2/auth/login',
+        data: {
+          'accountType': accountType,
+          'identifier': identifier.replaceAll('-', ''),
+          'password': password,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final token =
+            data['data']['tokens']?['accessToken'] ?? data['data']['token'];
+        final user = data['data']['user'];
+
+        // Save token
+        await _storage.write(key: 'auth_token', value: token);
+
+        // Map to UserEntity with multi-account support
+        return Right(UserEntity(
+          id: user['id'] ?? user['_id'],
+          email: user['email'],
+          firstName: user['firstName'] ?? user['representativeName'] ?? '',
+          lastName: user['lastName'] ?? '',
+          role: user['role'],
+          phoneNumber: user['phoneNumber'],
+          address: user['address'],
+          province: user['province'],
+          district: user['district'],
+          subdistrict: user['subdistrict'],
+          zipCode: user['zipCode'],
+          accountType: user['accountType'],
+          companyName: user['companyName'],
+          communityName: user['communityName'],
+          registeredAt: user['registeredAt'] != null
+              ? DateTime.tryParse(user['registeredAt'])
+              : null,
+        ));
+      } else {
+        return Left(
+            ServerFailure(message: response.data['message'] ?? 'Login failed'));
+      }
+    } on DioException catch (e) {
+      String errorMessage = e.message ?? 'Network Error';
+      if (e.response?.data != null) {
+        if (e.response!.data is Map) {
+          errorMessage = e.response!.data['message'] ?? errorMessage;
+        } else if (e.response!.data is String) {
+          errorMessage = e.response!.data;
+        }
+      }
+      return Left(ServerFailure(message: errorMessage));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
     try {
       final response = await _dioClient.get('/v2/auth/me');

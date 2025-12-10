@@ -85,6 +85,28 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
+  /// Login with specific account type
+  /// [accountType] - INDIVIDUAL, JURISTIC, COMMUNITY_ENTERPRISE
+  /// [identifier] - Thai ID, Tax ID, or Community Registration Number
+  /// [password] - User password
+  Future<void> loginWithAccountType(
+    String accountType,
+    String identifier,
+    String password,
+  ) async {
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await _repository.loginWithAccountType(
+      accountType,
+      identifier,
+      password,
+    );
+    result.fold(
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
+      (user) => state = state.copyWith(isLoading: false, user: user),
+    );
+  }
+
   Future<void> register(Map<String, dynamic> data, XFile image) async {
     state = state.copyWith(isLoading: true, error: null);
     final result = await _repository.register(data, image);

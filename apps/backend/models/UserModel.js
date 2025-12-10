@@ -10,11 +10,20 @@ const { encrypt, decrypt, hash } = require('../shared/encryption');
 
 const userSchema = new mongoose.Schema(
   {
+    // ========== ACCOUNT TYPE (determines login method) ==========
+    accountType: {
+      type: String,
+      enum: ['INDIVIDUAL', 'JURISTIC', 'COMMUNITY_ENTERPRISE', 'STAFF'],
+      required: true,
+      default: 'INDIVIDUAL',
+    },
+
+    // ========== LOGIN CREDENTIALS ==========
     email: {
       type: String,
-      required: true,
       lowercase: true,
       trim: true,
+      sparse: true, // Allow null for non-staff accounts
     },
     password: {
       type: String,
@@ -22,24 +31,22 @@ const userSchema = new mongoose.Schema(
       minlength: 8,
       select: false,
     },
+
+    // ========== INDIVIDUAL FARMER FIELDS ==========
     firstName: {
       type: String,
-      required: true,
       trim: true,
     },
     lastName: {
       type: String,
-      required: true,
       trim: true,
     },
     phoneNumber: {
       type: String,
-      required: true,
       trim: true,
     },
     idCard: {
       type: String,
-      required: true,
       trim: true,
       length: 13,
       select: false, // Privacy: Exclude from default queries
@@ -53,10 +60,48 @@ const userSchema = new mongoose.Schema(
     },
     laserCode: {
       type: String,
-      required: true,
       trim: true,
       select: false,
     },
+
+    // ========== JURISTIC PERSON (COMPANY) FIELDS ==========
+    companyName: {
+      type: String,
+      trim: true,
+    },
+    taxId: {
+      type: String,
+      trim: true,
+      length: 13, // Thai Tax ID is 13 digits
+    },
+    taxIdHash: {
+      type: String,
+      index: true,
+    },
+    representativeName: {
+      type: String,
+      trim: true,
+    },
+    representativePosition: {
+      type: String,
+      trim: true,
+    },
+
+    // ========== COMMUNITY ENTERPRISE FIELDS ==========
+    communityName: {
+      type: String,
+      trim: true,
+    },
+    communityRegistrationNo: {
+      type: String,
+      trim: true,
+    },
+    communityRegistrationNoHash: {
+      type: String,
+      index: true,
+    },
+
+    // ========== LEGACY FIELDS (kept for compatibility) ==========
     corporateId: {
       type: String,
       trim: true,
@@ -136,23 +181,47 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Indexes
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ idCard: 1 }, { unique: true });
+// Indexes - sparse to allow null values
+userSchema.index({ email: 1 }, { unique: true, sparse: true });
+userSchema.index({ idCardHash: 1 }, { unique: true, sparse: true });
+userSchema.index({ taxIdHash: 1 }, { unique: true, sparse: true });
+userSchema.index({ communityRegistrationNoHash: 1 }, { unique: true, sparse: true });
+userSchema.index({ accountType: 1 });
 
 // Virtual for full name
 userSchema.virtual('fullName').get(function () {
+  if (this.accountType === 'JURISTIC') {
+    return this.companyName || `${this.firstName} ${this.lastName}`;
+  }
+  if (this.accountType === 'COMMUNITY_ENTERPRISE') {
+    return this.communityName || `${this.firstName} ${this.lastName}`;
+  }
   return `${this.firstName} ${this.lastName}`;
 });
 
 // Pre-save middleware to hash password and encrypt sensitive fields
 userSchema.pre('save', async function (next) {
-  // Encrypt idCard if modified (AES-256-CBC)
+  // Encrypt idCard if modified (AES-256-CBC) - for INDIVIDUAL
   if (this.isModified('idCard') && this.idCard) {
-    // Store hash BEFORE encryption for duplicate detection
     if (!this.idCard.includes(':')) {
       this.idCardHash = hash(this.idCard);
       this.idCard = encrypt(this.idCard);
+    }
+  }
+
+  // Encrypt taxId if modified - for JURISTIC
+  if (this.isModified('taxId') && this.taxId) {
+    if (!this.taxId.includes(':')) {
+      this.taxIdHash = hash(this.taxId);
+      this.taxId = encrypt(this.taxId);
+    }
+  }
+
+  // Encrypt communityRegistrationNo if modified - for COMMUNITY_ENTERPRISE
+  if (this.isModified('communityRegistrationNo') && this.communityRegistrationNo) {
+    if (!this.communityRegistrationNo.includes(':')) {
+      this.communityRegistrationNoHash = hash(this.communityRegistrationNo);
+      this.communityRegistrationNo = encrypt(this.communityRegistrationNo);
     }
   }
 

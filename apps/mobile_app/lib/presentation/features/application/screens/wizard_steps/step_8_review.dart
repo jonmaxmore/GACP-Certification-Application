@@ -92,20 +92,20 @@ class Step8Review extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text("ชำระเงิน (Payment)"),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(LucideIcons.qrCode, size: 100),
-            const SizedBox(height: 10),
-            const Text("PromptPay QR Code"),
-            const Text("ยอดชำระ: 500.00 THB",
+            Icon(LucideIcons.qrCode, size: 100),
+            SizedBox(height: 10),
+            Text("PromptPay QR Code"),
+            Text("ยอดชำระ: 500.00 THB",
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                     color: Colors.green)),
-            const SizedBox(height: 20),
-            const LinearProgressIndicator(),
-            const Text("กำลังตรวจสอบการโอน... (Polling)",
+            SizedBox(height: 20),
+            LinearProgressIndicator(),
+            Text("กำลังตรวจสอบการโอน... (Polling)",
                 style: TextStyle(fontSize: 12)),
           ],
         ),

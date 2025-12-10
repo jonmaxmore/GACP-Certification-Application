@@ -720,9 +720,13 @@ class FormValidator {
     if (config.requiresLicense) {
       // Deep logic: if PlantingStatus == Notify, need notifyNumber
       if (app.licenseInfo?.plantingStatus == 'Notify' &&
-          (app.licenseInfo?.notifyNumber.isEmpty ?? true)) return false;
+          (app.licenseInfo?.notifyNumber.isEmpty ?? true)) {
+        return false;
+      }
       if (app.licenseInfo?.plantingStatus == 'Permission' &&
-          (app.licenseInfo?.licenseNumber.isEmpty ?? true)) return false;
+          (app.licenseInfo?.licenseNumber.isEmpty ?? true)) {
+        return false;
+      }
     }
     return true;
   }
@@ -745,8 +749,9 @@ class FormValidator {
     }
 
     // Post Harvest Required?
-    if (plan.postHarvest.packaging.isEmpty || plan.postHarvest.storage.isEmpty)
+    if (plan.postHarvest.packaging.isEmpty || plan.postHarvest.storage.isEmpty) {
       return false;
+    }
 
     return true;
   }

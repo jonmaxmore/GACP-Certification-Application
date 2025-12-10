@@ -166,7 +166,7 @@ class _ApplicantForm extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: state.profile.applicantType,
+            initialValue: state.profile.applicantType,
             decoration: const InputDecoration(
                 labelText: "ประเภทผู้ยื่น (Type)",
                 border: OutlineInputBorder()),
@@ -197,7 +197,7 @@ class _ApplicantForm extends StatelessWidget {
               (v) => notifier.updateProfile(responsibleName: v)),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: state.profile.qualification,
+            initialValue: state.profile.qualification,
             decoration: const InputDecoration(
                 labelText: "คุณสมบัติ (Qualification)",
                 border: OutlineInputBorder()),

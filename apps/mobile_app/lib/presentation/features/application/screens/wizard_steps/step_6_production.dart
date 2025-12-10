@@ -44,14 +44,14 @@ class Step6Production extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. Plant Parts
-            WizardSectionTitle(title: "1. ส่วนของพืชที่ใช้ (Plant Parts Used)"),
+            const WizardSectionTitle(title: "1. ส่วนของพืชที่ใช้ (Plant Parts Used)"),
             _buildPlantPartsSelector(
                 strategy, state.production.plantParts, notifier),
 
             const SizedBox(height: 24),
 
             // 2. Production Plan
-            WizardSectionTitle(title: "2. แผนการผลิต (Production Plan)"),
+            const WizardSectionTitle(title: "2. แผนการผลิต (Production Plan)"),
             if (isTreeUnit) ...[
               WizardTextInput(
                   "จำนวนต้นที่ปลูก (Tree Count)",
@@ -73,7 +73,7 @@ class Step6Production extends ConsumerWidget {
                   Expanded(
                     flex: 1,
                     child: DropdownButtonFormField<String>(
-                      value: state.production.areaSizeUnit ?? 'Rai',
+                      initialValue: state.production.areaSizeUnit ?? 'Rai',
                       decoration: const InputDecoration(
                           labelText: "หน่วย (Unit)",
                           border: OutlineInputBorder()),
@@ -250,7 +250,7 @@ class Step6Production extends ConsumerWidget {
                 ),
               ),
             );
-          }).toList()
+          })
       ],
     );
   }
@@ -269,7 +269,7 @@ class Step6Production extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: type,
+                    initialValue: type,
                     items: const [
                       DropdownMenuItem(
                           value: "Organic Fertilizer",

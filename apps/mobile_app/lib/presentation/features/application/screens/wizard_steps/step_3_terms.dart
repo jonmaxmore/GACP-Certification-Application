@@ -23,7 +23,7 @@ class Step3Terms extends ConsumerWidget {
           const Text("3. ข้อตกลงและนโยบายความเป็นส่วนตัว (Terms & Policy)",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           const SizedBox(height: 20),
-          Expanded(
+          const Expanded(
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -32,13 +32,13 @@ class Step3Terms extends ConsumerWidget {
                     content:
                         "ข้าพเจ้ายินยอมให้เจ้าหน้าที่เข้าตรวจสอบพื้นที่ สถานที่ผลิต และเอกสารที่เกี่ยวข้องได้ตลอดเวลา และรับทราบว่าจะต้องจัดทำบันทึกข้อมูลการผลิตอย่างต่อเนื่อง",
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _TermsSection(
                     title: "2. นโยบายข้อมูลส่วนบุคคล (PDPA/Data Consent)",
                     content:
                         "ข้าพเจ้ายินยอมให้เปิดเผยข้อมูลแก่หน่วยงานที่เกี่ยวข้องเพื่อประโยชน์ในการพิจารณาใบรับรอง และยินยอมให้เผยแพร่ข้อมูลสถานะใบรับรองต่อสาธารณะเพื่อการตรวจสอบ",
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _TermsSection(
                     title: "3. คำรับรองของผู้ยื่นคำขอ (Self Declaration)",
                     content:

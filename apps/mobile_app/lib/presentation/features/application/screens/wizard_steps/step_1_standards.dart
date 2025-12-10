@@ -33,10 +33,10 @@ class Step1Standards extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.grey[300]!),
               ),
-              child: SingleChildScrollView(
+              child: const SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     _StandardItem(
                         "1. การประกันคุณภาพ (QA) - ควบคุมทุกขั้นตอนการผลิต"),
                     _StandardItem(

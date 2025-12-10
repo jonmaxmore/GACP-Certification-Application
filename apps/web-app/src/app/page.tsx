@@ -62,7 +62,12 @@ export default function Home() {
       {/* Footer */}
       <div className="absolute bottom-6 text-center text-sm text-gray-400">
         <p>© 2024 กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</p>
-        <p className="mt-1">v2.6.0</p>
+        <div className="mt-2 flex justify-center gap-4">
+          <span>v2.6.0</span>
+          <Link href="/staff/login" className="text-slate-500 hover:text-[#1B5E20] transition-colors">
+            🛡️ เจ้าหน้าที่
+          </Link>
+        </div>
       </div>
     </div>
   );

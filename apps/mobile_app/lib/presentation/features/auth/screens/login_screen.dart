@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../providers/auth_provider.dart';
 
 /// GACP Official Login Screen
 /// Apple-Standard Design: Clean, Trustworthy, National-Grade UX
 /// Primary Auth: Thai ID Card (13 digits) - NOT Email
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _idCardController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -25,26 +28,46 @@ class _LoginScreenState extends State<LoginScreen> {
     if (value == null || value.isEmpty) return 'กรุณากรอกเลขบัตรประชาชน';
     String cleanId = value.replaceAll('-', '');
     if (cleanId.length != 13) return 'เลขบัตรต้องมี 13 หลัก';
-
-    // Optional: Mod-13 checksum validation
-    // For production, add proper ID validation here
     return null;
   }
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // UX: Dismiss Keyboard immediately
     FocusScope.of(context).unfocus();
-
     setState(() => _isLoading = true);
 
-    // Simulate API Call
-    await Future.delayed(const Duration(seconds: 2));
+    // Use Auth Provider for real login
+    final idCard = _idCardController.text.replaceAll('-', '');
+    final password = _passwordController.text;
 
-    if (mounted) {
-      setState(() => _isLoading = false);
-      // Apple Style Feedback: Haptic + Visual
+    await ref.read(authProvider.notifier).login(idCard, password);
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    final authState = ref.read(authProvider);
+
+    if (authState.error != null) {
+      // Show error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(child: Text(authState.error!)),
+            ],
+          ),
+          backgroundColor: Colors.red.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+    } else if (authState.isAuthenticated) {
+      // Success - navigate to dashboard
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Row(
@@ -61,15 +84,14 @@ class _LoginScreenState extends State<LoginScreen> {
           margin: const EdgeInsets.all(16),
         ),
       );
-      // TODO: Navigate to home screen
-      // context.go('/home');
+      context.go('/dashboard');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA), // Soft Enterprise Grey
+      backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -126,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextFormField(
                             controller: _idCardController,
                             keyboardType: TextInputType.number,
-                            maxLength: 17, // 13 digits + 4 dashes
+                            maxLength: 17,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                               _IdCardFormatter(),
@@ -230,7 +252,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             alignment: Alignment.centerRight,
                             child: TextButton(
                               onPressed: () {
-                                // TODO: Navigate to forgot password
+                                // TODO: Implement forgot password
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('ฟีเจอร์นี้กำลังพัฒนา')),
+                                );
                               },
                               child: const Text(
                                 'ลืมรหัสผ่าน?',
@@ -295,7 +321,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 32),
 
-                  // --- 3. Registration (Separated for clarity) ---
+                  // --- 3. Registration ---
                   Column(
                     children: [
                       Text(
@@ -305,9 +331,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 12),
                       OutlinedButton.icon(
-                        onPressed: () {
-                          // TODO: Navigate to registration
-                        },
+                        onPressed: () => context.push('/register'),
                         icon: const Icon(Icons.person_add_alt_1_rounded),
                         label: const Text('ลงทะเบียนเกษตรกรใหม่'),
                         style: OutlinedButton.styleFrom(
@@ -418,22 +442,16 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// --------------------------------------------------------
-// Utility: Smart Formatter for Thai ID (X-XXXX-XXXXX-XX-X)
-// --------------------------------------------------------
+// Thai ID Auto-Formatter
 class _IdCardFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    var text = newValue.text;
+    var text = newValue.text.replaceAll('-', '');
     if (newValue.selection.baseOffset == 0) return newValue;
 
-    // Remove existing dashes
-    text = text.replaceAll('-', '');
-
-    // Format: X-XXXX-XXXXX-XX-X
     String newText = '';
     for (int i = 0; i < text.length; i++) {
       if (i == 1 || i == 5 || i == 10 || i == 12) {

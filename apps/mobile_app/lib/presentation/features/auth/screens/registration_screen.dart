@@ -163,7 +163,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Row(
       children: List.generate(3, (index) {
         final isActive = index <= _currentStep;
-        final isComplete = index < _currentStep;
+        // isComplete indicator is implicit in progress bar color
         return Expanded(
           child: Container(
             margin: EdgeInsets.only(right: index < 2 ? 8 : 0),

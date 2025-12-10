@@ -28,17 +28,17 @@ class QuickActionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
           border: isPrimary
               ? null
-              : Border.all(color: Colors.grey.withOpacity(0.1)),
+              : Border.all(color: Colors.grey.withValues(alpha: 0.1)),
           gradient: isPrimary
               ? LinearGradient(
-                  colors: [color, color.withOpacity(0.8)],
+                  colors: [color, color.withValues(alpha: 0.8)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
@@ -56,8 +56,8 @@ class QuickActionCard extends StatelessWidget {
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: isPrimary
-                          ? Colors.white.withOpacity(0.2)
-                          : color.withOpacity(0.1),
+                          ? Colors.white.withValues(alpha: 0.2)
+                          : color.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(

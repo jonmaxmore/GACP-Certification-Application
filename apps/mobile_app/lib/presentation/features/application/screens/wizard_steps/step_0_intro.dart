@@ -76,7 +76,7 @@ class _PlantCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 35,
-              backgroundColor: color.withOpacity(0.2),
+              backgroundColor: color.withValues(alpha: 0.2),
               child: Icon(isHighControl ? Icons.security : Icons.spa,
                   color: color, size: 35),
             ),

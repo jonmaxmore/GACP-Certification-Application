@@ -14,9 +14,9 @@ class WeatherWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15), // Glassmorphismish
+        color: Colors.white.withValues(alpha: 0.15), // Glassmorphismish
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: const Row(
         mainAxisSize: MainAxisSize.min,

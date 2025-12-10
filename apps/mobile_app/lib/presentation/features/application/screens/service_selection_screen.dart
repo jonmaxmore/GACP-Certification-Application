@@ -97,14 +97,14 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                         border: Border.all(
                           color: isSelected
                               ? service['color']
-                              : Colors.grey.withOpacity(0.2),
+                              : Colors.grey.withValues(alpha: 0.2),
                           width: isSelected ? 2 : 1,
                         ),
                         boxShadow: [
                           if (isSelected)
                             BoxShadow(
                               color:
-                                  (service['color'] as Color).withOpacity(0.2),
+                                  (service['color'] as Color).withValues(alpha: 0.2),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -116,7 +116,7 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color:
-                                  (service['color'] as Color).withOpacity(0.1),
+                                  (service['color'] as Color).withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(

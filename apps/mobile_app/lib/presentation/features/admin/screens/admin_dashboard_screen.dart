@@ -103,7 +103,7 @@ class _DashboardOverviewState extends ConsumerState<DashboardOverview> {
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 10),
                           ]),
                       child: BarChart(
@@ -176,14 +176,14 @@ class _DashboardOverviewState extends ConsumerState<DashboardOverview> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color, color.withOpacity(0.8)],
+          colors: [color, color.withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.4),
+            color: color.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -199,7 +199,7 @@ class _DashboardOverviewState extends ConsumerState<DashboardOverview> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: Colors.white, size: 24),
@@ -225,7 +225,7 @@ class _DashboardOverviewState extends ConsumerState<DashboardOverview> {
               Text(
                 title,
                 style: TextStyle(
-                    color: Colors.white.withOpacity(0.9), fontSize: 14),
+                    color: Colors.white.withValues(alpha: 0.9), fontSize: 14),
                 overflow: TextOverflow.ellipsis,
               ),
             ],

@@ -93,7 +93,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                     decoration: BoxDecoration(
                       color: Colors.yellow[50],
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.orange.withOpacity(0.5)),
+                      border: Border.all(color: Colors.orange.withValues(alpha: 0.5)),
                     ),
                     child: const Row(
                       children: [
@@ -120,7 +120,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 )

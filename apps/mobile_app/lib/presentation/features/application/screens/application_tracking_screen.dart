@@ -86,7 +86,7 @@ class ApplicationTrackingScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.blue.withOpacity(0.3),
+                        color: Colors.blue.withValues(alpha: 0.3),
                         blurRadius: 10,
                         offset: const Offset(0, 4))
                   ],
@@ -109,7 +109,7 @@ class ApplicationTrackingScreen extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(20)),
                           child: const Row(
                             children: [
@@ -239,7 +239,7 @@ class ApplicationTrackingScreen extends ConsumerWidget {
                     border: Border.all(color: Colors.grey[200]!),
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.grey.withOpacity(0.05),
+                          color: Colors.grey.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4))
                     ],

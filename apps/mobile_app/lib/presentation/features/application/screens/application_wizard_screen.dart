@@ -79,7 +79,7 @@ class ApplicationWizardScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isCurrent
-                      ? Colors.green.withOpacity(0.1)
+                      ? Colors.green.withValues(alpha: 0.1)
                       : Colors.transparent,
                   border: Border.all(
                       color: isCurrent || isCompleted

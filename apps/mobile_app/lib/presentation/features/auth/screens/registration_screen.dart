@@ -1,26 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// GACP Official Registration Screen
-/// Apple-Standard Design: Clean, Trustworthy, National-Grade UX
-/// Primary Auth: Thai ID Card (13 digits)
-class RegistrationScreen extends StatefulWidget {
+/// Multi-Account Type: Individual, Juristic, Community Enterprise
+class RegistrationScreen extends ConsumerStatefulWidget {
   const RegistrationScreen({super.key});
 
   @override
-  State<RegistrationScreen> createState() => _RegistrationScreenState();
+  ConsumerState<RegistrationScreen> createState() => _RegistrationScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
-  final _idCardController = TextEditingController();
-  final _nameController = TextEditingController();
+  // Account Type
+  String _accountType = '';
+
+  // Controllers - Common
+  final _identifierController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  // Controllers - Individual
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+
+  // Controllers - Juristic
+  final _companyNameController = TextEditingController();
+  final _representativeNameController = TextEditingController();
+
+  // Controllers - Community
+  final _communityNameController = TextEditingController();
+  final _contactNameController = TextEditingController();
 
   // State
   bool _isPasswordVisible = false;
@@ -29,11 +44,66 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _acceptTerms = false;
   int _currentStep = 0;
 
-  // Thai ID Validation
-  String? _validateIdCard(String? value) {
-    if (value == null || value.isEmpty) return 'กรุณากรอกเลขบัตรประชาชน';
-    String cleanId = value.replaceAll('-', '');
-    if (cleanId.length != 13) return 'เลขบัตรต้องมี 13 หลัก';
+  // Account Types
+  static const List<Map<String, dynamic>> _accountTypes = [
+    {
+      'type': 'INDIVIDUAL',
+      'label': 'บุคคลธรรมดา',
+      'subtitle': 'เกษตรกรรายย่อย',
+      'icon': Icons.person,
+      'color': Color(0xFF2E7D32),
+      'idLabel': 'เลขบัตรประชาชน 13 หลัก',
+      'idHint': '1-2345-67890-12-3',
+    },
+    {
+      'type': 'JURISTIC',
+      'label': 'นิติบุคคล',
+      'subtitle': 'บริษัท / ห้างหุ้นส่วน',
+      'icon': Icons.business,
+      'color': Color(0xFF1565C0),
+      'idLabel': 'เลขทะเบียนนิติบุคคล 13 หลัก',
+      'idHint': '0-1055-12345-67-8',
+    },
+    {
+      'type': 'COMMUNITY_ENTERPRISE',
+      'label': 'วิสาหกิจชุมชน',
+      'subtitle': 'กลุ่มเกษตรกร',
+      'icon': Icons.groups,
+      'color': Color(0xFF7B1FA2),
+      'idLabel': 'เลขทะเบียนวิสาหกิจชุมชน',
+      'idHint': 'XXXX-XXXX-XXX',
+    },
+  ];
+
+  Map<String, dynamic> get _currentAccountConfig {
+    return _accountTypes.firstWhere(
+      (t) => t['type'] == _accountType,
+      orElse: () => _accountTypes[0],
+    );
+  }
+
+  // Step labels based on account type
+  List<String> get _stepLabels => [
+        'ประเภทบัญชี',
+        'ยืนยันตัวตน',
+        _accountType == 'INDIVIDUAL' ? 'ข้อมูลส่วนตัว' : 'ข้อมูลองค์กร',
+        'ตั้งรหัสผ่าน',
+      ];
+
+  String? _validateIdentifier(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'กรุณากรอก${_currentAccountConfig['idLabel']}';
+    }
+    String clean = value.replaceAll('-', '');
+    if (_accountType != 'COMMUNITY_ENTERPRISE') {
+      if (clean.length != 13) return 'ต้องมี 13 หลัก';
+      if (!RegExp(r'^\d+$').hasMatch(clean)) return 'ต้องเป็นตัวเลขเท่านั้น';
+    }
+    return null;
+  }
+
+  String? _validateRequired(String? value, String fieldName) {
+    if (value == null || value.isEmpty) return 'กรุณากรอก$fieldName';
     return null;
   }
 
@@ -55,6 +125,35 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return null;
   }
 
+  bool _canProceedToNextStep() {
+    switch (_currentStep) {
+      case 0:
+        return _accountType.isNotEmpty;
+      case 1:
+        return _validateIdentifier(_identifierController.text) == null;
+      case 2:
+        if (_accountType == 'INDIVIDUAL') {
+          return _firstNameController.text.isNotEmpty &&
+              _lastNameController.text.isNotEmpty &&
+              _phoneController.text.length >= 10;
+        } else if (_accountType == 'JURISTIC') {
+          return _companyNameController.text.isNotEmpty &&
+              _representativeNameController.text.isNotEmpty &&
+              _phoneController.text.length >= 10;
+        } else {
+          return _communityNameController.text.isNotEmpty &&
+              _contactNameController.text.isNotEmpty &&
+              _phoneController.text.length >= 10;
+        }
+      case 3:
+        return _validatePassword(_passwordController.text) == null &&
+            _validateConfirmPassword(_confirmPasswordController.text) == null &&
+            _acceptTerms;
+      default:
+        return false;
+    }
+  }
+
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
     if (!_acceptTerms) {
@@ -74,7 +173,32 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
 
-    // Simulate API Call
+    // Build registration data based on account type
+    final Map<String, dynamic> registrationData = {
+      'accountType': _accountType,
+      'identifier': _identifierController.text.replaceAll('-', ''),
+      'phone': _phoneController.text,
+      'password': _passwordController.text,
+    };
+
+    if (_accountType == 'INDIVIDUAL') {
+      registrationData['firstName'] = _firstNameController.text;
+      registrationData['lastName'] = _lastNameController.text;
+      registrationData['idCard'] =
+          _identifierController.text.replaceAll('-', '');
+    } else if (_accountType == 'JURISTIC') {
+      registrationData['companyName'] = _companyNameController.text;
+      registrationData['representativeName'] =
+          _representativeNameController.text;
+      registrationData['taxId'] =
+          _identifierController.text.replaceAll('-', '');
+    } else {
+      registrationData['communityName'] = _communityNameController.text;
+      registrationData['contactName'] = _contactNameController.text;
+      registrationData['communityRegistrationNo'] = _identifierController.text;
+    }
+
+    // TODO: Call API with registrationData
     await Future.delayed(const Duration(seconds: 2));
 
     if (mounted) {
@@ -95,8 +219,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           margin: const EdgeInsets.all(16),
         ),
       );
-      // TODO: Navigate to login or home
-      // context.go('/login');
+      context.go('/login');
     }
   }
 
@@ -109,10 +232,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1B5E20)),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            if (_currentStep > 0) {
+              setState(() => _currentStep--);
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
         ),
         title: Text(
-          'ลงทะเบียนเกษตรกร',
+          'ลงทะเบียนผู้ใช้ใหม่',
           style: GoogleFonts.sarabun(
             color: const Color(0xFF1B5E20),
             fontWeight: FontWeight.bold,
@@ -129,17 +258,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               children: [
                 // Progress Indicator
                 _buildProgressIndicator(),
-
                 const SizedBox(height: 24),
 
                 // Step Content
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  child: _currentStep == 0
-                      ? _buildStep1IdentityCard()
-                      : _currentStep == 1
-                          ? _buildStep2PersonalInfo()
-                          : _buildStep3Security(),
+                  child: _buildCurrentStep(),
                 ),
 
                 const SizedBox(height: 24),
@@ -161,12 +285,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   Widget _buildProgressIndicator() {
     return Row(
-      children: List.generate(3, (index) {
+      children: List.generate(4, (index) {
         final isActive = index <= _currentStep;
-        // isComplete indicator is implicit in progress bar color
         return Expanded(
           child: Container(
-            margin: EdgeInsets.only(right: index < 2 ? 8 : 0),
+            margin: EdgeInsets.only(right: index < 3 ? 8 : 0),
             child: Column(
               children: [
                 Container(
@@ -180,13 +303,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  index == 0
-                      ? 'ยืนยันตัวตน'
-                      : index == 1
-                          ? 'ข้อมูลส่วนตัว'
-                          : 'ความปลอดภัย',
+                  _stepLabels[index],
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 10,
                     color: isActive ? const Color(0xFF1B5E20) : Colors.grey,
                     fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                   ),
@@ -199,7 +318,125 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  Widget _buildStep1IdentityCard() {
+  Widget _buildCurrentStep() {
+    switch (_currentStep) {
+      case 0:
+        return _buildStep0AccountType();
+      case 1:
+        return _buildStep1Identifier();
+      case 2:
+        return _buildStep2Info();
+      case 3:
+        return _buildStep3Password();
+      default:
+        return const SizedBox();
+    }
+  }
+
+  Widget _buildStep0AccountType() {
+    return Container(
+      key: const ValueKey('step0'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'เลือกประเภทผู้ใช้งาน',
+            style: GoogleFonts.sarabun(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'กรุณาเลือกประเภทบัญชีที่ตรงกับท่าน',
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+          ),
+          const SizedBox(height: 24),
+          ...List.generate(_accountTypes.length, (index) {
+            final type = _accountTypes[index];
+            final isSelected = _accountType == type['type'];
+            return GestureDetector(
+              onTap: () => setState(() => _accountType = type['type']),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? (type['color'] as Color).withOpacity(0.08)
+                      : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected
+                        ? type['color'] as Color
+                        : Colors.grey.shade200,
+                    width: isSelected ? 2 : 1,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: (type['color'] as Color).withOpacity(0.2),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: (type['color'] as Color).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        type['icon'] as IconData,
+                        color: type['color'] as Color,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            type['label'] as String,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: isSelected
+                                  ? type['color'] as Color
+                                  : Colors.grey.shade800,
+                            ),
+                          ),
+                          Text(
+                            type['subtitle'] as String,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isSelected)
+                      Icon(Icons.check_circle,
+                          color: type['color'] as Color, size: 28),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep1Identifier() {
+    final config = _currentAccountConfig;
     return Container(
       key: const ValueKey('step1'),
       padding: const EdgeInsets.all(24),
@@ -212,37 +449,31 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1B5E20).withOpacity(0.1),
+                  color: (config['color'] as Color).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.badge_outlined,
-                    color: Color(0xFF1B5E20), size: 28),
+                child: Icon(Icons.badge_outlined,
+                    color: config['color'] as Color, size: 28),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'ขั้นตอนที่ 1',
-                      style:
-                          TextStyle(color: Colors.grey.shade500, fontSize: 13),
-                    ),
-                    const Text(
-                      'ยืนยันตัวตนด้วยบัตรประชาชน',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
+                    Text('ขั้นตอนที่ 2',
+                        style: TextStyle(
+                            color: Colors.grey.shade500, fontSize: 13)),
+                    const Text('ยืนยันตัวตน',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: 24),
-
-          // ID Card Input
           TextFormField(
-            controller: _idCardController,
+            controller: _identifierController,
             keyboardType: TextInputType.number,
             maxLength: 17,
             inputFormatters: [
@@ -250,21 +481,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               _IdCardFormatter(),
             ],
             style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 2,
-            ),
+                fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 2),
             decoration: _inputDecoration(
-              label: 'เลขบัตรประชาชน 13 หลัก',
-              hint: '1-2345-67890-12-3',
+              label: config['idLabel'] as String,
+              hint: config['idHint'] as String,
               icon: Icons.credit_card,
             ).copyWith(counterText: ''),
-            validator: _validateIdCard,
+            validator: _validateIdentifier,
           ),
-
           const SizedBox(height: 16),
-
-          // Info Box
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -278,7 +503,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'เลขบัตรประชาชนจะถูกใช้เป็น Username ในการเข้าสู่ระบบ',
+                    'หมายเลขนี้จะใช้เป็น Username ในการเข้าสู่ระบบ',
                     style: TextStyle(fontSize: 13, color: Colors.blue.shade800),
                   ),
                 ),
@@ -290,7 +515,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  Widget _buildStep2PersonalInfo() {
+  Widget _buildStep2Info() {
     return Container(
       key: const ValueKey('step2'),
       padding: const EdgeInsets.all(24),
@@ -306,23 +531,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   color: const Color(0xFF1B5E20).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.person_outline,
-                    color: Color(0xFF1B5E20), size: 28),
+                child: Icon(
+                  _accountType == 'INDIVIDUAL'
+                      ? Icons.person_outline
+                      : Icons.business_center_outlined,
+                  color: const Color(0xFF1B5E20),
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text('ขั้นตอนที่ 3',
+                        style: TextStyle(
+                            color: Colors.grey.shade500, fontSize: 13)),
                     Text(
-                      'ขั้นตอนที่ 2',
-                      style:
-                          TextStyle(color: Colors.grey.shade500, fontSize: 13),
-                    ),
-                    const Text(
-                      'ข้อมูลส่วนตัว',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      _accountType == 'INDIVIDUAL'
+                          ? 'ข้อมูลส่วนตัว'
+                          : 'ข้อมูลองค์กร',
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -330,31 +560,68 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             ],
           ),
           const SizedBox(height: 24),
-
-          // Name
-          TextFormField(
-            controller: _nameController,
-            decoration: _inputDecoration(
-              label: 'ชื่อ-นามสกุล',
-              hint: 'นายสมชาย ใจดี',
-              icon: Icons.person,
+          if (_accountType == 'INDIVIDUAL') ...[
+            TextFormField(
+              controller: _firstNameController,
+              decoration: _inputDecoration(
+                  label: 'ชื่อ', hint: 'สมชาย', icon: Icons.person),
+              validator: (v) => _validateRequired(v, 'ชื่อ'),
             ),
-            validator: (v) => v!.isEmpty ? 'กรุณากรอกชื่อ-นามสกุล' : null,
-          ),
-
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _lastNameController,
+              decoration: _inputDecoration(
+                  label: 'นามสกุล', hint: 'ใจดี', icon: Icons.person_outline),
+              validator: (v) => _validateRequired(v, 'นามสกุล'),
+            ),
+          ] else if (_accountType == 'JURISTIC') ...[
+            TextFormField(
+              controller: _companyNameController,
+              decoration: _inputDecoration(
+                  label: 'ชื่อบริษัท/นิติบุคคล',
+                  hint: 'บริษัท ABC จำกัด',
+                  icon: Icons.business),
+              validator: (v) => _validateRequired(v, 'ชื่อบริษัท'),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _representativeNameController,
+              decoration: _inputDecoration(
+                  label: 'ชื่อผู้มีอำนาจ',
+                  hint: 'นายสมชาย ใจดี',
+                  icon: Icons.person),
+              validator: (v) => _validateRequired(v, 'ชื่อผู้มีอำนาจ'),
+            ),
+          ] else ...[
+            TextFormField(
+              controller: _communityNameController,
+              decoration: _inputDecoration(
+                  label: 'ชื่อวิสาหกิจชุมชน',
+                  hint: 'กลุ่มเกษตรกรบ้านป่า',
+                  icon: Icons.groups),
+              validator: (v) => _validateRequired(v, 'ชื่อวิสาหกิจชุมชน'),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _contactNameController,
+              decoration: _inputDecoration(
+                  label: 'ชื่อผู้ติดต่อ',
+                  hint: 'นายสมชาย ใจดี',
+                  icon: Icons.person),
+              validator: (v) => _validateRequired(v, 'ชื่อผู้ติดต่อ'),
+            ),
+          ],
           const SizedBox(height: 16),
-
-          // Phone
           TextFormField(
             controller: _phoneController,
             keyboardType: TextInputType.phone,
             maxLength: 10,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             decoration: _inputDecoration(
-              label: 'เบอร์โทรศัพท์',
-              hint: '0812345678',
-              icon: Icons.phone,
-            ).copyWith(counterText: ''),
+                    label: 'เบอร์โทรศัพท์',
+                    hint: '0812345678',
+                    icon: Icons.phone)
+                .copyWith(counterText: ''),
             validator: _validatePhone,
           ),
         ],
@@ -362,7 +629,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  Widget _buildStep3Security() {
+  Widget _buildStep3Password() {
     return Container(
       key: const ValueKey('step3'),
       padding: const EdgeInsets.all(24),
@@ -386,88 +653,75 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'ขั้นตอนที่ 3',
-                      style:
-                          TextStyle(color: Colors.grey.shade500, fontSize: 13),
-                    ),
-                    const Text(
-                      'ตั้งรหัสผ่าน',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
+                    Text('ขั้นตอนที่ 4',
+                        style: TextStyle(
+                            color: Colors.grey.shade500, fontSize: 13)),
+                    const Text('ตั้งรหัสผ่าน',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: 24),
-
-          // Password
           TextFormField(
             controller: _passwordController,
             obscureText: !_isPasswordVisible,
             decoration: _inputDecoration(
-              label: 'รหัสผ่าน',
-              hint: 'อย่างน้อย 8 ตัวอักษร + ตัวเลข',
-              icon: Icons.lock,
-            ).copyWith(
+                    label: 'รหัสผ่าน',
+                    hint: 'อย่างน้อย 8 ตัวอักษร + ตัวเลข',
+                    icon: Icons.lock)
+                .copyWith(
               suffixIcon: IconButton(
                 icon: Icon(
-                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.grey,
-                ),
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.grey),
                 onPressed: () =>
                     setState(() => _isPasswordVisible = !_isPasswordVisible),
               ),
             ),
             validator: _validatePassword,
           ),
-
           const SizedBox(height: 16),
-
-          // Confirm Password
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: !_isConfirmPasswordVisible,
             decoration: _inputDecoration(
-              label: 'ยืนยันรหัสผ่าน',
-              hint: 'กรอกรหัสผ่านอีกครั้ง',
-              icon: Icons.lock_outline,
-            ).copyWith(
+                    label: 'ยืนยันรหัสผ่าน',
+                    hint: 'กรอกรหัสผ่านอีกครั้ง',
+                    icon: Icons.lock_outline)
+                .copyWith(
               suffixIcon: IconButton(
                 icon: Icon(
-                  _isConfirmPasswordVisible
-                      ? Icons.visibility
-                      : Icons.visibility_off,
-                  color: Colors.grey,
-                ),
+                    _isConfirmPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.grey),
                 onPressed: () => setState(() =>
                     _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
               ),
             ),
             validator: _validateConfirmPassword,
           ),
-
           const SizedBox(height: 20),
-
-          // Terms Checkbox
           Container(
             decoration: BoxDecoration(
               color: _acceptTerms ? Colors.green.shade50 : Colors.grey.shade50,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color:
-                    _acceptTerms ? Colors.green.shade200 : Colors.grey.shade200,
-              ),
+                  color: _acceptTerms
+                      ? Colors.green.shade200
+                      : Colors.grey.shade200),
             ),
             child: CheckboxListTile(
               value: _acceptTerms,
               onChanged: (v) => setState(() => _acceptTerms = v ?? false),
               title: const Text(
-                'ข้าพเจ้ายอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว',
-                style: TextStyle(fontSize: 13),
-              ),
+                  'ข้าพเจ้ายอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว',
+                  style: TextStyle(fontSize: 13)),
               activeColor: const Color(0xFF1B5E20),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: const EdgeInsets.symmetric(horizontal: 8),
@@ -507,24 +761,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ),
         if (_currentStep > 0) const SizedBox(width: 12),
         Expanded(
-          flex: _currentStep == 0 ? 1 : 1,
           child: ElevatedButton(
-            onPressed: _isLoading
+            onPressed: _isLoading || !_canProceedToNextStep()
                 ? null
                 : () {
-                    if (_currentStep < 2) {
-                      // Validate current step before proceeding
-                      if (_currentStep == 0 &&
-                          _validateIdCard(_idCardController.text) != null) {
-                        _formKey.currentState?.validate();
-                        return;
-                      }
-                      if (_currentStep == 1 &&
-                          (_nameController.text.isEmpty ||
-                              _phoneController.text.isEmpty)) {
-                        _formKey.currentState?.validate();
-                        return;
-                      }
+                    if (_currentStep < 3) {
                       setState(() => _currentStep++);
                     } else {
                       _handleRegister();
@@ -538,25 +779,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   borderRadius: BorderRadius.circular(12)),
               elevation: 4,
               shadowColor: const Color(0xFF1B5E20).withOpacity(0.4),
-              disabledBackgroundColor: const Color(0xFF1B5E20).withOpacity(0.7),
+              disabledBackgroundColor: Colors.grey.shade300,
             ),
             child: _isLoading
                 ? const SizedBox(
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2),
-                  )
+                        color: Colors.white, strokeWidth: 2))
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        _currentStep < 2 ? 'ถัดไป' : 'ลงทะเบียน',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
+                      Text(_currentStep < 3 ? 'ถัดไป' : 'ลงทะเบียน',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
                       const SizedBox(width: 8),
-                      Icon(_currentStep < 2 ? Icons.arrow_forward : Icons.check,
+                      Icon(_currentStep < 3 ? Icons.arrow_forward : Icons.check,
                           size: 18),
                     ],
                   ),
@@ -575,22 +813,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             Icon(Icons.verified_user_outlined,
                 size: 16, color: Colors.grey.shade500),
             const SizedBox(width: 6),
-            Text(
-              'ข้อมูลของคุณจะถูกเก็บรักษาอย่างปลอดภัย',
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-            ),
+            Text('ข้อมูลของคุณจะถูกเก็บรักษาอย่างปลอดภัย',
+                style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
           ],
         ),
         const SizedBox(height: 16),
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text(
-            'มีบัญชีแล้ว? เข้าสู่ระบบ',
-            style: TextStyle(
-              color: Color(0xFF1B5E20),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          onPressed: () => context.go('/login'),
+          child: const Text('มีบัญชีแล้ว? เข้าสู่ระบบ',
+              style: TextStyle(
+                  color: Color(0xFF1B5E20), fontWeight: FontWeight.bold)),
         ),
       ],
     );
@@ -602,20 +834,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       borderRadius: BorderRadius.circular(20),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.05),
-          blurRadius: 20,
-          offset: const Offset(0, 8),
-        ),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 8))
       ],
       border: Border.all(color: Colors.grey.shade100),
     );
   }
 
-  InputDecoration _inputDecoration({
-    required String label,
-    required String hint,
-    required IconData icon,
-  }) {
+  InputDecoration _inputDecoration(
+      {required String label, required String hint, required IconData icon}) {
     return InputDecoration(
       labelText: label,
       hintText: hint,
@@ -624,36 +852,34 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       fillColor: Colors.grey.shade50,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
+          borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
-      ),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade200)),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0xFF1B5E20), width: 2),
-      ),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFF1B5E20), width: 2)),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.red, width: 1.5),
-      ),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5)),
       labelStyle: TextStyle(color: Colors.grey.shade600),
       floatingLabelStyle: const TextStyle(
-        color: Color(0xFF1B5E20),
-        fontWeight: FontWeight.bold,
-      ),
+          color: Color(0xFF1B5E20), fontWeight: FontWeight.bold),
     );
   }
 
   @override
   void dispose() {
-    _idCardController.dispose();
-    _nameController.dispose();
+    _identifierController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _companyNameController.dispose();
+    _representativeNameController.dispose();
+    _communityNameController.dispose();
+    _contactNameController.dispose();
     super.dispose();
   }
 }
@@ -662,9 +888,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 class _IdCardFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
+      TextEditingValue oldValue, TextEditingValue newValue) {
     var text = newValue.text.replaceAll('-', '');
     if (newValue.selection.baseOffset == 0) return newValue;
 

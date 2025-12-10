@@ -279,9 +279,9 @@
     },
     {
       "name": "fl_chart",
-      "rootUri": "file:///C:/Users/usEr/AppData/Local/Pub/Cache/hosted/pub.dev/fl_chart-0.65.0",
+      "rootUri": "file:///C:/Users/usEr/AppData/Local/Pub/Cache/hosted/pub.dev/fl_chart-0.69.2",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.2"
     },
     {
       "name": "flutter",

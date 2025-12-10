@@ -22,7 +22,7 @@ class CannabisStrategy implements PlantStrategy {
           labelText: 'ประเภทใบอนุญาต BhT*',
           border: OutlineInputBorder(),
         ),
-        initialValue: state.licenseType,
+        value: state.licenseType,
         items: ['BhT 11', 'BhT 13', 'BhT 16']
             .map((e) => DropdownMenuItem(value: e, child: Text(e)))
             .toList(),

@@ -55,6 +55,21 @@ class Step5Security extends ConsumerWidget {
 
             const SizedBox(height: 24),
 
+            // 1.5 Land Ownership (Smart Logic for Document Requirements)
+            const WizardSectionTitle(
+                title: '1.5 กรรมสิทธิ์ที่ดิน (Land Ownership)'),
+            const Text(
+              'เลือกสถานะการครอบครองที่ดิน เพื่อระบุเอกสารที่ต้องใช้',
+              style: TextStyle(color: Colors.grey, fontSize: 13),
+            ),
+            const SizedBox(height: 8),
+            _buildLandOwnershipRadio(
+              state.location.landOwnership,
+              (value) => notifier.updateLocation(landOwnership: value),
+            ),
+
+            const SizedBox(height: 24),
+
             // 2. Security Checklist (Strategy Pattern)
             WizardSectionTitle(
                 title:
@@ -96,4 +111,56 @@ class Step5Security extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Helper widget to build Land Ownership radio selector
+Widget _buildLandOwnershipRadio(
+  String currentValue,
+  void Function(String) onChanged,
+) {
+  final options = [
+    {
+      'value': 'Own',
+      'label': '🏠 เป็นเจ้าของ (Own)',
+      'subtitle': 'ใช้โฉนดที่ดิน'
+    },
+    {'value': 'Rent', 'label': '📝 เช่า (Rent)', 'subtitle': 'ใช้สัญญาเช่า'},
+    {
+      'value': 'Consent',
+      'label': '🤝 ได้รับอนุญาต (Consent)',
+      'subtitle': 'ใช้หนังสือยินยอม'
+    },
+  ];
+
+  return Column(
+    children: options.map((option) {
+      final isSelected = currentValue == option['value'];
+      return Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isSelected ? Colors.green : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(8),
+          color: isSelected ? Colors.green.shade50 : Colors.white,
+        ),
+        child: RadioListTile<String>(
+          value: option['value']!,
+          groupValue: currentValue,
+          onChanged: (value) => onChanged(value ?? ''),
+          title: Text(option['label']!,
+              style: TextStyle(
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              )),
+          subtitle: Text(option['subtitle']!,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              )),
+          activeColor: Colors.green,
+        ),
+      );
+    }).toList(),
+  );
 }

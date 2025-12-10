@@ -425,6 +425,9 @@ class SiteLocation {
   final String south;
   final String east;
   final String west;
+  // Land Ownership (for conditional document requirements)
+  // Values: 'Own' | 'Rent' | 'Consent' | '' (not selected)
+  final String landOwnership;
 
   const SiteLocation({
     this.name = '',
@@ -435,6 +438,7 @@ class SiteLocation {
     this.south = '',
     this.east = '',
     this.west = '',
+    this.landOwnership = '',
   });
 
   SiteLocation copyWith({
@@ -446,6 +450,7 @@ class SiteLocation {
     String? south,
     String? east,
     String? west,
+    String? landOwnership,
   }) {
     return SiteLocation(
       name: name ?? this.name,
@@ -456,6 +461,7 @@ class SiteLocation {
       south: south ?? this.south,
       east: east ?? this.east,
       west: west ?? this.west,
+      landOwnership: landOwnership ?? this.landOwnership,
     );
   }
 
@@ -469,6 +475,7 @@ class SiteLocation {
       'south': south,
       'east': east,
       'west': west,
+      'landOwnership': landOwnership,
     };
   }
 
@@ -482,6 +489,7 @@ class SiteLocation {
       south: map['south'] ?? '',
       east: map['east'] ?? '',
       west: map['west'] ?? '',
+      landOwnership: map['landOwnership'] ?? '',
     );
   }
 }
@@ -749,7 +757,8 @@ class FormValidator {
     }
 
     // Post Harvest Required?
-    if (plan.postHarvest.packaging.isEmpty || plan.postHarvest.storage.isEmpty) {
+    if (plan.postHarvest.packaging.isEmpty ||
+        plan.postHarvest.storage.isEmpty) {
       return false;
     }
 

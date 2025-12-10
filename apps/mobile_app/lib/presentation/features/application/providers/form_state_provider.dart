@@ -137,6 +137,7 @@ class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
     String? south,
     String? east,
     String? west,
+    String? landOwnership,
   }) {
     state = state.copyWith(
       location: state.location.copyWith(
@@ -146,6 +147,7 @@ class ApplicationFormNotifier extends StateNotifier<GACPApplication> {
         south: south,
         east: east,
         west: west,
+        landOwnership: landOwnership,
       ),
     );
   }

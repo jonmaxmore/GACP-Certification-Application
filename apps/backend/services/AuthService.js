@@ -52,14 +52,44 @@ class AuthService {
 
     /**
      * V2 Login Logic
+     * Improved error messages per Apple QA feedback
      */
     async login(email, password) {
+        // 1. Check if user exists
         const user = await UserModel.findOne({ email: email.toLowerCase() }).select('+password');
-        if (!user) throw new Error('Invalid Credentials');
+        if (!user) {
+            const error = new Error('ไม่พบบัญชีผู้ใช้นี้ในระบบ (User not found)');
+            error.code = 'USER_NOT_FOUND';
+            throw error;
+        }
 
+        // 2. Check account status
+        if (user.status === 'SUSPENDED') {
+            const error = new Error('บัญชีถูกระงับการใช้งาน กรุณาติดต่อเจ้าหน้าที่');
+            error.code = 'ACCOUNT_SUSPENDED';
+            throw error;
+        }
+
+        if (user.status === 'LOCKED') {
+            const error = new Error('บัญชีถูกล็อค กรุณารอ 15 นาทีหรือติดต่อเจ้าหน้าที่');
+            error.code = 'ACCOUNT_LOCKED';
+            throw error;
+        }
+
+        // 3. Check password
         const isMatch = await user.comparePassword(password);
-        if (!isMatch) throw new Error('Invalid Credentials');
+        if (!isMatch) {
+            const error = new Error('รหัสผ่านไม่ถูกต้อง (Incorrect password)');
+            error.code = 'INVALID_PASSWORD';
+            throw error;
+        }
 
+        // 4. Update last login
+        user.lastLoginAt = new Date();
+        user.loginAttempts = 0; // Reset on successful login
+        await user.save();
+
+        // 5. Generate token
         const token = jwtSecurity.generateToken({
             id: user._id,
             email: user.email,

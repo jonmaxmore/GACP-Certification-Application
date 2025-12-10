@@ -62,11 +62,20 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, UserEntity>> login(
-      String email, String password) async {
+      String idCardOrEmail, String password) async {
     try {
+      // Support both Thai ID (13 digits) and Email login
+      final isThaiId =
+          RegExp(r'^\d{13}$').hasMatch(idCardOrEmail.replaceAll('-', ''));
+
       final response = await _dioClient.post(
         '/v2/auth/login',
-        data: {'email': email, 'password': password},
+        data: {
+          // Send as both fields for backend compatibility
+          'email': isThaiId ? null : idCardOrEmail,
+          'idCard': isThaiId ? idCardOrEmail.replaceAll('-', '') : null,
+          'password': password,
+        },
       );
 
       if (response.statusCode == 200) {

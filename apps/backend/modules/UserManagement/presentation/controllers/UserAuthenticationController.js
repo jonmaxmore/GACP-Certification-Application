@@ -56,17 +56,29 @@ class UserAuthenticationController {
         });
       }
 
-      const { email, password } = req.body;
+      const { email, idCard, password } = req.body;
+
+      // Support login via Thai ID (13 digits) or Email
+      // At least one identifier must be provided
+      const identifier = email || idCard;
+      if (!identifier) {
+        return res.status(400).json({
+          success: false,
+          error: 'VALIDATION_ERROR',
+          message: 'Email or Thai ID is required',
+        });
+      }
 
       // Build request context
       const context = {
         ip: req.ip || req.connection.remoteAddress,
         userAgent: req.get('User-Agent'),
         timestamp: new Date(),
+        loginMethod: idCard ? 'THAI_ID' : 'EMAIL', // Track login method
       };
 
-      // Authenticate user
-      const result = await this.authService.authenticateUser(email, password, context);
+      // Authenticate user (service handles both email and idCard lookup)
+      const result = await this.authService.authenticateUser(identifier, password, context);
 
       if (!result.success) {
         return res.status(401).json({
@@ -512,7 +524,9 @@ class UserAuthenticationController {
   static getValidationRules() {
     return {
       login: [
-        body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
+        // Either email or idCard is required (validated in controller)
+        body('email').optional().isEmail().normalizeEmail().withMessage('Valid email is required'),
+        body('idCard').optional().isLength({ min: 13, max: 13 }).isNumeric().withMessage('Valid 13-digit Thai ID is required'),
         body('password').isLength({ min: 1 }).withMessage('Password is required'),
       ],
 

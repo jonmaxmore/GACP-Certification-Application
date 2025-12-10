@@ -135,18 +135,28 @@ class UserAuthenticationService extends EventEmitter {
    * @param {Object} context - Request context (IP, user agent, etc.)
    * @returns {Promise<Object>} - Authentication result with tokens
    */
-  async authenticateUser(email, password, context = {}) {
+  async authenticateUser(identifier, password, context = {}) {
     try {
       // Input validation
-      if (!email || !password) {
-        throw new Error('Email and password are required');
+      if (!identifier || !password) {
+        throw new Error('Email/Thai ID and password are required');
       }
 
-      // Find user by email
-      const user = await this.userRepository.findByEmail(email.toLowerCase());
+      // Detect if identifier is Thai ID (13 digits) or Email
+      const cleanIdentifier = identifier.replace(/-/g, '');
+      const isThaiId = /^\d{13}$/.test(cleanIdentifier);
+
+      // Find user by email or Thai ID
+      let user;
+      if (isThaiId) {
+        user = await this.userRepository.findOne({ idCard: cleanIdentifier });
+      } else {
+        user = await this.userRepository.findByEmail(identifier.toLowerCase());
+      }
+
       if (!user) {
         await this._logSecurityEvent('LOGIN_FAILED', {
-          email,
+          identifier: isThaiId ? 'THAI_ID' : identifier,
           reason: 'USER_NOT_FOUND',
           ...context,
         });

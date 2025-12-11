@@ -194,8 +194,8 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
               GoRoute(
                 path: 'guidelines',
-                builder: (context, state) =>
-                    GuidelinesScreen(requestType: state.extra as String),
+                builder: (context, state) => GuidelinesScreen(
+                    requestType: (state.extra as String?) ?? 'NEW'),
               ),
               GoRoute(
                 path: ':id/pay1',

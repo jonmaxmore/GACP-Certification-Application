@@ -45,6 +45,24 @@ class ApplicationController {
         }
     }
 
+    // Get current user's applications
+    async getMyApplications(req, res) {
+        try {
+            const applications = await Application.find({ farmerId: req.user.id })
+                .sort({ createdAt: -1 })
+                .select('applicationNumber status data.applicantInfo.name data.formData.plantId createdAt')
+                .lean();
+
+            res.json({
+                success: true,
+                data: applications,
+                total: applications.length
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
     // Stage 1: Pre-Submission Review (Web View Trigger)
     async confirmReview(req, res) {
         try {

@@ -93,7 +93,8 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                     decoration: BoxDecoration(
                       color: Colors.yellow[50],
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.orange.withValues(alpha: 0.5)),
+                      border: Border.all(
+                          color: Colors.orange.withValues(alpha: 0.5)),
                     ),
                     child: const Row(
                       children: [
@@ -149,7 +150,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                     child: FilledButton(
                       onPressed: _isAccepted
                           ? () {
-                              context.go('/applications/create/1',
+                              context.go('/applications/create/step0',
                                   extra: widget.requestType);
                             }
                           : null,

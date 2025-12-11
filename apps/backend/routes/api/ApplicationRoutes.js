@@ -10,6 +10,7 @@ const paymentRateLimiter = strictRateLimiter(15 * 60 * 1000, 10); // 10 per 15 m
 
 // Farmer Routes (with rate limiting)
 router.post('/draft', authenticate, applicationRateLimiter, controller.createDraft);
+router.get('/my', authenticate, controller.getMyApplications); // NEW: Get user's applications
 router.post('/:id/confirm-review', authenticate, applicationRateLimiter, controller.confirmReview);
 router.post('/:id/pay-phase1', authenticate, paymentRateLimiter, controller.submitPayment1);
 

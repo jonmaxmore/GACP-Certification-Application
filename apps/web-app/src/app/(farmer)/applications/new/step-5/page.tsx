@@ -141,6 +141,28 @@ export default function Step5Site() {
                         <input type="text" value={form.gpsLng || ''} onChange={e => handleChange('gpsLng', e.target.value)} placeholder="100.501762" style={{ ...inputStyle, fontSize: '13px', padding: '8px 10px' }} />
                     </div>
                 </div>
+
+                {/* Map Preview */}
+                {form.gpsLat && form.gpsLng && (
+                    <div style={{ marginTop: '12px', borderRadius: '10px', overflow: 'hidden', border: `1px solid ${isDark ? '#4B5563' : '#E5E7EB'}` }}>
+                        <div style={{ background: isDark ? '#1F2937' : '#F3F4F6', padding: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '12px', fontWeight: 500, color: isDark ? '#D1D5DB' : '#374151' }}>📍 ตำแหน่งที่ปักหมุด</span>
+                            <a
+                                href={`https://www.google.com/maps?q=${form.gpsLat},${form.gpsLng}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ fontSize: '11px', color: '#3B82F6', textDecoration: 'none', fontWeight: 500 }}
+                            >
+                                🔗 เปิดใน Maps
+                            </a>
+                        </div>
+                        <iframe
+                            src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(form.gpsLng) - 0.005}%2C${parseFloat(form.gpsLat) - 0.003}%2C${parseFloat(form.gpsLng) + 0.005}%2C${parseFloat(form.gpsLat) + 0.003}&layer=mapnik&marker=${form.gpsLat}%2C${form.gpsLng}`}
+                            style={{ width: '100%', height: '160px', border: 'none' }}
+                            loading="lazy"
+                        />
+                    </div>
+                )}
             </div>
 
             {/* Address */}

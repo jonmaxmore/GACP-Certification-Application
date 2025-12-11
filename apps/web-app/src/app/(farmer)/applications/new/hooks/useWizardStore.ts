@@ -6,6 +6,8 @@ import { useState, useEffect, useCallback } from 'react';
 export type PlantId = 'cannabis' | 'kratom' | 'turmeric' | 'ginger' | 'black_galangal' | 'plai';
 export type ServiceType = 'NEW' | 'RENEWAL' | 'MODIFY' | 'REPLACEMENT';
 export type PlantGroup = 'HIGH_CONTROL' | 'GENERAL';
+export type CertificationPurpose = 'RESEARCH' | 'COMMERCIAL' | 'EXPORT';
+export type SiteType = 'OUTDOOR' | 'INDOOR' | 'GREENHOUSE';
 
 export interface Plant {
     id: PlantId;
@@ -121,6 +123,9 @@ export interface WizardState {
     currentStep: number;
     plantId: PlantId | null;
     serviceType: ServiceType | null;
+    certificationPurpose: CertificationPurpose | null;
+    siteTypes: SiteType[];
+    licensePdfUrl: string | null;
     consentedPDPA: boolean;
     acknowledgedStandards: boolean;
     applicantData: ApplicantData | null;
@@ -139,6 +144,9 @@ const initialState: WizardState = {
     currentStep: 0,
     plantId: null,
     serviceType: null,
+    certificationPurpose: null,
+    siteTypes: [],
+    licensePdfUrl: null,
     consentedPDPA: false,
     acknowledgedStandards: false,
     applicantData: null,
@@ -191,6 +199,18 @@ export function useWizardStore() {
         setState(prev => ({ ...prev, serviceType }));
     }, []);
 
+    const setCertificationPurpose = useCallback((purpose: CertificationPurpose) => {
+        setState(prev => ({ ...prev, certificationPurpose: purpose }));
+    }, []);
+
+    const setSiteTypes = useCallback((siteTypes: SiteType[]) => {
+        setState(prev => ({ ...prev, siteTypes }));
+    }, []);
+
+    const setLicensePdfUrl = useCallback((url: string | null) => {
+        setState(prev => ({ ...prev, licensePdfUrl: url }));
+    }, []);
+
     const setApplicantData = useCallback((applicantData: ApplicantData) => {
         setState(prev => ({ ...prev, applicantData }));
     }, []);
@@ -232,15 +252,16 @@ export function useWizardStore() {
     const canProceedFromStep = useCallback((step: number): boolean => {
         switch (step) {
             case 0: return !!state.plantId;
-            case 1: return state.acknowledgedStandards;
+            case 1: return !!state.certificationPurpose && state.siteTypes.length > 0;
             case 2: return !!state.serviceType;
             case 3: return state.consentedPDPA;
-            case 4: return !!state.applicantData?.firstName || !!state.applicantData?.companyName;
-            case 5: return !!state.siteData?.siteName;
-            case 6: return true; // Production data optional
-            case 7: return state.documents.filter(d => d.uploaded).length > 0;
-            case 8: return true; // Review step
-            case 9: return true; // Payment step
+            case 4: return state.acknowledgedStandards;
+            case 5: return !!state.applicantData?.firstName || !!state.applicantData?.companyName;
+            case 6: return !!state.siteData?.siteName;
+            case 7: return true; // Production data optional
+            case 8: return state.documents.filter(d => d.uploaded).length > 0;
+            case 9: return true; // Review step
+            case 10: return true; // Payment step
             default: return false;
         }
     }, [state]);
@@ -263,6 +284,9 @@ export function useWizardStore() {
         updateState,
         setPlant,
         setServiceType,
+        setCertificationPurpose,
+        setSiteTypes,
+        setLicensePdfUrl,
         setApplicantData,
         setSiteData,
         setProductionData,

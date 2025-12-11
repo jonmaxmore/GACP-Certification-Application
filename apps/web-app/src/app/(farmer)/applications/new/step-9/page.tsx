@@ -39,8 +39,8 @@ export default function Step9Payment() {
         const appId = `GACP-${Date.now().toString(36).toUpperCase()}`;
         localStorage.setItem('last_application_id', appId);
 
-        resetWizard();
-        router.push('/applications/new/success');
+        // Go to payment step
+        router.push('/applications/new/step-10');
     };
 
     const handleBack = () => router.push('/applications/new/step-8');

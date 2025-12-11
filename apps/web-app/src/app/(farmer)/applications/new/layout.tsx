@@ -4,18 +4,19 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
-// Step configuration
+// Step configuration for new flow
 const STEPS = [
     { id: 0, path: 'step-0', label: 'เลือกพืช', icon: '🌿' },
-    { id: 1, path: 'step-1', label: 'มาตรฐาน', icon: '📋' },
+    { id: 1, path: 'step-1', label: 'วัตถุประสงค์', icon: '🎯' },
     { id: 2, path: 'step-2', label: 'บริการ', icon: '🔖' },
     { id: 3, path: 'step-3', label: 'ยินยอม', icon: '✅' },
-    { id: 4, path: 'step-4', label: 'ผู้ยื่น', icon: '👤' },
-    { id: 5, path: 'step-5', label: 'สถานที่', icon: '📍' },
-    { id: 6, path: 'step-6', label: 'การผลิต', icon: '🌱' },
-    { id: 7, path: 'step-7', label: 'เอกสาร', icon: '📄' },
-    { id: 8, path: 'step-8', label: 'ตรวจสอบ', icon: '🔍' },
-    { id: 9, path: 'step-9', label: 'ชำระเงิน', icon: '💳' },
+    { id: 4, path: 'step-4', label: 'มาตรฐาน', icon: '📋' },
+    { id: 5, path: 'step-5', label: 'ผู้ยื่น', icon: '👤' },
+    { id: 6, path: 'step-6', label: 'สถานที่', icon: '📍' },
+    { id: 7, path: 'step-7', label: 'การผลิต', icon: '🌱' },
+    { id: 8, path: 'step-8', label: 'เอกสาร', icon: '📄' },
+    { id: 9, path: 'step-9', label: 'ตรวจสอบ', icon: '🔍' },
+    { id: 10, path: 'step-10', label: 'ชำระเงิน', icon: '💳' },
 ];
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {

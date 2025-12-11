@@ -24,15 +24,50 @@ const port = process.env.PORT || 3000;
 
 const path = require('path');
 
+// CORS Configuration - Environment Based
+const corsOptions = {
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, etc.)
+        if (!origin) return callback(null, true);
+
+        // In development, allow all origins
+        if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
+            return callback(null, true);
+        }
+
+        // In production, use whitelist from environment
+        const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3001').split(',');
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        logger.warn(`[CORS] Blocked request from: ${origin}`);
+        return callback(new Error('Not allowed by CORS'), false);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+};
+
+// Trust proxy for AWS/Cloud deployment (required for HTTPS behind load balancer)
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
+
 // Security & Performance Middleware
-app.use(helmet());
-app.use(helmet());
-app.use(cors({ origin: '*' })); // Allow all origins (Fix for ERR_CONNECTION_REFUSED)
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+    hsts: process.env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
+}));
+app.use(cors(corsOptions));
 app.use(compression());
-app.use(morgan('combined'));
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Serve Static Files (Uploads)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+    maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
+}));
 
 // Body Parsing
 app.use(express.json({ limit: '10mb' }));
@@ -54,8 +89,8 @@ app.use('/api/v2/establishments', EstablishmentRoutes); // Dual mount for V2 com
 app.use('/api/v2', v2Routes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Health Check
-app.get('/health', async (req, res) => {
+// Health Check - Both /health and /api/health for compatibility
+app.get(['/health', '/api/health'], async (req, res) => {
     try {
         const dbHealth = await databaseService.healthCheck();
         res.json({

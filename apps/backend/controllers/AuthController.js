@@ -72,9 +72,33 @@ class AuthController {
                 });
             }
 
+            // Handle MongoDB duplicate key error
+            let errorMessage = error.message;
+            if (error.code === 11000 || error.message.includes('E11000')) {
+                // Parse which field caused the duplicate - use regex for actual index name
+                const indexMatch = error.message.match(/index: (\w+)/);
+                const indexName = indexMatch ? indexMatch[1] : '';
+
+                console.log('[AuthController] Duplicate Key Index:', indexName, 'KeyValue:', error.keyValue);
+
+                if (indexName.includes('idCardHash') || error.keyValue?.idCardHash) {
+                    errorMessage = 'เลขบัตรประชาชนนี้ถูกลงทะเบียนแล้ว';
+                } else if (indexName.includes('taxIdHash') || error.keyValue?.taxIdHash) {
+                    errorMessage = 'เลขทะเบียนนิติบุคคลนี้ถูกลงทะเบียนแล้ว';
+                } else if (indexName.includes('communityRegistrationNoHash') || error.keyValue?.communityRegistrationNoHash) {
+                    errorMessage = 'เลขทะเบียนวิสาหกิจชุมชนนี้ถูกลงทะเบียนแล้ว';
+                } else if (indexName.includes('phoneNumber') || error.keyValue?.phoneNumber) {
+                    errorMessage = 'เบอร์โทรศัพท์นี้ถูกใช้งานแล้ว';
+                } else if (indexName.includes('email') || error.keyValue?.email) {
+                    errorMessage = 'อีเมลนี้ถูกใช้งานแล้ว';
+                } else {
+                    errorMessage = 'ข้อมูลนี้ถูกลงทะเบียนในระบบแล้ว';
+                }
+            }
+
             res.status(400).json({
                 success: false,
-                error: error.message
+                error: errorMessage
             });
         }
     }
@@ -124,6 +148,84 @@ class AuthController {
             });
         } catch (error) {
             res.status(500).json({ success: false, error: 'Server Error' });
+        }
+    }
+
+    /**
+     * Check if identifier (ID Card / Tax ID / CE No) already exists
+     * POST /auth/check-identifier
+     * Used for real-time validation at registration Step 2
+     */
+    async checkIdentifier(req, res) {
+        try {
+            const { identifier, accountType = 'INDIVIDUAL' } = req.body;
+
+            if (!identifier) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Identifier is required',
+                    available: false
+                });
+            }
+
+            // Clean identifier (remove dashes)
+            const cleanId = identifier.replace(/-/g, '');
+
+            // Validate format based on account type
+            if (accountType !== 'COMMUNITY_ENTERPRISE') {
+                if (cleanId.length !== 13) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'ต้องมี 13 หลัก',
+                        available: false
+                    });
+                }
+                if (!/^\d+$/.test(cleanId)) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'ต้องเป็นตัวเลขเท่านั้น',
+                        available: false
+                    });
+                }
+            }
+
+            // Check for duplicates in database
+            const isDuplicate = await AuthService.checkIdentifierExists(cleanId, accountType);
+
+            if (isDuplicate) {
+                let errorMessage = 'ข้อมูลนี้ถูกลงทะเบียนแล้ว';
+                switch (accountType) {
+                    case 'INDIVIDUAL':
+                        errorMessage = 'เลขบัตรประชาชนนี้ถูกลงทะเบียนแล้ว';
+                        break;
+                    case 'JURISTIC':
+                        errorMessage = 'เลขทะเบียนนิติบุคคลนี้ถูกลงทะเบียนแล้ว';
+                        break;
+                    case 'COMMUNITY_ENTERPRISE':
+                        errorMessage = 'เลขทะเบียนวิสาหกิจชุมชนนี้ถูกลงทะเบียนแล้ว';
+                        break;
+                }
+                return res.status(200).json({
+                    success: true,
+                    available: false,
+                    error: errorMessage
+                });
+            }
+
+            // Identifier is valid and available
+            res.status(200).json({
+                success: true,
+                available: true,
+                message: 'หมายเลขนี้สามารถใช้ลงทะเบียนได้'
+            });
+
+        } catch (error) {
+            console.error('[AuthController] Check Identifier Error:', error.message);
+            res.status(500).json({
+                success: false,
+                error: 'Server Error',
+                available: false
+            });
         }
     }
 }

@@ -1,10 +1,9 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Create app directory
 WORKDIR /usr/src/app
 
 # Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
 
 # Install production dependencies only
@@ -13,8 +12,18 @@ RUN npm ci --only=production
 # Bundle app source
 COPY . .
 
+# Create uploads directory
+RUN mkdir -p uploads
+
+# Set environment
+ENV NODE_ENV=production
+
 # Expose port
 EXPOSE 3000
 
+# Health check for AWS ECS/EKS
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
 # Start command
-CMD [ "npm", "start" ]
+CMD [ "node", "server.js" ]

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../establishment/providers/establishment_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/weather_widget.dart';
@@ -18,6 +19,10 @@ class DashboardScreen extends ConsumerWidget {
     final dashboardState =
         ref.watch(dashboardProvider); // Reserved for future stats
     final establishmentState = ref.watch(establishmentProvider);
+    final authState = ref.watch(authProvider);
+
+    // Get user display name from auth state
+    final userName = authState.user?.displayName ?? 'ผู้ใช้';
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -27,7 +32,7 @@ class DashboardScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Hero Section (Gradient + Weather)
-              _buildHeroSection(context),
+              _buildHeroSection(context, ref, userName),
 
               // 2. Quick Actions Grid
               Padding(
@@ -102,7 +107,8 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeroSection(BuildContext context) {
+  Widget _buildHeroSection(
+      BuildContext context, WidgetRef ref, String userName) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -126,9 +132,9 @@ class DashboardScreen extends ConsumerWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'สวัสดี, สมชาย 🙏', // Mock User
-                    style: TextStyle(
+                  Text(
+                    'สวัสดี, $userName 🙏',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,

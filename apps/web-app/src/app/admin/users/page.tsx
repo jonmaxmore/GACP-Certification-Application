@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import api from "@/services/apiClient";
 
 interface StaffUser {
     id: string;
@@ -68,58 +69,44 @@ export default function AdminUsersPage() {
         setError("");
         setIsLoading(true);
 
-        try {
-            // TODO: Call API
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api"}/v2/admin/users`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem("staff_token")}`,
-                    },
-                    body: JSON.stringify({
-                        email: newEmail,
-                        firstName: newFirstName,
-                        lastName: newLastName,
-                        role: newRole,
-                        password: newPassword,
-                        accountType: "STAFF",
-                    }),
-                }
-            );
+        // Use centralized API client with retry and error handling
+        const result = await api.post<{ success: boolean }>("/v2/admin/users", {
+            email: newEmail,
+            firstName: newFirstName,
+            lastName: newLastName,
+            role: newRole,
+            password: newPassword,
+            accountType: "STAFF",
+        });
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || "สร้างบัญชีไม่สำเร็จ");
-            }
-
-            // Add to list
-            setUsers([
-                ...users,
-                {
-                    id: Date.now().toString(),
-                    email: newEmail,
-                    firstName: newFirstName,
-                    lastName: newLastName,
-                    role: newRole,
-                    status: "ACTIVE",
-                    createdAt: new Date().toISOString().split("T")[0],
-                },
-            ]);
-
-            // Reset form
-            setNewEmail("");
-            setNewFirstName("");
-            setNewLastName("");
-            setNewRole("REVIEWER_AUDITOR");
-            setNewPassword("");
-            setShowCreateModal(false);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
-        } finally {
+        if (!result.success) {
+            setError(result.error);
             setIsLoading(false);
+            return;
         }
+
+        // Add to list
+        setUsers([
+            ...users,
+            {
+                id: Date.now().toString(),
+                email: newEmail,
+                firstName: newFirstName,
+                lastName: newLastName,
+                role: newRole,
+                status: "ACTIVE",
+                createdAt: new Date().toISOString().split("T")[0],
+            },
+        ]);
+
+        // Reset form
+        setNewEmail("");
+        setNewFirstName("");
+        setNewLastName("");
+        setNewRole("REVIEWER_AUDITOR");
+        setNewPassword("");
+        setShowCreateModal(false);
+        setIsLoading(false);
     };
 
     const getRoleBadge = (role: string) => {

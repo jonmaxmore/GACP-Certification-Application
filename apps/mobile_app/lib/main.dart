@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart'; // Import AppTheme
 
@@ -8,6 +9,10 @@ import 'core/managers/lifecycle_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Use path-based URLs instead of hash-based (removes # from URL)
+  usePathUrlStrategy();
+
   await Hive.initFlutter();
   await Hive.openBox('application_drafts');
 

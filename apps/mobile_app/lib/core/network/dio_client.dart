@@ -80,13 +80,21 @@ class DioClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onError: (DioException e, handler) async {
-          // Retry Logic for GET requests (Idempotent)
-          if (e.requestOptions.method == 'GET' && _shouldRetry(e)) {
-            final int retries = (e.requestOptions.extra['retries'] as int?) ?? 0;
+          // Retry Logic for GET requests and POST to auth endpoints (idempotent)
+          final isGetRequest = e.requestOptions.method == 'GET';
+          final isAuthPost = e.requestOptions.method == 'POST' &&
+              (e.requestOptions.path.contains('/auth') ||
+                  e.requestOptions.path.contains('/login') ||
+                  e.requestOptions.path.contains('/register'));
+
+          if ((isGetRequest || isAuthPost) && _shouldRetry(e)) {
+            final int retries =
+                (e.requestOptions.extra['retries'] as int?) ?? 0;
             if (retries < 3) {
               e.requestOptions.extra['retries'] = retries + 1;
-              await Future.delayed(Duration(
-                  milliseconds: 1000 * (retries + 1))); // Exponential Backoff
+              // Exponential Backoff: 1s, 2s, 4s
+              await Future.delayed(
+                  Duration(milliseconds: 1000 * (1 << retries)));
               try {
                 final response = await _dio.request(
                   e.requestOptions.path,

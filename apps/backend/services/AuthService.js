@@ -16,14 +16,14 @@ class AuthService {
             accountType: accountType,
             password: data.password,
             phoneNumber: data.phoneNumber,
-            email: data.email?.toLowerCase() || null,
             role: 'FARMER',
             status: 'PENDING_VERIFICATION'
         };
 
-        // Check email duplicate if provided
-        if (data.email) {
-            const existingEmail = await UserModel.findOne({ email: data.email.toLowerCase() });
+        // Only add email if provided (sparse index requires undefined, not null)
+        if (data.email && data.email.trim()) {
+            userData.email = data.email.toLowerCase();
+            const existingEmail = await UserModel.findOne({ email: userData.email });
             if (existingEmail) throw new Error('อีเมลนี้ถูกใช้งานแล้ว');
         }
 
@@ -121,6 +121,7 @@ class AuthService {
      * V2 Login Logic (Multi-Account Type Support)
      */
     async login(identifier, password, accountType = null) {
+        console.log('[AuthService] Login attempt:', { identifier, accountType });
         let user;
 
         // Determine lookup method based on identifier format or accountType
@@ -188,6 +189,32 @@ class AuthService {
      */
     async getProfile(userId) {
         return await UserModel.findById(userId);
+    }
+
+    /**
+     * Check if identifier already exists in database
+     * Used for real-time validation at registration Step 2
+     */
+    async checkIdentifierExists(identifier, accountType) {
+        const { hash } = require('../shared/encryption');
+        const identifierHash = hash(identifier);
+
+        switch (accountType) {
+            case 'INDIVIDUAL':
+                const existingIdCard = await UserModel.findOne({ idCardHash: identifierHash });
+                return !!existingIdCard;
+
+            case 'JURISTIC':
+                const existingTaxId = await UserModel.findOne({ taxIdHash: identifierHash });
+                return !!existingTaxId;
+
+            case 'COMMUNITY_ENTERPRISE':
+                const existingCE = await UserModel.findOne({ communityRegistrationNoHash: identifierHash });
+                return !!existingCE;
+
+            default:
+                return false;
+        }
     }
 }
 

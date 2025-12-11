@@ -18,6 +18,11 @@ exports.validateThaiID = (id) => {
     return false;
   }
 
+  // Skip checksum validation in development mode
+  if (process.env.NODE_ENV === 'development' || process.env.SKIP_THAI_ID_CHECKSUM === 'true') {
+    return true;
+  }
+
   let sum = 0;
   for (let i = 0; i < 12; i++) {
     sum += parseFloat(id.charAt(i)) * (13 - i);

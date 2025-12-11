@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Sarabun } from "next/font/google";
 import "./globals.css";
+import SystemGuard from "@/components/SystemGuard";
 
 const sarabun = Sarabun({
   variable: "--font-sarabun",
@@ -21,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body className={`${sarabun.variable} font-sarabun antialiased`}>
-        {children}
+        <SystemGuard>
+          {children}
+        </SystemGuard>
       </body>
     </html>
   );

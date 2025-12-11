@@ -107,7 +107,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                         backgroundImage:
                             const AssetImage('assets/images/user_avatar.png'),
                         child: user.firstName.isEmpty
-                            ? Text(user.email[0].toUpperCase(),
+                            ? Text((user.email ?? 'U')[0].toUpperCase(),
                                 style: const TextStyle(fontSize: 32))
                             : null,
                       ),
@@ -152,8 +152,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        _buildProfileItem(
-                            LucideIcons.mail, 'อีเมล (Email)', user.email),
+                        if (user.email != null && user.email!.isNotEmpty)
+                          _buildProfileItem(
+                              LucideIcons.mail, 'อีเมล (Email)', user.email!),
                         if (user.phoneNumber != null) ...[
                           const Divider(),
                           _buildProfileItem(LucideIcons.phone,

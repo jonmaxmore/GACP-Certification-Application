@@ -3,11 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:html' as html;
+
+import '../providers/auth_provider.dart';
 
 /// GACP Official Registration Screen
 /// Multi-Account Type: Individual, Juristic, Community Enterprise
 class RegistrationScreen extends ConsumerStatefulWidget {
-  const RegistrationScreen({super.key});
+  final int initialStep;
+
+  const RegistrationScreen({super.key, this.initialStep = 0});
 
   @override
   ConsumerState<RegistrationScreen> createState() => _RegistrationScreenState();
@@ -42,7 +47,102 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
   bool _acceptTerms = false;
-  int _currentStep = 0;
+  late int _currentStep;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentStep = widget.initialStep;
+  }
+
+  // Step to URL path mapping
+  static const Map<int, String> _stepPaths = {
+    0: '/register/account-type',
+    1: '/register/identifier',
+    2: '/register/personal-info',
+    3: '/register/password',
+  };
+
+  void _goToStep(int step) {
+    setState(() => _currentStep = step);
+    // Update browser URL without navigation (preserves widget state)
+    final path = _stepPaths[step] ?? '/register';
+    html.window.history.replaceState(null, '', path);
+  }
+
+  // Error message for identifier duplicate check
+
+  /// Show error SnackBar for identifier validation
+  void _showIdentifierError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: Colors.red.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }
+
+  /// Check if identifier is available (not already registered)
+  Future<bool> _checkIdentifierAvailable() async {
+    final cleanId = _identifierController.text.replaceAll('-', '');
+
+    // Local format validation first
+    if (_accountType != 'COMMUNITY_ENTERPRISE') {
+      if (cleanId.length != 13) {
+        _showIdentifierError('ต้องมี 13 หลัก');
+        return false;
+      }
+      if (!RegExp(r'^\d+$').hasMatch(cleanId)) {
+        _showIdentifierError('ต้องเป็นตัวเลขเท่านั้น');
+        return false;
+      }
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final dio = ref.read(dioClientProvider);
+      final response = await dio.post(
+        '/auth-farmer/check-identifier',
+        data: {
+          'identifier': cleanId,
+          'accountType': _accountType,
+        },
+      );
+
+      setState(() => _isLoading = false);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['available'] == true) {
+          return true;
+        } else {
+          final errorMsg = data['error'] ?? 'หมายเลขนี้ถูกใช้งานแล้ว';
+          _showIdentifierError(errorMsg);
+          return false;
+        }
+      } else {
+        final errorMsg = response.data['error'] ?? 'ตรวจสอบไม่ได้';
+        _showIdentifierError(errorMsg);
+        return false;
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showIdentifierError('ไม่สามารถตรวจสอบ ID ได้ กรุณาลองใหม่');
+      return false;
+    }
+  }
 
   // Account Types
   static const List<Map<String, dynamic>> _accountTypes = [
@@ -177,9 +277,13 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     final Map<String, dynamic> registrationData = {
       'accountType': _accountType,
       'identifier': _identifierController.text.replaceAll('-', ''),
-      'phone': _phoneController.text,
+      'phoneNumber': _phoneController.text,
       'password': _passwordController.text,
     };
+
+    // Debug: Log registration data
+    print('[Registration] Account Type: $_accountType');
+    print('[Registration] Data: $registrationData');
 
     if (_accountType == 'INDIVIDUAL') {
       registrationData['firstName'] = _firstNameController.text;
@@ -194,32 +298,78 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           _identifierController.text.replaceAll('-', '');
     } else {
       registrationData['communityName'] = _communityNameController.text;
-      registrationData['contactName'] = _contactNameController.text;
+      registrationData['representativeName'] = _contactNameController.text;
       registrationData['communityRegistrationNo'] = _identifierController.text;
     }
 
-    // TODO: Call API with registrationData
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // Call actual registration API
+      final result = await ref
+          .read(authProvider.notifier)
+          .registerWithData(registrationData);
 
-    if (mounted) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.white),
-              SizedBox(width: 12),
-              Text('ลงทะเบียนสำเร็จ!'),
-            ],
+      if (mounted) {
+        setState(() => _isLoading = false);
+
+        if (result != null) {
+          // Error occurred
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(result)),
+                ],
+              ),
+              backgroundColor: Colors.red.shade600,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              margin: const EdgeInsets.all(16),
+            ),
+          );
+        } else {
+          // Success
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white),
+                  SizedBox(width: 12),
+                  Text('ลงทะเบียนสำเร็จ!'),
+                ],
+              ),
+              backgroundColor: const Color(0xFF1B5E20),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              margin: const EdgeInsets.all(16),
+            ),
+          );
+          context.go('/login');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(child: Text('เกิดข้อผิดพลาด: ${e.toString()}')),
+              ],
+            ),
+            backgroundColor: Colors.red.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            margin: const EdgeInsets.all(16),
           ),
-          backgroundColor: const Color(0xFF1B5E20),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
-      context.go('/login');
+        );
+      }
     }
   }
 
@@ -234,9 +384,9 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1B5E20)),
           onPressed: () {
             if (_currentStep > 0) {
-              setState(() => _currentStep--);
+              _goToStep(_currentStep - 1);
             } else {
-              Navigator.of(context).pop();
+              context.go('/login');
             }
           },
         ),
@@ -480,6 +630,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
               FilteringTextInputFormatter.digitsOnly,
               _IdCardFormatter(),
             ],
+            onChanged: (_) => setState(() {}), // Trigger button state rebuild
             style: const TextStyle(
                 fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 2),
             decoration: _inputDecoration(
@@ -563,6 +714,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           if (_accountType == 'INDIVIDUAL') ...[
             TextFormField(
               controller: _firstNameController,
+              onChanged: (_) => setState(() {}),
               decoration: _inputDecoration(
                   label: 'ชื่อ', hint: 'สมชาย', icon: Icons.person),
               validator: (v) => _validateRequired(v, 'ชื่อ'),
@@ -570,6 +722,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _lastNameController,
+              onChanged: (_) => setState(() {}),
               decoration: _inputDecoration(
                   label: 'นามสกุล', hint: 'ใจดี', icon: Icons.person_outline),
               validator: (v) => _validateRequired(v, 'นามสกุล'),
@@ -577,6 +730,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           ] else if (_accountType == 'JURISTIC') ...[
             TextFormField(
               controller: _companyNameController,
+              onChanged: (_) => setState(() {}),
               decoration: _inputDecoration(
                   label: 'ชื่อบริษัท/นิติบุคคล',
                   hint: 'บริษัท ABC จำกัด',
@@ -586,6 +740,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _representativeNameController,
+              onChanged: (_) => setState(() {}),
               decoration: _inputDecoration(
                   label: 'ชื่อผู้มีอำนาจ',
                   hint: 'นายสมชาย ใจดี',
@@ -595,6 +750,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           ] else ...[
             TextFormField(
               controller: _communityNameController,
+              onChanged: (_) => setState(() {}),
               decoration: _inputDecoration(
                   label: 'ชื่อวิสาหกิจชุมชน',
                   hint: 'กลุ่มเกษตรกรบ้านป่า',
@@ -604,6 +760,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _contactNameController,
+              onChanged: (_) => setState(() {}),
               decoration: _inputDecoration(
                   label: 'ชื่อผู้ติดต่อ',
                   hint: 'นายสมชาย ใจดี',
@@ -617,6 +774,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
             keyboardType: TextInputType.phone,
             maxLength: 10,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onChanged: (_) => setState(() {}),
             decoration: _inputDecoration(
                     label: 'เบอร์โทรศัพท์',
                     hint: '0812345678',
@@ -668,6 +826,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           TextFormField(
             controller: _passwordController,
             obscureText: !_isPasswordVisible,
+            onChanged: (_) => setState(() {}),
             decoration: _inputDecoration(
                     label: 'รหัสผ่าน',
                     hint: 'อย่างน้อย 8 ตัวอักษร + ตัวเลข',
@@ -689,6 +848,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: !_isConfirmPasswordVisible,
+            onChanged: (_) => setState(() {}),
             decoration: _inputDecoration(
                     label: 'ยืนยันรหัสผ่าน',
                     hint: 'กรอกรหัสผ่านอีกครั้ง',
@@ -740,7 +900,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         if (_currentStep > 0)
           Expanded(
             child: OutlinedButton(
-              onPressed: () => setState(() => _currentStep--),
+              onPressed: () => _goToStep(_currentStep - 1),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF1B5E20),
                 side: const BorderSide(color: Color(0xFF1B5E20)),
@@ -764,9 +924,17 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           child: ElevatedButton(
             onPressed: _isLoading || !_canProceedToNextStep()
                 ? null
-                : () {
+                : () async {
                     if (_currentStep < 3) {
-                      setState(() => _currentStep++);
+                      // At Step 1 (identifier), check for duplicates before proceeding
+                      if (_currentStep == 1) {
+                        final isAvailable = await _checkIdentifierAvailable();
+                        if (!isAvailable) {
+                          // Show error message - validation failed or duplicate found
+                          return;
+                        }
+                      }
+                      _goToStep(_currentStep + 1);
                     } else {
                       _handleRegister();
                     }

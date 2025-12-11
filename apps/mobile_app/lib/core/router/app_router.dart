@@ -52,14 +52,18 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: GoRouterRefreshStream(authNotifier.stream),
     redirect: (context, state) {
       final isLoggedIn = ref.read(authProvider).isAuthenticated;
-      final isLoggingIn =
-          state.fullPath == '/login' || state.fullPath == '/register';
+      final path = state.fullPath ?? '';
 
-      if (!isLoggedIn && !isLoggingIn) {
+      // Allow login, all register paths, and forgot-password without auth
+      final isAuthPage = path == '/login' ||
+          path.startsWith('/register') ||
+          path == '/forgot-password';
+
+      if (!isLoggedIn && !isAuthPage) {
         return '/login';
       }
 
-      if (isLoggedIn && isLoggingIn) {
+      if (isLoggedIn && isAuthPage) {
         return '/dashboard';
       }
 
@@ -68,9 +72,34 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       // Authentication Routes (Outside Shell)
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+
+      // Registration Routes - Each step has its own path
       GoRoute(
         path: '/register',
-        builder: (context, state) => const RegistrationScreen(),
+        builder: (context, state) => const RegistrationScreen(initialStep: 0),
+      ),
+      GoRoute(
+        path: '/register/account-type',
+        builder: (context, state) => const RegistrationScreen(initialStep: 0),
+      ),
+      GoRoute(
+        path: '/register/identifier',
+        builder: (context, state) => const RegistrationScreen(initialStep: 1),
+      ),
+      GoRoute(
+        path: '/register/personal-info',
+        builder: (context, state) => const RegistrationScreen(initialStep: 2),
+      ),
+      GoRoute(
+        path: '/register/password',
+        builder: (context, state) => const RegistrationScreen(initialStep: 3),
+      ),
+
+      // Forgot Password
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) =>
+            const LoginScreen(), // TODO: Create ForgotPasswordScreen
       ),
 
       // App Shell

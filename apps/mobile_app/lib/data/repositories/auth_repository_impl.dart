@@ -14,6 +14,48 @@ class AuthRepositoryImpl implements AuthRepository {
 
   AuthRepositoryImpl(this._dioClient, this._storage);
 
+  /// Translate English error messages to Thai for better UX
+  String _translateError(String englishError) {
+    const errorMap = {
+      // Login errors
+      'Invalid credentials': 'เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง',
+      'Invalid email or password': 'เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง',
+      'User not found': 'ไม่พบบัญชีผู้ใช้นี้ กรุณาลงทะเบียนก่อน',
+      'Account is locked': 'บัญชีถูกล็อค กรุณารอ 30 นาทีแล้วลองใหม่',
+      'Account is disabled': 'บัญชีนี้ถูกระงับการใช้งาน',
+      'Password incorrect': 'รหัสผ่านไม่ถูกต้อง',
+      // Registration errors
+      'Thai ID Card already registered': 'บัตรประชาชนนี้ลงทะเบียนแล้ว',
+      'Tax ID already registered': 'เลขทะเบียนนิติบุคคลนี้ลงทะเบียนแล้ว',
+      'Community Enterprise already registered':
+          'วิสาหกิจชุมชนนี้ลงทะเบียนแล้ว',
+      'Invalid Thai ID Card number': 'เลขบัตรประชาชนไม่ถูกต้อง',
+      // Network errors
+      'Network Error': 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้',
+      'Connection timed out': 'หมดเวลาเชื่อมต่อ กรุณาลองใหม่',
+      'No internet connection': 'ไม่มีการเชื่อมต่ออินเทอร์เน็ต',
+    };
+
+    // Check exact match
+    if (errorMap.containsKey(englishError)) {
+      return errorMap[englishError]!;
+    }
+
+    // Check partial match
+    for (final entry in errorMap.entries) {
+      if (englishError.toLowerCase().contains(entry.key.toLowerCase())) {
+        return entry.value;
+      }
+    }
+
+    // Return original if already Thai or no translation
+    if (RegExp(r'[ก-๙]').hasMatch(englishError)) {
+      return englishError;
+    }
+
+    return 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+  }
+
   @override
   Future<Either<Failure, void>> register(
       Map<String, dynamic> data, XFile image) async {
@@ -54,9 +96,47 @@ class AuthRepositoryImpl implements AuthRepository {
         errorMessage = (e.error as NetworkException).message;
       }
 
-      return Left(ServerFailure(message: errorMessage));
+      return Left(ServerFailure(message: _translateError(errorMessage)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: _translateError(e.toString())));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> registerWithData(
+      Map<String, dynamic> data) async {
+    try {
+      final response = await _dioClient.post(
+        '/auth-farmer/register',
+        data: data,
+      );
+
+      if (response.statusCode == 201) {
+        return const Right(null);
+      } else {
+        return Left(ServerFailure(
+            message: response.data['error'] ??
+                response.data['message'] ??
+                'Registration failed'));
+      }
+    } on DioException catch (e) {
+      String errorMessage = e.message ?? 'Network Error';
+
+      if (e.response?.data != null) {
+        if (e.response!.data is Map) {
+          errorMessage = e.response!.data['error'] ??
+              e.response!.data['message'] ??
+              errorMessage;
+        } else if (e.response!.data is String) {
+          errorMessage = e.response!.data;
+        }
+      } else if (e.error is NetworkException) {
+        errorMessage = (e.error as NetworkException).message;
+      }
+
+      return Left(ServerFailure(message: _translateError(errorMessage)));
+    } catch (e) {
+      return Left(ServerFailure(message: _translateError(e.toString())));
     }
   }
 
@@ -116,9 +196,9 @@ class AuthRepositoryImpl implements AuthRepository {
           errorMessage = e.response!.data;
         }
       }
-      return Left(ServerFailure(message: errorMessage));
+      return Left(ServerFailure(message: _translateError(errorMessage)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: _translateError(e.toString())));
     }
   }
 
@@ -190,9 +270,9 @@ class AuthRepositoryImpl implements AuthRepository {
           errorMessage = e.response!.data;
         }
       }
-      return Left(ServerFailure(message: errorMessage));
+      return Left(ServerFailure(message: _translateError(errorMessage)));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: _translateError(e.toString())));
     }
   }
 

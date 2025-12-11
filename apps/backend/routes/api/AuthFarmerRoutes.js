@@ -12,6 +12,7 @@ const registerRateLimiter = strictRateLimiter(60 * 60 * 1000, 5); // 5 per hour
 // Public Routes (with rate limiting)
 router.post('/register', registerRateLimiter, upload.single('idCardImage'), (req, res) => AuthController.register(req, res));
 router.post('/login', loginRateLimiter, (req, res) => AuthController.login(req, res));
+router.post('/check-identifier', (req, res) => AuthController.checkIdentifier(req, res));
 
 // Protected Routes
 router.get('/me', authenticateFarmer, (req, res) => AuthController.getMe(req, res));

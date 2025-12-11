@@ -117,10 +117,28 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
+  /// Register with data only (no image required)
+  /// Returns null on success, error message on failure
+  Future<String?> registerWithData(Map<String, dynamic> data) async {
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await _repository.registerWithData(data);
+    return result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, error: failure.message);
+        return failure.message;
+      },
+      (_) {
+        state = state.copyWith(isLoading: false);
+        return null;
+      },
+    );
+  }
+
   Future<void> logout() async {
-    state = state.copyWith(isLoading: true);
+    // Clear user state FIRST to trigger immediate auth change notification
+    state = const AuthState(isLoading: false, user: null, error: null);
+    // Then delete token asynchronously
     await _repository.logout();
-    state = state.copyWith(isLoading: false, user: null);
   }
 }
 

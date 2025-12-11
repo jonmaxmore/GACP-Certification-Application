@@ -12,9 +12,9 @@ const LAND_TYPES = [
 
 const SECURITY_ITEMS = [
     { id: 'hasCCTV', label: 'กล้อง CCTV', icon: '📹' },
-    { id: 'hasFence2m', label: 'รั้วสูง 2 เมตร', icon: '🚧' },
-    { id: 'hasAccessLog', label: 'สมุดลงชื่อเข้า-ออก', icon: '📋' },
-    { id: 'hasBiometric', label: 'ระบบสแกนนิ้ว/ใบหน้า', icon: '👆', highControl: true },
+    { id: 'hasFence2m', label: 'รั้วสูง 2 ม.', icon: '🚧' },
+    { id: 'hasAccessLog', label: 'สมุดลงชื่อ', icon: '📋' },
+    { id: 'hasBiometric', label: 'สแกนนิ้ว/ใบหน้า', icon: '👆', highControl: true },
 ];
 
 export default function Step5Site() {
@@ -50,10 +50,7 @@ export default function Step5Site() {
     };
 
     const getLocation = () => {
-        if (!navigator.geolocation) {
-            alert('เบราว์เซอร์ไม่รองรับ GPS');
-            return;
-        }
+        if (!navigator.geolocation) { alert('เบราว์เซอร์ไม่รองรับ GPS'); return; }
         setLocating(true);
         navigator.geolocation.getCurrentPosition(
             (pos) => {
@@ -71,66 +68,88 @@ export default function Step5Site() {
 
     if (!isLoaded) return <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>กำลังโหลด...</div>;
 
-    const inputStyle = {
-        width: '100%', padding: '12px 14px', borderRadius: '10px',
-        border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
+    // Fixed input style with proper box-sizing
+    const inputStyle: React.CSSProperties = {
+        width: '100%',
+        padding: '10px 12px',
+        borderRadius: '8px',
+        border: `1px solid ${isDark ? '#374151' : '#D1D5DB'}`,
         background: isDark ? '#1F2937' : '#FFFFFF',
-        color: isDark ? '#F9FAFB' : '#111827', fontSize: '14px', outline: 'none',
+        color: isDark ? '#F9FAFB' : '#111827',
+        fontSize: '14px',
+        outline: 'none',
+        boxSizing: 'border-box',
+        fontFamily: "'Kanit', sans-serif",
     };
-    const labelStyle = { display: 'block', fontSize: '12px', fontWeight: 500, color: isDark ? '#D1D5DB' : '#374151', marginBottom: '6px' };
+
+    const labelStyle: React.CSSProperties = {
+        display: 'block',
+        fontSize: '12px',
+        fontWeight: 500,
+        color: isDark ? '#9CA3AF' : '#6B7280',
+        marginBottom: '4px',
+    };
+
+    const sectionStyle: React.CSSProperties = {
+        background: isDark ? '#374151' : '#F9FAFB',
+        borderRadius: '12px',
+        padding: '14px',
+        marginBottom: '14px',
+    };
 
     return (
-        <div>
+        <div style={{ fontFamily: "'Kanit', sans-serif" }}>
             {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                 <div style={{
-                    width: '56px', height: '56px',
+                    width: '48px', height: '48px',
                     background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)',
-                    borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    margin: '0 auto 16px', boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)',
+                    borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    margin: '0 auto 12px', boxShadow: '0 6px 20px rgba(59, 130, 246, 0.3)',
                 }}>
-                    <span style={{ fontSize: '24px' }}>📍</span>
+                    <span style={{ fontSize: '20px' }}>📍</span>
                 </div>
-                <h2 style={{ fontSize: '20px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827', marginBottom: '6px' }}>สถานที่ & ความปลอดภัย</h2>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827', margin: 0 }}>
+                    สถานที่ & ความปลอดภัย
+                </h2>
             </div>
 
             {/* Site Name */}
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: '12px' }}>
                 <label style={labelStyle}>ชื่อสถานที่/ฟาร์ม *</label>
-                <input type="text" value={form.siteName} onChange={e => handleChange('siteName', e.target.value)} placeholder="เช่น ฟาร์มสมุนไพรนายสมชาย" style={inputStyle} />
+                <input type="text" value={form.siteName} onChange={e => handleChange('siteName', e.target.value)} placeholder="เช่น ฟาร์มสมุนไพร" style={inputStyle} />
             </div>
 
-            {/* GPS */}
-            <div style={{ background: isDark ? '#374151' : '#F9FAFB', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827' }}>🛰️ พิกัด GPS</h3>
+            {/* GPS Section */}
+            <div style={sectionStyle}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827' }}>🛰️ พิกัด GPS</span>
                     <button onClick={getLocation} disabled={locating} style={{
-                        padding: '8px 14px', borderRadius: '20px', border: 'none',
-                        background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)',
-                        color: 'white', fontSize: '12px', fontWeight: 500, cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', gap: '6px',
+                        padding: '6px 12px', borderRadius: '16px', border: 'none',
+                        background: '#3B82F6', color: 'white', fontSize: '11px', fontWeight: 500, cursor: 'pointer',
                     }}>
-                        {locating ? '⏳' : '📍'} {locating ? 'กำลังหา...' : 'ปักหมุด'}
+                        {locating ? '⏳ หาตำแหน่ง...' : '📍 ปักหมุด'}
                     </button>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     <div>
                         <label style={{ ...labelStyle, fontSize: '11px' }}>ละติจูด</label>
-                        <input type="text" value={form.gpsLat || ''} onChange={e => handleChange('gpsLat', e.target.value)} placeholder="13.756331" style={{ ...inputStyle, fontSize: '13px' }} />
+                        <input type="text" value={form.gpsLat || ''} onChange={e => handleChange('gpsLat', e.target.value)} placeholder="13.756331" style={{ ...inputStyle, fontSize: '13px', padding: '8px 10px' }} />
                     </div>
                     <div>
                         <label style={{ ...labelStyle, fontSize: '11px' }}>ลองจิจูด</label>
-                        <input type="text" value={form.gpsLng || ''} onChange={e => handleChange('gpsLng', e.target.value)} placeholder="100.501762" style={{ ...inputStyle, fontSize: '13px' }} />
+                        <input type="text" value={form.gpsLng || ''} onChange={e => handleChange('gpsLng', e.target.value)} placeholder="100.501762" style={{ ...inputStyle, fontSize: '13px', padding: '8px 10px' }} />
                     </div>
                 </div>
             </div>
 
             {/* Address */}
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: '12px' }}>
                 <label style={labelStyle}>ที่อยู่สถานที่ *</label>
                 <input type="text" value={form.address} onChange={e => handleChange('address', e.target.value)} placeholder="บ้านเลขที่ หมู่ ถนน" style={inputStyle} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
                 <div>
                     <label style={labelStyle}>จังหวัด *</label>
                     <input type="text" value={form.province} onChange={e => handleChange('province', e.target.value)} placeholder="จังหวัด" style={inputStyle} />
@@ -142,73 +161,89 @@ export default function Step5Site() {
             </div>
 
             {/* Borders */}
-            <div style={{ background: isDark ? '#374151' : '#F9FAFB', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '14px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827', marginBottom: '12px' }}>🧭 ทิศที่ตั้งจรด</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div style={sectionStyle}>
+                <span style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827', marginBottom: '10px' }}>
+                    🧭 ทิศที่ตั้งจรด
+                </span>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     <div>
                         <label style={{ ...labelStyle, fontSize: '11px' }}>ทิศเหนือ</label>
-                        <input type="text" value={form.northBorder || ''} onChange={e => handleChange('northBorder', e.target.value)} placeholder="จรดถนนสาธารณะ" style={{ ...inputStyle, fontSize: '13px' }} />
+                        <input type="text" value={form.northBorder || ''} onChange={e => handleChange('northBorder', e.target.value)} placeholder="ถนนสาธารณะ" style={{ ...inputStyle, fontSize: '13px', padding: '8px 10px' }} />
                     </div>
                     <div>
                         <label style={{ ...labelStyle, fontSize: '11px' }}>ทิศใต้</label>
-                        <input type="text" value={form.southBorder || ''} onChange={e => handleChange('southBorder', e.target.value)} placeholder="จรดที่ดินนายก." style={{ ...inputStyle, fontSize: '13px' }} />
+                        <input type="text" value={form.southBorder || ''} onChange={e => handleChange('southBorder', e.target.value)} placeholder="ที่ดินนาย ก." style={{ ...inputStyle, fontSize: '13px', padding: '8px 10px' }} />
                     </div>
                     <div>
                         <label style={{ ...labelStyle, fontSize: '11px' }}>ทิศตะวันออก</label>
-                        <input type="text" value={form.eastBorder || ''} onChange={e => handleChange('eastBorder', e.target.value)} placeholder="จรดลำคลอง" style={{ ...inputStyle, fontSize: '13px' }} />
+                        <input type="text" value={form.eastBorder || ''} onChange={e => handleChange('eastBorder', e.target.value)} placeholder="ลำคลอง" style={{ ...inputStyle, fontSize: '13px', padding: '8px 10px' }} />
                     </div>
                     <div>
                         <label style={{ ...labelStyle, fontSize: '11px' }}>ทิศตะวันตก</label>
-                        <input type="text" value={form.westBorder || ''} onChange={e => handleChange('westBorder', e.target.value)} placeholder="จรดป่าชุมชน" style={{ ...inputStyle, fontSize: '13px' }} />
+                        <input type="text" value={form.westBorder || ''} onChange={e => handleChange('westBorder', e.target.value)} placeholder="ป่าชุมชน" style={{ ...inputStyle, fontSize: '13px', padding: '8px 10px' }} />
                     </div>
                 </div>
             </div>
 
             {/* Land Ownership */}
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: '14px' }}>
                 <label style={labelStyle}>สิทธิ์ในที่ดิน</label>
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                     {LAND_TYPES.map(type => (
                         <button key={type.id} onClick={() => handleChange('landOwnership', type.id)} style={{
-                            flex: 1, padding: '12px', borderRadius: '10px',
+                            padding: '10px 8px', borderRadius: '10px', textAlign: 'center', cursor: 'pointer',
                             border: form.landOwnership === type.id ? '2px solid #10B981' : `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
                             background: form.landOwnership === type.id ? (isDark ? 'rgba(16,185,129,0.15)' : '#ECFDF5') : 'transparent',
-                            cursor: 'pointer', textAlign: 'center',
                         }}>
-                            <div style={{ fontSize: '18px' }}>{type.icon}</div>
-                            <div style={{ fontSize: '12px', fontWeight: 500, color: isDark ? '#F9FAFB' : '#111827', marginTop: '4px' }}>{type.label}</div>
+                            <div style={{ fontSize: '16px' }}>{type.icon}</div>
+                            <div style={{ fontSize: '11px', fontWeight: 500, color: isDark ? '#F9FAFB' : '#111827', marginTop: '2px' }}>{type.label}</div>
                         </button>
                     ))}
                 </div>
             </div>
 
             {/* Security */}
-            <div style={{ background: isDark ? 'rgba(16,185,129,0.1)' : '#ECFDF5', borderRadius: '14px', padding: '16px', marginBottom: '20px' }}>
-                <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#059669', marginBottom: '12px' }}>🔒 มาตรการความปลอดภัย</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div style={{ background: isDark ? 'rgba(16,185,129,0.1)' : '#ECFDF5', borderRadius: '12px', padding: '14px', marginBottom: '16px' }}>
+                <span style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#059669', marginBottom: '10px' }}>
+                    🔒 มาตรการความปลอดภัย
+                </span>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     {SECURITY_ITEMS.filter(item => !item.highControl || isHighControl).map(item => (
                         <label key={item.id} style={{
-                            display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px',
+                            display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px',
                             background: (form as Record<string, boolean>)[item.id] ? (isDark ? '#374151' : 'white') : 'transparent',
-                            border: `1px solid ${(form as Record<string, boolean>)[item.id] ? '#10B981' : (isDark ? '#374151' : '#E5E7EB')}`,
-                            borderRadius: '10px', cursor: 'pointer',
+                            border: `1px solid ${(form as Record<string, boolean>)[item.id] ? '#10B981' : (isDark ? '#374151' : '#D1D5DB')}`,
+                            borderRadius: '8px', cursor: 'pointer', fontSize: '12px',
                         }}>
-                            <input type="checkbox" checked={(form as Record<string, boolean>)[item.id] || false} onChange={e => handleChange(item.id as keyof SiteData, e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#10B981' }} />
-                            <span style={{ fontSize: '13px', color: isDark ? '#F9FAFB' : '#111827' }}>{item.icon} {item.label}</span>
+                            <input type="checkbox" checked={(form as Record<string, boolean>)[item.id] || false} onChange={e => handleChange(item.id as keyof SiteData, e.target.checked)} style={{ width: '16px', height: '16px', accentColor: '#10B981' }} />
+                            <span style={{ color: isDark ? '#F9FAFB' : '#111827' }}>{item.icon} {item.label}</span>
                         </label>
                     ))}
                 </div>
             </div>
 
             {/* Navigation */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={handleBack} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: `1px solid ${isDark ? '#4B5563' : '#E5E7EB'}`, background: isDark ? '#374151' : 'white', color: isDark ? '#F9FAFB' : '#374151', fontSize: '15px', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg>
+            <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={handleBack} style={{
+                    flex: 1, padding: '12px', borderRadius: '10px',
+                    border: `1px solid ${isDark ? '#4B5563' : '#E5E7EB'}`,
+                    background: isDark ? '#374151' : 'white',
+                    color: isDark ? '#F9FAFB' : '#374151',
+                    fontSize: '14px', fontWeight: 500, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+                }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg>
                     ย้อนกลับ
                 </button>
-                <button onClick={handleNext} style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)', color: 'white', fontSize: '15px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 20px rgba(16, 185, 129, 0.4)' }}>
+                <button onClick={handleNext} style={{
+                    flex: 2, padding: '12px', borderRadius: '10px', border: 'none',
+                    background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
+                    color: 'white', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+                    boxShadow: '0 4px 16px rgba(16, 185, 129, 0.35)',
+                }}>
                     ถัดไป
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg>
                 </button>
             </div>
         </div>

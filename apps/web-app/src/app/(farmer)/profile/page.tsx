@@ -77,7 +77,21 @@ export default function ProfilePage() {
         } catch { router.push("/login"); }
     }, [router]);
 
+    // Validation functions
+    const validateEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    const validatePhone = (value: string) => /^0[689]\d{8}$/.test(value);
+
     const handleSaveProfile = async () => {
+        // Validate before save
+        if (email && !validateEmail(email)) {
+            setMessage("รูปแบบอีเมลไม่ถูกต้อง");
+            return;
+        }
+        if (phone && !validatePhone(phone)) {
+            setMessage("เบอร์โทรศัพท์ต้องขึ้นต้นด้วย 06, 08, 09 และมี 10 หลัก");
+            return;
+        }
+
         setIsSaving(true);
         setMessage("");
         const result = await api.put("/auth-farmer/profile", { firstName, lastName, email, phone, companyName });
@@ -85,14 +99,21 @@ export default function ProfilePage() {
             const updatedUser = { ...user, firstName, lastName, email, phone, companyName };
             localStorage.setItem("user", JSON.stringify(updatedUser));
             setUser(updatedUser);
-            setMessage("บันทึกข้อมูลเรียบร้อยแล้ว");
+            setMessage("✅ บันทึกข้อมูลเรียบร้อยแล้ว");
             setIsEditing(false);
-        } else { setMessage(result.error || "เกิดข้อผิดพลาด"); }
+        } else { setMessage("❌ " + (result.error || "เกิดข้อผิดพลาด")); }
         setIsSaving(false);
     };
 
     const toggleTheme = () => { setIsDark(!isDark); localStorage.setItem("theme", !isDark ? "dark" : "light"); };
-    const handleLogout = () => { localStorage.removeItem("user"); window.location.href = "/api/auth/logout"; };
+    const handleLogout = () => {
+        // Clear all app data
+        localStorage.removeItem("user");
+        localStorage.removeItem("gacp_wizard_state");
+        localStorage.removeItem("gacp_wizard_last_saved");
+        localStorage.removeItem("remember_login");
+        window.location.href = "/api/auth/logout";
+    };
     const getAccountTypeThai = () => { switch (user?.accountType) { case "INDIVIDUAL": return "บุคคลธรรมดา"; case "JURISTIC": return "นิติบุคคล"; case "COMMUNITY_ENTERPRISE": return "วิสาหกิจชุมชน"; default: return "ผู้สมัคร"; } };
     const getName = () => user?.companyName || user?.communityName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "ผู้ใช้";
 

@@ -15,7 +15,7 @@
 // with Authorization header extracted from httpOnly cookie
 const API_CONFIG = {
     baseUrl: '/api', // Local proxy - handles cookie auth automatically
-    backendUrl: 'http://localhost:3000', // Direct backend URL for health checks
+    backendUrl: 'http://localhost:3001', // Direct backend URL for health checks
     timeout: 15000,
     retryAttempts: 3,
     retryDelay: 1000, // Base delay in ms, will be multiplied exponentially

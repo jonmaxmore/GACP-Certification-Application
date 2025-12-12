@@ -160,49 +160,56 @@ export default function LoginPage() {
             return;
         }
 
-        // Use centralized API client with automatic retry and error handling
-        const result = await api.post<{
-            data: {
-                token?: string;
-                tokens?: { accessToken: string };
-                user: Record<string, unknown>;
-            };
-        }>("/v2/auth/login", {
-            accountType,
-            identifier: cleanIdentifier,
-            password: cleanPassword,
+        // Use local proxy API which sets cookie from same origin
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                accountType,
+                identifier: cleanIdentifier,
+                password: cleanPassword,
+            }),
         });
 
+        const result = await response.json();
+        console.log('[Login] Response:', result);
+
         if (!result.success) {
-            setError(result.error);
+            console.error('[Login] API call failed:', result);
+            setError(result.error || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
             setIsLoading(false);
             return;
         }
 
-        const token = result.data.data?.tokens?.accessToken || result.data.data?.token;
+        console.log('[Login] API response:', result);
+        console.log('[Login] result.data:', result.data);
+
+        // Handle nested response structure from apiClient
+        const responseData = result.data?.data || result.data;
+        const token = responseData?.tokens?.accessToken || responseData?.token;
+        console.log('[Login] extracted token:', token ? 'exists' : 'not found');
 
         if (!token) {
+            console.error('[Login] Token not found in response:', result.data);
             setError("ไม่พบข้อมูล Token จากเซิร์ฟเวอร์");
             setIsLoading(false);
             return;
         }
 
-        // Secure storage
-        localStorage.setItem("auth_token", token);
-        localStorage.setItem("user", JSON.stringify(result.data.data.user || {}));
+        // Note: auth_token is now set as httpOnly cookie by backend
+        // We only store non-sensitive user data for display purposes
+        localStorage.setItem("user", JSON.stringify(responseData?.user || {}));
 
-        // Handle Remember Me
+        // Handle Remember Me (only stores account type and identifier for convenience)
         if (rememberMe) {
             localStorage.setItem("remember_login", JSON.stringify({ accountType, identifier: cleanIdentifier }));
         } else {
             localStorage.removeItem("remember_login");
         }
 
-        // Secure cookie with SameSite flag
-        document.cookie = `auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-
         setIsLoading(false);
-        router.push("/dashboard");
+        // Use full page navigation to ensure cookies are applied
+        window.location.href = "/dashboard";
     };
 
     const getIcon = (type: string, isSelected: boolean) => {

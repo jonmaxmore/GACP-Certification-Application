@@ -119,10 +119,34 @@ class AuthController {
 
             const result = await AuthService.login(loginId, password, accountType);
 
+            // Set httpOnly cookies for web clients
+            res.cookie('auth_token', result.token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 24 * 60 * 60 * 1000, // 24 hours
+                path: '/',
+            });
+
+            // Set refresh token if available
+            if (result.refreshToken) {
+                res.cookie('refresh_token', result.refreshToken, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'lax',
+                    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+                    path: '/',
+                });
+            }
+
             res.status(200).json({
                 success: true,
                 data: {
-                    token: result.token,
+                    // Keep tokens for mobile apps
+                    tokens: {
+                        accessToken: result.token,
+                        refreshToken: result.refreshToken
+                    },
                     user: result.user
                 }
             });

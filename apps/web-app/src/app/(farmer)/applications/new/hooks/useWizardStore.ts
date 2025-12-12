@@ -25,9 +25,11 @@ export const PLANTS: Plant[] = [
     { id: 'plai', name: 'ไพล', icon: '🟢', group: 'GENERAL' },
 ];
 
-// Expanded ApplicantData with all fields from original Step4Applicant
+// Expanded ApplicantData with all fields for INDIVIDUAL, JURISTIC, COMMUNITY
 export interface ApplicantData {
     applicantType: 'INDIVIDUAL' | 'JURISTIC' | 'COMMUNITY';
+
+    // บุคคลธรรมดา (Individual)
     firstName?: string;
     lastName?: string;
     fullName?: string;
@@ -35,15 +37,35 @@ export interface ApplicantData {
     phone?: string;
     email?: string;
     lineId?: string;
-    companyName?: string;
-    registrationNumber?: string;
-    communityName?: string;
     address?: string;
     province?: string;
     district?: string;
     subdistrict?: string;
     postalCode?: string;
-    purpose?: 'RESEARCH' | 'COMMERCIAL' | 'EXPORT';
+
+    // วิสาหกิจชุมชน (Community Enterprise)
+    communityName?: string;           // ชื่อวิสาหกิจชุมชน
+    presidentName?: string;            // ชื่อประธาน
+    presidentIdCard?: string;          // เลขบัตรประชาชนประธาน
+    registrationSVC01?: string;        // รหัส สวช.01
+    registrationTVC3?: string;         // รหัส ท.ว.ช.3
+    houseRegistrationCode?: string;    // เลขรหัสประจำบ้าน
+    registeredAddress?: string;        // ที่อยู่ตามทะเบียนบ้าน
+
+    // นิติบุคคล (Juristic Person)
+    companyName?: string;              // ชื่อสถานประกอบการ/บริษัท
+    companyAddress?: string;           // ที่อยู่สถานที่จัดตั้ง
+    companyPhone?: string;             // โทรศัพท์สถานที่จัดตั้ง
+    directorName?: string;             // ชื่อประธานกรรมการ
+    registrationNumber?: string;       // เลขทะเบียนนิติบุคคล/เลขผู้เสียภาษี
+    directorPhone?: string;            // โทรศัพท์ประธานกรรมการ
+    directorEmail?: string;            // อีเมลประธาน
+    powerOfAttorneyUrl?: string;       // หนังสือมอบอำนาจ (PDF URL)
+    coordinatorName?: string;          // ชื่อผู้ประสานงาน (กรณีมอบอำนาจ)
+    coordinatorPhone?: string;         // โทรศัพท์ผู้ประสานงาน
+    coordinatorLineId?: string;        // Line ID ผู้ประสานงาน
+
+    // Legacy fields
     responsibleName?: string;
     qualification?: string;
     plantingStatus?: 'NOTIFY' | 'LICENSED';
@@ -248,6 +270,10 @@ export function useWizardStore() {
         localStorage.removeItem(STORAGE_KEY);
     }, []);
 
+    const setApplicationId = useCallback((applicationId: string) => {
+        setState(prev => ({ ...prev, applicationId }));
+    }, []);
+
     // Validation helpers
     const canProceedFromStep = useCallback((step: number): boolean => {
         switch (step) {
@@ -296,6 +322,7 @@ export function useWizardStore() {
         consentPDPA,
         acknowledgeStandards,
         resetWizard,
+        setApplicationId,
         canProceedFromStep,
         getCompletedSteps,
     };

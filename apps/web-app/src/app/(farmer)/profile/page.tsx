@@ -63,9 +63,9 @@ export default function ProfilePage() {
     useEffect(() => {
         setMounted(true);
         setIsDark(localStorage.getItem("theme") === "dark");
-        const token = localStorage.getItem("auth_token");
+        // Note: auth_token is now httpOnly cookie (not accessible via JS)
         const userData = localStorage.getItem("user");
-        if (!token || !userData) { router.push("/login"); return; }
+        if (!userData) { router.push("/login"); return; }
         try {
             const parsed = JSON.parse(userData);
             setUser(parsed);

@@ -95,8 +95,11 @@ function authenticateFarmer(req, res, next) {
   } catch (e) { }
   console.error('[DEBUG] authenticateFarmer called. CWD:', process.cwd());
   try {
+    // Priority: 1. Cookie (web clients), 2. Authorization header (mobile apps)
+    const cookieToken = req.cookies?.auth_token;
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const headerToken = authHeader && authHeader.split(' ')[1];
+    const token = cookieToken || headerToken;
 
     if (!token) {
       return res.status(401).json({
@@ -107,7 +110,7 @@ function authenticateFarmer(req, res, next) {
       });
     }
 
-    require('fs').appendFileSync('middleware_debug.log', `[DEBUG] Token prefix: ${token ? token.substring(0, 10) : 'NONE'}\n`);
+    require('fs').appendFileSync('middleware_debug.log', `[DEBUG] Token source: ${cookieToken ? 'cookie' : 'header'}, prefix: ${token ? token.substring(0, 10) : 'NONE'}\n`);
     // ใช้ secure JWT secret จาก configuration
     const decoded = jwtConfig.verifyToken(token, 'public', getActiveJwtConfig());
 

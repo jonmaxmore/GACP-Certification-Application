@@ -16,14 +16,14 @@ const requestStore = new Map();
  * Rate Limiter Configuration
  */
 const RATE_LIMITS = {
-    // Auth endpoints - stricter limits
-    'auth/login': { windowMs: 15 * 60 * 1000, maxRequests: 5 },     // 5 per 15 min
-    'auth/register': { windowMs: 60 * 60 * 1000, maxRequests: 3 },  // 3 per hour
+    // Auth endpoints - increased for development, reduce in production
+    'auth/login': { windowMs: 15 * 60 * 1000, maxRequests: 50 },     // 50 per 15 min (dev)
+    'auth/register': { windowMs: 60 * 60 * 1000, maxRequests: 10 },  // 10 per hour
     'auth/forgot-password': { windowMs: 60 * 60 * 1000, maxRequests: 3 },
 
     // Application endpoints
-    'applications/draft': { windowMs: 60 * 1000, maxRequests: 10 }, // 10 per min
-    'applications/submit': { windowMs: 5 * 60 * 1000, maxRequests: 3 }, // 3 per 5 min
+    'applications/draft': { windowMs: 60 * 1000, maxRequests: 30 }, // 30 per min
+    'applications/submit': { windowMs: 5 * 60 * 1000, maxRequests: 10 }, // 10 per 5 min
 
     // Default
     'default': { windowMs: 60 * 1000, maxRequests: 100 } // 100 per min

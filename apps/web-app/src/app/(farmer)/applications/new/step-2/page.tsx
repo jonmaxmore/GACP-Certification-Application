@@ -57,10 +57,10 @@ export default function Step2Service() {
     }, [state.serviceType]);
 
     useEffect(() => {
-        if (isLoaded && !state.acknowledgedStandards) {
+        if (isLoaded && !state.certificationPurpose) {
             router.replace('/applications/new/step-0');
         }
-    }, [isLoaded, state.acknowledgedStandards, router]);
+    }, [isLoaded, state.certificationPurpose, router]);
 
     const handleSelect = (type: ServiceType) => {
         setSelected(type);

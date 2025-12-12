@@ -37,7 +37,20 @@ export default function Step1Purpose() {
     }, [state.certificationPurpose, state.siteTypes]);
 
     useEffect(() => {
-        if (isLoaded && !state.plantId) router.replace('/applications/new/step-0');
+        // Only redirect if fully loaded AND no plant selected after a longer delay
+        // This prevents race condition when state is being loaded from localStorage
+        if (isLoaded) {
+            const timer = setTimeout(() => {
+                // Re-check state from localStorage directly to avoid stale state
+                const saved = localStorage.getItem('gacp_wizard_state');
+                const savedState = saved ? JSON.parse(saved) : null;
+
+                if (!state.plantId && !savedState?.plantId) {
+                    router.replace('/applications/new/step-0');
+                }
+            }, 300);
+            return () => clearTimeout(timer);
+        }
     }, [isLoaded, state.plantId, router]);
 
     const handlePurposeSelect = (p: CertificationPurpose) => {

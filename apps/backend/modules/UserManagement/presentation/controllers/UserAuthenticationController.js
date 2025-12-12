@@ -81,6 +81,13 @@ class UserAuthenticationController {
       // Authenticate user (service handles lookup by accountType)
       const result = await this.authService.authenticateUser(loginIdentifier, password, context);
 
+      // Debug: Log what we got from auth service
+      logger.info('[UserAuthController] Auth result keys:', Object.keys(result));
+      logger.info('[UserAuthController] Has tokens:', !!result.tokens);
+      if (result.tokens) {
+        logger.info('[UserAuthController] Has accessToken:', !!result.tokens.accessToken);
+      }
+
       if (!result.success) {
         return res.status(401).json({
           success: false,
@@ -90,12 +97,32 @@ class UserAuthenticationController {
         });
       }
 
-      // Successful login
+      // Successful login - Set httpOnly cookie for web clients
+      res.cookie('auth_token', result.tokens.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax', // 'lax' allows cookie on same-site navigations
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        path: '/',
+      });
+
+      // Also set refresh token as httpOnly cookie
+      if (result.tokens.refreshToken) {
+        res.cookie('refresh_token', result.tokens.refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax', // 'lax' allows cookie on same-site navigations
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+          path: '/',
+        });
+      }
+
       res.status(200).json({
         success: true,
         message: 'Login successful',
         data: {
           user: result.user,
+          // Keep tokens in response for mobile apps (they can't use cookies)
           tokens: result.tokens,
         },
       });
@@ -172,6 +199,20 @@ class UserAuthenticationController {
       };
 
       await this.authService.logout(userId, sessionId, context);
+
+      // Clear httpOnly cookies
+      res.clearCookie('auth_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/',
+      });
+      res.clearCookie('refresh_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/',
+      });
 
       res.status(200).json({
         success: true,

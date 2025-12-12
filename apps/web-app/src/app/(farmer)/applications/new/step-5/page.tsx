@@ -63,7 +63,11 @@ export default function Step5Site() {
         );
     };
 
-    const handleNext = () => router.push('/applications/new/step-6');
+    const handleNext = () => {
+        // Save siteData to store before navigating (in case user didn't modify anything)
+        setSiteData(form);
+        router.push('/applications/new/step-6');
+    };
     const handleBack = () => router.push('/applications/new/step-4');
 
     if (!isLoaded) return <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>กำลังโหลด...</div>;

@@ -86,6 +86,7 @@ export default function PaymentsPage() {
     const [filter, setFilter] = useState<"ALL" | "PENDING" | "PAID">("ALL");
     const [mounted, setMounted] = useState(false);
     const [isDark, setIsDark] = useState(false);
+    const [viewDoc, setViewDoc] = useState<PaymentRecord | null>(null);
 
     const t = isDark ? themes.dark : themes.light;
 
@@ -94,9 +95,9 @@ export default function PaymentsPage() {
         const savedTheme = localStorage.getItem("theme");
         setIsDark(savedTheme === "dark");
 
-        const token = localStorage.getItem("auth_token");
+        // Note: auth_token is now httpOnly cookie (not accessible via JS)
         const userData = localStorage.getItem("user");
-        if (!token || !userData) { window.location.href = "/login"; return; }
+        if (!userData) { window.location.href = "/login"; return; }
         try {
             setUser(JSON.parse(userData));
             setPayments(MOCK_PAYMENTS);
@@ -295,14 +296,23 @@ export default function PaymentsPage() {
                                         </span>
                                     </td>
                                     <td style={{ padding: "16px 20px", textAlign: "center" }}>
-                                        <button style={{
-                                            padding: "8px 16px", borderRadius: "10px", border: `1px solid ${t.border}`,
-                                            backgroundColor: "transparent", color: t.textSecondary, fontSize: "12px", fontWeight: 500, cursor: "pointer",
-                                            display: "inline-flex", alignItems: "center", gap: "6px",
-                                        }}>
-                                            {Icons.download(t.textMuted)}
-                                            ดาวน์โหลด
-                                        </button>
+                                        <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
+                                            <button onClick={() => setViewDoc(p)} style={{
+                                                padding: "8px 16px", borderRadius: "10px", border: `1px solid ${t.accent}`,
+                                                backgroundColor: t.accentBg, color: t.accent, fontSize: "12px", fontWeight: 500, cursor: "pointer",
+                                                display: "inline-flex", alignItems: "center", gap: "6px",
+                                            }}>
+                                                👁️ ดู
+                                            </button>
+                                            <button style={{
+                                                padding: "8px 16px", borderRadius: "10px", border: `1px solid ${t.border}`,
+                                                backgroundColor: "transparent", color: t.textSecondary, fontSize: "12px", fontWeight: 500, cursor: "pointer",
+                                                display: "inline-flex", alignItems: "center", gap: "6px",
+                                            }}>
+                                                {Icons.download(t.textMuted)}
+                                                PDF
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             )) : (
@@ -317,6 +327,170 @@ export default function PaymentsPage() {
                     </table>
                 </div>
             </main>
+
+            {/* Document Preview Modal */}
+            {viewDoc && (
+                <div style={{
+                    position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: "rgba(0,0,0,0.7)", zIndex: 1000,
+                    display: "flex", alignItems: "center", justifyContent: "center", padding: "20px",
+                }}>
+                    <div style={{
+                        width: "100%", maxWidth: "800px", maxHeight: "90vh", overflow: "auto",
+                        backgroundColor: "white", borderRadius: "16px", position: "relative",
+                    }}>
+                        {/* Modal Header */}
+                        <div style={{
+                            position: "sticky", top: 0, background: "white", padding: "16px 20px",
+                            borderBottom: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center",
+                        }}>
+                            <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 600, color: "#111827" }}>
+                                {TYPE_CONFIG[viewDoc.type].label} - {viewDoc.documentNumber}
+                            </h3>
+                            <button onClick={() => setViewDoc(null)} style={{
+                                padding: "8px 16px", borderRadius: "8px", border: "none",
+                                background: "#EF4444", color: "white", fontSize: "13px", cursor: "pointer",
+                            }}>✕ ปิด</button>
+                        </div>
+
+                        {/* A4 Document Preview */}
+                        <div style={{ padding: "20px", background: "#F3F4F6" }}>
+                            <div style={{
+                                width: "100%", aspectRatio: "210/297", background: "white",
+                                boxShadow: "0 4px 20px rgba(0,0,0,0.1)", padding: "30px",
+                                fontFamily: "'Kanit', sans-serif", fontSize: "10px", lineHeight: 1.4,
+                            }}>
+                                {/* Header */}
+                                <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "2px solid #000", paddingBottom: "8px", marginBottom: "12px" }}>
+                                    <div style={{ display: "flex", gap: "10px" }}>
+                                        <img src="/images/dtam-logo.png" alt="DTAM" style={{ width: "45px", height: "45px" }} />
+                                        <div>
+                                            <div style={{ fontSize: "12px", fontWeight: 700 }}>กองกัญชาทางการแพทย์</div>
+                                            <div style={{ fontSize: "10px", fontWeight: 600 }}>กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+                                            <div style={{ fontSize: "8px", color: "#374151" }}>88/23 หมู่ 4 ถนนติวานนท์ ตำบลตลาดขวัญ อำเภอเมือง จังหวัดนนทบุรี 11000</div>
+                                            <div style={{ fontSize: "8px", color: "#374151" }}>โทรศัพท์ (02) 5647889 อีเมล tdc.cannabis.gacp@gmail.com</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ textAlign: "right" }}>
+                                        <div style={{ background: TYPE_CONFIG[viewDoc.type].color, color: "#fff", padding: "3px 10px", fontSize: "10px", fontWeight: 600 }}>
+                                            {TYPE_CONFIG[viewDoc.type].label}
+                                        </div>
+                                        <div style={{ fontSize: "9px", marginTop: "4px" }}>เลขที่: {viewDoc.documentNumber}</div>
+                                        <div style={{ fontSize: "8px", color: "#6B7280" }}>วันที่: {viewDoc.createdAt}</div>
+                                    </div>
+                                </div>
+
+                                {/* Recipient Info */}
+                                <table style={{ width: "100%", fontSize: "9px", marginBottom: "10px" }}>
+                                    <tbody>
+                                        <tr><td style={{ width: "22%" }}><strong>เรียน</strong></td><td>ประธานกรรมการ (จากระบบ)</td></tr>
+                                        <tr><td><strong>หน่วยงานผู้รับบริการ:</strong></td><td>(จากระบบ)</td><td style={{ textAlign: "right" }}><strong>เลขที่เอกสาร:</strong> {viewDoc.documentNumber}</td></tr>
+                                        <tr><td><strong>เลขประจำตัวผู้เสียภาษี:</strong></td><td>-</td><td style={{ textAlign: "right" }}><strong>คำขอ:</strong> {viewDoc.applicationId}</td></tr>
+                                    </tbody>
+                                </table>
+
+                                {/* Fee Table - 6 columns like step-9/10 */}
+                                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "9px", marginBottom: "12px" }}>
+                                    <thead>
+                                        <tr style={{ background: "#374151", color: "white" }}>
+                                            <th style={{ border: "1px solid #374151", padding: "6px", width: "8%" }}>ลำดับที่</th>
+                                            <th style={{ border: "1px solid #374151", padding: "6px" }}>รายการ</th>
+                                            <th style={{ border: "1px solid #374151", padding: "6px", width: "10%" }}>จำนวน</th>
+                                            <th style={{ border: "1px solid #374151", padding: "6px", width: "10%" }}>หน่วย</th>
+                                            <th style={{ border: "1px solid #374151", padding: "6px", width: "12%" }}>ราคา/หน่วย</th>
+                                            <th style={{ border: "1px solid #374151", padding: "6px", width: "12%" }}>จำนวนเงิน</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {viewDoc.type === "QUOTATION" ? (
+                                            <>
+                                                <tr>
+                                                    <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "center" }}>1.</td>
+                                                    <td style={{ border: "1px solid #E5E7EB", padding: "6px" }}>ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น</td>
+                                                    <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "center" }}>1</td>
+                                                    <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "center" }}>ต่อคำขอ</td>
+                                                    <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "right" }}>5,000.00</td>
+                                                    <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "right" }}>5,000.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "center" }}>2.</td>
+                                                    <td style={{ border: "1px solid #E5E7EB", padding: "6px" }}>ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน</td>
+                                                    <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "center" }}>1</td>
+                                                    <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "center" }}>ต่อคำขอ</td>
+                                                    <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "right" }}>25,000.00</td>
+                                                    <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "right" }}>25,000.00</td>
+                                                </tr>
+                                            </>
+                                        ) : (
+                                            <tr>
+                                                <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "center" }}>1.</td>
+                                                <td style={{ border: "1px solid #E5E7EB", padding: "6px" }}>
+                                                    {viewDoc.type === "INVOICE" ? "ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น" : "ค่าบริการตามใบแจ้งหนี้"}
+                                                </td>
+                                                <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "center" }}>1</td>
+                                                <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "center" }}>ต่อคำขอ</td>
+                                                <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "right" }}>{formatAmount(viewDoc.amount)}.00</td>
+                                                <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "right" }}>{formatAmount(viewDoc.amount)}.00</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style={{ background: viewDoc.type === "QUOTATION" ? "#FEF3C7" : viewDoc.type === "INVOICE" ? "#DBEAFE" : "#ECFDF5" }}>
+                                            <td colSpan={5} style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "right", fontWeight: 600 }}>
+                                                {viewDoc.type === "INVOICE" ? "ยอดชำระงวดที่ 1" : "จำนวนเงินทั้งสิ้น"}
+                                            </td>
+                                            <td style={{ border: "1px solid #E5E7EB", padding: "6px", textAlign: "right", fontWeight: 700, fontSize: "11px" }}>
+                                                {formatAmount(viewDoc.amount)}.00
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                                {/* หมายเหตุ for Invoice */}
+                                {viewDoc.type === "INVOICE" && (
+                                    <div style={{ fontSize: "8px", padding: "8px", background: "#FEF3C7", borderRadius: "4px", marginBottom: "12px" }}>
+                                        <strong>หมายเหตุ:</strong> กรุณาชำระเงินภายใน 3 วัน<br />
+                                        โอนเข้าบัญชี: เงินบำรุงศูนย์พัฒนายาไทยและสมุนไพร ธ.กรุงไทย 4750134376
+                                    </div>
+                                )}
+
+                                {/* Signature Section */}
+                                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
+                                    <div style={{ width: "30%", textAlign: "center" }}>
+                                        <div style={{ fontWeight: 600, marginBottom: "5px", fontSize: "9px" }}>ผู้รับบริการ</div>
+                                        <div style={{ height: "35px", borderBottom: "1px solid #000", marginBottom: "3px" }}></div>
+                                        <div style={{ fontSize: "8px" }}>(.................................)</div>
+                                        <div style={{ fontSize: "7px", color: "#6B7280" }}>วันที่......./......./.......</div>
+                                    </div>
+                                    <div style={{ width: "30%", textAlign: "center" }}>
+                                        <div style={{ fontWeight: 600, marginBottom: "5px", fontSize: "9px" }}>ผู้ให้บริการ</div>
+                                        <div style={{ height: "35px", borderBottom: "1px solid #000", marginBottom: "3px" }}></div>
+                                        <div style={{ fontSize: "8px" }}>(.................................)</div>
+                                        <div style={{ fontSize: "7px", color: "#6B7280" }}>กองกัญชาทางการแพทย์</div>
+                                    </div>
+                                    <div style={{ width: "30%", textAlign: "center" }}>
+                                        <div style={{ fontWeight: 600, marginBottom: "5px", fontSize: "9px" }}>ผู้มีอำนาจลงนาม</div>
+                                        <div style={{ height: "35px", borderBottom: "1px solid #000", marginBottom: "3px" }}></div>
+                                        <div style={{ fontSize: "8px" }}>(นายปริชา พนูทิม)</div>
+                                        <div style={{ fontSize: "7px", color: "#6B7280" }}>ผู้อำนวยการกองกัญชาทางการแพทย์</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div style={{
+                            padding: "16px 20px", borderTop: "1px solid #E5E7EB",
+                            display: "flex", gap: "12px", justifyContent: "flex-end",
+                        }}>
+                            <button onClick={() => window.print()} style={{
+                                padding: "10px 20px", borderRadius: "8px", border: "1px solid #10B981",
+                                background: "#10B981", color: "white", fontSize: "13px", cursor: "pointer",
+                            }}>📥 ดาวน์โหลด PDF</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style jsx global>{`
                 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');

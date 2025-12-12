@@ -180,9 +180,10 @@ export default function DashboardPage() {
         const savedTheme = localStorage.getItem("theme");
         setIsDark(savedTheme === "dark");
 
-        const token = localStorage.getItem("auth_token");
+        // Note: auth_token is now httpOnly cookie (not accessible via JS)
+        // We check for user data only; middleware handles actual auth
         const userData = localStorage.getItem("user");
-        if (!token || !userData) { window.location.href = "/login"; return; }
+        if (!userData) { window.location.href = "/login"; return; }
         try {
             setUser(JSON.parse(userData));
             loadApplications();
@@ -196,7 +197,7 @@ export default function DashboardPage() {
     };
 
     const loadApplications = async () => {
-        const result = await api.get<{ data: Application[] }>("/api/v2/applications/my");
+        const result = await api.get<{ data: Application[] }>("/v2/applications/my");
         if (result.success && result.data?.data) setApplications(result.data.data);
     };
 

@@ -34,9 +34,9 @@ export default function EstablishmentsPage() {
     useEffect(() => {
         setMounted(true);
         setIsDark(localStorage.getItem("theme") === "dark");
-        const token = localStorage.getItem("auth_token");
+        // Note: auth_token is now httpOnly cookie (not accessible via JS)
         const userData = localStorage.getItem("user");
-        if (!token || !userData) { window.location.href = "/login"; return; }
+        if (!userData) { window.location.href = "/login"; return; }
         try { setUser(JSON.parse(userData)); } catch { window.location.href = "/login"; }
     }, []);
 

@@ -76,9 +76,9 @@ export default function TrackingPage() {
         const savedTheme = localStorage.getItem("theme");
         setIsDark(savedTheme === "dark");
 
-        const token = localStorage.getItem("auth_token");
+        // Note: auth_token is now httpOnly cookie (not accessible via JS)
         const userData = localStorage.getItem("user");
-        if (!token || !userData) { window.location.href = "/login"; return; }
+        if (!userData) { window.location.href = "/login"; return; }
         try {
             setUser(JSON.parse(userData));
             loadApplications();
@@ -86,8 +86,11 @@ export default function TrackingPage() {
     }, []);
 
     const loadApplications = async () => {
-        const result = await api.get<{ data: Application[] }>("/api/v2/applications/my");
-        if (result.success && result.data?.data) setApplications(result.data.data);
+        // Fetch applications from backend API only (production mode)
+        const result = await api.get<{ data: Application[] }>("/v2/applications/my");
+        if (result.success && result.data?.data) {
+            setApplications(result.data.data);
+        }
     };
 
     const toggleTheme = () => { setIsDark(!isDark); localStorage.setItem("theme", !isDark ? "dark" : "light"); };

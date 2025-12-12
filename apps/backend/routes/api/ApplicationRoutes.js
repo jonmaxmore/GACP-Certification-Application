@@ -33,6 +33,7 @@ router.get('/auditor/assignments', authenticate, controller.getAuditorAssignment
 // General ABAC / Admin Routes
 router.post('/', authenticate, controller.createDraft);
 router.patch('/:id/status', authenticate, controller.updateStatus);
+router.post('/:id/status', authenticate, controller.updateStatus); // POST alias for step-11 payment
 
 // Document Upload Route (Critical for mobile app)
 const multer = require('multer');

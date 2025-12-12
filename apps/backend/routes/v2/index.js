@@ -5,6 +5,11 @@
 
 const express = require('express');
 const router = express.Router();
+const apiVersionMiddleware = require('../../middleware/ApiVersionMiddleware');
+const { getVersionInfo } = require('../../middleware/ApiVersionMiddleware');
+
+// Apply API version middleware to all V2 routes
+router.use(apiVersionMiddleware);
 
 // Import V2 route modules
 const notificationsRouter = require('./notifications');
@@ -25,13 +30,28 @@ router.use('/auth', require('../api/AuthFarmerRoutes')); // Added for V2 Consist
 router.use('/plants', require('../api/PlantRoutes')); // Plant Master API
 router.use('/documents', require('../api/DocumentAnalysisRoutes')); // Document Analysis API
 
-// Health check
+// Health check with version info
 router.get('/health', (req, res) => {
   res.json({
     success: true,
-    version: '2.0.0',
+    ...getVersionInfo(),
     message: 'V2 API is running',
   });
 });
 
+// Version info endpoint
+router.get('/version', (req, res) => {
+  res.json({
+    success: true,
+    ...getVersionInfo(),
+    headers: {
+      'X-API-Version': 'Current API version',
+      'X-Min-Client-Version': 'Minimum supported client version',
+      'X-Deprecated': 'If endpoint is deprecated',
+      'X-Upgrade-Required': 'If client needs to update',
+    },
+  });
+});
+
 module.exports = router;
+

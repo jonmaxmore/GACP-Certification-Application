@@ -153,7 +153,7 @@ export default function QuotationDocument({
                                 <td style={{ border: "1px solid #000", padding: "8px" }}>{item.description}</td>
                                 <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>{item.quantity}</td>
                                 <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>ต่อคำขอ</td>
-                                <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right" }}>{formatAmount(item.unitPrice))},-</td>
+                                <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right" }}>{formatAmount(item.unitPrice)},-</td>
                                 <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right" }}>{formatAmount(item.quantity * item.unitPrice)}</td>
                             </tr>
                         ))}

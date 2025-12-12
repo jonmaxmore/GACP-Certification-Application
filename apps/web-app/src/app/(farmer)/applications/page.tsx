@@ -66,16 +66,19 @@ export default function ApplicationsPage() {
     useEffect(() => {
         setMounted(true);
         setIsDark(localStorage.getItem("theme") === "dark");
-        const token = localStorage.getItem("auth_token");
+        // Note: auth_token is now httpOnly cookie (not accessible via JS)
         const userData = localStorage.getItem("user");
-        if (!token || !userData) { window.location.href = "/login"; return; }
+        if (!userData) { window.location.href = "/login"; return; }
         try { setUser(JSON.parse(userData)); loadApplications(); } catch { window.location.href = "/login"; }
     }, []);
 
     const loadApplications = async () => {
         setLoading(true);
-        const result = await api.get<{ data: Application[] }>("/api/v2/applications/my");
-        if (result.success && result.data?.data) setApplications(result.data.data);
+        // Fetch applications from backend API only (production mode)
+        const result = await api.get<{ data: Application[] }>("/v2/applications/my");
+        if (result.success && result.data?.data) {
+            setApplications(result.data.data);
+        }
         setLoading(false);
     };
 

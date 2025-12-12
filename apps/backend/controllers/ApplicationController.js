@@ -12,6 +12,10 @@ class ApplicationController {
     // Stage 1: Create Draft (Auto-select Form 09/10)
     async createDraft(req, res) {
         try {
+            console.log('[ApplicationController] createDraft called');
+            console.log('[ApplicationController] req.user:', req.user);
+            console.log('[ApplicationController] req.body:', JSON.stringify(req.body).substring(0, 500));
+
             // Updated to accept GACP V2 Data Payload
             const {
                 farmId,
@@ -24,39 +28,97 @@ class ApplicationController {
                 siteInfo
             } = req.body;
 
+            if (!req.user || !req.user.id) {
+                console.error('[ApplicationController] No user ID found in request');
+                return res.status(401).json({ success: false, error: 'Unauthorized - no user found' });
+            }
+
+            // Map certificationType to valid enum values (schema expects array of ['CULTIVATION', 'PROCESSING'])
+            let mappedCertType = [];
+            if (certificationType === 'GACP' || !certificationType) {
+                mappedCertType = ['CULTIVATION']; // Default for GACP
+            } else if (Array.isArray(certificationType)) {
+                mappedCertType = certificationType;
+            } else {
+                mappedCertType = [certificationType];
+            }
+
+            // Map objective to valid enum values (schema expects array)
+            let mappedObjective = [];
+            if (objective) {
+                const objMap = { RESEARCH: 'RESEARCH', COMMERCIAL: 'COMMERCIAL_DOMESTIC', EXPORT: 'COMMERCIAL_EXPORT', OTHER: 'OTHER' };
+                if (Array.isArray(objective)) {
+                    mappedObjective = objective.map(o => objMap[o] || o);
+                } else {
+                    mappedObjective = [objMap[objective] || objective];
+                }
+            } else {
+                mappedObjective = ['COMMERCIAL_DOMESTIC'];
+            }
+
             const application = await Application.create({
                 farmerId: req.user.id,
-                status: 'DRAFT', // Explicit initial status
+                status: 'DRAFT',
                 data: {
                     farmId,
                     requestType: requestType ? requestType.toUpperCase() : 'NEW',
-                    certificationType,
-                    objective,
-                    applicantType: applicantType ? applicantType.toUpperCase() : 'PERSON',
+                    certificationType: mappedCertType,
+                    objective: mappedObjective,
+                    applicantType: applicantType ? applicantType.toUpperCase() : 'INDIVIDUAL',
                     applicantInfo,
                     siteInfo,
-                    formData: formData || {} // Save the snapshot of form data
+                    formData: formData || {}
                 },
-                forms: { form09: true, form10: true, form11: false } // Default Logic
+                forms: { form09: true, form10: true, form11: false }
             });
+            console.log('[ApplicationController] Draft created:', application._id);
+
+            // Invalidate user's applications cache
+            const redisService = require('../services/RedisService');
+            await redisService.del(`apps:user:${req.user.id}`);
+
             res.status(201).json({ success: true, data: application });
         } catch (error) {
+            console.error('[ApplicationController] createDraft error:', error.message, error.stack);
             res.status(500).json({ success: false, error: error.message });
         }
     }
 
-    // Get current user's applications
+    // Get current user's applications (with Redis caching)
     async getMyApplications(req, res) {
         try {
+            const redisService = require('../services/RedisService');
+            const cacheKey = `apps:user:${req.user.id}`;
+
+            // Try cache first
+            const cached = await redisService.get(cacheKey);
+            if (cached) {
+                console.log('[ApplicationController] Cache HIT for', cacheKey);
+                return res.json({
+                    success: true,
+                    data: cached.data,
+                    total: cached.total,
+                    cached: true
+                });
+            }
+
+            // Cache miss - query database
             const applications = await Application.find({ farmerId: req.user.id })
                 .sort({ createdAt: -1 })
                 .select('applicationNumber status data.applicantInfo.name data.formData.plantId createdAt')
                 .lean();
 
+            const result = { data: applications, total: applications.length };
+
+            // Store in cache (60 seconds TTL)
+            await redisService.set(cacheKey, result, 60);
+            console.log('[ApplicationController] Cache SET for', cacheKey);
+
             res.json({
                 success: true,
                 data: applications,
-                total: applications.length
+                total: applications.length,
+                cached: false
             });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
@@ -75,6 +137,56 @@ class ApplicationController {
 
             res.json({ success: true, message: 'Review Confirmed. Payment Unlocked.', data: app });
         } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // Generic Status Update (for step-11 demo payment and admin updates)
+    async updateStatus(req, res) {
+        try {
+            const { id } = req.params;
+            const { status, notes } = req.body;
+
+            // Valid status values from schema
+            const validStatuses = [
+                'DRAFT', 'REVIEW_PENDING', 'PAYMENT_1_PENDING', 'SUBMITTED',
+                'REVISION_REQ', 'PAYMENT_1_RETRY', 'PAYMENT_2_PENDING',
+                'AUDIT_PENDING', 'AUDIT_SCHEDULED', 'CERTIFIED', 'REJECTED'
+            ];
+
+            if (!status || !validStatuses.includes(status.toUpperCase())) {
+                return res.status(400).json({
+                    success: false,
+                    error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+                });
+            }
+
+            const app = await Application.findById(id);
+            if (!app) {
+                return res.status(404).json({ success: false, error: 'Application not found' });
+            }
+
+            // Update status
+            const prevStatus = app.status;
+            app.status = status.toUpperCase();
+            app.lastModifiedBy = req.user?.id;
+
+            // Store notes in data if provided
+            if (notes) {
+                app.data = app.data || {};
+                app.data.statusNotes = notes;
+            }
+
+            await app.save();
+
+            // Invalidate cache
+            const redisService = require('../services/RedisService');
+            await redisService.del(`apps:user:${app.farmerId}`);
+
+            console.log(`[ApplicationController] Status updated: ${prevStatus} -> ${status}`);
+            res.json({ success: true, data: app, previousStatus: prevStatus });
+        } catch (error) {
+            console.error('[ApplicationController] updateStatus error:', error.message);
             res.status(500).json({ success: false, error: error.message });
         }
     }

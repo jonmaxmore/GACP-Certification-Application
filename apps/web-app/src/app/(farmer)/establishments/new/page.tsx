@@ -27,8 +27,9 @@ export default function NewEstablishmentPage() {
     useEffect(() => {
         setMounted(true);
         setIsDark(localStorage.getItem("theme") === "dark");
-        const token = localStorage.getItem("auth_token");
-        if (!token) { window.location.href = "/login"; }
+        // Note: auth_token is now httpOnly cookie (not accessible via JS)
+        const userData = localStorage.getItem("user");
+        if (!userData) { window.location.href = "/login"; }
     }, []);
 
     const handleSubmit = (e: React.FormEvent) => {

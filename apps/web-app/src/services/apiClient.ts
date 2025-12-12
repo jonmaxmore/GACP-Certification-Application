@@ -11,8 +11,11 @@
  */
 
 // API Configuration
+// NOTE: API calls now go through local proxy (/api/v2/...) which forwards to backend
+// with Authorization header extracted from httpOnly cookie
 const API_CONFIG = {
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+    baseUrl: '/api', // Local proxy - handles cookie auth automatically
+    backendUrl: 'http://localhost:3000', // Direct backend URL for health checks
     timeout: 15000,
     retryAttempts: 3,
     retryDelay: 1000, // Base delay in ms, will be multiplied exponentially
@@ -88,9 +91,8 @@ function notifyStatusChange(online: boolean) {
  */
 export async function checkHealth(): Promise<boolean> {
     try {
-        // Use root /health endpoint (not /api/health)
-        const baseWithoutApi = API_CONFIG.baseUrl.replace('/api', '');
-        const response = await fetch(`${baseWithoutApi}/health`, {
+        // Use backend URL directly for health check
+        const response = await fetch(`${API_CONFIG.backendUrl}/health`, {
             method: 'GET',
             signal: AbortSignal.timeout(5000),
         });
@@ -126,17 +128,13 @@ export async function apiRequest<T = unknown>(
         'Content-Type': 'application/json',
     };
 
-    // Add auth token if available
-    if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-            defaultHeaders['Authorization'] = `Bearer ${token}`;
-        }
-    }
+    // Note: auth_token is now stored in httpOnly cookie
+    // Cookies are sent automatically with credentials: 'include'
 
     try {
         const response = await fetch(url, {
             ...options,
+            credentials: 'include', // Send httpOnly cookies with request
             headers: {
                 ...defaultHeaders,
                 ...options.headers,

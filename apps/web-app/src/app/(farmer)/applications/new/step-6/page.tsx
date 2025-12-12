@@ -20,9 +20,7 @@ const PROPAGATION_TYPES = [
 ];
 
 const SOURCE_TYPES = [
-    { id: 'SELF', label: 'ปลูกเอง', icon: '🏠' },
-    { id: 'BUY', label: 'ซื้อ', icon: '🛒' },
-    { id: 'IMPORT', label: 'นำเข้า', icon: '🌍' },
+    { id: 'SELF', label: 'ปลูกเอง', icon: '🏠', desc: 'เราปลูกเองในแหล่งผลิตนี้' },
 ];
 
 export default function Step6Production() {
@@ -56,7 +54,11 @@ export default function Step6Production() {
         handleChange('plantParts', updated);
     };
 
-    const handleNext = () => router.push('/applications/new/step-7');
+    const handleNext = () => {
+        // Save productionData to store before navigating
+        setProductionData(form);
+        router.push('/applications/new/step-7');
+    };
     const handleBack = () => router.push('/applications/new/step-5');
 
     if (!isLoaded) return <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>กำลังโหลด...</div>;

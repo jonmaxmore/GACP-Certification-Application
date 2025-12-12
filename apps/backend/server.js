@@ -9,8 +9,10 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 const logger = require('./shared/logger');
 const databaseService = require('./services/ProductionDatabase');
+const redisService = require('./services/RedisService');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 
@@ -64,21 +66,34 @@ app.use(cors(corsOptions));
 app.use(compression());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// Serve Static Files (Uploads)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
-    maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
-}));
+// CDN/Cache Middleware
+const { staticCacheMiddleware } = require('./middleware/CacheControlMiddleware');
+
+// Serve Static Files (Uploads) with cache headers
+app.use('/uploads',
+    staticCacheMiddleware,  // Add cache headers based on file type
+    express.static(path.join(__dirname, 'uploads'), {
+        maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
+        etag: true,
+        lastModified: true,
+    })
+);
 
 // Body Parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
 
-// Connect to Database
-// Connect to Database
+// Connect to Database and Redis
 if (process.env.NODE_ENV !== 'test') {
     databaseService.connect().catch(err => {
         logger.error('Failed to connect to database', err);
         process.exit(1);
+    });
+
+    // Connect to Redis (non-blocking, graceful degradation)
+    redisService.connect().catch(err => {
+        logger.warn('Redis unavailable - running without cache:', err.message);
     });
 }
 
@@ -97,7 +112,10 @@ app.get(['/health', '/api/health'], async (req, res) => {
             status: 'OK',
             timestamp: new Date(),
             environment: process.env.NODE_ENV,
-            database: dbHealth
+            database: dbHealth,
+            redis: {
+                connected: redisService.isAvailable(),
+            }
         });
     } catch (error) {
         res.status(503).json({

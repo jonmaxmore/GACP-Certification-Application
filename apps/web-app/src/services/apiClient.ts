@@ -27,16 +27,51 @@ let isServerOnline = true;
 let lastHealthCheck: Date | null = null;
 const subscribers: Set<(online: boolean) => void> = new Set();
 
-// Error Translation Map
+// Error Translation Map - Comprehensive Thai translations
 const ERROR_TRANSLATIONS: Record<string, string> = {
+    // Network & Server Errors
     'Network Error': 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ต',
     'Failed to fetch': 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ต',
-    'Invalid credentials': 'เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง',
-    'User not found': 'ไม่พบบัญชีผู้ใช้นี้ในระบบ',
-    'Account is locked': 'บัญชีถูกล็อค กรุณารอ 30 นาทีแล้วลองใหม่',
-    'Too many requests': 'มีการพยายามมากเกินไป กรุณารอสักครู่',
     'Internal Server Error': 'เซิร์ฟเวอร์มีปัญหา กรุณาลองใหม่ภายหลัง',
+    'Service Unavailable': 'ระบบปิดปรับปรุงชั่วคราว กรุณาลองใหม่ภายหลัง',
+
+    // Authentication Errors
+    'Invalid credentials': 'เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง',
+    'Invalid email or password': 'เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง',
+    'User not found': 'ไม่พบบัญชีผู้ใช้นี้ในระบบ',
+    'Account is locked': 'บัญชีถูกล็อคชั่วคราว กรุณารอ 30 นาทีแล้วลองใหม่',
+    'Account is inactive': 'บัญชีนี้ถูกระงับการใช้งาน',
+    'Your account has been suspended': 'บัญชีของคุณถูกระงับ กรุณาติดต่อเจ้าหน้าที่',
+    'Please verify your email': 'กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ',
+    'Too many requests': 'มีการพยายามมากเกินไป กรุณารอสักครู่',
     'Unauthorized': 'กรุณาเข้าสู่ระบบใหม่',
+    'Token expired': 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่',
+
+    // Registration Validation Errors
+    'Password is required': 'กรุณากรอกรหัสผ่าน',
+    'Password must be between 8 and 128 characters': 'รหัสผ่านต้องมี 8-128 ตัวอักษร',
+    'Phone number is required': 'กรุณากรอกเบอร์โทรศัพท์',
+    'Phone number must be 9-15 digits': 'เบอร์โทรศัพท์ต้องมี 9-15 หลัก',
+    'Email must be valid': 'รูปแบบอีเมลไม่ถูกต้อง',
+    'Thai ID must be 13 digits': 'เลขบัตรประชาชนต้องมี 13 หลัก',
+    'Tax ID must be 13 digits': 'เลขทะเบียนนิติบุคคลต้องมี 13 หลัก',
+    'First name must be 1-100 characters': 'ชื่อต้องมี 1-100 ตัวอักษร',
+    'Last name must be 1-100 characters': 'นามสกุลต้องมี 1-100 ตัวอักษร',
+    'Company name must be 1-200 characters': 'ชื่อบริษัทต้องมี 1-200 ตัวอักษร',
+    'Community name must be 1-200 characters': 'ชื่อวิสาหกิจชุมชนต้องมี 1-200 ตัวอักษร',
+    'Postal code must be 5 digits': 'รหัสไปรษณีย์ต้องมี 5 หลัก',
+    'Address must not exceed 500 characters': 'ที่อยู่ต้องไม่เกิน 500 ตัวอักษร',
+
+    // Duplicate Errors
+    'Duplicate entry': 'ข้อมูลนี้ถูกลงทะเบียนแล้ว',
+    'Email already exists': 'อีเมลนี้ถูกลงทะเบียนแล้ว',
+    'Phone already exists': 'เบอร์โทรศัพท์นี้ถูกลงทะเบียนแล้ว',
+
+    // Password Reset Errors
+    'Email is required': 'กรุณากรอกอีเมล',
+    'Reset token is required': 'ไม่พบ Token สำหรับรีเซ็ตรหัสผ่าน',
+    'New password is required': 'กรุณากรอกรหัสผ่านใหม่',
+    'Invalid reset token': 'ลิงก์รีเซ็ตรหัสผ่านไม่ถูกต้องหรือหมดอายุ',
 };
 
 /**

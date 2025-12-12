@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Routes that require authentication
-const protectedRoutes = ['/dashboard', '/applications', '/establishments', '/profile', '/notifications'];
+// Routes that require authentication (includes all farmer pages)
+const protectedRoutes = [
+    '/dashboard',
+    '/applications',
+    '/establishments',
+    '/profile',
+    '/notifications',
+    '/tracking',
+    '/payments',
+];
 
 // Routes that are only for unauthenticated users
 const authRoutes = ['/login', '/register', '/forgot-password'];

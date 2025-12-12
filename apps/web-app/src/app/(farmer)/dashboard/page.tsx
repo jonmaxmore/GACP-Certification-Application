@@ -172,6 +172,7 @@ export default function DashboardPage() {
     const [applications, setApplications] = useState<Application[]>([]);
     const [mounted, setMounted] = useState(false);
     const [isDark, setIsDark] = useState(false);
+    const [isRedirecting, setIsRedirecting] = useState(false);
 
     const t = isDark ? themes.dark : themes.light;
 
@@ -183,11 +184,18 @@ export default function DashboardPage() {
         // Note: auth_token is now httpOnly cookie (not accessible via JS)
         // We check for user data only; middleware handles actual auth
         const userData = localStorage.getItem("user");
-        if (!userData) { window.location.href = "/login"; return; }
+        if (!userData) {
+            setIsRedirecting(true);
+            window.location.href = "/login";
+            return;
+        }
         try {
             setUser(JSON.parse(userData));
             loadApplications();
-        } catch { window.location.href = "/login"; }
+        } catch {
+            setIsRedirecting(true);
+            window.location.href = "/login";
+        }
     }, []);
 
     const toggleTheme = () => {
@@ -202,10 +210,9 @@ export default function DashboardPage() {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem("auth_token");
         localStorage.removeItem("user");
-        document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        router.push("/login");
+        // Navigate to logout API - it clears cookies and redirects to login
+        window.location.href = "/api/auth/logout";
     };
 
     const getDisplayName = () => {
@@ -229,7 +236,7 @@ export default function DashboardPage() {
     };
     const currentStep = latestApp ? getCurrentStep(latestApp.status) : 0;
 
-    if (!user || !mounted) {
+    if (!user || !mounted || isRedirecting) {
         return (
             <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: t.bg }}>
                 <div className="spinner" style={{ width: 40, height: 40, border: `3px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%" }} />

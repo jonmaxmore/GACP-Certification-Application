@@ -92,7 +92,7 @@ export default function ProfilePage() {
     };
 
     const toggleTheme = () => { setIsDark(!isDark); localStorage.setItem("theme", !isDark ? "dark" : "light"); };
-    const handleLogout = () => { localStorage.removeItem("auth_token"); localStorage.removeItem("user"); document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"; router.push("/login"); };
+    const handleLogout = () => { localStorage.removeItem("user"); window.location.href = "/api/auth/logout"; };
     const getAccountTypeThai = () => { switch (user?.accountType) { case "INDIVIDUAL": return "บุคคลธรรมดา"; case "JURISTIC": return "นิติบุคคล"; case "COMMUNITY_ENTERPRISE": return "วิสาหกิจชุมชน"; default: return "ผู้สมัคร"; } };
     const getName = () => user?.companyName || user?.communityName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "ผู้ใช้";
 

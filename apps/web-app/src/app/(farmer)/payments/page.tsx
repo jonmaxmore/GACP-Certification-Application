@@ -111,10 +111,8 @@ export default function PaymentsPage() {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem("auth_token");
         localStorage.removeItem("user");
-        document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        router.push("/login");
+        window.location.href = "/api/auth/logout";
     };
 
     const getDisplayName = () => user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || "ผู้ใช้" : "";

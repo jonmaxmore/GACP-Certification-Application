@@ -41,7 +41,7 @@ export default function EstablishmentsPage() {
     }, []);
 
     const toggleTheme = () => { setIsDark(!isDark); localStorage.setItem("theme", !isDark ? "dark" : "light"); };
-    const handleLogout = () => { localStorage.removeItem("auth_token"); localStorage.removeItem("user"); document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"; router.push("/login"); };
+    const handleLogout = () => { localStorage.removeItem("user"); window.location.href = "/api/auth/logout"; };
 
     if (!user || !mounted) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: t.bg }}><div className="spinner" style={{ width: 40, height: 40, border: `3px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%" }} /><style jsx>{`@keyframes spin { to { transform: rotate(360deg); } } .spinner { animation: spin 1s linear infinite; }`}</style></div>;
 

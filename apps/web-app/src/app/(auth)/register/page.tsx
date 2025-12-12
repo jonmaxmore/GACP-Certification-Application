@@ -89,6 +89,81 @@ export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // Field-level errors for inline validation
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+    // Thai ID checksum validation (Modulo 11)
+    const validateThaiId = (id: string): boolean => {
+        const digits = id.replace(/-/g, "");
+        if (digits.length !== 13 || !/^\d{13}$/.test(digits)) return false;
+
+        let sum = 0;
+        for (let i = 0; i < 12; i++) {
+            sum += parseInt(digits[i]) * (13 - i);
+        }
+        const checkDigit = (11 - (sum % 11)) % 10;
+        return checkDigit === parseInt(digits[12]);
+    };
+
+    // Password strength calculation
+    const getPasswordStrength = (pwd: string): { level: number; label: string; color: string } => {
+        let score = 0;
+        if (pwd.length >= 8) score++;
+        if (pwd.length >= 12) score++;
+        if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
+        if (/\d/.test(pwd)) score++;
+        if (/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) score++;
+
+        if (score <= 1) return { level: 1, label: "อ่อนมาก", color: "#EF4444" };
+        if (score === 2) return { level: 2, label: "อ่อน", color: "#F97316" };
+        if (score === 3) return { level: 3, label: "ปานกลาง", color: "#EAB308" };
+        if (score === 4) return { level: 4, label: "แข็งแกร่ง", color: "#22C55E" };
+        return { level: 5, label: "แข็งแกร่งมาก", color: "#059669" };
+    };
+
+    // Real-time field validation
+    const validateField = (field: string, value: string) => {
+        const errors = { ...fieldErrors };
+
+        switch (field) {
+            case 'identifier':
+                const cleanId = value.replace(/-/g, "");
+                if (accountType === "INDIVIDUAL" && cleanId.length === 13) {
+                    if (!validateThaiId(value)) {
+                        errors.identifier = "เลขบัตรประชาชนไม่ถูกต้อง กรุณาตรวจสอบ";
+                    } else {
+                        delete errors.identifier;
+                    }
+                } else if (cleanId.length > 0 && cleanId.length < 13) {
+                    errors.identifier = `กรอกแล้ว ${cleanId.length}/13 หลัก`;
+                } else {
+                    delete errors.identifier;
+                }
+                break;
+            case 'phone':
+                if (value.length > 0 && value.length < 10) {
+                    errors.phone = `กรอกแล้ว ${value.length}/10 หลัก`;
+                } else if (value.length === 10) {
+                    if (!/^0[689]\d{8}$/.test(value)) {
+                        errors.phone = "เบอร์โทรศัพท์ต้องขึ้นต้นด้วย 06, 08, หรือ 09";
+                    } else {
+                        delete errors.phone;
+                    }
+                } else {
+                    delete errors.phone;
+                }
+                break;
+            case 'confirmPassword':
+                if (value && value !== password) {
+                    errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
+                } else {
+                    delete errors.confirmPassword;
+                }
+                break;
+        }
+        setFieldErrors(errors);
+    };
+
     const currentConfig = ACCOUNT_TYPES.find((t) => t.type === accountType);
 
     // Thai error message mapping
@@ -338,9 +413,51 @@ export default function RegisterPage() {
                             <p style={{ color: colors.textGray, marginBottom: "16px", fontSize: "14px" }}>กรอก{currentConfig.idLabel}</p>
                             <div style={{ position: "relative" }}>
                                 <div style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }}><PersonIcon color={colors.primary} /></div>
-                                <input type="text" value={identifier} onChange={(e) => setIdentifier(formatThaiId(e.target.value))} placeholder={currentConfig.idHint} maxLength={17}
-                                    style={{ ...inputStyle, paddingLeft: "48px", fontFamily: "monospace", letterSpacing: "1px" }} />
+                                <input
+                                    type="text"
+                                    value={identifier}
+                                    onChange={(e) => {
+                                        const formatted = formatThaiId(e.target.value);
+                                        setIdentifier(formatted);
+                                        validateField('identifier', formatted);
+                                    }}
+                                    placeholder={currentConfig.idHint}
+                                    maxLength={17}
+                                    style={{
+                                        ...inputStyle,
+                                        paddingLeft: "48px",
+                                        paddingRight: "48px",
+                                        fontFamily: "monospace",
+                                        letterSpacing: "1px",
+                                        borderColor: fieldErrors.identifier?.includes("ไม่ถูกต้อง") ? colors.error :
+                                            identifier.replace(/-/g, "").length === 13 && !fieldErrors.identifier ? "#22C55E" : colors.border,
+                                        borderWidth: "2px"
+                                    }}
+                                />
+                                {/* Validation icon */}
+                                <div style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)" }}>
+                                    {identifier.replace(/-/g, "").length === 13 && !fieldErrors.identifier?.includes("ไม่ถูกต้อง") && (
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg>
+                                    )}
+                                    {fieldErrors.identifier?.includes("ไม่ถูกต้อง") && (
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={colors.error} strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M15 9L9 15M9 9L15 15" /></svg>
+                                    )}
+                                </div>
                             </div>
+                            {/* Inline error message */}
+                            {fieldErrors.identifier && (
+                                <p style={{
+                                    fontSize: "13px",
+                                    marginTop: "8px",
+                                    color: fieldErrors.identifier.includes("ไม่ถูกต้อง") ? colors.error : colors.textGray,
+                                    display: "flex", alignItems: "center", gap: "4px"
+                                }}>
+                                    {fieldErrors.identifier.includes("ไม่ถูกต้อง") && (
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={colors.error} strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 8v4m0 4h.01" /></svg>
+                                    )}
+                                    {fieldErrors.identifier}
+                                </p>
+                            )}
                             <div style={{ marginTop: "16px", padding: "12px 16px", backgroundColor: colors.infoBg, borderRadius: "12px", color: colors.primary, fontSize: "13px", display: "flex", alignItems: "center", gap: "8px" }}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={colors.primary} strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 16V12M12 8H12.01" /></svg>
                                 หมายเลขนี้จะใช้เป็น Username ในการเข้าสู่ระบบ
@@ -356,7 +473,30 @@ export default function RegisterPage() {
                                 {accountType === "INDIVIDUAL" && (<><div><label style={labelStyle}>ชื่อ</label><input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="สมชาย" style={inputStyle} /></div><div><label style={labelStyle}>นามสกุล</label><input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="ใจดี" style={inputStyle} /></div></>)}
                                 {accountType === "JURISTIC" && (<><div><label style={labelStyle}>ชื่อบริษัท/นิติบุคคล</label><input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="บริษัท ABC จำกัด" style={inputStyle} /></div><div><label style={labelStyle}>ชื่อผู้มีอำนาจ</label><input type="text" value={representativeName} onChange={(e) => setRepresentativeName(e.target.value)} placeholder="นายสมชาย ใจดี" style={inputStyle} /></div></>)}
                                 {accountType === "COMMUNITY_ENTERPRISE" && (<><div><label style={labelStyle}>ชื่อวิสาหกิจชุมชน</label><input type="text" value={communityName} onChange={(e) => setCommunityName(e.target.value)} placeholder="กลุ่มเกษตรกรบ้านป่า" style={inputStyle} /></div><div><label style={labelStyle}>ชื่อผู้ติดต่อ</label><input type="text" value={representativeName} onChange={(e) => setRepresentativeName(e.target.value)} placeholder="นายสมชาย ใจดี" style={inputStyle} /></div></>)}
-                                <div><label style={labelStyle}>เบอร์โทรศัพท์</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="0812345678" style={inputStyle} /></div>
+                                <div>
+                                    <label style={labelStyle}>เบอร์โทรศัพท์</label>
+                                    <input
+                                        type="tel"
+                                        value={phone}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                            setPhone(val);
+                                            validateField('phone', val);
+                                        }}
+                                        placeholder="0812345678"
+                                        style={{
+                                            ...inputStyle,
+                                            borderColor: fieldErrors.phone?.includes("ต้องขึ้นต้น") ? colors.error :
+                                                phone.length === 10 && !fieldErrors.phone ? "#22C55E" : colors.border,
+                                            borderWidth: "2px"
+                                        }}
+                                    />
+                                    {fieldErrors.phone && (
+                                        <p style={{ fontSize: "13px", marginTop: "6px", color: fieldErrors.phone.includes("ต้องขึ้นต้น") ? colors.error : colors.textGray }}>
+                                            {fieldErrors.phone}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
@@ -372,14 +512,56 @@ export default function RegisterPage() {
                                         <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="อย่างน้อย 8 ตัวอักษร" style={{ ...inputStyle, paddingRight: "48px" }} />
                                         <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer" }}><EyeIcon open={showPassword} /></button>
                                     </div>
+                                    {/* Password Strength Indicator */}
+                                    {password && (
+                                        <div style={{ marginTop: "8px" }}>
+                                            <div style={{ display: "flex", gap: "4px", marginBottom: "6px" }}>
+                                                {[1, 2, 3, 4, 5].map(i => (
+                                                    <div key={i} style={{
+                                                        flex: 1, height: "4px", borderRadius: "2px",
+                                                        backgroundColor: i <= getPasswordStrength(password).level ? getPasswordStrength(password).color : "#E5E7EB"
+                                                    }} />
+                                                ))}
+                                            </div>
+                                            <p style={{ fontSize: "12px", color: getPasswordStrength(password).color, fontWeight: 500 }}>
+                                                ความแข็งแกร่ง: {getPasswordStrength(password).label}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <label style={labelStyle}>ยืนยันรหัสผ่าน</label>
                                     <div style={{ position: "relative" }}>
-                                        <input type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="กรอกรหัสผ่านอีกครั้ง" style={{ ...inputStyle, paddingRight: "48px" }} />
+                                        <input
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            value={confirmPassword}
+                                            onChange={(e) => {
+                                                setConfirmPassword(e.target.value);
+                                                validateField('confirmPassword', e.target.value);
+                                            }}
+                                            placeholder="กรอกรหัสผ่านอีกครั้ง"
+                                            style={{
+                                                ...inputStyle,
+                                                paddingRight: "48px",
+                                                borderColor: confirmPassword && password !== confirmPassword ? colors.error :
+                                                    confirmPassword && password === confirmPassword ? "#22C55E" : colors.border,
+                                                borderWidth: "2px"
+                                            }}
+                                        />
                                         <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer" }}><EyeIcon open={showConfirmPassword} /></button>
                                     </div>
-                                    {confirmPassword && password !== confirmPassword && <p style={{ color: colors.error, fontSize: "12px", marginTop: "6px" }}>รหัสผ่านไม่ตรงกัน</p>}
+                                    {confirmPassword && password !== confirmPassword && (
+                                        <p style={{ color: colors.error, fontSize: "12px", marginTop: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={colors.error} strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M15 9L9 15M9 9L15 15" /></svg>
+                                            รหัสผ่านไม่ตรงกัน
+                                        </p>
+                                    )}
+                                    {confirmPassword && password === confirmPassword && (
+                                        <p style={{ color: "#22C55E", fontSize: "12px", marginTop: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg>
+                                            รหัสผ่านตรงกัน
+                                        </p>
+                                    )}
                                 </div>
                                 <label style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "16px", backgroundColor: "#FAFAFA", borderRadius: "12px", cursor: "pointer" }}>
                                     <input type="checkbox" checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} style={{ width: "20px", height: "20px", marginTop: "2px", accentColor: colors.primary }} />

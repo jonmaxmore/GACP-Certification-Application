@@ -81,6 +81,7 @@ export default function LoginPage() {
     const [loginState, setLoginState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [error, setError] = useState("");
     const [rememberMe, setRememberMe] = useState(false);
+    const [capsLockOn, setCapsLockOn] = useState(false);
 
     // Load remembered credentials on mount
     useEffect(() => {
@@ -165,6 +166,10 @@ export default function LoginPage() {
         }
 
         try {
+            // Timeout after 10 seconds
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
             // Use local proxy API which sets cookie from same origin
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
@@ -174,7 +179,10 @@ export default function LoginPage() {
                     identifier: cleanIdentifier,
                     password: cleanPassword,
                 }),
+                signal: controller.signal,
             });
+
+            clearTimeout(timeoutId);
 
             const result = await response.json();
             console.log('[Login] Response:', result);
@@ -230,7 +238,12 @@ export default function LoginPage() {
 
         } catch (err) {
             console.error('[Login] Network error:', err);
-            setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง");
+            // Check if timeout
+            if (err instanceof Error && err.name === 'AbortError') {
+                setError("การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง");
+            } else {
+                setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง");
+            }
             setIsLoading(false);
             setLoginState('error');
         }
@@ -447,6 +460,8 @@ export default function LoginPage() {
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    onKeyUp={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
+                                    onKeyDown={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
                                     placeholder="กรอกรหัสผ่าน"
                                     style={{
                                         width: "100%",
@@ -475,6 +490,12 @@ export default function LoginPage() {
                                     <EyeIcon open={showPassword} />
                                 </button>
                             </div>
+                            {/* Caps Lock Warning */}
+                            {capsLockOn && (
+                                <p style={{ fontSize: "12px", color: "#F59E0B", marginTop: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
+                                    ⚠️ Caps Lock เปิดอยู่
+                                </p>
+                            )}
                         </div>
 
                         {/* Remember Me & Forgot Password */}

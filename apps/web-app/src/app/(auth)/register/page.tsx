@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api from "@/services/apiClient";
@@ -93,6 +93,39 @@ export default function RegisterPage() {
 
     // Field-level errors for inline validation
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+    // Auto-save form data to localStorage
+    useEffect(() => {
+        const savedData = localStorage.getItem("register_draft");
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData);
+                setStep(data.step || 0);
+                setAccountType(data.accountType || "");
+                setIdentifier(data.identifier || "");
+                setFirstName(data.firstName || "");
+                setLastName(data.lastName || "");
+                setCompanyName(data.companyName || "");
+                setRepresentativeName(data.representativeName || "");
+                setCommunityName(data.communityName || "");
+                setPhone(data.phone || "");
+                setEmail(data.email || "");
+                setPdpaAccepted(data.pdpaAccepted || false);
+                setPdpaScrolled(data.pdpaScrolled || false);
+            } catch { }
+        }
+    }, []);
+
+    // Save to localStorage on every change
+    useEffect(() => {
+        const data = {
+            step, accountType, identifier, firstName, lastName,
+            companyName, representativeName, communityName, phone, email,
+            pdpaAccepted, pdpaScrolled
+        };
+        localStorage.setItem("register_draft", JSON.stringify(data));
+    }, [step, accountType, identifier, firstName, lastName, companyName, representativeName, communityName, phone, email, pdpaAccepted, pdpaScrolled]);
+
 
     // Thai ID checksum validation (Modulo 11)
     const validateThaiId = (id: string): boolean => {
@@ -280,6 +313,8 @@ export default function RegisterPage() {
         }
 
         setIsLoading(false);
+        // Clear saved draft
+        localStorage.removeItem("register_draft");
         // Redirect to success page with user info
         const name = accountType === "INDIVIDUAL" ? `${firstName} ${lastName}` :
             accountType === "JURISTIC" ? companyName : communityName;

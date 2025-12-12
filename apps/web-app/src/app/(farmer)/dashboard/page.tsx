@@ -204,13 +204,25 @@ export default function DashboardPage() {
         localStorage.setItem("theme", newTheme ? "dark" : "light");
     };
 
+    const [loadError, setLoadError] = useState<string | null>(null);
+
     const loadApplications = async () => {
+        setLoadError(null);
         const result = await api.get<{ data: Application[] }>("/v2/applications/my");
-        if (result.success && result.data?.data) setApplications(result.data.data);
+        if (result.success && result.data?.data) {
+            setApplications(result.data.data);
+        } else {
+            setLoadError("ไม่สามารถโหลดข้อมูลคำขอได้ กรุณาลองใหม่");
+        }
     };
 
     const handleLogout = () => {
+        // Clear ALL app data
         localStorage.removeItem("user");
+        localStorage.removeItem("gacp_wizard_state");
+        localStorage.removeItem("gacp_wizard_last_saved");
+        localStorage.removeItem("remember_login");
+        sessionStorage.clear();
         // Navigate to logout API - it clears cookies and redirects to login
         window.location.href = "/api/auth/logout";
     };
@@ -337,6 +349,43 @@ export default function DashboardPage() {
                         <p style={{ fontSize: "13px", color: t.textMuted, letterSpacing: "0.05em", marginBottom: "4px" }}>{getGreeting()}</p>
                         <h1 style={{ fontSize: "28px", fontWeight: 500, letterSpacing: "-0.01em", margin: 0 }}>{getDisplayName()}</h1>
                     </div>
+
+                    {/* Error State with Retry */}
+                    {loadError && (
+                        <div style={{
+                            width: "100%",
+                            padding: "16px 20px",
+                            backgroundColor: isDark ? "rgba(239, 68, 68, 0.1)" : "#FEF2F2",
+                            border: `1px solid ${isDark ? "rgba(239, 68, 68, 0.3)" : "#FECACA"}`,
+                            borderRadius: "12px",
+                            marginBottom: "24px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: "12px",
+                        }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                {Icons.alertTriangle("#EF4444")}
+                                <span style={{ color: "#EF4444", fontSize: "14px" }}>{loadError}</span>
+                            </div>
+                            <button
+                                onClick={loadApplications}
+                                style={{
+                                    padding: "8px 16px",
+                                    backgroundColor: "#EF4444",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    fontSize: "13px",
+                                    fontWeight: 500,
+                                    cursor: "pointer",
+                                    fontFamily: "'Kanit', sans-serif",
+                                }}
+                            >
+                                ลองใหม่
+                            </button>
+                        </div>
+                    )}
                     <Link href="/applications/new" className="cta-btn" style={{
                         display: "flex", alignItems: "center", gap: "8px",
                         padding: "12px 24px", borderRadius: "12px",

@@ -51,12 +51,25 @@ export default function ProfilePage() {
     const [message, setMessage] = useState("");
     const [mounted, setMounted] = useState(false);
     const [isDark, setIsDark] = useState(false);
+    const [showExitWarning, setShowExitWarning] = useState(false);
+    const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
 
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
     const [companyName, setCompanyName] = useState("");
+
+    // Original values for change detection
+    const [originalValues, setOriginalValues] = useState({ firstName: "", lastName: "", email: "", phone: "", companyName: "" });
+
+    const hasChanges = isEditing && (
+        firstName !== originalValues.firstName ||
+        lastName !== originalValues.lastName ||
+        email !== originalValues.email ||
+        phone !== originalValues.phone ||
+        companyName !== originalValues.companyName
+    );
 
     const t = isDark ? themes.dark : themes.light;
 
@@ -74,6 +87,14 @@ export default function ProfilePage() {
             setEmail(parsed.email || "");
             setPhone(parsed.phone || "");
             setCompanyName(parsed.companyName || parsed.communityName || "");
+            // Store original values for change detection
+            setOriginalValues({
+                firstName: parsed.firstName || "",
+                lastName: parsed.lastName || "",
+                email: parsed.email || "",
+                phone: parsed.phone || "",
+                companyName: parsed.companyName || parsed.communityName || "",
+            });
         } catch { router.push("/login"); }
     }, [router]);
 
@@ -167,12 +188,34 @@ export default function ProfilePage() {
                         <div><label style={{ fontSize: "13px", color: t.textMuted, display: "block", marginBottom: "8px" }}>เลขบัตรประชาชน</label><input type="text" value={user.identifier || ""} disabled style={{ ...inputStyle, color: t.textMuted }} /></div>
                         {(user.companyName || user.communityName) && <div style={{ gridColumn: "span 2" }}><label style={{ fontSize: "13px", color: t.textMuted, display: "block", marginBottom: "8px" }}>ชื่อองค์กร/บริษัท</label><input type="text" value={companyName || user.companyName || user.communityName || ""} onChange={(e) => setCompanyName(e.target.value)} disabled={!isEditing} style={inputStyle} /></div>}
                     </div>
-                    <div style={{ marginTop: "20px", display: "flex", justifyContent: "flex-end", gap: "12px" }}>
-                        {isEditing ? (
-                            <><button onClick={() => setIsEditing(false)} style={{ padding: "12px 20px", backgroundColor: "transparent", border: `1px solid ${t.border}`, borderRadius: "12px", fontSize: "14px", cursor: "pointer", color: t.textSecondary }}>ยกเลิก</button><button onClick={handleSaveProfile} disabled={isSaving} style={{ padding: "12px 24px", background: `linear-gradient(135deg, ${t.accent} 0%, ${t.accentLight} 100%)`, color: "#FFF", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}>{isSaving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}</button></>
-                        ) : (
-                            <button onClick={() => setIsEditing(true)} style={{ padding: "12px 24px", background: `linear-gradient(135deg, ${t.accent} 0%, ${t.accentLight} 100%)`, color: "#FFF", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}>แก้ไขข้อมูล</button>
+                    <div style={{ marginTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        {/* Change indicator */}
+                        {hasChanges && (
+                            <span style={{ fontSize: "12px", color: "#F59E0B", display: "flex", alignItems: "center", gap: "4px" }}>
+                                ⚠️ มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก
+                            </span>
                         )}
+                        {!hasChanges && <div />}
+
+                        <div style={{ display: "flex", gap: "12px" }}>
+                            {isEditing ? (
+                                <>
+                                    <button onClick={() => {
+                                        // Restore original values
+                                        setFirstName(originalValues.firstName);
+                                        setLastName(originalValues.lastName);
+                                        setEmail(originalValues.email);
+                                        setPhone(originalValues.phone);
+                                        setCompanyName(originalValues.companyName);
+                                        setIsEditing(false);
+                                        setMessage("");
+                                    }} style={{ padding: "12px 20px", backgroundColor: "transparent", border: `1px solid ${t.border}`, borderRadius: "12px", fontSize: "14px", cursor: "pointer", color: t.textSecondary, fontFamily: "'Kanit', sans-serif" }}>ยกเลิก</button>
+                                    <button onClick={handleSaveProfile} disabled={isSaving} style={{ padding: "12px 24px", background: `linear-gradient(135deg, ${t.accent} 0%, ${t.accentLight} 100%)`, color: "#FFF", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: "'Kanit', sans-serif" }}>{isSaving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}</button>
+                                </>
+                            ) : (
+                                <button onClick={() => setIsEditing(true)} style={{ padding: "12px 24px", background: `linear-gradient(135deg, ${t.accent} 0%, ${t.accentLight} 100%)`, color: "#FFF", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: "'Kanit', sans-serif" }}>แก้ไขข้อมูล</button>
+                            )}
+                        </div>
                     </div>
                 </div>
 

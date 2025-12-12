@@ -27,6 +27,7 @@ export default function Step6Production() {
     const router = useRouter();
     const { state, setProductionData, isLoaded } = useWizardStore();
     const [isDark, setIsDark] = useState(false);
+    const [isNavigating, setIsNavigating] = useState(false);
     const [form, setForm] = useState<ProductionData>({
         plantParts: [], propagationType: 'SEED', varietyName: '', seedSource: '', varietySource: '',
         quantityWithUnit: '', harvestCycles: 1, estimatedYield: 0,
@@ -55,11 +56,16 @@ export default function Step6Production() {
     };
 
     const handleNext = () => {
-        // Save productionData to store before navigating
-        setProductionData(form);
-        router.push('/applications/new/step-7');
+        if (!isNavigating) {
+            setIsNavigating(true);
+            setProductionData(form);
+            router.push('/applications/new/step-7');
+        }
     };
-    const handleBack = () => router.push('/applications/new/step-5');
+    const handleBack = () => {
+        setIsNavigating(true);
+        router.push('/applications/new/step-5');
+    };
 
     if (!isLoaded) return <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>กำลังโหลด...</div>;
 
@@ -212,15 +218,18 @@ export default function Step6Production() {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg>
                     ย้อนกลับ
                 </button>
-                <button onClick={handleNext} style={{
+                <button onClick={handleNext} disabled={isNavigating} style={{
                     flex: 2, padding: '12px', borderRadius: '10px', border: 'none',
-                    background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
-                    color: 'white', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                    background: isNavigating ? '#9CA3AF' : 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
+                    color: 'white', fontSize: '14px', fontWeight: 600, cursor: isNavigating ? 'not-allowed' : 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                    boxShadow: '0 4px 16px rgba(16, 185, 129, 0.35)',
+                    boxShadow: isNavigating ? 'none' : '0 4px 16px rgba(16, 185, 129, 0.35)',
                 }}>
-                    ถัดไป
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg>
+                    {isNavigating ? (
+                        <><div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> กำลังโหลด...</>
+                    ) : (
+                        <>ถัดไป <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg></>
+                    )}
                 </button>
             </div>
         </div>

@@ -11,6 +11,7 @@ export default function Step10Invoice() {
     const { state, isLoaded } = useWizardStore();
     const [isDark, setIsDark] = useState(false);
     const [accepted, setAccepted] = useState(false);
+    const [isNavigating, setIsNavigating] = useState(false);
 
     useEffect(() => { setIsDark(localStorage.getItem("theme") === "dark"); }, []);
     useEffect(() => { if (isLoaded && !state.siteData) router.replace('/applications/new/step-0'); }, [isLoaded, state.siteData, router]);
@@ -30,8 +31,16 @@ export default function Step10Invoice() {
 
     const taxId = state.applicantData?.registrationNumber || state.applicantData?.idCard || '-';
 
-    const handleNext = () => router.push('/applications/new/step-11');
-    const handleBack = () => router.push('/applications/new/step-9');
+    const handleNext = () => {
+        if (!isNavigating && accepted) {
+            setIsNavigating(true);
+            router.push('/applications/new/step-11');
+        }
+    };
+    const handleBack = () => {
+        setIsNavigating(true);
+        router.push('/applications/new/step-9');
+    };
     const handlePrint = () => window.print();
 
     if (!isLoaded) return <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>กำลังโหลด...</div>;
@@ -215,12 +224,16 @@ export default function Step10Invoice() {
                     background: isDark ? '#374151' : 'white', color: isDark ? '#F9FAFB' : '#374151',
                     fontSize: '14px', fontWeight: 500, cursor: 'pointer',
                 }}>ย้อนกลับ</button>
-                <button onClick={handleNext} disabled={!accepted} style={{
+                <button onClick={handleNext} disabled={!accepted || isNavigating} style={{
                     flex: 2, padding: '14px', borderRadius: '10px', border: 'none',
-                    background: accepted ? 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)' : '#9CA3AF',
-                    color: 'white', fontSize: '14px', fontWeight: 600, cursor: accepted ? 'pointer' : 'not-allowed',
+                    background: accepted && !isNavigating ? 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)' : '#9CA3AF',
+                    color: 'white', fontSize: '14px', fontWeight: 600, cursor: accepted && !isNavigating ? 'pointer' : 'not-allowed',
                 }}>
-                    💳 ยอมรับและไปชำระเงิน
+                    {isNavigating ? (
+                        <><div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite', display: 'inline-block', marginRight: '8px' }} />กำลังโหลด...</>
+                    ) : (
+                        <>💳 ยอมรับและไปชำระเงิน</>
+                    )}
                 </button>
             </div>
 

@@ -42,6 +42,7 @@ export default function Step7Documents() {
     const router = useRouter();
     const { state, setDocuments, isLoaded } = useWizardStore();
     const [isDark, setIsDark] = useState(false);
+    const [isNavigating, setIsNavigating] = useState(false);
     const [docs, setDocs] = useState<DocSlot[]>(DOCUMENTS);
     const [videoUrl, setVideoUrl] = useState('');
     const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -80,8 +81,16 @@ export default function Step7Documents() {
     const requiredUploaded = docs.filter(d => d.required && d.uploaded).length;
     const requiredTotal = docs.filter(d => d.required).length;
 
-    const handleNext = () => router.push('/applications/new/step-8');
-    const handleBack = () => router.push('/applications/new/step-6');
+    const handleNext = () => {
+        if (!isNavigating) {
+            setIsNavigating(true);
+            router.push('/applications/new/step-8');
+        }
+    };
+    const handleBack = () => {
+        setIsNavigating(true);
+        router.push('/applications/new/step-6');
+    };
 
     if (!isLoaded) return <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>กำลังโหลด...</div>;
 
@@ -157,9 +166,12 @@ export default function Step7Documents() {
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg>
                     ย้อนกลับ
                 </button>
-                <button onClick={handleNext} style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)', color: 'white', fontSize: '15px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 20px rgba(16, 185, 129, 0.4)' }}>
-                    ถัดไป
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg>
+                <button onClick={handleNext} disabled={isNavigating} style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: isNavigating ? '#9CA3AF' : 'linear-gradient(135deg, #059669 0%, #10B981 100%)', color: 'white', fontSize: '15px', fontWeight: 600, cursor: isNavigating ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: isNavigating ? 'none' : '0 4px 20px rgba(16, 185, 129, 0.4)' }}>
+                    {isNavigating ? (
+                        <><div style={{ width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> กำลังโหลด...</>
+                    ) : (
+                        <>ถัดไป <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg></>
+                    )}
                 </button>
             </div>
         </div>

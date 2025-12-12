@@ -246,11 +246,11 @@ export default function Step5Site() {
                     {SECURITY_ITEMS.filter(item => !item.highControl || isHighControl).map(item => (
                         <label key={item.id} style={{
                             display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px',
-                            background: (form as Record<string, boolean>)[item.id] ? (isDark ? '#374151' : 'white') : 'transparent',
-                            border: `1px solid ${(form as Record<string, boolean>)[item.id] ? '#10B981' : (isDark ? '#374151' : '#D1D5DB')}`,
+                            background: form[item.id as keyof SiteData] ? (isDark ? '#374151' : 'white') : 'transparent',
+                            border: `1px solid ${form[item.id as keyof SiteData] ? '#10B981' : (isDark ? '#374151' : '#D1D5DB')}`,
                             borderRadius: '8px', cursor: 'pointer', fontSize: '12px',
                         }}>
-                            <input type="checkbox" checked={(form as Record<string, boolean>)[item.id] || false} onChange={e => handleChange(item.id as keyof SiteData, e.target.checked)} style={{ width: '16px', height: '16px', accentColor: '#10B981' }} />
+                            <input type="checkbox" checked={!!form[item.id as keyof SiteData]} onChange={e => handleChange(item.id as keyof SiteData, e.target.checked)} style={{ width: '16px', height: '16px', accentColor: '#10B981' }} />
                             <span style={{ color: isDark ? '#F9FAFB' : '#111827' }}>{item.icon} {item.label}</span>
                         </label>
                     ))}

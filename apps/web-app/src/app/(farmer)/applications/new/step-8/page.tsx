@@ -159,13 +159,14 @@ export default function Step8Review() {
 
             // Call backend API to create draft
             console.log('[Step-8] Creating draft with data:', draftData);
-            const result = await api.post<{ success: boolean; data: { _id: string; applicationNumber?: string } }>('/v2/applications/draft', draftData);
+            const result = await api.post<{ success: boolean; data: { _id: string; applicationNumber?: string }; error?: string }>('/v2/applications/draft', draftData);
             console.log('[Step-8] API Response:', result);
 
             // Handle different response structures
             if (result.success) {
-                // Try different response paths
-                const appId = result.data?.data?._id || result.data?._id || (result.data as unknown as { _id: string })?._id;
+                // Try different response paths - use type assertion for nested data
+                const responseData = result.data as { _id?: string; data?: { _id: string } };
+                const appId = responseData?.data?._id || responseData?._id;
                 console.log('[Step-8] Application ID:', appId);
 
                 if (appId) {
@@ -266,7 +267,7 @@ export default function Step8Review() {
                     <div style={{ border: '1px solid #E5E7EB', borderTop: 'none', padding: '10px', borderRadius: '0 0 4px 4px' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
                             <FormField label="วัตถุประสงค์" value={state.certificationPurpose ? PURPOSE_LABELS[state.certificationPurpose] : undefined} />
-                            <FormField label="ประเภทบริการ" value={state.serviceType === 'NEW' ? 'ขอรับรองใหม่' : state.serviceType === 'RENEWAL' ? 'ต่ออายุ' : state.serviceType} />
+                            <FormField label="ประเภทบริการ" value={state.serviceType === 'NEW' ? 'ขอรับรองใหม่' : state.serviceType === 'RENEWAL' ? 'ต่ออายุ' : state.serviceType ?? undefined} />
                             <FormField label="ลักษณะพื้นที่" value={state.siteTypes?.map(t => SITE_TYPE_LABELS[t]).join(', ')} colSpan={2} />
                         </div>
                     </div>

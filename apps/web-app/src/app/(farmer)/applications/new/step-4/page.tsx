@@ -14,6 +14,8 @@ export default function Step4Applicant() {
     const router = useRouter();
     const { state, setApplicantData, isLoaded } = useWizardStore();
     const [isDark, setIsDark] = useState(false);
+    const [isNavigating, setIsNavigating] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
     const [form, setForm] = useState<ApplicantData>({
         applicantType: 'INDIVIDUAL',
         firstName: '', lastName: '', idCard: '', phone: '', email: '', lineId: '',
@@ -21,6 +23,35 @@ export default function Step4Applicant() {
     });
 
     const isHighControl = PLANTS.find(p => p.id === state.plantId)?.group === 'HIGH_CONTROL';
+
+    // Thai ID checksum validation (Modulo 11)
+    const validateThaiId = (id: string): boolean => {
+        const digits = id.replace(/-/g, "");
+        if (digits.length !== 13 || !/^\d{13}$/.test(digits)) return false;
+        let sum = 0;
+        for (let i = 0; i < 12; i++) sum += parseInt(digits[i]) * (13 - i);
+        const checkDigit = (11 - (sum % 11)) % 10;
+        return checkDigit === parseInt(digits[12]);
+    };
+
+    // Real-time field validation
+    const validateField = (field: string, value: string) => {
+        const errors = { ...fieldErrors };
+        if (field === 'idCard' && form.applicantType === 'INDIVIDUAL') {
+            if (value.length === 13) {
+                if (!validateThaiId(value)) errors.idCard = 'เลขบัตรประชาชนไม่ถูกต้อง (Checksum ไม่ผ่าน)';
+                else delete errors.idCard;
+            } else if (value.length > 0) {
+                errors.idCard = `กรอกแล้ว ${value.length}/13 หลัก`;
+            } else delete errors.idCard;
+        }
+        if (field === 'phone') {
+            if (value.length > 0 && value.length < 10) errors.phone = `กรอกแล้ว ${value.length}/10 หลัก`;
+            else if (value.length === 10 && !/^0[689]\d{8}$/.test(value)) errors.phone = 'เบอร์ต้องขึ้นต้นด้วย 06, 08, 09';
+            else delete errors.phone;
+        }
+        setFieldErrors(errors);
+    };
 
     useEffect(() => {
         setIsDark(localStorage.getItem("theme") === "dark");
@@ -37,10 +68,19 @@ export default function Step4Applicant() {
         const updated = { ...form, [field]: value };
         setForm(updated);
         setApplicantData(updated);
+        validateField(field, value);
     };
 
-    const handleNext = () => router.push('/applications/new/step-5');
-    const handleBack = () => router.push('/applications/new/step-3');
+    const handleNext = () => {
+        if (!isNavigating) {
+            setIsNavigating(true);
+            router.push('/applications/new/step-5');
+        }
+    };
+    const handleBack = () => {
+        setIsNavigating(true);
+        router.push('/applications/new/step-3');
+    };
 
     if (!isLoaded) {
         return <div style={{ textAlign: 'center', padding: '60px 20px', color: isDark ? '#9CA3AF' : '#6B7280' }}>กำลังโหลด...</div>;
@@ -118,12 +158,51 @@ export default function Step4Applicant() {
                     </div>
                     <div style={{ marginBottom: '10px' }}>
                         <label style={labelStyle}>เลขบัตรประชาชน{requiredMark}</label>
-                        <input type="text" value={form.idCard || ''} onChange={e => handleChange('idCard', e.target.value)} placeholder="1-XXXX-XXXXX-XX-X" maxLength={13} style={inputStyle} />
+                        <input
+                            type="text"
+                            value={form.idCard || ''}
+                            onChange={e => handleChange('idCard', e.target.value.replace(/\D/g, '').slice(0, 13))}
+                            placeholder="1234567890123"
+                            maxLength={13}
+                            style={{
+                                ...inputStyle,
+                                borderColor: fieldErrors.idCard?.includes('ไม่ถูกต้อง') ? '#DC2626' :
+                                    (form.idCard?.length === 13 && !fieldErrors.idCard) ? '#22C55E' : inputStyle.border?.toString().includes('#') ? inputStyle.border?.toString().split(' ').pop() : '#D1D5DB',
+                                borderWidth: '2px'
+                            }}
+                        />
+                        {fieldErrors.idCard && (
+                            <p style={{ fontSize: '12px', marginTop: '4px', color: fieldErrors.idCard.includes('ไม่ถูกต้อง') ? '#DC2626' : '#6B7280' }}>
+                                {fieldErrors.idCard}
+                            </p>
+                        )}
+                        {form.idCard?.length === 13 && !fieldErrors.idCard && (
+                            <p style={{ fontSize: '12px', marginTop: '4px', color: '#22C55E', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                ✓ เลขบัตรประชาชนถูกต้อง
+                            </p>
+                        )}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
                         <div>
                             <label style={labelStyle}>โทรศัพท์{requiredMark}</label>
-                            <input type="tel" value={form.phone || ''} onChange={e => handleChange('phone', e.target.value)} placeholder="08X-XXX-XXXX" style={inputStyle} />
+                            <input
+                                type="tel"
+                                value={form.phone || ''}
+                                onChange={e => handleChange('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                placeholder="0812345678"
+                                maxLength={10}
+                                style={{
+                                    ...inputStyle,
+                                    borderColor: fieldErrors.phone?.includes('ขึ้นต้น') ? '#DC2626' :
+                                        (form.phone?.length === 10 && !fieldErrors.phone) ? '#22C55E' : inputStyle.border?.toString().includes('#') ? inputStyle.border?.toString().split(' ').pop() : '#D1D5DB',
+                                    borderWidth: '2px'
+                                }}
+                            />
+                            {fieldErrors.phone && (
+                                <p style={{ fontSize: '11px', marginTop: '4px', color: fieldErrors.phone.includes('ขึ้นต้น') ? '#DC2626' : '#6B7280' }}>
+                                    {fieldErrors.phone}
+                                </p>
+                            )}
                         </div>
                         <div>
                             <label style={labelStyle}>Line ID{requiredMark}</label>

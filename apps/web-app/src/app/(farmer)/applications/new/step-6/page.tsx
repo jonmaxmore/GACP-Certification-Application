@@ -55,8 +55,11 @@ export default function Step6Production() {
         handleChange('plantParts', updated);
     };
 
+    // Validation check
+    const isValid = (form.plantParts?.length || 0) > 0;
+
     const handleNext = () => {
-        if (!isNavigating) {
+        if (!isNavigating && isValid) {
             setIsNavigating(true);
             setProductionData(form);
             router.push('/applications/new/step-7');
@@ -205,7 +208,11 @@ export default function Step6Production() {
                 </div>
             </div>
 
-            {/* Navigation */}
+            {!isValid && (
+                <p style={{ fontSize: '12px', color: '#EF4444', marginBottom: '12px', textAlign: 'center' }}>
+                    ⚠️ กรุณาเลือกส่วนของพืชอย่างน้อย 1 รายการ
+                </p>
+            )}
             <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={handleBack} style={{
                     flex: 1, padding: '12px', borderRadius: '10px',
@@ -218,12 +225,12 @@ export default function Step6Production() {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg>
                     ย้อนกลับ
                 </button>
-                <button onClick={handleNext} disabled={isNavigating} style={{
+                <button onClick={handleNext} disabled={isNavigating || !isValid} style={{
                     flex: 2, padding: '12px', borderRadius: '10px', border: 'none',
-                    background: isNavigating ? '#9CA3AF' : 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
-                    color: 'white', fontSize: '14px', fontWeight: 600, cursor: isNavigating ? 'not-allowed' : 'pointer',
+                    background: (isNavigating || !isValid) ? '#9CA3AF' : 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
+                    color: 'white', fontSize: '14px', fontWeight: 600, cursor: (isNavigating || !isValid) ? 'not-allowed' : 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                    boxShadow: isNavigating ? 'none' : '0 4px 16px rgba(16, 185, 129, 0.35)',
+                    boxShadow: (isNavigating || !isValid) ? 'none' : '0 4px 16px rgba(16, 185, 129, 0.35)',
                 }}>
                     {isNavigating ? (
                         <><div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> กำลังโหลด...</>

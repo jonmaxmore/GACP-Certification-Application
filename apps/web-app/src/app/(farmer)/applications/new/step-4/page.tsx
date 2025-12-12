@@ -50,6 +50,11 @@ export default function Step4Applicant() {
             else if (value.length === 10 && !/^0[689]\d{8}$/.test(value)) errors.phone = 'เบอร์ต้องขึ้นต้นด้วย 06, 08, 09';
             else delete errors.phone;
         }
+        if (field === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (value.length > 0 && !emailRegex.test(value)) errors.email = 'รูปแบบอีเมลไม่ถูกต้อง';
+            else delete errors.email;
+        }
         setFieldErrors(errors);
     };
 
@@ -211,7 +216,23 @@ export default function Step4Applicant() {
                     </div>
                     <div style={{ marginBottom: '10px' }}>
                         <label style={labelStyle}>อีเมล{requiredMark}</label>
-                        <input type="email" value={form.email || ''} onChange={e => handleChange('email', e.target.value)} placeholder="email@example.com" style={inputStyle} />
+                        <input
+                            type="email"
+                            value={form.email || ''}
+                            onChange={e => handleChange('email', e.target.value)}
+                            placeholder="email@example.com"
+                            style={{
+                                ...inputStyle,
+                                borderColor: fieldErrors.email ? '#DC2626' :
+                                    (form.email && !fieldErrors.email) ? '#22C55E' : inputStyle.border?.toString().includes('#') ? inputStyle.border?.toString().split(' ').pop() : '#D1D5DB',
+                                borderWidth: form.email ? '2px' : '1px',
+                            }}
+                        />
+                        {fieldErrors.email && (
+                            <p style={{ fontSize: '12px', marginTop: '4px', color: '#DC2626' }}>
+                                {fieldErrors.email}
+                            </p>
+                        )}
                     </div>
                 </div>
             )}

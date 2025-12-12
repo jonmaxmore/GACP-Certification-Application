@@ -86,8 +86,10 @@ export default function RegisterPage() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [pdpaAccepted, setPdpaAccepted] = useState(false);
+    const [pdpaScrolled, setPdpaScrolled] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [email, setEmail] = useState("");
 
     // Field-level errors for inline validation
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -158,6 +160,14 @@ export default function RegisterPage() {
                     errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
                 } else {
                     delete errors.confirmPassword;
+                }
+                break;
+            case 'email':
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (value && !emailRegex.test(value)) {
+                    errors.email = "รูปแบบอีเมลไม่ถูกต้อง";
+                } else {
+                    delete errors.email;
                 }
                 break;
         }
@@ -270,7 +280,11 @@ export default function RegisterPage() {
         }
 
         setIsLoading(false);
-        router.push("/login?registered=true");
+        // Redirect to success page with user info
+        const name = accountType === "INDIVIDUAL" ? `${firstName} ${lastName}` :
+            accountType === "JURISTIC" ? companyName : communityName;
+        const formattedId = identifier.includes("-") ? identifier : formatThaiId(identifier);
+        router.push(`/register/success?type=${accountType}&id=${encodeURIComponent(formattedId)}&name=${encodeURIComponent(name)}`);
     };
 
     const getIcon = (type: string, isSelected: boolean) => {
@@ -320,17 +334,24 @@ export default function RegisterPage() {
                         <div>
                             <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "16px", color: colors.textDark }}>ยินยอมข้อมูลส่วนบุคคล (PDPA)</h2>
 
-                            <div style={{
-                                maxHeight: "280px",
-                                overflowY: "auto",
-                                padding: "16px",
-                                backgroundColor: "#FAFAFA",
-                                borderRadius: "12px",
-                                marginBottom: "16px",
-                                fontSize: "14px",
-                                lineHeight: 1.7,
-                                color: colors.textGray
-                            }}>
+                            <div
+                                onScroll={(e) => {
+                                    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+                                    if (scrollTop + clientHeight >= scrollHeight - 20) {
+                                        setPdpaScrolled(true);
+                                    }
+                                }}
+                                style={{
+                                    maxHeight: "280px",
+                                    overflowY: "auto",
+                                    padding: "16px",
+                                    backgroundColor: "#FAFAFA",
+                                    borderRadius: "12px",
+                                    marginBottom: "16px",
+                                    fontSize: "14px",
+                                    lineHeight: 1.7,
+                                    color: colors.textGray
+                                }}>
                                 <p style={{ fontWeight: 700, color: colors.textDark, marginBottom: "12px" }}>📋 วัตถุประสงค์ในการเก็บรวบรวมข้อมูล</p>
                                 <p style={{ marginBottom: "12px" }}>กรมการแพทย์แผนไทยและการแพทย์ทางเลือก (กระทรวงสาธารณสุข) มีความจำเป็นต้องเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของท่านเพื่อวัตถุประสงค์ดังต่อไปนี้:</p>
                                 <ul style={{ paddingLeft: "20px", marginBottom: "12px" }}>
@@ -354,24 +375,33 @@ export default function RegisterPage() {
                                 <p>ท่านมีสิทธิในการเข้าถึง แก้ไข ลบ หรือร้องขอให้ระงับการใช้ข้อมูลส่วนบุคคลของท่านได้ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</p>
                             </div>
 
+                            {/* Scroll Indicator */}
+                            {!pdpaScrolled && (
+                                <p style={{ fontSize: "12px", color: colors.textGray, marginBottom: "12px", textAlign: "center" }}>
+                                    ⬇️ กรุณาเลื่อนอ่านข้อความด้านบนให้จบก่อน
+                                </p>
+                            )}
+
                             <label style={{
                                 display: "flex",
                                 alignItems: "flex-start",
                                 gap: "12px",
                                 padding: "16px",
-                                backgroundColor: pdpaAccepted ? "#E8F5E9" : "#FAFAFA",
+                                backgroundColor: pdpaAccepted ? "#E8F5E9" : pdpaScrolled ? "#FAFAFA" : "#F5F5F5",
                                 borderRadius: "12px",
-                                cursor: "pointer",
+                                cursor: pdpaScrolled ? "pointer" : "not-allowed",
                                 border: pdpaAccepted ? `2px solid ${colors.primary}` : "2px solid transparent",
-                                transition: "all 0.2s"
+                                transition: "all 0.2s",
+                                opacity: pdpaScrolled ? 1 : 0.6,
                             }}>
                                 <input
                                     type="checkbox"
                                     checked={pdpaAccepted}
-                                    onChange={(e) => setPdpaAccepted(e.target.checked)}
+                                    onChange={(e) => pdpaScrolled && setPdpaAccepted(e.target.checked)}
+                                    disabled={!pdpaScrolled}
                                     style={{ width: "24px", height: "24px", marginTop: "2px", accentColor: colors.primary }}
                                 />
-                                <span style={{ fontSize: "14px", color: colors.textDark, lineHeight: 1.5, fontWeight: 500 }}>
+                                <span style={{ fontSize: "14px", color: pdpaScrolled ? colors.textDark : colors.textGray, lineHeight: 1.5, fontWeight: 500 }}>
                                     ข้าพเจ้าได้อ่านและยินยอมให้กรมการแพทย์แผนไทยและการแพทย์ทางเลือก เก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของข้าพเจ้าตามวัตถุประสงค์ที่ระบุไว้ข้างต้น
                                 </span>
                             </label>
@@ -497,6 +527,29 @@ export default function RegisterPage() {
                                         </p>
                                     )}
                                 </div>
+                                <div>
+                                    <label style={labelStyle}>อีเมล <span style={{ color: colors.textGray, fontWeight: 400 }}>(ไม่บังคับ - สำหรับกู้คืนรหัสผ่าน)</span></label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => {
+                                            setEmail(e.target.value);
+                                            validateField('email', e.target.value);
+                                        }}
+                                        placeholder="email@example.com"
+                                        style={{
+                                            ...inputStyle,
+                                            borderColor: fieldErrors.email ? colors.error :
+                                                email && !fieldErrors.email ? "#22C55E" : colors.border,
+                                            borderWidth: email ? "2px" : "1px"
+                                        }}
+                                    />
+                                    {fieldErrors.email && (
+                                        <p style={{ fontSize: "13px", marginTop: "6px", color: colors.error }}>
+                                            {fieldErrors.email}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
@@ -523,9 +576,24 @@ export default function RegisterPage() {
                                                     }} />
                                                 ))}
                                             </div>
-                                            <p style={{ fontSize: "12px", color: getPasswordStrength(password).color, fontWeight: 500 }}>
+                                            <p style={{ fontSize: "12px", color: getPasswordStrength(password).color, fontWeight: 500, marginBottom: "8px" }}>
                                                 ความแข็งแกร่ง: {getPasswordStrength(password).label}
                                             </p>
+                                            {/* Password Requirements Checklist */}
+                                            <div style={{ fontSize: "12px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                                                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: password.length >= 8 ? "#22C55E" : colors.textGray }}>
+                                                    {password.length >= 8 ? "✅" : "⬜"} อย่างน้อย 8 ตัวอักษร
+                                                </div>
+                                                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: /[a-z]/.test(password) && /[A-Z]/.test(password) ? "#22C55E" : colors.textGray }}>
+                                                    {/[a-z]/.test(password) && /[A-Z]/.test(password) ? "✅" : "⬜"} มีตัวพิมพ์เล็กและใหญ่
+                                                </div>
+                                                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: /\d/.test(password) ? "#22C55E" : colors.textGray }}>
+                                                    {/\d/.test(password) ? "✅" : "⬜"} มีตัวเลข
+                                                </div>
+                                                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: /[!@#$%^&*(),.?":{}|<>]/.test(password) ? "#22C55E" : colors.textGray }}>
+                                                    {/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "✅" : "⬜"} มีอักขระพิเศษ (!@#$%...)
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

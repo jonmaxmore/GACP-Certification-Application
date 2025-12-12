@@ -23,9 +23,24 @@ const STEPS = [
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [isDark, setIsDark] = useState(false);
+    const [showExitDialog, setShowExitDialog] = useState(false);
+    const [lastSaved, setLastSaved] = useState<string | null>(null);
 
     useEffect(() => {
         setIsDark(localStorage.getItem("theme") === "dark");
+        // Check last save time from localStorage
+        const savedTime = localStorage.getItem('gacp_wizard_last_saved');
+        if (savedTime) setLastSaved(savedTime);
+    }, []);
+
+    // Update last saved time periodically
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const now = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            localStorage.setItem('gacp_wizard_last_saved', now);
+            setLastSaved(now);
+        }, 30000); // Update every 30 seconds
+        return () => clearInterval(interval);
     }, []);
 
     // Get current step from pathname
@@ -194,20 +209,23 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                                 alignItems: 'center',
                                 marginBottom: '16px',
                             }}>
-                                <Link href="/dashboard" style={{
+                                <button onClick={() => setShowExitDialog(true)} style={{
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '6px',
                                     color: 'white',
-                                    textDecoration: 'none',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
                                     opacity: 0.9,
                                     fontSize: '13px',
+                                    fontFamily: "'Kanit', sans-serif",
                                 }}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M15 18L9 12L15 6" />
                                     </svg>
                                     ออก
-                                </Link>
+                                </button>
 
                                 <div style={{
                                     color: 'white',
@@ -328,6 +346,89 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                 </main>
             </div>
 
+            {/* Exit Confirmation Dialog */}
+            {showExitDialog && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999,
+                    animation: 'fadeIn 0.2s ease-out',
+                }}>
+                    <div style={{
+                        background: isDark ? '#1F2937' : 'white',
+                        borderRadius: '16px',
+                        padding: '24px',
+                        maxWidth: '340px',
+                        width: '90%',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+                        animation: 'slideUp 0.3s ease-out',
+                    }}>
+                        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                            <div style={{ fontSize: '48px', marginBottom: '12px' }}>⚠️</div>
+                            <h3 style={{ fontSize: '18px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827', marginBottom: '8px' }}>
+                                ยกเลิกคำขอ?
+                            </h3>
+                            <p style={{ fontSize: '14px', color: isDark ? '#9CA3AF' : '#6B7280' }}>
+                                ข้อมูลที่กรอกจะถูกบันทึกไว้ คุณสามารถกลับมาดำเนินการต่อได้
+                            </p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button onClick={() => setShowExitDialog(false)} style={{
+                                flex: 1, padding: '12px', borderRadius: '10px',
+                                border: `1px solid ${isDark ? '#4B5563' : '#E5E7EB'}`,
+                                background: isDark ? '#374151' : 'white',
+                                color: isDark ? '#F9FAFB' : '#374151',
+                                fontSize: '14px', fontWeight: 500, cursor: 'pointer',
+                                fontFamily: "'Kanit', sans-serif",
+                            }}>
+                                ดำเนินการต่อ
+                            </button>
+                            <Link href="/dashboard" style={{
+                                flex: 1, padding: '12px', borderRadius: '10px',
+                                border: 'none',
+                                background: '#EF4444',
+                                color: 'white',
+                                fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                                textDecoration: 'none',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontFamily: "'Kanit', sans-serif",
+                            }}>
+                                ออกจากหน้านี้
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Auto-Save Indicator */}
+            {!isSuccess && lastSaved && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    background: isDark ? 'rgba(16, 185, 129, 0.2)' : '#ECFDF5',
+                    border: `1px solid ${isDark ? '#10B981' : '#A7F3D0'}`,
+                    borderRadius: '8px',
+                    padding: '8px 14px',
+                    fontSize: '12px',
+                    color: '#059669',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    zIndex: 100,
+                    animation: 'fadeIn 0.3s ease-out',
+                }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2">
+                        <path d="M5 13l4 4L19 7" />
+                    </svg>
+                    บันทึกอัตโนมัติ {lastSaved}
+                </div>
+            )}
+
             {/* Responsive Styles */}
             <style jsx global>{`
                 @keyframes slideUp {
@@ -342,6 +443,11 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                 @keyframes pulse {
                     0%, 100% { opacity: 1; }
                     50% { opacity: 0.5; }
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
                 }
 
                 /* Mobile First - Hide desktop elements */

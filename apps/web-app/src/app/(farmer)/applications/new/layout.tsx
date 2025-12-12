@@ -94,20 +94,8 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                         {STEPS.map((step, i) => {
                             const isCompleted = i < currentStep;
                             const isCurrent = i === currentStep;
-                            return (
-                                <div key={step.id} style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '12px',
-                                    padding: '10px 12px',
-                                    borderRadius: '10px',
-                                    marginBottom: '4px',
-                                    background: isCurrent
-                                        ? (isDark ? 'rgba(16, 185, 129, 0.15)' : '#ECFDF5')
-                                        : 'transparent',
-                                    cursor: isCompleted ? 'pointer' : 'default',
-                                    opacity: i > currentStep ? 0.5 : 1,
-                                }}>
+                            const stepContent = (
+                                <>
                                     <div style={{
                                         width: '28px',
                                         height: '28px',
@@ -131,10 +119,39 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                                         fontWeight: isCurrent ? 600 : 400,
                                         color: isCurrent
                                             ? '#10B981'
-                                            : (isDark ? '#D1D5DB' : '#374151'),
+                                            : isCompleted ? '#059669' : (isDark ? '#D1D5DB' : '#374151'),
                                     }}>
                                         {step.label}
                                     </span>
+                                    {isCompleted && (
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" style={{ marginLeft: 'auto' }}>
+                                            <path d="M9 18L15 12L9 6" />
+                                        </svg>
+                                    )}
+                                </>
+                            );
+                            const stepStyle: React.CSSProperties = {
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                padding: '10px 12px',
+                                borderRadius: '10px',
+                                marginBottom: '4px',
+                                background: isCurrent
+                                    ? (isDark ? 'rgba(16, 185, 129, 0.15)' : '#ECFDF5')
+                                    : 'transparent',
+                                cursor: isCompleted ? 'pointer' : 'default',
+                                opacity: i > currentStep ? 0.5 : 1,
+                                textDecoration: 'none',
+                                transition: 'all 0.2s ease',
+                            };
+                            return isCompleted ? (
+                                <Link key={step.id} href={`/applications/new/${step.path}`} style={stepStyle}>
+                                    {stepContent}
+                                </Link>
+                            ) : (
+                                <div key={step.id} style={stepStyle}>
+                                    {stepContent}
                                 </div>
                             );
                         })}
@@ -316,6 +333,15 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                 @keyframes slideUp {
                     from { opacity: 0; transform: translateY(15px); }
                     to { opacity: 1; transform: translateY(0); }
+                }
+                
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+                
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.5; }
                 }
 
                 /* Mobile First - Hide desktop elements */

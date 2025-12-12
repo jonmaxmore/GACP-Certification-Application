@@ -36,6 +36,7 @@ export default function Step3PDPA() {
     const { state, consentPDPA, isLoaded } = useWizardStore();
     const [consented, setConsented] = useState(false);
     const [isDark, setIsDark] = useState(false);
+    const [isNavigating, setIsNavigating] = useState(false);
 
     useEffect(() => {
         setIsDark(localStorage.getItem("theme") === "dark");
@@ -56,12 +57,14 @@ export default function Step3PDPA() {
     };
 
     const handleNext = () => {
-        if (consented) {
+        if (consented && !isNavigating) {
+            setIsNavigating(true);
             router.push('/applications/new/step-4');
         }
     };
 
     const handleBack = () => {
+        setIsNavigating(true);
         router.push('/applications/new/step-2');
     };
 
@@ -266,30 +269,31 @@ export default function Step3PDPA() {
                 </button>
                 <button
                     onClick={handleNext}
-                    disabled={!consented}
+                    disabled={!consented || isNavigating}
                     style={{
                         flex: 2,
                         padding: '14px',
                         borderRadius: '12px',
                         border: 'none',
-                        background: consented
+                        background: consented && !isNavigating
                             ? 'linear-gradient(135deg, #059669 0%, #10B981 100%)'
                             : (isDark ? '#4B5563' : '#E5E7EB'),
-                        color: consented ? 'white' : (isDark ? '#9CA3AF' : '#9CA3AF'),
+                        color: consented && !isNavigating ? 'white' : (isDark ? '#9CA3AF' : '#9CA3AF'),
                         fontSize: '15px',
                         fontWeight: 600,
-                        cursor: consented ? 'pointer' : 'not-allowed',
+                        cursor: consented && !isNavigating ? 'pointer' : 'not-allowed',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '6px',
-                        boxShadow: consented ? '0 4px 20px rgba(16, 185, 129, 0.4)' : 'none',
+                        boxShadow: consented && !isNavigating ? '0 4px 20px rgba(16, 185, 129, 0.4)' : 'none',
                     }}
                 >
-                    ถัดไป
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M9 18L15 12L9 6" />
-                    </svg>
+                    {isNavigating ? (
+                        <><div style={{ width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> กำลังโหลด...</>
+                    ) : (
+                        <>ถัดไป <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg></>
+                    )}
                 </button>
             </div>
         </div>

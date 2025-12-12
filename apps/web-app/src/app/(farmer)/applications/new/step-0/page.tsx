@@ -66,6 +66,7 @@ export default function Step0Plant() {
     const { state, setPlant, isLoaded } = useWizardStore();
     const [selectedPlant, setSelectedPlant] = useState<PlantId | null>(null);
     const [isDark, setIsDark] = useState(false);
+    const [isNavigating, setIsNavigating] = useState(false);
 
     useEffect(() => {
         setIsDark(localStorage.getItem("theme") === "dark");
@@ -80,7 +81,8 @@ export default function Step0Plant() {
     };
 
     const handleNext = () => {
-        if (selectedPlant) {
+        if (selectedPlant && !isNavigating) {
+            setIsNavigating(true);
             router.push('/applications/new/step-1');
         }
     };
@@ -260,33 +262,34 @@ export default function Step0Plant() {
             {/* Next Button */}
             <button
                 onClick={handleNext}
-                disabled={!selectedPlant}
+                disabled={!selectedPlant || isNavigating}
                 style={{
                     width: '100%',
                     padding: '14px',
                     borderRadius: '12px',
                     border: 'none',
-                    background: selectedPlant
+                    background: selectedPlant && !isNavigating
                         ? 'linear-gradient(135deg, #059669 0%, #10B981 100%)'
                         : (isDark ? '#374151' : '#E5E7EB'),
-                    color: selectedPlant ? 'white' : (isDark ? '#6B7280' : '#9CA3AF'),
+                    color: selectedPlant && !isNavigating ? 'white' : (isDark ? '#6B7280' : '#9CA3AF'),
                     fontSize: '15px',
                     fontWeight: 600,
-                    cursor: selectedPlant ? 'pointer' : 'not-allowed',
+                    cursor: selectedPlant && !isNavigating ? 'pointer' : 'not-allowed',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '8px',
-                    boxShadow: selectedPlant
+                    boxShadow: selectedPlant && !isNavigating
                         ? '0 4px 16px rgba(16, 185, 129, 0.35)'
                         : 'none',
                     transition: 'all 0.2s ease',
                 }}
             >
-                ถัดไป
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M9 18L15 12L9 6" />
-                </svg>
+                {isNavigating ? (
+                    <><div style={{ width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> กำลังโหลด...</>
+                ) : (
+                    <>ถัดไป <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg></>
+                )}
             </button>
         </div>
     );

@@ -24,6 +24,7 @@ export default function Step1Purpose() {
     const [isDark, setIsDark] = useState(false);
     const [purpose, setPurpose] = useState<CertificationPurpose | null>(null);
     const [siteTypes, setLocalSiteTypes] = useState<SiteType[]>([]);
+    const [isNavigating, setIsNavigating] = useState(false);
 
     const plant = PLANTS.find(p => p.id === state.plantId);
     const isHighControl = plant?.group === 'HIGH_CONTROL';
@@ -66,9 +67,17 @@ export default function Step1Purpose() {
         setSiteTypes(newTypes);
     };
 
-    const canProceed = purpose && siteTypes.length > 0;
-    const handleNext = () => canProceed && router.push('/applications/new/step-2');
-    const handleBack = () => router.push('/applications/new/step-0');
+    const canProceed = purpose && siteTypes.length > 0 && !isNavigating;
+    const handleNext = () => {
+        if (canProceed) {
+            setIsNavigating(true);
+            router.push('/applications/new/step-2');
+        }
+    };
+    const handleBack = () => {
+        setIsNavigating(true);
+        router.push('/applications/new/step-0');
+    };
 
     if (!isLoaded) return <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>กำลังโหลด...</div>;
 
@@ -199,8 +208,11 @@ export default function Step1Purpose() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
                     boxShadow: canProceed ? '0 4px 16px rgba(16, 185, 129, 0.35)' : 'none',
                 }}>
-                    ถัดไป
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg>
+                    {isNavigating ? (
+                        <><div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> กำลังโหลด...</>
+                    ) : (
+                        <>ถัดไป <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg></>
+                    )}
                 </button>
             </div>
         </div>

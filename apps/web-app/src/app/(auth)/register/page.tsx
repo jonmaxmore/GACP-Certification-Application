@@ -26,7 +26,7 @@ const ACCOUNT_TYPES = [
     { type: "COMMUNITY_ENTERPRISE", label: "วิสาหกิจชุมชน", subtitle: "กลุ่มเกษตรกร", idLabel: "เลขทะเบียนวิสาหกิจชุมชน", idHint: "XXXX-XXXX-XXX" },
 ];
 
-const STEPS = ["ประเภทบัญชี", "ยืนยันตัวตน", "ข้อมูลส่วนตัว", "ตั้งรหัสผ่าน"];
+const STEPS = ["ยินยอม PDPA", "ประเภทบัญชี", "ยืนยันตัวตน", "ข้อมูลส่วนตัว", "ตั้งรหัสผ่าน"];
 
 // Icons
 const PersonIcon = ({ color = "#6B7280" }: { color?: string }) => (
@@ -85,6 +85,7 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [acceptTerms, setAcceptTerms] = useState(false);
+    const [pdpaAccepted, setPdpaAccepted] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -140,13 +141,14 @@ export default function RegisterPage() {
 
     const canProceed = () => {
         switch (step) {
-            case 0: return accountType !== "";
-            case 1: return identifier.replace(/-/g, "").length >= 10;
-            case 2:
+            case 0: return pdpaAccepted; // PDPA consent
+            case 1: return accountType !== ""; // Account type
+            case 2: return identifier.replace(/-/g, "").length >= 10; // Identifier
+            case 3: // Personal info
                 if (accountType === "INDIVIDUAL") return firstName && lastName && phone.length >= 10;
                 if (accountType === "JURISTIC") return companyName && representativeName && phone.length >= 10;
                 return communityName && representativeName && phone.length >= 10;
-            case 3: return password.length >= 8 && password === confirmPassword && acceptTerms;
+            case 4: return password.length >= 8 && password === confirmPassword && acceptTerms; // Password
             default: return false;
         }
     };
@@ -238,8 +240,71 @@ export default function RegisterPage() {
                         {error}
                     </div>}
 
-                    {/* Step 0: Account Type */}
+                    {/* Step 0: PDPA Consent */}
                     {step === 0 && (
+                        <div>
+                            <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "16px", color: colors.textDark }}>ยินยอมข้อมูลส่วนบุคคล (PDPA)</h2>
+
+                            <div style={{
+                                maxHeight: "280px",
+                                overflowY: "auto",
+                                padding: "16px",
+                                backgroundColor: "#FAFAFA",
+                                borderRadius: "12px",
+                                marginBottom: "16px",
+                                fontSize: "14px",
+                                lineHeight: 1.7,
+                                color: colors.textGray
+                            }}>
+                                <p style={{ fontWeight: 700, color: colors.textDark, marginBottom: "12px" }}>📋 วัตถุประสงค์ในการเก็บรวบรวมข้อมูล</p>
+                                <p style={{ marginBottom: "12px" }}>กรมการแพทย์แผนไทยและการแพทย์ทางเลือก (กระทรวงสาธารณสุข) มีความจำเป็นต้องเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของท่านเพื่อวัตถุประสงค์ดังต่อไปนี้:</p>
+                                <ul style={{ paddingLeft: "20px", marginBottom: "12px" }}>
+                                    <li>การยื่นขอการรับรองมาตรฐาน GACP</li>
+                                    <li>การตรวจสอบและประเมินแหล่งปลูกพืชสมุนไพร</li>
+                                    <li>การออกใบรับรองมาตรฐาน และการติดตามผล</li>
+                                    <li>การติดต่อสื่อสารเกี่ยวกับการรับรอง</li>
+                                </ul>
+
+                                <p style={{ fontWeight: 700, color: colors.textDark, marginBottom: "12px" }}>🔒 ข้อมูลที่จัดเก็บ</p>
+                                <ul style={{ paddingLeft: "20px", marginBottom: "12px" }}>
+                                    <li>ข้อมูลส่วนตัว: ชื่อ-นามสกุล, เลขบัตรประชาชน/ทะเบียนนิติบุคคล</li>
+                                    <li>ข้อมูลการติดต่อ: ที่อยู่, เบอร์โทรศัพท์, อีเมล</li>
+                                    <li>ข้อมูลสถานประกอบการ: พิกัด GPS, รูปถ่าย</li>
+                                </ul>
+
+                                <p style={{ fontWeight: 700, color: colors.textDark, marginBottom: "12px" }}>⏰ ระยะเวลาจัดเก็บ</p>
+                                <p style={{ marginBottom: "12px" }}>ข้อมูลจะถูกเก็บรักษาตลอดระยะเวลาที่ใบรับรองมีผลบังคับใช้ และอีก 5 ปีหลังจากหมดอายุ ตามกฎหมายที่เกี่ยวข้อง</p>
+
+                                <p style={{ fontWeight: 700, color: colors.textDark, marginBottom: "12px" }}>✅ สิทธิของท่าน</p>
+                                <p>ท่านมีสิทธิในการเข้าถึง แก้ไข ลบ หรือร้องขอให้ระงับการใช้ข้อมูลส่วนบุคคลของท่านได้ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</p>
+                            </div>
+
+                            <label style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "12px",
+                                padding: "16px",
+                                backgroundColor: pdpaAccepted ? "#E8F5E9" : "#FAFAFA",
+                                borderRadius: "12px",
+                                cursor: "pointer",
+                                border: pdpaAccepted ? `2px solid ${colors.primary}` : "2px solid transparent",
+                                transition: "all 0.2s"
+                            }}>
+                                <input
+                                    type="checkbox"
+                                    checked={pdpaAccepted}
+                                    onChange={(e) => setPdpaAccepted(e.target.checked)}
+                                    style={{ width: "24px", height: "24px", marginTop: "2px", accentColor: colors.primary }}
+                                />
+                                <span style={{ fontSize: "14px", color: colors.textDark, lineHeight: 1.5, fontWeight: 500 }}>
+                                    ข้าพเจ้าได้อ่านและยินยอมให้กรมการแพทย์แผนไทยและการแพทย์ทางเลือก เก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของข้าพเจ้าตามวัตถุประสงค์ที่ระบุไว้ข้างต้น
+                                </span>
+                            </label>
+                        </div>
+                    )}
+
+                    {/* Step 1: Account Type */}
+                    {step === 1 && (
                         <div>
                             <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "16px", color: colors.textDark }}>เลือกประเภทบัญชี</h2>
                             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -266,8 +331,8 @@ export default function RegisterPage() {
                         </div>
                     )}
 
-                    {/* Step 1: Identifier */}
-                    {step === 1 && currentConfig && (
+                    {/* Step 2: Identifier */}
+                    {step === 2 && currentConfig && (
                         <div>
                             <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "8px", color: colors.textDark }}>ยืนยันตัวตน</h2>
                             <p style={{ color: colors.textGray, marginBottom: "16px", fontSize: "14px" }}>กรอก{currentConfig.idLabel}</p>
@@ -283,8 +348,8 @@ export default function RegisterPage() {
                         </div>
                     )}
 
-                    {/* Step 2: Info */}
-                    {step === 2 && (
+                    {/* Step 3: Info */}
+                    {step === 3 && (
                         <div>
                             <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "16px", color: colors.textDark }}>{accountType === "INDIVIDUAL" ? "ข้อมูลส่วนตัว" : "ข้อมูลองค์กร"}</h2>
                             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -296,8 +361,8 @@ export default function RegisterPage() {
                         </div>
                     )}
 
-                    {/* Step 3: Password */}
-                    {step === 3 && (
+                    {/* Step 4: Password */}
+                    {step === 4 && (
                         <div>
                             <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "16px", color: colors.textDark }}>ตั้งรหัสผ่าน</h2>
                             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -327,8 +392,8 @@ export default function RegisterPage() {
                     {/* Navigation */}
                     <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
                         {step > 0 && <button type="button" onClick={() => setStep(step - 1)} style={{ flex: 1, padding: "14px", border: `1px solid ${colors.border}`, backgroundColor: "transparent", color: colors.textDark, borderRadius: "12px", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}>ย้อนกลับ</button>}
-                        <button type="button" onClick={() => step < 3 ? setStep(step + 1) : handleSubmit()} disabled={!canProceed() || isLoading} style={{ flex: 1, padding: "14px", backgroundColor: !canProceed() || isLoading ? "#94A3B8" : colors.primary, color: "#FFFFFF", border: "none", borderRadius: "12px", fontSize: "15px", fontWeight: 700, cursor: !canProceed() || isLoading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-                            {isLoading ? <span className="spinner"></span> : step < 3 ? <>ถัดไป <span>→</span></> : <>ลงทะเบียน <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg></>}
+                        <button type="button" onClick={() => step < 4 ? setStep(step + 1) : handleSubmit()} disabled={!canProceed() || isLoading} style={{ flex: 1, padding: "14px", backgroundColor: !canProceed() || isLoading ? "#94A3B8" : colors.primary, color: "#FFFFFF", border: "none", borderRadius: "12px", fontSize: "15px", fontWeight: 700, cursor: !canProceed() || isLoading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                            {isLoading ? <span className="spinner"></span> : step < 4 ? <>ถัดไป <span>→</span></> : <>ลงทะเบียน <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg></>}
                         </button>
                     </div>
                 </div>

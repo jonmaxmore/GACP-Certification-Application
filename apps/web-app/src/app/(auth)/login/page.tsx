@@ -78,6 +78,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [loginState, setLoginState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [error, setError] = useState("");
     const [rememberMe, setRememberMe] = useState(false);
 
@@ -143,6 +144,7 @@ export default function LoginPage() {
         e.preventDefault();
         setError("");
         setIsLoading(true);
+        setLoginState('loading');
 
         // Input sanitization - prevent XSS
         const cleanIdentifier = identifier.replace(/-/g, "").replace(/[<>'"&]/g, "");
@@ -150,66 +152,88 @@ export default function LoginPage() {
 
         // Validate before sending
         if (!cleanIdentifier || cleanIdentifier.length < 10) {
-            setError("กรุณากรอกเลขประจำตัวให้ครบถ้วน");
+            setError("กรุณากรอกเลขประจำตัวให้ครบถ้วน (อย่างน้อย 10 หลัก)");
             setIsLoading(false);
+            setLoginState('error');
             return;
         }
         if (!cleanPassword || cleanPassword.length < 8) {
             setError("รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร");
             setIsLoading(false);
+            setLoginState('error');
             return;
         }
 
-        // Use local proxy API which sets cookie from same origin
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                accountType,
-                identifier: cleanIdentifier,
-                password: cleanPassword,
-            }),
-        });
+        try {
+            // Use local proxy API which sets cookie from same origin
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    accountType,
+                    identifier: cleanIdentifier,
+                    password: cleanPassword,
+                }),
+            });
 
-        const result = await response.json();
-        console.log('[Login] Response:', result);
+            const result = await response.json();
+            console.log('[Login] Response:', result);
 
-        if (!result.success) {
-            console.error('[Login] API call failed:', result);
-            setError(result.error || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
+            if (!result.success) {
+                console.error('[Login] API call failed:', result);
+                // Provide more specific error messages
+                let errorMsg = result.error || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
+                if (response.status === 401) {
+                    errorMsg = "เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง";
+                } else if (response.status === 429) {
+                    errorMsg = "มีการเข้าสู่ระบบผิดพลาดหลายครั้ง กรุณารอ 5 นาทีแล้วลองใหม่";
+                } else if (response.status >= 500) {
+                    errorMsg = "เซิร์ฟเวอร์มีปัญหาชั่วคราว กรุณาลองใหม่ในอีกสักครู่";
+                }
+                setError(errorMsg);
+                setIsLoading(false);
+                setLoginState('error');
+                return;
+            }
+
+            // Handle nested response structure from apiClient
+            const responseData = result.data?.data || result.data;
+            const token = responseData?.tokens?.accessToken || responseData?.token;
+
+            if (!token) {
+                console.error('[Login] Token not found in response:', result.data);
+                setError("ไม่พบข้อมูล Token จากเซิร์ฟเวอร์ กรุณาติดต่อผู้ดูแลระบบ");
+                setIsLoading(false);
+                setLoginState('error');
+                return;
+            }
+
+            // Note: auth_token is now set as httpOnly cookie by backend
+            // We only store non-sensitive user data for display purposes
+            localStorage.setItem("user", JSON.stringify(responseData?.user || {}));
+
+            // Handle Remember Me (only stores account type and identifier for convenience)
+            if (rememberMe) {
+                localStorage.setItem("remember_login", JSON.stringify({ accountType, identifier: cleanIdentifier }));
+            } else {
+                localStorage.removeItem("remember_login");
+            }
+
+            // Show success state before redirecting
             setIsLoading(false);
-            return;
-        }
+            setLoginState('success');
 
-        console.log('[Login] API response:', result);
-        console.log('[Login] result.data:', result.data);
+            // Wait 1.5 seconds to show success animation, then redirect
+            setTimeout(() => {
+                window.location.href = "/dashboard";
+            }, 1500);
 
-        // Handle nested response structure from apiClient
-        const responseData = result.data?.data || result.data;
-        const token = responseData?.tokens?.accessToken || responseData?.token;
-        console.log('[Login] extracted token:', token ? 'exists' : 'not found');
-
-        if (!token) {
-            console.error('[Login] Token not found in response:', result.data);
-            setError("ไม่พบข้อมูล Token จากเซิร์ฟเวอร์");
+        } catch (err) {
+            console.error('[Login] Network error:', err);
+            setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง");
             setIsLoading(false);
-            return;
+            setLoginState('error');
         }
-
-        // Note: auth_token is now set as httpOnly cookie by backend
-        // We only store non-sensitive user data for display purposes
-        localStorage.setItem("user", JSON.stringify(responseData?.user || {}));
-
-        // Handle Remember Me (only stores account type and identifier for convenience)
-        if (rememberMe) {
-            localStorage.setItem("remember_login", JSON.stringify({ accountType, identifier: cleanIdentifier }));
-        } else {
-            localStorage.removeItem("remember_login");
-        }
-
-        setIsLoading(false);
-        // Use full page navigation to ensure cookies are applied
-        window.location.href = "/dashboard";
     };
 
     const getIcon = (type: string, isSelected: boolean) => {
@@ -230,9 +254,68 @@ export default function LoginPage() {
             alignItems: "center",
             justifyContent: "center",
             padding: "24px",
-            fontFamily: "'Sarabun', sans-serif"
+            fontFamily: "'Sarabun', sans-serif",
+            position: "relative"
         }}>
-            <div style={{ width: "100%", maxWidth: "420px" }}>
+            {/* Loading Overlay */}
+            {loginState === 'loading' && (
+                <div style={{
+                    position: "fixed",
+                    inset: 0,
+                    backgroundColor: "rgba(27, 94, 32, 0.95)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 9999,
+                    animation: "fadeIn 0.3s ease"
+                }}>
+                    <div className="loading-spinner" style={{
+                        width: "60px",
+                        height: "60px",
+                        border: "4px solid rgba(255,255,255,0.3)",
+                        borderTopColor: "#FFFFFF",
+                        borderRadius: "50%",
+                        marginBottom: "24px"
+                    }} />
+                    <p style={{ color: "#FFFFFF", fontSize: "18px", fontWeight: 600 }}>กำลังเข้าสู่ระบบ...</p>
+                    <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "14px", marginTop: "8px" }}>กรุณารอสักครู่</p>
+                </div>
+            )}
+
+            {/* Success Overlay */}
+            {loginState === 'success' && (
+                <div style={{
+                    position: "fixed",
+                    inset: 0,
+                    backgroundColor: "rgba(22, 163, 74, 0.97)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 9999,
+                    animation: "fadeIn 0.3s ease"
+                }}>
+                    <div className="success-check" style={{
+                        width: "80px",
+                        height: "80px",
+                        backgroundColor: "rgba(255,255,255,0.2)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "24px"
+                    }}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 6L9 17L4 12" className="check-path" />
+                        </svg>
+                    </div>
+                    <p style={{ color: "#FFFFFF", fontSize: "22px", fontWeight: 700 }}>เข้าสู่ระบบสำเร็จ!</p>
+                    <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "15px", marginTop: "8px" }}>กำลังพาคุณไปยังหน้าหลัก...</p>
+                </div>
+            )}
+
+            <div style={{ width: "100%", maxWidth: "420px", opacity: loginState === 'idle' || loginState === 'error' ? 1 : 0.3, transition: "opacity 0.3s" }}>
                 {/* Logo */}
                 <div style={{ textAlign: "center", marginBottom: "32px" }}>
                     <div style={{
@@ -481,7 +564,26 @@ export default function LoginPage() {
                     border-radius: 50%;
                     animation: spin 0.8s linear infinite;
                 }
+                .loading-spinner {
+                    animation: spin 1s linear infinite;
+                }
+                .success-check {
+                    animation: scaleIn 0.4s ease;
+                }
+                .check-path {
+                    stroke-dasharray: 30;
+                    stroke-dashoffset: 30;
+                    animation: drawCheck 0.5s ease 0.3s forwards;
+                }
                 @keyframes spin { to { transform: rotate(360deg); } }
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes scaleIn { 
+                    from { transform: scale(0.5); opacity: 0; } 
+                    to { transform: scale(1); opacity: 1; } 
+                }
+                @keyframes drawCheck {
+                    to { stroke-dashoffset: 0; }
+                }
             `}</style>
         </div>
     );

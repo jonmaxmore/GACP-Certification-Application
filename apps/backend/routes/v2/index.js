@@ -29,6 +29,7 @@ router.use('/officer', require('../api/OfficerRoutes'));
 router.use('/auth', require('../api/AuthFarmerRoutes')); // Added for V2 Consistency
 router.use('/plants', require('../api/PlantRoutes')); // Plant Master API
 router.use('/documents', require('../api/DocumentAnalysisRoutes')); // Document Analysis API
+router.use('/pricing', require('./pricing')); // Pricing API - One Brain Many Faces
 
 // Health check with version info
 router.get('/health', (req, res) => {

@@ -410,8 +410,12 @@ export default function LoginPage() {
 
                     {/* Error */}
                     {error && (
-                        <div style={{ padding: "12px 16px", backgroundColor: "#FEF2F2", borderRadius: "12px", color: "#DC2626", fontSize: "14px", marginBottom: "16px" }}>
-                            {error}
+                        <div
+                            role="alert"
+                            aria-live="assertive"
+                            style={{ padding: "12px 16px", backgroundColor: "#FEF2F2", borderRadius: "12px", color: "#DC2626", fontSize: "14px", marginBottom: "16px" }}
+                        >
+                            ⚠️ {error}
                         </div>
                     )}
 

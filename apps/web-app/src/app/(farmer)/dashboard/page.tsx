@@ -303,6 +303,30 @@ export default function DashboardPage() {
     return (
         <div style={{ minHeight: "100vh", backgroundColor: t.bg, color: t.text, fontFamily: "'Kanit', 'Sukhumvit Set', sans-serif", transition: "all 0.3s ease" }}>
 
+            {/* Skip Navigation Link - Accessibility */}
+            <a
+                href="#main-content"
+                className="skip-link"
+                style={{
+                    position: "absolute",
+                    top: "-100px",
+                    left: "16px",
+                    padding: "12px 24px",
+                    backgroundColor: t.accent,
+                    color: "#FFFFFF",
+                    borderRadius: "8px",
+                    zIndex: 9999,
+                    textDecoration: "none",
+                    fontWeight: 600,
+                    fontSize: "14px",
+                    transition: "top 0.2s",
+                }}
+                onFocus={(e) => e.currentTarget.style.top = "16px"}
+                onBlur={(e) => e.currentTarget.style.top = "-100px"}
+            >
+                ข้ามไปยังเนื้อหาหลัก
+            </a>
+
             {/* Sidebar - Desktop */}
             <aside className="sidebar" style={{
                 position: "fixed", left: 0, top: 0, bottom: 0, width: "72px",
@@ -388,7 +412,7 @@ export default function DashboardPage() {
             </nav>
 
             {/* Main Content */}
-            <main className="main-content" style={{ marginLeft: "72px", padding: "32px 40px", maxWidth: "1400px", transition: "all 0.3s ease" }}>
+            <main id="main-content" className="main-content" style={{ marginLeft: "72px", padding: "32px 40px", maxWidth: "1400px", transition: "all 0.3s ease" }}>
 
                 {/* Header */}
                 <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px", flexWrap: "wrap", gap: "16px" }}>

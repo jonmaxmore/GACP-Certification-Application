@@ -1,0 +1,135 @@
+# =============================================================================
+# GitHub Actions: Auto-Generate API Clients
+# "One Brain, Many Faces" Architecture
+# =============================================================================
+# This workflow automatically regenerates TypeScript and Dart API clients
+# whenever OpenAPI specs are modified.
+# =============================================================================
+
+name: Generate API Clients
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'openapi/**/*.yaml'
+      - 'openapi/**/*.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'openapi/**/*.yaml'
+      - 'openapi/**/*.yml'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  generate-clients:
+    name: Generate API Clients
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: ☕ Setup Java (for OpenAPI Generator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 📦 Install OpenAPI Generator CLI
+        run: npm install -g @openapitools/openapi-generator-cli
+
+      - name: 🔧 Generate TypeScript Clients
+        run: |
+          echo "Generating TypeScript clients..."
+          
+          # List of services to generate
+          SERVICES=(
+            "auth-farmer"
+            "application-service"
+            "payment-service"
+            "certificate-service"
+            "audit-service"
+            "authentication-service"
+            "pricing-service"
+            "access-service"
+          )
+          
+          for service in "${SERVICES[@]}"; do
+            SPEC_FILE="openapi/${service}.yaml"
+            if [ -f "$SPEC_FILE" ]; then
+              echo "  📦 Generating: $service"
+              openapi-generator-cli generate \
+                -i "$SPEC_FILE" \
+                -g typescript-axios \
+                -o "apps/web-app/src/generated/api/${service}" \
+                --additional-properties=supportsES6=true \
+                --skip-validate-spec || echo "⚠️ Warning: Issues with $service"
+            fi
+          done
+
+      - name: 🎯 Generate Dart Clients
+        run: |
+          echo "Generating Dart clients..."
+          
+          SERVICES=(
+            "auth-farmer"
+            "application-service"
+            "payment-service"
+            "certificate-service"
+            "audit-service"
+            "authentication-service"
+            "pricing-service"
+            "access-service"
+          )
+          
+          for service in "${SERVICES[@]}"; do
+            SPEC_FILE="openapi/${service}.yaml"
+            if [ -f "$SPEC_FILE" ]; then
+              echo "  📦 Generating: $service"
+              dart_name=$(echo "$service" | sed 's/-/_/g')
+              openapi-generator-cli generate \
+                -i "$SPEC_FILE" \
+                -g dart \
+                -o "apps/mobile_app/lib/generated/api/${dart_name}" \
+                --additional-properties=pubName=gacp_${dart_name}_client \
+                --skip-validate-spec || echo "⚠️ Warning: Issues with $service"
+            fi
+          done
+
+      - name: 📊 Check for Changes
+        id: check_changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📝 Commit and Push (if changes exist)
+        if: steps.check_changes.outputs.has_changes == 'true' && github.event_name == 'push'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add apps/web-app/src/generated/api/
+          git add apps/mobile_app/lib/generated/api/
+          git commit -m "chore: Auto-regenerate API clients from OpenAPI specs [skip ci]"
+          git push
+
+      - name: ✅ Summary
+        run: |
+          echo "=========================================="
+          echo "   API Client Generation Complete!"
+          echo "=========================================="
+          echo ""
+          echo "Generated clients for:"
+          ls -la apps/web-app/src/generated/api/ 2>/dev/null || echo "  (no TypeScript clients)"
+          echo ""
+          echo "Dart clients:"
+          ls -la apps/mobile_app/lib/generated/api/ 2>/dev/null || echo "  (no Dart clients)"

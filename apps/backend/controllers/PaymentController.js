@@ -5,7 +5,14 @@
 
 const logger = require('../shared/logger');
 const PaymentDocument = require('../models/PaymentDocument');
-const Application = require('../models/Application');
+// ApplicationModel may not exist in development - handle gracefully
+let Application;
+try {
+    Application = require('../models/ApplicationModel');
+} catch (e) {
+    logger.warn('ApplicationModel not found, payment document auto-generation will use demo data');
+    Application = null;
+}
 
 class PaymentController {
     /**

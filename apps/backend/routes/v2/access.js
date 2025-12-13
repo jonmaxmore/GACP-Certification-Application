@@ -7,7 +7,7 @@
 
 const express = require('express');
 const router = express.Router();
-const AuthMiddleware = require('../../middleware/AuthMiddleware');
+const { authenticateFarmer } = require('../../middleware/AuthMiddleware');
 
 // Role hierarchy for staff access
 const STAFF_ROLES = ['REVIEWER_AUDITOR', 'SCHEDULER', 'ADMIN', 'SUPER_ADMIN'];
@@ -18,7 +18,7 @@ const ADMIN_ROLES = ['ADMIN', 'SUPER_ADMIN'];
  * @description Check if user has access to a specific resource
  * @access Private (requires auth)
  */
-router.post('/check', AuthMiddleware, async (req, res) => {
+router.post('/check', authenticateFarmer, async (req, res) => {
     try {
         const { resource } = req.body;
         const user = req.user;

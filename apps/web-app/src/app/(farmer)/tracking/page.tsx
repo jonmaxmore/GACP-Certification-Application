@@ -38,6 +38,7 @@ const Icons = {
     compass: (c: string) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg>,
     check: (c: string) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>,
     clock: (c: string) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
+    award: (c: string) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5"><circle cx="12" cy="8" r="7" /><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" /></svg>,
 };
 
 interface Application { _id: string; applicationNumber?: string; status: string; createdAt: string; }
@@ -103,6 +104,7 @@ export default function TrackingPage() {
     const navItems = [
         { href: "/dashboard", icon: Icons.home, label: "หน้าหลัก" },
         { href: "/applications", icon: Icons.fileText, label: "คำขอ" },
+        { href: "/certificates", icon: Icons.award, label: "ใบรับรอง" },
         { href: "/tracking", icon: Icons.compass, label: "ติดตาม", active: true },
         { href: "/payments", icon: Icons.creditCard, label: "การเงิน" },
         { href: "/profile", icon: Icons.user, label: "โปรไฟล์" },

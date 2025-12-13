@@ -29,8 +29,12 @@ router.use('/officer', require('../api/OfficerRoutes'));
 router.use('/auth', require('../api/AuthFarmerRoutes')); // Added for V2 Consistency
 router.use('/plants', require('../api/PlantRoutes')); // Plant Master API
 router.use('/documents', require('../api/DocumentAnalysisRoutes')); // Document Analysis API
+router.use('/files', require('./documents')); // File Storage API - Upload/Download
 router.use('/pricing', require('./pricing')); // Pricing API - One Brain Many Faces
 router.use('/access', require('./access')); // Access Control API - One Brain Many Faces
+router.use('/reports', require('./reports')); // Reports API - Government Analytics
+router.use('/metrics', require('./metrics')); // Prometheus Metrics
+router.use('/audit', require('./audit')); // Audit Logging API
 
 // Health check with version info
 router.get('/health', (req, res) => {

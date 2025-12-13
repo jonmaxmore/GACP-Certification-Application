@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -14,7 +14,7 @@ const colors = {
     successBg: "#ECFDF5",
 };
 
-export default function RegisterSuccessPage() {
+function RegisterSuccessContent() {
     const searchParams = useSearchParams();
     const [mounted, setMounted] = useState(false);
 
@@ -40,7 +40,6 @@ export default function RegisterSuccessPage() {
         return (
             <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: colors.background }}>
                 <div style={{ width: 40, height: 40, border: "3px solid #E5E7EB", borderTopColor: colors.primary, borderRadius: "50%", animation: "spin 1s linear infinite" }} />
-                <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
         );
     }
@@ -168,7 +167,24 @@ export default function RegisterSuccessPage() {
                     </p>
                 </div>
             </div>
+        </div>
+    );
+}
 
+function LoadingFallback() {
+    return (
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: colors.background }}>
+            <div style={{ width: 40, height: 40, border: "3px solid #E5E7EB", borderTopColor: colors.primary, borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+        </div>
+    );
+}
+
+export default function RegisterSuccessPage() {
+    return (
+        <>
+            <Suspense fallback={<LoadingFallback />}>
+                <RegisterSuccessContent />
+            </Suspense>
             <style jsx global>{`
                 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
                 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -178,6 +194,6 @@ export default function RegisterSuccessPage() {
                 }
                 @keyframes spin { to { transform: rotate(360deg); } }
             `}</style>
-        </div>
+        </>
     );
 }

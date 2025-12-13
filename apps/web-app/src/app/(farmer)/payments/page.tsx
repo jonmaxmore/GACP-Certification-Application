@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import api from "@/services/apiClient";
 
 // Theme System - matching Dashboard
 const themes = {
@@ -87,6 +88,8 @@ export default function PaymentsPage() {
     const [mounted, setMounted] = useState(false);
     const [isDark, setIsDark] = useState(false);
     const [viewDoc, setViewDoc] = useState<PaymentRecord | null>(null);
+    const [payQR, setPayQR] = useState<PaymentRecord | null>(null);
+    const [loading, setLoading] = useState(true);
 
     const t = isDark ? themes.dark : themes.light;
 
@@ -100,9 +103,26 @@ export default function PaymentsPage() {
         if (!userData) { window.location.href = "/login"; return; }
         try {
             setUser(JSON.parse(userData));
-            setPayments(MOCK_PAYMENTS);
+            loadPayments();
         } catch { window.location.href = "/login"; }
     }, []);
+
+    const loadPayments = async () => {
+        setLoading(true);
+        try {
+            const result = await api.get<{ data: PaymentRecord[] }>("/v2/payments/my");
+            if (result.success && result.data?.data) {
+                setPayments(result.data.data);
+            } else {
+                // Fallback to mock for demo
+                setPayments(MOCK_PAYMENTS);
+            }
+        } catch {
+            setPayments(MOCK_PAYMENTS);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const toggleTheme = () => {
         const newTheme = !isDark;
@@ -302,6 +322,16 @@ export default function PaymentsPage() {
                                             }}>
                                                 👁️ ดู
                                             </button>
+                                            {p.type === "INVOICE" && p.status === "PENDING" && (
+                                                <button onClick={() => setPayQR(p)} style={{
+                                                    padding: "8px 16px", borderRadius: "10px", border: "none",
+                                                    background: "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
+                                                    color: "#FFF", fontSize: "12px", fontWeight: 600, cursor: "pointer",
+                                                    display: "inline-flex", alignItems: "center", gap: "6px",
+                                                }}>
+                                                    💳 ชำระ
+                                                </button>
+                                            )}
                                             <button style={{
                                                 padding: "8px 16px", borderRadius: "10px", border: `1px solid ${t.border}`,
                                                 backgroundColor: "transparent", color: t.textSecondary, fontSize: "12px", fontWeight: 500, cursor: "pointer",
@@ -485,6 +515,121 @@ export default function PaymentsPage() {
                                 padding: "10px 20px", borderRadius: "8px", border: "1px solid #10B981",
                                 background: "#10B981", color: "white", fontSize: "13px", cursor: "pointer",
                             }}>📥 ดาวน์โหลด PDF</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* PromptPay QR Modal */}
+            {payQR && (
+                <div style={{
+                    position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: "rgba(0,0,0,0.7)", zIndex: 1000,
+                    display: "flex", alignItems: "center", justifyContent: "center", padding: "20px",
+                }} onClick={() => setPayQR(null)}>
+                    <div style={{
+                        width: "100%", maxWidth: "400px",
+                        backgroundColor: "#FFFFFF", borderRadius: "24px",
+                    }} onClick={(e) => e.stopPropagation()}>
+                        {/* Header */}
+                        <div style={{
+                            padding: "20px", textAlign: "center",
+                            borderBottom: "1px solid #E5E7EB",
+                        }}>
+                            <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 600, color: "#111827" }}>
+                                ชำระเงินด้วย PromptPay QR
+                            </h3>
+                            <p style={{ margin: "8px 0 0", fontSize: "13px", color: "#6B7280" }}>
+                                สแกน QR Code เพื่อชำระเงิน
+                            </p>
+                        </div>
+
+                        {/* QR Code Section */}
+                        <div style={{ padding: "24px", textAlign: "center" }}>
+                            {/* PromptPay Logo */}
+                            <div style={{ marginBottom: "16px" }}>
+                                <span style={{
+                                    display: "inline-block",
+                                    padding: "8px 20px",
+                                    backgroundColor: "#00427A",
+                                    borderRadius: "8px",
+                                    color: "#FFF",
+                                    fontSize: "14px",
+                                    fontWeight: 600,
+                                }}>
+                                    พร้อมเพย์ | PromptPay
+                                </span>
+                            </div>
+
+                            {/* QR Code */}
+                            <div style={{
+                                width: "200px", height: "200px",
+                                margin: "0 auto 16px",
+                                backgroundColor: "#FFF",
+                                border: "2px solid #00427A",
+                                borderRadius: "12px",
+                                padding: "8px",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                            }}>
+                                <img
+                                    src={`https://promptpay.io/0994566289/${payQR.amount}.png`}
+                                    alt="PromptPay QR"
+                                    style={{ width: "180px", height: "180px" }}
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null;
+                                        e.currentTarget.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=PROMPTPAY:${payQR.amount}`;
+                                    }}
+                                />
+                            </div>
+
+                            {/* Amount */}
+                            <div style={{
+                                padding: "16px",
+                                backgroundColor: "#F0FDF4",
+                                borderRadius: "12px",
+                                marginBottom: "16px",
+                            }}>
+                                <p style={{ fontSize: "13px", color: "#6B7280", marginBottom: "4px" }}>จำนวนเงินที่ต้องชำระ</p>
+                                <p style={{ fontSize: "32px", fontWeight: 700, color: "#10B981", margin: 0 }}>
+                                    ฿{new Intl.NumberFormat('th-TH').format(payQR.amount)}
+                                </p>
+                            </div>
+
+                            {/* Receiver Info */}
+                            <div style={{
+                                padding: "12px",
+                                backgroundColor: "#F9FAFB",
+                                borderRadius: "8px",
+                                fontSize: "13px",
+                                color: "#374151",
+                            }}>
+                                <p style={{ margin: "0 0 4px" }}><strong>ผู้รับเงิน:</strong> กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</p>
+                                <p style={{ margin: 0 }}><strong>เลขที่เอกสาร:</strong> {payQR.documentNumber}</p>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div style={{
+                            padding: "16px 24px",
+                            borderTop: "1px solid #E5E7EB",
+                            display: "flex", flexDirection: "column", gap: "12px",
+                        }}>
+                            <button style={{
+                                width: "100%", padding: "14px",
+                                borderRadius: "12px", border: "none",
+                                backgroundColor: "#10B981", color: "#FFF",
+                                fontSize: "15px", fontWeight: 600, cursor: "pointer",
+                            }}>
+                                📤 อัปโหลดหลักฐานการชำระ
+                            </button>
+                            <button onClick={() => setPayQR(null)} style={{
+                                width: "100%", padding: "14px",
+                                borderRadius: "12px", border: "1px solid #E5E7EB",
+                                backgroundColor: "#FFF", color: "#6B7280",
+                                fontSize: "14px", fontWeight: 500, cursor: "pointer",
+                            }}>
+                                ยกเลิก
+                            </button>
                         </div>
                     </div>
                 </div>

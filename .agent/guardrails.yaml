@@ -1,0 +1,151 @@
+# Agent Guardrails Configuration
+# GACP Platform - Version 1.0
+# Last Updated: 2024-12-13
+
+# ===========================================
+# FORBIDDEN PATTERNS (Block and Alert)
+# ===========================================
+forbidden_patterns:
+  database:
+    - pattern: "DROP DATABASE"
+      severity: CRITICAL
+      action: BLOCK_AND_ALERT
+    - pattern: "db.dropDatabase()"
+      severity: CRITICAL
+      action: BLOCK_AND_ALERT
+    - pattern: "deleteMany({})"
+      severity: HIGH
+      action: REQUIRE_CONFIRMATION
+    - pattern: "remove({})"
+      severity: HIGH
+      action: REQUIRE_CONFIRMATION
+  
+  files:
+    - pattern: "rm -rf /"
+      severity: CRITICAL
+      action: BLOCK
+    - pattern: "Remove-Item -Recurse -Force C:\\"
+      severity: CRITICAL
+      action: BLOCK
+    - pattern: "unlink(.*uploads)"
+      severity: HIGH
+      action: REQUIRE_CONFIRMATION
+
+  secrets:
+    - pattern: "MONGO.*URI.*="
+      severity: HIGH
+      action: REDACT
+    - pattern: "JWT.*SECRET.*="
+      severity: HIGH
+      action: REDACT
+    - pattern: "API_KEY.*="
+      severity: HIGH
+      action: REDACT
+    - pattern: "password.*=.*['\"]"
+      severity: HIGH
+      action: REDACT
+
+# ===========================================
+# SAFE PATTERNS (Auto-approve)
+# ===========================================
+safe_patterns:
+  - "console.log"
+  - "console.error"
+  - "npm install"
+  - "npm run dev"
+  - "git status"
+  - "git diff"
+  - "ls -la"
+  - "cat"
+  - "view_file"
+
+# ===========================================
+# REVIEW REQUIRED PATHS
+# ===========================================
+review_required:
+  paths:
+    - "*/middleware/AuthMiddleware.js"
+    - "*/routes/*/auth*.js"
+    - "*/config/JwtSecurity.js"
+    - "*/.env*"
+    - "*/docker-compose*.yml"
+    - "*/Dockerfile"
+    - "*/database/*"
+    - "*/migrations/*"
+  
+  operations:
+    - DELETE_FILE
+    - MODIFY_AUTH
+    - MODIFY_DATABASE_SCHEMA
+    - DEPLOY_TO_PRODUCTION
+    - MODIFY_SECURITY_CONFIG
+
+# ===========================================
+# RATE LIMITS
+# ===========================================
+rate_limits:
+  file_operations:
+    max_creates_per_session: 50
+    max_deletes_per_session: 5
+    max_edits_per_file: 20
+  
+  command_execution:
+    max_commands_per_minute: 30
+    require_approval_after: 10
+  
+  api_calls:
+    max_per_minute: 100
+    max_per_session: 1000
+
+# ===========================================
+# OBSERVABILITY REQUIREMENTS
+# ===========================================
+observability:
+  required_logs:
+    - agent_action
+    - file_change
+    - command_execution
+    - error_occurrence
+    - security_event
+  
+  alert_on:
+    - forbidden_pattern_detected
+    - rate_limit_exceeded
+    - auth_file_modified
+    - database_operation
+    - production_deployment
+
+# ===========================================
+# HUMAN-IN-THE-LOOP CHECKPOINTS
+# ===========================================
+human_approval:
+  always_require:
+    - production_deployment
+    - database_migration
+    - auth_logic_change
+    - security_config_change
+    - bulk_delete_operation
+  
+  require_after_threshold:
+    consecutive_errors: 3
+    files_modified: 20
+    session_duration_hours: 4
+
+# ===========================================
+# RECOVERY PROCEDURES
+# ===========================================
+recovery:
+  auto_backup:
+    enabled: true
+    frequency: "before_major_change"
+    retention_days: 30
+  
+  rollback:
+    enabled: true
+    max_rollback_steps: 10
+  
+  incident_response:
+    notify_on_critical: true
+    notify_channels:
+      - email
+      - slack

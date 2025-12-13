@@ -295,6 +295,7 @@ export default function DashboardPage() {
     const navItems = [
         { href: "/dashboard", icon: Icons.home, label: "หน้าหลัก", active: true },
         { href: "/applications", icon: Icons.fileText, label: "คำขอ" },
+        { href: "/certificates", icon: Icons.award, label: "ใบรับรอง" },
         { href: "/tracking", icon: Icons.compass, label: "ติดตาม" },
         { href: "/payments", icon: Icons.creditCard, label: "การเงิน" },
         { href: "/profile", icon: Icons.user, label: "โปรไฟล์" },

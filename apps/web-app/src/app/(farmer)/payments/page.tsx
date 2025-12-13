@@ -114,11 +114,14 @@ export default function PaymentsPage() {
             if (result.success && result.data?.data) {
                 setPayments(result.data.data);
             } else {
-                // Fallback to mock for demo
-                setPayments(MOCK_PAYMENTS);
+                // No fallback to mock data - show empty state
+                console.warn('No payment data returned from API');
+                setPayments([]);
             }
-        } catch {
-            setPayments(MOCK_PAYMENTS);
+        } catch (error) {
+            console.error('Failed to load payments:', error);
+            // No fallback to mock data - show empty state with error info
+            setPayments([]);
         } finally {
             setLoading(false);
         }

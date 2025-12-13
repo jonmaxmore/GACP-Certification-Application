@@ -87,19 +87,22 @@ app.listen(port, '0.0.0.0', () => {
             });
 
             console.log('✅ All modules loaded. Server fully ready!');
+
+            // 404 handler MUST be AFTER all routes are loaded
+            app.use((req, res) => {
+                res.status(404).json({ success: false, message: 'Endpoint not found' });
+            });
+
+            // Error handler MUST be LAST
+            app.use((err, req, res, next) => {
+                console.error(err.stack);
+                res.status(500).json({ success: false, message: 'Internal Server Error' });
+            });
+            console.log('✅ Error handlers registered');
         } catch (error) {
             console.error('❌ Error loading modules:', error.message);
         }
     });
 });
 
-// 404 handler (after routes are loaded)
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: 'Endpoint not found' });
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
-});
+module.exports = app;

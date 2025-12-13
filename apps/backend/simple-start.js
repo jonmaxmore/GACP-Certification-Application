@@ -2,6 +2,12 @@
  * GACP Platform - Simple Start Script
  * Starts server FIRST, then loads heavy modules
  * Ensures graceful degradation when database is unavailable
+ * 
+ * Features:
+ * - Immediate server start for health checks
+ * - Background loading of heavy modules
+ * - Graceful shutdown handling
+ * - Uncaught exception recovery
  */
 
 require('dotenv').config();
@@ -14,7 +20,10 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 
 const app = express();
-const port = process.env.PORT || 5000; // Backend on 5000, Frontend on 3000
+const port = process.env.PORT || process.env.BACKEND_PORT || 5000;
+
+// Store server reference for graceful shutdown
+let server = null;
 
 // Basic middleware
 app.use(cors({ origin: true, credentials: true }));
@@ -32,14 +41,71 @@ app.get(['/health', '/api/health', '/api/v2/health'], (req, res) => {
         timestamp: new Date(),
         message: 'Server is running',
         database: global.dbReady ? 'connected' : 'connecting...',
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        pid: process.pid,
     });
 });
 
 // Serve static uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Start server IMMEDIATELY
-app.listen(port, '0.0.0.0', () => {
+// =====================================================
+// GRACEFUL SHUTDOWN HANDLING
+// =====================================================
+const gracefulShutdown = (signal) => {
+    console.log(`\n⚠️  ${signal} received. Starting graceful shutdown...`);
+
+    if (server) {
+        server.close((err) => {
+            if (err) {
+                console.error('❌ Error during shutdown:', err);
+                process.exit(1);
+            }
+            console.log('✅ HTTP server closed');
+
+            // Close database connections
+            if (global.dbConnection) {
+                global.dbConnection.close(false, () => {
+                    console.log('✅ Database connection closed');
+                    process.exit(0);
+                });
+            } else {
+                process.exit(0);
+            }
+        });
+
+        // Force close after 10 seconds
+        setTimeout(() => {
+            console.error('⚠️  Forcing shutdown after timeout');
+            process.exit(1);
+        }, 10000);
+    } else {
+        process.exit(0);
+    }
+};
+
+// Handle shutdown signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+    console.error('❌ Uncaught Exception:', err.message);
+    console.error(err.stack);
+    // Don't exit immediately - log and continue if possible
+    // In production, you might want to restart the process
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise);
+    console.error('Reason:', reason);
+});
+
+// =====================================================
+// START SERVER
+// =====================================================
+server = app.listen(port, '0.0.0.0', () => {
     console.log(`✅ Server running on port ${port}`);
     console.log(`📡 Health check: http://localhost:${port}/health`);
     console.log(`📡 Loading modules in background...`);
@@ -106,3 +172,4 @@ app.listen(port, '0.0.0.0', () => {
 });
 
 module.exports = app;
+

@@ -105,6 +105,49 @@ module.exports = {
   // Helper functions
   getTotalFee: () => PAYMENT_FEES.TOTAL_STANDARD_FEE,
 
+  // NEW: Calculate total fee based on number of area types
+  // Formula: 30,000 × areaCount
+  getTotalFeeByAreas: (areaCount = 1) => {
+    return PAYMENT_FEES.TOTAL_STANDARD_FEE * areaCount;
+  },
+
+  // NEW: Get document review fee by areas
+  getDocReviewFeeByAreas: (areaCount = 1) => {
+    return PAYMENT_FEES.DOCUMENT_REVIEW_FEE * areaCount;
+  },
+
+  // NEW: Get inspection fee by areas
+  getInspectionFeeByAreas: (areaCount = 1) => {
+    return PAYMENT_FEES.FIELD_AUDIT_FEE * areaCount;
+  },
+
+  // NEW: Get fee breakdown items for area count
+  getFeeBreakdown: (areaCount = 1) => {
+    const docReview = PAYMENT_FEES.DOCUMENT_REVIEW_FEE * areaCount;
+    const inspection = PAYMENT_FEES.FIELD_AUDIT_FEE * areaCount;
+    return {
+      items: [
+        {
+          order: 1,
+          description: 'ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น',
+          quantity: areaCount,
+          unitPrice: PAYMENT_FEES.DOCUMENT_REVIEW_FEE,
+          amount: docReview
+        },
+        {
+          order: 2,
+          description: 'ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน',
+          quantity: areaCount,
+          unitPrice: PAYMENT_FEES.FIELD_AUDIT_FEE,
+          amount: inspection
+        }
+      ],
+      subtotal: docReview + inspection,
+      total: docReview + inspection,
+      areaCount
+    };
+  },
+
   getPhaseAmount: phase => {
     const phases = PAYMENT_FEES.PAYMENT_PHASES;
     switch (phase) {

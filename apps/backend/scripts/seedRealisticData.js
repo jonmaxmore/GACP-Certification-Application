@@ -259,7 +259,9 @@ async function generateCertificate(app, users) {
     qrData: `https://gacp.dtam.go.th/verify/${app._id}`,
     applicationId: app._id,
     farmId: `FARM-${String(Math.floor(Math.random() * 999))}`,
-    userId: farmer.idCard,
+    userId: farmer._id, // Use MongoDB ObjectId for API queries
+    siteName: farmName, // Add siteName for frontend display
+    plantType: app.data?.formData?.cropType || 'Cannabis', // Add plantType for frontend
     farmName: farmName,
     farmerName: `${farmer.firstName} ${farmer.lastName}`,
     location: {

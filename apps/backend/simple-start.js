@@ -146,11 +146,16 @@ server = app.listen(port, '0.0.0.0', () => {
                     console.warn('⚠️ Database unavailable:', err.message);
                 });
 
-            // Connect to Redis (non-blocking)
-            const redisService = require('./services/RedisService');
-            redisService.connect().catch(err => {
-                console.warn('⚠️ Redis unavailable:', err.message);
-            });
+            // Connect to Redis (non-blocking, can be disabled via REDIS_ENABLED=false)
+            const redisEnabled = process.env.REDIS_ENABLED !== 'false';
+            if (redisEnabled) {
+                const redisService = require('./services/RedisService');
+                redisService.connect().catch(err => {
+                    console.warn('⚠️ Redis unavailable:', err.message);
+                });
+            } else {
+                console.log('ℹ️ Redis disabled (REDIS_ENABLED=false)');
+            }
 
             console.log('✅ All modules loaded. Server fully ready!');
 

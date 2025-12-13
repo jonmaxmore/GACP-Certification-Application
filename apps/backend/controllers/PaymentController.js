@@ -117,11 +117,31 @@ class PaymentController {
             }
 
             const documents = [];
-            const FEE_PHASE1 = 5000; // ค่าตรวจสอบคำขอเบื้องต้น
-            const FEE_PHASE2 = 25000; // ค่ารับรองมาตรฐาน
+            // Fee per area type: 5,000 (doc review) + 25,000 (inspection) = 30,000
+            const FEE_DOC_REVIEW_PER_AREA = 5000;
+            const FEE_INSPECTION_PER_AREA = 25000;
+            const FEE_TOTAL_PER_AREA = 30000;
 
             for (const app of applications) {
                 const appId = app._id;
+
+                // Get number of area types from application
+                // Check both new areaType (single) and legacy data.siteInfo.areaType (array)
+                let areaCount = 1;
+                if (app.areaType) {
+                    // New format: single areaType per application (already split)
+                    areaCount = 1;
+                } else if (app.data?.siteInfo?.areaType && Array.isArray(app.data.siteInfo.areaType)) {
+                    // Legacy format: array of area types
+                    areaCount = app.data.siteInfo.areaType.length || 1;
+                } else if (app.siteTypes && Array.isArray(app.siteTypes)) {
+                    // Alternative format
+                    areaCount = app.siteTypes.length || 1;
+                }
+
+                const docReviewTotal = FEE_DOC_REVIEW_PER_AREA * areaCount;
+                const inspectionTotal = FEE_INSPECTION_PER_AREA * areaCount;
+                const totalAmount = FEE_TOTAL_PER_AREA * areaCount;
 
                 // Generate QUOTATION (always)
                 const quotationNumber = await PaymentDocument.generateDocumentNumber('QUOTATION');
@@ -131,10 +151,24 @@ class PaymentController {
                     applicationId: appId,
                     userId,
                     phase: 1,
-                    amount: FEE_PHASE1 + FEE_PHASE2,
+                    amount: totalAmount,
                     items: [
-                        { order: 1, description: 'ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น', quantity: 1, unit: 'ต่อคำขอ', unitPrice: FEE_PHASE1, amount: FEE_PHASE1 },
-                        { order: 2, description: 'ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน', quantity: 1, unit: 'ต่อคำขอ', unitPrice: FEE_PHASE2, amount: FEE_PHASE2 }
+                        {
+                            order: 1,
+                            description: 'ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น',
+                            quantity: areaCount,
+                            unit: 'ต่อคำขอ',
+                            unitPrice: FEE_DOC_REVIEW_PER_AREA,
+                            amount: docReviewTotal
+                        },
+                        {
+                            order: 2,
+                            description: 'ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน',
+                            quantity: areaCount,
+                            unit: 'ต่อคำขอ',
+                            unitPrice: FEE_INSPECTION_PER_AREA,
+                            amount: inspectionTotal
+                        }
                     ],
                     status: 'APPROVED',
                     recipientName: app.applicantName || app.companyName || 'ผู้ยื่นคำขอ',
@@ -142,7 +176,7 @@ class PaymentController {
                 });
                 documents.push(quotation);
 
-                // Generate INVOICE Phase 1 (if app is submitted)
+                // Generate INVOICE (if app is submitted) - full amount with all areas
                 if (app.status && app.status !== 'DRAFT') {
                     const invoiceNumber = await PaymentDocument.generateDocumentNumber('INVOICE');
                     const invoice = await PaymentDocument.create({
@@ -151,9 +185,24 @@ class PaymentController {
                         applicationId: appId,
                         userId,
                         phase: 1,
-                        amount: FEE_PHASE1,
+                        amount: totalAmount,
                         items: [
-                            { order: 1, description: 'ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น (งวดที่ 1)', quantity: 1, unit: 'ต่อคำขอ', unitPrice: FEE_PHASE1, amount: FEE_PHASE1 }
+                            {
+                                order: 1,
+                                description: 'ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น',
+                                quantity: areaCount,
+                                unit: 'ต่อคำขอ',
+                                unitPrice: FEE_DOC_REVIEW_PER_AREA,
+                                amount: docReviewTotal
+                            },
+                            {
+                                order: 2,
+                                description: 'ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน',
+                                quantity: areaCount,
+                                unit: 'ต่อคำขอ',
+                                unitPrice: FEE_INSPECTION_PER_AREA,
+                                amount: inspectionTotal
+                            }
                         ],
                         status: app.payment?.phase1?.status === 'PAID' ? 'DELIVERED' : 'PENDING',
                         recipientName: app.applicantName || app.companyName || 'ผู้ยื่นคำขอ',
@@ -162,7 +211,7 @@ class PaymentController {
                     });
                     documents.push(invoice);
 
-                    // Generate RECEIPT if Phase 1 paid
+                    // Generate RECEIPT if paid
                     if (app.payment?.phase1?.status === 'PAID') {
                         const receiptNumber = await PaymentDocument.generateDocumentNumber('RECEIPT');
                         const receipt = await PaymentDocument.create({
@@ -171,7 +220,7 @@ class PaymentController {
                             applicationId: appId,
                             userId,
                             phase: 1,
-                            amount: FEE_PHASE1,
+                            amount: totalAmount,
                             relatedInvoiceId: invoice._id,
                             items: invoice.items,
                             status: 'ISSUED',

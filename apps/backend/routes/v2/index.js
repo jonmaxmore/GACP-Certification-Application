@@ -35,6 +35,11 @@ router.use('/access', require('./access')); // Access Control API - One Brain Ma
 router.use('/reports', require('./reports')); // Reports API - Government Analytics
 router.use('/metrics', require('./metrics')); // Prometheus Metrics
 router.use('/audit', require('./audit')); // Audit Logging API
+router.use('/certificates', require('../api/CertificateRoutes')); // Certificate API for Farmers
+router.use('/quotes', require('../api/QuoteRoutes')); // Quote API - Team sends quotes to farmers
+router.use('/invoices', require('../api/InvoiceRoutes')); // Invoice API - Payment tracking
+router.use('/licenses', require('./licenses')); // License API - บท.11/13/16 verification
+router.use('/batch', require('./batch')); // Batch Submission - Multi-area auto-split
 
 // Health check with version info
 router.get('/health', (req, res) => {

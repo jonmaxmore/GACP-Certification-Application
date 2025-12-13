@@ -1,31 +1,61 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const { SERVICE_TYPES, APPLICATION_STATUS } = require('../constants/ServiceTypeEnum');
 
 /**
  * GACP V2 Application Schema
  * Implements "2-Phase Payment / 3-Strike Penalty" Workflow
+ * Updated: Support for 4 service types (New, Renewal, Replacement, Amendment)
  */
 const ApplicationSchema = new Schema({
     applicationNumber: { type: String, required: true, unique: true },
     farmerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 
-    // Status Enum as per Detailed Brief
+    // Service Type - 4 ประเภทบริการ GACP
+    serviceType: {
+        type: String,
+        enum: Object.values(SERVICE_TYPES),
+        default: SERVICE_TYPES.NEW_APPLICATION,
+        required: true
+    },
+
+    // Batch Submission - สำหรับ auto-split multi-area applications
+    batchId: { type: String, index: true },      // ID ของ batch ที่กรอกพร้อมกัน
+    areaTypeIndex: { type: Number, default: 0 }, // ลำดับใน batch
+    totalAreaTypes: { type: Number, default: 1 }, // จำนวน area types ทั้งหมดใน batch
+
+    // Single Area Type - แต่ละ application = 1 area type = 1 certificate
+    areaType: {
+        type: String,
+        enum: ['OUTDOOR', 'INDOOR', 'GREENHOUSE'],
+        required: true
+    },
+
+    // License document is included in attachments (slot: 'license_bt11', 'license_bt13', 'license_bt16')
+    // Reviewed together with other documents during Phase 1 (5,000฿ per review)
+    // licenseId is optional reference for linking purposes
+    licenseId: { type: Schema.Types.ObjectId, ref: 'License', default: null },
+
+    // For Amendment/Replacement - reference to original certificate
+    originalCertificateId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Certificate',
+        default: null
+    },
+
+    // Status Enum - Updated for team review workflow
     status: {
         type: String,
-        enum: [
-            'DRAFT',                // Initial State
-            'REVIEW_PENDING',       // User checking "Pre-Submission" (Web View)
-            'PAYMENT_1_PENDING',    // User confirmed docs, waiting for 5,000 THB
-            'SUBMITTED',            // Paid & Submitted, waiting for Officer Review
-            'REVISION_REQ',         // Rejected (Count < 3) - Free Fix
-            'PAYMENT_1_RETRY',      // Rejected (Count >= 3) - Penalty Triggered
-            'PAYMENT_2_PENDING',    // Docs Approved, waiting for 25,000 THB
-            'AUDIT_PENDING',        // Paid Phase 2, waiting for Scheduler
-            'AUDIT_SCHEDULED',      // Auditor Assigned
-            'CERTIFIED',            // Passed Audit
-            'REJECTED'              // Failed Audit or Cancelled
-        ],
-        default: 'DRAFT'
+        enum: Object.values(APPLICATION_STATUS),
+        default: APPLICATION_STATUS.DRAFT
+    },
+
+    // Team Quote - for services requiring team review (replacement, amendment)
+    teamQuote: {
+        quoteId: { type: Schema.Types.ObjectId, ref: 'Quote' },
+        receivedAt: Date,
+        acceptedAt: Date,
+        amount: Number
     },
 
     // Form Selection Logic
@@ -39,7 +69,7 @@ const ApplicationSchema = new Schema({
     data: {
         farmId: { type: String, ref: 'Establishment' },
 
-        // 1. Request Info
+        // 1. Request Info (Legacy - use serviceType instead)
         requestType: {
             type: String,
             enum: ['NEW', 'RENEW', 'SUBSTITUTE'],

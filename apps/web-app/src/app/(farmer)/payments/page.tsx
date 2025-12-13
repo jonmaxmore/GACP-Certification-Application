@@ -53,11 +53,8 @@ interface PaymentRecord {
     paidAt?: string;
 }
 
-const MOCK_PAYMENTS: PaymentRecord[] = [
-    { id: "1", type: "QUOTATION", documentNumber: "G-012400001", applicationId: "APP-001", amount: 30000, status: "APPROVED", createdAt: "2024-12-01" },
-    { id: "2", type: "INVOICE", documentNumber: "GI-012400001", applicationId: "APP-001", amount: 5000, status: "DELIVERED", createdAt: "2024-12-01", paidAt: "2024-12-02" },
-    { id: "3", type: "RECEIPT", documentNumber: "REC-24120001", applicationId: "APP-001", amount: 5000, status: "ISSUED", createdAt: "2024-12-02" },
-];
+// NOTE: No mock data - all data comes from real API only
+// API endpoint: /api/v2/payments/my
 
 const TYPE_CONFIG = {
     QUOTATION: { label: "ใบเสนอราคา", color: "#3B82F6" },
@@ -162,14 +159,7 @@ export default function PaymentsPage() {
 
     const formatAmount = (n: number) => new Intl.NumberFormat('th-TH').format(n);
 
-    if (!user || !mounted) {
-        return (
-            <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: t.bg }}>
-                <div className="spinner" style={{ width: 40, height: 40, border: `3px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%" }} />
-                <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } } .spinner { animation: spin 1s linear infinite; }`}</style>
-            </div>
-        );
-    }
+    // Loading screen removed - show content directly
 
     const navItems = [
         { href: "/dashboard", icon: Icons.home, label: "หน้าหลัก" },
@@ -285,6 +275,7 @@ export default function PaymentsPage() {
                         <thead>
                             <tr style={{ borderBottom: `1px solid ${t.border}` }}>
                                 <th style={{ padding: "16px 20px", textAlign: "left", fontSize: "12px", color: t.textMuted, fontWeight: 500 }}>เอกสาร</th>
+                                <th style={{ padding: "16px 20px", textAlign: "left", fontSize: "12px", color: t.textMuted, fontWeight: 500 }}>หมายเลขเคส</th>
                                 <th style={{ padding: "16px 20px", textAlign: "left", fontSize: "12px", color: t.textMuted, fontWeight: 500 }}>ประเภท</th>
                                 <th style={{ padding: "16px 20px", textAlign: "right", fontSize: "12px", color: t.textMuted, fontWeight: 500 }}>จำนวนเงิน</th>
                                 <th style={{ padding: "16px 20px", textAlign: "center", fontSize: "12px", color: t.textMuted, fontWeight: 500 }}>สถานะ</th>
@@ -304,6 +295,19 @@ export default function PaymentsPage() {
                                                 <p style={{ fontSize: "12px", color: t.textMuted, margin: "2px 0 0" }}>{p.createdAt}</p>
                                             </div>
                                         </div>
+                                    </td>
+                                    <td style={{ padding: "16px 20px" }}>
+                                        {p.applicationId ? (
+                                            <Link href={`/tracking?appId=${p.applicationId}`} style={{
+                                                padding: "4px 12px", borderRadius: "8px", fontSize: "12px",
+                                                backgroundColor: t.accentBg, color: t.accent, fontWeight: 500,
+                                                textDecoration: "none", display: "inline-block"
+                                            }}>
+                                                📋 {p.applicationId.substring(0, 8)}...
+                                            </Link>
+                                        ) : (
+                                            <span style={{ fontSize: "12px", color: t.textMuted }}>-</span>
+                                        )}
                                     </td>
                                     <td style={{ padding: "16px 20px" }}>
                                         <span style={{ padding: "4px 12px", borderRadius: "100px", fontSize: "12px", backgroundColor: `${TYPE_CONFIG[p.type].color}15`, color: TYPE_CONFIG[p.type].color, fontWeight: 500 }}>

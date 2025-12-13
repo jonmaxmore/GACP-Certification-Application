@@ -8,7 +8,22 @@ const NotificationSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['info', 'success', 'warning', 'error'],
+        enum: [
+            // General types
+            'info', 'success', 'warning', 'error',
+            // Quote/Invoice workflow
+            'QUOTE_RECEIVED',       // ได้รับใบเสนอราคา
+            'INVOICE_RECEIVED',     // ได้รับใบวางบิล
+            'PAYMENT_REMINDER',     // แจ้งเตือนกำหนดชำระ
+            'PAYMENT_CONFIRMED',    // ยืนยันการชำระเงินแล้ว
+            // Application workflow
+            'APPLICATION_SUBMITTED', // ส่งคำขอแล้ว
+            'APPLICATION_APPROVED', // อนุมัติแล้ว
+            'APPLICATION_REJECTED', // ไม่อนุมัติ
+            'REVISION_REQUIRED',    // ต้องแก้ไข
+            // Team workflow
+            'TEAM_REVIEW_COMPLETE'  // ทีมประเมินเสร็จ
+        ],
         default: 'info'
     },
     title: {

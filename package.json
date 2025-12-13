@@ -4,8 +4,8 @@
   "private": true,
   "description": "GACP Platform - Backend API + Flutter Mobile App",
   "scripts": {
-    "dev": "cd apps/backend && node server.js",
-    "start": "cd apps/backend && node server.js",
+    "dev": "cd apps/backend && cross-env PORT=5000 node server.js",
+    "start": "cd apps/backend && cross-env PORT=5000 node server.js",
     "test": "cd apps/backend && node node_modules/jest/bin/jest.js --config jest.config.cjs --forceExit",
     "lint": "cd apps/backend && npx eslint .",
     "format": "npx prettier --write \"**/*.{js,json,md,yml,yaml}\"",

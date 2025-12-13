@@ -16,7 +16,12 @@ const SITE_TYPES = [
     { id: 'GREENHOUSE' as SiteType, label: 'โรงเรือนทั่วไป', icon: '🌿', desc: 'Greenhouse' },
 ];
 
-const FEE_PER_SITE_TYPE = 5000;
+// Fee configuration: (5,000 + 25,000) × number of areas = 30,000 × areas
+const FEE_CONFIG = {
+    docReviewPerArea: 5000,     // ค่าตรวจเอกสารต่อพื้นที่
+    inspectionPerArea: 25000,   // ค่าตรวจประเมินแปลงต่อพื้นที่
+    totalPerArea: 30000,        // รวมต่อพื้นที่
+};
 
 export default function Step1Purpose() {
     const router = useRouter();
@@ -29,7 +34,9 @@ export default function Step1Purpose() {
     const plant = PLANTS.find(p => p.id === state.plantId);
     const isHighControl = plant?.group === 'HIGH_CONTROL';
     const needsLicense = purpose === 'COMMERCIAL' || purpose === 'EXPORT';
-    const totalFee = siteTypes.length * FEE_PER_SITE_TYPE;
+
+    // Calculate fee: 30,000 × number of areas
+    const totalFee = FEE_CONFIG.totalPerArea * siteTypes.length;
 
     useEffect(() => {
         setIsDark(localStorage.getItem("theme") === "dark");
@@ -132,11 +139,42 @@ export default function Step1Purpose() {
                 </div>
             </div>
 
-            {/* License Upload Warning */}
-            {needsLicense && (
-                <div style={{ background: isDark ? 'rgba(245,158,11,0.15)' : '#FFFBEB', border: '1px solid #F59E0B', borderRadius: '12px', padding: '12px', marginBottom: '16px' }}>
-                    <p style={{ fontSize: '12px', color: '#B45309', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                        ⚠️ กรุณาเตรียมใบอนุญาตประกอบกิจการ (จะอัปโหลดใน step เอกสาร)
+            {/* License Upload Warning - specific requirements based on purpose */}
+            {(purpose === 'COMMERCIAL' || purpose === 'EXPORT') && (
+                <div style={{
+                    background: isDark ? 'rgba(245,158,11,0.15)' : '#FFFBEB',
+                    border: '1px solid #F59E0B',
+                    borderRadius: '12px',
+                    padding: '14px',
+                    marginBottom: '16px'
+                }}>
+                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#B45309', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 8px 0' }}>
+                        ⚠️ เอกสารใบอนุญาตที่ต้องเตรียม:
+                    </p>
+                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12px', color: isDark ? '#D97706' : '#92400E' }}>
+                        {isHighControl && (
+                            <li style={{ marginBottom: '4px' }}>
+                                <strong>บท.11</strong> - ใบอนุญาตปลูก (บังคับสำหรับพืชควบคุม)
+                            </li>
+                        )}
+                        {purpose === 'COMMERCIAL' && (
+                            <li style={{ marginBottom: '4px' }}>
+                                <strong>บท.13</strong> - ใบอนุญาตแปรรูปผลิตภัณฑ์ (บังคับ ✓)
+                            </li>
+                        )}
+                        {purpose === 'EXPORT' && (
+                            <>
+                                <li style={{ marginBottom: '4px' }}>
+                                    <strong>บท.13</strong> - ใบอนุญาตแปรรูปผลิตภัณฑ์ (ถ้ามีการแปรรูป)
+                                </li>
+                                <li style={{ marginBottom: '4px' }}>
+                                    <strong>บท.16</strong> - ใบอนุญาตส่งออก (บังคับ ✓)
+                                </li>
+                            </>
+                        )}
+                    </ul>
+                    <p style={{ fontSize: '11px', color: isDark ? '#9CA3AF' : '#6B7280', margin: '8px 0 0 0', fontStyle: 'italic' }}>
+                        📌 อัปโหลดเอกสารในขั้นตอนถัดไป - หากไม่มีใบอนุญาต กรุณาติดต่อกรมการแพทย์แผนไทยฯ
                     </p>
                 </div>
             )}
@@ -173,14 +211,56 @@ export default function Step1Purpose() {
                     background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
                     borderRadius: '12px', padding: '16px', marginBottom: '20px', color: 'white',
                 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>
+                        💰 ประมาณการค่าธรรมเนียมและใบรับรอง
+                    </div>
+
+                    {/* Per-area breakdown */}
+                    {siteTypes.map((type, idx) => {
+                        const areaLabel = SITE_TYPES.find(s => s.id === type)?.label || type;
+                        return (
+                            <div key={type} style={{
+                                background: 'rgba(255,255,255,0.1)',
+                                borderRadius: '8px',
+                                padding: '10px 12px',
+                                marginBottom: '8px',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
+                                <div>
+                                    <div style={{ fontSize: '13px', fontWeight: 500 }}>
+                                        📜 ใบรับรอง #{idx + 1}: {areaLabel}
+                                    </div>
+                                    <div style={{ fontSize: '10px', opacity: 0.8 }}>
+                                        ตรวจเอกสาร 5,000 + ตรวจแปลง 25,000
+                                    </div>
+                                </div>
+                                <div style={{ fontSize: '16px', fontWeight: 600 }}>
+                                    ฿30,000
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    {/* Total */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        borderTop: '1px solid rgba(255,255,255,0.3)',
+                        paddingTop: '12px',
+                        marginTop: '8px'
+                    }}>
                         <div>
-                            <div style={{ fontSize: '12px', opacity: 0.9 }}>ค่าธรรมเนียมงวด 1 (ตรวจเอกสาร)</div>
-                            <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '2px' }}>
-                                {FEE_PER_SITE_TYPE.toLocaleString()} บาท × {siteTypes.length} ลักษณะพื้นที่
+                            <div style={{ fontSize: '14px', fontWeight: 600 }}>
+                                รวมทั้งสิ้น ({siteTypes.length} ใบรับรอง)
+                            </div>
+                            <div style={{ fontSize: '11px', opacity: 0.8 }}>
+                                ชำระเงินรวมครั้งเดียว
                             </div>
                         </div>
-                        <div style={{ fontSize: '24px', fontWeight: 700 }}>
+                        <div style={{ fontSize: '28px', fontWeight: 700 }}>
                             ฿{totalFee.toLocaleString()}
                         </div>
                     </div>

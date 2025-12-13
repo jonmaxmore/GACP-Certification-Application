@@ -483,4 +483,100 @@ router.delete('/:id', rateLimitMiddleware, authMiddleware, async (req, res) => {
     }
 });
 
+// ============================================
+// Document Requirements API
+// ============================================
+const {
+    DOCUMENT_SLOTS,
+    getRequiredDocuments,
+    getObjectiveWarnings,
+    canProceedWithObjectives
+} = require('../../constants/DocumentSlots');
+
+/**
+ * @route GET /api/v2/files/requirements
+ * @desc Get all document slot definitions
+ * @access Public
+ */
+router.get('/requirements', (req, res) => {
+    res.json({
+        success: true,
+        data: {
+            slots: DOCUMENT_SLOTS,
+            note: 'Use /requirements/validate to check conditional requirements'
+        }
+    });
+});
+
+/**
+ * @route POST /api/v2/files/requirements/validate
+ * @desc Validate document requirements based on user selections
+ * @body { plantType, objectives, applicantType }
+ * @access Public
+ */
+router.post('/requirements/validate', (req, res) => {
+    try {
+        const { plantType, objectives = [], applicantType = 'INDIVIDUAL' } = req.body;
+
+        // Get required documents for these selections
+        const requiredDocs = getRequiredDocuments({ plantType, objectives, applicantType });
+
+        // Get warnings for objective selections
+        const warnings = getObjectiveWarnings(objectives);
+
+        res.json({
+            success: true,
+            data: {
+                requiredDocuments: requiredDocs,
+                warnings,
+                summary: {
+                    totalRequired: requiredDocs.length,
+                    hasConditionalWarnings: warnings.length > 0,
+                    conditionalDocs: warnings.map(w => ({
+                        slotId: w.slotId,
+                        warning: w.text
+                    }))
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Validate requirements error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'เกิดข้อผิดพลาด'
+        });
+    }
+});
+
+/**
+ * @route POST /api/v2/files/requirements/check-proceed
+ * @desc Check if user can proceed with their selections
+ * @body { objectives, uploadedSlots }
+ * @access Public
+ */
+router.post('/requirements/check-proceed', (req, res) => {
+    try {
+        const { objectives = [], uploadedSlots = [] } = req.body;
+
+        const result = canProceedWithObjectives(objectives, uploadedSlots);
+
+        res.json({
+            success: true,
+            data: {
+                canProceed: result.canProceed,
+                missingDocuments: result.missingDocs,
+                message: result.canProceed
+                    ? 'สามารถดำเนินการต่อได้'
+                    : `ยังขาดเอกสารที่จำเป็น: ${result.missingDocs.map(d => d.slotId).join(', ')}`
+            }
+        });
+    } catch (error) {
+        console.error('Check proceed error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'เกิดข้อผิดพลาด'
+        });
+    }
+});
+
 module.exports = router;

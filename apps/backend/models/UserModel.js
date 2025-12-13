@@ -53,7 +53,7 @@ const userSchema = new mongoose.Schema(
     },
     idCardHash: {
       type: String,
-      index: true, // Indexed for duplicate detection
+      // Note: index defined via schema.index() below
     },
     idCardImage: {
       type: String,
@@ -76,7 +76,7 @@ const userSchema = new mongoose.Schema(
     },
     taxIdHash: {
       type: String,
-      index: true,
+      // Note: index defined via schema.index() below
     },
     representativeName: {
       type: String,
@@ -98,7 +98,7 @@ const userSchema = new mongoose.Schema(
     },
     communityRegistrationNoHash: {
       type: String,
-      index: true,
+      // Note: index defined via schema.index() below
     },
 
     // ========== LEGACY FIELDS (kept for compatibility) ==========

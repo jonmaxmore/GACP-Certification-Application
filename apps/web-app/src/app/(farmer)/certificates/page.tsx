@@ -54,29 +54,8 @@ interface Certificate {
     qrCode?: string;
 }
 
-// Mock data for demo (will be replaced with API call)
-const MOCK_CERTIFICATES: Certificate[] = [
-    {
-        _id: "cert_1",
-        certificateNumber: "GACP-2567-001234",
-        applicationId: "app_12345",
-        siteName: "ฟาร์มกัญชาสุขใจ",
-        plantType: "กัญชา (Cannabis)",
-        issuedDate: "2024-06-15",
-        expiryDate: "2025-06-14",
-        status: "ACTIVE"
-    },
-    {
-        _id: "cert_2",
-        certificateNumber: "GACP-2566-000567",
-        applicationId: "app_67890",
-        siteName: "วิสาหกิจชุมชนกระท่อมบ้านไร่",
-        plantType: "กระท่อม (Kratom)",
-        issuedDate: "2023-09-20",
-        expiryDate: "2024-09-19",
-        status: "EXPIRED"
-    }
-];
+// NOTE: No mock data - all data comes from real API only
+// API endpoint: /api/v2/certificates/my
 
 export default function CertificatesPage() {
     const router = useRouter();
@@ -105,11 +84,14 @@ export default function CertificatesPage() {
             if (result.success && result.data?.data) {
                 setCertificates(result.data.data);
             } else {
-                // Fallback to mock data for demo
-                setCertificates(MOCK_CERTIFICATES);
+                // No fallback to mock data - show empty state
+                console.warn('No certificates returned from API');
+                setCertificates([]);
             }
-        } catch {
-            setCertificates(MOCK_CERTIFICATES);
+        } catch (error) {
+            console.error('Failed to load certificates:', error);
+            // No fallback to mock data - show empty state
+            setCertificates([]);
         } finally {
             setLoading(false);
         }
@@ -263,20 +245,22 @@ export default function CertificatesPage() {
                                         </div>
 
                                         {/* Actions */}
-                                        <div style={{ display: "flex", gap: "8px", paddingTop: "16px", borderTop: `1px solid ${t.border}` }}>
+                                        <div style={{ display: "flex", gap: "8px", paddingTop: "16px", borderTop: `1px solid ${t.border}`, flexWrap: "wrap" }}>
                                             <button onClick={() => setViewCert(cert)} style={{
                                                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
                                                 padding: "10px", borderRadius: "10px", border: `1px solid ${t.border}`,
-                                                backgroundColor: "transparent", color: t.text, fontSize: "13px", cursor: "pointer"
+                                                backgroundColor: "transparent", color: t.text, fontSize: "13px", cursor: "pointer",
+                                                minWidth: "100px"
                                             }}>
                                                 {Icons.eye(t.iconColor)} ดูใบรับรอง
                                             </button>
                                             <button onClick={() => setShowQR(cert)} style={{
                                                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
                                                 padding: "10px", borderRadius: "10px", border: `1px solid ${t.border}`,
-                                                backgroundColor: "transparent", color: t.text, fontSize: "13px", cursor: "pointer"
+                                                backgroundColor: "transparent", color: t.text, fontSize: "13px", cursor: "pointer",
+                                                minWidth: "80px"
                                             }}>
-                                                {Icons.qr(t.iconColor)} QR Code
+                                                {Icons.qr(t.iconColor)} QR
                                             </button>
                                             <button style={{
                                                 padding: "10px 14px", borderRadius: "10px", border: "none",
@@ -286,6 +270,21 @@ export default function CertificatesPage() {
                                                 {Icons.download("#FFF")}
                                             </button>
                                         </div>
+
+                                        {/* Renewal Button - show for expiring (< 90 days) or expired certs */}
+                                        {(daysRemaining <= 90 || cert.status === 'EXPIRED') && (
+                                            <Link href={`/applications/renewal?certId=${cert._id}`} style={{
+                                                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                                                marginTop: "12px", padding: "12px", borderRadius: "10px",
+                                                background: cert.status === 'EXPIRED'
+                                                    ? "linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)"
+                                                    : `linear-gradient(135deg, ${t.accent} 0%, ${t.accentLight} 100%)`,
+                                                color: "#FFF", fontSize: "14px", fontWeight: 600, textDecoration: "none",
+                                                boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+                                            }}>
+                                                🔄 {cert.status === 'EXPIRED' ? 'ต่อสัญญาเลย' : 'ต่อสัญญาก่อนหมดอายุ'}
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
                             );

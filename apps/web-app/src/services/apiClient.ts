@@ -166,6 +166,22 @@ export async function apiRequest<T = unknown>(
     // Note: auth_token is now stored in httpOnly cookie
     // Cookies are sent automatically with credentials: 'include'
 
+    // Development mode: Add X-User-ID header from localStorage
+    // This allows testing without full login flow
+    if (typeof window !== 'undefined') {
+        try {
+            const userData = localStorage.getItem('user');
+            if (userData) {
+                const user = JSON.parse(userData);
+                if (user?.id || user?._id) {
+                    defaultHeaders['X-User-ID'] = user.id || user._id;
+                }
+            }
+        } catch {
+            // Ignore localStorage errors
+        }
+    }
+
     try {
         const response = await fetch(url, {
             ...options,

@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th">
-      <body className={`${kanit.variable} font-kanit antialiased`}>
+      <body className={`${kanit.variable} font-kanit antialiased`} suppressHydrationWarning>
         <SystemGuard>
           {children}
         </SystemGuard>

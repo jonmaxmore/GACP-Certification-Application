@@ -8,29 +8,73 @@
 
 const express = require('express');
 const router = express.Router();
+const {
+    FEE_CONFIG,
+    AREA_TYPES,
+    OBJECTIVES,
+    calculateFee,
+    getFeeSummary
+} = require('../../constants/PricingService');
+const { SERVICE_TYPES, SERVICE_TYPE_LABELS } = require('../../constants/ServiceTypeEnum');
 
 /**
  * @route GET /api/v2/pricing/fees
- * @description Get all platform fees (application, inspection, etc.)
+ * @description Get all platform fees and configuration
  * @access Public
  */
 router.get('/fees', (req, res) => {
-    // Fees should be stored in database or config in production
-    const fees = {
-        applicationFee: 5000,           // ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น
-        inspectionFee: 25000,           // ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน
-        renewalFee: 15000,              // ค่าต่ออายุใบรับรอง
-        expediteFee: 10000,             // ค่าเร่งด่วน
-        currency: 'THB',
-        vatRate: 0,                     // ยกเว้นภาษีมูลค่าเพิ่ม (รัฐบาล)
-        lastUpdated: '2025-01-01',
-        validUntil: '2025-12-31'
-    };
-
     res.json({
         success: true,
-        data: fees
+        data: {
+            config: FEE_CONFIG,
+            areaTypes: Object.values(AREA_TYPES),
+            objectives: Object.values(OBJECTIVES),
+            serviceTypes: Object.entries(SERVICE_TYPES).map(([key, value]) => ({
+                id: value,
+                label: SERVICE_TYPE_LABELS[value]
+            })),
+            lastUpdated: '2025-12-13',
+            validUntil: '2025-12-31'
+        }
     });
+});
+
+/**
+ * @route POST /api/v2/pricing/calculate
+ * @description Calculate fee based on service type and area selection
+ * @access Public
+ */
+router.post('/calculate', (req, res) => {
+    try {
+        const { serviceType, areaTypes = [], plantType, objective } = req.body;
+
+        if (!serviceType) {
+            return res.status(400).json({
+                success: false,
+                error: 'กรุณาระบุประเภทบริการ (serviceType)'
+            });
+        }
+
+        const feeBreakdown = calculateFee(serviceType, areaTypes);
+
+        res.json({
+            success: true,
+            data: {
+                serviceType,
+                serviceLabel: SERVICE_TYPE_LABELS[serviceType],
+                areaTypes,
+                areaCount: areaTypes.length,
+                plantType,
+                objective,
+                ...feeBreakdown
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'ไม่สามารถคำนวณค่าธรรมเนียมได้'
+        });
+    }
 });
 
 /**
@@ -41,23 +85,51 @@ router.get('/fees', (req, res) => {
 router.get('/quotation/:applicationId', async (req, res) => {
     try {
         const { applicationId } = req.params;
+        const Application = require('../../models/ApplicationModel');
 
-        // In production, fetch from database
+        // Fetch actual application to get area count
+        const app = await Application.findById(applicationId).lean();
+        let areaCount = 1;
+
+        if (app) {
+            if (app.areaType) {
+                // New format: single areaType per application
+                areaCount = 1;
+            } else if (app.data?.siteInfo?.areaType && Array.isArray(app.data.siteInfo.areaType)) {
+                areaCount = app.data.siteInfo.areaType.length || 1;
+            } else if (app.siteTypes && Array.isArray(app.siteTypes)) {
+                areaCount = app.siteTypes.length || 1;
+            }
+        }
+
+        const docReviewPerArea = 5000;
+        const inspectionPerArea = 25000;
+        const docReviewTotal = docReviewPerArea * areaCount;
+        const inspectionTotal = inspectionPerArea * areaCount;
+        const total = docReviewTotal + inspectionTotal;
+
         const quotation = {
             applicationId,
             items: [
                 {
                     description: 'ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น',
-                    quantity: 1,
-                    unitPrice: 5000,
-                    total: 5000
+                    quantity: areaCount,
+                    unitPrice: docReviewPerArea,
+                    total: docReviewTotal
+                },
+                {
+                    description: 'ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน',
+                    quantity: areaCount,
+                    unitPrice: inspectionPerArea,
+                    total: inspectionTotal
                 }
             ],
-            subtotal: 5000,
+            subtotal: total,
             vat: 0,
-            total: 5000,
+            total: total,
             currency: 'THB',
             validDays: 30,
+            areaCount,
             createdAt: new Date().toISOString()
         };
 
@@ -66,6 +138,7 @@ router.get('/quotation/:applicationId', async (req, res) => {
             data: quotation
         });
     } catch (error) {
+        console.error('Quotation error:', error);
         res.status(500).json({
             success: false,
             error: 'ไม่สามารถสร้างใบเสนอราคาได้'

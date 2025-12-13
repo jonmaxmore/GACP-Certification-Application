@@ -11,7 +11,6 @@ import '../../presentation/features/admin/screens/task_queue_screen.dart';
 import '../../presentation/features/admin/screens/application_detail_screen.dart';
 import '../../presentation/features/auth/screens/login_screen.dart';
 import '../../presentation/features/auth/screens/registration_screen.dart';
-import '../../presentation/features/dashboard/screens/user_profile_screen.dart';
 
 import '../../presentation/features/application/screens/notification_screen.dart';
 import '../../presentation/features/application/screens/service_selection_screen.dart';

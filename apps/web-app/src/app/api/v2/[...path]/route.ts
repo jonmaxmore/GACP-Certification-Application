@@ -21,6 +21,13 @@ async function proxyRequest(request: NextRequest, path: string, method: string) 
             headers['Authorization'] = `Bearer ${authToken}`;
         }
 
+        // Development/Test Mode: Allow X-User-ID header for testing without real JWT
+        // This is useful when testing pages without going through full login flow
+        const testUserId = request.headers.get('X-User-ID');
+        if (testUserId && !authToken) {
+            headers['X-User-ID'] = testUserId;
+        }
+
         // Build the full backend URL
         const backendUrl = `${BACKEND_URL}/api/v2/${path}`;
 

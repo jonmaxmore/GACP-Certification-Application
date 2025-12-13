@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 /**
  * Generic API Proxy for V2 endpoints
@@ -23,7 +23,6 @@ async function proxyRequest(request: NextRequest, path: string, method: string) 
 
         // Build the full backend URL
         const backendUrl = `${BACKEND_URL}/api/v2/${path}`;
-        console.log(`[API Proxy] ${method} ${backendUrl}`);
 
         // Forward request body for POST/PUT/PATCH
         let body: string | undefined;

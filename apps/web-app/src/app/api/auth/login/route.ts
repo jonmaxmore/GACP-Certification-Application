@@ -16,8 +16,6 @@ export async function POST(request: NextRequest) {
         });
 
         const data = await response.json();
-        console.log('[Login Proxy] Backend response:', JSON.stringify(data).substring(0, 200));
-        console.log('[Login Proxy] Has accessToken:', !!data.data?.tokens?.accessToken);
 
         if (!response.ok || !data.success) {
             return NextResponse.json(data, { status: response.status });
@@ -28,7 +26,6 @@ export async function POST(request: NextRequest) {
 
         // Set cookies from the same origin (port 3001)
         if (data.data?.tokens?.accessToken) {
-            console.log('[Login Proxy] Setting auth_token cookie');
             nextResponse.cookies.set('auth_token', data.data.tokens.accessToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -36,8 +33,6 @@ export async function POST(request: NextRequest) {
                 maxAge: 24 * 60 * 60, // 24 hours in seconds
                 path: '/',
             });
-        } else {
-            console.log('[Login Proxy] No accessToken found in data.data.tokens');
         }
 
         if (data.data?.tokens?.refreshToken) {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export async function POST(request: NextRequest) {
     try {
@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
         });
 
         const data = await response.json();
-        console.log('[Register Proxy] Backend response:', JSON.stringify(data).substring(0, 200));
 
         // Return the response with the same status code
         return NextResponse.json(data, { status: response.status });

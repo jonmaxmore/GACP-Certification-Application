@@ -155,14 +155,14 @@ const sendQuote = async (req, res) => {
             'teamQuote.amount': quote.totalAmount
         });
 
-        // TODO: Send notification to farmer
-        // await NotificationService.create({
-        //     userId: quote.farmerId,
-        //     type: 'QUOTE_RECEIVED',
-        //     title: 'ได้รับใบเสนอราคา',
-        //     message: `คุณได้รับใบเสนอราคาเลขที่ ${quote.quoteNumber}`,
-        //     data: { quoteId: quote._id }
-        // });
+        // Send notification to farmer
+        const { sendNotification, NotifyType } = require('../services/NotificationService');
+        await sendNotification(quote.farmerId, NotifyType.QUOTE_RECEIVED, {
+            quoteId: quote._id,
+            quoteNumber: quote.quoteNumber,
+            amount: quote.totalAmount,
+            validUntil: quote.validUntil
+        });
 
         res.json({
             success: true,
@@ -246,6 +246,15 @@ const acceptQuote = async (req, res) => {
         await Application.findByIdAndUpdate(quote.applicationId, {
             status: APPLICATION_STATUS.AWAITING_PAYMENT,
             'teamQuote.acceptedAt': new Date()
+        });
+
+        // Send notification about new invoice
+        const { sendNotification, NotifyType } = require('../services/NotificationService');
+        await sendNotification(quote.farmerId, NotifyType.INVOICE_RECEIVED, {
+            invoiceId: invoice._id,
+            invoiceNumber: invoice.invoiceNumber,
+            amount: invoice.totalAmount,
+            applicationId: quote.applicationId
         });
 
         res.json({

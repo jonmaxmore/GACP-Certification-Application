@@ -19,7 +19,8 @@ Write-Host "==========================================" -ForegroundColor Cyan
 try {
     $null = Get-Command openapi-generator-cli -ErrorAction Stop
     Write-Host "✓ OpenAPI Generator CLI found" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "Installing OpenAPI Generator CLI..." -ForegroundColor Yellow
     npm install -g @openapitools/openapi-generator-cli
 }
@@ -35,7 +36,9 @@ $Services = @(
     "payment-service",
     "certificate-service",
     "audit-service",
-    "authentication-service"
+    "authentication-service",
+    "pricing-service",
+    "access-service"
 )
 
 Write-Host ""
@@ -54,10 +57,12 @@ foreach ($service in $Services) {
                 --additional-properties=supportsES6=true `
                 --skip-validate-spec 2>$null
             Write-Host "    ✓ Done" -ForegroundColor Green
-        } catch {
+        }
+        catch {
             Write-Host "    ⚠️ Warning: Some issues with $service" -ForegroundColor Yellow
         }
-    } else {
+    }
+    else {
         Write-Host "  ⏭️ Skipping: $service (spec not found)" -ForegroundColor Yellow
     }
 }
@@ -79,10 +84,12 @@ foreach ($service in $Services) {
                 --additional-properties=pubName=$pubName `
                 --skip-validate-spec 2>$null
             Write-Host "    ✓ Done" -ForegroundColor Green
-        } catch {
+        }
+        catch {
             Write-Host "    ⚠️ Warning: Some issues with $service" -ForegroundColor Yellow
         }
-    } else {
+    }
+    else {
         Write-Host "  ⏭️ Skipping: $service (spec not found)" -ForegroundColor Yellow
     }
 }

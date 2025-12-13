@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api from "@/services/apiClient";
+import { verifyStaffRole } from "@/hooks/useAccess";
 
 // Design tokens - exact match to Farmer Login
 const colors = {
@@ -101,10 +102,11 @@ export default function StaffLoginPage() {
 
         const user = result.data.data.user;
 
-        // Verify staff role
-        const staffRoles = ['REVIEWER_AUDITOR', 'SCHEDULER', 'ADMIN', 'SUPER_ADMIN'];
-        if (!staffRoles.includes(user.role)) {
-            setError("บัญชีนี้ไม่ใช่บัญชีเจ้าหน้าที่");
+        // ✅ ONE BRAIN: Ask backend to verify staff role
+        const verification = await verifyStaffRole(user.role);
+
+        if (!verification || !verification.isStaff) {
+            setError(verification?.message || "บัญชีนี้ไม่ใช่บัญชีเจ้าหน้าที่");
             setIsLoading(false);
             return;
         }
@@ -116,12 +118,8 @@ export default function StaffLoginPage() {
 
         setIsLoading(false);
 
-        // Redirect based on role
-        if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
-            router.push("/admin");
-        } else {
-            router.push("/staff/dashboard");
-        }
+        // ✅ ONE BRAIN: Backend tells us where to redirect
+        router.push(verification.redirect);
     };
 
     return (

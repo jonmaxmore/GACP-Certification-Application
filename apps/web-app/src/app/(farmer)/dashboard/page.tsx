@@ -250,9 +250,44 @@ export default function DashboardPage() {
 
     if (!user || !mounted || isRedirecting) {
         return (
-            <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: t.bg }}>
-                <div className="spinner" style={{ width: 40, height: 40, border: `3px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%" }} />
-                <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } } .spinner { animation: spin 1s linear infinite; }`}</style>
+            <div style={{ minHeight: "100vh", backgroundColor: t.bg }}>
+                {/* Skeleton Loading for better perceived performance */}
+                <div style={{ padding: "32px 40px", maxWidth: "1400px", marginLeft: "72px" }}>
+                    {/* Header Skeleton */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
+                        <div>
+                            <div style={{ width: 100, height: 16, backgroundColor: `${t.text}10`, borderRadius: 8, marginBottom: 8 }} />
+                            <div style={{ width: 200, height: 32, backgroundColor: `${t.text}10`, borderRadius: 8 }} />
+                        </div>
+                        <div style={{ width: 140, height: 44, backgroundColor: `${t.accent}20`, borderRadius: 12 }} />
+                    </div>
+
+                    {/* Stats Skeleton */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} style={{ backgroundColor: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 16, padding: 20 }}>
+                                <div style={{ width: 80, height: 14, backgroundColor: `${t.text}08`, borderRadius: 6, marginBottom: 12 }} />
+                                <div style={{ width: 60, height: 40, backgroundColor: `${t.accent}15`, borderRadius: 8 }} />
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Content Skeleton */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 24 }}>
+                        <div style={{ backgroundColor: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 20, padding: 28, height: 200 }} />
+                        <div style={{ backgroundColor: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 20, padding: 24, height: 200 }} />
+                    </div>
+                </div>
+
+                {/* Shimmer animation */}
+                <style jsx>{`
+                    @keyframes shimmer {
+                        0% { opacity: 0.5; }
+                        50% { opacity: 1; }
+                        100% { opacity: 0.5; }
+                    }
+                    div[style*="backgroundColor"] { animation: shimmer 1.5s infinite; }
+                `}</style>
             </div>
         );
     }
@@ -304,19 +339,31 @@ export default function DashboardPage() {
 
                 {/* Theme Toggle + Logout */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-                    <button onClick={toggleTheme} className="icon-btn" style={{
-                        width: "40px", height: "40px", borderRadius: "12px",
-                        backgroundColor: t.iconBg, border: `1px solid ${t.accent}30`, cursor: "pointer",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        transition: "all 0.2s",
-                    }}>
+                    <button
+                        onClick={toggleTheme}
+                        className="icon-btn"
+                        aria-label={isDark ? "เปลี่ยนเป็นโหมดสว่าง" : "เปลี่ยนเป็นโหมดมืด"}
+                        title={isDark ? "โหมดสว่าง" : "โหมดมืด"}
+                        style={{
+                            width: "40px", height: "40px", borderRadius: "12px",
+                            backgroundColor: t.iconBg, border: `1px solid ${t.accent}30`, cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            transition: "all 0.2s",
+                        }}
+                    >
                         {isDark ? Icons.sun(t.iconColor) : Icons.moon(t.iconColor)}
                     </button>
-                    <button onClick={handleLogout} className="icon-btn" style={{
-                        width: "40px", height: "40px", borderRadius: "12px",
-                        background: "transparent", border: "none", cursor: "pointer",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                    }}>
+                    <button
+                        onClick={handleLogout}
+                        className="icon-btn"
+                        aria-label="ออกจากระบบ"
+                        title="ออกจากระบบ"
+                        style={{
+                            width: "40px", height: "40px", borderRadius: "12px",
+                            background: "transparent", border: "none", cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                        }}
+                    >
                         {Icons.logout(t.textMuted)}
                     </button>
                 </div>

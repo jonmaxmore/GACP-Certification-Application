@@ -1,24 +1,15 @@
-import 'package:flutter/foundation.dart';
+// Flutter foundation now imported via api_config.dart
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'app_exception.dart';
+import '../config/api_config.dart';
 
 class DioClient {
   final Dio _dio;
   final FlutterSecureStorage _storage;
 
-  // Dynamic Base URL based on platform
-  static String get _baseUrl {
-    if (kIsWeb) return 'http://localhost:3000/api';
-    try {
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        return 'http://10.0.2.2:3000/api'; // Android Emulator
-      } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-        return 'http://localhost:3000/api'; // iOS Simulator
-      }
-    } catch (_) {}
-    return 'http://localhost:3000/api'; // Fallback
-  }
+  // Use centralized API config - SINGLE SOURCE OF TRUTH
+  static String get _baseUrl => ApiConfig.baseUrl;
 
   DioClient(this._storage)
       : _dio = Dio(

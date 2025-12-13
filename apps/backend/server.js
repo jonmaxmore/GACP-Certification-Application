@@ -22,7 +22,7 @@ const EstablishmentRoutes = require('./modules/Establishment');
 const v2Routes = require('./routes/v2');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000; // Default 5000 for backend
 
 const path = require('path');
 
@@ -84,18 +84,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// Connect to Database and Redis
-if (process.env.NODE_ENV !== 'test') {
-    databaseService.connect().catch(err => {
-        logger.error('Failed to connect to database', err);
-        process.exit(1);
-    });
-
-    // Connect to Redis (non-blocking, graceful degradation)
-    redisService.connect().catch(err => {
-        logger.warn('Redis unavailable - running without cache:', err.message);
-    });
-}
+// NOTE: Database and Redis connection moved to after app.listen() for graceful degradation
 
 // Mount Routes
 app.use('/api/auth-farmer', AuthFarmerRoutes);
@@ -136,10 +125,26 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start Server
+// Start Server - IMMEDIATELY, before database connection
 if (require.main === module) {
     app.listen(port, '0.0.0.0', () => {
         logger.info(`✅ Production Server running on port ${port}`);
+        logger.info(`📡 Server accepting requests (database connecting in background...)`);
+
+        // Connect to database AFTER server is already listening
+        if (process.env.NODE_ENV !== 'test') {
+            setImmediate(() => {
+                databaseService.connect()
+                    .then(() => logger.info('✅ Database connected successfully'))
+                    .catch(err => {
+                        logger.warn('⚠️ Database unavailable - running with limited functionality:', err.message);
+                    });
+
+                redisService.connect().catch(err => {
+                    logger.warn('⚠️ Redis unavailable - running without cache:', err.message);
+                });
+            });
+        }
     });
 }
 

@@ -40,7 +40,10 @@ class ProductionDatabaseService {
       logger.info('Connecting to MongoDB Atlas...');
       console.log('DEBUG: Connecting to MongoDB URI:', mongoUri);
 
-      await mongoose.connect(mongoUri);
+      await mongoose.connect(mongoUri, {
+        serverSelectionTimeoutMS: 10000, // 10 second timeout
+        connectTimeoutMS: 10000,
+      });
 
       this.connection = mongoose.connection;
       this.isConnected = true;
@@ -98,10 +101,8 @@ class ProductionDatabaseService {
    */
   async handleReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      logger.error('Max reconnection attempts reached. Exiting...');
-      if (process.env.NODE_ENV !== 'test') {
-        process.exit(1);
-      }
+      logger.warn('Max reconnection attempts reached. Running without database.');
+      // Don't exit - allow server to run with limited functionality
       return;
     }
 

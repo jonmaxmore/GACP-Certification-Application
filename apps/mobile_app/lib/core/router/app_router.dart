@@ -40,6 +40,13 @@ import '../../presentation/features/application/screens/wizard_steps/step_6_prod
 import '../../presentation/features/application/screens/wizard_steps/step_7_documents.dart';
 import '../../presentation/features/application/screens/wizard_steps/step_8_review.dart';
 
+// New Feature Screens - Synced with Web
+import '../../presentation/features/profile/profile_screen.dart';
+import '../../presentation/features/notifications/notifications_screen.dart';
+import '../../presentation/features/certificates/certificates_screen.dart';
+import '../../presentation/features/documents/documents_screen.dart';
+import '../../presentation/features/tracking/tracking_screen.dart';
+
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -231,7 +238,28 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/profile',
-            builder: (context, state) => const UserProfileScreen(),
+            builder: (context, state) =>
+                const ProfileScreen(), // New synced screen
+          ),
+          GoRoute(
+            path: '/notifications',
+            builder: (context, state) =>
+                const NotificationsScreen(), // New synced screen
+          ),
+          GoRoute(
+            path: '/certificates',
+            builder: (context, state) =>
+                const CertificatesScreen(), // New synced screen
+          ),
+          GoRoute(
+            path: '/documents',
+            builder: (context, state) =>
+                const DocumentsScreen(), // New synced screen
+          ),
+          GoRoute(
+            path: '/tracking',
+            builder: (context, state) =>
+                const TrackingScreen(), // New synced screen
           ),
           GoRoute(
             path: '/application/tracking',

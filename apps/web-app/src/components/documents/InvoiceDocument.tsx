@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useInvoice, DEFAULT_FEES } from "@/hooks/usePricing";
 
 interface InvoiceDocumentProps {
     invoiceNumber: string;
@@ -253,8 +254,26 @@ export default function InvoiceDocument({
     );
 }
 
-// Demo with Phase 1 invoice (5,000 baht)
+// Demo with Phase 1 invoice - fetches price from API (One Brain, Many Faces)
 export function InvoiceDocumentDemoPhase1() {
+    const { invoice, loading, error } = useInvoice('phase1');
+
+    // Use API data or fallback
+    const amount = invoice?.amount ?? DEFAULT_FEES.applicationFee;
+    const description = invoice?.description ?? 'ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น';
+
+    if (loading) {
+        return (
+            <div style={{ padding: "40px", textAlign: "center" }}>
+                <div>กำลังโหลดข้อมูลใบแจ้งหนี้...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        console.warn('Using fallback prices for Phase 1:', error);
+    }
+
     return (
         <InvoiceDocument
             invoiceNumber="GI-021268017"
@@ -267,16 +286,34 @@ export function InvoiceDocumentDemoPhase1() {
             applicantPhone="คุณบุญจวบริทนร์ ปวงรี โทรศัพท์ 0851914649"
             invoicePhase={1}
             items={[
-                { description: "ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น", quantity: 1, unitPrice: 5000 },
+                { description, quantity: 1, unitPrice: amount },
             ]}
-            totalAmount={5000}
+            totalAmount={amount}
             totalAmountText="ห้าพันบาทถ้วน"
         />
     );
 }
 
-// Demo with Phase 2 invoice (25,000 baht)
+// Demo with Phase 2 invoice - fetches price from API (One Brain, Many Faces)
 export function InvoiceDocumentDemoPhase2() {
+    const { invoice, loading, error } = useInvoice('phase2');
+
+    // Use API data or fallback
+    const amount = invoice?.amount ?? DEFAULT_FEES.inspectionFee;
+    const description = invoice?.description ?? 'ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน';
+
+    if (loading) {
+        return (
+            <div style={{ padding: "40px", textAlign: "center" }}>
+                <div>กำลังโหลดข้อมูลใบแจ้งหนี้...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        console.warn('Using fallback prices for Phase 2:', error);
+    }
+
     return (
         <InvoiceDocument
             invoiceNumber="GI-021268018"
@@ -289,10 +326,11 @@ export function InvoiceDocumentDemoPhase2() {
             applicantPhone="คุณบุญจวบริทนร์ ปวงรี โทรศัพท์ 0851914649"
             invoicePhase={2}
             items={[
-                { description: "ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน", quantity: 1, unitPrice: 25000 },
+                { description, quantity: 1, unitPrice: amount },
             ]}
-            totalAmount={25000}
+            totalAmount={amount}
             totalAmountText="สองหมื่นห้าพันบาทถ้วน"
         />
     );
 }
+

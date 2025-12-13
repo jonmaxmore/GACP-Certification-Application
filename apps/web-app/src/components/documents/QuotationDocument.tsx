@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { usePricing, generateQuotationItems, DEFAULT_FEES } from "@/hooks/usePricing";
 
 interface QuotationDocumentProps {
     quotationNumber: string;
@@ -238,8 +239,26 @@ export default function QuotationDocument({
     );
 }
 
-// Default export with sample data for demo
+// Demo component that fetches prices from API (One Brain, Many Faces)
 export function QuotationDocumentDemo() {
+    const { fees, loading, error } = usePricing();
+
+    // Use API fees or fallback to defaults
+    const items = generateQuotationItems(fees, true); // true = include inspection fee
+    const totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+
+    if (loading) {
+        return (
+            <div style={{ padding: "40px", textAlign: "center" }}>
+                <div>กำลังโหลดข้อมูลราคา...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        console.warn('Using fallback prices:', error);
+    }
+
     return (
         <QuotationDocument
             quotationNumber="G-011268017"
@@ -249,12 +268,10 @@ export function QuotationDocumentDemo() {
             applicantTaxId="0835566002415"
             applicantAddress="เลขที่ 209/44 หมู่ 5 ต.เกาะแก้ว ชะอำ อ.อกอลาง จ.หมู่กลูเกลต 83110"
             applicantPhone="คุณบุญจวบริทนร์ ปวงรี โทรศัพท์ 0851914649"
-            items={[
-                { description: "ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น", quantity: 1, unitPrice: 5000 },
-                { description: "ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน", quantity: 1, unitPrice: 25000 },
-            ]}
-            totalAmount={30000}
+            items={items}
+            totalAmount={totalAmount}
             totalAmountText="สามหมื่นบาทถ้วน"
         />
     );
 }
+

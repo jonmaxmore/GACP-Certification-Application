@@ -420,17 +420,50 @@ function setupPerformanceMiddleware(app) {
   });
 }
 
-// Auto-optimization scheduler
-setInterval(() => {
-  performanceOptimizer.autoOptimize();
-}, 60000); // Every minute
+// Auto-optimization scheduler (only in production)
+let autoOptimizeInterval = null;
+
+function startAutoOptimization() {
+  // Skip in test environment to prevent Jest hanging
+  if (process.env.NODE_ENV === 'test') {
+    console.log('⏭️  Auto-optimization skipped (test mode)');
+    return;
+  }
+
+  if (autoOptimizeInterval) {
+    console.log('⚠️  Auto-optimization already running');
+    return;
+  }
+
+  autoOptimizeInterval = setInterval(() => {
+    performanceOptimizer.autoOptimize();
+  }, 60000); // Every minute
+
+  console.log('✅ Auto-optimization started');
+}
+
+function stopAutoOptimization() {
+  if (autoOptimizeInterval) {
+    clearInterval(autoOptimizeInterval);
+    autoOptimizeInterval = null;
+    console.log('⏹️  Auto-optimization stopped');
+  }
+}
 
 // Graceful shutdown handling
-process.on('SIGTERM', () => performanceOptimizer.gracefulShutdown());
-process.on('SIGINT', () => performanceOptimizer.gracefulShutdown());
+process.on('SIGTERM', () => {
+  stopAutoOptimization();
+  performanceOptimizer.gracefulShutdown();
+});
+process.on('SIGINT', () => {
+  stopAutoOptimization();
+  performanceOptimizer.gracefulShutdown();
+});
 
 module.exports = {
   PerformanceOptimizer,
   performanceOptimizer,
   setupPerformanceMiddleware,
+  startAutoOptimization,
+  stopAutoOptimization,
 };

@@ -233,13 +233,8 @@ const certificateSchema = new mongoose.Schema(
 );
 
 // Indexes for performance
-certificateSchema.index({ certificateNumber: 1 }, { unique: true });
-certificateSchema.index({ applicationId: 1 });
-certificateSchema.index({ farmId: 1 });
-certificateSchema.index({ userId: 1 });
-certificateSchema.index({ status: 1 });
-certificateSchema.index({ expiryDate: 1 });
-certificateSchema.index({ verificationCode: 1 });
+// Note: certificateNumber has unique:true + index:true in schema
+// Note: applicationId, farmId, userId, status, expiryDate, verificationCode have index:true in schema
 certificateSchema.index({ issuedDate: -1 });
 
 // Compound indexes

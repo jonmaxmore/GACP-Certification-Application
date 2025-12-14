@@ -117,6 +117,6 @@ QuoteSchema.pre('save', function (next) {
 QuoteSchema.index({ applicationId: 1 });
 QuoteSchema.index({ farmerId: 1 });
 QuoteSchema.index({ status: 1 });
-QuoteSchema.index({ quoteNumber: 1 }, { unique: true });
+// Note: quoteNumber already has unique:true in schema definition
 
 module.exports = mongoose.model('Quote', QuoteSchema);

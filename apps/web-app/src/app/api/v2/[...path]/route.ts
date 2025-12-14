@@ -47,7 +47,9 @@ async function proxyRequest(request: NextRequest, path: string, method: string) 
             body,
         });
 
-        const data = await response.json();
+        // Use text() then JSON.parse to avoid stream issues
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
 
         return NextResponse.json(data, { status: response.status });
     } catch (error) {

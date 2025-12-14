@@ -1,20 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import api from "@/services/apiClient";
 
 interface AuditItem {
-    id: string;
-    applicantName: string;
-    plantType: string;
-    auditType: "ONLINE" | "ONSITE";
+    _id: string;
+    auditNumber: string;
+    applicationNumber: string;
+    farmerName: string;
+    plantType?: string;
+    auditMode: "ONLINE" | "ONSITE" | "HYBRID";
     status: string;
     scheduledDate?: string;
     scheduledTime?: string;
-    vdoCallLink?: string;
-    location?: string;
-    assignedTo?: string;
+    onlineSession?: {
+        meetingUrl?: string;
+    };
+    farmLocation?: {
+        address?: string;
+        province?: string;
+    };
+    auditorName?: string;
+}
+
+interface ApplicationItem {
+    _id: string;
+    applicationNumber: string;
+    farmerName?: string;
+    firstName?: string;
+    lastName?: string;
+    plantType?: string;
+    status: string;
 }
 
 interface StaffUser {
@@ -28,16 +46,40 @@ export default function StaffCalendarPage() {
     const router = useRouter();
     const [user, setUser] = useState<StaffUser | null>(null);
     const [audits, setAudits] = useState<AuditItem[]>([]);
+    const [pendingApplications, setPendingApplications] = useState<ApplicationItem[]>([]);
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0]);
     const [showScheduleModal, setShowScheduleModal] = useState(false);
-    const [selectedAudit, setSelectedAudit] = useState<AuditItem | null>(null);
+    const [selectedApplication, setSelectedApplication] = useState<ApplicationItem | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Schedule form
     const [scheduleDate, setScheduleDate] = useState("");
     const [scheduleTime, setScheduleTime] = useState("");
-    const [auditType, setAuditType] = useState<"ONLINE" | "ONSITE">("ONLINE");
+    const [auditMode, setAuditMode] = useState<"ONLINE" | "ONSITE">("ONLINE");
     const [vdoLink, setVdoLink] = useState("");
     const [location, setLocation] = useState("");
+
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            // Fetch scheduled audits
+            const auditsResult = await api.get<{ data: { audits: AuditItem[] } }>(`/v2/field-audits/my-schedule?date=${selectedDate}`);
+            if (auditsResult.success && auditsResult.data?.data?.audits) {
+                setAudits(auditsResult.data.data.audits);
+            }
+
+            // Fetch pending applications (would need applications API)
+            // For now, use mock data
+            setPendingApplications([
+                { _id: "1", applicationNumber: "REQ-2567-0010", firstName: "นายวิชัย", lastName: "สมบูรณ์", plantType: "ขิง", status: "WAITING_SCHEDULE" },
+                { _id: "2", applicationNumber: "REQ-2567-0012", firstName: "นางมะลิ", lastName: "ใจงาม", plantType: "ไพล", status: "WAITING_SCHEDULE" },
+            ]);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [selectedDate]);
 
     useEffect(() => {
         const token = localStorage.getItem("staff_token");
@@ -55,20 +97,14 @@ export default function StaffCalendarPage() {
             router.push("/staff/login");
         }
 
-        // Mock audit data
-        setAudits([
-            { id: "REQ-2567-0010", applicantName: "นายวิชัย สมบูรณ์", plantType: "ขิง", auditType: "ONLINE", status: "WAITING_SCHEDULE", assignedTo: "สมชาย" },
-            { id: "REQ-2567-0008", applicantName: "กลุ่มเกษตรอินทรีย์", plantType: "กระชายดำ", auditType: "ONLINE", status: "SCHEDULED", scheduledDate: "2024-12-12", scheduledTime: "10:00", vdoCallLink: "https://meet.google.com/abc-defg-hij", assignedTo: "สมชาย" },
-            { id: "REQ-2567-0005", applicantName: "นางมะลิ ใจงาม", plantType: "ไพล", auditType: "ONSITE", status: "SCHEDULED", scheduledDate: "2024-12-15", scheduledTime: "09:00", location: "จ.เชียงใหม่", assignedTo: "สมหญิง" },
-            { id: "REQ-2567-0003", applicantName: "บริษัท สมุนไพรดี จำกัด", plantType: "กัญชา", auditType: "ONLINE", status: "SCHEDULED", scheduledDate: "2024-12-10", scheduledTime: "14:00", vdoCallLink: "https://zoom.us/j/123456789", assignedTo: "สมชาย" },
-        ]);
-    }, [router]);
+        fetchData();
+    }, [router, fetchData]);
 
-    const handleSchedule = (audit: AuditItem) => {
-        setSelectedAudit(audit);
+    const handleSchedule = (application: ApplicationItem) => {
+        setSelectedApplication(application);
         setScheduleDate("");
         setScheduleTime("");
-        setAuditType("ONLINE");
+        setAuditMode("ONLINE");
         setVdoLink("");
         setLocation("");
         setShowScheduleModal(true);
@@ -83,26 +119,34 @@ export default function StaffCalendarPage() {
         setVdoLink(`https://meet.google.com/${part1}-${part2}-${part3}`);
     };
 
-    const handleSubmitSchedule = () => {
-        if (!selectedAudit || !scheduleDate || !scheduleTime) return;
-        if (auditType === "ONLINE" && !vdoLink) return;
-        if (auditType === "ONSITE" && !location) return;
+    const handleSubmitSchedule = async () => {
+        if (!selectedApplication || !scheduleDate || !scheduleTime) return;
+        if (auditMode === "ONLINE" && !vdoLink) return;
+        if (auditMode === "ONSITE" && !location) return;
 
-        // Update audit
-        setAudits(audits.map(a =>
-            a.id === selectedAudit.id
-                ? { ...a, status: "SCHEDULED", scheduledDate: scheduleDate, scheduledTime: scheduleTime, auditType, vdoCallLink: vdoLink, location }
-                : a
-        ));
+        try {
+            // Call API to create audit
+            await api.post("/v2/field-audits", {
+                applicationId: selectedApplication._id,
+                auditMode,
+                scheduledDate: scheduleDate,
+                scheduledTime: scheduleTime,
+                auditorId: user?.id,
+            });
 
-        setShowScheduleModal(false);
-        setSelectedAudit(null);
+            // Refresh data
+            await fetchData();
+            setShowScheduleModal(false);
+            setSelectedApplication(null);
+        } catch (error) {
+            console.error("Error creating audit:", error);
+            alert("เกิดข้อผิดพลาดในการสร้างนัดหมาย");
+        }
     };
 
-    const todayAudits = audits.filter(a => a.scheduledDate === selectedDate && a.status === "SCHEDULED");
-    const pendingSchedule = audits.filter(a => a.status === "WAITING_SCHEDULE");
+    const todayAudits = audits.filter(a => a.scheduledDate?.split("T")[0] === selectedDate && a.status === "SCHEDULED");
 
-    if (!user) {
+    if (isLoading || !user) {
         return <div className="min-h-screen flex items-center justify-center bg-slate-900"><div className="animate-spin text-4xl">⏳</div></div>;
     }
 
@@ -128,27 +172,27 @@ export default function StaffCalendarPage() {
                     <div className="lg:col-span-1">
                         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                             <div className="px-6 py-4 border-b bg-amber-50">
-                                <h3 className="font-semibold text-amber-800">⏳ รอจัดคิว ({pendingSchedule.length})</h3>
+                                <h3 className="font-semibold text-amber-800">⏳ รอจัดคิว ({pendingApplications.length})</h3>
                             </div>
                             <div className="divide-y">
-                                {pendingSchedule.map(audit => (
-                                    <div key={audit.id} className="p-4 hover:bg-slate-50">
+                                {pendingApplications.map(app => (
+                                    <div key={app._id} className="p-4 hover:bg-slate-50">
                                         <div className="flex justify-between items-start mb-2">
                                             <div>
-                                                <p className="font-mono text-sm text-slate-500">{audit.id}</p>
-                                                <p className="font-medium">{audit.applicantName}</p>
-                                                <p className="text-sm text-slate-500">{audit.plantType}</p>
+                                                <p className="font-mono text-sm text-slate-500">{app.applicationNumber}</p>
+                                                <p className="font-medium">{app.firstName} {app.lastName}</p>
+                                                <p className="text-sm text-slate-500">{app.plantType}</p>
                                             </div>
                                         </div>
                                         <button
-                                            onClick={() => handleSchedule(audit)}
+                                            onClick={() => handleSchedule(app)}
                                             className="w-full mt-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700"
                                         >
                                             📅 จัดนัดหมาย
                                         </button>
                                     </div>
                                 ))}
-                                {pendingSchedule.length === 0 && (
+                                {pendingApplications.length === 0 && (
                                     <div className="p-8 text-center text-slate-400">
                                         <p className="text-4xl mb-2">✅</p>
                                         <p>ไม่มีรายการรอจัดคิว</p>
@@ -191,7 +235,7 @@ export default function StaffCalendarPage() {
                             {todayAudits.length > 0 ? (
                                 <div className="divide-y">
                                     {todayAudits.map(audit => (
-                                        <div key={audit.id} className="p-6 hover:bg-slate-50">
+                                        <div key={audit._id} className="p-6 hover:bg-slate-50">
                                             <div className="flex justify-between items-start">
                                                 <div className="flex gap-4">
                                                     <div className="text-center">
@@ -199,24 +243,24 @@ export default function StaffCalendarPage() {
                                                         <p className="text-xs text-slate-500">น.</p>
                                                     </div>
                                                     <div>
-                                                        <p className="font-mono text-sm text-slate-500">{audit.id}</p>
-                                                        <p className="font-medium text-lg">{audit.applicantName}</p>
+                                                        <p className="font-mono text-sm text-slate-500">{audit.auditNumber}</p>
+                                                        <p className="font-medium text-lg">{audit.farmerName}</p>
                                                         <p className="text-sm text-slate-500">{audit.plantType}</p>
                                                         <div className="mt-2 flex items-center gap-2">
-                                                            {audit.auditType === "ONLINE" ? (
+                                                            {audit.auditMode === "ONLINE" ? (
                                                                 <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">📹 Online</span>
                                                             ) : (
                                                                 <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">📍 On-site</span>
                                                             )}
-                                                            <span className="text-xs text-slate-500">ผู้ตรวจ: {audit.assignedTo}</span>
+                                                            {audit.auditorName && <span className="text-xs text-slate-500">ผู้ตรวจ: {audit.auditorName}</span>}
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 <div className="text-right">
-                                                    {audit.auditType === "ONLINE" && audit.vdoCallLink && (
+                                                    {audit.auditMode === "ONLINE" && audit.onlineSession?.meetingUrl && (
                                                         <a
-                                                            href={audit.vdoCallLink}
+                                                            href={audit.onlineSession.meetingUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors"
@@ -225,12 +269,12 @@ export default function StaffCalendarPage() {
                                                             <span className="font-semibold">เข้าห้อง VDO Call</span>
                                                         </a>
                                                     )}
-                                                    {audit.auditType === "ONSITE" && audit.location && (
+                                                    {audit.auditMode === "ONSITE" && audit.farmLocation && (
                                                         <div className="text-right">
                                                             <p className="text-sm text-slate-500">สถานที่:</p>
-                                                            <p className="font-medium">{audit.location}</p>
+                                                            <p className="font-medium">{audit.farmLocation.address || audit.farmLocation.province}</p>
                                                             <a
-                                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(audit.location)}`}
+                                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(audit.farmLocation.address || audit.farmLocation.province || "")}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="inline-flex items-center gap-2 mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
@@ -256,7 +300,7 @@ export default function StaffCalendarPage() {
             </main>
 
             {/* Schedule Modal */}
-            {showScheduleModal && selectedAudit && (
+            {showScheduleModal && selectedApplication && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
                         <div className="px-6 py-4 border-b flex justify-between items-center">
@@ -267,9 +311,9 @@ export default function StaffCalendarPage() {
                         <div className="p-6 space-y-4">
                             {/* Applicant Info */}
                             <div className="p-4 bg-slate-50 rounded-xl">
-                                <p className="font-mono text-sm text-slate-500">{selectedAudit.id}</p>
-                                <p className="font-semibold text-lg">{selectedAudit.applicantName}</p>
-                                <p className="text-slate-500">{selectedAudit.plantType}</p>
+                                <p className="font-mono text-sm text-slate-500">{selectedApplication.applicationNumber}</p>
+                                <p className="font-semibold text-lg">{selectedApplication.firstName} {selectedApplication.lastName}</p>
+                                <p className="text-slate-500">{selectedApplication.plantType}</p>
                             </div>
 
                             {/* Date & Time */}
@@ -295,14 +339,14 @@ export default function StaffCalendarPage() {
                                 </div>
                             </div>
 
-                            {/* Audit Type */}
+                            {/* Audit Mode */}
                             <div>
                                 <label className="block text-sm text-slate-600 mb-2">รูปแบบการตรวจ</label>
                                 <div className="flex gap-4">
                                     <button
                                         type="button"
-                                        onClick={() => setAuditType("ONLINE")}
-                                        className={`flex-1 p-4 rounded-xl border-2 transition-all ${auditType === "ONLINE" ? "border-blue-500 bg-blue-50" : "border-slate-200"
+                                        onClick={() => setAuditMode("ONLINE")}
+                                        className={`flex-1 p-4 rounded-xl border-2 transition-all ${auditMode === "ONLINE" ? "border-blue-500 bg-blue-50" : "border-slate-200"
                                             }`}
                                     >
                                         <span className="text-2xl">📹</span>
@@ -311,8 +355,8 @@ export default function StaffCalendarPage() {
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => setAuditType("ONSITE")}
-                                        className={`flex-1 p-4 rounded-xl border-2 transition-all ${auditType === "ONSITE" ? "border-purple-500 bg-purple-50" : "border-slate-200"
+                                        onClick={() => setAuditMode("ONSITE")}
+                                        className={`flex-1 p-4 rounded-xl border-2 transition-all ${auditMode === "ONSITE" ? "border-purple-500 bg-purple-50" : "border-slate-200"
                                             }`}
                                     >
                                         <span className="text-2xl">📍</span>
@@ -323,7 +367,7 @@ export default function StaffCalendarPage() {
                             </div>
 
                             {/* VDO Link or Location */}
-                            {auditType === "ONLINE" ? (
+                            {auditMode === "ONLINE" ? (
                                 <div>
                                     <label className="block text-sm text-slate-600 mb-1">ลิงก์ VDO Call</label>
                                     <div className="flex gap-2">
@@ -369,7 +413,7 @@ export default function StaffCalendarPage() {
                                 <button
                                     type="button"
                                     onClick={handleSubmitSchedule}
-                                    disabled={!scheduleDate || !scheduleTime || (auditType === "ONLINE" && !vdoLink) || (auditType === "ONSITE" && !location)}
+                                    disabled={!scheduleDate || !scheduleTime || (auditMode === "ONLINE" && !vdoLink) || (auditMode === "ONSITE" && !location)}
                                     className="flex-1 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50"
                                 >
                                     ✅ ยืนยันนัดหมาย

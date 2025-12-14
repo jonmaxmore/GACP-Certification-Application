@@ -81,45 +81,55 @@ export default function StaffLoginPage() {
             return;
         }
 
-        // Use centralized API client with retry and error handling
-        const result = await api.post<{
-            data: {
-                token?: string;
-                tokens?: { accessToken: string };
-                user: { role: string;[key: string]: unknown };
-            };
-        }>("/v2/auth/login", {
-            accountType: "STAFF",
-            email,
-            password,
-        });
+        try {
+            // Use new staff auth endpoint
+            const result = await api.post<{
+                data: {
+                    token?: string;
+                    user: {
+                        role: string;
+                        roleDisplayName?: string;
+                        permissions?: string[];
+                        dashboardUrl?: string;
+                        [key: string]: unknown
+                    };
+                };
+            }>("/v2/auth-staff/login", {
+                username: email, // API accepts username or email
+                password,
+                userType: "DTAM_STAFF",
+            });
 
-        if (!result.success) {
-            setError(result.error);
+            if (!result.success) {
+                setError(result.error);
+                setIsLoading(false);
+                return;
+            }
+
+            const { user, token } = result.data.data;
+
+            // Validate staff role
+            const staffRoles = ['REVIEWER_AUDITOR', 'SCHEDULER', 'ACCOUNTANT', 'ADMIN', 'SUPER_ADMIN', 'admin', 'reviewer', 'manager', 'inspector'];
+            if (!staffRoles.includes(user.role)) {
+                setError("บัญชีนี้ไม่ใช่บัญชีเจ้าหน้าที่");
+                setIsLoading(false);
+                return;
+            }
+
+            // Save token and user
+            localStorage.setItem("staff_token", token || "");
+            localStorage.setItem("staff_user", JSON.stringify(user));
+
             setIsLoading(false);
-            return;
-        }
 
-        const user = result.data.data.user;
-
-        // ✅ ONE BRAIN: Ask backend to verify staff role
-        const verification = await verifyStaffRole(user.role);
-
-        if (!verification || !verification.isStaff) {
-            setError(verification?.message || "บัญชีนี้ไม่ใช่บัญชีเจ้าหน้าที่");
+            // Navigate to dashboard URL from backend (or default)
+            const dashboardUrl = user.dashboardUrl || "/staff/dashboard";
+            router.push(dashboardUrl);
+        } catch (err) {
+            console.error("Login error:", err);
+            setError("เกิดข้อผิดพลาดในการเข้าสู่ระบบ");
             setIsLoading(false);
-            return;
         }
-
-        // Save token
-        const token = result.data.data.tokens?.accessToken || result.data.data.token;
-        localStorage.setItem("staff_token", token || "");
-        localStorage.setItem("staff_user", JSON.stringify(user));
-
-        setIsLoading(false);
-
-        // ✅ ONE BRAIN: Backend tells us where to redirect
-        router.push(verification.redirect);
     };
 
     return (

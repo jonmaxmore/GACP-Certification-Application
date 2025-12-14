@@ -104,6 +104,6 @@ InvoiceSchema.pre('save', function (next) {
 InvoiceSchema.index({ applicationId: 1 });
 InvoiceSchema.index({ farmerId: 1 });
 InvoiceSchema.index({ status: 1 });
-InvoiceSchema.index({ invoiceNumber: 1 }, { unique: true });
+// Note: invoiceNumber already has unique:true in schema definition
 
 module.exports = mongoose.model('Invoice', InvoiceSchema);

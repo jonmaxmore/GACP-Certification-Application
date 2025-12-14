@@ -90,7 +90,7 @@ const plantMasterSchema = new mongoose.Schema(
 );
 
 // Indexes
-plantMasterSchema.index({ plantId: 1 }, { unique: true });
+// Note: plantId already has unique:true in schema definition
 plantMasterSchema.index({ group: 1, isActive: 1 });
 plantMasterSchema.index({ sortOrder: 1 });
 

@@ -68,8 +68,30 @@ function cleanExpired() {
     }
 }
 
-// Clean every minute
-setInterval(cleanExpired, 60 * 1000);
+// Cleanup interval reference
+let cleanupInterval = null;
+
+/**
+ * Start cleanup interval (call in production)
+ */
+function startCleanup() {
+    if (process.env.NODE_ENV === 'test') {
+        return;
+    }
+    if (!cleanupInterval) {
+        cleanupInterval = setInterval(cleanExpired, 60 * 1000);
+    }
+}
+
+/**
+ * Stop cleanup interval
+ */
+function stopCleanup() {
+    if (cleanupInterval) {
+        clearInterval(cleanupInterval);
+        cleanupInterval = null;
+    }
+}
 
 /**
  * Rate Limiting Middleware
@@ -155,5 +177,8 @@ function strictRateLimiter(windowMs, maxRequests) {
 module.exports = {
     rateLimiter,
     strictRateLimiter,
-    RATE_LIMITS
+    RATE_LIMITS,
+    startCleanup,
+    stopCleanup
 };
+

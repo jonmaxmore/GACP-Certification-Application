@@ -275,11 +275,32 @@ function formatUptime(uptime) {
   return `${days}d ${hours % 24}h ${minutes % 60}m ${seconds % 60}s`;
 }
 
-// Periodically collect system metrics
+// Metrics collection interval reference
+let metricsInterval = null;
+
+// Start periodic system metrics collection
+function startMetricsCollection() {
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
+  if (!metricsInterval) {
+    metricsInterval = setInterval(async () => {
+      await getSystemHealth();
+    }, 60000); // Every minute
+  }
+}
+
+// Stop metrics collection
+function stopMetricsCollection() {
+  if (metricsInterval) {
+    clearInterval(metricsInterval);
+    metricsInterval = null;
+  }
+}
+
+// Legacy function for backwards compatibility
 function collectSystemMetrics() {
-  setInterval(async () => {
-    await getSystemHealth();
-  }, 60000); // Every minute
+  startMetricsCollection();
 }
 
 // Reset metrics (e.g., after reporting to external system)
@@ -331,4 +352,7 @@ module.exports = {
   getSystemHealth,
   checkStorageHealth,
   resetMetrics,
+  startMetricsCollection,
+  stopMetricsCollection,
 };
+

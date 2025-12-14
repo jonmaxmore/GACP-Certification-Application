@@ -285,10 +285,26 @@ const memoryMonitor = {
     }
   },
 
+  // Interval reference
+  _monitoringInterval: null,
+
   startMemoryMonitoring: (interval = 60000) => {
-    setInterval(() => {
-      memoryMonitor.logMemoryUsage();
-    }, interval);
+    // Skip in test environment to prevent Jest hanging
+    if (process.env.NODE_ENV === 'test') {
+      return;
+    }
+    if (!memoryMonitor._monitoringInterval) {
+      memoryMonitor._monitoringInterval = setInterval(() => {
+        memoryMonitor.logMemoryUsage();
+      }, interval);
+    }
+  },
+
+  stopMemoryMonitoring: () => {
+    if (memoryMonitor._monitoringInterval) {
+      clearInterval(memoryMonitor._monitoringInterval);
+      memoryMonitor._monitoringInterval = null;
+    }
   },
 };
 

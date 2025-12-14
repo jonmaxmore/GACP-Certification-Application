@@ -140,17 +140,35 @@ const userSchema = new mongoose.Schema(
         // Farmer roles
         'FARMER',
         'PREMIUM_FARMER',
-        // Staff roles (new)
-        'REVIEWER_AUDITOR',  // ผู้ตรวจเอกสาร + ผู้ตรวจประเมิน (คนเดียวกัน)
+        // Staff roles
+        'REVIEWER_AUDITOR',  // ผู้ตรวจเอกสาร + ผู้ตรวจประเมิน (ลงพื้นที่)
         'SCHEDULER',         // เจ้าหน้าที่จัดคิว
+        'ACCOUNTANT',        // พนักงานบัญชี (ใบเสนอราคา, ใบวางบิล, ใบเสร็จ)
         'ADMIN',             // ผู้ดูแลระบบ
-        'SUPER_ADMIN',       // ผู้ดูแลสูงสุด
+        'SUPER_ADMIN',       // ผู้ดูแลสูงสุด (Full access)
         // Legacy (deprecated)
         'INSPECTOR',
         'DTAM_ADMIN',
         'OPERATOR',
       ],
       default: 'FARMER',
+    },
+    // Staff-specific fields
+    departmentId: {
+      type: String,
+      trim: true,
+    },
+    teamId: {
+      type: String,
+      trim: true,
+    },
+    supervisorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    region: {
+      type: String,
+      enum: ['NORTH', 'NORTHEAST', 'CENTRAL', 'EAST', 'WEST', 'SOUTH'],
     },
     status: {
       type: String,

@@ -147,6 +147,15 @@ class RBACService {
       'user.delete': 'Delete users',
       'user.list': 'List all users',
 
+      // Staff management (NEW)
+      'staff.create': 'Create staff accounts',
+      'staff.update': 'Update staff information',
+      'staff.list': 'List staff members',
+
+      // Team management (NEW)
+      'team.manage': 'Manage teams and assignments',
+      'team.view': 'View team information',
+
       // Application management
       'application.create': 'Submit new applications',
       'application.read': 'View applications',
@@ -168,22 +177,38 @@ class RBACService {
       'inspection.conduct': 'Conduct inspections',
       'inspection.review': 'Review inspection results',
       'inspection.approve': 'Approve inspection reports',
+      'inspection.reject': 'Reject inspection reports', // NEW
 
       // Payment management
       'payment.process': 'Process payments',
       'payment.refund': 'Process refunds',
       'payment.view': 'View payment information',
 
+      // Accounting (NEW)
+      'quote.manage': 'Manage quotations',
+      'invoice.manage': 'Manage invoices',
+      'receipt.manage': 'Manage receipts',
+      'document.update': 'Update document numbers',
+
       // System administration
       'system.admin': 'System administration',
       'system.config': 'System configuration',
+      'config.manage': 'Manage system configuration',
+      'workflow.manage': 'Manage workflows',
+      'field.manage': 'Manage form fields',
       'audit.read': 'View audit logs',
       'audit.export': 'Export audit data',
+
+      // KPI (NEW)
+      'kpi.manage': 'Manage KPI settings',
+      'kpi.view': 'View KPI metrics',
 
       // Reporting
       'report.generate': 'Generate reports',
       'report.export': 'Export reports',
       'dashboard.view': 'View dashboard',
+      'dashboard.personal': 'View personal dashboard',
+      'dashboard.accounting': 'View accounting dashboard',
     };
 
     Object.entries(permissions).forEach(([permission, description]) => {
@@ -349,6 +374,64 @@ class RBACService {
           'report.export',
           'dashboard.view',
           'system.manage',
+        ],
+        inheritFrom: [],
+      },
+
+      // NEW ROLES
+      reviewer_auditor: {
+        name: 'Reviewer/Auditor',
+        description: 'ผู้ตรวจเอกสาร + ผู้ตรวจประเมิน (ลงพื้นที่)',
+        permissions: [
+          'application.read',
+          'application.review',
+          'application.approve',
+          'application.reject',
+          'inspection.conduct',
+          'inspection.approve',
+          'inspection.reject',
+          'certificate.read',
+          'dashboard.view',
+          'dashboard.personal',
+          'kpi.view',
+        ],
+        inheritFrom: [],
+      },
+
+      scheduler: {
+        name: 'Scheduler',
+        description: 'เจ้าหน้าที่จัดคิวและมอบหมายงาน',
+        permissions: [
+          'inspection.schedule',
+          'application.assign',
+          'application.read',
+          'team.manage',
+          'team.view',
+          'staff.list',
+          'user.list',
+          'dashboard.view',
+          'dashboard.personal',
+          'report.generate',
+          'kpi.view',
+        ],
+        inheritFrom: [],
+      },
+
+      accountant: {
+        name: 'Accountant',
+        description: 'พนักงานบัญชี - จัดการใบเสนอราคา, ใบวางบิล, ใบเสร็จ',
+        permissions: [
+          'payment.view',
+          'payment.process',
+          'quote.manage',
+          'invoice.manage',
+          'receipt.manage',
+          'document.update',
+          'dashboard.view',
+          'dashboard.personal',
+          'dashboard.accounting',
+          'report.generate',
+          'kpi.view',
         ],
         inheritFrom: [],
       },

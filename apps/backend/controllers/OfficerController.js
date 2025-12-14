@@ -1,7 +1,7 @@
 // const ApplicationWorkflowService = require('../services/ApplicationWorkflowService');
 const User = require('../models/UserModel');
 const Application = require('../models/ApplicationModel');
-const Notification = require('../models/Notification');
+const Notification = require('../models/NotificationModel');
 const logger = require('../shared/logger');
 
 class OfficerController {

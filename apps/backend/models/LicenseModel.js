@@ -80,7 +80,7 @@ const LicenseSchema = new Schema({
 
 // Indexes
 LicenseSchema.index({ userId: 1, plantType: 1 });
-LicenseSchema.index({ licenseNumber: 1 });
+// Note: licenseNumber already has unique:true which creates index automatically
 LicenseSchema.index({ verificationStatus: 1 });
 
 // Virtual: ใบอนุญาตยังใช้ได้หรือไม่

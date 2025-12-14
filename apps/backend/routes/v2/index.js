@@ -40,6 +40,10 @@ router.use('/quotes', require('../api/QuoteRoutes')); // Quote API - Team sends 
 router.use('/invoices', require('../api/InvoiceRoutes')); // Invoice API - Payment tracking
 router.use('/licenses', require('./licenses')); // License API - บท.11/13/16 verification
 router.use('/batch', require('./batch')); // Batch Submission - Multi-area auto-split
+router.use('/staff', require('../api/StaffRoutes')); // Staff Management API - Admin/Super Admin
+router.use('/auth-staff', require('../../modules/AuthDtam/routes/DtamAuth')); // Staff Authentication API
+router.use('/field-audits', require('../api/FieldAuditRoutes')); // Field Audit API - Inspection/Assessment
+router.use('/public', require('../api/PublicVerificationRoutes')); // Public Certificate Verification (no auth)
 
 // Health check with version info
 router.get('/health', (req, res) => {

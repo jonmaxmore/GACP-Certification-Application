@@ -26,8 +26,14 @@ interface PendingItem {
 const ROLE_LABELS: Record<string, { label: string; icon: string }> = {
     REVIEWER_AUDITOR: { label: "ผู้ตรวจเอกสาร/ตรวจประเมิน", icon: "📋" },
     SCHEDULER: { label: "เจ้าหน้าที่จัดคิว", icon: "📅" },
+    ACCOUNTANT: { label: "พนักงานบัญชี", icon: "💰" },
     ADMIN: { label: "ผู้ดูแลระบบ", icon: "⚙️" },
     SUPER_ADMIN: { label: "ผู้ดูแลสูงสุด", icon: "🔐" },
+    // Legacy roles
+    admin: { label: "ผู้ดูแลระบบ", icon: "⚙️" },
+    reviewer: { label: "ผู้ตรวจสอบ", icon: "📋" },
+    manager: { label: "ผู้จัดการ", icon: "👔" },
+    inspector: { label: "ผู้ตรวจประเมิน", icon: "🔍" },
 };
 
 export default function StaffDashboardPage() {
@@ -48,7 +54,7 @@ export default function StaffDashboardPage() {
 
         try {
             const parsedUser = JSON.parse(userData);
-            const staffRoles = ['REVIEWER_AUDITOR', 'SCHEDULER', 'ADMIN', 'SUPER_ADMIN'];
+            const staffRoles = ['REVIEWER_AUDITOR', 'SCHEDULER', 'ACCOUNTANT', 'ADMIN', 'SUPER_ADMIN'];
             if (!staffRoles.includes(parsedUser.role)) {
                 router.push("/staff/login");
                 return;
@@ -296,16 +302,40 @@ export default function StaffDashboardPage() {
                             <h3 className="font-semibold">KPI Dashboard</h3>
                             <p className="text-sm text-slate-500">ดูสถิติและรายงาน</p>
                         </Link>
-                        <Link href="/admin/revenue" className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition-all">
+                        <Link href="/staff/accounting" className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition-all">
                             <div className="text-3xl mb-2">💰</div>
-                            <h3 className="font-semibold">รายได้</h3>
-                            <p className="text-sm text-slate-500">ยอดชำระค่าธรรมเนียม</p>
+                            <h3 className="font-semibold">ระบบบัญชี</h3>
+                            <p className="text-sm text-slate-500">จัดการใบแจ้งหนี้/ชำระเงิน</p>
                         </Link>
                         <Link href="/admin/settings" className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition-all">
                             <div className="text-3xl mb-2">⚙️</div>
                             <h3 className="font-semibold">ตั้งค่าระบบ</h3>
                             <p className="text-sm text-slate-500">ปรับ Flow/Config</p>
                         </Link>
+                    </div>
+                )}
+
+                {/* Quick Actions for ACCOUNTANT */}
+                {user.role === "ACCOUNTANT" && (
+                    <div className="mt-6">
+                        <h3 className="text-lg font-semibold text-slate-800 mb-4">💰 ระบบบัญชีและการเงิน</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <Link href="/staff/accounting" className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all">
+                                <div className="text-3xl mb-2">📋</div>
+                                <h3 className="font-semibold text-lg">ใบแจ้งหนี้</h3>
+                                <p className="text-emerald-100 text-sm">จัดการใบแจ้งหนี้ทั้งหมด</p>
+                            </Link>
+                            <Link href="/staff/accounting?tab=pending" className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition-all border-2 border-amber-200">
+                                <div className="text-3xl mb-2">⏳</div>
+                                <h3 className="font-semibold text-amber-700">รอชำระ</h3>
+                                <p className="text-sm text-slate-500">ตรวจสอบรายการค้างชำระ</p>
+                            </Link>
+                            <Link href="/staff/analytics" className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition-all">
+                                <div className="text-3xl mb-2">📊</div>
+                                <h3 className="font-semibold">รายงาน</h3>
+                                <p className="text-sm text-slate-500">สรุปรายได้และสถิติ</p>
+                            </Link>
+                        </div>
                     </div>
                 )}
             </main>

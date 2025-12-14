@@ -94,14 +94,37 @@ class MetricsService {
       errorRate: 5, // %
     };
 
-    // Start metrics collection
-    this.startCollection();
+    // Track if collection is active
+    this.isCollecting = false;
+
+    // Intervals (will be set when startCollection is called)
+    this.systemInterval = null;
+    this.cacheInterval = null;
+    this.queueInterval = null;
+    this.cleanupInterval = null;
+
+    // NOTE: Do NOT auto-start in constructor to prevent Jest hanging
+    // Call startCollection() manually in production server startup
   }
 
   /**
    * Start automatic metrics collection
    */
   startCollection() {
+    // Skip in test environment to prevent Jest hanging
+    if (process.env.NODE_ENV === 'test') {
+      console.log('⏭️  Metrics collection skipped (test mode)');
+      return;
+    }
+
+    // Prevent double start
+    if (this.isCollecting) {
+      console.log('⚠️  Metrics collection already running');
+      return;
+    }
+
+    this.isCollecting = true;
+
     // Collect system metrics every 30 seconds
     this.systemInterval = setInterval(() => {
       this.collectSystemMetrics();
@@ -129,10 +152,17 @@ class MetricsService {
    * Stop metrics collection
    */
   stopCollection() {
-    clearInterval(this.systemInterval);
-    clearInterval(this.cacheInterval);
-    clearInterval(this.queueInterval);
-    clearInterval(this.cleanupInterval);
+    if (this.systemInterval) clearInterval(this.systemInterval);
+    if (this.cacheInterval) clearInterval(this.cacheInterval);
+    if (this.queueInterval) clearInterval(this.queueInterval);
+    if (this.cleanupInterval) clearInterval(this.cleanupInterval);
+
+    this.systemInterval = null;
+    this.cacheInterval = null;
+    this.queueInterval = null;
+    this.cleanupInterval = null;
+    this.isCollecting = false;
+
     console.log('⏹️  Metrics collection stopped');
   }
 
@@ -524,7 +554,7 @@ class MetricsService {
         utilization: Math.round(
           (serverStatus.connections.current /
             (serverStatus.connections.current + serverStatus.connections.available)) *
-            100,
+          100,
         ),
       };
     } catch (error) {

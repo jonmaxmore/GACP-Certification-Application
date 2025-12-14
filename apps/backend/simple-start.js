@@ -129,6 +129,16 @@ server = app.listen(port, '0.0.0.0', () => {
             app.use('/api/v2/establishments', EstablishmentRoutes);
             console.log('✅ Establishment Routes loaded');
 
+            // Staff Management Routes (Admin/Super Admin)
+            const StaffRoutes = require('./routes/api/StaffRoutes');
+            app.use('/api/v2/staff', StaffRoutes);
+            console.log('✅ Staff Routes loaded');
+
+            // Accounting Routes (Accountant role)
+            const AccountingRoutes = require('./routes/api/AccountingRoutes');
+            app.use('/api/v2/accounting', AccountingRoutes);
+            console.log('✅ Accounting Routes loaded');
+
             // Load Swagger
             const swaggerUi = require('swagger-ui-express');
             const swaggerSpec = require('./config/swagger');

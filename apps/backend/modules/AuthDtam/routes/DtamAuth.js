@@ -22,6 +22,100 @@ const DTAMStaff = require('../models/DTAMStaff');
 const logger = require('../../../shared/logger');
 
 /**
+ * Role-based Permissions Configuration
+ * Based on SCOPE_OF_WORK.md
+ */
+const ROLE_PERMISSIONS = {
+  REVIEWER_AUDITOR: [
+    'document.review',
+    'document.approve',
+    'document.reject',
+    'audit.conduct',
+    'audit.report',
+    'car.create',
+    'car.review',
+  ],
+  SCHEDULER: [
+    'schedule.create',
+    'schedule.update',
+    'schedule.assign',
+    'schedule.view',
+    'auditor.availability',
+  ],
+  ACCOUNTANT: [
+    'quote.view',
+    'quote.update',
+    'invoice.view',
+    'invoice.update',
+    'receipt.create',
+    'receipt.print',
+    'report.financial',
+  ],
+  ADMIN: [
+    'staff.list',
+    'staff.view',
+    'staff.create',
+    'staff.update',
+    'settings.view',
+    'settings.update',
+    'report.all',
+  ],
+  SUPER_ADMIN: [
+    'staff.list',
+    'staff.view',
+    'staff.create',
+    'staff.update',
+    'staff.delete',
+    'settings.view',
+    'settings.update',
+    'settings.system',
+    'report.all',
+    'system.config',
+  ],
+  // Legacy roles mapping
+  admin: ['staff.list', 'staff.create', 'staff.update', 'report.all'],
+  reviewer: ['document.review', 'document.approve', 'document.reject'],
+  manager: ['staff.list', 'schedule.view', 'report.all'],
+  inspector: ['audit.conduct', 'audit.report'],
+};
+
+const ROLE_DISPLAY_NAMES = {
+  REVIEWER_AUDITOR: 'ผู้ตรวจสอบเอกสาร/ผู้ตรวจประเมิน',
+  SCHEDULER: 'ผู้จัดคิวนัดหมาย',
+  ACCOUNTANT: 'พนักงานบัญชี',
+  ADMIN: 'ผู้ดูแลระบบ',
+  SUPER_ADMIN: 'ผู้ดูแลระบบสูงสุด',
+  admin: 'ผู้ดูแลระบบ',
+  reviewer: 'ผู้ตรวจสอบ',
+  manager: 'ผู้จัดการ',
+  inspector: 'ผู้ตรวจประเมิน',
+};
+
+const ROLE_DASHBOARD_URLS = {
+  REVIEWER_AUDITOR: '/staff/dashboard/reviewer',
+  SCHEDULER: '/staff/dashboard/scheduler',
+  ACCOUNTANT: '/staff/dashboard/accountant',
+  ADMIN: '/staff/dashboard/admin',
+  SUPER_ADMIN: '/staff/dashboard/admin',
+  admin: '/staff/dashboard/admin',
+  reviewer: '/staff/dashboard/reviewer',
+  manager: '/staff/dashboard/admin',
+  inspector: '/staff/dashboard/reviewer',
+};
+
+function getRolePermissions(role) {
+  return ROLE_PERMISSIONS[role] || [];
+}
+
+function getRoleDisplayName(role) {
+  return ROLE_DISPLAY_NAMES[role] || role;
+}
+
+function getDashboardUrl(role) {
+  return ROLE_DASHBOARD_URLS[role] || '/staff/dashboard';
+}
+
+/**
  * @route POST /api/auth-dtam/login
  * @desc DTAM Staff Login - Separate from public farmer login
  * @access Public
@@ -123,6 +217,10 @@ router.post(
 
       logger.info(`DTAM staff login successful: ${staff.username} (${staff.role})`);
 
+      // Get permissions based on role
+      const rolePermissions = getRolePermissions(staff.role);
+      const dashboardUrl = getDashboardUrl(staff.role);
+
       return shared.response.success(
         res,
         {
@@ -135,7 +233,10 @@ router.post(
             lastName: staff.lastName,
             userType: 'DTAM_STAFF',
             role: staff.role,
+            roleDisplayName: getRoleDisplayName(staff.role),
             department: staff.department,
+            permissions: rolePermissions,
+            dashboardUrl: dashboardUrl,
           },
         },
         'เข้าสู่ระบบสำเร็จ',

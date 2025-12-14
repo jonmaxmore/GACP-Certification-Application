@@ -13,8 +13,8 @@
 
 const fs = require('fs').promises;
 const path = require('path');
-// const QRCode = require('qrcode'); // Mock for development
-// const { createCanvas } = require('canvas'); // Mock for development
+const QRCode = require('qrcode'); // Real QR Code library
+// const { createCanvas } = require('canvas'); // Optional for advanced graphics
 const PDFDocument = require('pdfkit');
 const crypto = require('crypto');
 
@@ -560,22 +560,18 @@ class GACPCertificateService {
   async generateQRCode(certificateData) {
     const verificationUrl = `${process.env.PUBLIC_URL || 'https://gacp.dtam.go.th'}/verify/${certificateData.certificateNumber}?code=${certificateData.verificationCode}`;
 
-    // Mock QR Code for development (replace with real implementation)
-    const qrCodeDataURL =
-      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-    /*
+    // Generate real QR Code
     const qrCodeDataURL = await QRCode.toDataURL(verificationUrl, {
       errorCorrectionLevel: 'H',
       type: 'image/png',
       quality: 0.92,
       margin: 1,
       color: {
-        dark: '#000000',
+        dark: '#1b5e20',
         light: '#FFFFFF'
       },
       width: 200
     });
-    */
 
     return {
       dataURL: qrCodeDataURL,

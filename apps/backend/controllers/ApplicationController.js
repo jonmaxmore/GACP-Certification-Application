@@ -1,5 +1,5 @@
 const Application = require('../models/ApplicationModel');
-const Notification = require('../models/Notification');
+const Notification = require('../models/NotificationModel');
 const PaymentTransaction = require('../models/PaymentTransaction');
 const KsherService = require('../services/KsherService');
 

@@ -12,7 +12,7 @@
 
 /* eslint-disable no-unused-vars */
 const path = require('path');
-const logger = require('../../shared/logger');
+const logger = require('../../shared/shared/logger');
 const mongoose = require('mongoose'); // Used in JSDoc type annotations
 const IUserRepository = require('./domain/interfaces/i-user-repository'); // Used for interface documentation
 /* eslint-enable no-unused-vars */
@@ -33,7 +33,7 @@ const GetUserProfileUseCase = require('./services/GetProfile.service');
 const UpdateUserProfileUseCase = require('./services/UpdateProfile.service');
 
 // Presentation -> Controllers & Routes
-const auth-controller = require('./controllers/auth.controller');
+const AuthController = require('./controllers/auth.controller');
 const createAuthRouter = require('./routes/auth.routes');
 
 /**
@@ -190,7 +190,7 @@ function createAuthFarmerModule(config) {
   });
 
   // Presentation Layer
-  const auth-controller = new auth-controller({
+  const AuthController = new auth-controller({
     registerUserUseCase,
     loginUserUseCase,
     verifyEmailUseCase,

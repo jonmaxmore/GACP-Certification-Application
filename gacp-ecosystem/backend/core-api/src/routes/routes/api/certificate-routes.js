@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticateFarmer: auth-middleware } = require('../../../middleware/auth-middleware');
+const { authenticateFarmer } = require('../../../middleware/auth-middleware');
 const logger = require('../../../shared/logger');
 
 // Get Certificate Model - handle gracefully if not available

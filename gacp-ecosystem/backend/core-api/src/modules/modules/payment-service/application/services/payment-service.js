@@ -249,7 +249,7 @@ class payment-service {
 
       // Send notification to user
       if (this.notification-service) {
-        await this.notification-service.sendPaymentInitiated({
+        await this.NotificationService.sendPaymentInitiated({
           userId,
           payment,
           qrCodeData: promptPayData,
@@ -483,7 +483,7 @@ class payment-service {
 
       // Send notification
       if (this.notification-service) {
-        await this.notification-service.sendRefundNotification({
+        await this.NotificationService.sendRefundNotification({
           userId: payment.userId,
           payment,
           refundAmount,
@@ -607,7 +607,7 @@ class payment-service {
 
     // Send success notification
     if (this.notification-service) {
-      await this.notification-service.sendPaymentSuccess({
+      await this.NotificationService.sendPaymentSuccess({
         userId: payment.userId,
         payment,
       });
@@ -629,7 +629,7 @@ class payment-service {
     if (payment.canRetry) {
       // Send retry notification
       if (this.notification-service) {
-        await this.notification-service.sendPaymentRetryAvailable({
+        await this.NotificationService.sendPaymentRetryAvailable({
           userId: payment.userId,
           payment,
         });
@@ -648,7 +648,7 @@ class payment-service {
     await payment.save();
 
     if (this.notification-service) {
-      await this.notification-service.sendPaymentExpired({
+      await this.NotificationService.sendPaymentExpired({
         userId: payment.userId,
         payment,
       });

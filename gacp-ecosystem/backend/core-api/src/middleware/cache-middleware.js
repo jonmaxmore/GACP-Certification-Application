@@ -3,7 +3,7 @@
  * Provides HTTP response caching
  */
 
-const cache-service = require('../services/services/cache/cache-service');
+const CacheService = require('../services/services/cache/cache-service');
 const logger = require('../shared/logger');
 
 /**
@@ -24,7 +24,7 @@ const cacheMiddleware = (keyGenerator, ttl = null) => {
         typeof keyGenerator === 'function' ? keyGenerator(req) : `gacp:api:${req.originalUrl}`;
 
       // Try to get from cache
-      const cachedData = await cache-service.get(cacheKey);
+      const cachedData = await CacheService.get(cacheKey);
 
       if (cachedData) {
         logger.debug(`Cache hit for: ${cacheKey}`);
@@ -47,7 +47,7 @@ const cacheMiddleware = (keyGenerator, ttl = null) => {
       res.json = function (data) {
         // Only cache successful responses
         if (res.statusCode === 200 && data) {
-          cache-service.set(cacheKey, data, ttl).catch(err => {
+          CacheService.set(cacheKey, data, ttl).catch(err => {
             logger.error('Failed to cache response:', err);
           });
         }
@@ -130,7 +130,7 @@ const invalidateCacheMiddleware = patterns => {
           for (const pattern of patterns) {
             const cachePattern = typeof pattern === 'function' ? pattern(req) : pattern;
 
-            await cache-service.deletePattern(cachePattern);
+            await CacheService.deletePattern(cachePattern);
             logger.debug(`Invalidated cache pattern: ${cachePattern}`);
           }
         } catch (error) {

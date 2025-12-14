@@ -41,7 +41,7 @@ class JWTTokenManager {
     const tokenHash = this._hashToken(token);
     const key = `${this.BLACKLIST_PREFIX}${tokenHash}`;
 
-    await this.cache-service.set(
+    await this.CacheService.set(
       key,
       {
         blacklistedAt: new Date(),
@@ -67,7 +67,7 @@ class JWTTokenManager {
     const tokenHash = this._hashToken(token);
     const key = `${this.BLACKLIST_PREFIX}${tokenHash}`;
 
-    const blacklistEntry = await this.cache-service.get(key);
+    const blacklistEntry = await this.CacheService.get(key);
     return !!blacklistEntry;
   }
 
@@ -78,7 +78,7 @@ class JWTTokenManager {
    */
   async getTokenVersion(userId) {
     const key = `${this.VERSION_PREFIX}${userId}`;
-    const version = await this.cache-service.get(key);
+    const version = await this.CacheService.get(key);
     return version || 1;
   }
 
@@ -94,7 +94,7 @@ class JWTTokenManager {
     const newVersion = currentVersion + 1;
 
     // Store version with 90 days expiry (long enough for password max age)
-    await this.cache-service.set(key, newVersion, 90 * 24 * 60 * 60);
+    await this.CacheService.set(key, newVersion, 90 * 24 * 60 * 60);
 
     logger.warn('[JWTTokenManager] Token version incremented:', {
       userId,
@@ -125,7 +125,7 @@ class JWTTokenManager {
   async storeTokenFamily(familyId, data, expiresIn) {
     const key = `${this.FAMILY_PREFIX}${familyId}`;
 
-    await this.cache-service.set(
+    await this.CacheService.set(
       key,
       {
         ...data,
@@ -143,7 +143,7 @@ class JWTTokenManager {
    */
   async getTokenFamily(familyId) {
     const key = `${this.FAMILY_PREFIX}${familyId}`;
-    return await this.cache-service.get(key);
+    return await this.CacheService.get(key);
   }
 
   /**
@@ -160,7 +160,7 @@ class JWTTokenManager {
 
       const key = `${this.FAMILY_PREFIX}${familyId}`;
       // Re-store with original TTL
-      await this.cache-service.set(key, family, 7 * 24 * 60 * 60); // 7 days
+      await this.CacheService.set(key, family, 7 * 24 * 60 * 60); // 7 days
     }
   }
 
@@ -180,7 +180,7 @@ class JWTTokenManager {
       family.compromisedReason = reason;
 
       const key = `${this.FAMILY_PREFIX}${familyId}`;
-      await this.cache-service.set(key, family, 7 * 24 * 60 * 60);
+      await this.CacheService.set(key, family, 7 * 24 * 60 * 60);
 
       logger.warn('[JWTTokenManager] Token family invalidated:', {
         familyId,

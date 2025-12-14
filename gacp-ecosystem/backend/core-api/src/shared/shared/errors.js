@@ -222,7 +222,7 @@ module.exports = {
   BusinessLogicError,
 
   // Middleware
-  error-handler,
+  errorHandler,
   notFoundHandler,
   asyncHandler,
 

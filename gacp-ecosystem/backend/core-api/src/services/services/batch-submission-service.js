@@ -8,7 +8,7 @@
 
 const Application = require('../../database/models/application-model');
 const { nanoid } = require('nanoid');
-const { FEE_CONFIG } = require('../constants/pricing-service');
+const { FEE_CONFIG } = require('../../modules/modules/shared/constants/pricing-service');
 
 /**
  * Generate unique batch ID

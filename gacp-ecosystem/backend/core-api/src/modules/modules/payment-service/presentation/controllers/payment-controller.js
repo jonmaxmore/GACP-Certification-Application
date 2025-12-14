@@ -31,7 +31,7 @@
 
 const logger = require('../../../../shared/logger/logger');
 const { validationResult, body, param, query } = require('express-validator');
-const payment-service = require('../services/payment-service');
+const PaymentService = require('../services/payment-service');
 
 class PaymentController {
   constructor(dependencies = {}) {
@@ -82,7 +82,7 @@ class PaymentController {
       });
 
       // Calculate fees using business service
-      const result = await this.payment-service.calculateApplicationFees(applicationType, {
+      const result = await this.PaymentService.calculateApplicationFees(applicationType, {
         isExpedited,
         requiresInspection,
         promoCode,
@@ -162,7 +162,7 @@ class PaymentController {
       });
 
       // Initiate payment through service
-      const result = await this.payment-service.initiatePayment(
+      const result = await this.PaymentService.initiatePayment(
         {
           applicationId,
           paymentType,
@@ -240,7 +240,7 @@ class PaymentController {
       const { paymentId } = req.params;
       const userId = req.userId;
 
-      const result = await this.payment-service.getPaymentStatus(paymentId, userId);
+      const result = await this.PaymentService.getPaymentStatus(paymentId, userId);
 
       res.status(200).json({
         success: true,
@@ -296,7 +296,7 @@ class PaymentController {
       // Add signature to webhook data for verification
       webhookData.signature = signature;
 
-      const result = await this.payment-service.processPaymentWebhook(webhookData);
+      const result = await this.PaymentService.processPaymentWebhook(webhookData);
 
       // Return success response quickly to acknowledge webhook
       res.status(200).json({
@@ -357,7 +357,7 @@ class PaymentController {
       logger.info(`[PaymentController] Retrying payment ${paymentId}`, { userId });
 
       // Get current payment status
-      const payment = await this.payment-service.getPaymentStatus(paymentId, userId);
+      const payment = await this.PaymentService.getPaymentStatus(paymentId, userId);
 
       if (!payment.success) {
         return res.status(404).json({
@@ -376,7 +376,7 @@ class PaymentController {
       }
 
       // Initiate new payment for the same application
-      const retryResult = await this.payment-service.initiatePayment(
+      const retryResult = await this.PaymentService.initiatePayment(
         {
           applicationId: payment.payment.applicationId,
           paymentType: payment.payment.paymentType,
@@ -425,7 +425,7 @@ class PaymentController {
       logger.info(`[PaymentController] Cancelling payment ${paymentId}`, { userId, reason });
 
       // This would be implemented in payment-service
-      // const result = await this.payment-service.cancelPayment(paymentId, userId, reason);
+      // const result = await this.PaymentService.cancelPayment(paymentId, userId, reason);
 
       res.status(200).json({
         success: true,
@@ -489,7 +489,7 @@ class PaymentController {
         amount,
       });
 
-      const result = await this.payment-service.processRefund(
+      const result = await this.PaymentService.processRefund(
         paymentId,
         {
           reason,
@@ -566,7 +566,7 @@ class PaymentController {
       const userRole = req.userRole;
 
       // Get payments through service (includes authorization check)
-      const payments = await this.payment-service.getApplicationPayments(
+      const payments = await this.PaymentService.getApplicationPayments(
         applicationId,
         userId,
         userRole,
@@ -638,7 +638,7 @@ class PaymentController {
           }),
       };
 
-      const result = await this.payment-service.getUserPaymentHistory(filters, {
+      const result = await this.PaymentService.getUserPaymentHistory(filters, {
         page: parseInt(page),
         limit: parseInt(limit),
       });
@@ -675,7 +675,7 @@ class PaymentController {
       const { paymentId } = req.params;
       const userId = req.userId;
 
-      const result = await this.payment-service.generateReceipt(paymentId, userId);
+      const result = await this.PaymentService.generateReceipt(paymentId, userId);
 
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');

@@ -7,7 +7,7 @@
  */
 
 /* eslint-disable no-unused-vars */
-const logger = require('../../shared/logger/logger');
+const logger = require('../../shared/shared/logger/logger');
 const Certificate = require('./domain/entities/Certificate'); // Used for type documentation
 const CertificateNumber = require('./domain/value-objects/certificate-number'); // Used for type documentation
 /* eslint-enable no-unused-vars */

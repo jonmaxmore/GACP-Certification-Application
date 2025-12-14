@@ -1,4 +1,4 @@
-const auth-service = require('../services/services/auth-service');
+const AuthService = require('../services/services/auth-service');
 
 const fs = require('fs');
 
@@ -54,7 +54,7 @@ class AuthController {
                 });
             }
 
-            const user = await auth-service.register(userData);
+            const user = await AuthService.register(userData);
 
             res.status(201).json({
                 success: true,
@@ -117,7 +117,7 @@ class AuthController {
                 });
             }
 
-            const result = await auth-service.login(loginId, password, accountType);
+            const result = await AuthService.login(loginId, password, accountType);
 
             // Set httpOnly cookies for web clients
             res.cookie('auth_token', result.token, {
@@ -165,7 +165,7 @@ class AuthController {
             if (!req.user || !req.user.id) {
                 return res.status(401).json({ success: false, error: 'Unauthorized' });
             }
-            const user = await auth-service.getProfile(req.user.id);
+            const user = await AuthService.getProfile(req.user.id);
             res.status(200).json({
                 success: true,
                 data: { user }
@@ -214,7 +214,7 @@ class AuthController {
             }
 
             // Check for duplicates in database
-            const isDuplicate = await auth-service.checkIdentifierExists(cleanId, accountType);
+            const isDuplicate = await AuthService.checkIdentifierExists(cleanId, accountType);
 
             if (isDuplicate) {
                 let errorMessage = 'ข้อมูลนี้ถูกลงทะเบียนแล้ว';

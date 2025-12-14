@@ -4,7 +4,7 @@
  * Based on field_audit_system_design.md
  */
 
-const field-audit-service = require('../services/services/field-audit-service');
+const FieldAuditService = require('../services/services/field-audit-service');
 const AuditChecklistTemplate = require('../database/models/audit-checklist-template-model');
 const AuditReportService = require('../services/services/pdf/audit-report-service');
 const CARReportService = require('../services/services/pdf/c-a-r-report-service');
@@ -37,7 +37,7 @@ class FieldAuditController {
                 });
             }
 
-            const result = await field-audit-service.createAudit({
+            const result = await FieldAuditService.createAudit({
                 applicationId,
                 templateType,
                 auditType,
@@ -77,7 +77,7 @@ class FieldAuditController {
      */
     async getAuditById(req, res) {
         try {
-            const audit = await field-audit-service.getAuditById(req.params.id);
+            const audit = await FieldAuditService.getAuditById(req.params.id);
 
             return res.json({
                 success: true,
@@ -105,7 +105,7 @@ class FieldAuditController {
      */
     async getAuditsByApplication(req, res) {
         try {
-            const result = await field-audit-service.getAuditsByApplication(req.params.applicationId);
+            const result = await FieldAuditService.getAuditsByApplication(req.params.applicationId);
 
             return res.json({
                 success: true,
@@ -129,7 +129,7 @@ class FieldAuditController {
             const auditorId = req.user?.userId;
             const date = req.query.date ? new Date(req.query.date) : new Date();
 
-            const audits = await field-audit-service.getAuditorSchedule(auditorId, date);
+            const audits = await FieldAuditService.getAuditorSchedule(auditorId, date);
 
             return res.json({
                 success: true,
@@ -157,7 +157,7 @@ class FieldAuditController {
             const { lat, lng, accuracy } = req.body;
             const auditorId = req.user?.userId;
 
-            const audit = await field-audit-service.startAudit(
+            const audit = await FieldAuditService.startAudit(
                 req.params.id,
                 auditorId,
                 { lat, lng, accuracy }
@@ -192,7 +192,7 @@ class FieldAuditController {
             const auditorId = req.user?.userId;
             const responseData = req.body;
 
-            const response = await field-audit-service.submitResponse(
+            const response = await FieldAuditService.submitResponse(
                 id,
                 auditorId,
                 itemCode,
@@ -228,7 +228,7 @@ class FieldAuditController {
                 });
             }
 
-            const audit = await field-audit-service.submitAllResponses(
+            const audit = await FieldAuditService.submitAllResponses(
                 req.params.id,
                 auditorId,
                 responses
@@ -261,7 +261,7 @@ class FieldAuditController {
             const auditorId = req.user?.userId;
             const completionData = req.body;
 
-            const result = await field-audit-service.completeAudit(
+            const result = await FieldAuditService.completeAudit(
                 req.params.id,
                 auditorId,
                 completionData
@@ -302,7 +302,7 @@ class FieldAuditController {
         try {
             const offlineData = req.body;
 
-            const audit = await field-audit-service.syncOfflineAudit(
+            const audit = await FieldAuditService.syncOfflineAudit(
                 req.params.id,
                 offlineData
             );
@@ -332,7 +332,7 @@ class FieldAuditController {
         try {
             const { startDate, endDate, auditorId } = req.query;
 
-            const stats = await field-audit-service.getAuditStats({
+            const stats = await FieldAuditService.getAuditStats({
                 startDate,
                 endDate,
                 auditorId,
@@ -417,7 +417,7 @@ class FieldAuditController {
      */
     async downloadReport(req, res) {
         try {
-            const audit = await field-audit-service.getAuditById(req.params.id);
+            const audit = await FieldAuditService.getAuditById(req.params.id);
 
             if (!audit) {
                 return res.status(404).json({
@@ -459,7 +459,7 @@ class FieldAuditController {
      */
     async previewReport(req, res) {
         try {
-            const audit = await field-audit-service.getAuditById(req.params.id);
+            const audit = await FieldAuditService.getAuditById(req.params.id);
 
             if (!audit) {
                 return res.status(404).json({
@@ -548,7 +548,7 @@ class FieldAuditController {
      */
     async getAuditPhotos(req, res) {
         try {
-            const audit = await field-audit-service.getAuditById(req.params.id);
+            const audit = await FieldAuditService.getAuditById(req.params.id);
 
             if (!audit) {
                 return res.status(404).json({
@@ -607,7 +607,7 @@ class FieldAuditController {
                 });
             }
 
-            const audit = await field-audit-service.getAuditById(req.params.id);
+            const audit = await FieldAuditService.getAuditById(req.params.id);
             if (!audit) {
                 return res.status(404).json({
                     success: false,
@@ -649,7 +649,7 @@ class FieldAuditController {
      */
     async downloadCAR(req, res) {
         try {
-            const audit = await field-audit-service.getAuditById(req.params.id);
+            const audit = await FieldAuditService.getAuditById(req.params.id);
 
             if (!audit) {
                 return res.status(404).json({

@@ -34,8 +34,8 @@
  * @date 2025-10-18
  */
 
-const logger = require('../../shared/logger/logger');
-const payment-service = require('./application/services/payment-service');
+const logger = require('../../shared/shared/logger/logger');
+const PaymentService = require('./application/services/payment-service');
 const PaymentController = require('./presentation/controllers/payment-controller');
 const PaymentRoutes = require('./presentation/routes/PaymentRoutes.routes');
 const Payment = require('./domain/entities/Payment');
@@ -345,7 +345,7 @@ class payment-serviceModule {
 
           // Notify user if notification service is available
           if (this.dependencies.notification-service) {
-            await this.dependencies.notification-service.sendPaymentExpired({
+            await this.dependencies.NotificationService.sendPaymentExpired({
               userId: payment.userId,
               payment,
             });

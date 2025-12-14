@@ -1,4 +1,4 @@
-﻿/**
+/**
  * User Authentication Service
  *
  * Handles authentication logic, role-based authorization, and security.
@@ -584,7 +584,7 @@ class UserAuthenticationService extends EventEmitter {
       await this._logSecurityEvent('PASSWORD_CHANGED', { userId, ...context });
 
       // Send notification
-      await this.notification-service.send(user.email, 'PASSWORD_CHANGED', {
+      await this.NotificationService.send(user.email, 'PASSWORD_CHANGED', {
         timestamp: new Date(),
         ip: context.ip,
       });
@@ -655,7 +655,7 @@ class UserAuthenticationService extends EventEmitter {
    */
   async _isAccountLocked(userId) {
     const cacheKey = `lockout:${userId}`;
-    const lockout = await this.cache-service.get(cacheKey);
+    const lockout = await this.CacheService.get(cacheKey);
     return lockout && new Date(lockout.until) > new Date();
   }
 
@@ -665,10 +665,10 @@ class UserAuthenticationService extends EventEmitter {
    */
   async _handleFailedLogin(userId, context) {
     const cacheKey = `failed_attempts:${userId}`;
-    const attempts = (await this.cache-service.get(cacheKey)) || 0;
+    const attempts = (await this.CacheService.get(cacheKey)) || 0;
     const newAttempts = attempts + 1;
 
-    await this.cache-service.set(cacheKey, newAttempts, 3600); // 1 hour expiry
+    await this.CacheService.set(cacheKey, newAttempts, 3600); // 1 hour expiry
 
     // Log failed attempt
     await this._logSecurityEvent('LOGIN_FAILED', {
@@ -683,7 +683,7 @@ class UserAuthenticationService extends EventEmitter {
       const lockoutKey = `lockout:${userId}`;
       const lockoutUntil = new Date(Date.now() + this.config.security.lockoutDuration);
 
-      await this.cache-service.set(
+      await this.CacheService.set(
         lockoutKey,
         { until: lockoutUntil },
         this.config.security.lockoutDuration / 1000,
@@ -694,7 +694,7 @@ class UserAuthenticationService extends EventEmitter {
       // Send notification to user
       const user = await this.userRepository.findById(userId);
       if (user) {
-        await this.notification-service.send(user.email, 'ACCOUNT_LOCKED', {
+        await this.NotificationService.send(user.email, 'ACCOUNT_LOCKED', {
           lockoutDuration: this.config.security.lockoutDuration / 60000, // minutes
           unlockTime: lockoutUntil,
         });
@@ -708,7 +708,7 @@ class UserAuthenticationService extends EventEmitter {
    */
   async _clearFailedLoginAttempts(userId) {
     const cacheKey = `failed_attempts:${userId}`;
-    await this.cache-service.delete(cacheKey);
+    await this.CacheService.delete(cacheKey);
   }
 
   /**
@@ -838,7 +838,7 @@ class UserAuthenticationService extends EventEmitter {
       isActive: true,
     };
 
-    await this.cache-service.set(
+    await this.CacheService.set(
       `session:${sessionId}`,
       sessionData,
       this.config.security.sessionTimeout / 1000,
@@ -850,7 +850,7 @@ class UserAuthenticationService extends EventEmitter {
    * @private
    */
   async _getSession(sessionId) {
-    return await this.cache-service.get(`session:${sessionId}`);
+    return await this.CacheService.get(`session:${sessionId}`);
   }
 
   /**
@@ -865,7 +865,7 @@ class UserAuthenticationService extends EventEmitter {
         session.ip = context.ip;
       }
 
-      await this.cache-service.set(
+      await this.CacheService.set(
         `session:${sessionId}`,
         session,
         this.config.security.sessionTimeout / 1000,
@@ -878,7 +878,7 @@ class UserAuthenticationService extends EventEmitter {
    * @private
    */
   async _invalidateSession(sessionId) {
-    await this.cache-service.delete(`session:${sessionId}`);
+    await this.CacheService.delete(`session:${sessionId}`);
   }
 
   /**

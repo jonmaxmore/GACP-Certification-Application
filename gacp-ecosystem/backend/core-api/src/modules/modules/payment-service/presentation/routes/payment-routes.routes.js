@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Payment Routes Configuration
  *
  * Express router for payment-related endpoints with comprehensive
@@ -317,7 +317,7 @@ class PaymentRoutes {
       } = req.query;
 
       // This would be implemented in payment-service
-      const stats = await this.paymentController.payment-service.getPaymentStatistics({
+      const stats = await this.paymentController.PaymentService.getPaymentStatistics({
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         groupBy,
@@ -351,7 +351,7 @@ class PaymentRoutes {
    */
   async _getHealthStatus(req, res) {
     try {
-      const health = await this.paymentController.payment-service.healthCheck();
+      const health = await this.paymentController.PaymentService.healthCheck();
 
       const statusCode = health.status === 'healthy' ? 200 : 503;
 

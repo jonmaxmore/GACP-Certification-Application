@@ -12,7 +12,7 @@ const createAuthFarmerModule = require('./container');
 const User = require('../../models/user-model');
 
 // Import services
-const logger = require('../../shared/logger');
+const logger = require('../../shared/shared/logger');
 
 // Import validators
 const validators = require('./validators/auth-validators');

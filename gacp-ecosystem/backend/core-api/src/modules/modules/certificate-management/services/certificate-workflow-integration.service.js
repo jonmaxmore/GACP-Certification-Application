@@ -143,7 +143,7 @@ class CertificateWorkflowIntegration {
       logger.info(`📝 Updated application status to CERTIFICATE_ISSUED: ${applicationId}`);
 
       // 2. ส่งการแจ้งเตือนไปยังเกษตรกร
-      await this.notification-service.sendCertificateIssuedNotification({
+      await this.NotificationService.sendCertificateIssuedNotification({
         userId,
         farmId,
         certificateNumber,
@@ -186,7 +186,7 @@ class CertificateWorkflowIntegration {
       const { certificateId, certificateNumber, userId, farmId, daysUntilExpiry } = event.payload;
 
       // ส่งการแจ้งเตือนการต่ออายุ
-      await this.notification-service.sendCertificateRenewalReminder({
+      await this.NotificationService.sendCertificateRenewalReminder({
         userId,
         farmId,
         certificateId,
@@ -233,7 +233,7 @@ class CertificateWorkflowIntegration {
       await this.certificateService.updateStatus(certificateId, 'EXPIRED');
 
       // 2. ส่งการแจ้งเตือนใบรับรองหมดอายุ
-      await this.notification-service.sendCertificateExpiredNotification({
+      await this.NotificationService.sendCertificateExpiredNotification({
         userId,
         farmId,
         certificateId,

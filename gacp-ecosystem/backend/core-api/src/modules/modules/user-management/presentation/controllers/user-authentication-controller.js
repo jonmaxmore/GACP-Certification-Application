@@ -436,7 +436,7 @@ class UserAuthenticationController {
 
         // Send reset email
         if (this.notification-service) {
-          await this.notification-service.send(user.email, 'PASSWORD_RESET', {
+          await this.NotificationService.send(user.email, 'PASSWORD_RESET', {
             resetToken,
             resetUrl: `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`,
             expiryTime: resetExpiry,
@@ -539,7 +539,7 @@ class UserAuthenticationController {
 
       // Send confirmation email
       if (this.notification-service) {
-        await this.notification-service.send(user.email, 'PASSWORD_RESET_CONFIRMED', {
+        await this.NotificationService.send(user.email, 'PASSWORD_RESET_CONFIRMED', {
           timestamp: new Date(),
           ip: req.ip,
         });

@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, checkPermission } = require('../../../middleware/auth-middleware');
-const upload = require('../../../middleware/uploadMiddleware');
+const upload = require('../../../middleware/upload-middleware');
 const paymentController = require('../../../controllers/payment-controller');
 
 // Get user's payment documents (Quotation, Invoice, Receipt)

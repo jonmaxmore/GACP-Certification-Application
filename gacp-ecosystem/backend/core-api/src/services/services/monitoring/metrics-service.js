@@ -244,8 +244,8 @@ class MetricsService {
    */
   async collectCacheMetrics() {
     try {
-      const cache-service = require('../cache/cache-service');
-      const stats = await cache-service.getStats();
+      const CacheService = require('../cache/cache-service');
+      const stats = await CacheService.getStats();
 
       const timestamp = Date.now();
 
@@ -657,8 +657,8 @@ class MetricsService {
    */
   async checkCacheHealth() {
     try {
-      const cache-service = require('../cache/cache-service');
-      const isConnected = await cache-service.isConnected();
+      const CacheService = require('../cache/cache-service');
+      const isConnected = await CacheService.isConnected();
 
       const issues = [];
       if (!isConnected) {

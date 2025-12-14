@@ -16,7 +16,7 @@ function initializeAuthRoutes() {
   const router = express.Router();
 
   // Import auth middleware
-  const { authenticateToken } = require('../shared/auth');
+  const { authenticateToken } = require('../shared/shared/auth');
 
   // Login route
   router.post('/login', async (req, res) => {
@@ -92,7 +92,7 @@ function initializeAuthRoutes() {
  */
 function initializeApplicationRoutes() {
   const router = express.Router();
-  const { authenticateToken } = require('../shared/auth');
+  const { authenticateToken } = require('../shared/shared/auth');
 
   // Get applications
   router.get('/', authenticateToken, async (req, res) => {
@@ -208,7 +208,7 @@ function initializeApplicationRoutes() {
  */
 function initializeDocumentRoutes() {
   const router = express.Router();
-  const { authenticateToken } = require('../shared/auth');
+  const { authenticateToken } = require('../shared/shared/auth');
 
   // Upload document
   router.post('/upload', authenticateToken, async (req, res) => {
@@ -289,7 +289,7 @@ function initializeDocumentRoutes() {
  */
 function initializeDashboardRoutes() {
   const router = express.Router();
-  const { authenticateToken } = require('../shared/auth');
+  const { authenticateToken } = require('../shared/shared/auth');
 
   // Get dashboard statistics
   router.get('/stats', authenticateToken, async (req, res) => {

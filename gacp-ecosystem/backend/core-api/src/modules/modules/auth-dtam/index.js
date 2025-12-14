@@ -16,7 +16,7 @@ const DTAMStaff = require('./models/d-t-a-m-staff');
 const dtamauth-middleware = require('./middleware/Dtamauth-middleware');
 
 // Import services
-const logger = require('../../shared/logger');
+const logger = require('../../shared/shared/logger');
 
 /**
  * Module exports

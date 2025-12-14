@@ -1,6 +1,6 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const { SERVICE_TYPES, APPLICATION_STATUS } = require('../constants/service-type-enum');
+const { SERVICE_TYPES, APPLICATION_STATUS } = require('../../modules/modules/shared/constants/service-type-enum');
 
 /**
  * GACP V2 Application Schema
@@ -11,7 +11,7 @@ const ApplicationSchema = new Schema({
     applicationNumber: { type: String, required: true, unique: true },
     farmerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 
-    // Service Type - 4 เธเธฃเธฐเน€เธ เธ—เธเธฃเธดเธเธฒเธฃ GACP
+    // Service Type - 4 ประเภทบริการ GACP
     serviceType: {
         type: String,
         enum: Object.values(SERVICE_TYPES),
@@ -19,12 +19,12 @@ const ApplicationSchema = new Schema({
         required: true
     },
 
-    // Batch Submission - เธชเธณเธซเธฃเธฑเธ auto-split multi-area applications
-    batchId: { type: String, index: true },      // ID เธเธญเธ batch เธ—เธตเนเธเธฃเธญเธเธเธฃเนเธญเธกเธเธฑเธ
-    areaTypeIndex: { type: Number, default: 0 }, // เธฅเธณเธ”เธฑเธเนเธ batch
-    totalAreaTypes: { type: Number, default: 1 }, // เธเธณเธเธงเธ area types เธ—เธฑเนเธเธซเธกเธ”เนเธ batch
+    // Batch Submission - สำหรับ auto-split multi-area applications
+    batchId: { type: String, index: true },      // ID ของ batch ที่กรอกพร้อมกัน
+    areaTypeIndex: { type: Number, default: 0 }, // ลำดับใน batch
+    totalAreaTypes: { type: Number, default: 1 }, // จำนวน area types ทั้งหมดใน batch
 
-    // Single Area Type - เนเธ•เนเธฅเธฐ application = 1 area type = 1 certificate
+    // Single Area Type - แต่ละ application = 1 area type = 1 certificate
     areaType: {
         type: String,
         enum: ['OUTDOOR', 'INDOOR', 'GREENHOUSE'],
@@ -32,7 +32,7 @@ const ApplicationSchema = new Schema({
     },
 
     // License document is included in attachments (slot: 'license_bt11', 'license_bt13', 'license_bt16')
-    // Reviewed together with other documents during Phase 1 (5,000เธฟ per review)
+    // Reviewed together with other documents during Phase 1 (5,000฿ per review)
     // licenseId is optional reference for linking purposes
     licenseId: { type: Schema.Types.ObjectId, ref: 'License', default: null },
 

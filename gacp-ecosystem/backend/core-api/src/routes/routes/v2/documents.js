@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
@@ -29,7 +29,7 @@ const rateLimitMiddleware = (req, res, next) => {
     if (rateLimit[ip].count > MAX_UPLOADS_PER_WINDOW) {
         return res.status(429).json({
             success: false,
-            message: 'เธเธณเธเธญเธกเธฒเธเน€เธเธดเธเนเธ เธเธฃเธธเธ“เธฒเธฅเธญเธเนเธซเธกเนเธ เธฒเธขเธซเธฅเธฑเธ',
+            message: 'คำขอมากเกินไป กรุณาลองใหม่ภายหลัง',
             retryAfter: Math.ceil((rateLimit[ip].resetTime - now) / 1000),
         });
     }
@@ -92,7 +92,7 @@ const storage = multer.diskStorage({
         const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png'];
 
         if (!allowedExtensions.includes(ext)) {
-            return cb(new Error('เธเธฒเธกเธชเธเธธเธฅเนเธเธฅเนเนเธกเนเธฃเธญเธเธฃเธฑเธ'));
+            return cb(new Error('นามสกุลไฟล์ไม่รองรับ'));
         }
 
         cb(null, `${randomBytes}${ext}`);
@@ -103,7 +103,7 @@ const fileFilter = (req, file, cb) => {
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
 
     if (!allowedTypes.includes(file.mimetype)) {
-        return cb(new Error('เธเธฃเธฐเน€เธ เธ—เนเธเธฅเนเนเธกเนเธฃเธญเธเธฃเธฑเธ'), false);
+        return cb(new Error('ประเภทไฟล์ไม่รองรับ'), false);
     }
 
     cb(null, true);
@@ -124,7 +124,7 @@ const documents = new Map();
 // ============================================
 // SECURITY: Auth Middleware Placeholder
 // ============================================
-const auth-middleware = (req, res, next) => {
+const AuthMiddleware = (req, res, next) => {
     // In production, verify JWT token and attach user
     // For now, allow anonymous but log it
     if (!req.user) {
@@ -151,7 +151,7 @@ const checkOwnership = (document, userId) => {
  * @desc Upload a document with security checks
  * @access Private
  */
-router.post('/upload', rateLimitMiddleware, auth-middleware, upload.single('file'), async (req, res) => {
+router.post('/upload', rateLimitMiddleware, AuthMiddleware, upload.single('file'), async (req, res) => {
     try {
         const file = req.file;
         const { applicationId, documentType, name } = req.body;
@@ -159,7 +159,7 @@ router.post('/upload', rateLimitMiddleware, auth-middleware, upload.single('file
         if (!file) {
             return res.status(400).json({
                 success: false,
-                message: 'เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเนเธเธฅเน',
+                message: 'กรุณาเลือกไฟล์',
             });
         }
 
@@ -170,7 +170,7 @@ router.post('/upload', rateLimitMiddleware, auth-middleware, upload.single('file
             fs.unlinkSync(file.path);
             return res.status(400).json({
                 success: false,
-                message: 'เนเธเธฅเนเนเธกเนเธ–เธนเธเธ•เนเธญเธ (content mismatch)',
+                message: 'ไฟล์ไม่ถูกต้อง (content mismatch)',
             });
         }
 
@@ -197,7 +197,7 @@ router.post('/upload', rateLimitMiddleware, auth-middleware, upload.single('file
         // SECURITY: Don't expose internal path
         res.status(201).json({
             success: true,
-            message: 'เธญเธฑเธเนเธซเธฅเธ”เน€เธญเธเธชเธฒเธฃเธชเธณเน€เธฃเนเธ',
+            message: 'อัปโหลดเอกสารสำเร็จ',
             data: {
                 _id: document._id,
                 name: document.name,
@@ -212,7 +212,7 @@ router.post('/upload', rateLimitMiddleware, auth-middleware, upload.single('file
         // SECURITY: Don't expose internal error details
         res.status(500).json({
             success: false,
-            message: 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”เนเธเธเธฒเธฃเธญเธฑเธเนเธซเธฅเธ”',
+            message: 'เกิดข้อผิดพลาดในการอัปโหลด',
         });
     }
 });
@@ -222,7 +222,7 @@ router.post('/upload', rateLimitMiddleware, auth-middleware, upload.single('file
  * @desc Upload multiple documents with rate limiting
  * @access Private
  */
-router.post('/upload-multiple', rateLimitMiddleware, auth-middleware, upload.array('files', 10), async (req, res) => {
+router.post('/upload-multiple', rateLimitMiddleware, AuthMiddleware, upload.array('files', 10), async (req, res) => {
     try {
         const files = req.files;
         const { applicationId, documentType } = req.body;
@@ -230,7 +230,7 @@ router.post('/upload-multiple', rateLimitMiddleware, auth-middleware, upload.arr
         if (!files || files.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: 'เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเนเธเธฅเน',
+                message: 'กรุณาเลือกไฟล์',
             });
         }
 
@@ -276,7 +276,7 @@ router.post('/upload-multiple', rateLimitMiddleware, auth-middleware, upload.arr
 
         res.status(201).json({
             success: true,
-            message: `เธญเธฑเธเนเธซเธฅเธ” ${uploadedDocs.length} เนเธเธฅเนเธชเธณเน€เธฃเนเธ`,
+            message: `อัปโหลด ${uploadedDocs.length} ไฟล์สำเร็จ`,
             data: uploadedDocs,
             failed: failedFiles.length > 0 ? failedFiles : undefined,
         });
@@ -284,7 +284,7 @@ router.post('/upload-multiple', rateLimitMiddleware, auth-middleware, upload.arr
         console.error('Upload error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”เนเธเธเธฒเธฃเธญเธฑเธเนเธซเธฅเธ”',
+            message: 'เกิดข้อผิดพลาดในการอัปโหลด',
         });
     }
 });
@@ -294,7 +294,7 @@ router.post('/upload-multiple', rateLimitMiddleware, auth-middleware, upload.arr
  * @desc Get document info by ID
  * @access Private
  */
-router.get('/:id', auth-middleware, async (req, res) => {
+router.get('/:id', AuthMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -302,7 +302,7 @@ router.get('/:id', auth-middleware, async (req, res) => {
         if (!/^[a-f0-9]{32}$/.test(id)) {
             return res.status(400).json({
                 success: false,
-                message: 'เธฃเธนเธเนเธเธ ID เนเธกเนเธ–เธนเธเธ•เนเธญเธ',
+                message: 'รูปแบบ ID ไม่ถูกต้อง',
             });
         }
 
@@ -311,7 +311,7 @@ router.get('/:id', auth-middleware, async (req, res) => {
         if (!document) {
             return res.status(404).json({
                 success: false,
-                message: 'เนเธกเนเธเธเน€เธญเธเธชเธฒเธฃ',
+                message: 'ไม่พบเอกสาร',
             });
         }
 
@@ -332,7 +332,7 @@ router.get('/:id', auth-middleware, async (req, res) => {
         console.error('Get document error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”',
+            message: 'เกิดข้อผิดพลาด',
         });
     }
 });
@@ -342,7 +342,7 @@ router.get('/:id', auth-middleware, async (req, res) => {
  * @desc Download/stream document file
  * @access Private
  */
-router.get('/:id/file', auth-middleware, async (req, res) => {
+router.get('/:id/file', AuthMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -350,7 +350,7 @@ router.get('/:id/file', auth-middleware, async (req, res) => {
         if (!/^[a-f0-9]{32}$/.test(id)) {
             return res.status(400).json({
                 success: false,
-                message: 'เธฃเธนเธเนเธเธ ID เนเธกเนเธ–เธนเธเธ•เนเธญเธ',
+                message: 'รูปแบบ ID ไม่ถูกต้อง',
             });
         }
 
@@ -359,14 +359,14 @@ router.get('/:id/file', auth-middleware, async (req, res) => {
         if (!document) {
             return res.status(404).json({
                 success: false,
-                message: 'เนเธกเนเธเธเน€เธญเธเธชเธฒเธฃ',
+                message: 'ไม่พบเอกสาร',
             });
         }
 
         if (!fs.existsSync(document.path)) {
             return res.status(404).json({
                 success: false,
-                message: 'เนเธกเนเธเธเนเธเธฅเน',
+                message: 'ไม่พบไฟล์',
             });
         }
 
@@ -382,7 +382,7 @@ router.get('/:id/file', auth-middleware, async (req, res) => {
         console.error('Get file error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”',
+            message: 'เกิดข้อผิดพลาด',
         });
     }
 });
@@ -392,7 +392,7 @@ router.get('/:id/file', auth-middleware, async (req, res) => {
  * @desc Get all documents for an application
  * @access Private
  */
-router.get('/application/:appId', auth-middleware, async (req, res) => {
+router.get('/application/:appId', AuthMiddleware, async (req, res) => {
     try {
         const { appId } = req.params;
 
@@ -400,7 +400,7 @@ router.get('/application/:appId', auth-middleware, async (req, res) => {
         if (!appId || appId.length > 50) {
             return res.status(400).json({
                 success: false,
-                message: 'เธฃเธนเธเนเธเธ Application ID เนเธกเนเธ–เธนเธเธ•เนเธญเธ',
+                message: 'รูปแบบ Application ID ไม่ถูกต้อง',
             });
         }
 
@@ -424,7 +424,7 @@ router.get('/application/:appId', auth-middleware, async (req, res) => {
         console.error('Get documents error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”',
+            message: 'เกิดข้อผิดพลาด',
         });
     }
 });
@@ -434,7 +434,7 @@ router.get('/application/:appId', auth-middleware, async (req, res) => {
  * @desc Delete a document
  * @access Private
  */
-router.delete('/:id', rateLimitMiddleware, auth-middleware, async (req, res) => {
+router.delete('/:id', rateLimitMiddleware, AuthMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -442,7 +442,7 @@ router.delete('/:id', rateLimitMiddleware, auth-middleware, async (req, res) => 
         if (!/^[a-f0-9]{32}$/.test(id)) {
             return res.status(400).json({
                 success: false,
-                message: 'เธฃเธนเธเนเธเธ ID เนเธกเนเธ–เธนเธเธ•เนเธญเธ',
+                message: 'รูปแบบ ID ไม่ถูกต้อง',
             });
         }
 
@@ -451,7 +451,7 @@ router.delete('/:id', rateLimitMiddleware, auth-middleware, async (req, res) => 
         if (!document) {
             return res.status(404).json({
                 success: false,
-                message: 'เนเธกเนเธเธเน€เธญเธเธชเธฒเธฃ',
+                message: 'ไม่พบเอกสาร',
             });
         }
 
@@ -459,7 +459,7 @@ router.delete('/:id', rateLimitMiddleware, auth-middleware, async (req, res) => 
         if (!checkOwnership(document, req.user?.id)) {
             return res.status(403).json({
                 success: false,
-                message: 'เนเธกเนเธกเธตเธชเธดเธ—เธเธดเนเธฅเธเน€เธญเธเธชเธฒเธฃเธเธตเน',
+                message: 'ไม่มีสิทธิ์ลบเอกสารนี้',
             });
         }
 
@@ -472,13 +472,13 @@ router.delete('/:id', rateLimitMiddleware, auth-middleware, async (req, res) => 
 
         res.json({
             success: true,
-            message: 'เธฅเธเน€เธญเธเธชเธฒเธฃเธชเธณเน€เธฃเนเธ',
+            message: 'ลบเอกสารสำเร็จ',
         });
     } catch (error) {
         console.error('Delete document error:', error.message);
         res.status(500).json({
             success: false,
-            message: 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”',
+            message: 'เกิดข้อผิดพลาด',
         });
     }
 });
@@ -491,7 +491,7 @@ const {
     getRequiredDocuments,
     getObjectiveWarnings,
     canProceedWithObjectives
-} = require('../../constants/document-slots');
+} = require('../../../modules/modules/shared/constants/document-slots');
 
 /**
  * @route GET /api/v2/files/requirements
@@ -543,7 +543,7 @@ router.post('/requirements/validate', (req, res) => {
         console.error('Validate requirements error:', error);
         res.status(500).json({
             success: false,
-            error: 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”'
+            error: 'เกิดข้อผิดพลาด'
         });
     }
 });
@@ -566,15 +566,15 @@ router.post('/requirements/check-proceed', (req, res) => {
                 canProceed: result.canProceed,
                 missingDocuments: result.missingDocs,
                 message: result.canProceed
-                    ? 'เธชเธฒเธกเธฒเธฃเธ–เธ”เธณเน€เธเธดเธเธเธฒเธฃเธ•เนเธญเนเธ”เน'
-                    : `เธขเธฑเธเธเธฒเธ”เน€เธญเธเธชเธฒเธฃเธ—เธตเนเธเธณเน€เธเนเธ: ${result.missingDocs.map(d => d.slotId).join(', ')}`
+                    ? 'สามารถดำเนินการต่อได้'
+                    : `ยังขาดเอกสารที่จำเป็น: ${result.missingDocs.map(d => d.slotId).join(', ')}`
             }
         });
     } catch (error) {
         console.error('Check proceed error:', error);
         res.status(500).json({
             success: false,
-            error: 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”'
+            error: 'เกิดข้อผิดพลาด'
         });
     }
 });

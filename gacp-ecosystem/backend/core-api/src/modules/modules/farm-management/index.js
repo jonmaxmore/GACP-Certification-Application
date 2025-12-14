@@ -3,7 +3,7 @@
  * Exports all farm management module components
  */
 
-const logger = require('../../shared/logger/logger');
+const logger = require('../../shared/shared/logger/logger');
 const FarmManagementService = require('./services/FarmManagement.service');
 const FarmManagementController = require('./controllers/FarmManagement.controller');
 const farmRoutes = require('./routes/farm.routes');

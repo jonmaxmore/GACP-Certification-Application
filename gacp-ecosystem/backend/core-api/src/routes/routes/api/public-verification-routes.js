@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const gacp-certificateService = require('../../../services/services/gacp-certificate');
+const GacpCertificateService = require('../../../services/services/gacp-certificate');
 
 /**
  * @route GET /api/v2/public/verify/:certificateNumber

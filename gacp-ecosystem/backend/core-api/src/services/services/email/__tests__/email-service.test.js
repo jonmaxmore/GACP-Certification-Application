@@ -1,9 +1,9 @@
-﻿/**
+/**
  * email-service Tests
  * @jest-environment node
  */
 
-const email-service = require('../email-service');
+const EmailService = require('../email-service');
 const EmailTemplateEngine = require('../email-template-engine');
 
 // Mock nodemailer
@@ -108,7 +108,7 @@ describe('email-service', () => {
 
   describe('sendEmail', () => {
     it('should send email successfully', async () => {
-      const result = await email-service.sendEmail({
+      const result = await EmailService.sendEmail({
         to: 'user@example.com',
         subject: 'Test Subject',
         template: 'welcome',
@@ -135,7 +135,7 @@ describe('email-service', () => {
       mockTransporter.sendMail.mockRejectedValue(new Error('SMTP Error'));
 
       await expect(
-        email-service.sendEmail({
+        EmailService.sendEmail({
           to: 'user@example.com',
           subject: 'Test',
           template: 'welcome',
@@ -153,12 +153,12 @@ describe('email-service', () => {
       };
       const resetToken = 'test-reset-token-123';
 
-      await email-service.sendPasswordResetEmail(user, resetToken);
+      await EmailService.sendPasswordResetEmail(user, resetToken);
 
       expect(mockTransporter.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'user@example.com',
-          subject: 'เธฃเธตเน€เธเนเธ•เธฃเธซเธฑเธชเธเนเธฒเธ - GACP Platform',
+          subject: 'รีเซ็ตรหัสผ่าน - GACP Platform',
         })
       );
 
@@ -173,7 +173,7 @@ describe('email-service', () => {
       };
       const resetToken = 'test-token';
 
-      await email-service.sendPasswordResetEmail(user, resetToken);
+      await EmailService.sendPasswordResetEmail(user, resetToken);
 
       const callArgs = mockTransporter.sendMail.mock.calls[0][0];
       expect(callArgs.html).toContain('user@example.com');
@@ -188,12 +188,12 @@ describe('email-service', () => {
       };
       const verificationToken = 'verification-token-456';
 
-      await email-service.sendVerificationEmail(user, verificationToken);
+      await EmailService.sendVerificationEmail(user, verificationToken);
 
       expect(mockTransporter.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'newuser@example.com',
-          subject: 'เธขเธทเธเธขเธฑเธเธญเธตเน€เธกเธฅ - GACP Platform',
+          subject: 'ยืนยันอีเมล - GACP Platform',
         })
       );
 
@@ -211,12 +211,12 @@ describe('email-service', () => {
         role: 'farmer',
       };
 
-      await email-service.sendWelcomeEmail(user);
+      await EmailService.sendWelcomeEmail(user);
 
       expect(mockTransporter.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'welcome@example.com',
-          subject: 'เธขเธดเธเธ”เธตเธ•เนเธญเธเธฃเธฑเธเธชเธนเน GACP Platform',
+          subject: 'ยินดีต้อนรับสู่ GACP Platform',
         })
       );
 
@@ -238,7 +238,7 @@ describe('email-service', () => {
       };
       const newStatus = 'APPROVED';
 
-      await email-service.sendApplicationStatusEmail(user, application, newStatus);
+      await EmailService.sendApplicationStatusEmail(user, application, newStatus);
 
       expect(mockTransporter.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -266,17 +266,17 @@ describe('email-service', () => {
         notes: 'Please prepare documents',
       };
 
-      await email-service.sendInspectionScheduledEmail(user, inspection);
+      await EmailService.sendInspectionScheduledEmail(user, inspection);
 
       expect(mockTransporter.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'farmer@example.com',
-          subject: 'เธเธฒเธฃเธ•เธฃเธงเธเธชเธญเธเธเธฒเธฃเนเธกเนเธ”เนเธฃเธฑเธเธเธฒเธฃเธเธฑเธ”เธซเธกเธฒเธขเนเธฅเนเธง',
+          subject: 'การตรวจสอบฟาร์มได้รับการนัดหมายแล้ว',
         })
       );
 
       const callArgs = mockTransporter.sendMail.mock.calls[0][0];
-      expect(callArgs.html).toContain('เธ•เธฃเธงเธเธเนเธฒเธเธงเธดเธ”เธตเนเธญเธเธญเธฅ');
+      expect(callArgs.html).toContain('ตรวจผ่านวิดีโอคอล');
       expect(callArgs.html).toContain('Inspector John');
       expect(callArgs.html).toContain('Please prepare documents');
     });
@@ -292,25 +292,25 @@ describe('email-service', () => {
         scheduledTime: '14:00',
       };
 
-      await email-service.sendInspectionScheduledEmail(user, inspection);
+      await EmailService.sendInspectionScheduledEmail(user, inspection);
 
       const callArgs = mockTransporter.sendMail.mock.calls[0][0];
-      expect(callArgs.html).toContain('เธ•เธฃเธงเธเธ—เธตเนเธเธฒเธฃเนเธก');
+      expect(callArgs.html).toContain('ตรวจที่ฟาร์ม');
     });
   });
 
   describe('getStatusMessage', () => {
     it('should return correct status messages', () => {
-      expect(email-service.getStatusMessage('DRAFT')).toBe('เนเธเธชเธกเธฑเธเธฃเธญเธขเธนเนเนเธเธชเธ–เธฒเธเธฐเธฃเนเธฒเธ');
-      expect(email-service.getStatusMessage('APPROVED')).toBe('เนเธเธชเธกเธฑเธเธฃเนเธ”เนเธฃเธฑเธเธเธฒเธฃเธญเธเธธเธกเธฑเธ•เธด');
-      expect(email-service.getStatusMessage('REJECTED')).toBe('เนเธเธชเธกเธฑเธเธฃเนเธกเนเธเนเธฒเธเธเธฒเธฃเธเธดเธเธฒเธฃเธ“เธฒ');
-      expect(email-service.getStatusMessage('UNKNOWN_STATUS')).toBe('เธชเธ–เธฒเธเธฐเธญเธฑเธเน€เธ”เธ•');
+      expect(EmailService.getStatusMessage('DRAFT')).toBe('ใบสมัครอยู่ในสถานะร่าง');
+      expect(EmailService.getStatusMessage('APPROVED')).toBe('ใบสมัครได้รับการอนุมัติ');
+      expect(EmailService.getStatusMessage('REJECTED')).toBe('ใบสมัครไม่ผ่านการพิจารณา');
+      expect(EmailService.getStatusMessage('UNKNOWN_STATUS')).toBe('สถานะอัปเดต');
     });
   });
 
   describe('verifyConnection', () => {
     it('should verify email connection successfully', async () => {
-      const result = await email-service.verifyConnection();
+      const result = await EmailService.verifyConnection();
 
       expect(mockTransporter.verify).toHaveBeenCalled();
       expect(result).toBe(true);
@@ -319,7 +319,7 @@ describe('email-service', () => {
     it('should handle verification failure', async () => {
       mockTransporter.verify.mockRejectedValue(new Error('Connection failed'));
 
-      const result = await email-service.verifyConnection();
+      const result = await EmailService.verifyConnection();
 
       expect(result).toBe(false);
     });

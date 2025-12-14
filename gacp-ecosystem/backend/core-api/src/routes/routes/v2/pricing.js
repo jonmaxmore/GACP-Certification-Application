@@ -14,8 +14,8 @@ const {
     OBJECTIVES,
     calculateFee,
     getFeeSummary
-} = require('../../constants/pricing-service');
-const { SERVICE_TYPES, SERVICE_TYPE_LABELS } = require('../../constants/service-type-enum');
+} = require('../../../modules/modules/shared/constants/pricing-service');
+const { SERVICE_TYPES, SERVICE_TYPE_LABELS } = require('../../../modules/modules/shared/constants/service-type-enum');
 
 /**
  * @route GET /api/v2/pricing/fees

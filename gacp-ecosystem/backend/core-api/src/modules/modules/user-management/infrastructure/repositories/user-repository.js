@@ -97,7 +97,7 @@ class UserRepository {
 
       // Try cache first
       if (this.cache-service && !options.skipCache) {
-        const cached = await this.cache-service.get(cacheKey);
+        const cached = await this.CacheService.get(cacheKey);
         if (cached) {
           return cached;
         }
@@ -119,7 +119,7 @@ class UserRepository {
 
       // Cache result
       if (this.cache-service && user) {
-        await this.cache-service.set(cacheKey, user, this.cacheTTL.user);
+        await this.CacheService.set(cacheKey, user, this.cacheTTL.user);
       }
 
       return user;
@@ -146,7 +146,7 @@ class UserRepository {
 
       // Try cache first
       if (this.cache-service && !options.skipCache) {
-        const cached = await this.cache-service.get(cacheKey);
+        const cached = await this.CacheService.get(cacheKey);
         if (cached) {
           return cached;
         }
@@ -168,7 +168,7 @@ class UserRepository {
 
       // Cache result
       if (this.cache-service && user) {
-        await this.cache-service.set(cacheKey, user, this.cacheTTL.user);
+        await this.CacheService.set(cacheKey, user, this.cacheTTL.user);
       }
 
       return user;
@@ -325,7 +325,7 @@ class UserRepository {
 
       // Try cache first
       if (this.cache-service && !options.skipCache) {
-        const cached = await this.cache-service.get(cacheKey);
+        const cached = await this.CacheService.get(cacheKey);
         if (cached) {
           return cached;
         }
@@ -362,7 +362,7 @@ class UserRepository {
 
       // Cache result
       if (this.cache-service) {
-        await this.cache-service.set(cacheKey, result, this.cacheTTL.userList);
+        await this.CacheService.set(cacheKey, result, this.cacheTTL.userList);
       }
 
       return result;
@@ -386,7 +386,7 @@ class UserRepository {
 
       // Try cache first
       if (this.cache-service && !options.skipCache) {
-        const cached = await this.cache-service.get(cacheKey);
+        const cached = await this.CacheService.get(cacheKey);
         if (cached) {
           return cached;
         }
@@ -423,7 +423,7 @@ class UserRepository {
 
       // Cache result
       if (this.cache-service) {
-        await this.cache-service.set(cacheKey, users, this.cacheTTL.search);
+        await this.CacheService.set(cacheKey, users, this.cacheTTL.search);
       }
 
       return users;
@@ -447,7 +447,7 @@ class UserRepository {
 
       // Try cache first
       if (this.cache-service && !options.skipCache) {
-        const cached = await this.cache-service.get(cacheKey);
+        const cached = await this.CacheService.get(cacheKey);
         if (cached) {
           return cached;
         }
@@ -472,7 +472,7 @@ class UserRepository {
 
       // Cache result
       if (this.cache-service) {
-        await this.cache-service.set(cacheKey, users, this.cacheTTL.userList);
+        await this.CacheService.set(cacheKey, users, this.cacheTTL.userList);
       }
 
       return users;
@@ -493,7 +493,7 @@ class UserRepository {
 
       // Try cache first
       if (this.cache-service) {
-        const cached = await this.cache-service.get(cacheKey);
+        const cached = await this.CacheService.get(cacheKey);
         if (cached) {
           return cached;
         }
@@ -503,7 +503,7 @@ class UserRepository {
 
       // Cache result
       if (this.cache-service) {
-        await this.cache-service.set(cacheKey, inspectors, this.cacheTTL.userList);
+        await this.CacheService.set(cacheKey, inspectors, this.cacheTTL.userList);
       }
 
       return inspectors;
@@ -523,7 +523,7 @@ class UserRepository {
 
       // Try cache first
       if (this.cache-service) {
-        const cached = await this.cache-service.get(cacheKey);
+        const cached = await this.CacheService.get(cacheKey);
         if (cached) {
           return cached;
         }
@@ -598,7 +598,7 @@ class UserRepository {
 
       // Cache result
       if (this.cache-service) {
-        await this.cache-service.set(cacheKey, result, this.cacheTTL.userList);
+        await this.CacheService.set(cacheKey, result, this.cacheTTL.userList);
       }
 
       return result;
@@ -650,7 +650,7 @@ class UserRepository {
       const patterns = [`user:${userId}:*`, 'user:email:*:*'];
 
       for (const pattern of patterns) {
-        await this.cache-service.deletePattern(pattern);
+        await this.CacheService.deletePattern(pattern);
       }
     } catch (error) {
       logger.error('[UserRepository] Clear user caches error:', error);
@@ -670,7 +670,7 @@ class UserRepository {
       const patterns = ['users:*', 'inspectors:*'];
 
       for (const pattern of patterns) {
-        await this.cache-service.deletePattern(pattern);
+        await this.CacheService.deletePattern(pattern);
       }
     } catch (error) {
       logger.error('[UserRepository] Clear user list caches error:', error);

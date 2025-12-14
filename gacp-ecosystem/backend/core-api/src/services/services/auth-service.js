@@ -1,9 +1,9 @@
-const user-model = require('../../database/models/user-model');
+const UserModel = require('../../database/models/user-model');
 const jwtSecurity = require('../../config/config/jwt-security');
-const { validateThaiID, validateLaserCode } = require('../utils/validators');
+const { validateThaiID, validateLaserCode } = require('../../utils/validators');
 const { hash } = require('../../shared/encryption');
 
-class auth-service {
+class AuthService {
     /**
      * V2 Registration Logic (Multi-Account Type Support)
      * Supports: INDIVIDUAL, JURISTIC, COMMUNITY_ENTERPRISE
@@ -23,7 +23,7 @@ class auth-service {
         // Only add email if provided (sparse index requires undefined, not null)
         if (data.email && data.email.trim()) {
             userData.email = data.email.toLowerCase();
-            const existingEmail = await user-model.findOne({ email: userData.email });
+            const existingEmail = await UserModel.findOne({ email: userData.email });
             if (existingEmail) throw new Error('อีเมลนี้ถูกใช้งานแล้ว');
         }
 
@@ -42,7 +42,7 @@ class auth-service {
 
                 // Check ID duplicate
                 const idCardHashValue = hash(idCard);
-                const existingID = await user-model.findOne({ idCardHash: idCardHashValue });
+                const existingID = await UserModel.findOne({ idCardHash: idCardHashValue });
                 if (existingID) throw new Error('เลขบัตรประชาชนนี้ถูกลงทะเบียนแล้ว');
 
                 userData = {
@@ -71,7 +71,7 @@ class auth-service {
 
                 // Check Tax ID duplicate
                 const taxIdHashValue = hash(taxId);
-                const existingTax = await user-model.findOne({ taxIdHash: taxIdHashValue });
+                const existingTax = await UserModel.findOne({ taxIdHash: taxIdHashValue });
                 if (existingTax) throw new Error('เลขทะเบียนนิติบุคคลนี้ถูกลงทะเบียนแล้ว');
 
                 userData = {
@@ -91,7 +91,7 @@ class auth-service {
 
                 // Check CE No duplicate
                 const ceHashValue = hash(ceNo);
-                const existingCE = await user-model.findOne({ communityRegistrationNoHash: ceHashValue });
+                const existingCE = await UserModel.findOne({ communityRegistrationNoHash: ceHashValue });
                 if (existingCE) throw new Error('เลขทะเบียนวิสาหกิจชุมชนนี้ถูกลงทะเบียนแล้ว');
 
                 userData = {
@@ -110,7 +110,7 @@ class auth-service {
         }
 
         // Create User
-        const user = new user-model(userData);
+        const user = new UserModel(userData);
         await user.save();
         console.log('[auth-service] User Created:', user._id);
 
@@ -127,19 +127,19 @@ class auth-service {
         // Determine lookup method based on identifier format or accountType
         if (accountType === 'STAFF' || identifier.includes('@')) {
             // Email login
-            user = await user-model.findOne({ email: identifier.toLowerCase() }).select('+password');
+            user = await UserModel.findOne({ email: identifier.toLowerCase() }).select('+password');
         } else if (accountType === 'JURISTIC') {
             // Tax ID lookup
             const taxIdHashValue = hash(identifier);
-            user = await user-model.findOne({ taxIdHash: taxIdHashValue }).select('+password');
+            user = await UserModel.findOne({ taxIdHash: taxIdHashValue }).select('+password');
         } else if (accountType === 'COMMUNITY_ENTERPRISE') {
             // CE No lookup
             const ceHashValue = hash(identifier);
-            user = await user-model.findOne({ communityRegistrationNoHash: ceHashValue }).select('+password');
+            user = await UserModel.findOne({ communityRegistrationNoHash: ceHashValue }).select('+password');
         } else {
             // Thai ID lookup (INDIVIDUAL or auto-detect)
             const idCardHashValue = hash(identifier);
-            user = await user-model.findOne({ idCardHash: idCardHashValue }).select('+password');
+            user = await UserModel.findOne({ idCardHash: idCardHashValue }).select('+password');
         }
 
         if (!user) {
@@ -188,7 +188,7 @@ class auth-service {
      * V2 Profile Logic
      */
     async getProfile(userId) {
-        return await user-model.findById(userId);
+        return await UserModel.findById(userId);
     }
 
     /**
@@ -201,15 +201,15 @@ class auth-service {
 
         switch (accountType) {
             case 'INDIVIDUAL':
-                const existingIdCard = await user-model.findOne({ idCardHash: identifierHash });
+                const existingIdCard = await UserModel.findOne({ idCardHash: identifierHash });
                 return !!existingIdCard;
 
             case 'JURISTIC':
-                const existingTaxId = await user-model.findOne({ taxIdHash: identifierHash });
+                const existingTaxId = await UserModel.findOne({ taxIdHash: identifierHash });
                 return !!existingTaxId;
 
             case 'COMMUNITY_ENTERPRISE':
-                const existingCE = await user-model.findOne({ communityRegistrationNoHash: identifierHash });
+                const existingCE = await UserModel.findOne({ communityRegistrationNoHash: identifierHash });
                 return !!existingCE;
 
             default:
@@ -218,4 +218,4 @@ class auth-service {
     }
 }
 
-module.exports = new auth-service();
+module.exports = new AuthService();

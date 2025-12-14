@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-const logger = require('../../shared/logger');
+const logger = require('../../../shared/logger');
 const mongoose = require('mongoose');
 
 // Service Logic
@@ -129,7 +129,7 @@ const upload = multer({ storage });
 
 // ... (Service Logic remains same)
 
-const { authenticate } = require('../../middleware/auth-middleware');
+const { authenticate } = require('../../../middleware/auth-middleware');
 
 // ... (Service Logic remains same)
 

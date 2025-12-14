@@ -1,7 +1,7 @@
 const Quote = require('../database/models/quote-model');
 const Invoice = require('../database/models/invoice-model');
 const Application = require('../database/models/application-model');
-const { APPLICATION_STATUS } = require('../constants/service-type-enum');
+const { APPLICATION_STATUS } = require('../modules/modules/shared/constants/service-type-enum');
 
 /**
  * Quote Controller - จัดการใบเสนอราคา

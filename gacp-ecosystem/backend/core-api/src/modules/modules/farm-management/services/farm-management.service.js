@@ -1,12 +1,12 @@
-﻿/**
- * ๐ฑ Farm Management Service
+/**
+ * 🌱 Farm Management Service
  * Business logic for cultivation cycle management
  */
 
 const { v4: uuidv4 } = require('uuid');
 const CultivationCycle = require('../models/cultivation-cycle');
-const { AppError } = require('../../shared/utils/error-handlerUtils');
-const logger = require('../../shared/utils/logger');
+const { AppError } = require('../../shared/shared/utils/error-handlerUtils');
+const logger = require('../../shared/shared/utils/logger');
 
 class FarmManagementService {
   constructor(db) {

@@ -4,7 +4,7 @@
  * Main entry point for certificate management functionality
  */
 
-const logger = require('../../shared/logger/logger');
+const logger = require('../../shared/shared/logger/logger');
 const CertificateService = require('./services/certificate.service');
 const CertificateController = require('./controllers/certificate.controller');
 const initializeRoutes = require('./routes/certificate.routes');

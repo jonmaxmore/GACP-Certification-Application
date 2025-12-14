@@ -520,11 +520,11 @@ class field-audit-service {
 
 // Export both instance and class
 const instance = new field-audit-service();
-instance.calculateCategoryScore = field-audit-service.calculateCategoryScore;
-instance.isPassingScore = field-audit-service.isPassingScore;
-instance.countMajorFails = field-audit-service.countMajorFails;
-instance.shouldAutoCancel = field-audit-service.shouldAutoCancel;
-instance.generateAuditNumber = field-audit-service.generateAuditNumber;
+instance.calculateCategoryScore = FieldAuditService.calculateCategoryScore;
+instance.isPassingScore = FieldAuditService.isPassingScore;
+instance.countMajorFails = FieldAuditService.countMajorFails;
+instance.shouldAutoCancel = FieldAuditService.shouldAutoCancel;
+instance.generateAuditNumber = FieldAuditService.generateAuditNumber;
 
 module.exports = instance;
 

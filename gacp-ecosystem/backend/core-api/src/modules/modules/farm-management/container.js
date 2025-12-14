@@ -6,7 +6,7 @@
  */
 
 // Domain
-const logger = require('../../shared/logger/logger');
+const logger = require('../../shared/shared/logger/logger');
 const Farm = require('./domain/entities/Farm');
 
 // Application Use Cases

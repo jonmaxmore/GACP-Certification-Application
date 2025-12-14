@@ -1,4 +1,4 @@
-﻿/**
+/**
  * User Management Module
  *
  * Complete user authentication and management system for GACP platform.
@@ -37,7 +37,7 @@
  * @date 2025-10-18
  */
 
-const logger = require('../../shared/logger/logger');
+const logger = require('../../shared/shared/logger/logger');
 const UserAuthenticationService = require('./domain/user-authentication-service');
 const AuthenticationMiddleware = require('./presentation/middleware/authentication-middleware-middleware');
 const UserAuthenticationController = require('./presentation/controllers/user-authentication-controller');
@@ -245,7 +245,7 @@ class UserManagementModule {
       // Check cache service
       if (this.cache-service) {
         try {
-          await this.cache-service.ping();
+          await this.CacheService.ping();
           health.components.cache = 'healthy';
         } catch (error) {
           health.components.cache = 'unhealthy';
@@ -334,6 +334,6 @@ module.exports = {
  * app.use('/api/protected', auth.authenticate(), auth.authorize('some:permission'));
  *
  * // Use authentication service in other modules
- * const auth-service = userModule.getAuthenticationService();
+ * const AuthService = userModule.getAuthenticationService();
  * const isValid = await auth-service.validateToken(token);
  */

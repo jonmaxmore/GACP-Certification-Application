@@ -89,7 +89,7 @@ router.post('/:invoiceId/pay', async (req, res) => {
 
         // Update application status
         const Application = require('../../../database/models/application-model');
-        const { APPLICATION_STATUS } = require('../../constants/service-type-enum');
+        const { APPLICATION_STATUS } = require('../../../../../modules/modules/shared/constants/service-type-enum');
 
         await Application.findByIdAndUpdate(invoice.applicationId, {
             status: APPLICATION_STATUS.PAYMENT_RECEIVED

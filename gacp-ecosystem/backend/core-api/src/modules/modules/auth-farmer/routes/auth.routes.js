@@ -7,7 +7,7 @@
 
 const express = require('express');
 const authValidator = require('../validators/auth.validator');
-const auth-middleware = require('../../../middleware/auth-middleware');
+const AuthMiddleware = require('../../../middleware/auth-middleware');
 const upload = require('../../../middleware/upload');
 
 /**

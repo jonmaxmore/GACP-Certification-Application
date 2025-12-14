@@ -8,7 +8,7 @@
  */
 
 const MongoDBAuditLogRepository = require('./infrastructure/database/audit-log-model');
-const { createLogger } = require('../../shared/logger');
+const { createLogger } = require('../../shared/shared/logger');
 const logger = createLogger('audit-container');
 
 const {

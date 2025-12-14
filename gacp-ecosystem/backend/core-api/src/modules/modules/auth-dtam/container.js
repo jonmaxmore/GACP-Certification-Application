@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable no-unused-vars */
-const logger = require('../../shared/logger/logger');
+const logger = require('../../shared/shared/logger/logger');
 const mongoose = require('mongoose'); // Used in JSDoc type annotations
 const IDTAMStaffRepository = require('./domain/interfaces/i-d-t-a-m-staff-repository'); // Used for interface documentation
 /* eslint-enable no-unused-vars */
@@ -154,7 +154,7 @@ function createAuthDTAMModule(config) {
   });
 
   // Presentation Layer
-  const auth-controller = new DTAMStaffauth-controller({
+  const AuthController = new DTAMStaffauth-controller({
     createDTAMStaffUseCase,
     loginDTAMStaffUseCase,
     requestPasswordResetUseCase,

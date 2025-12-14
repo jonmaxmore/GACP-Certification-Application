@@ -3,8 +3,8 @@
  * HTTP request handlers for farm management operations
  */
 
-const { successResponse, errorResponse } = require('../../shared/response');
-const logger = require('../../shared/utils/logger');
+const { successResponse, errorResponse } = require('../../shared/shared/response');
+const logger = require('../../shared/shared/utils/logger');
 
 class FarmManagementController {
   constructor(farmService) {

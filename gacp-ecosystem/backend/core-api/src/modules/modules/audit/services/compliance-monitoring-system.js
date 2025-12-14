@@ -535,7 +535,7 @@ class ComplianceMonitoringSystem extends EventEmitter {
       };
 
       if (this.notification-service) {
-        await this.notification-service.sendAlert(alertData);
+        await this.NotificationService.sendAlert(alertData);
       }
 
       this.metrics.alertsSent++;

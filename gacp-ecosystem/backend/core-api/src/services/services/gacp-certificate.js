@@ -20,7 +20,7 @@ const crypto = require('crypto');
 
 // Phase 2 Services Integration
 const queueService = require('./queue/queueService');
-const cache-service = require('./cache/cache-service');
+const CacheService = require('./cache/cache-service');
 
 const Application = require('../../database/models/application-model');
 const _User = require('../../database/models/user-model');
@@ -151,8 +151,8 @@ class gacp-certificateService {
       await this.applicationRepository.save(application);
 
       // Invalidate cache
-      await cache-service.invalidateApplication(application._id);
-      await cache-service.invalidatePattern('certificates:*');
+      await CacheService.invalidateApplication(application._id);
+      await CacheService.invalidatePattern('certificates:*');
 
       // Queue email notification (async)
       if (process.env.ENABLE_QUEUE === 'true') {
@@ -205,7 +205,7 @@ class gacp-certificateService {
     try {
       // Check cache first
       const cacheKey = `certificate:verify:${certificateNumber}`;
-      const cached = await cache-service.get(cacheKey);
+      const cached = await CacheService.get(cacheKey);
 
       if (cached) {
         logger.debug('Certificate verification cache hit', { certificateNumber });
@@ -234,7 +234,7 @@ class gacp-certificateService {
           certificate: this.sanitizeCertificateData(certificate.toObject ? certificate.toObject() : certificate),
         };
         // Cache for 5 minutes (might be reactivated)
-        await cache-service.set(cacheKey, result, 300);
+        await CacheService.set(cacheKey, result, 300);
         return result;
       }
 
@@ -248,7 +248,7 @@ class gacp-certificateService {
           certificate: this.sanitizeCertificateData(certificate.toObject ? certificate.toObject() : certificate),
         };
         // Cache expired certificates for 1 hour
-        await cache-service.set(cacheKey, result, 3600);
+        await CacheService.set(cacheKey, result, 3600);
         return result;
       }
 
@@ -288,7 +288,7 @@ class gacp-certificateService {
       };
 
       // Cache valid certificate for 1 hour
-      await cache-service.set(cacheKey, result, 3600);
+      await CacheService.set(cacheKey, result, 3600);
 
       return result;
     } catch (error) {

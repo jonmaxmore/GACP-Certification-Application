@@ -112,7 +112,7 @@ const logger = require('../shared/logger');
 /**
  * Express error handler middleware
  */
-const error-handler = (err, req, res, _next) => {
+const errorHandler = (err, req, res, _next) => {
   logger.error('Error occurred:', {
     message: err.message,
     stack: err.stack,
@@ -243,7 +243,7 @@ module.exports = {
   ERROR_CODES,
   ERROR_MESSAGES_TH,
   createErrorResponse,
-  error-handler,
+  errorHandler,
   notFoundHandler,
   sendSuccess,
   sendError,

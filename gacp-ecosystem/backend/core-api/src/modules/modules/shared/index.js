@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Shared Module
  *
- * Purpose: เธ—เธฃเธฑเธเธขเธฒเธเธฃเนเธฅเธฐ utilities เธ—เธตเนเนเธเนเธฃเนเธงเธกเธเธฑเธเธ—เธธเธ module
+ * Purpose: ทรัพยากรและ utilities ที่ใช้ร่วมกันทุก module
  *
  * Exports:
  * - config: Configuration files
@@ -17,8 +17,8 @@ const environment = require('./config/environment');
 const database = require('../../config/mongodb-manager');
 
 // Middleware
-const error-handler = require('./middleware/error-handlerMiddleware');
-const auth-middleware = require('./middleware/auth-middleware');
+const errorHandler = require('./middleware/error-handlerMiddleware');
+const AuthMiddleware = require('./middleware/auth-middleware');
 const securityMiddleware = require('./middleware/security-middleware');
 
 // Utils
@@ -49,7 +49,7 @@ module.exports = {
 
   // Middleware exports
   middleware: {
-    error-handler,
+    errorHandler,
     auth: auth-middleware,
     security: securityMiddleware,
   },

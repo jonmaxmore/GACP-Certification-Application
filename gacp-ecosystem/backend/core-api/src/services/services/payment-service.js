@@ -11,7 +11,7 @@
  */
 
 const EventEmitter = require('events');
-const logger = require('../utils/logger');
+const logger = require('../../utils/logger');
 
 class payment-service extends EventEmitter {
   constructor(paymentRepository, applicationRepository, notification-service) {
@@ -95,7 +95,7 @@ class payment-service extends EventEmitter {
 
       // Send notification to farmer
       if (this.notification-service) {
-        await this.notification-service.sendNotification({
+        await this.NotificationService.sendNotification({
           userId: farmerId,
           type: 'payment_required',
           title: 'จำเป็นต้องชำระเงิน',
@@ -171,7 +171,7 @@ class payment-service extends EventEmitter {
       // Send notifications
       if (this.notification-service) {
         // Notify farmer
-        await this.notification-service.sendNotification({
+        await this.NotificationService.sendNotification({
           userId: payment.farmerId,
           type: 'payment_completed',
           title: 'ชำระเงินสำเร็จ',
@@ -188,7 +188,7 @@ class payment-service extends EventEmitter {
         if (payment.type === this.PAYMENT_TYPES.INITIAL) {
           const application = await this.applicationRepository.findById(payment.applicationId);
           if (application && application.assignedReviewer) {
-            await this.notification-service.sendNotification({
+            await this.NotificationService.sendNotification({
               userId: application.assignedReviewer,
               type: 'payment_completed',
               title: 'ได้รับการชำระเงินแล้ว',

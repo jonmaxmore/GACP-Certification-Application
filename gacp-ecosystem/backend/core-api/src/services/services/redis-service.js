@@ -213,7 +213,7 @@ class redis-service {
 }
 
 // Singleton instance
-const redis-service = new redis-service();
+const RedisService = new redis-service();
 
 // Cache key generators for consistent naming
 const CacheKeys = {

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const auth-controller = require('../../../controllers/auth-controller');
+const AuthController = require('../../../controllers/auth-controller');
 const upload = require('../../../middleware/upload-middleware');
 const { authenticateFarmer } = require('../../../middleware/auth-middleware');
 const { strictRateLimiter } = require('../../../middleware/rate-limit-middleware');

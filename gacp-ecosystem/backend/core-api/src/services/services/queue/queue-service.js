@@ -1,12 +1,12 @@
-﻿/**
+/**
  * Job Queue Service using Bull
  * Handles background processing for notifications and other async tasks
  */
 
 const Bull = require('bull');
 const logger = require('../../shared/logger');
-const notification-service = require('../notification/notification-service');
-const cache-service = require('../cache/cache-service');
+const NotificationService = require('../notification/notification-service');
+const CacheService = require('../cache/cache-service');
 const DTAMApplication = require('../../models/application-model');
 
 class QueueService {
@@ -108,25 +108,25 @@ class QueueService {
         let result;
         switch (type) {
           case 'new-application':
-            result = await notification-service.notifyNewApplication(application);
+            result = await NotificationService.notifyNewApplication(application);
             break;
           case 'inspector-assignment':
-            result = await notification-service.notifyInspectorAssignment(
+            result = await NotificationService.notifyInspectorAssignment(
               application,
               application.inspector,
             );
             break;
           case 'inspection-complete':
-            result = await notification-service.notifyApproverInspectionComplete(application);
+            result = await NotificationService.notifyApproverInspectionComplete(application);
             break;
           case 'status-change':
-            result = await notification-service.notifyFarmerStatusChange(
+            result = await NotificationService.notifyFarmerStatusChange(
               application,
               data.newStatus,
             );
             break;
           case 'inspection-reminder':
-            result = await notification-service.sendInspectionReminder(application);
+            result = await NotificationService.sendInspectionReminder(application);
             break;
           default:
             throw new Error(`Unknown email type: ${type}`);
@@ -184,7 +184,7 @@ class QueueService {
           // But gacp-certificateService depends on QueueService
           // We should require it inside the processor or use dependency injection
           // For now, let's dynamic require
-          const gacp-certificateService = require('../gacp-certificate');
+          const GacpCertificateService = require('../gacp-certificate');
           const applicationRepository = require('../../repositories/application-repository');
           const appRepo = new applicationRepository();
 

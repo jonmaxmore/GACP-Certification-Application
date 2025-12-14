@@ -471,6 +471,60 @@ class FieldAuditService {
 
         return audit;
     }
+
+    // ============ Static Utility Methods (for testing) ============
+
+    /**
+     * Calculate category score from responses
+     * @param {Array} responses - Array of responses with itemCode and response
+     * @returns {number} Score percentage
+     */
+    static calculateCategoryScore(responses) {
+        const validResponses = responses.filter(r => r.response !== 'NA');
+        if (validResponses.length === 0) return 0;
+
+        const passCount = validResponses.filter(r => r.response === 'PASS').length;
+        return (passCount / validResponses.length) * 100;
+    }
+
+    /**
+     * Check if score meets passing threshold (90%)
+     */
+    static isPassingScore(score) {
+        return score >= 90;
+    }
+
+    /**
+     * Count major/critical fails
+     */
+    static countMajorFails(responses) {
+        return responses.filter(r => r.response === 'FAIL' && r.isCritical === true).length;
+    }
+
+    /**
+     * Check if should auto-cancel (3 strikes rule)
+     */
+    static shouldAutoCancel(responses) {
+        return this.countMajorFails(responses) >= 3;
+    }
+
+    /**
+     * Generate audit number
+     */
+    static generateAuditNumber() {
+        const year = new Date().getFullYear();
+        const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+        return `FA-${year}-${random}`;
+    }
 }
 
-module.exports = new FieldAuditService();
+// Export both instance and class
+const instance = new FieldAuditService();
+instance.calculateCategoryScore = FieldAuditService.calculateCategoryScore;
+instance.isPassingScore = FieldAuditService.isPassingScore;
+instance.countMajorFails = FieldAuditService.countMajorFails;
+instance.shouldAutoCancel = FieldAuditService.shouldAutoCancel;
+instance.generateAuditNumber = FieldAuditService.generateAuditNumber;
+
+module.exports = instance;
+

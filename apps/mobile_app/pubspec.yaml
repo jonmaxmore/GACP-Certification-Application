@@ -25,6 +25,10 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   
+  # Offline Storage
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  
   # UI Components
   google_fonts: ^6.1.0
   lucide_icons: ^0.257.0

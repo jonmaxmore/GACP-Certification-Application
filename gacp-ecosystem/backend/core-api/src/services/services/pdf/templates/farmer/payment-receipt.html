@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+  <style>
+    .receipt-box { border: 2px solid #0066cc; padding: 30px; margin: 20px 0; }
+    .amount { font-size: 28pt; font-weight: 700; color: #0066cc; text-align: center; margin: 20px 0; }
+    .payment-details { background: #f9f9f9; padding: 20px; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">ใบเสร็จรับเงิน</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">Payment Receipt</div>
+  
+  <div class="document-number">เลขที่: {{receiptNumber}}<br>วันที่: {{receiptDate}}</div>
+
+  <div class="receipt-box">
+    <div class="section">
+      <div class="section-title">ข้อมูลผู้ชำระเงิน (Payer Information)</div>
+      <div class="info-row"><div class="info-label">ชื่อ-นามสกุล:</div><div class="info-value">{{payerName}}</div></div>
+      <div class="info-row"><div class="info-label">เลขที่คำขอ:</div><div class="info-value">{{applicationNumber}}</div></div>
+      <div class="info-row"><div class="info-label">ชื่อฟาร์ม:</div><div class="info-value">{{farmName}}</div></div>
+    </div>
+
+    <div class="payment-details">
+      <div class="section-title">รายการชำระเงิน (Payment Details)</div>
+      <div class="info-row"><div class="info-label">รายการ:</div><div class="info-value">{{paymentDescription}}</div></div>
+      <div class="info-row"><div class="info-label">ประเภท:</div><div class="info-value">{{paymentType}}</div></div>
+      <div class="amount">{{amount}} บาท</div>
+      <div style="text-align: center; font-size: 14pt; color: #666;">({{amountText}})</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">ข้อมูลการชำระเงิน (Transaction Information)</div>
+      <div class="info-row"><div class="info-label">วิธีการชำระ:</div><div class="info-value">{{paymentMethod}}</div></div>
+      <div class="info-row"><div class="info-label">เลขที่อ้างอิง:</div><div class="info-value">{{transactionRef}}</div></div>
+      <div class="info-row"><div class="info-label">วันที่ชำระ:</div><div class="info-value">{{paymentDate}}</div></div>
+      <div class="info-row"><div class="info-label">สถานะ:</div><div class="info-value" style="color: #28a745; font-weight: 600;">ชำระเงินสำเร็จ</div></div>
+    </div>
+  </div>
+
+  <div class="qr-code">
+    <img src="{{qrCodeUrl}}" alt="QR Code">
+    <div style="font-size: 12pt; color: #666;">สแกนเพื่อตรวจสอบใบเสร็จ</div>
+  </div>
+
+  <div class="footer-info">
+    เอกสารนี้สร้างโดยระบบอัตโนมัติ ไม่ต้องลงลายมือชื่อ<br>
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข<br>
+    โทร: 02-xxx-xxxx | อีเมล: info@dtam.go.th
+  </div>
+</body>
+</html>

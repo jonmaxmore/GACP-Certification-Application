@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+  <style>
+    .success-box { background: #d4edda; border: 3px solid #28a745; padding: 30px; margin: 30px 0; text-align: center; border-radius: 10px; }
+    .app-number { font-size: 32pt; font-weight: 700; color: #28a745; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">ใบยืนยันการส่งคำขอรับรองมาตรฐาน GACP</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">Application Confirmation</div>
+  
+  <div class="document-number">วันที่: {{submissionDate}}</div>
+
+  <div class="success-box">
+    <div style="font-size: 48pt; color: #28a745;">✓</div>
+    <div style="font-size: 20pt; font-weight: 600; margin: 15px 0;">ส่งคำขอสำเร็จ</div>
+    <div style="font-size: 16pt;">เลขที่คำขอของท่าน</div>
+    <div class="app-number">{{applicationNumber}}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ข้อมูลผู้ยื่นคำขอ</div>
+    <div class="info-row"><div class="info-label">ชื่อ-นามสกุล:</div><div class="info-value">{{farmerName}}</div></div>
+    <div class="info-row"><div class="info-label">ชื่อฟาร์ม:</div><div class="info-value">{{farmName}}</div></div>
+    <div class="info-row"><div class="info-label">พืชที่ขอรับรอง:</div><div class="info-value">{{cropType}}</div></div>
+    <div class="info-row"><div class="info-label">วันที่ส่งคำขอ:</div><div class="info-value">{{submissionDate}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">เอกสารที่ส่ง</div>
+    <table>
+      <thead><tr><th>เอกสาร</th><th>สถานะ</th></tr></thead>
+      <tbody>{{documentsList}}</tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ขั้นตอนต่อไป</div>
+    <ol style="line-height: 2;">
+      <li>เจ้าหน้าที่จะตรวจสอบเอกสารภายใน 7 วันทำการ</li>
+      <li>หากเอกสารครบถ้วน จะได้รับการนัดหมายตรวจสอบภาคสนาม</li>
+      <li>ระยะเวลาดำเนินการทั้งหมดประมาณ 45 วัน</li>
+      <li>ท่านสามารถติดตามสถานะได้ที่เมนู "คำขอของฉัน"</li>
+    </ol>
+  </div>
+
+  <div class="qr-code">
+    <img src="{{qrCodeUrl}}" alt="QR Code">
+    <div style="font-size: 12pt; color: #666;">สแกนเพื่อตรวจสอบสถานะ</div>
+  </div>
+
+  <div class="footer-info">
+    กรุณาเก็บเอกสารนี้ไว้เป็นหลักฐาน<br>
+    หากมีข้อสงสัย โทร 02-xxx-xxxx หรืออีเมล info@dtam.go.th
+  </div>
+</body>
+</html>

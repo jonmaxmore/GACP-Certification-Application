@@ -1,0 +1,22 @@
+# Backend Core API
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY backend/core-api/package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy source
+COPY backend/core-api/src ./src
+COPY backend/core-api/simple-start.js ./
+
+# Copy shared packages
+COPY packages/ts-types ./packages/ts-types
+COPY packages/utils ./packages/utils
+
+EXPOSE 5000
+
+CMD ["node", "simple-start.js"]

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+  <style>
+    .video-info { background: #e3f2fd; padding: 20px; margin: 20px 0; border-left: 4px solid #2196f3; }
+    .snapshot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }
+    .snapshot { border: 1px solid #ddd; padding: 10px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">รายงานการตรวจสอบแบบ Video Call</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">Video Inspection Report</div>
+  
+  <div class="document-number">เลขที่: {{reportNumber}}<br>วันที่: {{reportDate}}</div>
+
+  <div class="section">
+    <div class="section-title">ข้อมูลการตรวจสอบ</div>
+    <div class="info-row"><div class="info-label">เลขที่คำขอ:</div><div class="info-value">{{applicationNumber}}</div></div>
+    <div class="info-row"><div class="info-label">ชื่อฟาร์ม:</div><div class="info-value">{{farmName}}</div></div>
+    <div class="info-row"><div class="info-label">เจ้าของฟาร์ม:</div><div class="info-value">{{farmerName}}</div></div>
+    <div class="info-row"><div class="info-label">ผู้ตรวจสอบ:</div><div class="info-value">{{inspectorName}}</div></div>
+  </div>
+
+  <div class="video-info">
+    <div class="section-title">📹 ข้อมูล Video Call</div>
+    <div class="info-row"><div class="info-label">วันที่:</div><div class="info-value">{{callDate}}</div></div>
+    <div class="info-row"><div class="info-label">เวลาเริ่ม:</div><div class="info-value">{{startTime}}</div></div>
+    <div class="info-row"><div class="info-label">เวลาสิ้นสุด:</div><div class="info-value">{{endTime}}</div></div>
+    <div class="info-row"><div class="info-label">ระยะเวลา:</div><div class="info-value">{{duration}} นาที</div></div>
+    <div class="info-row"><div class="info-label">ผู้เข้าร่วม:</div><div class="info-value">{{participants}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ภาพถ่ายจาก Video Call</div>
+    <div class="snapshot-grid">{{snapshotImages}}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ข้อสังเกตจากการตรวจสอบ</div>
+    <p>{{observations}}</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ผลการตรวจสอบ GACP</div>
+    <table>
+      <thead><tr><th>CCP</th><th>ผลการตรวจสอบ</th><th>คะแนน</th></tr></thead>
+      <tbody>{{ccpResults}}</tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">สรุป</div>
+    <div class="info-row"><div class="info-label">คะแนนรวม:</div><div class="info-value">{{totalScore}}/80</div></div>
+    <div class="info-row"><div class="info-label">คำตัดสิน:</div><div class="info-value" style="color: {{decisionColor}}; font-weight: 700;">{{decision}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">คำแนะนำ</div>
+    <p>{{recommendations}}</p>
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-line">
+      ({{inspectorName}})<br>
+      ผู้ตรวจสอบ / Inspector<br>
+      วันที่: {{reportDate}}
+    </div>
+  </div>
+
+  <div class="footer-info">
+    รายงานนี้สร้างจากการตรวจสอบผ่าน Video Call<br>
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข
+  </div>
+</body>
+</html>

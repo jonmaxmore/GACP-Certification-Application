@@ -1,0 +1,55 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "lib": [
+            "ES2020"
+        ],
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "baseUrl": ".",
+        "paths": {
+            "@modules/*": [
+                "src/modules/*"
+            ],
+            "@services/*": [
+                "src/services/*"
+            ],
+            "@shared/*": [
+                "src/shared/*"
+            ],
+            "@middleware/*": [
+                "src/middleware/*"
+            ],
+            "@config/*": [
+                "src/config/*"
+            ],
+            "@routes/*": [
+                "src/routes/*"
+            ],
+            "@packages/ui-kit": [
+                "../../packages/ui-kit"
+            ],
+            "@packages/ts-types": [
+                "../../packages/ts-types"
+            ],
+            "@packages/utils": [
+                "../../packages/utils"
+            ]
+        }
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "**/*.test.ts"
+    ]
+}

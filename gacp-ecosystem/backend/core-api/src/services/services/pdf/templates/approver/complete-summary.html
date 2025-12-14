@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+</head>
+<body>
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">รายงานสรุปการตรวจสอบทั้งหมด</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">Complete Inspection Summary</div>
+  
+  <div class="document-number">เลขที่คำขอ: {{applicationNumber}}<br>วันที่: {{reportDate}}</div>
+
+  <div class="section">
+    <div class="section-title">ข้อมูลคำขอ</div>
+    <div class="info-row"><div class="info-label">เลขที่คำขอ:</div><div class="info-value">{{applicationNumber}}</div></div>
+    <div class="info-row"><div class="info-label">ชื่อเกษตรกร:</div><div class="info-value">{{farmerName}}</div></div>
+    <div class="info-row"><div class="info-label">ชื่อฟาร์ม:</div><div class="info-value">{{farmName}}</div></div>
+    <div class="info-row"><div class="info-label">พืชที่ขอรับรอง:</div><div class="info-value">{{cropType}}</div></div>
+    <div class="info-row"><div class="info-label">วันที่ยื่นคำขอ:</div><div class="info-value">{{submissionDate}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">1. ผลการตรวจสอบเอกสาร (Document Review)</div>
+    <div class="info-row"><div class="info-label">ผู้ตรวจสอบ:</div><div class="info-value">{{reviewerName}}</div></div>
+    <div class="info-row"><div class="info-label">วันที่ตรวจสอบ:</div><div class="info-value">{{reviewDate}}</div></div>
+    <div class="info-row"><div class="info-label">ผลการตรวจสอบ:</div><div class="info-value" style="color: #28a745;">✓ ผ่าน</div></div>
+    <div class="info-row"><div class="info-label">หมายเหตุ:</div><div class="info-value">{{reviewNotes}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">2. ผลการตรวจสอบภาคสนาม (Field Inspection)</div>
+    <div class="info-row"><div class="info-label">ผู้ตรวจสอบ:</div><div class="info-value">{{inspectorName}}</div></div>
+    <div class="info-row"><div class="info-label">ประเภท:</div><div class="info-value">{{inspectionType}}</div></div>
+    <div class="info-row"><div class="info-label">วันที่ตรวจสอบ:</div><div class="info-value">{{inspectionDate}}</div></div>
+    <div class="info-row"><div class="info-label">คะแนนรวม:</div><div class="info-value">{{inspectionScore}}/80</div></div>
+    <div class="info-row"><div class="info-label">ผลการตัดสิน:</div><div class="info-value" style="color: {{inspectionColor}};">{{inspectionDecision}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">3. คะแนนแต่ละ CCP</div>
+    <table>
+      <thead><tr><th>CCP</th><th>รายละเอียด</th><th>คะแนน</th><th>สถานะ</th></tr></thead>
+      <tbody>{{ccpScores}}</tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">4. ภาพถ่ายประกอบ</div>
+    <div class="info-row"><div class="info-label">จำนวนภาพ:</div><div class="info-value">{{snapshotCount}} ภาพ</div></div>
+    <p style="font-size: 12pt; color: #666;">ภาพถ่ายทั้งหมดเก็บไว้ในระบบ สามารถดูได้ที่เมนู "ภาพประกอบ"</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">5. สรุปผลการประเมิน</div>
+    <div class="info-row"><div class="info-label">คะแนนรวม:</div><div class="info-value" style="font-size: 20pt; font-weight: 700; color: #0066cc;">{{totalScore}}/100</div></div>
+    <div class="info-row"><div class="info-label">ระดับ:</div><div class="info-value">{{certificateLevel}}</div></div>
+    <div class="info-row"><div class="info-label">คำแนะนำ:</div><div class="info-value">{{recommendation}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">6. ข้อเสนอแนะสำหรับผู้อนุมัติ</div>
+    <p>{{approverRecommendation}}</p>
+  </div>
+
+  <div class="signature-section" style="display: flex; justify-content: space-between;">
+    <div style="text-align: center;">
+      <div style="border-top: 1px solid #333; padding-top: 10px; margin-top: 60px; width: 200px;">
+        ({{reviewerName}})<br>
+        ผู้ตรวจสอบเอกสาร
+      </div>
+    </div>
+    <div style="text-align: center;">
+      <div style="border-top: 1px solid #333; padding-top: 10px; margin-top: 60px; width: 200px;">
+        ({{inspectorName}})<br>
+        ผู้ตรวจสอบภาคสนาม
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-info">
+    รายงานนี้รวบรวมผลการตรวจสอบทั้งหมดเพื่อประกอบการพิจารณาอนุมัติ<br>
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข
+  </div>
+</body>
+</html>

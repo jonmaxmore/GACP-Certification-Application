@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+  <style>
+    .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px; margin: 15px 0; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    .stat-number { font-size: 48pt; font-weight: 700; margin: 15px 0; }
+  </style>
+</head>
+<body>
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">รายงานสถิติการอนุมัติ</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">Approval Statistics Report</div>
+  
+  <div class="document-number">ช่วงเวลา: {{periodStart}} - {{periodEnd}}<br>วันที่สร้างรายงาน: {{reportDate}}</div>
+
+  <div class="section">
+    <div class="section-title">สรุปภาพรวม (Overview)</div>
+    <table>
+      <tr>
+        <td><div class="stat-card"><div>คำขอทั้งหมด</div><div class="stat-number">{{totalApplications}}</div></div></td>
+        <td><div class="stat-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);"><div>อนุมัติ</div><div class="stat-number">{{approvedCount}}</div></div></td>
+      </tr>
+      <tr>
+        <td><div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"><div>ไม่อนุมัติ</div><div class="stat-number">{{rejectedCount}}</div></div></td>
+        <td><div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"><div>รอพิจารณา</div><div class="stat-number">{{pendingCount}}</div></div></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">อัตราการอนุมัติ</div>
+    <table>
+      <thead>
+        <tr><th>สถานะ</th><th>จำนวน</th><th>ร้อยละ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="color: #28a745;">✓ อนุมัติ</td><td>{{approvedCount}}</td><td style="font-weight: 700; color: #28a745;">{{approvalRate}}%</td></tr>
+        <tr><td style="color: #dc3545;">✗ ไม่อนุมัติ</td><td>{{rejectedCount}}</td><td style="font-weight: 700; color: #dc3545;">{{rejectionRate}}%</td></tr>
+        <tr><td style="color: #ffc107;">⏳ รอพิจารณา</td><td>{{pendingCount}}</td><td style="font-weight: 700; color: #ffc107;">{{pendingRate}}%</td></tr>
+        <tr style="font-weight: 700;"><td>รวม</td><td>{{totalApplications}}</td><td>100%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">เวลาเฉลี่ยในการพิจารณา</div>
+    <div class="info-row"><div class="info-label">เวลาเฉลี่ยทั้งหมด:</div><div class="info-value">{{avgDecisionTime}} วัน</div></div>
+    <div class="info-row"><div class="info-label">เร็วที่สุด:</div><div class="info-value">{{minDecisionTime}} วัน</div></div>
+    <div class="info-row"><div class="info-label">ช้าที่สุด:</div><div class="info-value">{{maxDecisionTime}} วัน</div></div>
+    <div class="info-row"><div class="info-label">เป้าหมาย:</div><div class="info-value">≤ 45 วัน</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">การอนุมัติตามประเภทพืช</div>
+    <table>
+      <thead>
+        <tr><th>ประเภทพืช</th><th>คำขอ</th><th>อนุมัติ</th><th>ไม่อนุมัติ</th><th>อัตราผ่าน</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>กัญชา (Cannabis)</td><td>{{cannabisTotal}}</td><td>{{cannabisApproved}}</td><td>{{cannabisRejected}}</td><td>{{cannabisRate}}%</td></tr>
+        <tr><td>ขมิ้นชัน (Turmeric)</td><td>{{turmericTotal}}</td><td>{{turmericApproved}}</td><td>{{turmericRejected}}</td><td>{{turmericRate}}%</td></tr>
+        <tr><td>ขิง (Ginger)</td><td>{{gingerTotal}}</td><td>{{gingerApproved}}</td><td>{{gingerRejected}}</td><td>{{gingerRate}}%</td></tr>
+        <tr><td>อื่นๆ</td><td>{{othersTotal}}</td><td>{{othersApproved}}</td><td>{{othersRejected}}</td><td>{{othersRate}}%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">สาเหตุการไม่อนุมัติ (Top Rejection Reasons)</div>
+    <table>
+      <thead>
+        <tr><th>ลำดับ</th><th>สาเหตุ</th><th>จำนวน</th><th>ร้อยละ</th></tr>
+      </thead>
+      <tbody>{{rejectionReasons}}</tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">การอนุมัติตามภูมิภาค</div>
+    <table>
+      <thead>
+        <tr><th>ภูมิภาค</th><th>คำขอ</th><th>อนุมัติ</th><th>อัตราผ่าน</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ภาคเหนือ</td><td>{{northTotal}}</td><td>{{northApproved}}</td><td>{{northRate}}%</td></tr>
+        <tr><td>ภาคกลาง</td><td>{{centralTotal}}</td><td>{{centralApproved}}</td><td>{{centralRate}}%</td></tr>
+        <tr><td>ภาคตะวันออกเฉียงเหนือ</td><td>{{northeastTotal}}</td><td>{{northeastApproved}}</td><td>{{northeastRate}}%</td></tr>
+        <tr><td>ภาคใต้</td><td>{{southTotal}}</td><td>{{southApproved}}</td><td>{{southRate}}%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">แนวโน้ม (Trend)</div>
+    <table>
+      <thead>
+        <tr><th>เดือน</th><th>คำขอ</th><th>อนุมัติ</th><th>อัตราผ่าน</th></tr>
+      </thead>
+      <tbody>{{monthlyTrend}}</tbody>
+    </table>
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-line">
+      ({{approverName}})<br>
+      ผู้อนุมัติ / Approver<br>
+      วันที่: {{reportDate}}
+    </div>
+  </div>
+
+  <div class="footer-info">
+    รายงานนี้สร้างโดยระบบอัตโนมัติ<br>
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข
+  </div>
+</body>
+</html>

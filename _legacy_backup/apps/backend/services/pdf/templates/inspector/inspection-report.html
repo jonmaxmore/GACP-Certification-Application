@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+  <style>
+    .checklist-item { margin: 15px 0; padding: 10px; background: #f9f9f9; border-left: 4px solid #0066cc; }
+    .status-pass { color: #28a745; font-weight: 600; }
+    .status-fail { color: #dc3545; font-weight: 600; }
+    .snapshot { width: 200px; margin: 10px; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <div class="watermark">{{watermark}}</div>
+  
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">รายงานผลการตรวจสอบมาตรฐาน GACP</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">GACP Inspection Report</div>
+  
+  <div class="document-number">เลขที่: {{reportNumber}}<br>วันที่: {{reportDate}}</div>
+
+  <div class="section">
+    <div class="section-title">ข้อมูลการตรวจสอบ (Inspection Information)</div>
+    <div class="info-row"><div class="info-label">เลขที่คำขอ:</div><div class="info-value">{{applicationNumber}}</div></div>
+    <div class="info-row"><div class="info-label">ประเภทการตรวจสอบ:</div><div class="info-value">{{inspectionType}}</div></div>
+    <div class="info-row"><div class="info-label">วันที่ตรวจสอบ:</div><div class="info-value">{{inspectionDate}}</div></div>
+    <div class="info-row"><div class="info-label">ผู้ตรวจสอบ:</div><div class="info-value">{{inspectorName}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ข้อมูลฟาร์ม (Farm Information)</div>
+    <div class="info-row"><div class="info-label">ชื่อฟาร์ม:</div><div class="info-value">{{farmName}}</div></div>
+    <div class="info-row"><div class="info-label">เจ้าของฟาร์ม:</div><div class="info-value">{{farmerName}}</div></div>
+    <div class="info-row"><div class="info-label">ที่ตั้ง:</div><div class="info-value">{{farmLocation}}</div></div>
+    <div class="info-row"><div class="info-label">พืชที่ขอรับรอง:</div><div class="info-value">{{cropType}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ผลการตรวจสอบ GACP (GACP Checklist Results)</div>
+    {{checklistItems}}
+  </div>
+
+  <div class="section">
+    <div class="section-title">สรุปผลการตรวจสอบ (Summary)</div>
+    <p>{{summary}}</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">จุดแข็ง (Strengths)</div>
+    <p>{{strengths}}</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">จุดที่ควรปรับปรุง (Areas for Improvement)</div>
+    <p>{{weaknesses}}</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">คำแนะนำ (Recommendations)</div>
+    <p>{{recommendations}}</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">คำตัดสิน (Decision)</div>
+    <p style="font-size: 18pt; font-weight: 700; color: {{decisionColor}};">{{decision}}</p>
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-line">
+      ({{inspectorName}})<br>
+      ผู้ตรวจสอบ / Inspector
+    </div>
+  </div>
+
+  <div class="footer-info">
+    เอกสารนี้สร้างโดยระบบ GACP Platform<br>
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข
+  </div>
+</body>
+</html>

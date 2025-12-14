@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+</head>
+<body>
+  <div class="watermark">{{watermark}}</div>
+  
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">รายงานสรุปคำขอรับรองมาตรฐาน GACP</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">Application Summary Report</div>
+  
+  <div class="document-number">เลขที่: {{applicationNumber}}<br>วันที่: {{reportDate}}</div>
+
+  <div class="section">
+    <div class="section-title">ข้อมูลเกษตรกร (Farmer Information)</div>
+    <div class="info-row"><div class="info-label">ชื่อ-นามสกุล:</div><div class="info-value">{{farmerName}}</div></div>
+    <div class="info-row"><div class="info-label">เลขบัตรประชาชน:</div><div class="info-value">{{idNumber}}</div></div>
+    <div class="info-row"><div class="info-label">ที่อยู่:</div><div class="info-value">{{address}}</div></div>
+    <div class="info-row"><div class="info-label">โทรศัพท์:</div><div class="info-value">{{phone}}</div></div>
+    <div class="info-row"><div class="info-label">อีเมล:</div><div class="info-value">{{email}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ข้อมูลฟาร์ม (Farm Information)</div>
+    <div class="info-row"><div class="info-label">ชื่อฟาร์ม:</div><div class="info-value">{{farmName}}</div></div>
+    <div class="info-row"><div class="info-label">ที่ตั้ง:</div><div class="info-value">{{farmLocation}}</div></div>
+    <div class="info-row"><div class="info-label">พื้นที่รวม:</div><div class="info-value">{{totalArea}} ไร่</div></div>
+    <div class="info-row"><div class="info-label">พื้นที่เพาะปลูก:</div><div class="info-value">{{cultivatedArea}} ไร่</div></div>
+    <div class="info-row"><div class="info-label">พืชที่ขอรับรอง:</div><div class="info-value">{{cropType}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">เอกสารประกอบ (Documents Checklist)</div>
+    <table>
+      <thead>
+        <tr><th>เอกสาร</th><th>สถานะ</th><th>หมายเหตุ</th></tr>
+      </thead>
+      <tbody>{{documentsList}}</tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">สถานะการตรวจสอบ (Review Status)</div>
+    <div class="info-row"><div class="info-label">สถานะปัจจุบัน:</div><div class="info-value">{{currentStatus}}</div></div>
+    <div class="info-row"><div class="info-label">ผู้ตรวจสอบ:</div><div class="info-value">{{reviewerName}}</div></div>
+    <div class="info-row"><div class="info-label">วันที่เริ่มตรวจสอบ:</div><div class="info-value">{{reviewStartDate}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ประวัติการดำเนินการ (History)</div>
+    <table>
+      <thead>
+        <tr><th>วันที่</th><th>กิจกรรม</th><th>ผู้ดำเนินการ</th></tr>
+      </thead>
+      <tbody>{{historyList}}</tbody>
+    </table>
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-line">
+      ({{reviewerName}})<br>
+      ผู้ตรวจสอบเอกสาร / Document Reviewer
+    </div>
+  </div>
+
+  <div class="footer-info">
+    เอกสารนี้สร้างโดยระบบ GACP Platform<br>
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข
+  </div>
+</body>
+</html>

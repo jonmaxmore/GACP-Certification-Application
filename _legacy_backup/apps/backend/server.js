@@ -1,0 +1,151 @@
+/**
+ * GACP Platform - Production Server
+ * Entry point for the backend application
+ */
+
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
+const logger = require('./shared/logger');
+const databaseService = require('./services/ProductionDatabase');
+const redisService = require('./services/RedisService');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
+
+// Import Modules
+const AuthFarmerRoutes = require('./routes/api/AuthFarmerRoutes');
+const EstablishmentRoutes = require('./modules/Establishment');
+const v2Routes = require('./routes/v2');
+
+const app = express();
+const port = process.env.PORT || 5000; // Default 5000 for backend
+
+const path = require('path');
+
+// CORS Configuration - Environment Based
+const corsOptions = {
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, etc.)
+        if (!origin) return callback(null, true);
+
+        // In development, allow all origins
+        if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
+            return callback(null, true);
+        }
+
+        // In production, use whitelist from environment
+        const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3001').split(',');
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        logger.warn(`[CORS] Blocked request from: ${origin}`);
+        return callback(new Error('Not allowed by CORS'), false);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+};
+
+// Trust proxy for AWS/Cloud deployment (required for HTTPS behind load balancer)
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
+
+// Security & Performance Middleware
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+    hsts: process.env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
+}));
+app.use(cors(corsOptions));
+app.use(compression());
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// CDN/Cache Middleware
+const { staticCacheMiddleware } = require('./middleware/CacheControlMiddleware');
+
+// Serve Static Files (Uploads) with cache headers
+app.use('/uploads',
+    staticCacheMiddleware,  // Add cache headers based on file type
+    express.static(path.join(__dirname, 'uploads'), {
+        maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
+        etag: true,
+        lastModified: true,
+    })
+);
+
+// Body Parsing
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
+
+// NOTE: Database and Redis connection moved to after app.listen() for graceful degradation
+
+// Mount Routes
+app.use('/api/auth-farmer', AuthFarmerRoutes);
+app.use('/api/establishments', EstablishmentRoutes); // Fix 404
+app.use('/api/v2/establishments', EstablishmentRoutes); // Dual mount for V2 compatibility
+app.use('/api/v2', v2Routes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Health Check - Both /health and /api/health for compatibility
+app.get(['/health', '/api/health'], async (req, res) => {
+    try {
+        const dbHealth = await databaseService.healthCheck();
+        res.json({
+            status: 'OK',
+            timestamp: new Date(),
+            environment: process.env.NODE_ENV,
+            database: dbHealth,
+            redis: {
+                connected: redisService.isAvailable(),
+            }
+        });
+    } catch (error) {
+        res.status(503).json({
+            status: 'ERROR',
+            timestamp: new Date(),
+            error: error.message
+        });
+    }
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    logger.error(err.stack);
+    res.status(500).json({
+        success: false,
+        message: 'Internal Server Error',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+});
+
+// Start Server - IMMEDIATELY, before database connection
+if (require.main === module) {
+    app.listen(port, '0.0.0.0', () => {
+        logger.info(`✅ Production Server running on port ${port}`);
+        logger.info(`📡 Server accepting requests (database connecting in background...)`);
+
+        // Connect to database AFTER server is already listening
+        if (process.env.NODE_ENV !== 'test') {
+            setImmediate(() => {
+                databaseService.connect()
+                    .then(() => logger.info('✅ Database connected successfully'))
+                    .catch(err => {
+                        logger.warn('⚠️ Database unavailable - running with limited functionality:', err.message);
+                    });
+
+                redisService.connect().catch(err => {
+                    logger.warn('⚠️ Redis unavailable - running without cache:', err.message);
+                });
+            });
+        }
+    });
+}
+
+module.exports = app;

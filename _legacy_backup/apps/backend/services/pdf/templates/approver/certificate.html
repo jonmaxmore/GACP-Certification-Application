@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Sarabun', sans-serif; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .certificate { background: white; padding: 60px; border: 15px solid #0066cc; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+    .header { text-align: center; margin-bottom: 40px; }
+    .logo { width: 100px; height: 100px; margin: 0 auto 20px; }
+    .title { font-size: 36pt; font-weight: 700; color: #0066cc; margin-bottom: 10px; }
+    .subtitle { font-size: 20pt; color: #666; }
+    .content { margin: 40px 0; text-align: center; }
+    .cert-text { font-size: 18pt; line-height: 2; }
+    .farmer-name { font-size: 24pt; font-weight: 700; color: #0066cc; margin: 20px 0; }
+    .farm-name { font-size: 20pt; font-weight: 600; color: #333; }
+    .details { margin: 30px 0; text-align: left; }
+    .detail-row { display: flex; margin: 15px 0; font-size: 16pt; }
+    .detail-label { font-weight: 600; min-width: 200px; }
+    .footer { margin-top: 50px; display: flex; justify-content: space-between; }
+    .signature { text-align: center; }
+    .signature-line { border-top: 2px solid #333; padding-top: 10px; margin-top: 60px; }
+    .qr-section { text-align: center; margin-top: 30px; }
+    .qr-code { width: 120px; height: 120px; }
+    .seal { position: absolute; right: 100px; top: 500px; width: 150px; height: 150px; opacity: 0.3; }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <div class="header">
+      <div class="title">ใบรับรองมาตรฐาน GACP</div>
+      <div class="subtitle">GACP Certification</div>
+      <div class="subtitle" style="font-size: 14pt; margin-top: 10px;">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    </div>
+
+    <div class="content">
+      <div class="cert-text">ขอรับรองว่า</div>
+      <div class="farmer-name">{{farmerName}}</div>
+      <div class="farm-name">{{farmName}}</div>
+      <div class="cert-text">ได้ผ่านการตรวจสอบและรับรองมาตรฐาน<br>Good Agricultural and Collection Practices (GACP)</div>
+    </div>
+
+    <div class="details">
+      <div class="detail-row"><div class="detail-label">เลขที่ใบรับรอง:</div><div>{{certificateNumber}}</div></div>
+      <div class="detail-row"><div class="detail-label">พืชที่ได้รับการรับรอง:</div><div>{{cropType}}</div></div>
+      <div class="detail-row"><div class="detail-label">ที่ตั้งฟาร์ม:</div><div>{{farmLocation}}</div></div>
+      <div class="detail-row"><div class="detail-label">วันที่ออกใบรับรอง:</div><div>{{issueDate}}</div></div>
+      <div class="detail-row"><div class="detail-label">วันหมดอายุ:</div><div>{{expiryDate}}</div></div>
+    </div>
+
+    <div class="qr-section">
+      <img src="{{qrCodeUrl}}" class="qr-code" alt="QR Code">
+      <div style="font-size: 12pt; color: #666; margin-top: 10px;">สแกนเพื่อตรวจสอบความถูกต้อง</div>
+    </div>
+
+    <div class="footer">
+      <div class="signature">
+        <div class="signature-line">
+          ({{approverName}})<br>
+          ผู้อนุมัติ
+        </div>
+      </div>
+      <div class="signature">
+        <div class="signature-line">
+          ({{directorName}})<br>
+          อธิบดีกรมการแพทย์แผนไทยฯ
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

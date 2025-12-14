@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+  <style>
+    .checklist-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    .checklist-table th { background: #0066cc; color: white; padding: 15px; text-align: left; }
+    .checklist-table td { border: 1px solid #ddd; padding: 15px; vertical-align: top; }
+    .checkbox { width: 30px; height: 30px; border: 2px solid #333; display: inline-block; margin-right: 10px; }
+    .notes-area { min-height: 80px; border: 1px solid #ddd; padding: 10px; background: #f9f9f9; }
+  </style>
+</head>
+<body>
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">แบบฟอร์มตรวจสอบมาตรฐาน GACP</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">GACP Inspection Checklist</div>
+  
+  <div class="document-number">เลขที่: {{checklistNumber}}<br>วันที่: {{inspectionDate}}</div>
+
+  <div class="section">
+    <div class="section-title">ข้อมูลการตรวจสอบ</div>
+    <div class="info-row"><div class="info-label">เลขที่คำขอ:</div><div class="info-value">{{applicationNumber}}</div></div>
+    <div class="info-row"><div class="info-label">ชื่อฟาร์ม:</div><div class="info-value">{{farmName}}</div></div>
+    <div class="info-row"><div class="info-label">เจ้าของฟาร์ม:</div><div class="info-value">{{farmerName}}</div></div>
+    <div class="info-row"><div class="info-label">ผู้ตรวจสอบ:</div><div class="info-value">{{inspectorName}}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">8 Critical Control Points (CCPs)</div>
+    
+    <table class="checklist-table">
+      <tr>
+        <th colspan="3">1. คุณภาพเมล็ดพันธุ์และวัสดุขยายพันธุ์ (Seed Quality)</th>
+      </tr>
+      <tr>
+        <td width="50"><span class="checkbox"></span></td>
+        <td>มีการใช้เมล็ดพันธุ์/กล้าพันธุ์ที่มีคุณภาพและแหล่งที่มาชัดเจน</td>
+        <td width="100">คะแนน: ___/10</td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <strong>ข้อสังเกต:</strong>
+          <div class="notes-area"></div>
+        </td>
+      </tr>
+    </table>
+
+    <table class="checklist-table">
+      <tr>
+        <th colspan="3">2. การจัดการดิน (Soil Management)</th>
+      </tr>
+      <tr>
+        <td width="50"><span class="checkbox"></span></td>
+        <td>มีการตรวจสอบคุณภาพดินและปรับปรุงดินอย่างเหมาะสม</td>
+        <td width="100">คะแนน: ___/10</td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <strong>ข้อสังเกต:</strong>
+          <div class="notes-area"></div>
+        </td>
+      </tr>
+    </table>
+
+    <table class="checklist-table">
+      <tr>
+        <th colspan="3">3. การจัดการศัตรูพืช (Pest Management)</th>
+      </tr>
+      <tr>
+        <td width="50"><span class="checkbox"></span></td>
+        <td>มีการควบคุมศัตรูพืชตามหลัก IPM และใช้สารเคมีอย่างปลอดภัย</td>
+        <td width="100">คะแนน: ___/10</td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <strong>ข้อสังเกต:</strong>
+          <div class="notes-area"></div>
+        </td>
+      </tr>
+    </table>
+
+    <table class="checklist-table">
+      <tr>
+        <th colspan="3">4. การเก็บเกี่ยว (Harvesting)</th>
+      </tr>
+      <tr>
+        <td width="50"><span class="checkbox"></span></td>
+        <td>มีการเก็บเกี่ยวในช่วงเวลาที่เหมาะสมและถูกวิธี</td>
+        <td width="100">คะแนน: ___/10</td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <strong>ข้อสังเกต:</strong>
+          <div class="notes-area"></div>
+        </td>
+      </tr>
+    </table>
+
+    <table class="checklist-table">
+      <tr>
+        <th colspan="3">5. การจัดการหลังการเก็บเกี่ยว (Post-Harvest)</th>
+      </tr>
+      <tr>
+        <td width="50"><span class="checkbox"></span></td>
+        <td>มีกระบวนการทำความสะอาด คัดแยก และแปรรูปที่เหมาะสม</td>
+        <td width="100">คะแนน: ___/10</td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <strong>ข้อสังเกต:</strong>
+          <div class="notes-area"></div>
+        </td>
+      </tr>
+    </table>
+
+    <table class="checklist-table">
+      <tr>
+        <th colspan="3">6. การจัดเก็บและบรรจุภัณฑ์ (Storage & Packaging)</th>
+      </tr>
+      <tr>
+        <td width="50"><span class="checkbox"></span></td>
+        <td>มีสถานที่เก็บที่เหมาะสมและบรรจุภัณฑ์ปลอดภัย</td>
+        <td width="100">คะแนน: ___/10</td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <strong>ข้อสังเกต:</strong>
+          <div class="notes-area"></div>
+        </td>
+      </tr>
+    </table>
+
+    <table class="checklist-table">
+      <tr>
+        <th colspan="3">7. การบันทึกข้อมูล (Documentation)</th>
+      </tr>
+      <tr>
+        <td width="50"><span class="checkbox"></span></td>
+        <td>มีการบันทึกข้อมูลการผลิตอย่างครบถ้วนและเป็นระบบ</td>
+        <td width="100">คะแนน: ___/10</td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <strong>ข้อสังเกต:</strong>
+          <div class="notes-area"></div>
+        </td>
+      </tr>
+    </table>
+
+    <table class="checklist-table">
+      <tr>
+        <th colspan="3">8. การอบรมบุคลากร (Personnel Training)</th>
+      </tr>
+      <tr>
+        <td width="50"><span class="checkbox"></span></td>
+        <td>พนักงานได้รับการอบรมและมีความรู้เรื่อง GACP</td>
+        <td width="100">คะแนน: ___/10</td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <strong>ข้อสังเกต:</strong>
+          <div class="notes-area"></div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">สรุปผลการตรวจสอบ</div>
+    <div class="info-row"><div class="info-label">คะแนนรวม:</div><div class="info-value">_____ / 80</div></div>
+    <div class="info-row"><div class="info-label">ผลการประเมิน:</div><div class="info-value">☐ ผ่าน  ☐ ไม่ผ่าน  ☐ ต้องตรวจสอบเพิ่มเติม</div></div>
+  </div>
+
+  <div class="signature-section" style="display: flex; justify-content: space-between; margin-top: 60px;">
+    <div style="text-align: center;">
+      <div style="border-top: 1px solid #333; padding-top: 10px; margin-top: 60px; width: 250px;">
+        ({{farmerName}})<br>
+        เจ้าของฟาร์ม / Farm Owner
+      </div>
+    </div>
+    <div style="text-align: center;">
+      <div style="border-top: 1px solid #333; padding-top: 10px; margin-top: 60px; width: 250px;">
+        ({{inspectorName}})<br>
+        ผู้ตรวจสอบ / Inspector
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-info">
+    แบบฟอร์มนี้ใช้สำหรับการตรวจสอบภาคสนาม<br>
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข
+  </div>
+</body>
+</html>

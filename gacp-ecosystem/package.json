@@ -1,0 +1,36 @@
+{
+    "name": "gacp-ecosystem",
+    "version": "1.0.0",
+    "description": "GACP Platform Monorepo - Feature-First Architecture",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "backend/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev:api": "npm run dev --workspace=backend/core-api",
+        "dev:web": "npm run dev --workspace=apps/web-portal",
+        "build:api": "npm run build --workspace=backend/core-api",
+        "build:web": "npm run build --workspace=apps/web-portal",
+        "test": "npm test --workspaces",
+        "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+        "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "prepare": "husky install"
+    },
+    "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^6.0.0",
+        "@typescript-eslint/parser": "^6.0.0",
+        "eslint": "^8.50.0",
+        "eslint-config-prettier": "^9.0.0",
+        "eslint-plugin-check-file": "^2.6.0",
+        "husky": "^8.0.0",
+        "lint-staged": "^15.0.0",
+        "prettier": "^3.0.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

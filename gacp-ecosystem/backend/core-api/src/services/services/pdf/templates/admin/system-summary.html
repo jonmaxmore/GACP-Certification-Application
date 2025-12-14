@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../../styles/common.css">
+  <style>
+    .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0; }
+    .metric-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .metric-value { font-size: 40pt; font-weight: 700; margin: 10px 0; }
+    .metric-label { font-size: 13pt; opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="document-header">
+    <div class="organization-name">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+    <div class="department-name">Department of Thai Traditional and Alternative Medicine</div>
+  </div>
+
+  <div class="document-title">รายงานสรุประบบ GACP Platform</div>
+  <div class="document-title" style="font-size: 16pt; color: #666;">System Summary Report</div>
+  
+  <div class="document-number">วันที่: {{reportDate}}<br>ช่วงเวลา: {{periodStart}} - {{periodEnd}}</div>
+
+  <div class="section">
+    <div class="section-title">ภาพรวมระบบ (System Overview)</div>
+    <div class="dashboard-grid">
+      <div class="metric-box">
+        <div class="metric-label">ผู้ใช้งานทั้งหมด</div>
+        <div class="metric-value">{{totalUsers}}</div>
+        <div class="metric-label">คน</div>
+      </div>
+      <div class="metric-box" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+        <div class="metric-label">คำขอทั้งหมด</div>
+        <div class="metric-value">{{totalApplications}}</div>
+        <div class="metric-label">คำขอ</div>
+      </div>
+      <div class="metric-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="metric-label">ใบรับรองที่ออก</div>
+        <div class="metric-value">{{totalCertificates}}</div>
+        <div class="metric-label">ใบ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">สถิติผู้ใช้งาน (User Statistics)</div>
+    <table>
+      <thead>
+        <tr><th>ประเภทผู้ใช้</th><th>จำนวน</th><th>ร้อยละ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>เกษตรกร (Farmers)</td><td>{{farmerCount}}</td><td>{{farmerPercent}}%</td></tr>
+        <tr><td>ผู้ตรวจสอบเอกสาร (Reviewers)</td><td>{{reviewerCount}}</td><td>{{reviewerPercent}}%</td></tr>
+        <tr><td>ผู้ตรวจสอบภาคสนาม (Inspectors)</td><td>{{inspectorCount}}</td><td>{{inspectorPercent}}%</td></tr>
+        <tr><td>ผู้อนุมัติ (Approvers)</td><td>{{approverCount}}</td><td>{{approverPercent}}%</td></tr>
+        <tr><td>ผู้ดูแลระบบ (Admins)</td><td>{{adminCount}}</td><td>{{adminPercent}}%</td></tr>
+        <tr style="font-weight: 700;"><td>รวม</td><td>{{totalUsers}}</td><td>100%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">สถานะคำขอ (Application Status)</div>
+    <table>
+      <thead>
+        <tr><th>สถานะ</th><th>จำนวน</th><th>ร้อยละ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ร่าง (Draft)</td><td>{{draftCount}}</td><td>{{draftPercent}}%</td></tr>
+        <tr><td>ส่งคำขอแล้ว (Submitted)</td><td>{{submittedCount}}</td><td>{{submittedPercent}}%</td></tr>
+        <tr><td>กำลังตรวจสอบ (Under Review)</td><td>{{reviewCount}}</td><td>{{reviewPercent}}%</td></tr>
+        <tr><td>กำลังตรวจสอบภาคสนาม (Inspection)</td><td>{{inspectionCount}}</td><td>{{inspectionPercent}}%</td></tr>
+        <tr><td style="color: #28a745;">อนุมัติ (Approved)</td><td>{{approvedCount}}</td><td>{{approvedPercent}}%</td></tr>
+        <tr><td style="color: #dc3545;">ไม่อนุมัติ (Rejected)</td><td>{{rejectedCount}}</td><td>{{rejectedPercent}}%</td></tr>
+        <tr style="font-weight: 700;"><td>รวม</td><td>{{totalApplications}}</td><td>100%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">การใช้งานระบบ (System Usage)</div>
+    <div class="info-row"><div class="info-label">จำนวนการเข้าใช้งาน:</div><div class="info-value">{{totalLogins}} ครั้ง</div></div>
+    <div class="info-row"><div class="info-label">ผู้ใช้งานเฉลี่ยต่อวัน:</div><div class="info-value">{{avgDailyUsers}} คน</div></div>
+    <div class="info-row"><div class="info-label">เอกสารที่อัพโหลด:</div><div class="info-value">{{totalDocuments}} ไฟล์</div></div>
+    <div class="info-row"><div class="info-label">ขนาดข้อมูลรวม:</div><div class="info-value">{{totalDataSize}} GB</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ประสิทธิภาพระบบ (System Performance)</div>
+    <table>
+      <thead>
+        <tr><th>ตัวชี้วัด</th><th>ค่า</th><th>เป้าหมาย</th><th>สถานะ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Uptime</td><td>{{uptime}}%</td><td>≥ 99.5%</td><td style="color: {{uptimeColor}};">{{uptimeStatus}}</td></tr>
+        <tr><td>Response Time</td><td>{{responseTime}} ms</td><td>≤ 500 ms</td><td style="color: {{responseColor}};">{{responseStatus}}</td></tr>
+        <tr><td>Error Rate</td><td>{{errorRate}}%</td><td>≤ 0.1%</td><td style="color: {{errorColor}};">{{errorStatus}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">รายได้ (Revenue)</div>
+    <div class="info-row"><div class="info-label">รายได้รวม:</div><div class="info-value">{{totalRevenue}} บาท</div></div>
+    <div class="info-row"><div class="info-label">ค่าธรรมเนียมเฉลี่ย:</div><div class="info-value">{{avgFee}} บาท/คำขอ</div></div>
+    <div class="info-row"><div class="info-label">การชำระเงินสำเร็จ:</div><div class="info-value">{{successfulPayments}} ครั้ง ({{paymentSuccessRate}}%)</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">การกระจายตามภูมิภาค (Regional Distribution)</div>
+    <table>
+      <thead>
+        <tr><th>ภูมิภาค</th><th>เกษตรกร</th><th>คำขอ</th><th>ใบรับรอง</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ภาคเหนือ</td><td>{{northFarmers}}</td><td>{{northApps}}</td><td>{{northCerts}}</td></tr>
+        <tr><td>ภาคกลาง</td><td>{{centralFarmers}}</td><td>{{centralApps}}</td><td>{{centralCerts}}</td></tr>
+        <tr><td>ภาคตะวันออกเฉียงเหนือ</td><td>{{northeastFarmers}}</td><td>{{northeastApps}}</td><td>{{northeastCerts}}</td></tr>
+        <tr><td>ภาคใต้</td><td>{{southFarmers}}</td><td>{{southApps}}</td><td>{{southCerts}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Top 5 จังหวัด</div>
+    <table>
+      <thead>
+        <tr><th>ลำดับ</th><th>จังหวัด</th><th>คำขอ</th><th>ใบรับรอง</th></tr>
+      </thead>
+      <tbody>{{topProvinces}}</tbody>
+    </table>
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-line">
+      ({{adminName}})<br>
+      ผู้ดูแลระบบ / System Administrator<br>
+      วันที่: {{reportDate}}
+    </div>
+  </div>
+
+  <div class="footer-info">
+    รายงานนี้สร้างโดยระบบอัตโนมัติ<br>
+    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก กระทรวงสาธารณสุข<br>
+    GACP Platform v2.0.0
+  </div>
+</body>
+</html>

@@ -94,7 +94,7 @@ class BusinessLogicError extends AppError {
 /**
  * Error handler middleware
  */
-function error-handler(err, req, res) {
+function errorHandler(err, req, res) {
   // Default error properties
   const error = {
     success: false,

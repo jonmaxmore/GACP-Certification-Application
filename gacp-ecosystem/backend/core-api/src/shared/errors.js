@@ -3,6 +3,10 @@
  * Provides consistent error handling across the application
  */
 
+// Import logger at top for performance (avoid require inside functions)
+const { createLogger } = require('./logger');
+const errorLogger = createLogger ? createLogger('error-handler') : console;
+
 /**
  * Base application error class
  */
@@ -94,7 +98,9 @@ class BusinessLogicError extends AppError {
 /**
  * Error handler middleware
  */
-function errorHandler(err, req, res) {
+// Express Error Handler requires 4 arguments (err, req, res, next)
+// Even if 'next' is not used, it must be present for Express to recognize this as error middleware
+function errorHandler(err, req, res, next) {
   // Default error properties
   const error = {
     success: false,
@@ -154,10 +160,7 @@ function errorHandler(err, req, res) {
     code: 'INTERNAL_ERROR',
   };
 
-  // Log unexpected errors with proper logger
-  const { logger } = require('./logger');
-  const errorLogger = logger.createLogger('error-handler');
-
+  // Log unexpected errors (logger imported at top for performance)
   errorLogger.error('Unexpected error occurred', {
     message: err.message,
     stack: err.stack,

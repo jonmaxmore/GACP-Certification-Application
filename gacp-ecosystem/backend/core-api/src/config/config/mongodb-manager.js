@@ -61,8 +61,10 @@ try {
         w: 'majority', // Write to majority of replica set
         journal: true, // Ensure writes are journaled
       },
-      reconnectInterval: 5000,
-      reconnectAttempts: 5,
+      // Reconnection settings with Exponential Backoff
+      reconnectInterval: 5000, // Base interval (5 seconds)
+      maxReconnectInterval: 60000, // Max interval cap (1 minute)
+      reconnectAttempts: 10, // Increased for exponential backoff
     },
   };
 }
@@ -169,23 +171,30 @@ async function connect() {
 }
 
 /**
- * Schedule reconnection attempt
+ * Schedule reconnection attempt with Exponential Backoff
+ * Interval doubles each attempt: 5s -> 10s -> 20s -> 40s -> 60s (capped)
  */
 function scheduleReconnect() {
   if (reconnectTimer) {
     clearTimeout(reconnectTimer);
   }
 
-  const maxAttempts = config.mongodb.reconnectAttempts || 5;
+  const maxAttempts = config.mongodb.reconnectAttempts || 10;
   if (reconnectAttempts >= maxAttempts) {
     dbLogger.error(`Maximum reconnect attempts (${maxAttempts}) reached. Giving up.`);
     return;
   }
 
   reconnectAttempts++;
-  const interval = config.mongodb.reconnectInterval || 5000;
+
+  // Exponential Backoff: baseInterval * 2^(attempt-1)
+  const baseInterval = config.mongodb.reconnectInterval || 5000;
+  const maxInterval = config.mongodb.maxReconnectInterval || 60000;
+  const exponentialInterval = baseInterval * Math.pow(2, reconnectAttempts - 1);
+  const interval = Math.min(exponentialInterval, maxInterval);
+
   dbLogger.info(
-    `Scheduling MongoDB reconnection attempt ${reconnectAttempts}/${maxAttempts} in ${interval}ms`,
+    `Scheduling MongoDB reconnection attempt ${reconnectAttempts}/${maxAttempts} in ${interval}ms (exponential backoff)`,
   );
 
   reconnectTimer = setTimeout(async () => {
@@ -344,6 +353,38 @@ async function reset(overrides = {}) {
   }
 }
 
+/**
+ * Graceful Shutdown Hook
+ * Handle SIGINT (Ctrl+C) and SIGTERM (Kubernetes, Docker stop)
+ * Ensures MongoDB connections are closed properly before process exit
+ */
+function setupGracefulShutdown() {
+  const shutdown = async (signal) => {
+    dbLogger.info(`${signal} received. Closing MongoDB connection gracefully...`);
+    try {
+      await disconnect();
+      dbLogger.info('MongoDB connection closed. Exiting process.');
+      process.exit(0);
+    } catch (error) {
+      dbLogger.error(`Error during graceful shutdown: ${error.message}`);
+      process.exit(1);
+    }
+  };
+
+  // Only attach once
+  if (!process.listenerCount('SIGINT')) {
+    process.on('SIGINT', () => shutdown('SIGINT'));
+  }
+  if (!process.listenerCount('SIGTERM')) {
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+  }
+}
+
+// Auto-setup graceful shutdown (can be disabled in tests)
+if (process.env.NODE_ENV !== 'test') {
+  setupGracefulShutdown();
+}
+
 module.exports = {
   connect,
   disconnect,
@@ -352,6 +393,7 @@ module.exports = {
   healthCheck,
   configure,
   reset,
+  setupGracefulShutdown, // Export for manual setup if needed
   isConnected: () => isConnected,
   connection: mongoose.connection,
 };

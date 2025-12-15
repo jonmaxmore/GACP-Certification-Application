@@ -600,4 +600,293 @@ router.get('/health', async (req, res) => {
   }
 });
 
+// ==========================================
+// NEW FEATURES (Based on Code Review)
+// ==========================================
+
+/**
+ * Token Blacklist (In-Memory)
+ * In production, use Redis for distributed systems
+ */
+const tokenBlacklist = new Set();
+
+/**
+ * Check if token is blacklisted
+ */
+function isTokenBlacklisted(token) {
+  return tokenBlacklist.has(token);
+}
+
+/**
+ * Role Hierarchy for permission checking
+ * Higher number = higher privilege
+ */
+const ROLE_HIERARCHY = {
+  SUPER_ADMIN: 100,
+  ADMIN: 80,
+  admin: 80,
+  manager: 60,
+  SCHEDULER: 50,
+  ACCOUNTANT: 50,
+  REVIEWER_AUDITOR: 40,
+  reviewer: 40,
+  auditor: 40,
+  officer: 30,
+  inspector: 30,
+};
+
+/**
+ * Check if creator can create a role
+ * @param {string} creatorRole - Role of the person creating
+ * @param {string} targetRole - Role being created
+ * @returns {boolean}
+ */
+function canCreateRole(creatorRole, targetRole) {
+  const creatorLevel = ROLE_HIERARCHY[creatorRole] || 0;
+  const targetLevel = ROLE_HIERARCHY[targetRole] || 0;
+
+  // Can only create roles equal or lower than your own
+  // Exception: SUPER_ADMIN can create any role
+  if (creatorRole === 'SUPER_ADMIN') {
+    return true;
+  }
+
+  return creatorLevel >= targetLevel;
+}
+
+/**
+ * @route POST /api/auth-dtam/logout
+ * @desc DTAM Staff Logout - Invalidate token
+ * @access Private (requires valid DTAM token)
+ */
+router.post('/logout', dtamMiddleware.verifyDTAMToken, async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+
+    if (token) {
+      // Add token to blacklist
+      tokenBlacklist.add(token);
+
+      // Clean up old tokens periodically (simple implementation)
+      // In production, use Redis with TTL
+      if (tokenBlacklist.size > 10000) {
+        // Clear oldest entries if too many (simple cleanup)
+        const tokens = Array.from(tokenBlacklist);
+        tokenBlacklist.clear();
+        tokens.slice(-5000).forEach(t => tokenBlacklist.add(t));
+      }
+
+      logger.info(`DTAM staff logged out: ${req.user.username}`);
+    }
+
+    return shared.response.success(
+      res,
+      { message: 'ออกจากระบบสำเร็จ' },
+      'Logout successful',
+    );
+  } catch (error) {
+    logger.error('Logout error:', error);
+    return shared.response.error(
+      res,
+      'เกิดข้อผิดพลาดในการออกจากระบบ',
+      shared.constants.statusCodes.INTERNAL_SERVER_ERROR,
+    );
+  }
+});
+
+/**
+ * @route POST /api/auth-dtam/change-password
+ * @desc Change own password
+ * @access Private (DTAM staff only)
+ */
+router.post(
+  '/change-password',
+  [
+    dtamMiddleware.verifyDTAMToken,
+    body('currentPassword').notEmpty().withMessage('กรุณากรอกรหัสผ่านปัจจุบัน'),
+    body('newPassword')
+      .isLength({ min: 8 })
+      .withMessage('รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร'),
+    body('confirmPassword')
+      .custom((value, { req }) => value === req.body.newPassword)
+      .withMessage('รหัสผ่านใหม่ไม่ตรงกัน'),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return shared.response.error(
+          res,
+          errors.array()[0].msg,
+          shared.constants.statusCodes.BAD_REQUEST,
+        );
+      }
+
+      const { currentPassword, newPassword } = req.body;
+
+      // Find staff with password
+      const staff = await DTAMStaff.findById(req.user.userId).select('+password');
+      if (!staff) {
+        return shared.response.error(
+          res,
+          'ไม่พบข้อมูลผู้ใช้',
+          shared.constants.statusCodes.NOT_FOUND,
+        );
+      }
+
+      // Verify current password
+      const isCurrentPasswordValid = await staff.comparePassword(currentPassword);
+      if (!isCurrentPasswordValid) {
+        return shared.response.error(
+          res,
+          'รหัสผ่านปัจจุบันไม่ถูกต้อง',
+          shared.constants.statusCodes.UNAUTHORIZED,
+        );
+      }
+
+      // Check if new password is same as current
+      const isSamePassword = await staff.comparePassword(newPassword);
+      if (isSamePassword) {
+        return shared.response.error(
+          res,
+          'รหัสผ่านใหม่ต้องไม่เหมือนกับรหัสผ่านปัจจุบัน',
+          shared.constants.statusCodes.BAD_REQUEST,
+        );
+      }
+
+      // Update password (will be hashed by pre-save hook)
+      staff.password = newPassword;
+      staff.passwordChangedAt = new Date();
+      await staff.save();
+
+      logger.info(`Password changed for DTAM staff: ${staff.username}`);
+
+      return shared.response.success(
+        res,
+        { message: 'เปลี่ยนรหัสผ่านสำเร็จ' },
+        'Password changed successfully',
+      );
+    } catch (error) {
+      logger.error('Change password error:', error);
+      return shared.response.error(
+        res,
+        'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน',
+        shared.constants.statusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  },
+);
+
+/**
+ * @route POST /api/auth-dtam/create-staff-v2
+ * @desc Create new DTAM staff account with role hierarchy check
+ * @access Private (DTAM admin only, with role hierarchy validation)
+ */
+router.post(
+  '/create-staff-v2',
+  [
+    dtamMiddleware.verifyDTAMToken,
+    dtamMiddleware.requireDTAMAdmin,
+    body('username')
+      .trim()
+      .isLength({ min: 3 })
+      .withMessage('ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร'),
+    body('email').isEmail().normalizeEmail().withMessage('กรุณาใส่อีเมลที่ถูกต้อง'),
+    body('password').isLength({ min: 8 }).withMessage('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร'),
+    body('firstName').notEmpty().withMessage('กรุณาใส่ชื่อ'),
+    body('lastName').notEmpty().withMessage('กรุณาใส่นามสกุล'),
+    body('role')
+      .isIn(['admin', 'reviewer', 'manager', 'inspector', 'auditor', 'officer'])
+      .withMessage('ตำแหน่งไม่ถูกต้อง'),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return shared.response.error(
+          res,
+          'ข้อมูลไม่ถูกต้อง',
+          shared.constants.statusCodes.BAD_REQUEST,
+          errors.array(),
+        );
+      }
+
+      const { username, email, password, firstName, lastName, role, department } = req.body;
+
+      // Role Hierarchy Check: Prevent creating roles higher than your own
+      if (!canCreateRole(req.user.role, role)) {
+        logger.warn(`Role hierarchy violation: ${req.user.username} (${req.user.role}) tried to create ${role}`);
+        return shared.response.error(
+          res,
+          `คุณไม่มีสิทธิ์สร้างบัญชีตำแหน่ง "${getRoleDisplayName(role)}" เนื่องจากเป็นตำแหน่งที่สูงกว่าหรือเท่ากับตำแหน่งของคุณ`,
+          shared.constants.statusCodes.FORBIDDEN,
+        );
+      }
+
+      // Check if username or email already exists
+      const existingStaff = await DTAMStaff.findOne({
+        $or: [{ username }, { email }],
+      });
+
+      if (existingStaff) {
+        return shared.response.error(
+          res,
+          'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้งานแล้ว',
+          shared.constants.statusCodes.CONFLICT,
+        );
+      }
+
+      // Create new staff
+      const newStaff = new DTAMStaff({
+        username,
+        email,
+        password,
+        firstName,
+        lastName,
+        userType: 'DTAM_STAFF',
+        role,
+        department: department || 'กรมส่งเสริมการเกษตร',
+        isActive: true,
+      });
+
+      await newStaff.save();
+
+      logger.info(`New DTAM staff created: ${newStaff.username} (${role}) by ${req.user.username} (${req.user.role})`);
+
+      return shared.response.success(
+        res,
+        {
+          userId: newStaff._id,
+          username: newStaff.username,
+          email: newStaff.email,
+          firstName: newStaff.firstName,
+          lastName: newStaff.lastName,
+          role: newStaff.role,
+          roleDisplayName: getRoleDisplayName(newStaff.role),
+          department: newStaff.department,
+          createdBy: {
+            username: req.user.username,
+            role: req.user.role,
+          },
+        },
+        'สร้างบัญชีเจ้าหน้าที่สำเร็จ',
+        shared.constants.statusCodes.CREATED,
+      );
+    } catch (error) {
+      logger.error('Create DTAM staff v2 error:', error);
+      return shared.response.error(
+        res,
+        'ไม่สามารถสร้างบัญชีได้',
+        shared.constants.statusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  },
+);
+
+// Export token blacklist check for middleware use
+router.isTokenBlacklisted = isTokenBlacklisted;
+router.canCreateRole = canCreateRole;
+router.ROLE_HIERARCHY = ROLE_HIERARCHY;
+
 module.exports = router;
+

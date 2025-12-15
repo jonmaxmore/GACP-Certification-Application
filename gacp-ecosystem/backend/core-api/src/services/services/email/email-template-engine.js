@@ -7,7 +7,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
-const logger = require('../../shared/logger');
+const logger = require('../../../shared/logger');
 
 class EmailTemplateEngine {
   constructor() {

@@ -3,7 +3,7 @@
  * Centralized database connection for all modules
  */
 
-const logger = require('../../../shared/logger');
+const logger = require('../../../../shared/logger');
 const mongoose = require('mongoose');
 const config = require('../config/environment');
 

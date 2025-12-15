@@ -3,10 +3,10 @@
  * Generates Corrective Action Request PDFs for failed audit items
  */
 
-const pdfGenerator = require('./PdfGenerator.service');
+const pdfGenerator = require('./pdf-generator.service');
 const path = require('path');
 const fs = require('fs').promises;
-const { createLogger } = require('../../shared/logger');
+const { createLogger } = require('../../../shared/logger');
 const logger = createLogger('car-service');
 
 class CARReportService {

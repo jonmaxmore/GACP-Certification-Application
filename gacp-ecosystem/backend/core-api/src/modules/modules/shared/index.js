@@ -14,10 +14,10 @@
 // Config
 const environment = require('./config/environment');
 // Database - use mongodb-manager.js as the single source of truth
-const database = require('../../config/mongodb-manager');
+const database = require('../../../config/config/mongodb-manager');
 
 // Middleware
-const errorHandler = require('./middleware/error-handlerMiddleware');
+const errorHandler = require('./middleware/error-handler-middleware');
 const AuthMiddleware = require('./middleware/auth-middleware');
 const securityMiddleware = require('./middleware/security-middleware');
 
@@ -50,7 +50,7 @@ module.exports = {
   // Middleware exports
   middleware: {
     errorHandler,
-    auth: auth-middleware,
+    auth: AuthMiddleware,
     security: securityMiddleware,
   },
 

@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 // Import logger
-const logger = require('../../../shared/logger');
+const logger = require('../../../../shared/logger');
 
 /**
  * DTAM Staff Schema

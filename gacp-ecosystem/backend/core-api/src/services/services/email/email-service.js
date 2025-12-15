@@ -1,4 +1,4 @@
-﻿/**
+/**
  * email-service
  * Centralized email sending service with template support
  *
@@ -6,7 +6,7 @@
  */
 
 const nodemailer = require('nodemailer');
-const logger = require('../../shared/logger');
+const logger = require('../../../shared/logger');
 const EmailTemplateEngine = require('./email-template-engine');
 
 class email-service {
@@ -138,7 +138,7 @@ class email-service {
 
     return this.sendEmail({
       to: user.email,
-      subject: 'เธฃเธตเน€เธเนเธ•เธฃเธซเธฑเธชเธเนเธฒเธ - GACP Platform',
+      subject: 'รีเซ็ตรหัสผ่าน - GACP Platform',
       template: 'password-reset',
       data: {
         name: user.fullName || user.email,
@@ -159,7 +159,7 @@ class email-service {
 
     return this.sendEmail({
       to: user.email,
-      subject: 'เธขเธทเธเธขเธฑเธเธญเธตเน€เธกเธฅ - GACP Platform',
+      subject: 'ยืนยันอีเมล - GACP Platform',
       template: 'email-verification',
       data: {
         name: user.fullName || user.email,
@@ -177,7 +177,7 @@ class email-service {
   async sendWelcomeEmail(user) {
     return this.sendEmail({
       to: user.email,
-      subject: 'เธขเธดเธเธ”เธตเธ•เนเธญเธเธฃเธฑเธเธชเธนเน GACP Platform',
+      subject: 'ยินดีต้อนรับสู่ GACP Platform',
       template: 'welcome',
       data: {
         name: user.fullName || user.email,
@@ -197,7 +197,7 @@ class email-service {
   async sendApplicationStatusEmail(user, application, newStatus) {
     return this.sendEmail({
       to: user.email,
-      subject: `เธญเธฑเธเน€เธ”เธ•เธชเธ–เธฒเธเธฐเนเธเธชเธกเธฑเธเธฃ GACP - ${application.applicationNumber}`,
+      subject: `อัปเดตสถานะใบสมัคร GACP - ${application.applicationNumber}`,
       template: 'application-status',
       data: {
         name: user.fullName || user.email,
@@ -218,14 +218,14 @@ class email-service {
   async sendInspectionScheduledEmail(user, inspection) {
     return this.sendEmail({
       to: user.email,
-      subject: 'เธเธฒเธฃเธ•เธฃเธงเธเธชเธญเธเธเธฒเธฃเนเธกเนเธ”เนเธฃเธฑเธเธเธฒเธฃเธเธฑเธ”เธซเธกเธฒเธขเนเธฅเนเธง',
+      subject: 'การตรวจสอบฟาร์มได้รับการนัดหมายแล้ว',
       template: 'inspection-scheduled',
       data: {
         name: user.fullName || user.email,
-        inspectionType: inspection.type === 'video_call' ? 'เธ•เธฃเธงเธเธเนเธฒเธเธงเธดเธ”เธตเนเธญเธเธญเธฅ' : 'เธ•เธฃเธงเธเธ—เธตเนเธเธฒเธฃเนเธก',
+        inspectionType: inspection.type === 'video_call' ? 'ตรวจผ่านวิดีโอคอล' : 'ตรวจที่ฟาร์ม',
         scheduledDate: new Date(inspection.scheduledDate).toLocaleDateString('th-TH'),
         scheduledTime: inspection.scheduledTime,
-        inspectorName: inspection.inspectorName || 'เน€เธเนเธฒเธซเธเนเธฒเธ—เธตเน',
+        inspectorName: inspection.inspectorName || 'เจ้าหน้าที่',
         notes: inspection.notes || '',
       },
     });
@@ -238,22 +238,22 @@ class email-service {
    */
   getStatusMessage(status) {
     const statusMessages = {
-      DRAFT: 'เนเธเธชเธกเธฑเธเธฃเธญเธขเธนเนเนเธเธชเธ–เธฒเธเธฐเธฃเนเธฒเธ',
-      SUBMITTED: 'เนเธ”เนเธฃเธฑเธเนเธเธชเธกเธฑเธเธฃเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง',
-      PAYMENT_PENDING_1: 'เธฃเธญเธเธฒเธฃเธเธณเธฃเธฐเน€เธเธดเธเธเธงเธ”เธ—เธตเน 1 (5,000 เธเธฒเธ—)',
-      DOCUMENT_REVIEW: 'เธญเธขเธนเนเธฃเธฐเธซเธงเนเธฒเธเธเธฒเธฃเธ•เธฃเธงเธเธชเธญเธเน€เธญเธเธชเธฒเธฃ',
-      DOCUMENT_REVISION: 'เธเธฃเธธเธ“เธฒเนเธเนเนเธเน€เธญเธเธชเธฒเธฃเธ•เธฒเธกเธ—เธตเนเนเธเนเธ',
-      PAYMENT_PENDING_2: 'เธฃเธญเธเธฒเธฃเธเธณเธฃเธฐเน€เธเธดเธเธเธงเธ”เธ—เธตเน 2 (25,000 เธเธฒเธ—)',
-      INSPECTION_SCHEDULED: 'เธเธฑเธ”เธซเธกเธฒเธขเธเธฒเธฃเธ•เธฃเธงเธเธชเธญเธเธเธฒเธฃเนเธกเนเธฅเนเธง',
-      INSPECTION_COMPLETED: 'เธ•เธฃเธงเธเธชเธญเธเธเธฒเธฃเนเธกเน€เธชเธฃเนเธเธชเธดเนเธ',
-      PENDING_APPROVAL: 'เธฃเธญเธญเธเธธเธกเธฑเธ•เธดเธเธฅเธเธฒเธฃเธ•เธฃเธงเธเธชเธญเธ',
-      APPROVED: 'เนเธเธชเธกเธฑเธเธฃเนเธ”เนเธฃเธฑเธเธเธฒเธฃเธญเธเธธเธกเธฑเธ•เธด',
-      REJECTED: 'เนเธเธชเธกเธฑเธเธฃเนเธกเนเธเนเธฒเธเธเธฒเธฃเธเธดเธเธฒเธฃเธ“เธฒ',
-      CERTIFICATE_GENERATING: 'เธเธณเธฅเธฑเธเธญเธญเธเนเธเธฃเธฑเธเธฃเธญเธ GACP',
-      CERTIFICATE_ISSUED: 'เธญเธญเธเนเธเธฃเธฑเธเธฃเธญเธ GACP เน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง',
+      DRAFT: 'ใบสมัครอยู่ในสถานะร่าง',
+      SUBMITTED: 'ได้รับใบสมัครเรียบร้อยแล้ว',
+      PAYMENT_PENDING_1: 'รอการชำระเงินงวดที่ 1 (5,000 บาท)',
+      DOCUMENT_REVIEW: 'อยู่ระหว่างการตรวจสอบเอกสาร',
+      DOCUMENT_REVISION: 'กรุณาแก้ไขเอกสารตามที่แจ้ง',
+      PAYMENT_PENDING_2: 'รอการชำระเงินงวดที่ 2 (25,000 บาท)',
+      INSPECTION_SCHEDULED: 'นัดหมายการตรวจสอบฟาร์มแล้ว',
+      INSPECTION_COMPLETED: 'ตรวจสอบฟาร์มเสร็จสิ้น',
+      PENDING_APPROVAL: 'รออนุมัติผลการตรวจสอบ',
+      APPROVED: 'ใบสมัครได้รับการอนุมัติ',
+      REJECTED: 'ใบสมัครไม่ผ่านการพิจารณา',
+      CERTIFICATE_GENERATING: 'กำลังออกใบรับรอง GACP',
+      CERTIFICATE_ISSUED: 'ออกใบรับรอง GACP เรียบร้อยแล้ว',
     };
 
-    return statusMessages[status] || 'เธชเธ–เธฒเธเธฐเธญเธฑเธเน€เธ”เธ•';
+    return statusMessages[status] || 'สถานะอัปเดต';
   }
 
   /**

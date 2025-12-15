@@ -19,7 +19,7 @@ const PDFDocument = require('pdfkit');
 const crypto = require('crypto');
 
 // Phase 2 Services Integration
-const queueService = require('./queue/queueService');
+const queueService = require('./queue/queue-service');
 const CacheService = require('./cache/cache-service');
 
 const Application = require('../../database/models/application-model');
@@ -30,7 +30,7 @@ const { ValidationError, BusinessLogicError } = require('../../shared/errors');
 const CertificateRepository = require('../repositories/certificate-repository');
 const ApplicationRepository = require('../repositories/application-repository');
 
-class gacp-certificateService {
+class GacpCertificateService {
   constructor() {
     this.certificateDirectory = path.join(process.cwd(), 'storage', 'certificates');
     this.templateDirectory = path.join(process.cwd(), 'resources', 'templates');
@@ -56,7 +56,7 @@ class gacp-certificateService {
    * Returns immediately with job ID
    */
   async generateCertificate(applicationId, approvedBy) {
-    console.log('gacp-certificateService.generateCertificate called with:', applicationId, approvedBy);
+    console.log('GacpCertificateService.generateCertificate called with:', applicationId, approvedBy);
     try {
       const application = await this.applicationRepository.findById(applicationId);
 
@@ -887,4 +887,4 @@ class gacp-certificateService {
   }
 }
 
-module.exports = new gacp-certificateService();
+module.exports = new GacpCertificateService();

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Redis Connection Manager
  *
  * Provides distributed caching, session management,
@@ -6,7 +6,7 @@
  */
 const { createClient } = require('redis');
 const configManager = require('./config-manager');
-const logger = require('../shared/logger');
+const logger = require('../../shared/logger');
 const redisLogger = logger.createLogger('redis');
 
 // Get Redis configuration

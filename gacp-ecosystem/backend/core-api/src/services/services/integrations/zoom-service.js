@@ -9,7 +9,7 @@
  */
 
 const axios = require('axios');
-const { createLogger } = require('../../shared/logger');
+const { createLogger } = require('../../../shared/logger');
 const logger = createLogger('zoom-service');
 
 class ZoomService {

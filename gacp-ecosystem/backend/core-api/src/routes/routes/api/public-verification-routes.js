@@ -24,7 +24,7 @@ router.get('/verify/:certificateNumber', async (req, res) => {
             });
         }
 
-        const result = await gacp-certificateService.verifyCertificate(certificateNumber, code);
+        const result = await GacpCertificateService.verifyCertificate(certificateNumber, code);
 
         // Return public verification result
         return res.json({
@@ -67,7 +67,7 @@ router.get('/verify/:certificateNumber/page', async (req, res) => {
     try {
         const { certificateNumber } = req.params;
 
-        const verificationPage = await gacp-certificateService.generateVerificationPage(certificateNumber);
+        const verificationPage = await GacpCertificateService.generateVerificationPage(certificateNumber);
 
         // Generate HTML page
         const html = generateVerificationHTML(verificationPage);

@@ -15,9 +15,9 @@
 
 const shared = require('../../shared');
 const { constants } = shared;
-const logger = require('../../../shared/logger');
+const logger = require('../../../../shared/logger');
 // Resolve JWT config from repository root to keep ESM/CJS compatibility in tests
-const jwtConfig = require('../../../config/jwt-security');
+const jwtConfig = require('../../../../config/config/jwt-security');
 
 // เนเธซเธฅเธ” JWT configuration (เธเธฐ throw error เธ–เนเธฒเนเธกเนเธกเธต secret)
 let JWT_CONFIG;

@@ -16,8 +16,8 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
-const logger = require('../shared').logger;
-const dbLogger = logger.createLogger('mongodb');
+const loggerModule = require('../../shared/logger');
+const dbLogger = loggerModule.createLogger ? loggerModule.createLogger('mongodb') : { info: console.log, warn: console.warn, error: console.error };
 
 let config;
 try {

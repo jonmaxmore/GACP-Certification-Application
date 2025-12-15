@@ -2,7 +2,7 @@
  * Audit Report Service
  * Generates PDF reports for Field Audit results
  */
-const pdfGenerator = require('./PdfGenerator.service');
+const pdfGenerator = require('./pdf-generator.service');
 const path = require('path');
 const fs = require('fs').promises;
 

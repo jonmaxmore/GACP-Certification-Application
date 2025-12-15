@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 const Joi = require('joi');
-const logger = require('../shared/logger');
+const logger = require('../../shared/logger');
 const configLogger = logger.createLogger('config');
 
 // Load environment variables

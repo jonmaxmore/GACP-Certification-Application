@@ -6,7 +6,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
-const { createLogger } = require('../../shared/logger');
+const { createLogger } = require('../../../shared/logger');
 const logger = createLogger('photo-service');
 
 class PhotoUploadService {

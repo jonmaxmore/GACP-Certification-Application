@@ -4,10 +4,10 @@
  */
 
 const Bull = require('bull');
-const logger = require('../../shared/logger');
+const logger = require('../../../shared/logger');
 const NotificationService = require('../notification/notification-service');
 const CacheService = require('../cache/cache-service');
-const DTAMApplication = require('../../models/application-model');
+const DTAMApplication = require('../../../database/models/application-model');
 
 class QueueService {
   constructor() {

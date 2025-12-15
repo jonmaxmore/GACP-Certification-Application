@@ -11,7 +11,7 @@ const ZoomService = require('./integrations/zoom-service');
 const { createLogger } = require('../../shared/logger');
 const logger = createLogger('field-audit-service');
 
-class field-audit-service {
+class FieldAuditService {
     /**
      * Create a new field audit for an application
      */
@@ -519,7 +519,7 @@ class field-audit-service {
 }
 
 // Export both instance and class
-const instance = new field-audit-service();
+const instance = new FieldAuditService();
 instance.calculateCategoryScore = FieldAuditService.calculateCategoryScore;
 instance.isPassingScore = FieldAuditService.isPassingScore;
 instance.countMajorFails = FieldAuditService.countMajorFails;

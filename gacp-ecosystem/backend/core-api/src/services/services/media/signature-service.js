@@ -6,7 +6,7 @@
 const path = require('path');
 const fs = require('fs').promises;
 const crypto = require('crypto');
-const { createLogger } = require('../../shared/logger');
+const { createLogger } = require('../../../shared/logger');
 const logger = createLogger('signature-service');
 
 class SignatureService {

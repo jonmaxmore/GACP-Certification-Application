@@ -535,3 +535,102 @@ model AuditLog {
   @@index([createdAt(sort: Desc)])
   @@map("audit_logs")
 }
+
+// =============================================================================
+// PLANT SPECIES MODEL (พันธุ์พืช)
+// =============================================================================
+model PlantSpecies {
+  id        String   @id @default(uuid())
+  uuid      String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ข้อมูลพืช
+  thaiName       String   // ชื่อไทย เช่น "กัญชง", "ขมิ้นชัน"
+  scientificName String   // ชื่อวิทยาศาสตร์
+  englishName    String?  // ชื่ออังกฤษ
+  familyName     String?  // วงศ์
+  
+  // ประเภท GACP
+  gacpCategory   String   // MEDICINAL, CANNABIS, KRATOM, OTHER
+  dtamPlantCode  String?  // รหัสพืชกรมการแพทย์แผนไทย
+  
+  // ข้อมูลการปลูก
+  cultivationType      String   @default("SELF_GROWN") // SELF_GROWN=ปลูกเอง (DTAM required)
+  propagationMethod    String?  // วิธีขยายพันธุ์: SEED, CUTTING, TISSUE_CULTURE
+  growingDurationDays  Int?     // ระยะเวลาปลูก (วัน)
+  harvestCycle         String?  // รอบเก็บเกี่ยว: ANNUAL, PERENNIAL
+  
+  // ส่วนที่ใช้
+  usableParts    String?  // ส่วนที่ใช้: ROOT, LEAF, FLOWER, SEED, BARK
+  processingType String?  // การแปรรูป: FRESH, DRIED, EXTRACT
+  
+  // รูปภาพ/เอกสาร
+  imageUrl       String?
+  description    String?
+  
+  // Relations
+  harvestBatches HarvestBatch[]
+  
+  // Active status
+  isActive  Boolean @default(true)
+  isDeleted Boolean @default(false)
+  
+  @@index([thaiName])
+  @@index([gacpCategory])
+  @@index([isActive, isDeleted])
+  @@map("plant_species")
+}
+
+// =============================================================================
+// HARVEST BATCH MODEL (Lot การเก็บเกี่ยว)
+// =============================================================================
+model HarvestBatch {
+  id        String   @id @default(uuid())
+  uuid      String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // รหัส Lot
+  batchNumber String @unique // เช่น "LOT-2025-001"
+  
+  // ความสัมพันธ์
+  farmId    String
+  speciesId String
+  species   PlantSpecies @relation(fields: [speciesId], references: [id])
+  
+  // ข้อมูลการปลูก
+  plantingDate    DateTime  // วันปลูก
+  harvestDate     DateTime? // วันเก็บเกี่ยว
+  cultivationType String    @default("SELF_GROWN") // ปลูกเอง (DTAM required)
+  seedSource      String?   // แหล่งเมล็ดพันธุ์
+  
+  // พื้นที่
+  plotName        String?   // ชื่อแปลง
+  plotArea        Float?    // พื้นที่ปลูก
+  areaUnit        String    @default("rai")
+  
+  // ปริมาณ
+  estimatedYield  Float?    // ผลผลิตที่คาดการณ์
+  actualYield     Float?    // ผลผลิตจริง
+  yieldUnit       String    @default("kg")
+  
+  // สถานะ
+  status          String    @default("GROWING") // GROWING, READY_HARVEST, HARVESTED, PROCESSED
+  qualityGrade    String?   // A, B, C
+  
+  // หมายเหตุ
+  notes           String?
+  
+  // Soft Delete
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  
+  @@index([farmId])
+  @@index([speciesId])
+  @@index([status])
+  @@index([harvestDate])
+  @@index([isDeleted])
+  @@map("harvest_batches")
+}
+

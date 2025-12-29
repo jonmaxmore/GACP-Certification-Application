@@ -250,6 +250,187 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "Plants",
+            "item": [
+                {
+                    "name": "Get All Plants",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/plants"
+                    }
+                },
+                {
+                    "name": "Get Plants by Category",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v2/plants?category=MEDICINAL",
+                            "query": [
+                                {
+                                    "key": "category",
+                                    "value": "MEDICINAL"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Plant by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/plants/:id"
+                    }
+                },
+                {
+                    "name": "Create Plant",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/api/v2/plants",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"thaiName\": \"ขมิ้นชัน\",\n  \"scientificName\": \"Curcuma longa L.\",\n  \"englishName\": \"Turmeric\",\n  \"gacpCategory\": \"MEDICINAL\",\n  \"cultivationType\": \"SELF_GROWN\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Update Plant",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base_url}}/api/v2/plants/:id",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"description\": \"Updated description\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Plant",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{base_url}}/api/v2/plants/:id"
+                    }
+                },
+                {
+                    "name": "Get Plant Categories",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/plants/categories/list"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Harvest Batches (Lots)",
+            "item": [
+                {
+                    "name": "Get All Batches",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/harvest-batches"
+                    }
+                },
+                {
+                    "name": "Get Batches by Farm",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v2/harvest-batches?farmId=xxx",
+                            "query": [
+                                {
+                                    "key": "farmId",
+                                    "value": "xxx"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Batch by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/harvest-batches/:id"
+                    }
+                },
+                {
+                    "name": "Get Batch by Lot Number (Traceability)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/harvest-batches/lot/LOT-XXXXXXXX-2025-001"
+                    }
+                },
+                {
+                    "name": "Create Batch",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/api/v2/harvest-batches",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"farmId\": \"farm-uuid-here\",\n  \"speciesId\": \"species-uuid-here\",\n  \"plantingDate\": \"2025-01-15\",\n  \"cultivationType\": \"SELF_GROWN\",\n  \"plotName\": \"แปลง A1\",\n  \"plotArea\": 2.5,\n  \"areaUnit\": \"rai\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Update Batch",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base_url}}/api/v2/harvest-batches/:id",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"notes\": \"Updated notes\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Record Harvest",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/api/v2/harvest-batches/:id/harvest",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"harvestDate\": \"2025-04-20\",\n  \"actualYield\": 150.5,\n  \"yieldUnit\": \"kg\",\n  \"qualityGrade\": \"A\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Farm Statistics",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/harvest-batches/stats/:farmId"
+                    }
+                }
+            ]
         }
     ]
 }

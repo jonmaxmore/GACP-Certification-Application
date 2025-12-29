@@ -7,8 +7,8 @@
 
 const express = require('express');
 const router = express.Router();
-const Notification = require('../../models/NotificationModel');
-const { authenticate, checkPermission } = require('../../middleware/AuthMiddleware');
+const Notification = require('../../models-mongoose-legacy/notification-model');
+const { authenticate, checkPermission } = require('../../middleware/auth-middleware');
 
 // Real implementation
 const notificationController = {

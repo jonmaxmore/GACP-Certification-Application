@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const officerController = require('../../controllers/OfficerController');
-const { authenticate, checkPermission } = require('../../middleware/AuthMiddleware');
+const { authenticate, checkPermission } = require('../../middleware/auth-middleware');
 
 // Middleware to ensure user is an officer or admin
 // allow 'officer.access' permission or similar. Assuming checkPermission handles it.

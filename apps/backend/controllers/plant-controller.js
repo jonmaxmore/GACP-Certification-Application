@@ -6,8 +6,8 @@
  * GET /api/v2/plants/:plantId/documents - Get document requirements for plant
  */
 
-const PlantMaster = require('../models/PlantMasterModel');
-const DocumentRequirement = require('../models/DocumentRequirementModel');
+const PlantMaster = require('../models-mongoose-legacy/PlantMaster-model');
+const DocumentRequirement = require('../models-mongoose-legacy/DocumentRequirement-model');
 
 class PlantController {
     /**

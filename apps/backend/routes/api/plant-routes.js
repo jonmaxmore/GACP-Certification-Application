@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const plantController = require('../../controllers/PlantController');
-const { authenticate } = require('../../middleware/AuthMiddleware');
+const { authenticate } = require('../../middleware/auth-middleware');
 
 // ===================== PUBLIC ROUTES (No Auth Required) =====================
 

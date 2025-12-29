@@ -6,7 +6,7 @@
  * Payment: รวมเป็น 1 ครั้ง แต่แยก invoice per application
  */
 
-const Application = require('../models/ApplicationModel');
+const Application = require('../models-mongoose-legacy/application-model');
 const { nanoid } = require('nanoid');
 const { FEE_CONFIG } = require('../constants/PricingService');
 
@@ -196,7 +196,7 @@ async function updateBatchPaymentStatus(batchId, paymentData) {
  * (must have verified license)
  */
 async function canSubmitForPlant(userId, plantType) {
-    const License = require('../models/LicenseModel');
+    const License = require('../models-mongoose-legacy/license-model');
     const license = await License.findByPlantType(userId, plantType);
 
     if (!license) {

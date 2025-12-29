@@ -3,7 +3,7 @@
  * Handles staff management operations for Admin/Super Admin
  */
 
-const User = require('../models/UserModel');
+const User = require('../models-mongoose-legacy/user-model');
 const { createLogger } = require('../shared/logger');
 const logger = createLogger('staff-controller');
 

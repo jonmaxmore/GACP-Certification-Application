@@ -14,8 +14,8 @@ jest.mock('../../models/PlantMasterModel', () => ({
     getPlantById: jest.fn(),
 }));
 
-const DocumentRequirement = require('../../models/DocumentRequirementModel');
-const PlantMaster = require('../../models/PlantMasterModel');
+const DocumentRequirement = require('../../models-mongoose-legacy/DocumentRequirement-model');
+const PlantMaster = require('../../models-mongoose-legacy/PlantMaster-model');
 
 describe('DocumentAnalysisService', () => {
     beforeEach(() => {

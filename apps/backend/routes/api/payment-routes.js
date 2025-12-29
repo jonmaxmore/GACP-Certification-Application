@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticate, checkPermission } = require('../../middleware/AuthMiddleware');
+const { authenticate, checkPermission } = require('../../middleware/auth-middleware');
 const upload = require('../../middleware/uploadMiddleware');
 const paymentController = require('../../controllers/PaymentController');
 

@@ -22,8 +22,8 @@ const crypto = require('crypto');
 const queueService = require('./queue/queueService');
 const cacheService = require('./cache/cacheService');
 
-const Application = require('../models/ApplicationModel');
-const _User = require('../models/UserModel');
+const Application = require('../models-mongoose-legacy/application-model');
+const _User = require('../models-mongoose-legacy/user-model');
 const logger = require('../shared/logger');
 const { ValidationError, BusinessLogicError } = require('../shared/errors');
 

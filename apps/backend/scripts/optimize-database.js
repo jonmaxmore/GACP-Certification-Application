@@ -8,8 +8,8 @@ const mongoose = require('mongoose');
 const logger = require('../shared/logger');
 
 // Import models
-const DTAMApplication = require('../models/ApplicationModel');
-const User = require('../models/UserModel');
+const DTAMApplication = require('../models-mongoose-legacy/application-model');
+const User = require('../models-mongoose-legacy/user-model');
 
 /**
  * Create indexes for optimal query performance

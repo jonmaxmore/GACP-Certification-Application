@@ -4,7 +4,7 @@
  */
 
 const logger = require('../shared/logger');
-const Certificate = require('../models/CertificateModel');
+const Certificate = require('../models-mongoose-legacy/certificate-model');
 
 class CertificateRepository {
   constructor() {

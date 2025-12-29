@@ -11,7 +11,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticateFarmer } = require('../../middleware/AuthMiddleware');
+const { authenticateFarmer } = require('../../middleware/auth-middleware');
 
 // Mock data for demo (replace with real DB queries)
 const generateMockStats = () => {

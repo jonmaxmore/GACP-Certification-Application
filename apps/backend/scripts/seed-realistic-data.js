@@ -15,9 +15,9 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 // Import Production Models
-const User = require('../models/UserModel');
-const Application = require('../models/ApplicationModel');
-const Certificate = require('../models/CertificateModel');
+const User = require('../models-mongoose-legacy/user-model');
+const Application = require('../models-mongoose-legacy/application-model');
+const Certificate = require('../models-mongoose-legacy/certificate-model');
 
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/gacp_production';

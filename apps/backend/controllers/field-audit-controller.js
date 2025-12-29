@@ -5,7 +5,7 @@
  */
 
 const FieldAuditService = require('../services/FieldAuditService');
-const AuditChecklistTemplate = require('../models/AuditChecklistTemplateModel');
+const AuditChecklistTemplate = require('../models-mongoose-legacy/AuditChecklistTemplate-model');
 const AuditReportService = require('../services/pdf/AuditReportService');
 const CARReportService = require('../services/pdf/CARReportService');
 const PhotoUploadService = require('../services/media/PhotoUploadService');

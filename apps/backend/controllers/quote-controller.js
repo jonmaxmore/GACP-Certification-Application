@@ -1,6 +1,6 @@
-const Quote = require('../models/QuoteModel');
-const Invoice = require('../models/InvoiceModel');
-const Application = require('../models/ApplicationModel');
+const Quote = require('../models-mongoose-legacy/quote-model');
+const Invoice = require('../models-mongoose-legacy/invoice-model');
+const Application = require('../models-mongoose-legacy/application-model');
 const { APPLICATION_STATUS } = require('../constants/ServiceTypeEnum');
 
 /**

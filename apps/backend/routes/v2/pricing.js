@@ -85,7 +85,7 @@ router.post('/calculate', (req, res) => {
 router.get('/quotation/:applicationId', async (req, res) => {
     try {
         const { applicationId } = req.params;
-        const Application = require('../../models/ApplicationModel');
+        const Application = require('../../models-mongoose-legacy/application-model');
 
         // Fetch actual application to get area count
         const app = await Application.findById(applicationId).lean();

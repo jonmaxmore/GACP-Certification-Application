@@ -5,13 +5,13 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticateFarmer: authMiddleware } = require('../../middleware/AuthMiddleware');
+const { authenticateFarmer: authMiddleware } = require('../../middleware/auth-middleware');
 const logger = require('../../shared/logger');
 
 // Get Certificate Model - handle gracefully if not available
 let Certificate;
 try {
-    Certificate = require('../../models/CertificateModel');
+    Certificate = require('../../models-mongoose-legacy/certificate-model');
 } catch (e) {
     logger.warn('CertificateModel not found, using inline schema');
     const mongoose = require('mongoose');

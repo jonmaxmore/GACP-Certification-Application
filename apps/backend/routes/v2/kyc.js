@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../../models/UserModel');
-const { authenticate, checkPermission } = require('../../middleware/AuthMiddleware');
+const User = require('../../models-mongoose-legacy/user-model');
+const { authenticate, checkPermission } = require('../../middleware/auth-middleware');
 
 // Real implementation
 const kycController = {

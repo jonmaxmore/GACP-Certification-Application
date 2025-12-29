@@ -3,7 +3,7 @@
  * Automatically logs access to sensitive endpoints
  */
 
-const AccessLog = require('../models/AccessLogModel');
+const AccessLog = require('../models-mongoose-legacy/AccessLog-model');
 
 /**
  * Create middleware that logs access to sensitive data

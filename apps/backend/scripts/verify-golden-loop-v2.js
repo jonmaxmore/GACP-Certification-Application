@@ -8,7 +8,7 @@ process.env.JWT_SECRET = 'test-secret';
 process.env.DTAM_JWT_SECRET = 'test-dtam-secret';
 
 const app = require('../server');
-const User = require('../models/UserModel');
+const User = require('../models-mongoose-legacy/user-model');
 
 let mongoServer;
 let server;

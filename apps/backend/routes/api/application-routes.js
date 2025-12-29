@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../../controllers/ApplicationController');
-const { authenticate } = require('../../middleware/AuthMiddleware');
+const { authenticate } = require('../../middleware/auth-middleware');
 const { strictRateLimiter } = require('../../middleware/RateLimitMiddleware');
 
 // Rate limiters for application routes

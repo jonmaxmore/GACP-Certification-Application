@@ -6,8 +6,8 @@
 
 require('dotenv').config();
 const mongoose = require('mongoose');
-const PlantMaster = require('../models/PlantMasterModel');
-const DocumentRequirement = require('../models/DocumentRequirementModel');
+const PlantMaster = require('../models-mongoose-legacy/PlantMaster-model');
+const DocumentRequirement = require('../models-mongoose-legacy/DocumentRequirement-model');
 
 // ===================== PLANT DATA =====================
 

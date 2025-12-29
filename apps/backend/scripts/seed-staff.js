@@ -64,7 +64,7 @@ async function seedStaff() {
         console.log('✅ Connected to MongoDB');
 
         // Get User model
-        const User = require('../models/UserModel');
+        const User = require('../models-mongoose-legacy/user-model');
 
         console.log('\n📝 Creating staff accounts...\n');
 

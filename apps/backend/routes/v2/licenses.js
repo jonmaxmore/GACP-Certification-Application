@@ -12,7 +12,7 @@
 
 const express = require('express');
 const router = express.Router();
-const License = require('../../models/LicenseModel');
+const License = require('../../models-mongoose-legacy/license-model');
 
 /**
  * @route POST /api/v2/licenses

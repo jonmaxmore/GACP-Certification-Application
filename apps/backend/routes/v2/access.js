@@ -7,7 +7,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticateFarmer } = require('../../middleware/AuthMiddleware');
+const { authenticateFarmer } = require('../../middleware/auth-middleware');
 
 // Role hierarchy for staff access
 const STAFF_ROLES = ['REVIEWER_AUDITOR', 'SCHEDULER', 'ADMIN', 'SUPER_ADMIN'];

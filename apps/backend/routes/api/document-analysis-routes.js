@@ -14,7 +14,7 @@ const router = express.Router();
 const controller = require('../../controllers/DocumentAnalysisController');
 
 // Optional auth middleware - some routes are public
-const { authenticate } = require('../../middleware/AuthMiddleware');
+const { authenticate } = require('../../middleware/auth-middleware');
 
 /**
  * @route   GET /api/v2/documents/plants

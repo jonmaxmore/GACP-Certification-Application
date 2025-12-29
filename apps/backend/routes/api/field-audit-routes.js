@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const fieldAuditController = require('../../controllers/FieldAuditController');
-const { authenticate, checkPermission } = require('../../middleware/AuthMiddleware');
+const { authenticate, checkPermission } = require('../../middleware/auth-middleware');
 
 // All routes require authentication
 router.use(authenticate);

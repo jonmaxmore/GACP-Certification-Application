@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Ticket = require('../../models/TicketModel');
-const { authenticate, checkPermission } = require('../../middleware/AuthMiddleware');
+const Ticket = require('../../models-mongoose-legacy/ticket-model');
+const { authenticate, checkPermission } = require('../../middleware/auth-middleware');
 
 // Real implementation
 const ticketController = {

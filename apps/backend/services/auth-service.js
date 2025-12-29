@@ -1,4 +1,4 @@
-const UserModel = require('../models/UserModel');
+const UserModel = require('../models-mongoose-legacy/user-model');
 const jwtSecurity = require('../config/jwt-security');
 const { validateThaiID, validateLaserCode } = require('../utils/validators');
 const { hash } = require('../shared/encryption');

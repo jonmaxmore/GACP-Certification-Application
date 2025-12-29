@@ -4,7 +4,7 @@
  */
 
 const DocumentAnalysisService = require('../services/document-analysis-service');
-const PlantMaster = require('../models/PlantMasterModel');
+const PlantMaster = require('../models-mongoose-legacy/PlantMaster-model');
 
 /**
  * GET /api/v2/documents/requirements/:plantId

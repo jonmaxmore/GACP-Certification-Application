@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 
 // MOCK the Application Model to avoid DB Setup issues
 jest.mock('../../models/ApplicationModel');
-const Application = require('../../models/ApplicationModel');
+const Application = require('../../models-mongoose-legacy/application-model');
 
 describe('Deep QA: 1.2 Data Integrity (Controller Logic)', () => {
     const SECRET = process.env.JWT_SECRET || 'gacp_secret_2024';

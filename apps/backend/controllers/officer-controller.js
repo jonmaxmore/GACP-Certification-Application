@@ -1,7 +1,7 @@
 // const ApplicationWorkflowService = require('../services/ApplicationWorkflowService');
-const User = require('../models/UserModel');
-const Application = require('../models/ApplicationModel');
-const Notification = require('../models/NotificationModel');
+const User = require('../models-mongoose-legacy/user-model');
+const Application = require('../models-mongoose-legacy/application-model');
+const Notification = require('../models-mongoose-legacy/notification-model');
 const logger = require('../shared/logger');
 
 class OfficerController {

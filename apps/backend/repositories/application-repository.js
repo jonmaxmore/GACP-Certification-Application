@@ -7,7 +7,7 @@
  */
 
 const logger = require('../shared/logger');
-const Application = require('../models/ApplicationModel');
+const Application = require('../models-mongoose-legacy/application-model');
 
 const ApplicationStatus = {
   DRAFT: 'draft',

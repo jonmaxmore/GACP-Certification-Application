@@ -3,9 +3,9 @@
  * Handles application renewal process with pre-fill logic
  */
 
-const Application = require('../models/ApplicationModel');
-const ApplicationSnapshot = require('../models/ApplicationSnapshotModel');
-const DocumentRequirement = require('../models/DocumentRequirementModel');
+const Application = require('../models-mongoose-legacy/application-model');
+const ApplicationSnapshot = require('../models-mongoose-legacy/ApplicationSnapshot-model');
+const DocumentRequirement = require('../models-mongoose-legacy/DocumentRequirement-model');
 const response = require('../shared/response');
 const logger = require('../shared/logger');
 

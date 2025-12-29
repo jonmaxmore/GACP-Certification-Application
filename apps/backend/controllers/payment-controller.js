@@ -8,7 +8,7 @@ const PaymentDocument = require('../models/PaymentDocument');
 // ApplicationModel may not exist in development - handle gracefully
 let Application;
 try {
-    Application = require('../models/ApplicationModel');
+    Application = require('../models-mongoose-legacy/application-model');
 } catch (e) {
     logger.warn('ApplicationModel not found, payment document auto-generation will use demo data');
     Application = null;

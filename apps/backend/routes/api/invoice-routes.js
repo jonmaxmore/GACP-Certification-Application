@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Invoice = require('../../models/InvoiceModel');
+const Invoice = require('../../models-mongoose-legacy/invoice-model');
 
 /**
  * Invoice Routes - API สำหรับใบวางบิล
@@ -88,7 +88,7 @@ router.post('/:invoiceId/pay', async (req, res) => {
         await invoice.save();
 
         // Update application status
-        const Application = require('../../models/ApplicationModel');
+        const Application = require('../../models-mongoose-legacy/application-model');
         const { APPLICATION_STATUS } = require('../../constants/ServiceTypeEnum');
 
         await Application.findByIdAndUpdate(invoice.applicationId, {

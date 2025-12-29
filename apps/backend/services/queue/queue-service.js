@@ -7,7 +7,7 @@ const Bull = require('bull');
 const logger = require('../../shared/logger');
 const notificationService = require('../notification/notificationService');
 const cacheService = require('../cache/cacheService');
-const DTAMApplication = require('../../models/ApplicationModel');
+const DTAMApplication = require('../../models-mongoose-legacy/application-model');
 
 class QueueService {
   constructor() {

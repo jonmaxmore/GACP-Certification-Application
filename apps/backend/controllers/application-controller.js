@@ -1,5 +1,5 @@
-const Application = require('../models/ApplicationModel');
-const Notification = require('../models/NotificationModel');
+const Application = require('../models-mongoose-legacy/application-model');
+const Notification = require('../models-mongoose-legacy/notification-model');
 const PaymentTransaction = require('../models/PaymentTransaction');
 const KsherService = require('../services/KsherService');
 

@@ -12,7 +12,7 @@ process.env.JWT_SECRET = 'test-secret';
 process.env.DTAM_JWT_SECRET = 'test-dtam-secret';
 
 const app = require('../server'); // Import app
-const User = require('../models/UserModel');
+const User = require('../models-mongoose-legacy/user-model');
 const { RBACService } = require('../services/security-compliance');
 
 let mongoServer;

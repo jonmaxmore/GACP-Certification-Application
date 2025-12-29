@@ -8,7 +8,7 @@
 
 require('dotenv').config();
 const mongoose = require('mongoose');
-const AuditChecklistTemplate = require('../models/AuditChecklistTemplateModel');
+const AuditChecklistTemplate = require('../models-mongoose-legacy/AuditChecklistTemplate-model');
 
 // GACP Categories with items
 const GACP_CATEGORIES = [

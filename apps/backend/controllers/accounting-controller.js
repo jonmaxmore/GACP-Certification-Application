@@ -4,9 +4,9 @@
  * Features: CRUD, document number updates, real-time sync
  */
 
-const Quote = require('../models/QuoteModel');
-const Invoice = require('../models/InvoiceModel');
-const User = require('../models/UserModel');
+const Quote = require('../models-mongoose-legacy/quote-model');
+const Invoice = require('../models-mongoose-legacy/invoice-model');
+const User = require('../models-mongoose-legacy/user-model');
 const { createLogger } = require('../shared/logger');
 const logger = createLogger('accounting-controller');
 

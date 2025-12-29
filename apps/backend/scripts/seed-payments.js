@@ -6,8 +6,8 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-const User = require('../models/UserModel');
-const Application = require('../models/ApplicationModel');
+const User = require('../models-mongoose-legacy/user-model');
+const Application = require('../models-mongoose-legacy/application-model');
 const PaymentDocument = require('../models/PaymentDocument');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/gacp_production';

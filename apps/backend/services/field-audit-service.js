@@ -4,9 +4,9 @@
  * Based on field_audit_system_design.md
  */
 
-const FieldAudit = require('../models/FieldAuditModel');
-const AuditChecklistTemplate = require('../models/AuditChecklistTemplateModel');
-const Application = require('../models/ApplicationModel');
+const FieldAudit = require('../models-mongoose-legacy/FieldAudit-model');
+const AuditChecklistTemplate = require('../models-mongoose-legacy/AuditChecklistTemplate-model');
+const Application = require('../models-mongoose-legacy/application-model');
 const ZoomService = require('./integrations/ZoomService');
 const { createLogger } = require('../shared/logger');
 const logger = createLogger('field-audit-service');

@@ -18,7 +18,7 @@ const database = require('../../config/MongodbManager');
 
 // Middleware
 const errorHandler = require('./middleware/ErrorHandlerMiddleware');
-const authMiddleware = require('./middleware/AuthMiddleware');
+const authMiddleware = require('./middleware/auth-middleware');
 const securityMiddleware = require('./middleware/SecurityMiddleware');
 
 // Utils

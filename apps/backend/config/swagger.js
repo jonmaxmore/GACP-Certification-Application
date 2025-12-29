@@ -7,7 +7,21 @@ const options = {
         info: {
             title: 'GACP Certification API',
             version: '2.0.0',
-            description: 'API Documentation for GACP Certification Platform',
+            description: `
+## GACP Certification Platform API
+
+API Documentation สำหรับระบบรับรองมาตรฐาน GACP (Good Agricultural and Collection Practices)
+
+### Features:
+- 🌱 **Plants** - จัดการข้อมูลพืชสมุนไพร
+- 🌾 **Harvest Batches** - ติดตาม Lot และ Traceability
+- 📋 **Config** - เทมเพลตแบบฟอร์มและมาตรฐาน
+- ✅ **Validation** - ตรวจสอบก่อนยื่นใบสมัคร
+- 🔐 **Auth** - ระบบ Authentication
+
+### Thai ID Validation:
+รองรับการตรวจสอบเลขบัตรประชาชนไทย 13 หลักตามมาตรฐานกระทรวงมหาดไทย
+            `,
             contact: {
                 name: 'GACP Support',
                 email: 'support@gacp.com',
@@ -15,13 +29,16 @@ const options = {
         },
         servers: [
             {
-                url: 'http://localhost:3001/api/v2',
+                url: 'http://localhost:3000',
                 description: 'Development Server',
             },
-            {
-                url: 'http://localhost:3001',
-                description: 'Root Server (for Auth)',
-            },
+        ],
+        tags: [
+            { name: 'Config', description: 'Configuration endpoints (document slots, templates, standards, pricing)' },
+            { name: 'Plants', description: 'Plant species management' },
+            { name: 'HarvestBatches', description: 'Harvest batch and lot tracking' },
+            { name: 'Validation', description: 'Pre-submission validation' },
+            { name: 'Auth', description: 'Authentication and user management' },
         ],
         components: {
             securitySchemes: {
@@ -32,6 +49,64 @@ const options = {
                 },
             },
             schemas: {
+                PlantSpecies: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'integer' },
+                        uuid: { type: 'string', format: 'uuid' },
+                        thaiName: { type: 'string', example: 'กัญชา' },
+                        scientificName: { type: 'string', example: 'Cannabis sativa L.' },
+                        englishName: { type: 'string', example: 'Cannabis' },
+                        gacpCategory: { type: 'string', enum: ['CONTROLLED', 'MEDICINAL', 'ORNAMENTAL'] },
+                        cultivationType: { type: 'string', enum: ['SELF_GROWN', 'CONTRACT_FARMING', 'PURCHASED'] },
+                    },
+                },
+                HarvestBatch: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'integer' },
+                        uuid: { type: 'string', format: 'uuid' },
+                        batchNumber: { type: 'string', example: 'LOT-ABC12345-2025-001' },
+                        farmId: { type: 'integer' },
+                        speciesId: { type: 'integer' },
+                        plantingDate: { type: 'string', format: 'date' },
+                        harvestDate: { type: 'string', format: 'date' },
+                        status: { type: 'string', enum: ['PLANNED', 'GROWING', 'HARVESTED', 'PROCESSING', 'COMPLETED'] },
+                        actualYield: { type: 'number', example: 150.5 },
+                        yieldUnit: { type: 'string', example: 'kg' },
+                        qualityGrade: { type: 'string', enum: ['A', 'B', 'C', 'REJECTED'] },
+                    },
+                },
+                PreSubmissionValidation: {
+                    type: 'object',
+                    properties: {
+                        isReady: { type: 'boolean' },
+                        completionPercentage: { type: 'integer', example: 75 },
+                        sections: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: {
+                                    name: { type: 'string' },
+                                    percentage: { type: 'integer' },
+                                    missing: { type: 'array', items: { type: 'object' } },
+                                },
+                            },
+                        },
+                        missingRequired: { type: 'array', items: { type: 'object' } },
+                        warnings: { type: 'array', items: { type: 'object' } },
+                    },
+                },
+                DocumentSlot: {
+                    type: 'object',
+                    properties: {
+                        slotId: { type: 'string', example: 'license_bt11' },
+                        name: { type: 'string', example: 'ใบอนุญาต บท.11' },
+                        description: { type: 'string' },
+                        required: { type: 'boolean' },
+                        conditionalRequired: { type: 'boolean' },
+                    },
+                },
                 User: {
                     type: 'object',
                     properties: {
@@ -43,33 +118,6 @@ const options = {
                         status: { type: 'string', enum: ['pending', 'active', 'suspended'] },
                     },
                 },
-                Establishment: {
-                    type: 'object',
-                    required: ['name', 'address', 'owner'],
-                    properties: {
-                        id: { type: 'string', description: 'Establishment ID' },
-                        name: { type: 'string' },
-                        type: { type: 'string', enum: ['CULTIVATION', 'PROCESSING', 'DISTRIBUTION'] },
-                        address: {
-                            type: 'object',
-                            properties: {
-                                street: { type: 'string' },
-                                city: { type: 'string' },
-                                zipCode: { type: 'string' },
-                            },
-                        },
-                        status: { type: 'string' },
-                    },
-                },
-                Application: {
-                    type: 'object',
-                    properties: {
-                        id: { type: 'string' },
-                        type: { type: 'string' },
-                        status: { type: 'string' },
-                        submissionDate: { type: 'string', format: 'date-time' },
-                    },
-                },
             },
         },
         security: [
@@ -78,7 +126,6 @@ const options = {
             },
         ],
     },
-    // Ensure we pick up docs from routes and controllers
     apis: [
         path.join(__dirname, '../routes/**/*.js'),
         path.join(__dirname, '../controllers/**/*.js'),
@@ -89,4 +136,3 @@ const options = {
 const swaggerSpec = swaggerJsdoc(options);
 
 module.exports = swaggerSpec;
-

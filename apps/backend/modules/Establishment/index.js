@@ -1,120 +1,22 @@
 /**
- * Establishment Module
- * Handles farm establishment management
+ * Establishment Module - Prisma Version
+ * Handles farm establishment management using PostgreSQL
  */
 
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../../shared/logger');
-const mongoose = require('mongoose');
-
-// Service Logic
-class EstablishmentService {
-    constructor() {
-        this.collectionName = 'establishments';
-    }
-
-    get collection() {
-        return mongoose.connection.collection(this.collectionName);
-    }
-
-    async create(data) {
-        const establishment = {
-            id: uuidv4(),
-            ...data,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            status: 'active'
-        };
-
-        await this.collection.insertOne(establishment);
-        return establishment;
-    }
-
-    async getById(id) {
-        return await this.collection.findOne({ id });
-    }
-}
-
-const service = new EstablishmentService();
-
-// Routes
-/**
- * @swagger
- * components:
- *   schemas:
- *     Establishment:
- *       type: object
- *       required:
- *         - name
- *         - type
- *         - address
- *       properties:
- *         id:
- *           type: string
- *           description: Auto-generated ID
- *         name:
- *           type: string
- *           description: Name of the establishment
- *         type:
- *           type: string
- *           enum: [farm, shop, processing, extraction]
- *           description: Type of establishment
- *         address:
- *           type: object
- *           properties:
- *             street:
- *               type: string
- *             city:
- *               type: string
- *             zipCode:
- *               type: string
- *         coordinates:
- *           type: object
- *           properties:
- *             lat:
- *               type: number
- *             lng:
- *               type: number
- *         images:
- *           type: array
- *           items:
- *             type: string
- *           description: List of image URLs
- */
-
-// Routes
-
-/**
- * @swagger
- * /api/v2/establishments:
- *   post:
- *     summary: Create a new establishment
- *     tags: [Establishments]
- *     security:
- *       - BearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Establishment'
- *     responses:
- *       201:
- *         description: Establishment created successfully
- *       500:
- *         description: Server error
- */
+const prismaDatabase = require('../../services/prisma-database');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const { authenticate } = require('../../middleware/auth-middleware');
 
-// Configure Multer
+// Configure Multer for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadDir = 'uploads/establishments';
-        // Create dir if not exists
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
         }
@@ -127,48 +29,119 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ... (Service Logic remains same)
+// Prisma-based Establishment Service
+class EstablishmentService {
+    constructor() {
+        this.prisma = null;
+    }
 
-const { authenticate } = require('../../middleware/auth-middleware');
+    get client() {
+        if (!this.prisma) {
+            this.prisma = prismaDatabase.getClient();
+        }
+        return this.prisma;
+    }
 
-// ... (Service Logic remains same)
+    async create(data) {
+        const establishment = await this.client.farm.create({
+            data: {
+                id: uuidv4(),
+                farmName: data.name || data.farmName || 'Unnamed',
+                farmType: data.type || 'CULTIVATION',
+                address: data.address?.street || data.address || '',
+                province: data.address?.city || data.province || '',
+                district: data.district || '',
+                subDistrict: data.subDistrict || '',
+                postalCode: data.address?.zipCode || data.postalCode || '',
+                latitude: data.location?.coordinates?.[1] || data.latitude || null,
+                longitude: data.location?.coordinates?.[0] || data.longitude || null,
+                totalArea: parseFloat(data.totalArea) || 0,
+                cultivationArea: parseFloat(data.cultivationArea) || 0,
+                cultivationMethod: data.cultivationMethod || 'CONVENTIONAL',
+                status: 'DRAFT',
+                ownerId: data.owner,
+                landDocuments: data.images ? { images: data.images } : {}
+            }
+        });
+        return establishment;
+    }
 
-// Routes
+    async getById(id) {
+        return await this.client.farm.findFirst({
+            where: { id }
+        });
+    }
+
+    async getByOwner(ownerId) {
+        return await this.client.farm.findMany({
+            where: {
+                ownerId,
+                isDeleted: false
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+    }
+
+    async getAll() {
+        return await this.client.farm.findMany({
+            where: { isDeleted: false },
+            orderBy: { createdAt: 'desc' }
+        });
+    }
+
+    async update(id, data) {
+        return await this.client.farm.update({
+            where: { id },
+            data: {
+                ...data,
+                updatedAt: new Date()
+            }
+        });
+    }
+
+    async delete(id) {
+        return await this.client.farm.update({
+            where: { id },
+            data: {
+                isDeleted: true,
+                deletedAt: new Date()
+            }
+        });
+    }
+}
+
+const service = new EstablishmentService();
+
 // Apply Authentication to all routes
 router.use(authenticate);
 
-// 1. Get MY Establishments (Mobile App Route)
+// GET /my-establishments - Get user's establishments
 router.get('/my-establishments', async (req, res) => {
     try {
-        // Filter by Owner
-        const establishments = await service.collection.find({ owner: req.user.id }).toArray();
+        const establishments = await service.getByOwner(req.user.userId);
         res.json({
             success: true,
             data: establishments
         });
     } catch (error) {
+        logger.error('Get my establishments error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
+// POST / - Create establishment
 router.post('/', upload.single('evidence_photo'), async (req, res) => {
     try {
-        console.log('Create Est Body:', req.body); // Debug
-
         const establishmentData = {
             ...req.body,
-            owner: req.user.id // Assign Owner
+            owner: req.user.userId
         };
 
-        // Handle file
         if (req.file) {
-            // Convert to relative path for URL
             const imageUrl = `/uploads/establishments/${req.file.filename}`;
             establishmentData.images = [imageUrl];
-            establishmentData.imageUrl = imageUrl; // For backward compatibility / simplified view
         }
 
-        // Parse coordinates if sent as string (Multipart often sends numbers as strings)
         if (establishmentData.latitude && establishmentData.longitude) {
             establishmentData.location = {
                 type: 'Point',
@@ -177,9 +150,6 @@ router.post('/', upload.single('evidence_photo'), async (req, res) => {
                     parseFloat(establishmentData.latitude)
                 ]
             };
-            // Clean up flat fields
-            delete establishmentData.latitude;
-            delete establishmentData.longitude;
         }
 
         const establishment = await service.create(establishmentData);
@@ -189,153 +159,66 @@ router.post('/', upload.single('evidence_photo'), async (req, res) => {
         });
     } catch (error) {
         logger.error('Create establishment error:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-/**
- * @swagger
- * /api/v2/establishments:
- *   get:
- *     summary: List all establishments (Admin Only)
- */
-router.get('/', async (req, res) => {
-    try {
-        // Restrict to Admin/Officer
-        if (!['admin', 'officer', 'dtam_staff'].includes(req.user.role?.toLowerCase())) {
-            // Fallback for user: return own
-            const establishments = await service.collection.find({ owner: req.user.id }).toArray();
-            return res.json({ success: true, data: establishments });
-        }
-
-        const establishments = await service.collection.find().toArray();
-        res.json({
-            success: true,
-            data: establishments
-        });
-    } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-/**
- * @swagger
- * /api/v2/establishments/{id}:
- *   get:
- *     summary: Get establishment details
- *     tags: [Establishments]
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Establishment details
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Establishment'
- *       404:
- *         description: Not found
- */
+// GET / - List all establishments (Admin only, or own for farmers)
+router.get('/', async (req, res) => {
+    try {
+        if (!['admin', 'officer', 'dtam_staff', 'ADMIN', 'SUPER_ADMIN'].includes(req.user.role)) {
+            const establishments = await service.getByOwner(req.user.userId);
+            return res.json({ success: true, data: establishments });
+        }
+
+        const establishments = await service.getAll();
+        res.json({ success: true, data: establishments });
+    } catch (error) {
+        logger.error('List establishments error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// GET /:id - Get establishment by ID
 router.get('/:id', async (req, res) => {
     try {
         const establishment = await service.getById(req.params.id);
         if (!establishment) {
-            return res.status(404).json({
-                success: false,
-                error: 'Establishment not found'
-            });
+            return res.status(404).json({ success: false, error: 'Establishment not found' });
         }
-        res.json({
-            success: true,
-            data: establishment
-        });
+        res.json({ success: true, data: establishment });
     } catch (error) {
         logger.error('Get establishment error:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-/**
- * @swagger
- * /api/v2/establishments/{id}:
- *   put:
- *     summary: Update establishment details
- *     tags: [Establishments]
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Establishment'
- *     responses:
- *       200:
- *         description: Establishment updated
- */
-router.put('/:id', async (req, res) => {
-    try {
-        const result = await service.collection.updateOne({ id: req.params.id }, { $set: { ...req.body, updatedAt: new Date() } });
-
-        if (result.matchedCount === 0) {
-            return res.status(404).json({ success: false, error: 'Establishment not found or ID mismatch' });
-        }
-
-        res.json({ success: true, message: 'Establishment updated' });
-    } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-/**
- * @swagger
- * /api/v2/establishments/{id}:
- *   delete:
- *     summary: Delete establishment
- *     tags: [Establishments]
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Establishment deleted
- */
+// PUT /:id - Update establishment
+router.put('/:id', async (req, res) => {
+    try {
+        const establishment = await service.update(req.params.id, req.body);
+        res.json({ success: true, data: establishment });
+    } catch (error) {
+        if (error.code === 'P2025') {
+            return res.status(404).json({ success: false, error: 'Establishment not found' });
+        }
+        logger.error('Update establishment error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// DELETE /:id - Soft delete establishment
 router.delete('/:id', async (req, res) => {
     try {
-        const result = await service.collection.deleteOne({ id: req.params.id });
-
-        if (result.deletedCount === 0) {
-            return res.status(404).json({ success: false, error: 'Establishment not found or ID mismatch' });
-        }
-
+        await service.delete(req.params.id);
         res.json({ success: true, message: 'Establishment deleted' });
     } catch (error) {
+        if (error.code === 'P2025') {
+            return res.status(404).json({ success: false, error: 'Establishment not found' });
+        }
+        logger.error('Delete establishment error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
 module.exports = router;
-

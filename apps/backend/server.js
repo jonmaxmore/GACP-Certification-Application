@@ -20,8 +20,7 @@ const swaggerSpec = require('./config/swagger');
 // Import Modules
 const AuthFarmerRoutes = require('./routes/api/auth-farmer-routes');
 const v2Routes = require('./routes/v2');
-// TEMPORARILY DISABLED - Mongoose dependencies
-// const EstablishmentRoutes = require('./modules/Establishment');
+const EstablishmentRoutes = require('./modules/Establishment');
 
 const app = express();
 const port = process.env.PORT || 3000; // Backend API port
@@ -90,9 +89,8 @@ app.use(cookieParser());
 // Mount Routes
 app.use('/api/auth-farmer', AuthFarmerRoutes);
 app.use('/api/v2', v2Routes);
-// TEMPORARILY DISABLED - Mongoose dependencies
-// app.use('/api/establishments', EstablishmentRoutes);
-// app.use('/api/v2/establishments', EstablishmentRoutes);
+app.use('/api/establishments', EstablishmentRoutes);
+app.use('/api/v2/establishments', EstablishmentRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Health Check - Both /health and /api/health for compatibility

@@ -13,7 +13,7 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const logger = require('./shared/logger');
 const prismaDatabase = require('./services/prisma-database'); // PostgreSQL
-const redisService = require('./services/RedisService');
+const redisService = require('./services/redis-service');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 

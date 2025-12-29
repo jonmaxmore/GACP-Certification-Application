@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const AuthController = require('../../controllers/AuthController');
-const upload = require('../../middleware/UploadMiddleware');
-const { authenticateFarmer } = require('../../middleware/AuthMiddleware');
-const { strictRateLimiter } = require('../../middleware/RateLimitMiddleware');
+const AuthController = require('../../controllers/auth-controller');
+const upload = require('../../middleware/upload-middleware');
+const { authenticateFarmer } = require('../../middleware/auth-middleware');
+const { strictRateLimiter } = require('../../middleware/rate-limit-middleware');
 
 // Rate limiters for auth routes (防止暴力破解 / Brute-force protection)
 const loginRateLimiter = strictRateLimiter(15 * 60 * 1000, 10); // 10 per 15 min

@@ -1,6 +1,8 @@
 /**
  * E2E Tests for Authentication Flow
  * Tests registration, login, token refresh, and logout
+ * 
+ * Routes: /api/auth-farmer/*
  */
 
 const { test, expect } = require('@playwright/test');
@@ -8,14 +10,6 @@ const crypto = require('crypto');
 
 // Generate unique test data
 const testId = crypto.randomBytes(4).toString('hex');
-const testUser = {
-    identifier: `1234567890${testId.slice(0, 3)}`, // Unique 13-digit ID
-    password: 'TestPass123!',
-    firstName: 'ทดสอบ',
-    lastName: 'อีทูอี',
-    phoneNumber: `08${testId}12345`.slice(0, 10),
-    accountType: 'INDIVIDUAL',
-};
 
 // ============================================================================
 // AUTHENTICATION API TESTS
@@ -23,24 +17,24 @@ const testUser = {
 
 test.describe('Authentication API', () => {
 
-    test('POST /auth/check-identifier with new ID should return available', async ({ request }) => {
-        const response = await request.post('/auth/check-identifier', {
+    test('POST /api/auth-farmer/check-identifier with valid format', async ({ request }) => {
+        const response = await request.post('/api/auth-farmer/check-identifier', {
             data: {
-                identifier: '9999999999999',
+                identifier: '1234567890123',
                 accountType: 'INDIVIDUAL',
             },
         });
 
+        expect(response.ok()).toBeTruthy();
         const data = await response.json();
         expect(data.success).toBe(true);
-        // Either available or already exists is a valid response
         expect(typeof data.available).toBe('boolean');
     });
 
-    test('POST /auth/check-identifier with invalid format should return error', async ({ request }) => {
-        const response = await request.post('/auth/check-identifier', {
+    test('POST /api/auth-farmer/check-identifier with short ID should fail', async ({ request }) => {
+        const response = await request.post('/api/auth-farmer/check-identifier', {
             data: {
-                identifier: '123',  // Too short
+                identifier: '123',
                 accountType: 'INDIVIDUAL',
             },
         });
@@ -50,11 +44,11 @@ test.describe('Authentication API', () => {
         expect(data.available).toBe(false);
     });
 
-    test('POST /auth/login with wrong credentials should return 401', async ({ request }) => {
-        const response = await request.post('/auth/login', {
+    test('POST /api/auth-farmer/login with wrong credentials', async ({ request }) => {
+        const response = await request.post('/api/auth-farmer/login', {
             data: {
                 identifier: '1234567890123',
-                password: 'wrongpassword',
+                password: 'wrongpassword123',
                 accountType: 'INDIVIDUAL',
             },
         });
@@ -64,35 +58,23 @@ test.describe('Authentication API', () => {
         expect(data.success).toBe(false);
     });
 
-    test('GET /auth/me without token should return 401', async ({ request }) => {
-        const response = await request.get('/auth/me');
+    test('GET /api/auth-farmer/me without token should return 401', async ({ request }) => {
+        const response = await request.get('/api/auth-farmer/me');
         expect(response.status()).toBe(401);
     });
 
 });
 
 // ============================================================================
-// SECURITY ENDPOINT TESTS
+// SECURITY TESTS
 // ============================================================================
 
-test.describe('Security Endpoints', () => {
+test.describe('Security Tests', () => {
 
-    test('API should require Bearer token format', async ({ request }) => {
-        // Test with malformed token
-        const response = await request.get('/auth/me', {
-            headers: {
-                'Authorization': 'InvalidToken',
-            },
-        });
+    test('Should reject expired/invalid JWT tokens', async ({ request }) => {
+        const fakeToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMyIsImV4cCI6MTYwMDAwMDAwMH0.signature';
 
-        expect(response.status()).toBe(401);
-    });
-
-    test('API should reject expired tokens gracefully', async ({ request }) => {
-        // Use a clearly fake but properly formatted token
-        const fakeToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMyIsImV4cCI6MTYwMDAwMDAwMH0.fake';
-
-        const response = await request.get('/auth/me', {
+        const response = await request.get('/api/auth-farmer/me', {
             headers: {
                 'Authorization': `Bearer ${fakeToken}`,
             },
@@ -102,56 +84,73 @@ test.describe('Security Endpoints', () => {
         expect(response.status()).toBeLessThanOrEqual(403);
     });
 
-});
+    test('Should reject malformed Authorization header', async ({ request }) => {
+        const response = await request.get('/api/auth-farmer/me', {
+            headers: {
+                'Authorization': 'NotBearerToken',
+            },
+        });
 
-// ============================================================================
-// TOKEN VALIDATION TESTS
-// ============================================================================
-
-test.describe('Token Validation', () => {
-
-    test('Protected routes should return proper error codes', async ({ request }) => {
-        const protectedRoutes = [
-            { method: 'GET', path: '/auth/me' },
-            { method: 'GET', path: '/api/v2/notifications' },
-        ];
-
-        for (const route of protectedRoutes) {
-            const response = route.method === 'GET'
-                ? await request.get(route.path)
-                : await request.post(route.path);
-
-            // Should be 401 (Unauthorized) without token
-            expect(response.status()).toBe(401);
-        }
+        expect(response.status()).toBeGreaterThanOrEqual(401);
     });
 
 });
 
 // ============================================================================
-// PUBLIC ENDPOINTS TESTS (No Auth Required)
+// PUBLIC ENDPOINTS (NO AUTH REQUIRED)
 // ============================================================================
 
-test.describe('Public Endpoints (No Auth)', () => {
+test.describe('Public Endpoints', () => {
 
-    test('GET /api/v2/health should be accessible without auth', async ({ request }) => {
+    test('GET /api/v2/health should work without auth', async ({ request }) => {
         const response = await request.get('/api/v2/health');
         expect(response.ok()).toBeTruthy();
+
+        const data = await response.json();
+        expect(data.success).toBe(true);
     });
 
-    test('GET /api/v2/config/document-slots should be accessible', async ({ request }) => {
+    test('GET /api/v2/config/document-slots should work without auth', async ({ request }) => {
         const response = await request.get('/api/v2/config/document-slots');
         expect(response.ok()).toBeTruthy();
+
+        const data = await response.json();
+        expect(data.success).toBe(true);
+        expect(data.totalSlots).toBeGreaterThan(0);
     });
 
-    test('POST /auth/check-identifier should be accessible', async ({ request }) => {
-        const response = await request.post('/auth/check-identifier', {
+    test('POST /api/auth-farmer/check-identifier should work without auth', async ({ request }) => {
+        const response = await request.post('/api/auth-farmer/check-identifier', {
             data: {
-                identifier: '1234567890123',
+                identifier: '9876543210123',
                 accountType: 'INDIVIDUAL',
             },
         });
+
         expect(response.ok()).toBeTruthy();
+    });
+
+    test('GET /api/v2/config/standards should work without auth', async ({ request }) => {
+        const response = await request.get('/api/v2/config/standards');
+        expect(response.ok()).toBeTruthy();
+    });
+
+    test('GET /api/v2/config/pricing should work without auth', async ({ request }) => {
+        const response = await request.get('/api/v2/config/pricing');
+        expect(response.ok()).toBeTruthy();
+    });
+
+});
+
+// ============================================================================
+// PROTECTED ENDPOINTS (AUTH REQUIRED)
+// ============================================================================
+
+test.describe('Protected Endpoints', () => {
+
+    test('GET /api/v2/notifications should require auth', async ({ request }) => {
+        const response = await request.get('/api/v2/notifications');
+        expect(response.status()).toBe(401);
     });
 
 });

@@ -1,0 +1,255 @@
+{
+    "info": {
+        "name": "GACP Platform API",
+        "description": "GACP Certification Platform API Collection - All endpoints testable",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000"
+        }
+    ],
+    "item": [
+        {
+            "name": "Health",
+            "item": [
+                {
+                    "name": "V2 Health Check",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/health"
+                    }
+                },
+                {
+                    "name": "V2 Version",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/version"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Config - Document Slots",
+            "item": [
+                {
+                    "name": "Get All Document Slots",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/config/document-slots"
+                    }
+                },
+                {
+                    "name": "Get Required Documents (Cannabis, Individual)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v2/config/document-slots/required?plantType=cannabis&applicantType=INDIVIDUAL",
+                            "query": [
+                                {
+                                    "key": "plantType",
+                                    "value": "cannabis"
+                                },
+                                {
+                                    "key": "applicantType",
+                                    "value": "INDIVIDUAL"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Required Documents (Cannabis, Juristic, Processing)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v2/config/document-slots/required?plantType=cannabis&applicantType=JURISTIC&objectives=PROCESSING",
+                            "query": [
+                                {
+                                    "key": "plantType",
+                                    "value": "cannabis"
+                                },
+                                {
+                                    "key": "applicantType",
+                                    "value": "JURISTIC"
+                                },
+                                {
+                                    "key": "objectives",
+                                    "value": "PROCESSING"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Objective Warnings",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v2/config/document-slots/warnings?objectives=PROCESSING,EXPORT",
+                            "query": [
+                                {
+                                    "key": "objectives",
+                                    "value": "PROCESSING,EXPORT"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Validate Document Completion",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/api/v2/config/document-slots/validate",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"objectives\": [\"PROCESSING\"],\n  \"uploadedSlots\": [\"license_bt11\", \"land_deed\"]\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Config - Form Templates",
+            "item": [
+                {
+                    "name": "Get All Templates (Metadata)",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/config/templates"
+                    }
+                },
+                {
+                    "name": "Get Pre-Cultivation Template",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/config/templates/pre_cultivation_assessment"
+                    }
+                },
+                {
+                    "name": "Get Cultivation Practices Template",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/config/templates/cultivation_practices"
+                    }
+                },
+                {
+                    "name": "Get Pre-Cultivation Questions Only",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/config/templates/pre_cultivation_assessment/questions"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Config - Standards",
+            "item": [
+                {
+                    "name": "Get All Standards",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/config/standards"
+                    }
+                },
+                {
+                    "name": "Get Thai GACP Standard",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/config/standards/thai"
+                    }
+                },
+                {
+                    "name": "Get WHO GAP Standard",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/config/standards/who"
+                    }
+                },
+                {
+                    "name": "Get EU Organic Standard",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/config/standards/eu"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Config - Pricing",
+            "item": [
+                {
+                    "name": "Get Pricing Info",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/api/v2/config/pricing"
+                    }
+                },
+                {
+                    "name": "Calculate Cost (1 Area Type)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v2/config/pricing/calculate?areaTypes=OUTDOOR",
+                            "query": [
+                                {
+                                    "key": "areaTypes",
+                                    "value": "OUTDOOR"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Calculate Cost (2 Area Types + Processing)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v2/config/pricing/calculate?areaTypes=OUTDOOR,INDOOR&hasProcessing=true",
+                            "query": [
+                                {
+                                    "key": "areaTypes",
+                                    "value": "OUTDOOR,INDOOR"
+                                },
+                                {
+                                    "key": "hasProcessing",
+                                    "value": "true"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Calculate Cost (Full - Processing + Export)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v2/config/pricing/calculate?areaTypes=OUTDOOR,INDOOR,GREENHOUSE&hasProcessing=true&hasExport=true",
+                            "query": [
+                                {
+                                    "key": "areaTypes",
+                                    "value": "OUTDOOR,INDOOR,GREENHOUSE"
+                                },
+                                {
+                                    "key": "hasProcessing",
+                                    "value": "true"
+                                },
+                                {
+                                    "key": "hasExport",
+                                    "value": "true"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -11,11 +11,13 @@ const logger = require('../../shared/logger');
 const notificationsRouter = require('./notifications');
 const ticketsRouter = require('./tickets');
 const kycRouter = require('./kyc');
+const configRouter = require('./config');
 
 // Mount V2 routes
 router.use('/notifications', notificationsRouter);
 router.use('/tickets', ticketsRouter);
 router.use('/kyc', kycRouter);
+router.use('/config', configRouter);
 
 // Health check with version info
 router.get('/health', (req, res) => {
@@ -33,8 +35,9 @@ router.get('/version', (req, res) => {
     success: true,
     version: '2.0.0',
     minClientVersion: '1.0.0',
-    features: ['notifications', 'tickets', 'kyc']
+    features: ['notifications', 'tickets', 'kyc', 'config']
   });
 });
 
 module.exports = router;
+

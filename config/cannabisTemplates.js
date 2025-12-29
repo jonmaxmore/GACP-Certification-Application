@@ -3,7 +3,8 @@
  * Ready-to-use cannabis survey templates for different purposes and regions
  */
 
-const { CannabisSurveyTemplate, CannabisQuestion } = require('../models/CannabisSurvey');
+// Note: CannabisSurvey model was removed during migration to PostgreSQL
+// Templates are now served via API from /api/v2/config/templates
 
 // Template definitions with comprehensive cannabis-specific questions
 const cannabisTemplates = [
@@ -845,137 +846,14 @@ const cannabisTemplates = [
   }
 ];
 
-// Function to create all templates and questions
-async function createCannabisTemplates(createdBy = null) {
-  try {
-    const results = [];
-
-    for (const templateData of cannabisTemplates) {
-      // Create template
-      const template = new CannabisSurveyTemplate({
-        ...templateData.template,
-        createdBy: createdBy || new mongoose.Types.ObjectId()
-      });
-
-      await template.save();
-
-      // Create questions for this template
-      const questions = templateData.questions.map((q, index) => ({
-        ...q,
-        templateId: template._id,
-        order: q.order || index + 1
-      }));
-
-      const createdQuestions = await CannabisQuestion.insertMany(questions);
-
-      results.push({
-        template: template,
-        questions: createdQuestions,
-        questionCount: createdQuestions.length
-      });
-
-      console.log(
-        `Created cannabis survey template: ${template.title} with ${createdQuestions.length} questions`
-      );
-    }
-
-    return results;
-  } catch (error) {
-    console.error('Error creating cannabis templates:', error);
-    throw error;
-  }
-}
-
-// Function to create individual template
-async function createIndividualTemplate(templateIndex, createdBy = null) {
-  try {
-    if (templateIndex < 0 || templateIndex >= cannabisTemplates.length) {
-      throw new Error('Invalid template index');
-    }
-
-    const templateData = cannabisTemplates[templateIndex];
-
-    const template = new CannabisSurveyTemplate({
-      ...templateData.template,
-      createdBy: createdBy || new mongoose.Types.ObjectId()
-    });
-
-    await template.save();
-
-    const questions = templateData.questions.map((q, index) => ({
-      ...q,
-      templateId: template._id,
-      order: q.order || index + 1
-    }));
-
-    const createdQuestions = await CannabisQuestion.insertMany(questions);
-
-    return {
-      template: template,
-      questions: createdQuestions,
-      questionCount: createdQuestions.length
-    };
-  } catch (error) {
-    console.error('Error creating individual cannabis template:', error);
-    throw error;
-  }
-}
-
-// Function to get template by survey type
-async function getTemplateByType(surveyType, region = 'national') {
-  try {
-    const template = await CannabisSurveyTemplate.findOne({
-      'cannabisMetadata.surveyType': surveyType,
-      region: { $in: [region, 'national'] },
-      status: 'published'
-    });
-
-    if (!template) {
-      return null;
-    }
-
-    const questions = await CannabisQuestion.find({
-      templateId: template._id,
-      isActive: true
-    }).sort({ order: 1 });
-
-    return {
-      template,
-      questions
-    };
-  } catch (error) {
-    console.error('Error getting template by type:', error);
-    throw error;
-  }
-}
-
-// Function to update existing templates
-async function updateTemplateQuestions(templateId, newQuestions) {
-  try {
-    // Deactivate existing questions
-    await CannabisQuestion.updateMany({ templateId }, { isActive: false });
-
-    // Create new questions
-    const questions = newQuestions.map((q, index) => ({
-      ...q,
-      templateId,
-      order: q.order || index + 1,
-      isActive: true
-    }));
-
-    const createdQuestions = await CannabisQuestion.insertMany(questions);
-
-    return createdQuestions;
-  } catch (error) {
-    console.error('Error updating template questions:', error);
-    throw error;
-  }
+// Helper function to get template by type (API-style)
+function getTemplateByType(surveyType) {
+  return cannabisTemplates.find(t =>
+    t.template?.cannabisMetadata?.surveyType === surveyType
+  );
 }
 
 module.exports = {
   cannabisTemplates,
-  createCannabisTemplates,
-  createIndividualTemplate,
-  getTemplateByType,
-  updateTemplateQuestions
+  getTemplateByType
 };

@@ -260,11 +260,17 @@ const requiresLicense = (plantType) => {
 
 /**
  * Get required documents based on selections
- * @param {Object} options - { plantType, objectives, applicantType }
+ * @param {Object} options - { plantType, objectives, applicantType, landOwnership, applicationType }
  * @returns {Array} List of required document slots
  */
 const getRequiredDocuments = (options = {}) => {
-    const { plantType = 'general', objectives = [], applicantType = 'INDIVIDUAL' } = options;
+    const {
+        plantType = 'general',
+        objectives = [],
+        applicantType = 'INDIVIDUAL',
+        landOwnership = 'owned',
+        applicationType = 'NEW'
+    } = options;
     const required = [];
 
     for (const [key, slot] of Object.entries(DOCUMENT_SLOTS)) {
@@ -288,7 +294,28 @@ const getRequiredDocuments = (options = {}) => {
             }
         }
 
-        // Check applicant type specific (e.g., company registration for juristic)
+        // Check applicant type specific
+        if (slot.conditionalRequired && slot.requiredFor?.applicantTypes) {
+            if (slot.requiredFor.applicantTypes.includes(applicantType)) {
+                isRequired = true;
+            }
+        }
+
+        // Check land ownership specific (LAND_CONSENT for permitted_use)
+        if (slot.conditionalRequired && slot.requiredFor?.landOwnership) {
+            if (slot.requiredFor.landOwnership.includes(landOwnership)) {
+                isRequired = true;
+            }
+        }
+
+        // Check application type specific (RENEWAL documents)
+        if (slot.conditionalRequired && slot.requiredFor?.applicationTypes) {
+            if (slot.requiredFor.applicationTypes.includes(applicationType)) {
+                isRequired = true;
+            }
+        }
+
+        // Legacy check for company registration
         if (key === 'COMPANY_REG' && applicantType === 'JURISTIC') {
             isRequired = true;
         }

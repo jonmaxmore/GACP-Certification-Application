@@ -19,8 +19,9 @@ const swaggerSpec = require('./config/swagger');
 
 // Import Modules
 const AuthFarmerRoutes = require('./routes/api/auth-farmer-routes');
-const EstablishmentRoutes = require('./modules/Establishment');
-const v2Routes = require('./routes/v2');
+// TEMPORARILY DISABLED - Mongoose dependencies
+// const EstablishmentRoutes = require('./modules/Establishment');
+// const v2Routes = require('./routes/v2');
 
 const app = express();
 const port = process.env.PORT || 3000; // Backend API port
@@ -67,12 +68,11 @@ app.use(cors(corsOptions));
 app.use(compression());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// CDN/Cache Middleware
-const { staticCacheMiddleware } = require('./middleware/CacheControlMiddleware');
+// CDN/Cache Middleware (temporarily disabled)
+// const { staticCacheMiddleware } = require('./middleware/CacheControlMiddleware');
 
-// Serve Static Files (Uploads) with cache headers
+// Serve Static Files (Uploads)
 app.use('/uploads',
-    staticCacheMiddleware,  // Add cache headers based on file type
     express.static(path.join(__dirname, 'uploads'), {
         maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
         etag: true,
@@ -89,9 +89,10 @@ app.use(cookieParser());
 
 // Mount Routes
 app.use('/api/auth-farmer', AuthFarmerRoutes);
-app.use('/api/establishments', EstablishmentRoutes); // Fix 404
-app.use('/api/v2/establishments', EstablishmentRoutes); // Dual mount for V2 compatibility
-app.use('/api/v2', v2Routes);
+// TEMPORARILY DISABLED - Mongoose dependencies
+// app.use('/api/establishments', EstablishmentRoutes);
+// app.use('/api/v2/establishments', EstablishmentRoutes);
+// app.use('/api/v2', v2Routes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Health Check - Both /health and /api/health for compatibility

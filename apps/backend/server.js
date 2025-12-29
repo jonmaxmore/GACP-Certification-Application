@@ -1,7 +1,7 @@
 /**
  * GACP Platform - Production Server
  * Entry point for the backend application
- * Database: PostgreSQL (Prisma) + MongoDB (Legacy, migrating)
+ * Database: PostgreSQL (Prisma)
  */
 
 require('dotenv').config();
@@ -12,19 +12,18 @@ const compression = require('compression');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const logger = require('./shared/logger');
-const databaseService = require('./services/production-database'); // MongoDB (Legacy)
-const prismaDatabase = require('./services/prisma-database'); // PostgreSQL (New)
+const prismaDatabase = require('./services/prisma-database'); // PostgreSQL
 const redisService = require('./services/RedisService');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 
 // Import Modules
-const AuthFarmerRoutes = require('./routes/api/AuthFarmerRoutes');
+const AuthFarmerRoutes = require('./routes/api/auth-farmer-routes');
 const EstablishmentRoutes = require('./modules/Establishment');
 const v2Routes = require('./routes/v2');
 
 const app = express();
-const port = process.env.PORT || 5000; // Default 5000 for backend
+const port = process.env.PORT || 3000; // Backend API port
 
 const path = require('path');
 
@@ -98,16 +97,12 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Health Check - Both /health and /api/health for compatibility
 app.get(['/health', '/api/health'], async (req, res) => {
     try {
-        const mongoHealth = await databaseService.healthCheck();
-        const postgresHealth = await prismaDatabase.healthCheck();
+        const dbHealth = await prismaDatabase.healthCheck();
         res.json({
             status: 'OK',
             timestamp: new Date(),
             environment: process.env.NODE_ENV,
-            database: {
-                mongodb: mongoHealth,
-                postgresql: postgresHealth,
-            },
+            database: dbHealth,
             redis: {
                 connected: redisService.isAvailable(),
             }
@@ -131,27 +126,20 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start Server - IMMEDIATELY, before database connection
+// Start Server
 if (require.main === module) {
     app.listen(port, '0.0.0.0', () => {
-        logger.info(`✅ Production Server running on port ${port}`);
-        logger.info(`📡 Server accepting requests (databases connecting in background...)`);
+        logger.info(`✅ GACP Backend running on port ${port}`);
+        logger.info(`📡 Server accepting requests...`);
 
-        // Connect to databases AFTER server is already listening
+        // Connect to database AFTER server is already listening
         if (process.env.NODE_ENV !== 'test') {
             setImmediate(async () => {
-                // Connect to MongoDB (Legacy)
-                databaseService.connect()
-                    .then(() => logger.info('✅ MongoDB connected successfully'))
-                    .catch(err => {
-                        logger.warn('⚠️ MongoDB unavailable - running with limited functionality:', err.message);
-                    });
-
-                // Connect to PostgreSQL (New - Prisma)
+                // Connect to PostgreSQL (Prisma)
                 prismaDatabase.connect()
-                    .then(() => logger.info('✅ PostgreSQL connected successfully'))
+                    .then(() => logger.info('✅ PostgreSQL connected'))
                     .catch(err => {
-                        logger.warn('⚠️ PostgreSQL unavailable:', err.message);
+                        logger.error('❌ PostgreSQL error:', err.message);
                     });
 
                 // Connect to Redis (Cache)
@@ -164,4 +152,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-

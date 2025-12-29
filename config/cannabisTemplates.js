@@ -113,6 +113,144 @@ const cannabisTemplates = [
         order: 1
       },
       {
+        // NEW: DTAM Required - Cultivation Type (ปลูกเองเท่านั้น)
+        type: 'single_choice',
+        text: 'How do you cultivate your medicinal plants?',
+        textTH: 'สำหรับเกษตรกร: ท่านเพาะปลูกสมุนไพรอย่างไร?',
+        category: 'cultivation_practices',
+        options: [
+          {
+            value: 'self_grown',
+            label: 'Self-grown (cultivation from seeds/propagation on own farm)',
+            labelTH: '✅ ปลูกเอง - เพาะเมล็ด/ขยายพันธุ์ในฟาร์มของท่าน',
+            complianceScore: 100,
+            riskImpact: 'positive'
+          },
+          {
+            value: 'purchased_seedlings',
+            label: 'Purchased seedlings from other sources (NOT ALLOWED)',
+            labelTH: '❌ ซื้อต้นกล้าจากแหล่งอื่น (ไม่ผ่าน GACP)',
+            complianceScore: 0,
+            riskImpact: 'critical'
+          },
+          {
+            value: 'wild_collection',
+            label: 'Collected from wild/nature (NOT ALLOWED)',
+            labelTH: '❌ เก็บจากธรรมชาติ/ป่า (ไม่ผ่าน GACP)',
+            complianceScore: 0,
+            riskImpact: 'critical'
+          }
+        ],
+        cannabisProperties: {
+          complianceCritical: true,
+          riskLevel: 'critical',
+          regulatoryBasis: [
+            {
+              regulation: 'DTAM_GACP_Standard',
+              section: 'Section 8 - Seeds & Propagation',
+              requirement: 'Self-grown cultivation only (ปลูกเองเท่านั้น)'
+            }
+          ]
+        },
+        validation: {
+          required: true,
+          customValidation: {
+            rule: 'must_be_self_grown',
+            errorMessage: 'DTAM GACP requires self-grown cultivation only',
+            errorMessageTH: 'กรมการแพทย์แผนไทยรับรองเฉพาะ "ปลูกเอง" เท่านั้น'
+          }
+        },
+        metadata: {
+          helpText: '⚠️ DTAM GACP certification requires SELF-GROWN cultivation only. Purchased seedlings or wild collection will NOT be approved.',
+          helpTextTH: '⚠️ กรมการแพทย์แผนไทยรับรองเฉพาะการ "ปลูกเอง" เท่านั้น การซื้อต้นกล้าหรือเก็บจากป่าจะไม่ผ่านการรับรอง'
+        },
+        order: 2
+      },
+      {
+        // NEW: Seed Source
+        type: 'single_choice',
+        text: 'Where do you obtain your seeds/propagation materials?',
+        textTH: 'สำหรับเกษตรกร: เมล็ดพันธุ์/กิ่งพันธุ์มาจากไหน?',
+        category: 'cultivation_practices',
+        options: [
+          {
+            value: 'government_agency',
+            label: 'Government agency (Dept. of Agriculture, University)',
+            labelTH: '🏫 หน่วยงานราชการ (กรมวิชาการเกษตร, มหาวิทยาลัย)',
+            complianceScore: 100,
+            riskImpact: 'positive'
+          },
+          {
+            value: 'licensed_company',
+            label: 'Licensed company',
+            labelTH: '🏢 บริษัทที่ได้รับอนุญาต',
+            complianceScore: 90,
+            riskImpact: 'positive'
+          },
+          {
+            value: 'own_saved_seeds',
+            label: 'Own saved seeds from previous harvest (specify lot)',
+            labelTH: '🌾 เก็บเมล็ดจากฤดูกาลก่อน (ระบุ Lot เดิม)',
+            complianceScore: 85,
+            riskImpact: 'neutral'
+          }
+        ],
+        cannabisProperties: {
+          complianceCritical: true,
+          riskLevel: 'high'
+        },
+        validation: {
+          required: true
+        },
+        metadata: {
+          helpText: 'DTAM requires traceability of seed/propagation materials',
+          helpTextTH: 'กรมการแพทย์แผนไทยต้องการให้ระบุแหล่งที่มาของเมล็ดพันธุ์เพื่อติดตามสายพันธุ์ได้'
+        },
+        order: 3
+      },
+      {
+        // NEW: Land Ownership
+        type: 'single_choice',
+        text: 'What is your land ownership status for the cultivation site?',
+        textTH: 'สำหรับเกษตรกร: ท่านมีสถานะการถือครองที่ดินอย่างไร?',
+        category: 'general_information',
+        options: [
+          {
+            value: 'owned',
+            label: 'Owned land (with title deed)',
+            labelTH: '🏡 เป็นเจ้าของที่ดิน (มีโฉนด)',
+            complianceScore: 100,
+            riskImpact: 'positive'
+          },
+          {
+            value: 'rented',
+            label: 'Rented land (with rental agreement)',
+            labelTH: '📄 เช่าที่ดิน (มีสัญญาเช่า)',
+            complianceScore: 85,
+            riskImpact: 'neutral'
+          },
+          {
+            value: 'permitted_use',
+            label: 'Permitted use (with consent letter)',
+            labelTH: '📝 ได้รับอนุญาตให้ใช้ (มีหนังสือยินยอม)',
+            complianceScore: 80,
+            riskImpact: 'neutral'
+          }
+        ],
+        cannabisProperties: {
+          complianceCritical: true,
+          riskLevel: 'high'
+        },
+        validation: {
+          required: true
+        },
+        metadata: {
+          helpText: 'Required document: Title deed, rental agreement, or consent letter',
+          helpTextTH: 'ต้องอัปโหลดเอกสาร: โฉนดที่ดิน, สัญญาเช่า, หรือหนังสือยินยอมตามที่เลือก'
+        },
+        order: 4
+      },
+      {
         type: 'cultivation_area',
         text: 'What is the total area allocated for cannabis cultivation (in rai)?',
         textTH: 'พื้นที่รวมที่จัดสรรสำหรับการเพาะปลูกกัญชา (หน่วยไร่)?',
@@ -132,10 +270,10 @@ const cannabisTemplates = [
           maxValue: 50
         },
         metadata: {
-          helpText: 'Area must not exceed license limitations',
-          helpTextTH: 'พื้นที่ต้องไม่เกินข้อจำกัดในใบอนุญาต'
+          helpText: 'Area must not exceed license limitations (ภ.ท.9 limit: 5 rai for household)',
+          helpTextTH: 'พื้นที่ต้องไม่เกินข้อจำกัดในใบอนุญาต (ภ.ท.9 สำหรับรายย่อย: ไม่เกิน 5 ไร่)'
         },
-        order: 2
+        order: 5
       },
       {
         type: 'single_choice',
@@ -294,45 +432,7 @@ const cannabisTemplates = [
         },
         order: 6
       },
-      {
-        type: 'rating_scale',
-        text: 'Rate your current knowledge of GACP (Good Agricultural and Collection Practices) standards for cannabis',
-        textTH: 'ประเมินความรู้ปัจจุบันของคุณเกี่ยวกับมาตรฐาน GACP สำหรับกัญชา',
-        category: 'training_needs',
-        options: [
-          { value: '1', label: 'No knowledge', labelTH: 'ไม่มีความรู้', complianceScore: 20 },
-          {
-            value: '2',
-            label: 'Basic knowledge',
-            labelTH: 'ความรู้ขั้นพื้นฐาน',
-            complianceScore: 40
-          },
-          {
-            value: '3',
-            label: 'Moderate knowledge',
-            labelTH: 'ความรู้ปานกลาง',
-            complianceScore: 60
-          },
-          { value: '4', label: 'Good knowledge', labelTH: 'ความรู้ดี', complianceScore: 80 },
-          {
-            value: '5',
-            label: 'Expert knowledge',
-            labelTH: 'ความรู้ระดับผู้เชี่ยวชาญ',
-            complianceScore: 100
-          }
-        ],
-        cannabisProperties: {
-          riskLevel: 'medium',
-          sopLinked: {
-            sopCode: 'GACP-TRAIN-001',
-            relevance: 'indirect'
-          }
-        },
-        validation: {
-          required: true
-        },
-        order: 7
-      },
+      // REMOVED: GACP knowledge rating (not required by DTAM)
       {
         type: 'boolean',
         text: 'Have you completed the mandatory cannabis cultivation training program required by law?',

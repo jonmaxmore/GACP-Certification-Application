@@ -129,7 +129,7 @@ const upload = multer({ storage });
 
 // ... (Service Logic remains same)
 
-const { authenticate } = require('../../middleware/AuthMiddleware');
+const { authenticate } = require('../../middleware/auth-middleware');
 
 // ... (Service Logic remains same)
 

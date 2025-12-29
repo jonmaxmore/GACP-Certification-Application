@@ -1,22 +1,23 @@
 /**
- * V2 Notification Routes
- * In-app notification system for closed-loop communication
- *
- * Architecture: Router → Controller → Service → Model
+ * V2 Notification Routes - Prisma Version
+ * In-app notification system using PostgreSQL
  */
 
 const express = require('express');
 const router = express.Router();
-const Notification = require('../../models-mongoose-legacy/notification-model');
+const prismaDatabase = require('../../services/prisma-database');
 const { authenticate, checkPermission } = require('../../middleware/auth-middleware');
 
-// Real implementation
+// Prisma-based notification controller
 const notificationController = {
     getNotifications: async (req, res) => {
         try {
-            const notifications = await Notification.find({ recipient: req.user.userId })
-                .sort({ createdAt: -1 })
-                .limit(50); // Limit to last 50 notifications
+            const prisma = prismaDatabase.getClient();
+            const notifications = await prisma.notification.findMany({
+                where: { userId: req.user.userId },
+                orderBy: { createdAt: 'desc' },
+                take: 50
+            });
 
             res.json({ success: true, data: notifications });
         } catch (error) {
@@ -26,9 +27,12 @@ const notificationController = {
 
     getUnreadCount: async (req, res) => {
         try {
-            const count = await Notification.countDocuments({
-                recipient: req.user.userId,
-                read: false
+            const prisma = prismaDatabase.getClient();
+            const count = await prisma.notification.count({
+                where: {
+                    userId: req.user.userId,
+                    isRead: false
+                }
             });
             res.json({ success: true, count });
         } catch (error) {
@@ -38,13 +42,19 @@ const notificationController = {
 
     markAsRead: async (req, res) => {
         try {
-            const notification = await Notification.findOneAndUpdate(
-                { _id: req.params.id, recipient: req.user.userId },
-                { read: true },
-                { new: true }
-            );
+            const prisma = prismaDatabase.getClient();
+            const notification = await prisma.notification.updateMany({
+                where: {
+                    id: req.params.id,
+                    userId: req.user.userId
+                },
+                data: {
+                    isRead: true,
+                    readAt: new Date()
+                }
+            });
 
-            if (!notification) {
+            if (notification.count === 0) {
                 return res.status(404).json({ success: false, message: 'Notification not found' });
             }
 
@@ -56,10 +66,17 @@ const notificationController = {
 
     markAllAsRead: async (req, res) => {
         try {
-            await Notification.updateMany(
-                { recipient: req.user.userId, read: false },
-                { read: true }
-            );
+            const prisma = prismaDatabase.getClient();
+            await prisma.notification.updateMany({
+                where: {
+                    userId: req.user.userId,
+                    isRead: false
+                },
+                data: {
+                    isRead: true,
+                    readAt: new Date()
+                }
+            });
             res.json({ success: true });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
@@ -68,17 +85,19 @@ const notificationController = {
 
     createNotification: async (req, res) => {
         try {
+            const prisma = prismaDatabase.getClient();
             const { recipient, title, message, type, data } = req.body;
 
-            const notification = new Notification({
-                recipient,
-                title,
-                message,
-                type: type || 'info', // 'info', 'success', 'warning', 'error'
-                data
+            const notification = await prisma.notification.create({
+                data: {
+                    userId: recipient,
+                    title,
+                    message,
+                    type: type || 'INFO',
+                    metadata: data || {}
+                }
             });
 
-            await notification.save();
             res.status(201).json({ success: true, data: notification });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
@@ -89,35 +108,19 @@ const notificationController = {
 // All routes require authentication
 router.use(authenticate);
 
-/**
- * GET /api/v2/notifications
- * Get user's notifications
- */
+// GET /api/v2/notifications
 router.get('/', checkPermission('dashboard.view'), notificationController.getNotifications);
 
-/**
- * GET /api/v2/notifications/unread-count
- * Get count of unread notifications
- */
+// GET /api/v2/notifications/unread-count
 router.get('/unread-count', checkPermission('dashboard.view'), notificationController.getUnreadCount);
 
-/**
- * PUT /api/v2/notifications/:id/read
- * Mark notification as read
- */
+// PUT /api/v2/notifications/:id/read
 router.put('/:id/read', checkPermission('dashboard.view'), notificationController.markAsRead);
 
-/**
- * PUT /api/v2/notifications/mark-all-read
- * Mark all notifications as read
- */
+// PUT /api/v2/notifications/mark-all-read
 router.put('/mark-all-read', checkPermission('dashboard.view'), notificationController.markAllAsRead);
 
-/**
- * POST /api/v2/notifications (Admin/Staff only)
- * Create a new notification
- */
+// POST /api/v2/notifications (Admin/Staff only)
 router.post('/', checkPermission('system.admin'), notificationController.createNotification);
 
 module.exports = router;
-

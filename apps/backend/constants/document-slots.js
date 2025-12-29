@@ -70,8 +70,34 @@ const DOCUMENT_SLOTS = {
     COMPANY_REG: {
         slotId: 'company_reg',
         name: 'หนังสือรับรองบริษัท',
-        description: 'กรณีนิติบุคคล',
-        required: false
+        description: 'กรณีนิติบุคคล (อายุไม่เกิน 6 เดือน)',
+        required: false,
+        conditionalRequired: true,
+        requiredFor: { applicantTypes: ['JURISTIC', 'COMMUNITY_ENTERPRISE'] }
+    },
+    // NEW: DTAM Required Documents
+    CRIMINAL_BG: {
+        slotId: 'criminal_bg',
+        name: 'ผลตรวจสอบประวัติอาชญากรรม',
+        description: 'ใบรับรองความประพฤติจาก สตช. (อายุไม่เกิน 3 เดือน)',
+        required: true,
+        warningText: '⚠️ กรมการแพทย์แผนไทยกำหนดให้ต้องมีผลตรวจประวัติอาชญากรรม'
+    },
+    LAND_CONSENT: {
+        slotId: 'land_consent',
+        name: 'หนังสือยินยอมให้ใช้ที่ดิน',
+        description: 'กรณีใช้ที่ดินของผู้อื่น (ไม่ใช่เจ้าของ/ไม่ใช่เช่า)',
+        required: false,
+        conditionalRequired: true,
+        requiredFor: { landOwnership: ['permitted_use'] }
+    },
+    GOV_SUPPORT: {
+        slotId: 'gov_support',
+        name: 'หนังสือสนับสนุนจากหน่วยงาน',
+        description: 'กรณีวิสาหกิจชุมชน/บุคคลธรรมดาบางกรณี',
+        required: false,
+        conditionalRequired: true,
+        requiredFor: { applicantTypes: ['COMMUNITY_ENTERPRISE'] }
     },
 
     // ===== เอกสาร SOP =====

@@ -1,0 +1,536 @@
+// GACP Platform - Prisma Schema
+// PostgreSQL Database with UUID, Audit Trail, Soft Delete, Legal Retention
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================================
+// USER MODEL
+// =============================================================================
+model User {
+  id        String   @id @default(uuid())
+  uuid      String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Account Type
+  accountType String @default("INDIVIDUAL") // INDIVIDUAL, JURISTIC, COMMUNITY_ENTERPRISE, STAFF
+
+  // Login Credentials
+  email    String? @unique
+  password String
+
+  // Individual Farmer Fields
+  firstName   String?
+  lastName    String?
+  phoneNumber String?
+  idCard      String? // Encrypted
+  idCardHash  String? @unique
+  laserCode   String? // Encrypted
+
+  // Juristic Person Fields
+  companyName             String?
+  taxId                   String?
+  taxIdHash               String? @unique
+  representativeName      String?
+  representativePosition  String?
+
+  // Community Enterprise Fields
+  communityName                 String?
+  communityRegistrationNo       String?
+  communityRegistrationNoHash   String? @unique
+
+  // Role & Status
+  role   String @default("FARMER") // FARMER, REVIEWER_AUDITOR, SCHEDULER, ACCOUNTANT, ADMIN, SUPER_ADMIN
+  status String @default("PENDING_VERIFICATION") // PENDING_VERIFICATION, ACTIVE, SUSPENDED, LOCKED, INACTIVE
+
+  // Address
+  address     String?
+  province    String?
+  district    String?
+  subdistrict String?
+  zipCode     String?
+
+  // Verification
+  isEmailVerified         Boolean   @default(false)
+  emailVerificationToken  String?
+  emailVerificationExpiry DateTime?
+  passwordResetToken      String?
+  passwordResetExpiry     DateTime?
+
+  // Login History
+  lastLoginAt   DateTime?
+  loginAttempts Int       @default(0)
+  isLocked      Boolean   @default(false)
+  lockedUntil   DateTime?
+
+  // Audit Trail
+  createdBy   String?
+  updatedBy   String?
+  createdByIp String?
+  updatedByIp String?
+
+  // Soft Delete
+  isDeleted    Boolean   @default(false)
+  deletedAt    DateTime?
+  deletedBy    String?
+  deleteReason String?
+
+  // Legal Retention (5 years)
+  retainUntil DateTime @default(dbgenerated("NOW() + INTERVAL '5 years'"))
+  legalHold   Boolean  @default(false)
+
+  // Relations
+  applications  Application[]
+  certificates  Certificate[]
+  invoices      Invoice[]
+  notifications Notification[]
+  farms         Farm[]
+  auditLogs     AuditLog[]
+
+  @@index([email])
+  @@index([role, status])
+  @@index([accountType])
+  @@index([isDeleted])
+  @@map("users")
+}
+
+// =============================================================================
+// APPLICATION MODEL
+// =============================================================================
+model Application {
+  id        String   @id @default(uuid())
+  uuid      String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Application Number
+  applicationNumber String @unique
+
+  // Owner
+  farmerId String
+  farmer   User   @relation(fields: [farmerId], references: [id])
+
+  // Service Type
+  serviceType String @default("new_application") // new_application, renewal, replacement, amendment
+  areaType    String // OUTDOOR, INDOOR, GREENHOUSE
+
+  // Status
+  status      String @default("DRAFT")
+  rejectCount Int    @default(0)
+
+  // Batch Submission
+  batchId        String?
+  areaTypeIndex  Int     @default(0)
+  totalAreaTypes Int     @default(1)
+
+  // Payment
+  phase1Amount   Int       @default(5000)
+  phase1Status   String    @default("PENDING")
+  phase1PaidAt   DateTime?
+  phase2Amount   Int       @default(25000)
+  phase2Status   String    @default("PENDING")
+  phase2PaidAt   DateTime?
+
+  // Audit Info
+  auditorId     String?
+  scheduledDate DateTime?
+  auditResult   String?
+  auditNotes    String?
+
+  // Form Data (JSON)
+  formData Json?
+
+  // Attachments (JSON array)
+  attachments Json?
+
+  // Workflow History (JSON array)
+  workflowHistory Json?
+
+  // Document Integrity
+  submissionHash        String?
+  officialReceiptNumber String?
+  idempotencyKey        String? @unique
+
+  // Audit Trail
+  createdBy   String?
+  updatedBy   String?
+  createdByIp String?
+  updatedByIp String?
+
+  // Soft Delete
+  isDeleted    Boolean   @default(false)
+  deletedAt    DateTime?
+  deletedBy    String?
+  deleteReason String?
+
+  // Legal Retention (5 years)
+  retainUntil DateTime @default(dbgenerated("NOW() + INTERVAL '5 years'"))
+  legalHold   Boolean  @default(false)
+
+  // Relations
+  certificates Certificate[]
+  invoices     Invoice[]
+  quotes       Quote[]
+
+  @@index([farmerId])
+  @@index([status])
+  @@index([applicationNumber])
+  @@index([isDeleted])
+  @@map("applications")
+}
+
+// =============================================================================
+// CERTIFICATE MODEL
+// =============================================================================
+model Certificate {
+  id        String   @id @default(uuid())
+  uuid      String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Certificate Number
+  certificateNumber String @unique
+  verificationCode  String
+  qrData            String
+
+  // Relations
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+
+  // Farm Info
+  farmId     String
+  farmName   String
+  farmerName String
+  cropType   String
+  farmSize   Float
+
+  // Location
+  province    String
+  district    String
+  subDistrict String
+  address     String?
+
+  // Standard
+  standardId   String
+  standardName String
+  score        Float
+
+  // Status & Dates
+  status        String   @default("active") // active, expired, revoked, renewed
+  issuedDate    DateTime @default(now())
+  expiryDate    DateTime
+  validityYears Int      @default(3)
+  issuedBy      String
+
+  // PDF
+  pdfGenerated   Boolean   @default(false)
+  pdfUrl         String?
+  pdfGeneratedAt DateTime?
+
+  // Usage Tracking
+  downloadCount      Int       @default(0)
+  verificationCount  Int       @default(0)
+  lastDownloadedAt   DateTime?
+  lastVerifiedAt     DateTime?
+
+  // Revocation
+  revokedAt     DateTime?
+  revokedBy     String?
+  revokedReason String?
+
+  // Renewal Chain
+  renewedCertificateId  String?
+  previousCertificateId String?
+
+  // Document Integrity
+  documentHash String?
+  signedBy     String?
+  signedAt     DateTime?
+
+  // Print History (JSON)
+  printHistory Json?
+
+  // Audit Trail
+  createdBy String?
+  updatedBy String?
+
+  // Soft Delete
+  isDeleted    Boolean   @default(false)
+  deletedAt    DateTime?
+  deletedBy    String?
+  deleteReason String?
+
+  // Legal Retention (5 years)
+  retainUntil DateTime @default(dbgenerated("NOW() + INTERVAL '5 years'"))
+  legalHold   Boolean  @default(false)
+
+  @@index([userId])
+  @@index([status])
+  @@index([certificateNumber])
+  @@index([expiryDate])
+  @@index([isDeleted])
+  @@map("certificates")
+}
+
+// =============================================================================
+// INVOICE MODEL
+// =============================================================================
+model Invoice {
+  id        String   @id @default(uuid())
+  uuid      String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Invoice Number
+  invoiceNumber String @unique
+
+  // Relations
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+  farmerId      String
+  farmer        User        @relation(fields: [farmerId], references: [id])
+  quoteId       String?
+
+  // Service Type
+  serviceType String
+
+  // Billing
+  billingName       String?
+  billingAddress    String?
+  certificateNumber String?
+
+  // Items (JSON)
+  items Json?
+
+  // Totals
+  subtotal        Float
+  vat             Float   @default(0)
+  totalAmount     Float
+  totalAmountText String?
+
+  // Payment
+  dueDate              DateTime
+  status               String    @default("pending") // pending, paid, overdue, cancelled
+  paidAt               DateTime?
+  paymentTransactionId String?
+
+  // Notes
+  notes String?
+
+  // Audit Trail
+  createdBy   String?
+  updatedBy   String?
+  createdByIp String?
+
+  // Soft Delete
+  isDeleted    Boolean   @default(false)
+  deletedAt    DateTime?
+  deletedBy    String?
+  deleteReason String?
+
+  // Legal Retention (7 years for tax)
+  retainUntil DateTime @default(dbgenerated("NOW() + INTERVAL '7 years'"))
+  legalHold   Boolean  @default(false)
+
+  @@index([applicationId])
+  @@index([farmerId])
+  @@index([status])
+  @@index([invoiceNumber])
+  @@index([isDeleted])
+  @@map("invoices")
+}
+
+// =============================================================================
+// QUOTE MODEL
+// =============================================================================
+model Quote {
+  id        String   @id @default(uuid())
+  uuid      String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Quote Number
+  quoteNumber String @unique
+
+  // Relations
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+
+  // Items (JSON)
+  items Json?
+
+  // Totals
+  subtotal    Float
+  vat         Float   @default(0)
+  totalAmount Float
+
+  // Status
+  status     String    @default("pending") // pending, accepted, rejected, expired
+  validUntil DateTime
+  acceptedAt DateTime?
+  rejectedAt DateTime?
+
+  // Notes
+  notes String?
+
+  // Soft Delete
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([applicationId])
+  @@index([status])
+  @@index([isDeleted])
+  @@map("quotes")
+}
+
+// =============================================================================
+// FARM MODEL
+// =============================================================================
+model Farm {
+  id        String   @id @default(uuid())
+  uuid      String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Owner
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+
+  // Farm Info
+  farmName          String
+  farmType          String // CULTIVATION, PROCESSING, BOTH
+  address           String
+  province          String
+  district          String
+  subDistrict       String
+  postalCode        String
+
+  // GPS
+  latitude  Float?
+  longitude Float?
+
+  // Area
+  totalArea       Float
+  cultivationArea Float
+  areaUnit        String @default("rai")
+
+  // Cultivation
+  cultivationMethod String
+  irrigationType    String?
+  soilType          String?
+  waterSource       String?
+
+  // Status
+  status            String    @default("DRAFT")
+  verificationNotes String?
+  verifiedBy        String?
+  verifiedAt        DateTime?
+  rejectionReason   String?
+  submittedAt       DateTime?
+
+  // Land Documents (JSON)
+  landDocuments Json?
+
+  // Soft Delete
+  isDeleted    Boolean   @default(false)
+  deletedAt    DateTime?
+  deletedBy    String?
+  deleteReason String?
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([province])
+  @@index([isDeleted])
+  @@map("farms")
+}
+
+// =============================================================================
+// NOTIFICATION MODEL
+// =============================================================================
+model Notification {
+  id        String   @id @default(uuid())
+  uuid      String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+
+  // Owner
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Content
+  title    String
+  message  String
+  type     String // INFO, WARNING, SUCCESS, ERROR, QUOTE_RECEIVED, INVOICE_RECEIVED
+  category String?
+
+  // Status
+  isRead   Boolean   @default(false)
+  readAt   DateTime?
+  priority Int       @default(0)
+
+  // Metadata (JSON)
+  metadata Json?
+
+  @@index([userId])
+  @@index([userId, isRead])
+  @@index([createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+// =============================================================================
+// AUDIT LOG MODEL (Immutable)
+// =============================================================================
+model AuditLog {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("timestamp")
+
+  // Log ID
+  logId          String @unique
+  sequenceNumber Int    @unique
+
+  // Event Classification
+  category String // AUTHENTICATION, APPLICATION, PAYMENT, CERTIFICATE, ADMIN, SECURITY, SYSTEM
+  action   String
+  severity String @default("INFO") // INFO, WARNING, ERROR, CRITICAL
+
+  // Actor
+  actorId    String
+  actor      User   @relation(fields: [actorId], references: [id])
+  actorType  String @default("USER") // USER, SERVICE, SYSTEM
+  actorEmail String?
+  actorRole  String
+
+  // Resource
+  resourceType String // USER, APPLICATION, INVOICE, PAYMENT, CERTIFICATE, DOCUMENT, SYSTEM
+  resourceId   String
+
+  // Context
+  ipAddress String
+  userAgent String
+
+  // Event Data (JSON)
+  metadata Json?
+
+  // Result
+  result       String  @default("SUCCESS") // SUCCESS, FAILURE
+  errorCode    String?
+  errorMessage String?
+
+  // Hash Chain (Immutable)
+  previousHash  String
+  currentHash   String @unique
+  hashAlgorithm String @default("SHA-256")
+
+  @@index([actorId])
+  @@index([resourceType, resourceId])
+  @@index([category, severity])
+  @@index([createdAt(sort: Desc)])
+  @@map("audit_logs")
+}

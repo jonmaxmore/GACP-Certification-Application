@@ -146,12 +146,78 @@ const DOCUMENT_SLOTS = {
         required: false
     },
 
-    // ===== รูปถ่าย =====
+    // ===== รูปถ่าย (แยกหมวด) =====
+    PHOTOS_EXTERIOR: {
+        slotId: 'photos_exterior',
+        name: 'ภาพถ่ายภายนอก',
+        description: 'ภาพถ่ายพื้นที่ภายนอก/แปลงปลูก',
+        required: true,
+        category: 'photos'
+    },
+    PHOTOS_INTERIOR: {
+        slotId: 'photos_interior',
+        name: 'ภาพถ่ายภายใน',
+        description: 'ภาพถ่ายภายในอาคาร/โรงเรือน',
+        required: false,
+        category: 'photos'
+    },
+    PHOTOS_STORAGE: {
+        slotId: 'photos_storage',
+        name: 'ภาพถ่ายคลังเก็บ',
+        description: 'ภาพถ่ายพื้นที่เก็บรักษาผลผลิต',
+        required: false,
+        category: 'photos'
+    },
+    PHOTOS_SIGNAGE: {
+        slotId: 'photos_signage',
+        name: 'ภาพถ่ายป้าย',
+        description: 'ป้ายชื่อสถานที่/ป้ายเตือน/ป้ายความปลอดภัย',
+        required: true,
+        category: 'photos'
+    },
+    // Legacy photo slot (for backward compatibility)
     PHOTOS_SITE: {
         slotId: 'photos_site',
-        name: 'ภาพถ่ายพื้นที่',
-        description: 'ภาพถ่ายแปลงปลูกปัจจุบัน',
-        required: true
+        name: 'ภาพถ่ายพื้นที่ (รวม)',
+        description: 'ภาพถ่ายแปลงปลูกปัจจุบัน (deprecated - ใช้ photos แยกหมวดแทน)',
+        required: false,
+        deprecated: true
+    },
+
+    // ===== เอกสารนิติบุคคล (เพิ่มเติม) =====
+    COMMUNITY_CERT: {
+        slotId: 'community_cert',
+        name: 'หนังสือจดทะเบียนวิสาหกิจชุมชน',
+        description: 'สำเนาหนังสือสำคัญแสดงการจดทะเบียน',
+        required: false,
+        conditionalRequired: true,
+        requiredFor: { applicantTypes: ['COMMUNITY_ENTERPRISE'] }
+    },
+    COOP_CERT: {
+        slotId: 'coop_cert',
+        name: 'หนังสือสำคัญสหกรณ์การเกษตร',
+        description: 'สำเนาหนังสือสำคัญสหกรณ์',
+        required: false,
+        conditionalRequired: true,
+        requiredFor: { applicantTypes: ['AGRICULTURAL_COOP'] }
+    },
+
+    // ===== เอกสาร Renewal =====
+    RENEWAL_REPORT: {
+        slotId: 'renewal_report',
+        name: 'รายงานผลการดำเนินการ',
+        description: 'รายงานผลการดำเนินการที่ผ่านมา (สำหรับขอต่ออายุ)',
+        required: false,
+        conditionalRequired: true,
+        requiredFor: { applicationTypes: ['RENEWAL'] }
+    },
+    PREVIOUS_CERT: {
+        slotId: 'previous_cert',
+        name: 'ใบรับรอง GACP เดิม',
+        description: 'สำเนาใบรับรอง GACP ที่หมดอายุ (สำหรับขอต่ออายุ)',
+        required: false,
+        conditionalRequired: true,
+        requiredFor: { applicationTypes: ['RENEWAL'] }
     },
 
     // ===== แบบฟอร์ม GACP =====

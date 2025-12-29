@@ -431,6 +431,83 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "Validation (Pre-submission)",
+            "item": [
+                {
+                    "name": "Get Checklist Template",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v2/validation/checklist?plantType=cannabis&applicantType=INDIVIDUAL",
+                            "query": [
+                                {
+                                    "key": "plantType",
+                                    "value": "cannabis"
+                                },
+                                {
+                                    "key": "applicantType",
+                                    "value": "INDIVIDUAL"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Checklist (Juristic Person)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/v2/validation/checklist?plantType=cannabis&applicantType=JURISTIC",
+                            "query": [
+                                {
+                                    "key": "plantType",
+                                    "value": "cannabis"
+                                },
+                                {
+                                    "key": "applicantType",
+                                    "value": "JURISTIC"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Validate Pre-submission (Full Check)",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/api/v2/validation/pre-submission",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"plantType\": \"cannabis\",\n  \"applicantType\": \"INDIVIDUAL\",\n  \"objectives\": [\"PROCESSING\"],\n  \"landOwnership\": \"owned\",\n  \"applicationType\": \"NEW\",\n  \"uploadedDocuments\": [\n    \"id_card\",\n    \"house_reg\",\n    \"criminal_bg\",\n    \"land_deed\",\n    \"license_bt11\",\n    \"photos_exterior\",\n    \"photos_signage\"\n  ]\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Validate Pre-submission (Empty)",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/api/v2/validation/pre-submission",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"plantType\": \"cannabis\",\n  \"applicantType\": \"INDIVIDUAL\",\n  \"objectives\": [],\n  \"landOwnership\": \"owned\",\n  \"applicationType\": \"NEW\",\n  \"uploadedDocuments\": []\n}"
+                        }
+                    }
+                }
+            ]
         }
     ]
 }

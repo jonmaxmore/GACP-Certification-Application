@@ -1,5 +1,0 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-npx eslint .  # เช็คชื่อไฟล์และโค้ดก่อน
-# ถ้า eslint error (ชื่อไฟล์ผิด), การ commit จะถูกยกเลิกทันที!

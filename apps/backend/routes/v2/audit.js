@@ -1,16 +1,26 @@
 /**
  * Audit Logging Middleware for GACP Platform
  * Tracks all significant actions for compliance and debugging
+ * 
+ * UPGRADED: Now uses Prisma database for 5-year retention (DTAM compliance)
  */
 
 const fs = require('fs');
 const path = require('path');
 
-// Audit log storage (in production, use database or log aggregation service)
+// Import Prisma-based audit service
+let auditService;
+try {
+    auditService = require('../../services/audit-trail');
+} catch (e) {
+    console.warn('[Audit] audit-trail service not available, using file-based fallback');
+}
+
+// Audit log storage (fallback for file-based logging)
 const auditLogs = [];
 const MAX_IN_MEMORY_LOGS = 10000;
 
-// Ensure audit log directory exists
+// Ensure audit log directory exists (for fallback)
 const auditLogDir = path.join(__dirname, '../logs/audit');
 if (!fs.existsSync(auditLogDir)) {
     fs.mkdirSync(auditLogDir, { recursive: true });
@@ -23,22 +33,42 @@ const getAuditLogPath = () => {
 };
 
 /**
- * Create an audit log entry
+ * Create an audit log entry (with Prisma + file fallback)
  */
-const createAuditLog = (entry) => {
+const createAuditLog = async (entry) => {
     const log = {
         id: `audit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         timestamp: new Date().toISOString(),
         ...entry,
     };
 
-    // Store in memory
+    // Try Prisma first (for 5-year retention compliance)
+    if (auditService) {
+        try {
+            await auditService.logAction({
+                action: entry.action || 'UNKNOWN',
+                entityType: entry.entityType || entry.category || 'SYSTEM',
+                entityId: entry.target?.id,
+                userId: entry.user?.id,
+                userEmail: entry.user?.email,
+                userRole: entry.user?.role,
+                ipAddress: entry.user?.ip,
+                description: entry.details || JSON.stringify(entry.metadata),
+                metadata: entry,
+                severity: entry.severity || 'INFO',
+            });
+        } catch (err) {
+            console.warn('[Audit] Prisma audit failed, falling back to file:', err.message);
+        }
+    }
+
+    // Store in memory (for quick access)
     auditLogs.push(log);
     if (auditLogs.length > MAX_IN_MEMORY_LOGS) {
         auditLogs.shift();
     }
 
-    // Write to file (append mode)
+    // Write to file (append mode - backup)
     try {
         fs.appendFileSync(getAuditLogPath(), JSON.stringify(log) + '\n');
     } catch (error) {

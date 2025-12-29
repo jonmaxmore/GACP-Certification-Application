@@ -1,4 +1,5 @@
-const AuthService = require('../services/AuthService');
+// Using Prisma (PostgreSQL) instead of MongoDB
+const AuthService = require('../services/prisma-auth-service');
 
 const fs = require('fs');
 

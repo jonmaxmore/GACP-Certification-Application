@@ -27,3 +27,4 @@ const defaultLogger = winston.createLogger({
 
 module.exports = defaultLogger;
 module.exports.createLogger = createLogger;
+

@@ -17,7 +17,7 @@
 
 const { createLogger } = require('../shared/logger');
 const logger = createLogger('auth-middleware');
-const jwtConfig = require('../config/JwtSecurity');
+const jwtConfig = require('../config/jwt-security');
 const jwt = require('jsonwebtoken');
 
 // ------------------------------------
@@ -268,7 +268,7 @@ function optionalAuth(req, res, next) {
   }
 }
 
-const { RBACService } = require('../services/SecurityCompliance');
+const { RBACService } = require('../services/security-compliance');
 const rbacService = new RBACService();
 
 module.exports = {
@@ -314,3 +314,4 @@ module.exports = {
     return (req, res, next) => next();
   },
 };
+

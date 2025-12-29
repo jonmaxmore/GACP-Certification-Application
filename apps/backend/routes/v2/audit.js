@@ -298,3 +298,4 @@ module.exports.logSecurityEvent = logSecurityEvent;
 module.exports.logAdminAction = logAdminAction;
 module.exports.AuditCategory = AuditCategory;
 module.exports.AuditAction = AuditAction;
+

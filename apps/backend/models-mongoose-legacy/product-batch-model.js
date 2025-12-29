@@ -56,3 +56,4 @@ const ProductBatchSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('ProductBatch', ProductBatchSchema);
+

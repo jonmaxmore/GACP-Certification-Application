@@ -56,3 +56,4 @@ class ListFarmsUseCase {
 }
 
 module.exports = ListFarmsUseCase;
+

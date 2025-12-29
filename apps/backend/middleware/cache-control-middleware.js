@@ -172,3 +172,4 @@ module.exports = {
     getCdnUrl,
     CACHE_PRESETS,
 };
+

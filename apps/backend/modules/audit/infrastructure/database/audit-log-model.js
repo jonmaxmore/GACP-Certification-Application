@@ -565,3 +565,4 @@ class MongoDBAuditLogRepository extends IAuditLogRepository {
 }
 
 module.exports = MongoDBAuditLogRepository;
+

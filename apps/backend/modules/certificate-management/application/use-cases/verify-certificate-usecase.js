@@ -260,3 +260,4 @@ class VerifyCertificateUseCase {
 }
 
 module.exports = VerifyCertificateUseCase;
+

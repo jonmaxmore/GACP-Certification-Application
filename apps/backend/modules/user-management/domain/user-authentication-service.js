@@ -929,3 +929,4 @@ class UserAuthenticationService extends EventEmitter {
 }
 
 module.exports = UserAuthenticationService;
+

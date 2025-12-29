@@ -73,3 +73,4 @@ class ResetPasswordUseCase {
 }
 
 module.exports = ResetPasswordUseCase;
+

@@ -237,3 +237,4 @@ module.exports = {
   DEVELOPMENT_ORIGINS,
   ALLOWED_ORIGIN_PATTERNS,
 };
+

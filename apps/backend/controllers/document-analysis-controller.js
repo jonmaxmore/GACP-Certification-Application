@@ -3,7 +3,7 @@
  * API endpoints for document requirement analysis
  */
 
-const DocumentAnalysisService = require('../services/DocumentAnalysisService');
+const DocumentAnalysisService = require('../services/document-analysis-service');
 const PlantMaster = require('../models/PlantMasterModel');
 
 /**
@@ -168,3 +168,4 @@ module.exports = {
     validateDocuments,
     getAvailablePlants,
 };
+

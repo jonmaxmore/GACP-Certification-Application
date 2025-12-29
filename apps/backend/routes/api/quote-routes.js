@@ -35,3 +35,4 @@ router.post('/:quoteId/accept', QuoteController.acceptQuote);
 router.post('/:quoteId/reject', QuoteController.rejectQuote);
 
 module.exports = router;
+

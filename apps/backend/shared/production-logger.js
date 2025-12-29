@@ -121,3 +121,4 @@ logger.warn = (message, ...meta) => {
 // Export logger and Sentry for manual usage
 module.exports = logger;
 module.exports.Sentry = Sentry;
+

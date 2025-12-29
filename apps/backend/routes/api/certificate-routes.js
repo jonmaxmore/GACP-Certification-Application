@@ -193,3 +193,4 @@ router.get('/verify/:certificateNumber', async (req, res) => {
 });
 
 module.exports = router;
+

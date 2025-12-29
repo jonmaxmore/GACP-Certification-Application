@@ -1,5 +1,5 @@
 const UserModel = require('../models/UserModel');
-const jwtSecurity = require('../config/JwtSecurity');
+const jwtSecurity = require('../config/jwt-security');
 const { validateThaiID, validateLaserCode } = require('../utils/validators');
 const { hash } = require('../shared/encryption');
 
@@ -219,3 +219,4 @@ class AuthService {
 }
 
 module.exports = new AuthService();
+

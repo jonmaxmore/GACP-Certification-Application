@@ -117,3 +117,4 @@ function createAuditModule(config) {
 }
 
 module.exports = createAuditModule;
+

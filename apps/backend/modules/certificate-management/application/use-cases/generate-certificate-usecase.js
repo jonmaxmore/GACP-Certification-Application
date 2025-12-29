@@ -178,3 +178,4 @@ class GenerateCertificateUseCase {
 }
 
 module.exports = GenerateCertificateUseCase;
+

@@ -120,3 +120,4 @@ QuoteSchema.index({ status: 1 });
 // Note: quoteNumber already has unique:true in schema definition
 
 module.exports = mongoose.model('Quote', QuoteSchema);
+

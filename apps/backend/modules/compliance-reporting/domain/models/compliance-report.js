@@ -43,3 +43,4 @@ const complianceReportSchema = new mongoose.Schema({
 complianceReportSchema.index({ licenseId: 1, reportType: 1, 'period.year': 1, 'period.month': 1 });
 
 module.exports = mongoose.model('ComplianceReport', complianceReportSchema);
+

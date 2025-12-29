@@ -478,3 +478,4 @@ try {
 }
 
 module.exports = User;
+

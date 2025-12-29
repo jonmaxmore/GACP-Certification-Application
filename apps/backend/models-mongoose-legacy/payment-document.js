@@ -127,3 +127,4 @@ PaymentDocumentSchema.index({ applicationId: 1 });
 PaymentDocumentSchema.index({ type: 1, status: 1 });
 
 module.exports = mongoose.model('PaymentDocument', PaymentDocumentSchema);
+

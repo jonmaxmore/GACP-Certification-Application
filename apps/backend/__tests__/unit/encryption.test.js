@@ -50,3 +50,4 @@ describe('🔐 Encryption Utility', () => {
         expect(decrypt(encrypted2)).toBe(input);
     });
 });
+

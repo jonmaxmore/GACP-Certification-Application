@@ -26,3 +26,4 @@ module.exports.authenticateToken = auth.authenticateToken;
 module.exports.generateToken = auth.generateToken;
 module.exports.requireRole = auth.requireRole;
 module.exports.requirePermission = auth.requirePermission;
+

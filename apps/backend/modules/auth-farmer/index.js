@@ -48,3 +48,4 @@ module.exports = {
     logger.info(`Auth Farmer routes mounted at ${basePath} (via deprecated method)`);
   },
 };
+

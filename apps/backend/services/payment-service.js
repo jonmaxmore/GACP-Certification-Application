@@ -398,3 +398,4 @@ class PaymentService extends EventEmitter {
 }
 
 module.exports = PaymentService;
+

@@ -182,3 +182,4 @@ describe('Data Integrity', () => {
         expect(Math.abs(statusTotal - overview.totalApplications)).toBeLessThan(100);
     });
 });
+

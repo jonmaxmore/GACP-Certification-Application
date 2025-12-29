@@ -49,3 +49,4 @@ class CertificateIssued {
 }
 
 module.exports = CertificateIssued;
+

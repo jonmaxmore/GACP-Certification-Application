@@ -194,3 +194,4 @@ class MongoDBCertificateRepository extends ICertificateRepository {
 }
 
 module.exports = MongoDBCertificateRepository;
+

@@ -179,3 +179,4 @@ function createAuthDTAMModule(config) {
 }
 
 module.exports = createAuthDTAMModule;
+

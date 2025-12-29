@@ -358,3 +358,4 @@ cultivationCycleSchema.statics.findActiveCyclesForFarmer = function (farmerId) {
 const CultivationCycle = mongoose.model('CultivationCycle', cultivationCycleSchema);
 
 module.exports = CultivationCycle;
+

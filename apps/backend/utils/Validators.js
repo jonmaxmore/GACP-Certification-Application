@@ -52,3 +52,4 @@ exports.validateLaserCode = (laser) => {
   const regex = /^[A-Z]{2}[0-9]{10}$/;
   return regex.test(cleanLaser);
 };
+

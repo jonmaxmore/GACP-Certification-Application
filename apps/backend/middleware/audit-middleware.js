@@ -728,3 +728,4 @@ class AuditMiddleware {
 }
 
 module.exports = AuditMiddleware;
+

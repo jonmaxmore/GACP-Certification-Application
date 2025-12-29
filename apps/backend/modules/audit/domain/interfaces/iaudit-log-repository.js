@@ -146,3 +146,4 @@ class IAuditLogRepository {
 }
 
 module.exports = IAuditLogRepository;
+

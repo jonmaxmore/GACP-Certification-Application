@@ -39,3 +39,4 @@ class PasswordResetRequested {
 }
 
 module.exports = PasswordResetRequested;
+

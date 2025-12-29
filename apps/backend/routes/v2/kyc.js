@@ -68,3 +68,4 @@ router.get('/pending', authenticate, checkPermission('user.list'), (req, res) =>
 router.post('/verify', authenticate, checkPermission('user.update'), (req, res) => kycController.verifyUser(req, res));
 
 module.exports = router;
+

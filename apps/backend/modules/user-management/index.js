@@ -337,3 +337,4 @@ module.exports = {
  * const authService = userModule.getAuthenticationService();
  * const isValid = await authService.validateToken(token);
  */
+

@@ -462,3 +462,4 @@ class AuthenticationMiddleware {
 }
 
 module.exports = AuthenticationMiddleware;
+

@@ -138,3 +138,4 @@ class CertificateRepository {
 }
 
 module.exports = CertificateRepository;
+

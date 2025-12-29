@@ -536,3 +536,4 @@ module.exports = {
   createEnhancedAuditRoutes,
   getRouteDocumentation,
 };
+

@@ -386,3 +386,4 @@ module.exports = {
   clearTimestampCache: (...args) => getCryptoService().clearTimestampCache(...args),
   getStatus: (...args) => getCryptoService().getStatus(...args),
 };
+

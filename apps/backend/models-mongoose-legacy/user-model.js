@@ -377,3 +377,4 @@ try {
 }
 
 module.exports = User;
+

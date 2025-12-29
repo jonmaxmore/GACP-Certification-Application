@@ -42,3 +42,4 @@ class UserLoggedIn {
 }
 
 module.exports = UserLoggedIn;
+

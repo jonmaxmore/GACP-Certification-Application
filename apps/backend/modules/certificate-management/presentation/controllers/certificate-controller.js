@@ -425,3 +425,4 @@ class CertificateController {
 }
 
 module.exports = CertificateController;
+

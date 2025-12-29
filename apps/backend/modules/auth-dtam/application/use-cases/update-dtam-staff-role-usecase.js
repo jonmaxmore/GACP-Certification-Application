@@ -42,3 +42,4 @@ class UpdateDTAMStaffRoleUseCase {
 }
 
 module.exports = UpdateDTAMStaffRoleUseCase;
+

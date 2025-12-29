@@ -18,3 +18,4 @@ router.get('/', authenticateToken, ComplianceController.getMyReports);
 router.post('/:id/acknowledge', authenticateToken, ComplianceController.acknowledgeReport);
 
 module.exports = router;
+

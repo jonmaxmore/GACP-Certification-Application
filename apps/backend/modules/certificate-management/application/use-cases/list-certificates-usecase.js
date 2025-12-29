@@ -250,3 +250,4 @@ class ListCertificatesUseCase {
 }
 
 module.exports = ListCertificatesUseCase;
+

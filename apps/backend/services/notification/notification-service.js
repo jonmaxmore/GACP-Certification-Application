@@ -10,3 +10,4 @@ module.exports = {
     notifyFarmerStatusChange: async () => ({ success: true }),
     sendInspectionReminder: async () => ({ success: true }),
 };
+

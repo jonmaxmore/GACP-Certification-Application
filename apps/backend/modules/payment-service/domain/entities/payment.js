@@ -542,3 +542,4 @@ PaymentSchema.post('save', function (doc) {
 const Payment = mongoose.model('Payment', PaymentSchema);
 
 module.exports = Payment;
+

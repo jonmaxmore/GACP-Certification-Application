@@ -160,3 +160,4 @@ class AuditController {
 }
 
 module.exports = AuditController;
+

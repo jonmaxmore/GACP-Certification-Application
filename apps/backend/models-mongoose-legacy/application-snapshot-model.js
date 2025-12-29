@@ -132,3 +132,4 @@ try {
 }
 
 module.exports = ApplicationSnapshot;
+

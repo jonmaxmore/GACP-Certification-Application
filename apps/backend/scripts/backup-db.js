@@ -36,3 +36,4 @@ exec(command, (error, stdout, stderr) => {
   }
   console.log(`Backup completed successfully at ${backupPath}`);
 });
+

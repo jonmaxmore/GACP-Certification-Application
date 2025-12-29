@@ -24,3 +24,4 @@ module.exports = function (req, res, next) {
     res.status(500).json({ message: 'Server error during authentication' });
   }
 };
+

@@ -13,7 +13,7 @@ process.env.DTAM_JWT_SECRET = 'test-dtam-secret';
 
 const app = require('../server'); // Import app
 const User = require('../models/UserModel');
-const { RBACService } = require('../services/SecurityCompliance');
+const { RBACService } = require('../services/security-compliance');
 
 let mongoServer;
 let server;
@@ -198,3 +198,4 @@ async function runTests() {
 }
 
 runTests();
+

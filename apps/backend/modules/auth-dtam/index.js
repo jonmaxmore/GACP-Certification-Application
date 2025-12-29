@@ -51,3 +51,4 @@ module.exports = {
     logger.info(`Auth DTAM routes mounted at ${basePath}`);
   },
 };
+

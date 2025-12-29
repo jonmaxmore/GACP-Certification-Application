@@ -47,3 +47,4 @@ class RevokeCertificateUseCase {
 }
 
 module.exports = RevokeCertificateUseCase;
+

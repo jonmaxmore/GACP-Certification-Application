@@ -51,3 +51,4 @@ function createAuditRoutes(controller, authMiddleware) {
 }
 
 module.exports = createAuditRoutes;
+

@@ -3,7 +3,7 @@
  * Tests the document requirement analysis logic
  */
 
-const DocumentAnalysisService = require('../../services/DocumentAnalysisService');
+const DocumentAnalysisService = require('../../services/document-analysis-service');
 
 // Mock the models
 jest.mock('../../models/DocumentRequirementModel', () => ({
@@ -235,3 +235,4 @@ describe('DocumentAnalysisService', () => {
         });
     });
 });
+

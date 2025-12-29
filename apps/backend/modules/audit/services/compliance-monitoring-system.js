@@ -798,3 +798,4 @@ class ComplianceMonitoringSystem extends EventEmitter {
 }
 
 module.exports = ComplianceMonitoringSystem;
+

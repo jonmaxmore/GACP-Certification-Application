@@ -40,3 +40,4 @@ class ComplianceController {
 }
 
 module.exports = new ComplianceController();
+

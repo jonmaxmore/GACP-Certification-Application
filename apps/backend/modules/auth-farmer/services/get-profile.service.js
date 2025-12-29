@@ -36,3 +36,4 @@ class GetUserProfileUseCase {
 }
 
 module.exports = GetUserProfileUseCase;
+

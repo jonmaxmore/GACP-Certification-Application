@@ -87,3 +87,4 @@ class RegisterFarmUseCase {
 }
 
 module.exports = RegisterFarmUseCase;
+

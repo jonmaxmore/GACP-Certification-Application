@@ -41,3 +41,4 @@ class UserRegistered {
 }
 
 module.exports = UserRegistered;
+

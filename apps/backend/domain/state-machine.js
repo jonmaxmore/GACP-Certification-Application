@@ -58,3 +58,4 @@ class ApplicationStateMachine {
 }
 
 module.exports = ApplicationStateMachine;
+

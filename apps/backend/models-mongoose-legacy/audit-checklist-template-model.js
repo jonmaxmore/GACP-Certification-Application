@@ -248,3 +248,4 @@ AuditChecklistTemplateSchema.statics.getActiveTemplate = async function (templat
 const AuditChecklistTemplate = mongoose.model('AuditChecklistTemplate', AuditChecklistTemplateSchema);
 
 module.exports = AuditChecklistTemplate;
+

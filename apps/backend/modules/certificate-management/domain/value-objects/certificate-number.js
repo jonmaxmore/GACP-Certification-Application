@@ -96,3 +96,4 @@ class CertificateNumber {
 }
 
 module.exports = CertificateNumber;
+

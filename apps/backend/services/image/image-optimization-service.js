@@ -415,3 +415,4 @@ class ImageOptimizationService {
 
 // Export singleton instance
 module.exports = new ImageOptimizationService();
+

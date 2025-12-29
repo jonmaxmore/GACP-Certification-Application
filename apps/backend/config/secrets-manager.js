@@ -54,3 +54,4 @@ class SecretsManager {
 }
 
 module.exports = new SecretsManager();
+

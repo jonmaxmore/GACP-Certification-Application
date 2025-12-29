@@ -155,3 +155,4 @@ describe('Magic Bytes Validation', () => {
         expect(validateMagicBytes(invalidPdf, 'unknown/type')).toBe(true);
     });
 });
+

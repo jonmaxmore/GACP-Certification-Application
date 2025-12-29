@@ -304,3 +304,4 @@ class ApplicationRepository {
 }
 
 module.exports = ApplicationRepository;
+

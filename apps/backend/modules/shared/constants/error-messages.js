@@ -50,3 +50,4 @@ module.exports = {
   INVALID_FILE_TYPE: 'Invalid file type',
   UPLOAD_FAILED: 'File upload failed',
 };
+

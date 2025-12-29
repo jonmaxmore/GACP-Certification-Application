@@ -207,3 +207,4 @@ router.put('/:id/resolve', checkPermission('dashboard.view'), ticketController.r
 router.put('/:id/close', checkPermission('dashboard.view'), ticketController.closeTicket);
 
 module.exports = router;
+

@@ -124,3 +124,4 @@ LicenseSchema.statics.findByPlantType = function (userId, plantType) {
 const License = mongoose.model('License', LicenseSchema);
 
 module.exports = License;
+

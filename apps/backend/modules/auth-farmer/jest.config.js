@@ -31,3 +31,4 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/../../jest.setup.js'],
   globalTeardown: '<rootDir>/../../jest.teardown.js',
 };
+

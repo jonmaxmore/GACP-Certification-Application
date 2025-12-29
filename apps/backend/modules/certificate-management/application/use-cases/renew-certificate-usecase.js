@@ -203,3 +203,4 @@ class RenewCertificateUseCase {
 }
 
 module.exports = RenewCertificateUseCase;
+

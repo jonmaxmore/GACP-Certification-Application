@@ -180,3 +180,4 @@ class Certificate {
 }
 
 module.exports = Certificate;
+

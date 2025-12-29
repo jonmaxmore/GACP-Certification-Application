@@ -292,3 +292,4 @@ class DocumentAnalysisService {
 }
 
 module.exports = new DocumentAnalysisService();
+

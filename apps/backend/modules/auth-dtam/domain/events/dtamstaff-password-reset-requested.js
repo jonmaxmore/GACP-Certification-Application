@@ -27,3 +27,4 @@ class DTAMStaffPasswordResetRequested {
 }
 
 module.exports = DTAMStaffPasswordResetRequested;
+

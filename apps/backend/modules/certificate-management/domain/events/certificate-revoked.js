@@ -40,3 +40,4 @@ class CertificateRevoked {
 }
 
 module.exports = CertificateRevoked;
+

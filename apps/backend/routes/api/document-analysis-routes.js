@@ -48,3 +48,4 @@ router.post('/analyze', authenticate, controller.analyzeDocuments);
 router.post('/validate', authenticate, controller.validateDocuments);
 
 module.exports = router;
+

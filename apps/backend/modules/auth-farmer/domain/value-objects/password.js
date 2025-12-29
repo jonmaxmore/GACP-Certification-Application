@@ -167,3 +167,4 @@ class Password {
 }
 
 module.exports = Password;
+

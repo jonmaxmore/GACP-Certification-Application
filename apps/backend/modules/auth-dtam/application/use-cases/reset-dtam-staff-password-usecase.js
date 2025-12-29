@@ -60,3 +60,4 @@ class ResetDTAMStaffPasswordUseCase {
 }
 
 module.exports = ResetDTAMStaffPasswordUseCase;
+

@@ -120,3 +120,4 @@ router.put('/mark-all-read', checkPermission('dashboard.view'), notificationCont
 router.post('/', checkPermission('system.admin'), notificationController.createNotification);
 
 module.exports = router;
+

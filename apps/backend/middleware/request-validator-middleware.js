@@ -163,3 +163,4 @@ module.exports = function (options = {}) {
 // Export functions to register schemas
 module.exports.registerSchema = registerSchema;
 module.exports.schemaRegistry = schemaRegistry;
+

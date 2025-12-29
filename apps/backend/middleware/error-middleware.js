@@ -105,3 +105,4 @@ module.exports = function () {
 
 // Export the AppError class for use throughout the application
 module.exports.AppError = AppError;
+

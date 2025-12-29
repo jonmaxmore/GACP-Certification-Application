@@ -30,3 +30,4 @@ class FarmVerificationCompleted {
 }
 
 module.exports = FarmVerificationCompleted;
+

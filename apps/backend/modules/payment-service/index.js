@@ -486,3 +486,4 @@ module.exports.metadata = {
     refundWindow: '30 days',
   },
 };
+

@@ -119,3 +119,4 @@ function initializeRoutes(controller, authMiddleware) {
 }
 
 module.exports = initializeRoutes;
+

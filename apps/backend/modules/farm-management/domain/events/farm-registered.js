@@ -28,3 +28,4 @@ class FarmRegistered {
 }
 
 module.exports = FarmRegistered;
+

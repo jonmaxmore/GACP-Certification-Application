@@ -404,3 +404,4 @@ dtamStaffSchema.statics.getStaffList = async function (options = {}) {
 const DTAMStaff = mongoose.model('DTAMStaff', dtamStaffSchema);
 
 module.exports = DTAMStaff;
+

@@ -24,3 +24,4 @@ class ListDTAMStaffUseCase {
 }
 
 module.exports = ListDTAMStaffUseCase;
+

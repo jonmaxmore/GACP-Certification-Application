@@ -90,3 +90,4 @@ async function migrateAddUuid() {
 
 // Run migration
 migrateAddUuid();
+

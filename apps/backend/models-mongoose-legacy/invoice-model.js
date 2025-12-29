@@ -137,3 +137,4 @@ InvoiceSchema.index({ status: 1 });
 // Note: invoiceNumber already has unique:true in schema definition
 
 module.exports = mongoose.model('Invoice', InvoiceSchema);
+

@@ -32,3 +32,4 @@ const PaymentTransactionSchema = new Schema({
 }, { timestamps: true });
 
 module.exports = mongoose.model('PaymentTransaction', PaymentTransactionSchema);
+

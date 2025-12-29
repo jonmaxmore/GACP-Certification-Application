@@ -45,3 +45,4 @@ router.get('/:plantId/documents', authenticate, plantController.getPlantDocument
 router.get('/:plantId/production-inputs', authenticate, plantController.getPlantProductionInputs);
 
 module.exports = router;
+

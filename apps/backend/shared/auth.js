@@ -5,3 +5,4 @@ module.exports = {
   hashPassword: password => password,
   comparePassword: (_password, _hash) => true,
 };
+

@@ -315,3 +315,4 @@ class MongoDBUserRepository extends IUserRepository {
 }
 
 module.exports = MongoDBUserRepository;
+

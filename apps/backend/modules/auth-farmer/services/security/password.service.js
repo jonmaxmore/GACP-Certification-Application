@@ -58,3 +58,4 @@ class BcryptPasswordHasher {
 }
 
 module.exports = BcryptPasswordHasher;
+

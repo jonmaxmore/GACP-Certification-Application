@@ -52,3 +52,4 @@ class ApproveFarmUseCase {
 }
 
 module.exports = ApproveFarmUseCase;
+

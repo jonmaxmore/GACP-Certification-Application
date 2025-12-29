@@ -59,3 +59,4 @@ class UpdateUserProfileUseCase {
 }
 
 module.exports = UpdateUserProfileUseCase;
+

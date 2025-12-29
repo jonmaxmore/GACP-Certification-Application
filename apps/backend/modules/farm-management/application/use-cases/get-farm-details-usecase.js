@@ -28,3 +28,4 @@ class GetFarmDetailsUseCase {
 }
 
 module.exports = GetFarmDetailsUseCase;
+

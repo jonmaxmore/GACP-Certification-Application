@@ -385,3 +385,4 @@ module.exports = {
   getAllowedFileTypes,
   ALLOWED_FILE_TYPES,
 };
+

@@ -81,3 +81,4 @@ class ConnectionHealthChecker {
 }
 
 module.exports = ConnectionHealthChecker;
+

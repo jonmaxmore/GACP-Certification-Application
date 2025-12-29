@@ -45,3 +45,4 @@ const upload = multer({
 router.post('/:id/documents/:docType', authenticate, upload.single('document'), controller.uploadDocument);
 
 module.exports = router;
+

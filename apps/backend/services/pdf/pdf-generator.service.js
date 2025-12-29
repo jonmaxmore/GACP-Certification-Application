@@ -74,3 +74,4 @@ class PDFGeneratorService {
 }
 
 module.exports = new PDFGeneratorService();
+

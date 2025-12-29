@@ -26,3 +26,4 @@ function getSecret(key, defaultValue = null) {
 }
 
 module.exports = { validateEnvironment, getSecret };
+

@@ -77,3 +77,4 @@ class LicenseGenerator {
 }
 
 module.exports = new LicenseGenerator();
+

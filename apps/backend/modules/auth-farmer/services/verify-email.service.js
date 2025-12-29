@@ -58,3 +58,4 @@ class VerifyEmailUseCase {
 }
 
 module.exports = VerifyEmailUseCase;
+

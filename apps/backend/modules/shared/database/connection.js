@@ -127,3 +127,4 @@ class DatabaseConnection {
 const dbConnection = new DatabaseConnection();
 
 module.exports = dbConnection;
+

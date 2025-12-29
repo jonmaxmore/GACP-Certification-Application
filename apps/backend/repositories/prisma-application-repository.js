@@ -165,3 +165,4 @@ class ApplicationRepository {
 }
 
 module.exports = new ApplicationRepository();
+

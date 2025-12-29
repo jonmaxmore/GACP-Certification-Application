@@ -620,3 +620,4 @@ class EnhancedAuditController {
 }
 
 module.exports = EnhancedAuditController;
+

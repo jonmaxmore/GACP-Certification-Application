@@ -28,3 +28,4 @@ module.exports = {
     inspector: ['read:inspections', 'write:inspections'],
   },
 };
+

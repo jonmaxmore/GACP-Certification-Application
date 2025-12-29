@@ -247,3 +247,4 @@ class CARReportService {
 }
 
 module.exports = new CARReportService();
+

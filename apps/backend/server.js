@@ -1,6 +1,7 @@
 /**
  * GACP Platform - Production Server
  * Entry point for the backend application
+ * Database: PostgreSQL (Prisma) + MongoDB (Legacy, migrating)
  */
 
 require('dotenv').config();
@@ -11,7 +12,8 @@ const compression = require('compression');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const logger = require('./shared/logger');
-const databaseService = require('./services/ProductionDatabase');
+const databaseService = require('./services/production-database'); // MongoDB (Legacy)
+const prismaDatabase = require('./services/prisma-database'); // PostgreSQL (New)
 const redisService = require('./services/RedisService');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
@@ -96,12 +98,16 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Health Check - Both /health and /api/health for compatibility
 app.get(['/health', '/api/health'], async (req, res) => {
     try {
-        const dbHealth = await databaseService.healthCheck();
+        const mongoHealth = await databaseService.healthCheck();
+        const postgresHealth = await prismaDatabase.healthCheck();
         res.json({
             status: 'OK',
             timestamp: new Date(),
             environment: process.env.NODE_ENV,
-            database: dbHealth,
+            database: {
+                mongodb: mongoHealth,
+                postgresql: postgresHealth,
+            },
             redis: {
                 connected: redisService.isAvailable(),
             }
@@ -129,17 +135,26 @@ app.use((err, req, res, next) => {
 if (require.main === module) {
     app.listen(port, '0.0.0.0', () => {
         logger.info(`✅ Production Server running on port ${port}`);
-        logger.info(`📡 Server accepting requests (database connecting in background...)`);
+        logger.info(`📡 Server accepting requests (databases connecting in background...)`);
 
-        // Connect to database AFTER server is already listening
+        // Connect to databases AFTER server is already listening
         if (process.env.NODE_ENV !== 'test') {
-            setImmediate(() => {
+            setImmediate(async () => {
+                // Connect to MongoDB (Legacy)
                 databaseService.connect()
-                    .then(() => logger.info('✅ Database connected successfully'))
+                    .then(() => logger.info('✅ MongoDB connected successfully'))
                     .catch(err => {
-                        logger.warn('⚠️ Database unavailable - running with limited functionality:', err.message);
+                        logger.warn('⚠️ MongoDB unavailable - running with limited functionality:', err.message);
                     });
 
+                // Connect to PostgreSQL (New - Prisma)
+                prismaDatabase.connect()
+                    .then(() => logger.info('✅ PostgreSQL connected successfully'))
+                    .catch(err => {
+                        logger.warn('⚠️ PostgreSQL unavailable:', err.message);
+                    });
+
+                // Connect to Redis (Cache)
                 redisService.connect().catch(err => {
                     logger.warn('⚠️ Redis unavailable - running without cache:', err.message);
                 });
@@ -149,3 +164,4 @@ if (require.main === module) {
 }
 
 module.exports = app;
+

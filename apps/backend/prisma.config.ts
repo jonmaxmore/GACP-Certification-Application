@@ -9,6 +9,7 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Use Prisma dev server URL or env variable
+    url: process.env["DATABASE_URL"] || "postgres://postgres:postgres@localhost:51214/template1?sslmode=disable",
   },
 });

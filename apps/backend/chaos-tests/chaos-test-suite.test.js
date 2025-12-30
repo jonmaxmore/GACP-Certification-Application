@@ -9,7 +9,7 @@ const http = require('http');
 
 const BASE_URL = 'http://localhost:3000';
 
-// Helper function to make HTTP requests
+// Helper function to make HTTP requests with proper cleanup
 const makeRequest = (path, method = 'GET', data = null, headers = {}) => {
     return new Promise((resolve, reject) => {
         const url = new URL(path, BASE_URL);
@@ -22,13 +22,15 @@ const makeRequest = (path, method = 'GET', data = null, headers = {}) => {
                 'Content-Type': 'application/json',
                 ...headers,
             },
-            timeout: 5000,
+            timeout: 3000,
         };
 
         const req = http.request(options, (res) => {
             let body = '';
             res.on('data', chunk => body += chunk);
             res.on('end', () => {
+                // Destroy socket to prevent open handles
+                res.socket?.destroy();
                 try {
                     resolve({
                         status: res.statusCode,
@@ -40,8 +42,15 @@ const makeRequest = (path, method = 'GET', data = null, headers = {}) => {
             });
         });
 
-        req.on('error', reject);
-        req.on('timeout', () => reject(new Error('Timeout')));
+        req.on('error', (err) => {
+            req.destroy();
+            reject(err);
+        });
+
+        req.on('timeout', () => {
+            req.destroy();
+            reject(new Error('Timeout'));
+        });
 
         if (data) {
             req.write(JSON.stringify(data));

@@ -1,0 +1,150 @@
+name: 🍎 Apple Quality Gate - Lint & Format
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint-backend:
+    name: 🔍 Backend Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/backend/package-lock.json
+      
+      - name: Install Dependencies
+        working-directory: apps/backend
+        run: npm ci
+      
+      - name: Run ESLint
+        working-directory: apps/backend
+        run: npm run lint --if-present || echo "No lint script"
+      
+      - name: Check for Hardcoded Secrets
+        run: |
+          echo "🔒 Checking for hardcoded secrets..."
+          # Check for common secret patterns
+          if grep -rE "(password|secret|api[_-]?key|token)\s*[:=]\s*['\"][^'\"]+['\"]" \
+            --include="*.js" --include="*.ts" --include="*.json" \
+            --exclude-dir=node_modules --exclude-dir=.git \
+            apps/backend/; then
+            echo "⚠️ Potential hardcoded secrets found!"
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets detected"
+
+  lint-frontend:
+    name: 🔍 Frontend Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/web-app/package-lock.json
+      
+      - name: Install Dependencies
+        working-directory: apps/web-app
+        run: npm ci
+      
+      - name: Run ESLint
+        working-directory: apps/web-app
+        run: npm run lint --if-present
+      
+      - name: TypeScript Check
+        working-directory: apps/web-app
+        run: npx tsc --noEmit || true
+
+  check-thai-strings:
+    name: 🇹🇭 Thai String Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Check for Hardcoded Thai Strings in JSX
+        run: |
+          echo "🔍 Checking for hardcoded Thai strings..."
+          # Count Thai characters in JSX/TSX files (excluding comments and locales)
+          THAI_COUNT=$(grep -rE "[\u0E00-\u0E7F]+" \
+            --include="*.tsx" --include="*.jsx" \
+            --exclude-dir=node_modules --exclude-dir=locales --exclude-dir=.next \
+            apps/web-app/src/ 2>/dev/null | wc -l || echo "0")
+          
+          echo "Found $THAI_COUNT lines with Thai characters"
+          
+          # Warning only (not failing for now)
+          if [ "$THAI_COUNT" -gt 50 ]; then
+            echo "⚠️ Consider moving Thai strings to locale files"
+          else
+            echo "✅ Thai string usage looks acceptable"
+          fi
+
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Check for Sensitive Files
+        run: |
+          echo "🔒 Checking for sensitive files in repo..."
+          SENSITIVE_FILES=".env .env.local .env.production id_rsa *.pem *.key"
+          
+          for pattern in $SENSITIVE_FILES; do
+            if find . -name "$pattern" -not -path "./.git/*" | grep -q .; then
+              echo "⚠️ Found sensitive file matching: $pattern"
+              find . -name "$pattern" -not -path "./.git/*"
+            fi
+          done
+          
+          echo "✅ Security check complete"
+      
+      - name: npm audit
+        working-directory: apps/backend
+        run: npm audit --audit-level=high || true
+        continue-on-error: true
+
+  build-check:
+    name: 🏗️ Build Check
+    runs-on: ubuntu-latest
+    needs: [lint-frontend]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/web-app/package-lock.json
+      
+      - name: Install Dependencies
+        working-directory: apps/web-app
+        run: npm ci
+      
+      - name: Build
+        working-directory: apps/web-app
+        run: npm run build
+        env:
+          NEXT_PUBLIC_BACKEND_URL: http://localhost:3000

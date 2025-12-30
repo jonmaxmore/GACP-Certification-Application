@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Routes that require authentication (includes all farmer pages)
-const protectedRoutes = [
+// 🍎 Zero-Crash Security Middleware
+
+// Routes that require farmer authentication
+const protectedFarmerRoutes = [
     '/dashboard',
     '/applications',
     '/establishments',
@@ -10,41 +12,98 @@ const protectedRoutes = [
     '/notifications',
     '/tracking',
     '/payments',
+    '/certificates',
+    '/documents',
+];
+
+// Routes that require staff authentication
+const protectedStaffRoutes = [
+    '/staff/dashboard',
+    '/staff/applications',
+    '/staff/audits',
+    '/staff/accounting',
+    '/staff/calendar',
+    '/staff/analytics',
 ];
 
 // Routes that are only for unauthenticated users
 const authRoutes = ['/login', '/register', '/forgot-password'];
+const staffAuthRoutes = ['/staff/login'];
+
+// Security headers for all responses
+const securityHeaders = {
+    'X-Frame-Options': 'DENY',
+    'X-Content-Type-Options': 'nosniff',
+    'X-XSS-Protection': '1; mode=block',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+};
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
+    const response = NextResponse.next();
 
-    // Check for auth_token in cookies (Next.js can't access localStorage)
-    // For web app, we'll check via client-side and use cookie for SSR
+    // ========================================
+    // 🔒 EARLY EXIT: Apply Security Headers
+    // ========================================
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value);
+    });
+
+    // ========================================
+    // 🔒 EARLY EXIT: Block suspicious patterns
+    // ========================================
+    const suspiciousPatterns = [
+        /\.\.\//,           // Path traversal
+        /<script/i,         // XSS attempt
+        /javascript:/i,     // JS injection
+        /\x00/,             // Null byte
+    ];
+
+    if (suspiciousPatterns.some(pattern => pattern.test(pathname))) {
+        return new NextResponse('Forbidden', { status: 403 });
+    }
+
+    // ========================================
+    // 🔐 Farmer Route Protection
+    // ========================================
     const token = request.cookies.get('auth_token')?.value;
-
-    // Check if route requires auth
-    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+    const isProtectedFarmerRoute = protectedFarmerRoutes.some(route => pathname.startsWith(route));
     const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
 
-    // Redirect unauthenticated users from protected routes to login
-    if (isProtectedRoute && !token) {
+    if (isProtectedFarmerRoute && !token) {
         const loginUrl = new URL('/login', request.url);
         loginUrl.searchParams.set('redirect', pathname);
         return NextResponse.redirect(loginUrl);
     }
 
-    // Redirect authenticated users from auth routes to dashboard
     if (isAuthRoute && token) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
-    return NextResponse.next();
+    // ========================================
+    // 🔐 Staff Route Protection
+    // ========================================
+    const staffToken = request.cookies.get('staff_token')?.value;
+    const isProtectedStaffRoute = protectedStaffRoutes.some(route => pathname.startsWith(route));
+    const isStaffAuthRoute = staffAuthRoutes.some(route => pathname.startsWith(route));
+
+    if (isProtectedStaffRoute && !staffToken) {
+        const loginUrl = new URL('/staff/login', request.url);
+        loginUrl.searchParams.set('redirect', pathname);
+        return NextResponse.redirect(loginUrl);
+    }
+
+    if (isStaffAuthRoute && staffToken) {
+        return NextResponse.redirect(new URL('/staff/dashboard', request.url));
+    }
+
+    return response;
 }
 
 export const config = {
     matcher: [
         /*
-         * Match all request paths except for the ones starting with:
+         * Match all request paths except for:
          * - api (API routes)
          * - _next/static (static files)
          * - _next/image (image optimization files)

@@ -4,8 +4,8 @@
  */
 module.exports = {
   testEnvironment: 'node',
-  roots: ['<rootDir>/modules', '<rootDir>/services', '<rootDir>/__tests__'],
-  testMatch: ['**/__tests__/**/*.test.js', '**/__tests__/**/*.test.ts'],
+  roots: ['<rootDir>/modules', '<rootDir>/services', '<rootDir>/__tests__', '<rootDir>/chaos-tests'],
+  testMatch: ['**/__tests__/**/*.test.js', '**/__tests__/**/*.test.ts', '**/chaos-tests/**/*.test.js'],
   testPathIgnorePatterns: ['/node_modules/', '/.next/', '/dist/', '/build/'],
   moduleFileExtensions: ['js', 'ts', 'json'],
   verbose: true,

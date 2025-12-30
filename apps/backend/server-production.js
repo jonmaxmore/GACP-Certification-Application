@@ -1,7 +1,8 @@
 /**
- * GACP Platform - Production Server (MongoDB Only)
+ * GACP Platform - Production Server (PostgreSQL + Redis)
  * Optimized for AWS EC2 deployment
- * Database: MongoDB Atlas
+ * Database: PostgreSQL (Prisma ORM)
+ * Cache: Redis
  */
 
 require('dotenv').config();
@@ -11,21 +12,42 @@ const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const mongoose = require('mongoose');
 const swaggerUi = require('swagger-ui-express');
+const { PrismaClient } = require('@prisma/client');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://gacp-premierprime:PremierPrime2025@thai-gacp.re1651p.mongodb.net/gacp-production?retryWrites=true&w=majority';
+// Initialize Prisma
+const prisma = new PrismaClient();
 
-mongoose.connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-})
-    .then(() => console.log('✅ MongoDB Connected'))
-    .catch(err => console.error('❌ MongoDB Connection Error:', err.message));
+// Test database connection
+async function testDatabaseConnection() {
+    try {
+        await prisma.$connect();
+        console.log('✅ PostgreSQL Connected');
+        return true;
+    } catch (error) {
+        console.error('❌ PostgreSQL Connection Error:', error.message);
+        return false;
+    }
+}
+
+// Redis connection (optional)
+let redisClient = null;
+async function connectRedis() {
+    try {
+        const Redis = require('ioredis');
+        redisClient = new Redis({
+            host: process.env.REDIS_HOST || 'localhost',
+            port: process.env.REDIS_PORT || 6379,
+        });
+        redisClient.on('connect', () => console.log('✅ Redis Connected'));
+        redisClient.on('error', (err) => console.log('⚠️ Redis Error:', err.message));
+    } catch (e) {
+        console.log('⚠️ Redis not available');
+    }
+}
 
 // CORS Configuration
 const corsOptions = {
@@ -53,22 +75,40 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Health Check
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+    let dbStatus = 'unknown';
+    try {
+        await prisma.$queryRaw`SELECT 1`;
+        dbStatus = 'connected';
+    } catch (e) {
+        dbStatus = 'disconnected';
+    }
+
     res.json({
         status: 'ok',
         service: 'GACP Backend',
         version: '2.0.0',
-        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        database: dbStatus,
+        cache: redisClient?.status === 'ready' ? 'connected' : 'disconnected',
         timestamp: new Date().toISOString(),
     });
 });
 
-app.get('/api/v2/health', (req, res) => {
+app.get('/api/v2/health', async (req, res) => {
+    let dbStatus = 'unknown';
+    try {
+        await prisma.$queryRaw`SELECT 1`;
+        dbStatus = 'connected';
+    } catch (e) {
+        dbStatus = 'disconnected';
+    }
+
     res.json({
         status: 'ok',
         service: 'GACP Backend API v2',
         version: '2.0.0',
-        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        database: dbStatus,
+        cache: redisClient?.status === 'ready' ? 'connected' : 'disconnected',
         uptime: process.uptime(),
         timestamp: new Date().toISOString(),
     });
@@ -135,15 +175,21 @@ app.get('/api/v2/config/fee-structure', (req, res) => {
 });
 
 // Plants API
-app.get('/api/v2/plants', (req, res) => {
-    res.json({
-        success: true,
-        data: [
-            { id: 1, name: 'กัญชา', thaiName: 'Cannabis', permittedUse: 'medical' },
-            { id: 2, name: 'กระท่อม', thaiName: 'Kratom', permittedUse: 'medical' },
-            { id: 3, name: 'ขมิ้นชัน', thaiName: 'Turmeric', permittedUse: 'general' },
-        ]
-    });
+app.get('/api/v2/plants', async (req, res) => {
+    try {
+        const plants = await prisma.plantSpecies.findMany();
+        res.json({ success: true, data: plants });
+    } catch (e) {
+        // Fallback data if DB not connected
+        res.json({
+            success: true,
+            data: [
+                { id: 1, name: 'กัญชา', thaiName: 'Cannabis', permittedUse: 'medical' },
+                { id: 2, name: 'กระท่อม', thaiName: 'Kratom', permittedUse: 'medical' },
+                { id: 3, name: 'ขมิ้นชัน', thaiName: 'Turmeric', permittedUse: 'general' },
+            ]
+        });
+    }
 });
 
 // Validation API
@@ -179,17 +225,26 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
-    console.log(`
+async function startServer() {
+    await testDatabaseConnection();
+    await connectRedis();
+
+    app.listen(PORT, () => {
+        console.log(`
 ========================================
 🚀 GACP Backend Server Started
 ========================================
 📡 Port: ${PORT}
 🌍 Environment: ${process.env.NODE_ENV || 'development'}
+🗄️ Database: PostgreSQL (Prisma)
+⚡ Cache: Redis
 📚 API Docs: http://localhost:${PORT}/api-docs
 ❤️ Health: http://localhost:${PORT}/health
 ========================================
-    `);
-});
+        `);
+    });
+}
+
+startServer();
 
 module.exports = app;

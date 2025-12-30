@@ -1,0 +1,163 @@
+{
+    "app": {
+        "name": "GACP Certification System",
+        "departmentName": "Department of Thai Traditional and Alternative Medicine",
+        "version": "v2.6.0"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "edit": "Edit",
+        "delete": "Delete",
+        "search": "Search",
+        "filter": "Filter",
+        "back": "Back",
+        "next": "Next",
+        "previous": "Previous",
+        "submit": "Submit",
+        "close": "Close",
+        "yes": "Yes",
+        "no": "No",
+        "all": "All",
+        "none": "None",
+        "required": "Required",
+        "optional": "Optional"
+    },
+    "auth": {
+        "login": "Login",
+        "logout": "Logout",
+        "register": "Register",
+        "registerNew": "Register New Account",
+        "forgotPassword": "Forgot Password",
+        "resetPassword": "Reset Password",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "rememberMe": "Remember Me",
+        "loginFailed": "Login Failed",
+        "invalidCredentials": "Invalid ID or password",
+        "sessionExpired": "Session expired. Please login again",
+        "staffLogin": "Staff Login"
+    },
+    "registration": {
+        "title": "Registration",
+        "accountType": "Account Type",
+        "individual": "Individual",
+        "juristic": "Legal Entity",
+        "communityEnterprise": "Community Enterprise",
+        "personalInfo": "Personal Information",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "idCard": "ID Card Number",
+        "laserCode": "Laser Code",
+        "phoneNumber": "Phone Number",
+        "companyName": "Company Name",
+        "taxId": "Tax ID",
+        "communityName": "Community Enterprise Name",
+        "registrationNo": "Registration Number",
+        "address": "Address",
+        "province": "Province",
+        "district": "District",
+        "subdistrict": "Subdistrict",
+        "zipCode": "Zip Code"
+    },
+    "application": {
+        "title": "Application",
+        "new": "New Application",
+        "renewal": "Certificate Renewal",
+        "amendment": "Amendment Request",
+        "replacement": "Certificate Replacement",
+        "myApplications": "My Applications",
+        "status": "Status"
+    },
+    "status": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "underReview": "Under Review",
+        "documentRequired": "Documents Required",
+        "pendingPayment": "Pending Payment",
+        "paymentConfirmed": "Payment Confirmed",
+        "scheduled": "Audit Scheduled",
+        "auditInProgress": "Audit In Progress",
+        "pendingApproval": "Pending Approval",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled",
+        "expired": "Expired"
+    },
+    "payment": {
+        "title": "Payment",
+        "amount": "Amount",
+        "baht": "THB",
+        "invoice": "Invoice",
+        "quotation": "Quotation",
+        "payNow": "Pay Now",
+        "viewInvoice": "View Invoice",
+        "uploadSlip": "Upload Payment Slip"
+    },
+    "certificate": {
+        "title": "Certificate",
+        "number": "Certificate Number",
+        "issueDate": "Issue Date",
+        "expiryDate": "Expiry Date",
+        "download": "Download",
+        "print": "Print"
+    },
+    "farm": {
+        "title": "Farm",
+        "name": "Farm Name",
+        "address": "Farm Address",
+        "area": "Area",
+        "rai": "Rai",
+        "plants": "Cultivated Plants"
+    },
+    "plants": {
+        "cannabis": "Cannabis",
+        "kratom": "Kratom",
+        "turmeric": "Turmeric",
+        "ginger": "Ginger",
+        "blackGalingale": "Black Galingale",
+        "plai": "Plai"
+    },
+    "roles": {
+        "farmer": "Farmer",
+        "reviewerAuditor": "Reviewer/Auditor",
+        "scheduler": "Scheduler",
+        "accountant": "Accountant",
+        "admin": "Administrator",
+        "superAdmin": "Super Administrator"
+    },
+    "navigation": {
+        "home": "Home",
+        "dashboard": "Dashboard",
+        "applications": "Applications",
+        "certificates": "Certificates",
+        "payments": "Payments",
+        "notifications": "Notifications",
+        "profile": "Profile",
+        "settings": "Settings",
+        "help": "Help"
+    },
+    "errors": {
+        "networkError": "Cannot connect to server",
+        "serverError": "Server error",
+        "notFound": "Page not found",
+        "unauthorized": "Unauthorized access",
+        "forbidden": "Access forbidden",
+        "validationError": "Validation error",
+        "tryAgain": "Try Again"
+    },
+    "validation": {
+        "required": "This field is required",
+        "invalidEmail": "Invalid email format",
+        "invalidPhone": "Invalid phone number",
+        "invalidIdCard": "Invalid ID card number",
+        "invalidLaserCode": "Invalid laser code",
+        "passwordTooShort": "Password must be at least 8 characters",
+        "passwordMismatch": "Passwords do not match"
+    }
+}

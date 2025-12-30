@@ -1,0 +1,163 @@
+{
+    "app": {
+        "name": "ระบบรับรองมาตรฐาน GACP",
+        "departmentName": "กรมการแพทย์แผนไทยและการแพทย์ทางเลือก",
+        "version": "v2.6.0"
+    },
+    "common": {
+        "loading": "กำลังโหลด...",
+        "error": "เกิดข้อผิดพลาด",
+        "success": "สำเร็จ",
+        "cancel": "ยกเลิก",
+        "confirm": "ยืนยัน",
+        "save": "บันทึก",
+        "edit": "แก้ไข",
+        "delete": "ลบ",
+        "search": "ค้นหา",
+        "filter": "กรอง",
+        "back": "กลับ",
+        "next": "ถัดไป",
+        "previous": "ก่อนหน้า",
+        "submit": "ส่ง",
+        "close": "ปิด",
+        "yes": "ใช่",
+        "no": "ไม่",
+        "all": "ทั้งหมด",
+        "none": "ไม่มี",
+        "required": "จำเป็น",
+        "optional": "ไม่บังคับ"
+    },
+    "auth": {
+        "login": "เข้าสู่ระบบ",
+        "logout": "ออกจากระบบ",
+        "register": "ลงทะเบียน",
+        "registerNew": "ลงทะเบียนใหม่",
+        "forgotPassword": "ลืมรหัสผ่าน",
+        "resetPassword": "ตั้งรหัสผ่านใหม่",
+        "email": "อีเมล",
+        "password": "รหัสผ่าน",
+        "confirmPassword": "ยืนยันรหัสผ่าน",
+        "rememberMe": "จดจำฉัน",
+        "loginFailed": "เข้าสู่ระบบไม่สำเร็จ",
+        "invalidCredentials": "เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง",
+        "sessionExpired": "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่",
+        "staffLogin": "สำหรับเจ้าหน้าที่"
+    },
+    "registration": {
+        "title": "สมัครสมาชิก",
+        "accountType": "ประเภทบัญชี",
+        "individual": "บุคคลธรรมดา",
+        "juristic": "นิติบุคคล",
+        "communityEnterprise": "วิสาหกิจชุมชน",
+        "personalInfo": "ข้อมูลส่วนตัว",
+        "firstName": "ชื่อ",
+        "lastName": "นามสกุล",
+        "idCard": "เลขบัตรประชาชน",
+        "laserCode": "รหัสหลังบัตร",
+        "phoneNumber": "เบอร์โทรศัพท์",
+        "companyName": "ชื่อบริษัท/องค์กร",
+        "taxId": "เลขประจำตัวผู้เสียภาษี",
+        "communityName": "ชื่อวิสาหกิจชุมชน",
+        "registrationNo": "เลขทะเบียนวิสาหกิจ",
+        "address": "ที่อยู่",
+        "province": "จังหวัด",
+        "district": "อำเภอ",
+        "subdistrict": "ตำบล",
+        "zipCode": "รหัสไปรษณีย์"
+    },
+    "application": {
+        "title": "ใบสมัคร",
+        "new": "ยื่นใบสมัครใหม่",
+        "renewal": "ต่ออายุใบรับรอง",
+        "amendment": "ขอแก้ไขข้อมูล",
+        "replacement": "ขอใบรับรองแทน",
+        "myApplications": "ใบสมัครของฉัน",
+        "status": "สถานะ"
+    },
+    "status": {
+        "draft": "แบบร่าง",
+        "submitted": "ยื่นแล้ว",
+        "underReview": "อยู่ระหว่างตรวจสอบ",
+        "documentRequired": "ต้องการเอกสารเพิ่มเติม",
+        "pendingPayment": "รอชำระเงิน",
+        "paymentConfirmed": "ชำระเงินแล้ว",
+        "scheduled": "นัดตรวจแล้ว",
+        "auditInProgress": "กำลังตรวจประเมิน",
+        "pendingApproval": "รอการอนุมัติ",
+        "approved": "อนุมัติแล้ว",
+        "rejected": "ไม่อนุมัติ",
+        "cancelled": "ยกเลิก",
+        "expired": "หมดอายุ"
+    },
+    "payment": {
+        "title": "การชำระเงิน",
+        "amount": "จำนวนเงิน",
+        "baht": "บาท",
+        "invoice": "ใบแจ้งหนี้",
+        "quotation": "ใบเสนอราคา",
+        "payNow": "ชำระเงินเดี๋ยวนี้",
+        "viewInvoice": "ดูใบแจ้งหนี้",
+        "uploadSlip": "อัพโหลดหลักฐานการชำระเงิน"
+    },
+    "certificate": {
+        "title": "ใบรับรอง",
+        "number": "เลขที่ใบรับรอง",
+        "issueDate": "วันที่ออก",
+        "expiryDate": "วันหมดอายุ",
+        "download": "ดาวน์โหลด",
+        "print": "พิมพ์"
+    },
+    "farm": {
+        "title": "แปลงปลูก",
+        "name": "ชื่อแปลง",
+        "address": "ที่ตั้งแปลง",
+        "area": "พื้นที่",
+        "rai": "ไร่",
+        "plants": "พืชที่ปลูก"
+    },
+    "plants": {
+        "cannabis": "กัญชา",
+        "kratom": "กระท่อม",
+        "turmeric": "ขมิ้นชัน",
+        "ginger": "ขิง",
+        "blackGalingale": "กระชายดำ",
+        "plai": "ไพล"
+    },
+    "roles": {
+        "farmer": "เกษตรกร",
+        "reviewerAuditor": "ผู้ตรวจสอบ",
+        "scheduler": "ผู้จัดตารางนัดหมาย",
+        "accountant": "เจ้าหน้าที่การเงิน",
+        "admin": "ผู้ดูแลระบบ",
+        "superAdmin": "ผู้ดูแลระบบสูงสุด"
+    },
+    "navigation": {
+        "home": "หน้าแรก",
+        "dashboard": "แดชบอร์ด",
+        "applications": "ใบสมัคร",
+        "certificates": "ใบรับรอง",
+        "payments": "การชำระเงิน",
+        "notifications": "การแจ้งเตือน",
+        "profile": "โปรไฟล์",
+        "settings": "ตั้งค่า",
+        "help": "ช่วยเหลือ"
+    },
+    "errors": {
+        "networkError": "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้",
+        "serverError": "เซิร์ฟเวอร์มีปัญหา",
+        "notFound": "ไม่พบหน้าที่ต้องการ",
+        "unauthorized": "ไม่มีสิทธิ์เข้าถึง",
+        "forbidden": "ถูกระงับการเข้าถึง",
+        "validationError": "ข้อมูลไม่ถูกต้อง",
+        "tryAgain": "ลองอีกครั้ง"
+    },
+    "validation": {
+        "required": "กรุณากรอกข้อมูล",
+        "invalidEmail": "รูปแบบอีเมลไม่ถูกต้อง",
+        "invalidPhone": "หมายเลขโทรศัพท์ไม่ถูกต้อง",
+        "invalidIdCard": "เลขบัตรประชาชนไม่ถูกต้อง",
+        "invalidLaserCode": "รหัสหลังบัตรไม่ถูกต้อง",
+        "passwordTooShort": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร",
+        "passwordMismatch": "รหัสผ่านไม่ตรงกัน"
+    }
+}

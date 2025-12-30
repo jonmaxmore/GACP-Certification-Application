@@ -52,29 +52,31 @@ export default function AccountingDashboard() {
     const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
-            // Mock data for now - replace with real API
-            setSummary({
-                totalRevenue: 2450000,
-                pendingAmount: 185000,
-                overdueAmount: 35000,
-                monthlyRevenue: 425000,
-                invoiceCount: {
-                    total: 156,
-                    pending: 12,
-                    paid: 138,
-                    overdue: 6,
-                },
-            });
+            // Fetch payment summary from API
+            const summaryResult = await api.get<{ data: PaymentSummary }>(`/v2/payments/summary?startDate=${dateRange.start}&endDate=${dateRange.end}`);
+            if (summaryResult.success && summaryResult.data?.data) {
+                setSummary(summaryResult.data.data);
+            } else {
+                setSummary({
+                    totalRevenue: 0,
+                    pendingAmount: 0,
+                    overdueAmount: 0,
+                    monthlyRevenue: 0,
+                    invoiceCount: { total: 0, pending: 0, paid: 0, overdue: 0 },
+                });
+            }
 
-            setInvoices([
-                { _id: "1", invoiceNumber: "INV-2567-0156", applicationNumber: "REQ-2567-0089", farmerName: "นายสมชาย ใจดี", amount: 15000, status: "PENDING", dueDate: "2024-12-20", createdAt: "2024-12-10" },
-                { _id: "2", invoiceNumber: "INV-2567-0155", applicationNumber: "REQ-2567-0088", farmerName: "บริษัท สมุนไพรดี จำกัด", amount: 45000, status: "PAID", dueDate: "2024-12-15", paidAt: "2024-12-14", createdAt: "2024-12-08" },
-                { _id: "3", invoiceNumber: "INV-2567-0154", applicationNumber: "REQ-2567-0085", farmerName: "กลุ่มเกษตรอินทรีย์", amount: 25000, status: "OVERDUE", dueDate: "2024-12-05", createdAt: "2024-11-28" },
-                { _id: "4", invoiceNumber: "INV-2567-0153", applicationNumber: "REQ-2567-0082", farmerName: "นางมะลิ ใจงาม", amount: 15000, status: "PAID", dueDate: "2024-12-10", paidAt: "2024-12-09", createdAt: "2024-12-01" },
-                { _id: "5", invoiceNumber: "INV-2567-0152", applicationNumber: "REQ-2567-0080", farmerName: "นายวิชัย สมบูรณ์", amount: 35000, status: "PENDING", dueDate: "2024-12-25", createdAt: "2024-12-12" },
-            ]);
+            // Fetch invoices from API
+            const invoicesResult = await api.get<{ data: { invoices: InvoiceItem[] } }>(`/v2/invoices?startDate=${dateRange.start}&endDate=${dateRange.end}`);
+            if (invoicesResult.success && invoicesResult.data?.data?.invoices) {
+                setInvoices(invoicesResult.data.data.invoices);
+            } else {
+                setInvoices([]);
+            }
         } catch (error) {
             console.error("Error fetching data:", error);
+            setSummary(null);
+            setInvoices([]);
         } finally {
             setIsLoading(false);
         }
@@ -272,8 +274,8 @@ export default function AccountingDashboard() {
                                     key={tab.key}
                                     onClick={() => setActiveTab(tab.key as typeof activeTab)}
                                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.key
-                                            ? "bg-emerald-600 text-white"
-                                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                        ? "bg-emerald-600 text-white"
+                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                         }`}
                                 >
                                     {tab.label} ({tab.count})

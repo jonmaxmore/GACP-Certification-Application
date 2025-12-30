@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import api from "@/services/api-client";
 
 interface StaffUser {
     id: string;
@@ -69,19 +70,49 @@ export default function StaffDashboardPage() {
             router.push("/staff/login");
         }
 
-        // Mock data
-        setPendingDocuments([
-            { id: "REQ-2567-0012", applicantName: "นายสมชาย ใจดี", plantType: "กัญชา", status: "FIRST_SUBMISSION", submittedAt: "2024-12-10", submissionCount: 1, waitTime: "2 ชั่วโมง" },
-            { id: "REQ-2567-0015", applicantName: "บริษัท สมุนไพรไทย จำกัด", plantType: "กระท่อม", status: "REVISION_1", submittedAt: "2024-12-09", submissionCount: 2, waitTime: "1 วัน" },
-            { id: "REQ-2567-0018", applicantName: "วิสาหกิจชุมชนบ้านป่า", plantType: "ขมิ้นชัน", status: "REVISION_2", submittedAt: "2024-12-08", submissionCount: 3, waitTime: "2 วัน" },
-        ]);
-
-        setPendingAudits([
-            { id: "REQ-2567-0010", applicantName: "นายวิชัย สมบูรณ์", plantType: "ขิง", status: "WAITING_SCHEDULE", submittedAt: "2024-12-07", waitTime: "3 วัน" },
-            { id: "REQ-2567-0008", applicantName: "กลุ่มเกษตรอินทรีย์", plantType: "กระชายดำ", status: "SCHEDULED", submittedAt: "2024-12-05", waitTime: "5 ธ.ค. 10:00" },
-            { id: "REQ-2567-0005", applicantName: "นางมะลิ ใจงาม", plantType: "ไพล", status: "WAITING_RESULT", submittedAt: "2024-12-03", waitTime: "เลยกำหนด" },
-        ]);
+        // Fetch real data from API
+        fetchPendingData();
     }, [router]);
+
+    const fetchPendingData = async () => {
+        try {
+            // Fetch pending documents
+            const docsResult = await api.get<{ data: { applications: PendingItem[] } }>('/v2/applications?status=PENDING_REVIEW');
+            if (docsResult.success && docsResult.data?.data?.applications) {
+                setPendingDocuments(docsResult.data.data.applications.map(app => ({
+                    ...app,
+                    waitTime: getWaitTime(app.submittedAt)
+                })));
+            } else {
+                setPendingDocuments([]);
+            }
+
+            // Fetch pending audits
+            const auditsResult = await api.get<{ data: { audits: PendingItem[] } }>('/v2/field-audits?status=PENDING');
+            if (auditsResult.success && auditsResult.data?.data?.audits) {
+                setPendingAudits(auditsResult.data.data.audits.map(audit => ({
+                    ...audit,
+                    waitTime: getWaitTime(audit.submittedAt)
+                })));
+            } else {
+                setPendingAudits([]);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            setPendingDocuments([]);
+            setPendingAudits([]);
+        }
+    };
+
+    const getWaitTime = (submittedAt: string): string => {
+        const submitted = new Date(submittedAt);
+        const now = new Date();
+        const diffMs = now.getTime() - submitted.getTime();
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        if (diffHours < 24) return `${diffHours} ชั่วโมง`;
+        const diffDays = Math.floor(diffHours / 24);
+        return `${diffDays} วัน`;
+    };
 
     const handleLogout = () => {
         localStorage.removeItem("staff_token");

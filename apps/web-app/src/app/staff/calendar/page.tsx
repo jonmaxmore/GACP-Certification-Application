@@ -66,16 +66,21 @@ export default function StaffCalendarPage() {
             const auditsResult = await api.get<{ data: { audits: AuditItem[] } }>(`/v2/field-audits/my-schedule?date=${selectedDate}`);
             if (auditsResult.success && auditsResult.data?.data?.audits) {
                 setAudits(auditsResult.data.data.audits);
+            } else {
+                setAudits([]);
             }
 
-            // Fetch pending applications (would need applications API)
-            // For now, use mock data
-            setPendingApplications([
-                { _id: "1", applicationNumber: "REQ-2567-0010", firstName: "นายวิชัย", lastName: "สมบูรณ์", plantType: "ขิง", status: "WAITING_SCHEDULE" },
-                { _id: "2", applicationNumber: "REQ-2567-0012", firstName: "นางมะลิ", lastName: "ใจงาม", plantType: "ไพล", status: "WAITING_SCHEDULE" },
-            ]);
+            // Fetch pending applications waiting for schedule
+            const appsResult = await api.get<{ data: { applications: ApplicationItem[] } }>('/v2/applications?status=WAITING_SCHEDULE');
+            if (appsResult.success && appsResult.data?.data?.applications) {
+                setPendingApplications(appsResult.data.data.applications);
+            } else {
+                setPendingApplications([]);
+            }
         } catch (error) {
             console.error("Error fetching data:", error);
+            setAudits([]);
+            setPendingApplications([]);
         } finally {
             setIsLoading(false);
         }

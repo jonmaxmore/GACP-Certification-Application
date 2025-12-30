@@ -1,0 +1,115 @@
+{
+    "name": "GACP Platform Stress Test",
+    "description": "100 Concurrent Users - Zero-Crash Validation",
+    "version": "1.0.0",
+    "target": {
+        "host": "47.129.167.71",
+        "backend_port": 3000,
+        "frontend_port": 3001,
+        "environment": "production"
+    },
+    "stages": [
+        {
+            "name": "Warmup",
+            "duration": "30s",
+            "target_vus": 10,
+            "description": "Initial warmup with 10 virtual users"
+        },
+        {
+            "name": "Ramp Up 1",
+            "duration": "1m",
+            "target_vus": 25,
+            "description": "Gradually increase to 25 users"
+        },
+        {
+            "name": "Ramp Up 2",
+            "duration": "1m",
+            "target_vus": 50,
+            "description": "Increase to 50 concurrent users"
+        },
+        {
+            "name": "Peak Load",
+            "duration": "2m",
+            "target_vus": 100,
+            "description": "Maximum load - 100 concurrent users"
+        },
+        {
+            "name": "Sustained",
+            "duration": "3m",
+            "target_vus": 100,
+            "description": "Sustained peak load for stability check"
+        },
+        {
+            "name": "Ramp Down",
+            "duration": "30s",
+            "target_vus": 10,
+            "description": "Graceful ramp down"
+        }
+    ],
+    "workloads": [
+        {
+            "name": "Health Check",
+            "weight": 10,
+            "endpoint": "/health",
+            "method": "GET"
+        },
+        {
+            "name": "API Health",
+            "weight": 10,
+            "endpoint": "/api/v2/health",
+            "method": "GET"
+        },
+        {
+            "name": "Login Flow",
+            "weight": 25,
+            "endpoint": "/api/v2/auth/login",
+            "method": "POST"
+        },
+        {
+            "name": "Registration",
+            "weight": 15,
+            "endpoint": "/api/v2/auth/register",
+            "method": "POST"
+        },
+        {
+            "name": "Applications List",
+            "weight": 20,
+            "endpoint": "/api/v2/applications",
+            "method": "GET"
+        },
+        {
+            "name": "File Upload Simulation",
+            "weight": 20,
+            "endpoint": "/api/v2/documents/upload",
+            "method": "POST",
+            "io_intensive": true
+        }
+    ],
+    "thresholds": {
+        "http_req_duration": {
+            "p95": 200,
+            "max": 500,
+            "unit": "ms"
+        },
+        "http_req_failed": {
+            "max": 0.01,
+            "unit": "percent"
+        },
+        "iterations": {
+            "min": 1000,
+            "unit": "count"
+        }
+    },
+    "checkpoints": {
+        "io_operations": true,
+        "db_queries": true,
+        "deadlock_detection": true,
+        "memory_usage": true,
+        "cpu_usage": true
+    },
+    "data_integrity": {
+        "thai_id_checksum": true,
+        "idempotency_check": true,
+        "duplicate_detection": true
+    }
+}

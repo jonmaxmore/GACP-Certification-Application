@@ -15,6 +15,7 @@ const configRouter = require('./config');
 const plantsRouter = require('./plants');
 const harvestBatchesRouter = require('./harvest-batches');
 const validationRouter = require('./validation');
+const auditRouter = require('./audit');
 
 // Mount V2 routes
 router.use('/notifications', notificationsRouter);
@@ -24,6 +25,7 @@ router.use('/config', configRouter);
 router.use('/plants', plantsRouter);
 router.use('/harvest-batches', harvestBatchesRouter);
 router.use('/validation', validationRouter);
+router.use('/audit', auditRouter);
 
 // Health check with version info
 router.get('/health', (req, res) => {

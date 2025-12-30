@@ -1,7 +1,6 @@
 // UI Components barrel export
-export { ModernButton } from './ModernButton';
-export { ModernInput } from './ModernInput';
-export { ModernCard } from './ModernCard';
-export { BottomNav } from './BottomNav';
-export { ThemeToggle } from './ThemeToggle';
-
+export { ModernButton } from './modern-button';
+export { ModernInput } from './modern-input';
+export { ModernCard } from './modern-card';
+export { BottomNav } from './bottom-nav';
+export { ThemeToggle } from './theme-toggle';

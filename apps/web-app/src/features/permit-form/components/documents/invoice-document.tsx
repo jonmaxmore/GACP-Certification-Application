@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { useInvoice, DEFAULT_FEES } from "@/hooks/usePricing";
+import { useInvoice, DEFAULT_FEES } from "@/hooks/use-pricing";
 
 interface InvoiceDocumentProps {
     invoiceNumber: string;

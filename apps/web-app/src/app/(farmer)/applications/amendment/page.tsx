@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/services/api-client";
 
@@ -32,7 +32,8 @@ interface EditableField {
     isModified: boolean;
 }
 
-export default function AmendmentApplicationPage() {
+// Main content component with useSearchParams
+function AmendmentContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const certId = searchParams.get('certId');
@@ -345,3 +346,24 @@ export default function AmendmentApplicationPage() {
     );
 }
 
+// Loading fallback component
+function AmendmentLoadingFallback() {
+    return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F8FAF9', fontFamily: "'Kanit', sans-serif" }}>
+            <div style={{ textAlign: 'center' }}>
+                <div style={{ width: 40, height: 40, border: '3px solid rgba(0,0,0,0.08)', borderTopColor: '#2563EB', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+                <p style={{ color: '#5A5A5A', fontSize: '14px' }}>กำลังโหลด...</p>
+                <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </div>
+        </div>
+    );
+}
+
+// 🍎 Apple-standard Suspense wrapper
+export default function AmendmentApplicationPage() {
+    return (
+        <Suspense fallback={<AmendmentLoadingFallback />}>
+            <AmendmentContent />
+        </Suspense>
+    );
+}

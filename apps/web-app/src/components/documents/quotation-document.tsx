@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { usePricing, generateQuotationItems, DEFAULT_FEES } from "@/hooks/usePricing";
+import { usePricing, generateQuotationItems, DEFAULT_FEES } from "@/hooks/use-pricing";
 
 interface QuotationDocumentProps {
     quotationNumber: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/services/api-client';
@@ -48,7 +48,8 @@ const REQUIRED_DOCS = [
     { id: 'tax_certificate', name: 'หนังสือรับรองการเสียภาษี', required: false },
 ];
 
-export default function RenewalPage() {
+// Main content component with useSearchParams
+function RenewalContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const certId = searchParams.get('certId');
@@ -871,3 +872,24 @@ export default function RenewalPage() {
     );
 }
 
+// Loading fallback component
+function RenewalLoadingFallback() {
+    return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F8FAF9', fontFamily: "'Kanit', sans-serif" }}>
+            <div style={{ textAlign: 'center' }}>
+                <div className="spinner" style={{ width: 48, height: 48, border: '3px solid rgba(0,0,0,0.08)', borderTopColor: '#16A34A', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+                <p style={{ color: '#5A5A5A', fontSize: '14px' }}>กำลังโหลดข้อมูลการต่ออายุ...</p>
+                <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </div>
+        </div>
+    );
+}
+
+// 🍎 Apple-standard Suspense wrapper for useSearchParams
+export default function RenewalPage() {
+    return (
+        <Suspense fallback={<RenewalLoadingFallback />}>
+            <RenewalContent />
+        </Suspense>
+    );
+}

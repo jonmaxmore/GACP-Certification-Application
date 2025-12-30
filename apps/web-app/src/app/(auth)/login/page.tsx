@@ -518,30 +518,38 @@ export default function LoginPage() {
                             </Link>
                         </div>
 
-                        {/* Submit */}
+                        {/* Submit - 🍎 Liquid Glass Design */}
                         <button
                             type="submit"
                             disabled={isLoading}
+                            className="liquid-glass-btn"
                             style={{
                                 width: "100%",
-                                padding: "16px",
+                                padding: "18px",
                                 backgroundColor: isLoading ? "#94A3B8" : colors.primary,
                                 color: "#FFFFFF",
-                                fontSize: "16px",
+                                fontSize: "17px",
                                 fontWeight: 700,
                                 border: "none",
-                                borderRadius: "12px",
+                                borderRadius: "16px",
                                 cursor: isLoading ? "not-allowed" : "pointer",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                gap: "8px"
+                                gap: "10px",
+                                boxShadow: isLoading
+                                    ? "none"
+                                    : "0 4px 14px rgba(27, 94, 32, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+                                transform: "scale(1)",
+                                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                minHeight: "54px",
+                                letterSpacing: "0.5px"
                             }}
                         >
                             {isLoading ? (
                                 <span className="spinner"></span>
                             ) : (
-                                <>เข้าสู่ระบบ <span style={{ fontSize: "20px" }}>→</span></>
+                                <>เข้าสู่ระบบ <span style={{ fontSize: "22px", fontWeight: 400 }}>→</span></>
                             )}
                         </button>
                     </form>
@@ -581,7 +589,28 @@ export default function LoginPage() {
             <style jsx global>{`
                 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;900&display=swap');
                 * { box-sizing: border-box; margin: 0; padding: 0; }
-                input:focus { border-color: ${colors.primary} !important; }
+                input:focus { border-color: ${colors.primary} !important; box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.15); }
+                
+                /* 🍎 Liquid Glass Button Effects */
+                .liquid-glass-btn:hover:not(:disabled) {
+                    transform: scale(1.02) translateY(-1px);
+                    box-shadow: 0 8px 20px rgba(27, 94, 32, 0.5), 0 4px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+                    background-color: #166534 !important;
+                }
+                .liquid-glass-btn:active:not(:disabled) {
+                    transform: scale(0.98);
+                    box-shadow: 0 2px 8px rgba(27, 94, 32, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+                .liquid-glass-btn:focus {
+                    outline: none;
+                    box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.3), 0 4px 14px rgba(27, 94, 32, 0.4);
+                }
+                
+                /* Card hover effect */
+                .glass-card:hover {
+                    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                }
+                
                 .spinner {
                     width: 20px; height: 20px;
                     border: 3px solid rgba(255,255,255,0.3);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import api from '@/services/apiClient';
+import api from '@/services/api-client';
 
 interface PricingConfig {
     config: {
@@ -276,3 +276,4 @@ export default function ApplicationSelector({
         </div>
     );
 }
+

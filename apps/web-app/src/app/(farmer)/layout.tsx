@@ -30,3 +30,4 @@ export function FarmerLayout({ children }: FarmerLayoutProps) {
 }
 
 export default FarmerLayout;
+

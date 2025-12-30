@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import api from "@/services/apiClient";
+import api from "@/services/api-client";
 
 interface InvoiceItem {
     _id: string;
@@ -371,3 +371,4 @@ export default function AccountingDashboard() {
         </div>
     );
 }
+

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import api from "@/services/apiClient";
+import api from "@/services/api-client";
 
 interface ChecklistItem {
     itemCode: string;

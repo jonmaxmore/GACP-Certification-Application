@@ -399,3 +399,4 @@ export default function Step4Applicant() {
         </div>
     );
 }
+

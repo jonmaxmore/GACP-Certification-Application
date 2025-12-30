@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWizardStore, PLANTS } from '../hooks/useWizardStore';
-import api from '@/services/apiClient';
+import api from '@/services/api-client';
 
 const FEE_PER_SITE_TYPE = 5000;
 
@@ -259,3 +259,4 @@ export default function Step11Payment() {
         </div>
     );
 }
+

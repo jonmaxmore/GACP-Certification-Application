@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import api from "@/services/apiClient";
+import api from "@/services/api-client";
 
 // Theme System
 const themes = {
@@ -344,3 +344,4 @@ export default function AmendmentApplicationPage() {
         </div>
     );
 }
+

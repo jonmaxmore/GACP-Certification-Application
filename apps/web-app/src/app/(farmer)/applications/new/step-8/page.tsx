@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWizardStore, PLANTS } from '../hooks/useWizardStore';
-import api from '@/services/apiClient';
+import api from '@/services/api-client';
 
 const SITE_TYPE_LABELS: Record<string, string> = {
     OUTDOOR: 'กลางแจ้ง (Outdoor)',
@@ -549,3 +549,4 @@ export default function Step8Review() {
         </div>
     );
 }
+

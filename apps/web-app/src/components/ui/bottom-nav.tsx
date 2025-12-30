@@ -151,3 +151,4 @@ export function BottomNav({ isDark = false }: BottomNavProps) {
 }
 
 export default BottomNav;
+

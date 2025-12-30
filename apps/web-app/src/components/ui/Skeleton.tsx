@@ -182,3 +182,4 @@ export function CardSkeleton({ isDark = false }: { isDark?: boolean }) {
 }
 
 export default Skeleton;
+

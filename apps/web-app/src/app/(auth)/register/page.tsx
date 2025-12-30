@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import api from "@/services/apiClient";
+import api from "@/services/api-client";
 
 // Design tokens - exact match to Mobile App
 const colors = {
@@ -705,3 +705,4 @@ export default function RegisterPage() {
         </div>
     );
 }
+

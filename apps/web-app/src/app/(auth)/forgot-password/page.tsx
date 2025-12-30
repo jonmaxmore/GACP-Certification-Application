@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import api from "@/services/apiClient";
+import api from "@/services/api-client";
 
 const colors = {
     primary: "#1B5E20",
@@ -204,3 +204,4 @@ export default function ForgotPasswordPage() {
         </div>
     );
 }
+

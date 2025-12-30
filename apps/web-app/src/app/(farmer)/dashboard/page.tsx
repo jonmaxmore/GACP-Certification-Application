@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import api from "@/services/apiClient";
+import api from "@/services/api-client";
 
 // Theme System - Light & Dark
 const themes = {
@@ -782,3 +782,4 @@ export default function DashboardPage() {
         </div>
     );
 }
+

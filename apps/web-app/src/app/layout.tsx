@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Kanit } from "next/font/google";
 import "./globals.css";
-import SystemGuard from "@/components/SystemGuard";
+import SystemGuard from "@/components/system-guard";
 
 const kanit = Kanit({
   variable: "--font-kanit",
@@ -30,3 +30,4 @@ export default function RootLayout({
     </html>
   );
 }
+

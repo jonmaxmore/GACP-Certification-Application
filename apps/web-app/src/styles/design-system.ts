@@ -237,3 +237,4 @@ export type Theme = typeof lightTheme;
 export const getTheme = (isDark: boolean): Theme => {
     return isDark ? darkTheme : lightTheme;
 };
+

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, ReactNode, useCallback } from "react";
-import api from "@/services/apiClient";
+import api from "@/services/api-client";
 
 interface SystemGuardProps {
     children: ReactNode;
@@ -203,3 +203,4 @@ export default function SystemGuard({ children }: SystemGuardProps) {
     // Server is online - render children
     return <>{children}</>;
 }
+

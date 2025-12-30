@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import api from "@/services/apiClient";
+import api from "@/services/api-client";
 
 // Theme System with iconBg and iconColor
 const themes = {
@@ -200,3 +200,4 @@ export default function ApplicationsPage() {
         </div>
     );
 }
+

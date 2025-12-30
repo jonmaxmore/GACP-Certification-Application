@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import api from "@/services/apiClient";
+import api from "@/services/api-client";
 import { verifyStaffRole } from "@/hooks/useAccess";
 
 // Design tokens - exact match to Farmer Login
@@ -349,3 +349,4 @@ export default function StaffLoginPage() {
         </div>
     );
 }
+

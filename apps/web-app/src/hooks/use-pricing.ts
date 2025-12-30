@@ -153,3 +153,4 @@ export function generateQuotationItems(fees: PricingFees | null, includeInspecti
 
     return items;
 }
+

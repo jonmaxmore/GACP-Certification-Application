@@ -15,3 +15,4 @@ export function useWizard() {
     if (!ctx) throw new Error('useWizard must be inside WizardProvider');
     return ctx;
 }
+

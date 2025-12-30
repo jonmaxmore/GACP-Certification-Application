@@ -145,9 +145,15 @@ function rateLimiter(req, res, next) {
 
 /**
  * Strict rate limiter for sensitive endpoints
+ * Bypassed in test/CI environment for E2E testing
  */
 function strictRateLimiter(windowMs, maxRequests) {
     return (req, res, next) => {
+        // Bypass rate limiting in test environment
+        if (process.env.NODE_ENV === 'test' || process.env.CI === 'true') {
+            return next();
+        }
+
         const clientId = getClientId(req);
         const key = `strict:${clientId}:${req.path}`;
         const now = Date.now();

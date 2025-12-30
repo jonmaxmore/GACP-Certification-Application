@@ -122,3 +122,63 @@ jobs:
     steps:
       - name: All checks passed
         run: echo "All CI checks passed successfully!"
+
+  # ─────────────────────────────────────────────────────────────
+  # CHAOS TESTS (On demand)
+  # ─────────────────────────────────────────────────────────────
+  chaos:
+    name: 🌪️ Chaos Tests
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[chaos]')
+    needs: test
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/backend/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: apps/backend
+        run: npm ci
+      
+      - name: Run Chaos Tests
+        working-directory: apps/backend
+        env:
+          NODE_ENV: test
+        run: npm test -- --testPathPattern="chaos"
+
+  # ─────────────────────────────────────────────────────────────
+  # E2E TESTS
+  # ─────────────────────────────────────────────────────────────
+  e2e:
+    name: 🎭 E2E Tests
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/backend/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: apps/backend
+        run: |
+          npm ci
+          npx playwright install --with-deps
+      
+      - name: Run E2E Tests
+        working-directory: apps/backend
+        env:
+          NODE_ENV: test
+        run: npx playwright test --reporter=list
+

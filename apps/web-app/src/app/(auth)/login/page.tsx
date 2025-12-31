@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import api from "@/services/api-client";
 import { PersonIcon, BuildingIcon, GroupIcon, LockIcon, EyeIcon } from "@/components/ui/icons";
 import { colors } from "@/lib/design-tokens";
+import { formatThaiId, validateThaiId } from "@/utils/thai-id-validator";
 
 
 const ACCOUNT_TYPES = [
@@ -74,15 +75,7 @@ export default function LoginPage() {
         return englishError;
     };
 
-    const formatThaiId = (value: string) => {
-        const digits = value.replace(/\D/g, "");
-        let formatted = "";
-        for (let i = 0; i < digits.length && i < 13; i++) {
-            if (i === 1 || i === 5 || i === 10 || i === 12) formatted += "-";
-            formatted += digits[i];
-        }
-        return formatted;
-    };
+    // formatThaiId imported from @/utils/thai-id-validator
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

@@ -49,21 +49,35 @@ async function connectRedis() {
     }
 }
 
-// CORS Configuration
+// CORS Configuration - Apple ATS Compliant
 const corsOptions = {
     origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, etc)
         if (!origin) return callback(null, true);
+
+        // Development mode - allow all origins
         if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
             return callback(null, true);
         }
-        const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3001').split(',');
+
+        // Production allowed origins
+        const allowedOrigins = (process.env.CORS_ORIGINS ||
+            'http://localhost:3001,http://47.129.167.71,https://47.129.167.71'
+        ).split(',');
+
         if (allowedOrigins.includes(origin)) {
             return callback(null, true);
         }
+
+        // Log blocked origins for debugging
+        console.log(`[CORS] Blocked origin: ${origin}`);
         return callback(new Error('Not allowed by CORS'), false);
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
+
 
 // Middleware
 app.use(helmet({ contentSecurityPolicy: false }));

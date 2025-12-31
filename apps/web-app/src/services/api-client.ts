@@ -126,8 +126,8 @@ function notifyStatusChange(online: boolean) {
  */
 export async function checkHealth(): Promise<boolean> {
     try {
-        // Use backend URL directly for health check
-        const response = await fetch(`${API_CONFIG.backendUrl}/health`, {
+        // Use /api proxy path for health check (Nginx routes /api/* to backend)
+        const response = await fetch('/api/health', {
             method: 'GET',
             signal: AbortSignal.timeout(5000),
         });

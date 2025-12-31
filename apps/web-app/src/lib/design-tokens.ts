@@ -1,0 +1,92 @@
+/**
+ * Design Tokens - GACP Platform
+ * Shared color palette and design constants
+ * Exact match to Mobile App for consistency
+ */
+
+// Primary Colors - DTAM/MOPH Green Theme
+export const colors = {
+    // Primary
+    primary: "#1B5E20",
+    primaryLight: "#1B5E2014",
+    primaryDark: "#0D3A12",
+
+    // Backgrounds
+    background: "#F5F7FA",
+    card: "#FFFFFF",
+    inputBg: "#FFFFFF",
+
+    // Text
+    text: "#1B5E20",
+    textDark: "#1E293B",
+    textGray: "#64748B",
+    textLight: "#94A3B8",
+
+    // Borders & Dividers
+    border: "#E0E0E0",
+    borderLight: "#F0F0F0",
+
+    // Status Colors
+    success: "#22C55E",
+    warning: "#F59E0B",
+    error: "#EF4444",
+    info: "#3B82F6",
+
+    // Document Colors
+    accent: "#2E7D32",
+    secondary: "#4CAF50",
+};
+
+// Typography
+export const typography = {
+    fontFamily: {
+        primary: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        thai: "'Sarabun', 'Noto Sans Thai', sans-serif",
+    },
+    fontSize: {
+        xs: "12px",
+        sm: "14px",
+        base: "16px",
+        lg: "18px",
+        xl: "20px",
+        "2xl": "24px",
+        "3xl": "30px",
+    },
+};
+
+// Spacing
+export const spacing = {
+    xs: "4px",
+    sm: "8px",
+    md: "16px",
+    lg: "24px",
+    xl: "32px",
+    "2xl": "48px",
+};
+
+// Border Radius
+export const borderRadius = {
+    sm: "4px",
+    md: "8px",
+    lg: "12px",
+    xl: "16px",
+    full: "9999px",
+};
+
+// Shadows (Liquid Glass Effect)
+export const shadows = {
+    sm: "0 1px 2px rgba(0, 0, 0, 0.05)",
+    md: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    lg: "0 10px 15px rgba(0, 0, 0, 0.1)",
+    xl: "0 20px 25px rgba(0, 0, 0, 0.15)",
+    glass: "0 8px 32px rgba(27, 94, 32, 0.15)",
+};
+
+// Default export for convenience
+export default {
+    colors,
+    typography,
+    spacing,
+    borderRadius,
+    shadows,
+};

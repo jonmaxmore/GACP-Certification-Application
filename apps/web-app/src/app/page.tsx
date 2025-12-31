@@ -57,8 +57,8 @@ export default function LoadingPage() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        // 🌿 Sage Green Subtle Gradient
-        background: "linear-gradient(180deg, #B8C5A8 0%, #9AAA88 50%, #8A9A78 100%)",
+        // 🤍 White Background
+        backgroundColor: "#FFFFFF",
         fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif",
         padding: "24px",
         position: "relative",
@@ -169,14 +169,13 @@ export default function LoadingPage() {
         </div>
       </div>
 
-      {/* 📝 Typography - SF Pro, White */}
+      {/* 📝 Typography - SF Pro, Green */}
       <p
         style={{
-          color: "#FFFFFF",
+          color: "#1B5E20",
           fontSize: "17px",
           fontWeight: 500,
           letterSpacing: "0.3px",
-          textShadow: "0 1px 4px rgba(0, 0, 0, 0.25)",
           margin: 0,
           textAlign: "center",
           animation: "fadeIn 0.5s ease-out",
@@ -188,7 +187,7 @@ export default function LoadingPage() {
       {/* Progress Percentage */}
       <p
         style={{
-          color: "rgba(255, 255, 255, 0.85)",
+          color: "#2E7D32",
           fontSize: "14px",
           fontWeight: 400,
           marginTop: "8px",
@@ -204,7 +203,7 @@ export default function LoadingPage() {
           position: "fixed",
           bottom: "32px",
           textAlign: "center",
-          color: "rgba(255, 255, 255, 0.75)",
+          color: "#388E3C",
           fontSize: "13px",
           animation: "fadeIn 1s ease-out 0.5s both",
         }}

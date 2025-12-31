@@ -1,0 +1,38 @@
+﻿node.exe : node:internal/modules/run_main:107
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (node:internal/modules/run_main:10 
+   7:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    triggerUncaughtException(
+    ^
+
+TypeError [ERR_INVALID_ARG_VALUE]: The argument 'path' must be a string, 
+Uint8Array, or URL without null bytes. Received 'C:\\Users\\usEr\\Documents\\Gi
+tHub\\GACP-Certification-Application\\apps\\web-app\\!**\\\x00'
+    at Object.lstat (node:fs:1618:10)
+    at Object.read (C:\Users\usEr\Documents\GitHub\GACP-Certification-Applicati
+on\apps\web-app\node_modules\@nodelib\fs.stat\out\providers\async.js:5:17)
+    at ReaderStream.stat [as _stat] (C:\Users\usEr\Documents\GitHub\GACP-Certif
+ication-Application\apps\web-app\node_modules\@nodelib\fs.stat\out\index.js:13:
+11)
+    at C:\Users\usEr\Documents\GitHub\GACP-Certification-Application\apps\web-a
+pp\node_modules\knip\node_modules\fast-glob\out\readers\stream.js:49:18
+    at new Promise (<anonymous>)
+    at ReaderStream._getStat (C:\Users\usEr\Documents\GitHub\GACP-Certification
+-Application\apps\web-app\node_modules\knip\node_modules\fast-glob\out\readers\
+stream.js:48:16)
+    at ReaderStream._getEntry (C:\Users\usEr\Documents\GitHub\GACP-Certificatio
+n-Application\apps\web-app\node_modules\knip\node_modules\fast-glob\out\readers
+\stream.js:38:21)
+    at stream._write (C:\Users\usEr\Documents\GitHub\GACP-Certification-Applica
+tion\apps\web-app\node_modules\knip\node_modules\fast-glob\out\readers\stream.j
+s:20:25)
+    at doWrite (node:internal/streams/writable:596:12)
+    at clearBuffer (node:internal/streams/writable:781:7) {
+  code: 'ERR_INVALID_ARG_VALUE'
+}
+
+Node.js v24.11.0

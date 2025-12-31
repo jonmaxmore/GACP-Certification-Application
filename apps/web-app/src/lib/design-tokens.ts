@@ -31,14 +31,17 @@ export const colors = {
     successBg: "#F0FDF4",
     warning: "#F59E0B",
     warningBg: "#FFFBEB",
+    warningLight: "#FEF3C7",
     error: "#EF4444",
     errorBg: "#FEF2F2",
+    danger: "#DC2626",
     info: "#3B82F6",
     infoBg: "#E8F5E9",
 
     // Document Colors
     accent: "#2E7D32",
     secondary: "#4CAF50",
+
 };
 
 // Typography

@@ -5,51 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api from "@/services/api-client";
 import { verifyStaffRole } from "@/hooks/use-access";
+import { colors } from "@/lib/design-tokens";
+import { LockIcon, EyeIcon } from "@/components/ui/icons";
 
-// Design tokens - exact match to Farmer Login
-const colors = {
-    primary: "#1B5E20",
-    primaryLight: "#1B5E2014",
-    background: "#F5F7FA",
-    card: "#FFFFFF",
-    text: "#1B5E20",
-    textDark: "#1E293B",
-    textGray: "#64748B",
-    border: "#E0E0E0",
-    inputBg: "#FFFFFF",
-    warning: "#F59E0B",
-    warningLight: "#FEF3C7",
-};
 
-// Icons
-const LockIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-        <rect x="5" y="11" width="14" height="10" rx="2" stroke={colors.primary} strokeWidth="2" />
-        <path d="M8 11V7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7V11" stroke={colors.primary} strokeWidth="2" />
-    </svg>
-);
-
+// Local Icons (not in shared module)
 const MailIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.primary} strokeWidth="2">
         <rect x="3" y="5" width="18" height="14" rx="2" />
         <path d="M3 7L12 13L21 7" />
-    </svg>
-);
-
-const EyeIcon = ({ open }: { open: boolean }) => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2">
-        {open ? (
-            <>
-                <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" />
-                <circle cx="12" cy="12" r="3" />
-            </>
-        ) : (
-            <>
-                <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12" />
-                <path d="M2 12C2 12 5 19 12 19C19 19 22 12 22 12" />
-                <path d="M4 4L20 20" />
-            </>
-        )}
     </svg>
 );
 
@@ -60,6 +24,7 @@ const ShieldIcon = () => (
         <path d="M20 24L23 27L28 21" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
 );
+
 
 export default function StaffLoginPage() {
     const router = useRouter();

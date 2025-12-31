@@ -2,19 +2,12 @@
 
 import { useEffect, useState, ReactNode, useCallback } from "react";
 import api from "@/services/api-client";
+import { colors } from "@/lib/design-tokens";
 
 interface SystemGuardProps {
     children: ReactNode;
 }
 
-const colors = {
-    background: "#F5F7FA",
-    card: "#FFFFFF",
-    primary: "#1B5E20",
-    danger: "#DC2626",
-    textDark: "#1E293B",
-    textGray: "#64748B",
-};
 
 /**
  * SystemGuard Component

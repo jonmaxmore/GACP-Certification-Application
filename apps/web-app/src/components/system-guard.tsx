@@ -22,16 +22,30 @@ const colors = {
  * Shows a friendly "Server Down" screen when backend is unavailable
  */
 export default function SystemGuard({ children }: SystemGuardProps) {
-    const [isChecking, setIsChecking] = useState(true);
-    const [isOnline, setIsOnline] = useState(true);
+    // Start assuming online so pages load immediately (better UX)
+    // Only block if confirmed offline after multiple failed checks
+    const [isChecking, setIsChecking] = useState(false); // Don't show checking state initially
+    const [isOnline, setIsOnline] = useState(true); // Assume online initially
     const [retryCount, setRetryCount] = useState(0);
+    const [failedChecks, setFailedChecks] = useState(0); // Track consecutive failures
 
     const checkServer = useCallback(async () => {
         setIsChecking(true);
         const online = await api.health();
         setIsOnline(online);
         setIsChecking(false);
-        if (online) setRetryCount(0);
+
+        if (online) {
+            setRetryCount(0);
+            setFailedChecks(0);
+        } else {
+            // Only mark as offline after 2+ consecutive failures
+            setFailedChecks(prev => {
+                const newCount = prev + 1;
+                if (newCount >= 2) setIsOnline(false);
+                return newCount;
+            });
+        }
     }, []);
 
     useEffect(() => {

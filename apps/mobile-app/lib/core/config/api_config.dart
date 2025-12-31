@@ -11,8 +11,8 @@ class ApiConfig {
   // PORT CONFIGURATION - CHANGE HERE ONLY!
   // =====================================================
 
-  /// Backend API port
-  static const int backendPort = 5000;
+  /// Backend API port (production uses 3002, dev can use 5000)
+  static const int backendPort = 3002;
 
   /// Frontend port (for web)
   static const int frontendPort = 3000;
@@ -46,11 +46,11 @@ class ApiConfig {
   static String get healthUrl => 'http://localhost:$backendPort/health';
 
   // =====================================================
-  // PRODUCTION URLs - Update for deployment
+  // PRODUCTION URLs - AWS EC2 Deployment
   // =====================================================
 
-  /// Production API URL (override in release builds)
-  static const String productionUrl = 'https://api.gacp.go.th';
+  /// Production API URL (AWS EC2 instance)
+  static const String productionUrl = 'http://47.129.167.71/api';
 
   /// Whether to use production URL
   static bool get useProduction => kReleaseMode;

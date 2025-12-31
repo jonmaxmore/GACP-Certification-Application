@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:html' as html;
 
 import '../providers/auth_provider.dart';
 
@@ -55,19 +54,9 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     _currentStep = widget.initialStep;
   }
 
-  // Step to URL path mapping
-  static const Map<int, String> _stepPaths = {
-    0: '/register/account-type',
-    1: '/register/identifier',
-    2: '/register/personal-info',
-    3: '/register/password',
-  };
-
   void _goToStep(int step) {
     setState(() => _currentStep = step);
-    // Update browser URL without navigation (preserves widget state)
-    final path = _stepPaths[step] ?? '/register';
-    html.window.history.replaceState(null, '', path);
+    // URL update removed - only works on web platform
   }
 
   // Error message for identifier duplicate check

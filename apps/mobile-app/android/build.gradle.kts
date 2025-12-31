@@ -1,3 +1,6 @@
+// Compatibility with legacy Flutter plugins that use ext.kotlin_version
+extra["kotlin_version"] = "1.9.22"
+
 allprojects {
     repositories {
         google()

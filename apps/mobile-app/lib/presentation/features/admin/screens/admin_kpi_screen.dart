@@ -45,7 +45,7 @@ class AdminKpiScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: DropdownButtonFormField<String>(
-                        value: 'q4_2024',
+                        initialValue: 'q4_2024',
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           contentPadding:

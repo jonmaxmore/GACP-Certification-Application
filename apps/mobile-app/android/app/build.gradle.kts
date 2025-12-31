@@ -9,7 +9,7 @@ android {
     namespace = "com.example.mobile_app"
     compileSdk = 34
     buildToolsVersion = "34.0.0"
-    ndkVersion = "28.2.13676358"
+    // ndkVersion removed - use default NDK
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

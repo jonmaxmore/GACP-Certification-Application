@@ -83,6 +83,16 @@ export default function RegisterPage() {
     // Field-level errors for inline validation
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+    // PDPA fallback timer - in case scroll detection fails
+    useEffect(() => {
+        if (step === 0 && !pdpaScrolled) {
+            const timer = setTimeout(() => {
+                setPdpaScrolled(true);
+            }, 3000); // Enable after 3 seconds as fallback
+            return () => clearTimeout(timer);
+        }
+    }, [step, pdpaScrolled]);
+
     // Auto-save form data to localStorage
     useEffect(() => {
         const savedData = localStorage.getItem("register_draft");

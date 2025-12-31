@@ -71,8 +71,10 @@ export default function SystemGuard({ children }: SystemGuardProps) {
         await checkServer();
     };
 
-    // Show "Server Down" screen when offline
-    if (!isOnline && !isChecking) {
+    // CHANGED: Never block page rendering - always show content
+    // Health check only for background monitoring, not blocking
+    // This allows login/register pages to always be visible
+    if (false && !isOnline && !isChecking) {  // Disabled blocking - always show children
         return (
             <div style={{
                 minHeight: "100vh",

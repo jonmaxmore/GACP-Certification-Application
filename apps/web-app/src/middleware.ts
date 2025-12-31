@@ -40,6 +40,14 @@ const securityHeaders = {
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
+
+    // ========================================
+    // 🏠 ROOT REDIRECT: Send / to /login
+    // ========================================
+    if (pathname === '/') {
+        return NextResponse.redirect(new URL('/login', request.url));
+    }
+
     const response = NextResponse.next();
 
     // ========================================

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { colors } from "@/lib/design-tokens";
 
 /**
  * 🍎 GACP Loading Page - Apple HIG Liquid Glass Design (2025)

@@ -7,7 +7,7 @@
 
 const http = require('http');
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = process.env.CHAOS_TARGET || 'http://47.129.167.71';
 
 // Helper function to make HTTP requests with proper cleanup
 const makeRequest = (path, method = 'GET', data = null, headers = {}) => {

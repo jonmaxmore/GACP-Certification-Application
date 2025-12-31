@@ -674,11 +674,26 @@ export default function RegisterPage() {
                         </div>
                     )}
 
-                    {/* Navigation */}
+                    {/* Navigation - 🍎 Liquid Glass */}
                     <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
-                        {step > 0 && <button type="button" onClick={() => setStep(step - 1)} style={{ flex: 1, padding: "14px", border: `1px solid ${colors.border}`, backgroundColor: "transparent", color: colors.textDark, borderRadius: "12px", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}>ย้อนกลับ</button>}
-                        <button type="button" onClick={() => step < 4 ? setStep(step + 1) : handleSubmit()} disabled={!canProceed() || isLoading} style={{ flex: 1, padding: "14px", backgroundColor: !canProceed() || isLoading ? "#94A3B8" : colors.primary, color: "#FFFFFF", border: "none", borderRadius: "12px", fontSize: "15px", fontWeight: 700, cursor: !canProceed() || isLoading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-                            {isLoading ? <span className="spinner"></span> : step < 4 ? <>ถัดไป <span>→</span></> : <>ลงทะเบียน <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg></>}
+                        {step > 0 && <button type="button" onClick={() => setStep(step - 1)} style={{
+                            flex: 1, padding: "16px", border: `1px solid ${colors.border}`,
+                            backgroundColor: "transparent", color: colors.textDark, borderRadius: "14px",
+                            fontSize: "15px", fontWeight: 600, cursor: "pointer",
+                            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                        }}>ย้อนกลับ</button>}
+                        <button type="button" onClick={() => step < 4 ? setStep(step + 1) : handleSubmit()} disabled={!canProceed() || isLoading} style={{
+                            flex: 1, padding: "18px",
+                            backgroundColor: !canProceed() || isLoading ? "#94A3B8" : colors.primary,
+                            color: "#FFFFFF", border: "none", borderRadius: "14px",
+                            fontSize: "16px", fontWeight: 700,
+                            cursor: !canProceed() || isLoading ? "not-allowed" : "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                            boxShadow: !canProceed() || isLoading ? "none" : "0 4px 14px rgba(27, 94, 32, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1)",
+                            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                            minHeight: "54px"
+                        }}>
+                            {isLoading ? <span className="spinner"></span> : step < 4 ? <>ถัดไป <span style={{ fontSize: "18px" }}>→</span></> : <>ลงทะเบียน <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg></>}
                         </button>
                     </div>
                 </div>
@@ -692,7 +707,17 @@ export default function RegisterPage() {
             <style jsx global>{`
                 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;900&display=swap');
                 * { box-sizing: border-box; margin: 0; padding: 0; }
-                input:focus { border-color: ${colors.primary} !important; }
+                input:focus { border-color: ${colors.primary} !important; box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.15); }
+                
+                /* 🍎 Liquid Glass Button Effects */
+                button[type="button"]:not(:disabled):hover {
+                    transform: scale(1.02) translateY(-1px);
+                    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+                }
+                button[type="button"]:not(:disabled):active {
+                    transform: scale(0.98);
+                }
+                
                 .spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
                 @keyframes spin { to { transform: rotate(360deg); } }
                 @keyframes shake {

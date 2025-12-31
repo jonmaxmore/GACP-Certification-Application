@@ -4,21 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api from "@/services/api-client";
+import { colors } from "@/lib/design-tokens";
 
-// Design tokens - exact match to Mobile App
-const colors = {
-    primary: "#1B5E20",
-    primaryLight: "#1B5E2014",
-    background: "#F5F7FA",
-    card: "#FFFFFF",
-    text: "#1B5E20",
-    textDark: "#1E293B",
-    textGray: "#64748B",
-    border: "#E0E0E0",
-    error: "#DC2626",
-    errorBg: "#FEF2F2",
-    infoBg: "#E8F5E9",
-};
 
 const ACCOUNT_TYPES = [
     { type: "INDIVIDUAL", label: "บุคคลธรรมดา", subtitle: "เกษตรกรรายย่อย", idLabel: "เลขบัตรประชาชน 13 หลัก", idHint: "1-2345-67890-12-3" },

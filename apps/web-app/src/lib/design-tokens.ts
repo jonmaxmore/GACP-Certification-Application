@@ -28,9 +28,13 @@ export const colors = {
 
     // Status Colors
     success: "#22C55E",
+    successBg: "#F0FDF4",
     warning: "#F59E0B",
+    warningBg: "#FFFBEB",
     error: "#EF4444",
+    errorBg: "#FEF2F2",
     info: "#3B82F6",
+    infoBg: "#E8F5E9",
 
     // Document Colors
     accent: "#2E7D32",

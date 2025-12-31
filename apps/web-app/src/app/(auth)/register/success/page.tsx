@@ -3,16 +3,8 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { colors } from "@/lib/design-tokens";
 
-const colors = {
-    primary: "#1B5E20",
-    background: "#F5F7FA",
-    card: "#FFFFFF",
-    textDark: "#1E293B",
-    textGray: "#64748B",
-    success: "#059669",
-    successBg: "#ECFDF5",
-};
 
 function RegisterSuccessContent() {
     const searchParams = useSearchParams();

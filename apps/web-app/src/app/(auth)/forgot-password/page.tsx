@@ -3,18 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import api from "@/services/api-client";
+import { colors } from "@/lib/design-tokens";
 
-const colors = {
-    primary: "#1B5E20",
-    background: "#F5F7FA",
-    card: "#FFFFFF",
-    textDark: "#1E293B",
-    textGray: "#64748B",
-    error: "#DC2626",
-    errorBg: "#FEF2F2",
-    success: "#059669",
-    successBg: "#ECFDF5",
-};
 
 export default function ForgotPasswordPage() {
     const [input, setInput] = useState("");

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import api from "@/services/api-client";
 import { colors } from "@/lib/design-tokens";
 import { formatThaiId, validateThaiId } from "@/utils/thai-id-validator";
+import { translateError } from "@/utils/error-translator";
 
 
 const ACCOUNT_TYPES = [
@@ -197,43 +198,7 @@ export default function RegisterPage() {
 
     const currentConfig = ACCOUNT_TYPES.find((t) => t.type === accountType);
 
-    // Thai error message mapping
-    const translateError = (englishError: string): string => {
-        const errorMap: Record<string, string> = {
-            // Duplicate validation
-            "Thai ID Card already registered": "บัตรประชาชนนี้ลงทะเบียนแล้ว กรุณาใช้หมายเลขอื่น",
-            "Tax ID already registered": "เลขทะเบียนนิติบุคคลนี้ลงทะเบียนแล้ว",
-            "Community Enterprise already registered": "วิสาหกิจชุมชนนี้ลงทะเบียนแล้ว",
-            "Email already exists": "อีเมลนี้ลงทะเบียนแล้ว",
-            "Phone number already registered": "เบอร์โทรศัพท์นี้ลงทะเบียนแล้ว",
-            // Validation errors
-            "Invalid Thai ID Card number": "เลขบัตรประชาชนไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง",
-            "Tax ID must be 13 digits": "เลขทะเบียนนิติบุคคลต้องมี 13 หลัก",
-            "Thai ID Card is required for individual registration": "กรุณากรอกเลขบัตรประชาชน",
-            "Tax ID is required for juristic registration": "กรุณากรอกเลขทะเบียนนิติบุคคล",
-            "Company name is required": "กรุณากรอกชื่อบริษัท",
-            "Community name is required": "กรุณากรอกชื่อวิสาหกิจชุมชน",
-            "Password must be at least 8 characters": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร",
-            "Invalid Laser Code format": "รูปแบบรหัสเลเซอร์ไม่ถูกต้อง",
-            // Network errors
-            "Failed to fetch": "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ต",
-            "Network Error": "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้",
-        };
-
-        // Check exact match first
-        if (errorMap[englishError]) return errorMap[englishError];
-
-        // Check partial matches
-        for (const [key, value] of Object.entries(errorMap)) {
-            if (englishError.toLowerCase().includes(key.toLowerCase())) return value;
-        }
-
-        // Return original if no translation found, or generic Thai error
-        if (/[a-z]/i.test(englishError)) {
-            return "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
-        }
-        return englishError;
-    };
+    // translateError imported from @/utils/error-translator
 
     // formatThaiId imported from @/utils/thai-id-validator
 

@@ -7,6 +7,7 @@ import api from "@/services/api-client";
 import { PersonIcon, BuildingIcon, GroupIcon, LockIcon, EyeIcon } from "@/components/ui/icons";
 import { colors } from "@/lib/design-tokens";
 import { formatThaiId, validateThaiId } from "@/utils/thai-id-validator";
+import { translateError } from "@/utils/error-translator";
 
 
 const ACCOUNT_TYPES = [
@@ -42,38 +43,7 @@ export default function LoginPage() {
 
     const currentConfig = ACCOUNT_TYPES.find((t) => t.type === accountType)!;
 
-    // Thai error message mapping
-    const translateError = (englishError: string): string => {
-        const errorMap: Record<string, string> = {
-            // Login errors
-            "Invalid credentials": "เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง",
-            "Invalid email or password": "เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง",
-            "User not found": "ไม่พบบัญชีผู้ใช้นี้ กรุณาลงทะเบียนก่อน",
-            "Account is locked": "บัญชีถูกล็อค กรุณารอ 30 นาทีแล้วลองใหม่",
-            "Account locked. Try again in": "บัญชีถูกล็อคชั่วคราว กรุณารอสักครู่แล้วลองใหม่",
-            "Account is disabled": "บัญชีนี้ถูกระงับการใช้งาน",
-            "Account not verified": "บัญชียังไม่ได้ยืนยันตัวตน",
-            "Password incorrect": "รหัสผ่านไม่ถูกต้อง",
-            // Network errors
-            "Failed to fetch": "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ต",
-            "Network Error": "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้",
-            "Internal Server Error": "เซิร์ฟเวอร์มีปัญหา กรุณาลองใหม่ภายหลัง",
-        };
-
-        // Check exact match first
-        if (errorMap[englishError]) return errorMap[englishError];
-
-        // Check partial matches
-        for (const [key, value] of Object.entries(errorMap)) {
-            if (englishError.toLowerCase().includes(key.toLowerCase())) return value;
-        }
-
-        // Return original if no translation found, or generic Thai error
-        if (/[a-z]/i.test(englishError)) {
-            return "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
-        }
-        return englishError;
-    };
+    // translateError imported from @/utils/error-translator
 
     // formatThaiId imported from @/utils/thai-id-validator
 

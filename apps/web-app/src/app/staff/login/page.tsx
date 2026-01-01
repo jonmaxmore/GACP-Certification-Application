@@ -47,31 +47,28 @@ export default function StaffLoginPage() {
         }
 
         try {
-            // Use new staff auth endpoint
-            const result = await api.post<{
-                data: {
-                    token?: string;
-                    user: {
-                        role: string;
-                        roleDisplayName?: string;
-                        permissions?: string[];
-                        dashboardUrl?: string;
-                        [key: string]: unknown
-                    };
-                };
-            }>("/auth-dtam/login", {
-                username: email, // API accepts username or email
-                password,
-                userType: "DTAM_STAFF",
+            // Use direct fetch to bypass api-client proxy (routes directly via Nginx to backend)
+            const response = await fetch('/api/auth-dtam/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: email,
+                    password,
+                    userType: 'DTAM_STAFF',
+                }),
             });
 
-            if (!result.success) {
-                setError(result.error);
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                setError(result.error || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
                 setIsLoading(false);
                 return;
             }
 
-            const { user, token } = result.data.data;
+            const { user, token } = result.data;
 
             // Validate staff role
             const staffRoles = ['REVIEWER_AUDITOR', 'SCHEDULER', 'ACCOUNTANT', 'ADMIN', 'SUPER_ADMIN', 'admin', 'reviewer', 'manager', 'inspector'];

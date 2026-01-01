@@ -5,11 +5,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import API_CONFIG from '@/config/api.config';
 
-// Use centralized config for backend URL
+// Use environment variables for backend URL configuration
 const getBackendBaseUrl = () => {
-    // In server-side, NEXT_PUBLIC vars are available
     return process.env.NEXT_PUBLIC_API_URL ||
         `http://${process.env.NEXT_PUBLIC_BACKEND_HOST || 'localhost'}:${process.env.NEXT_PUBLIC_BACKEND_PORT || '3002'}`;
 };
@@ -18,15 +16,27 @@ export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ path: string[] }> }
 ) {
+    const backendUrl = getBackendBaseUrl();
+
     try {
         const { path } = await params;
         const endpoint = path.join('/');
-        const body = await request.json();
-        const backendUrl = getBackendBaseUrl();
 
-        console.log(`[auth-dtam proxy] POST to ${backendUrl}/api/auth-dtam/${endpoint}`);
-        console.log(`[auth-dtam proxy] Body:`, JSON.stringify(body));
+        // Parse request body with error handling
+        let body;
+        try {
+            body = await request.json();
+        } catch {
+            console.error('[auth-dtam proxy] Failed to parse request body');
+            return NextResponse.json(
+                { success: false, error: 'รูปแบบข้อมูลไม่ถูกต้อง' },
+                { status: 400 }
+            );
+        }
 
+        console.log(`[auth-dtam proxy] POST ${backendUrl}/api/auth-dtam/${endpoint}`);
+
+        // Forward request to backend
         const response = await fetch(`${backendUrl}/api/auth-dtam/${endpoint}`, {
             method: 'POST',
             headers: {
@@ -35,11 +45,20 @@ export async function POST(
             body: JSON.stringify(body),
         });
 
-        const data = await response.json();
+        // Parse response
+        let data;
+        try {
+            data = await response.json();
+        } catch {
+            console.error('[auth-dtam proxy] Failed to parse backend response');
+            return NextResponse.json(
+                { success: false, error: 'การตอบกลับจากเซิร์ฟเวอร์ไม่ถูกต้อง' },
+                { status: 502 }
+            );
+        }
 
-        console.log(`[auth-dtam proxy] Response status: ${response.status}`);
+        console.log(`[auth-dtam proxy] Response: ${response.status}`);
 
-        // Forward response with same status
         return NextResponse.json(data, { status: response.status });
 
     } catch (error) {
@@ -55,10 +74,11 @@ export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ path: string[] }> }
 ) {
+    const backendUrl = getBackendBaseUrl();
+
     try {
         const { path } = await params;
         const endpoint = path.join('/');
-        const backendUrl = getBackendBaseUrl();
 
         console.log(`[auth-dtam proxy] GET ${backendUrl}/api/auth-dtam/${endpoint}`);
 
@@ -69,7 +89,16 @@ export async function GET(
             },
         });
 
-        const data = await response.json();
+        let data;
+        try {
+            data = await response.json();
+        } catch {
+            console.error('[auth-dtam proxy] Failed to parse backend response');
+            return NextResponse.json(
+                { success: false, error: 'การตอบกลับจากเซิร์ฟเวอร์ไม่ถูกต้อง' },
+                { status: 502 }
+            );
+        }
 
         return NextResponse.json(data, { status: response.status });
 

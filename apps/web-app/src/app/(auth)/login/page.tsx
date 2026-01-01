@@ -77,7 +77,7 @@ export default function LoginPage() {
             const timeoutId = setTimeout(() => controller.abort(), 10000);
 
             // Use local proxy API which sets cookie from same origin
-            const response = await fetch('/api/auth/login', {
+            const response = await fetch('/api/auth-farmer/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

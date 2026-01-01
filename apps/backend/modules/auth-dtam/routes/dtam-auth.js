@@ -57,133 +57,128 @@ function getRoleDisplayName(role) {
 function getDashboardUrl(role) {
   return ROLE_DASHBOARD_URLS[role] || '/staff/dashboard';
 }
-
 /**
  * @route POST /api/auth-dtam/login
  * @desc DTAM Staff Login using Prisma
  */
-router.post(
-  '/login',
-  [
-    body('username').notEmpty().withMessage('กรุณากรอกชื่อผู้ใช้'),
-    body('password').notEmpty().withMessage('กรุณากรอกรหัสผ่าน'),
-    body('userType').equals('DTAM_STAFF').withMessage('ประเภทผู้ใช้ไม่ถูกต้อง'),
-  ],
-  async (req, res) => {
-    try {
-      // Debug logging
-      logger.info('[DTAM Login] Request received');
-      logger.info('[DTAM Login] Body:', JSON.stringify(req.body));
+router.post('/login', async (req, res) => {
+  try {
+    // Simplified route - removed validation temporarily to debug 500 error
+    const { username, password, userType } = req.body;
 
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        logger.info('[DTAM Login] Validation failed:', JSON.stringify(errors.array()));
-        return res.status(400).json({
-          success: false,
-          error: 'ข้อมูลไม่ถูกต้อง',
-          errors: errors.array(),
-        });
-      }
-
-      const { username, password } = req.body;
-
-      // Find staff by username or email using Prisma
-      const staff = await prisma.dTAMStaff.findFirst({
-        where: {
-          OR: [{ username: username }, { email: username }],
-          isDeleted: false,
-        },
+    // Basic validation
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน',
       });
+    }
 
-      if (!staff) {
-        return res.status(401).json({
-          success: false,
-          error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
-        });
-      }
+    if (userType !== 'DTAM_STAFF') {
+      return res.status(400).json({
+        success: false,
+        error: 'ประเภทผู้ใช้ไม่ถูกต้อง',
+      });
+    }
 
-      if (!staff.isActive) {
-        return res.status(403).json({
-          success: false,
-          error: 'บัญชีของคุณถูกระงับการใช้งาน',
-        });
-      }
 
-      // Verify password
-      const isPasswordValid = await bcrypt.compare(password, staff.password);
-      if (!isPasswordValid) {
-        // Increment failed attempts
-        await prisma.dTAMStaff.update({
-          where: { id: staff.id },
-          data: {
-            failedLoginAttempts: staff.failedLoginAttempts + 1,
-            isActive: staff.failedLoginAttempts >= 4 ? false : staff.isActive,
-            lockedAt: staff.failedLoginAttempts >= 4 ? new Date() : null,
-          },
-        });
+    // Find staff by username or email using Prisma
+    const staff = await prisma.dTAMStaff.findFirst({
+      where: {
+        OR: [{ username: username }, { email: username }],
+        isDeleted: false,
+      },
+    });
 
-        return res.status(401).json({
-          success: false,
-          error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
-        });
-      }
+    if (!staff) {
+      return res.status(401).json({
+        success: false,
+        error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+      });
+    }
 
-      // Reset failed attempts and update last login
+    if (!staff.isActive) {
+      return res.status(403).json({
+        success: false,
+        error: 'บัญชีของคุณถูกระงับการใช้งาน',
+      });
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, staff.password);
+    if (!isPasswordValid) {
+      // Increment failed attempts
       await prisma.dTAMStaff.update({
         where: { id: staff.id },
         data: {
-          failedLoginAttempts: 0,
-          lastLoginAt: new Date(),
+          failedLoginAttempts: staff.failedLoginAttempts + 1,
+          isActive: staff.failedLoginAttempts >= 4 ? false : staff.isActive,
+          lockedAt: staff.failedLoginAttempts >= 4 ? new Date() : null,
         },
       });
 
-      // Generate JWT token
-      const dtamJwtSecret = process.env.DTAM_JWT_SECRET || 'gacp-dtam-secret-key-2025';
-      const token = jwt.sign(
-        {
+      return res.status(401).json({
+        success: false,
+        error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+      });
+    }
+
+    // Reset failed attempts and update last login
+    await prisma.dTAMStaff.update({
+      where: { id: staff.id },
+      data: {
+        failedLoginAttempts: 0,
+        lastLoginAt: new Date(),
+      },
+    });
+
+    // Generate JWT token
+    const dtamJwtSecret = process.env.DTAM_JWT_SECRET || 'gacp-dtam-secret-key-2025';
+    const token = jwt.sign(
+      {
+        userId: staff.id,
+        username: staff.username,
+        email: staff.email,
+        userType: 'DTAM_STAFF',
+        role: staff.role,
+        department: staff.department,
+      },
+      dtamJwtSecret,
+      { expiresIn: '8h' },
+    );
+
+    logger.info(`DTAM staff login successful: ${staff.username} (${staff.role})`);
+
+    return res.json({
+      success: true,
+      message: 'เข้าสู่ระบบสำเร็จ',
+      data: {
+        token,
+        user: {
           userId: staff.id,
           username: staff.username,
           email: staff.email,
+          firstName: staff.firstName,
+          lastName: staff.lastName,
           userType: 'DTAM_STAFF',
           role: staff.role,
+          roleDisplayName: getRoleDisplayName(staff.role),
           department: staff.department,
+          permissions: getRolePermissions(staff.role),
+          dashboardUrl: getDashboardUrl(staff.role),
         },
-        dtamJwtSecret,
-        { expiresIn: '8h' },
-      );
-
-      logger.info(`DTAM staff login successful: ${staff.username} (${staff.role})`);
-
-      return res.json({
-        success: true,
-        message: 'เข้าสู่ระบบสำเร็จ',
-        data: {
-          token,
-          user: {
-            userId: staff.id,
-            username: staff.username,
-            email: staff.email,
-            firstName: staff.firstName,
-            lastName: staff.lastName,
-            userType: 'DTAM_STAFF',
-            role: staff.role,
-            roleDisplayName: getRoleDisplayName(staff.role),
-            department: staff.department,
-            permissions: getRolePermissions(staff.role),
-            dashboardUrl: getDashboardUrl(staff.role),
-          },
-        },
-      });
-    } catch (error) {
-      logger.error('DTAM login error:', error.message);
-      logger.error('DTAM login stack:', error.stack);
-      return res.status(500).json({
-        success: false,
-        error: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ',
-        debug: process.env.NODE_ENV !== 'production' ? error.message : undefined,
-      });
-    }
-  },
+      },
+    });
+  } catch (error) {
+    logger.error('DTAM login error:', error.message);
+    logger.error('DTAM login stack:', error.stack);
+    return res.status(500).json({
+      success: false,
+      error: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ',
+      debug: process.env.NODE_ENV !== 'production' ? error.message : undefined,
+    });
+  }
+},
 );
 
 /**

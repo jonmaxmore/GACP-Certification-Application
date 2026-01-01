@@ -7,7 +7,7 @@
  */
 
 // Import routes
-const dtamAuthRoutes = require('./routes/DtamAuthMiddleware');
+const dtamAuthRoutes = require('./routes/dtam-auth');
 
 // Import models
 const DTAMStaff = require('./models/DTAMStaff');

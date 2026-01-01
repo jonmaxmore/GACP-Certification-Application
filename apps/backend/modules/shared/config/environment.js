@@ -182,7 +182,8 @@ if (config.environment === 'production') {
 const requiredEnvVars = [];
 
 if (config.environment === 'production') {
-  requiredEnvVars.push('MONGODB_URI', 'JWT_SECRET', 'SESSION_SECRET');
+  // Note: MONGODB_URI removed - now using PostgreSQL/Prisma
+  requiredEnvVars.push('JWT_SECRET', 'SESSION_SECRET');
 }
 
 for (const envVar of requiredEnvVars) {

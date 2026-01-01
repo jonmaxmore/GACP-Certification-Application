@@ -19,6 +19,7 @@ const swaggerSpec = require('./config/swagger');
 
 // Import Modules
 const AuthFarmerRoutes = require('./routes/api/auth-farmer-routes');
+const AuthDTAM = require('./modules/auth-dtam');
 const v2Routes = require('./routes/v2');
 const EstablishmentRoutes = require('./modules/Establishment');
 
@@ -88,6 +89,7 @@ app.use(cookieParser());
 
 // Mount Routes
 app.use('/api/auth-farmer', AuthFarmerRoutes);
+AuthDTAM.mountRoutes(app, '/api/auth-dtam'); // DTAM staff authentication
 app.use('/api/v2', v2Routes);
 app.use('/api/establishments', EstablishmentRoutes);
 app.use('/api/v2/establishments', EstablishmentRoutes);

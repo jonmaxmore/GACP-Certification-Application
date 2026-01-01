@@ -10,7 +10,7 @@ const { body, validationResult } = require('express-validator');
 const router = express.Router();
 
 // Import Prisma client
-const prisma = require('../../../services/prisma-database').prismaClient;
+const { prisma } = require('../../../services/prisma-database');
 const logger = require('../../../shared/logger');
 
 /**

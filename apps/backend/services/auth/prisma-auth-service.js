@@ -20,7 +20,7 @@ class PrismaAuthService {
      * Register a new user
      */
     async register(userData) {
-        const { accountType = 'INDIVIDUAL', password, ...rest } = userData;
+        const { accountType = 'INDIVIDUAL', password, identifier, idCardImage, ...rest } = userData;
 
         // Prepare data based on account type
         const createData = {

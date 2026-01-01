@@ -1,106 +1,49 @@
 /**
  * DTAM Staff Authentication Routes
- * Separate authentication system for government staff
- * NO self-registration - accounts created by admin only
- * Migrated from microservices/auth-service/src/routes/auth-dtam.js
+ * Now uses Prisma (PostgreSQL) instead of MongoDB
  */
 
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
 
-// Import from shared module
-const shared = require('../../shared');
-const { config } = shared;
-
-// Import DTAM-specific middleware (not from shared)
-const dtamMiddleware = require('../middleware/dtam-auth-middleware');
-
-// Import DTAM-specific models
-const DTAMStaff = require('../models/dtam-staff');
+// Import Prisma client
+const prisma = require('../../../services/prisma-database').prismaClient;
 const logger = require('../../../shared/logger');
 
 /**
  * Role-based Permissions Configuration
- * Based on SCOPE_OF_WORK.md
  */
 const ROLE_PERMISSIONS = {
-  REVIEWER_AUDITOR: [
-    'document.review',
-    'document.approve',
-    'document.reject',
-    'audit.conduct',
-    'audit.report',
-    'car.create',
-    'car.review',
-  ],
-  SCHEDULER: [
-    'schedule.create',
-    'schedule.update',
-    'schedule.assign',
-    'schedule.view',
-    'auditor.availability',
-  ],
-  ACCOUNTANT: [
-    'quote.view',
-    'quote.update',
-    'invoice.view',
-    'invoice.update',
-    'receipt.create',
-    'receipt.print',
-    'report.financial',
-  ],
-  ADMIN: [
-    'staff.list',
-    'staff.view',
-    'staff.create',
-    'staff.update',
-    'settings.view',
-    'settings.update',
-    'report.all',
-  ],
-  SUPER_ADMIN: [
-    'staff.list',
-    'staff.view',
-    'staff.create',
-    'staff.update',
-    'staff.delete',
-    'settings.view',
-    'settings.update',
-    'settings.system',
-    'report.all',
-    'system.config',
-  ],
-  // Legacy roles mapping
-  admin: ['staff.list', 'staff.create', 'staff.update', 'report.all'],
+  admin: ['staff.list', 'staff.create', 'staff.update', 'staff.delete', 'report.all', 'settings.update'],
   reviewer: ['document.review', 'document.approve', 'document.reject'],
-  manager: ['staff.list', 'schedule.view', 'report.all'],
+  auditor: ['audit.conduct', 'audit.report', 'car.create'],
+  scheduler: ['schedule.create', 'schedule.update', 'schedule.assign'],
+  accountant: ['quote.view', 'invoice.view', 'receipt.create', 'report.financial'],
   inspector: ['audit.conduct', 'audit.report'],
+  manager: ['staff.list', 'schedule.view', 'report.all'],
 };
 
 const ROLE_DISPLAY_NAMES = {
-  REVIEWER_AUDITOR: 'ผู้ตรวจสอบเอกสาร/ผู้ตรวจประเมิน',
-  SCHEDULER: 'ผู้จัดคิวนัดหมาย',
-  ACCOUNTANT: 'พนักงานบัญชี',
-  ADMIN: 'ผู้ดูแลระบบ',
-  SUPER_ADMIN: 'ผู้ดูแลระบบสูงสุด',
   admin: 'ผู้ดูแลระบบ',
-  reviewer: 'ผู้ตรวจสอบ',
-  manager: 'ผู้จัดการ',
+  reviewer: 'ผู้ตรวจสอบเอกสาร',
+  auditor: 'ผู้ตรวจประเมิน',
+  scheduler: 'ผู้จัดคิวนัดหมาย',
+  accountant: 'พนักงานบัญชี',
   inspector: 'ผู้ตรวจประเมิน',
+  manager: 'ผู้จัดการ',
 };
 
 const ROLE_DASHBOARD_URLS = {
-  REVIEWER_AUDITOR: '/staff/dashboard/reviewer',
-  SCHEDULER: '/staff/dashboard/scheduler',
-  ACCOUNTANT: '/staff/dashboard/accountant',
-  ADMIN: '/staff/dashboard/admin',
-  SUPER_ADMIN: '/staff/dashboard/admin',
   admin: '/staff/dashboard/admin',
   reviewer: '/staff/dashboard/reviewer',
-  manager: '/staff/dashboard/admin',
+  auditor: '/staff/dashboard/reviewer',
+  scheduler: '/staff/dashboard/scheduler',
+  accountant: '/staff/dashboard/accountant',
   inspector: '/staff/dashboard/reviewer',
+  manager: '/staff/dashboard/admin',
 };
 
 function getRolePermissions(role) {
@@ -117,8 +60,7 @@ function getDashboardUrl(role) {
 
 /**
  * @route POST /api/auth-dtam/login
- * @desc DTAM Staff Login - Separate from public farmer login
- * @access Public
+ * @desc DTAM Staff Login using Prisma
  */
 router.post(
   '/login',
@@ -129,82 +71,72 @@ router.post(
   ],
   async (req, res) => {
     try {
-      // Validate request
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return shared.response.error(
-          res,
-          'ข้อมูลไม่ถูกต้อง',
-          shared.constants.statusCodes.BAD_REQUEST,
-          errors.array(),
-        );
+        return res.status(400).json({
+          success: false,
+          error: 'ข้อมูลไม่ถูกต้อง',
+          errors: errors.array(),
+        });
       }
 
-      const { username, password, userType } = req.body;
+      const { username, password } = req.body;
 
-      // Verify userType is DTAM_STAFF
-      if (userType !== 'DTAM_STAFF') {
-        return shared.response.error(
-          res,
-          'คุณไม่มีสิทธิ์เข้าถึงระบบนี้',
-          shared.constants.statusCodes.FORBIDDEN,
-        );
-      }
-
-      // Find staff user by username or email
-      const staff = await DTAMStaff.findOne({
-        $or: [{ username: username }, { email: username }],
-        userType: 'DTAM_STAFF',
+      // Find staff by username or email using Prisma
+      const staff = await prisma.dTAMStaff.findFirst({
+        where: {
+          OR: [{ username: username }, { email: username }],
+          isDeleted: false,
+        },
       });
 
       if (!staff) {
-        return shared.response.error(
-          res,
-          'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
-          shared.constants.statusCodes.UNAUTHORIZED,
-        );
+        return res.status(401).json({
+          success: false,
+          error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+        });
       }
 
-      // Check if account is active
       if (!staff.isActive) {
-        return shared.response.error(
-          res,
-          'บัญชีของคุณถูกระงับการใช้งาน',
-          shared.constants.statusCodes.FORBIDDEN,
-        );
+        return res.status(403).json({
+          success: false,
+          error: 'บัญชีของคุณถูกระงับการใช้งาน',
+        });
       }
 
       // Verify password
-      const isPasswordValid = await staff.comparePassword(password);
+      const isPasswordValid = await bcrypt.compare(password, staff.password);
       if (!isPasswordValid) {
         // Increment failed attempts
-        staff.failedLoginAttempts += 1;
-        if (staff.failedLoginAttempts >= 5) {
-          staff.isActive = false;
-          staff.lockedAt = new Date();
-        }
-        await staff.save();
+        await prisma.dTAMStaff.update({
+          where: { id: staff.id },
+          data: {
+            failedLoginAttempts: staff.failedLoginAttempts + 1,
+            isActive: staff.failedLoginAttempts >= 4 ? false : staff.isActive,
+            lockedAt: staff.failedLoginAttempts >= 4 ? new Date() : null,
+          },
+        });
 
-        return shared.response.error(
-          res,
-          'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
-          shared.constants.statusCodes.UNAUTHORIZED,
-        );
+        return res.status(401).json({
+          success: false,
+          error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+        });
       }
 
-      // Reset failed attempts on successful login
-      staff.failedLoginAttempts = 0;
-      staff.lastLoginAt = new Date();
-      await staff.save();
+      // Reset failed attempts and update last login
+      await prisma.dTAMStaff.update({
+        where: { id: staff.id },
+        data: {
+          failedLoginAttempts: 0,
+          lastLoginAt: new Date(),
+        },
+      });
 
-      // Generate DTAM-specific JWT token (separate secret)
-      const dtamJwtSecret =
-        config.environment.dtamJwtSecret ||
-        process.env.DTAM_JWT_SECRET ||
-        'gacp-dtam-secret-key-2025';
+      // Generate JWT token
+      const dtamJwtSecret = process.env.DTAM_JWT_SECRET || 'gacp-dtam-secret-key-2025';
       const token = jwt.sign(
         {
-          userId: staff._id,
+          userId: staff.id,
           username: staff.username,
           email: staff.email,
           userType: 'DTAM_STAFF',
@@ -212,21 +144,18 @@ router.post(
           department: staff.department,
         },
         dtamJwtSecret,
-        { expiresIn: '8h' }, // Shorter session for security
+        { expiresIn: '8h' },
       );
 
       logger.info(`DTAM staff login successful: ${staff.username} (${staff.role})`);
 
-      // Get permissions based on role
-      const rolePermissions = getRolePermissions(staff.role);
-      const dashboardUrl = getDashboardUrl(staff.role);
-
-      return shared.response.success(
-        res,
-        {
+      return res.json({
+        success: true,
+        message: 'เข้าสู่ระบบสำเร็จ',
+        data: {
           token,
           user: {
-            userId: staff._id,
+            userId: staff.id,
             username: staff.username,
             email: staff.email,
             firstName: staff.firstName,
@@ -235,40 +164,35 @@ router.post(
             role: staff.role,
             roleDisplayName: getRoleDisplayName(staff.role),
             department: staff.department,
-            permissions: rolePermissions,
-            dashboardUrl: dashboardUrl,
+            permissions: getRolePermissions(staff.role),
+            dashboardUrl: getDashboardUrl(staff.role),
           },
         },
-        'เข้าสู่ระบบสำเร็จ',
-      );
+      });
     } catch (error) {
       logger.error('DTAM login error:', error);
-      return shared.response.error(
-        res,
-        'เกิดข้อผิดพลาดในการเข้าสู่ระบบ',
-        shared.constants.statusCodes.INTERNAL_SERVER_ERROR,
-      );
+      return res.status(500).json({
+        success: false,
+        error: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ',
+      });
     }
   },
 );
 
 /**
  * @route POST /api/auth-dtam/register
- * @desc BLOCKED - DTAM staff cannot self-register
- * @access Public (but always returns 403)
+ * @desc BLOCKED - Staff cannot self-register
  */
 router.post('/register', (req, res) => {
-  return shared.response.error(
-    res,
-    'ไม่สามารถสมัครสมาชิกด้วยตนเองได้ - บัญชีเจ้าหน้าที่ต้องสร้างโดยผู้ดูแลระบบเท่านั้น กรุณาติดต่อผู้ดูแลระบบ',
-    shared.constants.statusCodes.FORBIDDEN,
-  );
+  return res.status(403).json({
+    success: false,
+    error: 'ไม่สามารถสมัครสมาชิกด้วยตนเองได้ - บัญชีเจ้าหน้าที่ต้องสร้างโดยผู้ดูแลระบบ',
+  });
 });
 
 /**
  * @route POST /api/auth-dtam/setup
  * @desc First-time setup - Create initial admin account
- * @access Public (only works when NO staff exists in database)
  */
 router.post(
   '/setup',
@@ -278,314 +202,84 @@ router.post(
     body('password').isLength({ min: 6 }).withMessage('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'),
     body('firstName').notEmpty().withMessage('กรุณากรอกชื่อ'),
     body('lastName').notEmpty().withMessage('กรุณากรอกนามสกุล'),
-    body('setupKey').equals(process.env.ADMIN_SETUP_KEY || 'GACP-FIRST-ADMIN-2025').withMessage('Setup key ไม่ถูกต้อง'),
+    body('setupKey')
+      .equals(process.env.ADMIN_SETUP_KEY || 'GACP-FIRST-ADMIN-2025')
+      .withMessage('Setup key ไม่ถูกต้อง'),
   ],
   async (req, res) => {
     try {
-      // Validate request
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return shared.response.error(
-          res,
-          errors.array()[0].msg,
-          shared.constants.statusCodes.BAD_REQUEST,
-        );
+        return res.status(400).json({
+          success: false,
+          error: errors.array()[0].msg,
+        });
       }
 
       // Check if any staff exists
-      const staffCount = await DTAMStaff.countDocuments();
+      const staffCount = await prisma.dTAMStaff.count();
       if (staffCount > 0) {
-        return shared.response.error(
-          res,
-          'ไม่สามารถใช้งาน setup ได้ - มีบัญชีเจ้าหน้าที่อยู่แล้ว กรุณาติดต่อผู้ดูแลระบบ',
-          shared.constants.statusCodes.FORBIDDEN,
-        );
+        return res.status(403).json({
+          success: false,
+          error: 'ไม่สามารถใช้งาน setup ได้ - มีบัญชีเจ้าหน้าที่อยู่แล้ว',
+        });
       }
 
       const { email, username, password, firstName, lastName } = req.body;
 
-      // Create first admin account
-      const admin = new DTAMStaff({
-        email,
-        username,
-        password,
-        firstName,
-        lastName,
-        role: 'admin', // Valid enum: admin, auditor, officer
-        department: 'IT',
-        isActive: true,
-        userType: 'DTAM_STAFF',
-      });
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 12);
 
-      await admin.save();
+      // Create first admin account
+      const admin = await prisma.dTAMStaff.create({
+        data: {
+          email,
+          username,
+          password: hashedPassword,
+          firstName,
+          lastName,
+          role: 'admin',
+          department: 'IT',
+          isActive: true,
+          userType: 'DTAM_STAFF',
+        },
+      });
 
       logger.info(`First admin account created: ${username} (${email})`);
 
-      return shared.response.success(
-        res,
-        {
-          message: 'สร้างบัญชีผู้ดูแลระบบสำเร็จ',
-          user: {
-            userId: admin._id,
-            username: admin.username,
-            email: admin.email,
-            role: admin.role,
-          },
+      return res.status(201).json({
+        success: true,
+        message: 'Setup สำเร็จ - สามารถเข้าสู่ระบบได้แล้ว',
+        data: {
+          userId: admin.id,
+          username: admin.username,
+          email: admin.email,
+          role: admin.role,
         },
-        'Setup สำเร็จ - สามารถเข้าสู่ระบบได้แล้ว',
-        shared.constants.statusCodes.CREATED,
-      );
+      });
     } catch (error) {
       logger.error('Setup error:', error);
-      return shared.response.error(
-        res,
-        error.message || 'เกิดข้อผิดพลาดในการสร้างบัญชี',
-        shared.constants.statusCodes.INTERNAL_SERVER_ERROR,
-      );
-    }
-  },
-);
-
-/**
- * @route GET /api/auth-dtam/verify
- * @desc Verify DTAM token
- * @access Public
- */
-router.get('/verify', (req, res) => {
-  try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-
-    if (!token) {
-      return shared.response.error(res, 'ไม่พบ token', shared.constants.statusCodes.UNAUTHORIZED);
-    }
-
-    // Verify token with DTAM secret
-    const dtamJwtSecret =
-      config.environment.dtamJwtSecret ||
-      process.env.DTAM_JWT_SECRET ||
-      'gacp-dtam-secret-key-2025';
-    const decoded = jwt.verify(token, dtamJwtSecret);
-
-    // Verify userType
-    if (decoded.userType !== 'DTAM_STAFF') {
-      return shared.response.error(res, 'Token ไม่ถูกต้อง', shared.constants.statusCodes.FORBIDDEN);
-    }
-
-    return shared.response.success(res, {
-      valid: true,
-      user: {
-        userId: decoded.userId,
-        username: decoded.username,
-        email: decoded.email,
-        userType: decoded.userType,
-        role: decoded.role,
-        department: decoded.department,
-      },
-    });
-  } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return shared.response.error(
-        res,
-        'Token ไม่ถูกต้อง',
-        shared.constants.statusCodes.UNAUTHORIZED,
-      );
-    }
-    if (error.name === 'TokenExpiredError') {
-      return shared.response.error(res, 'Token หมดอายุ', shared.constants.statusCodes.UNAUTHORIZED);
-    }
-    logger.error('DTAM token verification error:', error);
-    return shared.response.error(
-      res,
-      'เกิดข้อผิดพลาดในการตรวจสอบ token',
-      shared.constants.statusCodes.INTERNAL_SERVER_ERROR,
-    );
-  }
-});
-
-/**
- * @route GET /api/auth-dtam/profile
- * @desc Get DTAM staff profile
- * @access Private (DTAM staff only)
- */
-router.get('/profile', dtamMiddleware.verifyDTAMToken, async (req, res) => {
-  try {
-    const staff = await DTAMStaff.findById(req.user.userId).select('-password');
-
-    if (!staff || !staff.isActive) {
-      return shared.response.error(
-        res,
-        'ไม่พบข้อมูลผู้ใช้',
-        shared.constants.statusCodes.NOT_FOUND,
-      );
-    }
-
-    return shared.response.success(res, {
-      userId: staff._id,
-      username: staff.username,
-      email: staff.email,
-      firstName: staff.firstName,
-      lastName: staff.lastName,
-      userType: staff.userType,
-      role: staff.role,
-      department: staff.department,
-      isActive: staff.isActive,
-      lastLoginAt: staff.lastLoginAt,
-      createdAt: staff.createdAt,
-    });
-  } catch (error) {
-    logger.error('Get DTAM profile error:', error);
-    return shared.response.error(
-      res,
-      'ไม่สามารถดึงข้อมูลโปรไฟล์ได้',
-      shared.constants.statusCodes.INTERNAL_SERVER_ERROR,
-    );
-  }
-});
-
-/**
- * @route GET /api/auth-dtam/staff-list
- * @desc Get list of DTAM staff (admin only)
- * @access Private (DTAM admin only)
- */
-router.get(
-  '/staff-list',
-  dtamMiddleware.verifyDTAMToken,
-  dtamMiddleware.requireDTAMAdmin,
-  async (req, res) => {
-    try {
-      const staffList = await DTAMStaff.find().select('-password').sort({ createdAt: -1 });
-
-      return shared.response.success(res, {
-        count: staffList.length,
-        staff: staffList.map(staff => ({
-          userId: staff._id,
-          username: staff.username,
-          email: staff.email,
-          firstName: staff.firstName,
-          lastName: staff.lastName,
-          role: staff.role,
-          department: staff.department,
-          isActive: staff.isActive,
-          createdAt: staff.createdAt,
-          lastLoginAt: staff.lastLoginAt,
-        })),
+      return res.status(500).json({
+        success: false,
+        error: error.message || 'เกิดข้อผิดพลาดในการสร้างบัญชี',
       });
-    } catch (error) {
-      logger.error('Get DTAM staff list error:', error);
-      return shared.response.error(
-        res,
-        'เกิดข้อผิดพลาด',
-        shared.constants.statusCodes.INTERNAL_SERVER_ERROR,
-      );
-    }
-  },
-);
-
-/**
- * @route POST /api/auth-dtam/create-staff
- * @desc Create new DTAM staff account (admin only)
- * @access Private (DTAM admin only)
- */
-router.post(
-  '/create-staff',
-  [
-    dtamMiddleware.verifyDTAMToken,
-    dtamMiddleware.requireDTAMAdmin,
-    body('username')
-      .trim()
-      .isLength({ min: 3 })
-      .withMessage('ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร'),
-    body('email').isEmail().normalizeEmail().withMessage('กรุณาใส่อีเมลที่ถูกต้อง'),
-    body('password').isLength({ min: 8 }).withMessage('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร'),
-    body('firstName').notEmpty().withMessage('กรุณาใส่ชื่อ'),
-    body('lastName').notEmpty().withMessage('กรุณาใส่นามสกุล'),
-    body('role')
-      .isIn(['admin', 'reviewer', 'manager', 'inspector'])
-      .withMessage('ตำแหน่งไม่ถูกต้อง'),
-  ],
-  async (req, res) => {
-    try {
-      // Validate request
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return shared.response.error(
-          res,
-          'ข้อมูลไม่ถูกต้อง',
-          shared.constants.statusCodes.BAD_REQUEST,
-          errors.array(),
-        );
-      }
-
-      const { username, email, password, firstName, lastName, role, department } = req.body;
-
-      // Check if username or email already exists
-      const existingStaff = await DTAMStaff.findOne({
-        $or: [{ username }, { email }],
-      });
-
-      if (existingStaff) {
-        return shared.response.error(
-          res,
-          'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้งานแล้ว',
-          shared.constants.statusCodes.CONFLICT,
-        );
-      }
-
-      // Create new staff
-      const newStaff = new DTAMStaff({
-        username,
-        email,
-        password, // Will be hashed by pre-save middleware
-        firstName,
-        lastName,
-        userType: 'DTAM_STAFF',
-        role,
-        department: department || 'กรมส่งเสริมการเกษตร',
-        isActive: true,
-      });
-
-      await newStaff.save();
-
-      logger.info(`New DTAM staff created: ${newStaff.username} by ${req.user.username}`);
-
-      return shared.response.success(
-        res,
-        {
-          userId: newStaff._id,
-          username: newStaff.username,
-          email: newStaff.email,
-          firstName: newStaff.firstName,
-          lastName: newStaff.lastName,
-          role: newStaff.role,
-          department: newStaff.department,
-        },
-        'สร้างบัญชีเจ้าหน้าที่สำเร็จ',
-        shared.constants.statusCodes.CREATED,
-      );
-    } catch (error) {
-      logger.error('Create DTAM staff error:', error);
-      return shared.response.error(
-        res,
-        'ไม่สามารถสร้างบัญชีได้',
-        shared.constants.statusCodes.INTERNAL_SERVER_ERROR,
-      );
     }
   },
 );
 
 /**
  * @route GET /api/auth-dtam/health
- * @desc Health check for DTAM auth
- * @access Public
+ * @desc Health check
  */
 router.get('/health', async (req, res) => {
   try {
-    const staffCount = await DTAMStaff.countDocuments();
-    const activeCount = await DTAMStaff.countDocuments({ isActive: true });
+    const staffCount = await prisma.dTAMStaff.count();
+    const activeCount = await prisma.dTAMStaff.count({ where: { isActive: true } });
 
     res.json({
       service: 'auth-dtam',
       status: 'healthy',
+      database: 'prisma/postgresql',
       staffCount,
       activeStaffCount: activeCount,
       timestamp: new Date().toISOString(),
@@ -600,5 +294,48 @@ router.get('/health', async (req, res) => {
   }
 });
 
-module.exports = router;
+/**
+ * @route GET /api/auth-dtam/verify
+ * @desc Verify DTAM token
+ */
+router.get('/verify', (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
 
+    if (!token) {
+      return res.status(401).json({ success: false, error: 'ไม่พบ token' });
+    }
+
+    const dtamJwtSecret = process.env.DTAM_JWT_SECRET || 'gacp-dtam-secret-key-2025';
+    const decoded = jwt.verify(token, dtamJwtSecret);
+
+    if (decoded.userType !== 'DTAM_STAFF') {
+      return res.status(403).json({ success: false, error: 'Token ไม่ถูกต้อง' });
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        valid: true,
+        user: {
+          userId: decoded.userId,
+          username: decoded.username,
+          email: decoded.email,
+          userType: decoded.userType,
+          role: decoded.role,
+          department: decoded.department,
+        },
+      },
+    });
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ success: false, error: 'Token ไม่ถูกต้อง' });
+    }
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ success: false, error: 'Token หมดอายุ' });
+    }
+    return res.status(500).json({ success: false, error: 'เกิดข้อผิดพลาด' });
+  }
+});
+
+module.exports = router;

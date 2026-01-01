@@ -633,3 +633,48 @@ model HarvestBatch {
   @@index([isDeleted])
   @@map("harvest_batches")
 }
+
+// =============================================================================
+// DTAM STAFF MODEL (เจ้าหน้าที่กรมการแพทย์แผนไทย)
+// =============================================================================
+model DTAMStaff {
+  id        String   @id @default(uuid())
+  uuid      String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Login Credentials
+  username String  @unique
+  email    String  @unique
+  password String
+
+  // Personal Info
+  firstName  String
+  lastName   String
+  employeeId String? @unique
+  department String  @default("กรมการแพทย์แผนไทย")
+
+  // Role & Permissions
+  role     String @default("reviewer") // admin, reviewer, auditor, scheduler, accountant, inspector, manager
+  userType String @default("DTAM_STAFF")
+
+  // Status
+  isActive            Boolean   @default(true)
+  failedLoginAttempts Int       @default(0)
+  lockedAt            DateTime?
+  lastLoginAt         DateTime?
+
+  // Audit Trail
+  createdBy String?
+  updatedBy String?
+
+  // Soft Delete
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([username])
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@map("dtam_staff")
+}

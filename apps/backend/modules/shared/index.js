@@ -21,20 +21,20 @@ try {
   // MongoDB manager no longer exists - use Prisma instead
 }
 // Middleware
-const errorHandler = require('./middleware/ErrorHandlerMiddleware');
+const errorHandler = require('./middleware/error-handler-middleware');
 const authMiddleware = require('./middleware/auth-middleware');
-const securityMiddleware = require('./middleware/SecurityMiddleware');
+const securityMiddleware = require('./middleware/security-middleware');
 
 // Utils
-const responseUtils = require('./utils/ResponseUtils');
-const validationUtils = require('./utils/ValidationUtils');
-const cryptoUtils = require('./utils/CryptoUtils');
-const dateUtils = require('./utils/DateUtils');
+const responseUtils = require('./utils/response-utils');
+const validationUtils = require('./utils/validation-utils');
+const cryptoUtils = require('./utils/crypto-utils');
+const dateUtils = require('./utils/date-utils');
 
 // Constants
-const statusCodes = require('./constants/StatusCodes');
-const userRoles = require('./constants/UserRoles');
-const errorMessages = require('./constants/ErrorMessages');
+const statusCodes = require('./constants/status-codes');
+const userRoles = require('./constants/user-roles');
+const errorMessages = require('./constants/error-messages');
 
 // Database
 const dbConnection = require('./database/connection');

@@ -59,7 +59,7 @@ export default function StaffLoginPage() {
                         [key: string]: unknown
                     };
                 };
-            }>("/v2/auth-staff/login", {
+            }>("/auth-dtam/login", {
                 username: email, // API accepts username or email
                 password,
                 userType: "DTAM_STAFF",

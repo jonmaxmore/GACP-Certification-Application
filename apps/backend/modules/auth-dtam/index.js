@@ -1,21 +1,10 @@
 /**
  * Auth DTAM Module
- * Handles DTAM staff authentication and management
- * Separate from farmer authentication for security
- *
- * Entry point for the DTAM authentication module
+ * DTAM staff authentication using Prisma (PostgreSQL)
  */
 
-// Import routes
+// Import routes (Prisma-based)
 const dtamAuthRoutes = require('./routes/dtam-auth');
-
-// Import models
-const DTAMStaff = require('./models/DTAMStaff');
-
-// Import middleware
-const dtamAuthMiddleware = require('./middleware/DtamAuthMiddleware');
-
-// Import services
 const logger = require('../../shared/logger');
 
 /**
@@ -23,27 +12,7 @@ const logger = require('../../shared/logger');
  */
 module.exports = {
   // Routes
-  routes: {
-    dtamAuth: dtamAuthRoutes,
-  },
-
-  // Models
-  models: {
-    DTAMStaff,
-  },
-
-  // Middleware
-  middleware: {
-    dtamAuth: dtamAuthMiddleware.verifyDTAMToken,
-    requireDTAMRole: dtamAuthMiddleware.requireDTAMRole,
-    requireDTAMAdmin: dtamAuthMiddleware.requireDTAMAdmin,
-    requireDTAMManagerOrAdmin: dtamAuthMiddleware.requireDTAMManagerOrAdmin,
-  },
-
-  // Services
-  services: {
-    logger,
-  },
+  routes: dtamAuthRoutes,
 
   // Convenience method to mount routes
   mountRoutes: (app, basePath = '/api/auth-dtam') => {
@@ -51,4 +20,3 @@ module.exports = {
     logger.info(`Auth DTAM routes mounted at ${basePath}`);
   },
 };
-

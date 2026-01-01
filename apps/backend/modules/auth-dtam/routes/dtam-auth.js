@@ -15,10 +15,10 @@ const shared = require('../../shared');
 const { config } = shared;
 
 // Import DTAM-specific middleware (not from shared)
-const dtamMiddleware = require('../middleware/DtamAuthMiddleware');
+const dtamMiddleware = require('../middleware/dtam-auth-middleware');
 
 // Import DTAM-specific models
-const DTAMStaff = require('../models/DTAMStaff');
+const DTAMStaff = require('../models/dtam-staff');
 const logger = require('../../../shared/logger');
 
 /**

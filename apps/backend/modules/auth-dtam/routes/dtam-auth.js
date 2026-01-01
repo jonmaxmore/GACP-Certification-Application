@@ -170,10 +170,12 @@ router.post(
         },
       });
     } catch (error) {
-      logger.error('DTAM login error:', error);
+      logger.error('DTAM login error:', error.message);
+      logger.error('DTAM login stack:', error.stack);
       return res.status(500).json({
         success: false,
         error: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ',
+        debug: process.env.NODE_ENV !== 'production' ? error.message : undefined,
       });
     }
   },

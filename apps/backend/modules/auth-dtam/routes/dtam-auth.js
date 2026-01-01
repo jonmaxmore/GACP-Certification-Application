@@ -71,8 +71,13 @@ router.post(
   ],
   async (req, res) => {
     try {
+      // Debug logging
+      logger.info('[DTAM Login] Request received');
+      logger.info('[DTAM Login] Body:', JSON.stringify(req.body));
+
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        logger.info('[DTAM Login] Validation failed:', JSON.stringify(errors.array()));
         return res.status(400).json({
           success: false,
           error: 'ข้อมูลไม่ถูกต้อง',

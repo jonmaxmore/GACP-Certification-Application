@@ -13,9 +13,13 @@
 
 // Config
 const environment = require('./config/environment');
-// Database - use mongodb-manager.js as the single source of truth
-const database = require('../../config/MongodbManager');
-
+// Database - disabled after MongoDB removal
+let database = null;
+try {
+  database = require('../../config/MongodbManager');
+} catch (e) {
+  // MongoDB manager no longer exists - use Prisma instead
+}
 // Middleware
 const errorHandler = require('./middleware/ErrorHandlerMiddleware');
 const authMiddleware = require('./middleware/auth-middleware');
@@ -34,8 +38,12 @@ const errorMessages = require('./constants/ErrorMessages');
 
 // Database
 const dbConnection = require('./database/connection');
-const mongoosePlugins = require('./database/MongoosePlugins');
-
+let mongoosePlugins = null;
+try {
+  mongoosePlugins = require('./database/MongoosePlugins');
+} catch (e) {
+  // Mongoose plugins removed after MongoDB cleanup
+}
 module.exports = {
   name: 'shared',
   version: '1.0.0',

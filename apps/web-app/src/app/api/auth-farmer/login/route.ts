@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
         if (data.data?.tokens?.accessToken) {
             nextResponse.cookies.set('auth_token', data.data.tokens.accessToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: false, // Set to true when HTTPS is enabled
                 sameSite: 'lax',
                 maxAge: 24 * 60 * 60, // 24 hours in seconds
                 path: '/',
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
         if (data.data?.tokens?.refreshToken) {
             nextResponse.cookies.set('refresh_token', data.data.tokens.refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: false, // Set to true when HTTPS is enabled
                 sameSite: 'lax',
                 maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
                 path: '/',

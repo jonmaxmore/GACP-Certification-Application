@@ -10,8 +10,8 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // Port Configuration
 const PORTS = {
-    FRONTEND: 3000,
-    BACKEND: 5000,
+    FRONTEND: 3001,
+    BACKEND: 3002,
 } as const;
 
 // Base URLs

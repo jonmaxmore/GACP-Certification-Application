@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
 
         // Forward login request to backend
-        const response = await fetch(`${BACKEND_URL}/v2/auth/login`, {
+        const response = await fetch(`${BACKEND_URL}/auth-farmer/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

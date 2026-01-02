@@ -43,6 +43,7 @@ export default function JobSheetPage() {
     const [showActionModal, setShowActionModal] = useState(false);
     const [actionType, setActionType] = useState<"approve" | "reject">("approve");
     const [comment, setComment] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("staff_token");
@@ -51,38 +52,49 @@ export default function JobSheetPage() {
             return;
         }
 
-        // Mock application data
-        setApp({
-            id: params.id as string,
-            applicantName: "นายสมชาย ใจดี",
-            applicantType: "บุคคลธรรมดา",
-            plantType: "กัญชา",
-            status: "PENDING_REVIEW",
-            phase: 1,
-            submissionCount: 2,
-            submittedAt: "2024-12-08",
-            lastUpdatedAt: "2024-12-10 09:30",
-            slaTimer: "2 วัน",
-            documents: [
-                { name: "แบบฟอร์ม 09 - คำขอรับรอง", status: "verified", url: "#" },
-                { name: "แบบฟอร์ม 10 - ข้อมูลแปลง", status: "verified", url: "#" },
-                { name: "โฉนดที่ดิน", status: "pending", url: "#" },
-                { name: "รูปถ่ายพื้นที่ปลูก (5 รูป)", status: "verified", url: "#" },
-                { name: "SOP การปลูก", status: "issue", url: "#" },
-                { name: "ผลตรวจสารปนเปื้อน", status: "pending", url: "#" },
-                { name: "ใบอนุญาตสถานที่", status: "verified", url: "#" },
-            ],
-            reviewHistory: [
-                { date: "2024-12-08 10:00", action: "ยื่นคำขอ", comment: "ยื่นคำขอครั้งแรก", by: "ระบบ" },
-                { date: "2024-12-08 10:05", action: "ชำระเงิน", comment: "ชำระเงินงวดที่ 1 (5,000 บาท)", by: "ระบบ" },
-                { date: "2024-12-09 14:30", action: "ส่งคืนแก้ไข", comment: "โฉนดที่ดินไม่ชัด, SOP ขาดขั้นตอนการเก็บเกี่ยว", by: "สมชาย รักงาน" },
-                { date: "2024-12-10 09:30", action: "ส่งแก้ไข", comment: "แก้ไขครั้งที่ 1", by: "ผู้สมัคร" },
-            ],
-            payments: [
-                { phase: 1, amount: 5000, paidAt: "2024-12-08 10:05" },
-            ],
-        });
+        // Fetch real application data
+        const fetchApplication = async () => {
+            try {
+                const res = await fetch(`/api/applications/${params.id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const result = await res.json();
+                    if (result.success && result.data) {
+                        const data = result.data;
+                        setApp({
+                            id: data._id || data.id || params.id as string,
+                            applicantName: data.data?.applicantInfo?.name || 'ไม่ระบุชื่อ',
+                            applicantType: data.data?.applicantType || 'บุคคลธรรมดา',
+                            plantType: data.data?.formData?.plantId || 'ไม่ระบุ',
+                            status: data.status,
+                            phase: data.status?.includes('AUDIT') ? 2 : 1,
+                            submissionCount: (data.rejectCount || 0) + 1,
+                            submittedAt: data.createdAt?.split('T')[0] || '-',
+                            lastUpdatedAt: data.updatedAt || data.createdAt || '-',
+                            slaTimer: getSLATimer(data.createdAt),
+                            documents: data.documents || [],
+                            reviewHistory: [],
+                            payments: []
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching application:', error);
+            }
+        };
+        fetchApplication();
     }, [params.id, router]);
+
+    const getSLATimer = (createdAt: string): string => {
+        if (!createdAt) return '-';
+        const created = new Date(createdAt);
+        const now = new Date();
+        const diffDays = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays <= 3) return `${diffDays} วัน`;
+        if (diffDays <= 5) return `${diffDays} วัน ⚠️`;
+        return `${diffDays} วัน 🔴 เกิน SLA`;
+    };
 
     const handleAction = (type: "approve" | "reject") => {
         setActionType(type);
@@ -90,10 +102,38 @@ export default function JobSheetPage() {
         setShowActionModal(true);
     };
 
-    const submitAction = () => {
-        // TODO: Submit to API
-        alert(`${actionType === "approve" ? "อนุมัติ" : "ส่งคืนแก้ไข"}: ${comment}`);
-        setShowActionModal(false);
+    const submitAction = async () => {
+        const token = localStorage.getItem("staff_token");
+        if (!token || !app) return;
+
+        setIsSubmitting(true);
+        try {
+            const res = await fetch(`/api/applications/${app.id}/review`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: actionType === "approve" ? "APPROVE" : "REJECT",
+                    comment: comment
+                })
+            });
+
+            if (res.ok) {
+                alert(`${actionType === "approve" ? "อนุมัติสำเร็จ" : "ส่งคืนแก้ไขสำเร็จ"}`);
+                setShowActionModal(false);
+                router.push('/staff/dashboard');
+            } else {
+                const err = await res.json();
+                alert(`เกิดข้อผิดพลาด: ${err.error || 'ไม่ทราบสาเหตุ'}`);
+            }
+        } catch (error) {
+            console.error('Submit error:', error);
+            alert('เกิดข้อผิดพลาดในการส่งข้อมูล');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (!app) {
@@ -140,8 +180,8 @@ export default function JobSheetPage() {
                         ].map((step, i) => (
                             <div key={i} className="flex items-center gap-2">
                                 <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step.done ? "bg-green-500 text-white" :
-                                        step.active ? "bg-blue-500 text-white animate-pulse" :
-                                            "bg-slate-600 text-slate-400"
+                                    step.active ? "bg-blue-500 text-white animate-pulse" :
+                                        "bg-slate-600 text-slate-400"
                                     }`}>
                                     {step.done ? "✓" : i + 1}
                                 </div>
@@ -166,10 +206,10 @@ export default function JobSheetPage() {
                             onClick={() => !tab.disabled && setActiveTab(tab.id as typeof activeTab)}
                             disabled={tab.disabled}
                             className={`px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === tab.id
-                                    ? "bg-slate-800 text-white"
-                                    : tab.disabled
-                                        ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                                        : "bg-white text-slate-600 hover:bg-slate-50"
+                                ? "bg-slate-800 text-white"
+                                : tab.disabled
+                                    ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                    : "bg-white text-slate-600 hover:bg-slate-50"
                                 }`}
                         >
                             {tab.label} {tab.count !== undefined && `(${tab.count})`}
@@ -178,8 +218,8 @@ export default function JobSheetPage() {
 
                     {/* Submission Counter */}
                     <div className={`ml-auto px-4 py-3 rounded-xl font-semibold ${app.submissionCount >= 3 ? "bg-red-100 text-red-700" :
-                            app.submissionCount === 2 ? "bg-amber-100 text-amber-700" :
-                                "bg-green-100 text-green-700"
+                        app.submissionCount === 2 ? "bg-amber-100 text-amber-700" :
+                            "bg-green-100 text-green-700"
                         }`}>
                         ส่งครั้งที่: {app.submissionCount}/3
                         {app.submissionCount >= 3 && " ⚠️ ครบโควตาฟรี"}
@@ -196,16 +236,16 @@ export default function JobSheetPage() {
                             {app.documents.map((doc, i) => (
                                 <div key={i} className="flex items-center gap-4 p-4 hover:bg-slate-50">
                                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${doc.status === "verified" ? "bg-green-100" :
-                                            doc.status === "issue" ? "bg-red-100" :
-                                                "bg-amber-100"
+                                        doc.status === "issue" ? "bg-red-100" :
+                                            "bg-amber-100"
                                         }`}>
                                         {doc.status === "verified" ? "✅" : doc.status === "issue" ? "❌" : "⏳"}
                                     </div>
                                     <div className="flex-1">
                                         <p className="font-medium">{doc.name}</p>
                                         <p className={`text-sm ${doc.status === "verified" ? "text-green-600" :
-                                                doc.status === "issue" ? "text-red-600" :
-                                                    "text-amber-600"
+                                            doc.status === "issue" ? "text-red-600" :
+                                                "text-amber-600"
                                             }`}>
                                             {doc.status === "verified" ? "ถูกต้อง" : doc.status === "issue" ? "ต้องแก้ไข" : "รอตรวจสอบ"}
                                         </p>

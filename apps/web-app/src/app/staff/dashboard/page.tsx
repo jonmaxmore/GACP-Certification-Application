@@ -76,27 +76,56 @@ export default function StaffDashboardPage() {
     }, [router]);
 
     const fetchPendingData = async () => {
+        const token = localStorage.getItem("staff_token");
+        if (!token) return;
+
         try {
-            // Fetch pending documents
-            const docsResult = await api.get<{ data: { applications: PendingItem[] } }>('/v2/applications?status=PENDING_REVIEW');
-            if (docsResult.success && docsResult.data?.data?.applications) {
-                setPendingDocuments(docsResult.data.data.applications.map(app => ({
-                    ...app,
-                    waitTime: getWaitTime(app.submittedAt)
-                })));
-            } else {
-                setPendingDocuments([]);
+            // Fetch pending reviews from real API
+            const pendingRes = await fetch('/api/applications/pending-reviews', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (pendingRes.ok) {
+                const result = await pendingRes.json();
+                if (result.success && result.data) {
+                    setPendingDocuments(result.data.map((app: { _id: string; applicationNumber: string; data?: { applicantInfo?: { name?: string }; formData?: { plantId?: string } }; status: string; createdAt: string; rejectCount?: number }) => ({
+                        id: app._id || app.applicationNumber,
+                        applicantName: app.data?.applicantInfo?.name || 'ไม่ระบุชื่อ',
+                        plantType: app.data?.formData?.plantId || 'ไม่ระบุ',
+                        status: app.status,
+                        submittedAt: app.createdAt,
+                        submissionCount: (app.rejectCount || 0) + 1,
+                        waitTime: getWaitTime(app.createdAt)
+                    })));
+                }
             }
 
             // Fetch pending audits
-            const auditsResult = await api.get<{ data: { audits: PendingItem[] } }>('/v2/field-audits?status=PENDING');
-            if (auditsResult.success && auditsResult.data?.data?.audits) {
-                setPendingAudits(auditsResult.data.data.audits.map(audit => ({
-                    ...audit,
-                    waitTime: getWaitTime(audit.submittedAt)
-                })));
-            } else {
-                setPendingAudits([]);
+            const auditsRes = await fetch('/api/applications/auditor/assignments', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (auditsRes.ok) {
+                const result = await auditsRes.json();
+                if (result.success && result.data) {
+                    setPendingAudits(result.data.map((app: { _id: string; applicationNumber: string; data?: { applicantInfo?: { name?: string }; formData?: { plantId?: string } }; status: string; createdAt: string; audit?: { scheduledDate?: string } }) => ({
+                        id: app._id || app.applicationNumber,
+                        applicantName: app.data?.applicantInfo?.name || 'ไม่ระบุชื่อ',
+                        plantType: app.data?.formData?.plantId || 'ไม่ระบุ',
+                        status: app.status,
+                        submittedAt: app.audit?.scheduledDate || app.createdAt,
+                        waitTime: getWaitTime(app.createdAt)
+                    })));
+                }
+            }
+
+            // Fetch dashboard stats
+            const statsRes = await fetch('/api/applications/stats', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (statsRes.ok) {
+                const result = await statsRes.json();
+                if (result.success) {
+                    console.log('[Dashboard] Stats:', result.data);
+                }
             }
         } catch (error) {
             console.error('Error fetching data:', error);

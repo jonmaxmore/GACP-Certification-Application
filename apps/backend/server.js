@@ -22,6 +22,8 @@ const AuthFarmerRoutes = require('./routes/api/auth-farmer-routes');
 const AuthDTAMRoutes = require('./modules/auth-dtam/routes/dtam-auth');
 const v2Routes = require('./routes/v2');
 const EstablishmentRoutes = require('./modules/Establishment');
+const ApplicationRoutes = require('./routes/api/application-routes');
+const InvoiceRoutes = require('./routes/api/invoice-routes');
 
 const app = express();
 const port = process.env.PORT || 3000; // Backend API port
@@ -105,6 +107,8 @@ app.use('/api/auth-dtam', AuthDTAMRoutes); // DTAM staff authentication
 app.use('/api/v2', v2Routes);
 app.use('/api/establishments', EstablishmentRoutes);
 app.use('/api/v2/establishments', EstablishmentRoutes);
+app.use('/api/applications', ApplicationRoutes);  // Application workflow routes
+app.use('/api/v2/invoices', InvoiceRoutes);        // Invoice/accounting routes
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Health Check - Both /health and /api/health for compatibility

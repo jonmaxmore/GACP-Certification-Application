@@ -89,15 +89,40 @@ router.get('/auditor/assignments', authenticateDTAM, async (req, res) => {
     }
 });
 
-// Get single application
+// Get single application (by ID or applicationNumber)
 router.get('/:id', authenticateDTAM, async (req, res) => {
     try {
-        const application = await prisma.application.findUnique({
-            where: { id: req.params.id }
+        const { id } = req.params;
+
+        // Try to find by applicationNumber first (APP-xxx format)
+        let application = await prisma.application.findFirst({
+            where: {
+                OR: [
+                    { id: id },
+                    { applicationNumber: id }
+                ],
+                isDeleted: false
+            },
+            include: {
+                farmer: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        phoneNumber: true,
+                        province: true
+                    }
+                }
+            }
         });
 
         if (!application) {
-            return res.status(404).json({ success: false, error: 'Not Found' });
+            return res.status(404).json({
+                success: false,
+                error: 'Not Found',
+                message: `Application ${id} not found`
+            });
         }
 
         res.json({ success: true, data: application });

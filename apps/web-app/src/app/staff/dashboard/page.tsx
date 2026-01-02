@@ -43,6 +43,7 @@ export default function StaffDashboardPage() {
     const [activeTab, setActiveTab] = useState<"documents" | "audits">("documents");
     const [pendingDocuments, setPendingDocuments] = useState<PendingItem[]>([]);
     const [pendingAudits, setPendingAudits] = useState<PendingItem[]>([]);
+    const [dashboardStats, setDashboardStats] = useState<{ total: number; pending: number; approved: number; todayChecked: number }>({ total: 0, pending: 0, approved: 0, todayChecked: 0 });
 
     useEffect(() => {
         const token = localStorage.getItem("staff_token");
@@ -123,8 +124,14 @@ export default function StaffDashboardPage() {
             });
             if (statsRes.ok) {
                 const result = await statsRes.json();
-                if (result.success) {
+                if (result.success && result.data) {
                     console.log('[Dashboard] Stats:', result.data);
+                    setDashboardStats({
+                        total: result.data.total || 0,
+                        pending: result.data.pending || 0,
+                        approved: result.data.approved || 0,
+                        todayChecked: result.data.todayChecked || 0
+                    });
                 }
             }
         } catch (error) {
@@ -216,11 +223,11 @@ export default function StaffDashboardPage() {
                         <p className="text-xs text-slate-500">รอดำเนินการ</p>
                     </div>
                     <div className="text-center">
-                        <p className="text-2xl font-bold text-blue-600">15</p>
+                        <p className="text-2xl font-bold text-blue-600">{dashboardStats.todayChecked}</p>
                         <p className="text-xs text-slate-500">ตรวจวันนี้</p>
                     </div>
                     <div className="text-center">
-                        <p className="text-2xl font-bold text-green-600">48</p>
+                        <p className="text-2xl font-bold text-green-600">{dashboardStats.approved}</p>
                         <p className="text-xs text-slate-500">อนุมัติแล้ว</p>
                     </div>
                     <div className="ml-auto flex items-center gap-2 text-sm text-slate-500">

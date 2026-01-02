@@ -31,11 +31,24 @@ router.get('/pending-reviews', authenticateDTAM, async (req, res) => {
 // Get dashboard stats
 router.get('/stats', authenticateDTAM, async (req, res) => {
     try {
-        const [total, pending, approved, revenue] = await Promise.all([
+        // Calculate today's date range
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const [total, pending, approved, revenue, todayChecked] = await Promise.all([
             prisma.application.count({ where: { isDeleted: false } }),
             prisma.application.count({ where: { status: { in: ['SUBMITTED', 'PENDING_REVIEW'] }, isDeleted: false } }),
             prisma.application.count({ where: { status: 'APPROVED', isDeleted: false } }),
-            prisma.invoice.aggregate({ _sum: { totalAmount: true }, where: { status: 'paid' } })
+            prisma.invoice.aggregate({ _sum: { totalAmount: true }, where: { status: 'paid' } }),
+            prisma.application.count({
+                where: {
+                    updatedAt: { gte: today, lt: tomorrow },
+                    status: { notIn: ['DRAFT', 'SUBMITTED'] },
+                    isDeleted: false
+                }
+            })
         ]);
 
         res.json({
@@ -44,14 +57,15 @@ router.get('/stats', authenticateDTAM, async (req, res) => {
                 total: total || 0,
                 pending: pending || 0,
                 approved: approved || 0,
-                revenue: revenue._sum?.totalAmount || 0
+                revenue: revenue._sum?.totalAmount || 0,
+                todayChecked: todayChecked || 0
             }
         });
     } catch (error) {
         console.error('[Applications] getStats error:', error);
         res.json({
             success: true,
-            data: { total: 0, pending: 0, approved: 0, revenue: 0 }
+            data: { total: 0, pending: 0, approved: 0, revenue: 0, todayChecked: 0 }
         });
     }
 });

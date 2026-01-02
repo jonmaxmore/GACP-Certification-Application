@@ -170,6 +170,18 @@ export async function apiRequest<T = unknown>(
     // This allows testing without full login flow
     if (typeof window !== 'undefined') {
         try {
+            // Staff token for DTAM staff authentication (stored in localStorage)
+            const staffToken = localStorage.getItem('staff_token');
+            if (staffToken) {
+                defaultHeaders['Authorization'] = `Bearer ${staffToken}`;
+            }
+
+            // Farmer token (also check localStorage as fallback)
+            const farmerToken = localStorage.getItem('auth_token');
+            if (!staffToken && farmerToken) {
+                defaultHeaders['Authorization'] = `Bearer ${farmerToken}`;
+            }
+
             const userData = localStorage.getItem('user');
             if (userData) {
                 const user = JSON.parse(userData);

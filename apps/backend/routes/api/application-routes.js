@@ -5,10 +5,10 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../../services/prisma-database').prisma;
-const { authenticateStaffJWT } = require('../../modules/auth-dtam/middleware/auth-middleware');
+const { authenticateDTAM } = require('../../middleware/auth-middleware');
 
 // Get pending reviews (applications with status PENDING_REVIEW or SUBMITTED)
-router.get('/pending-reviews', authenticateStaffJWT, async (req, res) => {
+router.get('/pending-reviews', authenticateDTAM, async (req, res) => {
     try {
         const applications = await prisma.application.findMany({
             where: {
@@ -29,7 +29,7 @@ router.get('/pending-reviews', authenticateStaffJWT, async (req, res) => {
 });
 
 // Get dashboard stats
-router.get('/stats', authenticateStaffJWT, async (req, res) => {
+router.get('/stats', authenticateDTAM, async (req, res) => {
     try {
         const [total, pending, approved, revenue] = await Promise.all([
             prisma.application.count({ where: { isDeleted: false } }),
@@ -57,7 +57,7 @@ router.get('/stats', authenticateStaffJWT, async (req, res) => {
 });
 
 // Get auditor assignments
-router.get('/auditor/assignments', authenticateStaffJWT, async (req, res) => {
+router.get('/auditor/assignments', authenticateDTAM, async (req, res) => {
     try {
         const applications = await prisma.application.findMany({
             where: {
@@ -76,7 +76,7 @@ router.get('/auditor/assignments', authenticateStaffJWT, async (req, res) => {
 });
 
 // Get single application
-router.get('/:id', authenticateStaffJWT, async (req, res) => {
+router.get('/:id', authenticateDTAM, async (req, res) => {
     try {
         const application = await prisma.application.findUnique({
             where: { id: req.params.id }
@@ -94,7 +94,7 @@ router.get('/:id', authenticateStaffJWT, async (req, res) => {
 });
 
 // Review document (approve/reject)
-router.post('/:id/review', authenticateStaffJWT, async (req, res) => {
+router.post('/:id/review', authenticateDTAM, async (req, res) => {
     try {
         const { action, comment } = req.body;
         const { id } = req.params;

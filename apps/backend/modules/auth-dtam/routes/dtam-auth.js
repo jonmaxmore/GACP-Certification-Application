@@ -62,7 +62,13 @@ function getDashboardUrl(role) {
  * @desc DTAM Staff Login using Prisma
  */
 router.post('/login', async (req, res) => {
-  console.log('[DTAM-AUTH] Login route hit - body:', JSON.stringify(req.body));
+  console.log('[DTAM-AUTH] Login route hit');
+  console.log('[DTAM-AUTH] Content-Type:', req.headers['content-type']);
+  console.log('[DTAM-AUTH] Origin:', req.headers['origin']);
+  console.log('[DTAM-AUTH] Body type:', typeof req.body);
+  console.log('[DTAM-AUTH] Body keys:', Object.keys(req.body || {}));
+  console.log('[DTAM-AUTH] Body:', JSON.stringify(req.body));
+
   try {
     // Simplified route - removed validation temporarily to debug 500 error
     const { username, password, userType } = req.body;

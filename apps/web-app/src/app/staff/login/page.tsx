@@ -10,10 +10,10 @@ import { LockIcon, EyeIcon } from "@/components/ui/icons";
 
 
 // Local Icons (not in shared module)
-const MailIcon = () => (
+const UserIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.primary} strokeWidth="2">
-        <rect x="3" y="5" width="18" height="14" rx="2" />
-        <path d="M3 7L12 13L21 7" />
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 20c0-4 4-7 8-7s8 3 8 7" />
     </svg>
 );
 
@@ -28,7 +28,7 @@ const ShieldIcon = () => (
 
 export default function StaffLoginPage() {
     const router = useRouter();
-    const [email, setEmail] = useState("");
+    const [loginId, setLoginId] = useState("");  // username, email, or employeeId
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -39,9 +39,9 @@ export default function StaffLoginPage() {
         setError("");
         setIsLoading(true);
 
-        // Validate email format
-        if (!email.includes("@")) {
-            setError("กรุณากรอกอีเมลให้ถูกต้อง");
+        // Validate login ID (username, email, or employeeId)
+        if (!loginId.trim()) {
+            setError("กรุณากรอกชื่อผู้ใช้หรือรหัสพนักงาน");
             setIsLoading(false);
             return;
         }
@@ -54,7 +54,7 @@ export default function StaffLoginPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    username: email,
+                    username: loginId.trim(),  // Backend accepts username, email, or employeeId
                     password,
                     userType: 'DTAM_STAFF',
                 }),
@@ -176,20 +176,20 @@ export default function StaffLoginPage() {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit}>
-                        {/* Email */}
+                        {/* Login ID (username / email / employeeId) */}
                         <div style={{ marginBottom: "16px" }}>
                             <label style={{ fontSize: "13px", fontWeight: 600, color: colors.primary, display: "block", marginBottom: "8px" }}>
-                                อีเมลเจ้าหน้าที่
+                                ชื่อผู้ใช้ / รหัสพนักงาน / อีเมล
                             </label>
                             <div style={{ position: "relative" }}>
                                 <div style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }}>
-                                    <MailIcon />
+                                    <UserIcon />
                                 </div>
                                 <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="officer@dtam.go.th"
+                                    type="text"
+                                    value={loginId}
+                                    onChange={(e) => setLoginId(e.target.value)}
+                                    placeholder="admin / EMP001 / officer@dtam.go.th"
                                     style={{
                                         width: "100%",
                                         padding: "14px 16px 14px 48px",

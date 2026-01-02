@@ -95,8 +95,9 @@ export default function AccountingDashboard() {
             const parsedUser = JSON.parse(userData);
             setUser(parsedUser);
 
-            // Check if user has accounting permission
-            if (!["ACCOUNTANT", "ADMIN", "SUPER_ADMIN"].includes(parsedUser.role)) {
+            // Check if user has accounting permission (case-insensitive)
+            const allowedRoles = ["ACCOUNTANT", "ADMIN", "SUPER_ADMIN"];
+            if (!allowedRoles.includes(parsedUser.role.toUpperCase())) {
                 router.push("/staff/dashboard");
                 return;
             }

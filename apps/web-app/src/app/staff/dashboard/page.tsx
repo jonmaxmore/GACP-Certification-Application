@@ -55,8 +55,9 @@ export default function StaffDashboardPage() {
 
         try {
             const parsedUser = JSON.parse(userData);
+            // Staff roles check - case-insensitive
             const staffRoles = ['REVIEWER_AUDITOR', 'SCHEDULER', 'ACCOUNTANT', 'ADMIN', 'SUPER_ADMIN'];
-            if (!staffRoles.includes(parsedUser.role)) {
+            if (!staffRoles.includes(parsedUser.role.toUpperCase())) {
                 router.push("/staff/login");
                 return;
             }

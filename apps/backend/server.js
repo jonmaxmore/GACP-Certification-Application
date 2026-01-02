@@ -31,16 +31,28 @@ const path = require('path');
 // CORS Configuration - Environment Based
 const corsOptions = {
     origin: (origin, callback) => {
-        // Allow requests with no origin (mobile apps, curl, etc.)
+        // Allow requests with no origin (mobile apps, curl, PowerShell, etc.)
         if (!origin) return callback(null, true);
+
+        // Always allow production server origin
+        const productionOrigins = [
+            'http://47.129.167.71',
+            'https://47.129.167.71',
+            'http://localhost:3001',
+            'http://localhost:3000',
+        ];
+
+        if (productionOrigins.includes(origin)) {
+            return callback(null, true);
+        }
 
         // In development, allow all origins
         if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
             return callback(null, true);
         }
 
-        // In production, use whitelist from environment
-        const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3001').split(',');
+        // In production, also check environment-configured origins
+        const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').filter(Boolean);
         if (allowedOrigins.includes(origin)) {
             return callback(null, true);
         }

@@ -101,7 +101,7 @@ export default function StaffCalendarPage() {
             }
 
             // Fetch inspectors for dropdown
-            const inspectorsResult = await api.get<{ data: { id: string; firstName?: string; lastName?: string; role: string }[] }>('/staff/inspectors');
+            const inspectorsResult = await api.get<{ data: { id: string; firstName?: string; lastName?: string; role: string }[] }>('/v2/staff/inspectors');
             if (inspectorsResult.success && inspectorsResult.data?.data) {
                 const mappedInspectors = inspectorsResult.data.data.map(i => ({
                     id: i.id,

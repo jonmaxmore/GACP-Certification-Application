@@ -30,6 +30,35 @@ async function seedTestData() {
             console.log('✅ Created test farmer user\n');
         }
 
+        // Create test inspector/auditor staff
+        const inspectorRoles = [
+            { firstName: 'สมชาย', lastName: 'รักษาฟาร์ม', role: 'inspector', email: 'inspector1@dtam.test' },
+            { firstName: 'สุดา', lastName: 'ตรวจประเมิน', role: 'auditor', email: 'auditor1@dtam.test' },
+            { firstName: 'ประวิทย์', lastName: 'สอบเอกสาร', role: 'reviewer', email: 'reviewer1@dtam.test' },
+        ];
+
+        for (const staff of inspectorRoles) {
+            const existing = await prisma.dTAMStaff.findFirst({
+                where: { email: staff.email }
+            });
+
+            if (!existing) {
+                await prisma.dTAMStaff.create({
+                    data: {
+                        username: staff.email.split('@')[0],
+                        email: staff.email,
+                        password: '$2a$12$dummy.hash.for.test.only',
+                        firstName: staff.firstName,
+                        lastName: staff.lastName,
+                        role: staff.role,
+                        isActive: true,
+                        isDeleted: false
+                    }
+                });
+                console.log(`✅ Created ${staff.role}: ${staff.firstName} ${staff.lastName}`);
+            }
+        }
+
         // Create sample applications in different statuses
         const statuses = [
             { status: 'SUBMITTED', count: 3 },

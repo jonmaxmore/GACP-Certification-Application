@@ -72,12 +72,29 @@ router.post('/schedule', authenticateDTAM, async (req, res) => {
         // Combine date and time
         const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime || '09:00'}:00`);
 
-        // Get existing formData first
-        const existing = await prisma.application.findUnique({ where: { id: applicationId } });
-        const existingFormData = (typeof existing?.formData === 'object' && existing?.formData) ? existing.formData : {};
+        // Find application by UUID or applicationNumber (handle both formats)
+        const application = await prisma.application.findFirst({
+            where: {
+                OR: [
+                    { id: applicationId },
+                    { applicationNumber: applicationId }
+                ],
+                isDeleted: false
+            }
+        });
+
+        if (!application) {
+            return res.status(404).json({
+                success: false,
+                error: 'Application not found'
+            });
+        }
+
+        // Get existing formData
+        const existingFormData = (typeof application.formData === 'object' && application.formData) ? application.formData : {};
 
         const updated = await prisma.application.update({
-            where: { id: applicationId },
+            where: { id: application.id },
             data: {
                 status: 'AUDIT_SCHEDULED',
                 scheduledDate: scheduledDateTime,

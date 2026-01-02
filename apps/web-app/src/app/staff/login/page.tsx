@@ -82,6 +82,10 @@ export default function StaffLoginPage() {
             localStorage.setItem("staff_token", token || "");
             localStorage.setItem("staff_user", JSON.stringify(user));
 
+            // Also save token to cookie for Next.js middleware auth check
+            // Middleware reads cookies, not localStorage
+            document.cookie = `staff_token=${token}; path=/; max-age=${60 * 60 * 8}; SameSite=Lax`;
+
             setIsLoading(false);
 
             // Navigate to dashboard URL from backend (or default)

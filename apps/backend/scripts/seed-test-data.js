@@ -32,9 +32,12 @@ async function seedTestData() {
 
         // Create test inspector/auditor staff
         const inspectorRoles = [
-            { firstName: 'สมชาย', lastName: 'รักษาฟาร์ม', role: 'inspector', email: 'inspector1@dtam.test' },
-            { firstName: 'สุดา', lastName: 'ตรวจประเมิน', role: 'auditor', email: 'auditor1@dtam.test' },
-            { firstName: 'ประวิทย์', lastName: 'สอบเอกสาร', role: 'reviewer', email: 'reviewer1@dtam.test' },
+            { firstName: 'สมชาย', lastName: 'รักษาฟาร์ม', role: 'inspector', email: 'inspector1@dtam.test', username: 'inspector1' },
+            { firstName: 'สุดา', lastName: 'ตรวจประเมิน', role: 'auditor', email: 'auditor1@dtam.test', username: 'auditor1' },
+            { firstName: 'ประวิทย์', lastName: 'สอบเอกสาร', role: 'reviewer', email: 'reviewer1@dtam.test', username: 'reviewer1' },
+            { firstName: 'นิติ', lastName: 'การเงิน', role: 'accountant', email: 'accountant@dtam.test', username: 'accountant' },
+            { firstName: 'วิชัย', lastName: 'จัดตาราง', role: 'scheduler', email: 'scheduler@dtam.test', username: 'scheduler' },
+            { firstName: 'ผู้ดูแล', lastName: 'ระบบ', role: 'admin', email: 'admin@dtam.test', username: 'admin' },
         ];
 
         for (const staff of inspectorRoles) {
@@ -43,11 +46,14 @@ async function seedTestData() {
             });
 
             if (!existing) {
+                // bcrypt hash for password 'Gacp@2024' with 12 rounds
+                const passwordHash = '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhxzYt3EfJA7Z.1xZJZYHW';
+
                 await prisma.dTAMStaff.create({
                     data: {
-                        username: staff.email.split('@')[0],
+                        username: staff.username,
                         email: staff.email,
-                        password: '$2a$12$dummy.hash.for.test.only',
+                        password: passwordHash,
                         firstName: staff.firstName,
                         lastName: staff.lastName,
                         role: staff.role,
@@ -55,7 +61,7 @@ async function seedTestData() {
                         isDeleted: false
                     }
                 });
-                console.log(`✅ Created ${staff.role}: ${staff.firstName} ${staff.lastName}`);
+                console.log(`✅ Created ${staff.role}: ${staff.firstName} ${staff.lastName} (username: ${staff.username})`);
             }
         }
 

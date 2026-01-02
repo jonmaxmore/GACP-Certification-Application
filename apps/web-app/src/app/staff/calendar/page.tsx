@@ -62,18 +62,37 @@ export default function StaffCalendarPage() {
     const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
-            // Fetch scheduled audits
-            const auditsResult = await api.get<{ data: { audits: AuditItem[] } }>(`/v2/field-audits/my-schedule?date=${selectedDate}`);
-            if (auditsResult.success && auditsResult.data?.data?.audits) {
-                setAudits(auditsResult.data.data.audits);
+            // Fetch scheduled audits from real API
+            const auditsResult = await api.get<{ data: AuditItem[] }>(`/v2/audits/scheduled?startDate=${selectedDate}&endDate=${selectedDate}`);
+            if (auditsResult.success && auditsResult.data?.data) {
+                const audits = auditsResult.data.data.map((a: { id?: string; _id?: string; applicationNumber?: string; data?: { applicantInfo?: { name?: string }; formData?: { plantId?: string } }; auditMode?: string; status?: string; auditScheduledAt?: string }) => ({
+                    _id: a.id || a._id || '',
+                    auditNumber: a.applicationNumber || '',
+                    applicationNumber: a.applicationNumber || '',
+                    farmerName: a.data?.applicantInfo?.name || 'ไม่ระบุ',
+                    plantType: a.data?.formData?.plantId || '-',
+                    auditMode: (a.auditMode as "ONLINE" | "ONSITE" | "HYBRID") || "ONSITE",
+                    status: a.status || 'SCHEDULED',
+                    scheduledDate: a.auditScheduledAt?.split('T')[0],
+                    scheduledTime: a.auditScheduledAt ? new Date(a.auditScheduledAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : undefined
+                }));
+                setAudits(audits);
             } else {
                 setAudits([]);
             }
 
             // Fetch pending applications waiting for schedule
-            const appsResult = await api.get<{ data: { applications: ApplicationItem[] } }>('/v2/applications?status=WAITING_SCHEDULE');
-            if (appsResult.success && appsResult.data?.data?.applications) {
-                setPendingApplications(appsResult.data.data.applications);
+            const appsResult = await api.get<{ data: ApplicationItem[] }>('/v2/audits/pending-schedule');
+            if (appsResult.success && appsResult.data?.data) {
+                const apps = appsResult.data.data.map((a: { id?: string; _id?: string; applicationNumber?: string; data?: { applicantInfo?: { name?: string; firstName?: string; lastName?: string }; formData?: { plantId?: string } }; status?: string }) => ({
+                    _id: a.id || a._id || '',
+                    applicationNumber: a.applicationNumber || '',
+                    firstName: a.data?.applicantInfo?.firstName || a.data?.applicantInfo?.name?.split(' ')[0] || '',
+                    lastName: a.data?.applicantInfo?.lastName || a.data?.applicantInfo?.name?.split(' ')[1] || '',
+                    plantType: a.data?.formData?.plantId || '',
+                    status: a.status || ''
+                }));
+                setPendingApplications(apps);
             } else {
                 setPendingApplications([]);
             }
@@ -130,19 +149,24 @@ export default function StaffCalendarPage() {
         if (auditMode === "ONSITE" && !location) return;
 
         try {
-            // Call API to create audit
-            await api.post("/v2/field-audits", {
+            // Call real scheduling API
+            const result = await api.post("/v2/audits/schedule", {
                 applicationId: selectedApplication._id,
-                auditMode,
                 scheduledDate: scheduleDate,
                 scheduledTime: scheduleTime,
+                auditMode,
+                meetingUrl: auditMode === "ONLINE" ? vdoLink : undefined,
                 auditorId: user?.id,
             });
 
-            // Refresh data
-            await fetchData();
-            setShowScheduleModal(false);
-            setSelectedApplication(null);
+            if (result.success) {
+                alert("จัดนัดหมายสำเร็จ!");
+                await fetchData();
+                setShowScheduleModal(false);
+                setSelectedApplication(null);
+            } else {
+                alert(`เกิดข้อผิดพลาด: ${result.error}`);
+            }
         } catch (error) {
             console.error("Error creating audit:", error);
             alert("เกิดข้อผิดพลาดในการสร้างนัดหมาย");

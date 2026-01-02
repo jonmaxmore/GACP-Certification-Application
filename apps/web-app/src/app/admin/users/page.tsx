@@ -47,21 +47,42 @@ export default function AdminUsersPage() {
 
         try {
             const parsedUser = JSON.parse(userData);
-            if (!["ADMIN", "SUPER_ADMIN"].includes(parsedUser.role)) {
+            const role = parsedUser.role?.toUpperCase() || '';
+            if (!["ADMIN", "SUPER_ADMIN"].includes(role)) {
                 router.push("/staff/dashboard");
                 return;
             }
             setCurrentUser(parsedUser);
         } catch {
             router.push("/staff/login");
+            return;
         }
 
-        // Mock users data
-        setUsers([
-            { id: "1", email: "somchai@dtam.go.th", firstName: "สมชาย", lastName: "รักงาน", role: "REVIEWER_AUDITOR", status: "ACTIVE", createdAt: "2024-01-15" },
-            { id: "2", email: "somying@dtam.go.th", firstName: "สมหญิง", lastName: "ใจเย็น", role: "SCHEDULER", status: "ACTIVE", createdAt: "2024-02-20" },
-            { id: "3", email: "admin@dtam.go.th", firstName: "ผู้ดูแล", lastName: "ระบบ", role: "ADMIN", status: "ACTIVE", createdAt: "2024-01-01" },
-        ]);
+        // Fetch real staff list from API
+        const fetchStaff = async () => {
+            try {
+                const res = await fetch('/api/v2/staff', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const result = await res.json();
+                    if (result.success && result.data) {
+                        setUsers(result.data.map((s: { id: string; email: string; firstName: string; lastName: string; role: string; isActive: boolean; createdAt: string }) => ({
+                            id: s.id,
+                            email: s.email || '',
+                            firstName: s.firstName || '',
+                            lastName: s.lastName || '',
+                            role: s.role?.toUpperCase() || 'REVIEWER_AUDITOR',
+                            status: s.isActive ? 'ACTIVE' : 'INACTIVE',
+                            createdAt: s.createdAt?.split('T')[0] || ''
+                        })));
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching staff:', error);
+            }
+        };
+        fetchStaff();
     }, [router]);
 
     const handleCreateUser = async (e: React.FormEvent) => {
@@ -69,44 +90,62 @@ export default function AdminUsersPage() {
         setError("");
         setIsLoading(true);
 
-        // Use centralized API client with retry and error handling
-        const result = await api.post<{ success: boolean }>("/v2/admin/users", {
-            email: newEmail,
-            firstName: newFirstName,
-            lastName: newLastName,
-            role: newRole,
-            password: newPassword,
-            accountType: "STAFF",
-        });
+        try {
+            const token = localStorage.getItem("staff_token");
+            const res = await fetch('/api/v2/staff', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: newEmail.split('@')[0], // Use email prefix as username
+                    email: newEmail,
+                    firstName: newFirstName,
+                    lastName: newLastName,
+                    role: newRole.toLowerCase(),
+                    password: newPassword
+                })
+            });
 
-        if (!result.success) {
-            setError(result.error);
+            const result = await res.json();
+
+            if (!result.success) {
+                setError(result.error || 'ไม่สามารถสร้างบัญชีได้');
+                setIsLoading(false);
+                return;
+            }
+
+            // Add created user to list
+            if (result.data) {
+                setUsers([
+                    {
+                        id: result.data.id,
+                        email: result.data.email,
+                        firstName: result.data.firstName,
+                        lastName: result.data.lastName,
+                        role: result.data.role?.toUpperCase() || newRole,
+                        status: "ACTIVE",
+                        createdAt: new Date().toISOString().split("T")[0],
+                    },
+                    ...users,
+                ]);
+            }
+
+            // Reset form
+            setNewEmail("");
+            setNewFirstName("");
+            setNewLastName("");
+            setNewRole("REVIEWER_AUDITOR");
+            setNewPassword("");
+            setShowCreateModal(false);
+            alert("สร้างบัญชีสำเร็จ!");
+        } catch (error) {
+            console.error('Create user error:', error);
+            setError('เกิดข้อผิดพลาดในการสร้างบัญชี');
+        } finally {
             setIsLoading(false);
-            return;
         }
-
-        // Add to list
-        setUsers([
-            ...users,
-            {
-                id: Date.now().toString(),
-                email: newEmail,
-                firstName: newFirstName,
-                lastName: newLastName,
-                role: newRole,
-                status: "ACTIVE",
-                createdAt: new Date().toISOString().split("T")[0],
-            },
-        ]);
-
-        // Reset form
-        setNewEmail("");
-        setNewFirstName("");
-        setNewLastName("");
-        setNewRole("REVIEWER_AUDITOR");
-        setNewPassword("");
-        setShowCreateModal(false);
-        setIsLoading(false);
     };
 
     const getRoleBadge = (role: string) => {

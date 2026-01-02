@@ -47,7 +47,7 @@ async function seedTestData() {
 
             if (!existing) {
                 // bcrypt hash for password 'Gacp@2024' with 12 rounds
-                const passwordHash = '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhxzYt3EfJA7Z.1xZJZYHW';
+                const passwordHash = '$2b$12$JQC2Pft7ZnsK/e8QQZB.TupuFHp8MyfzzfCfuIrF3W52Jusgf/EicC';
 
                 await prisma.dTAMStaff.create({
                     data: {

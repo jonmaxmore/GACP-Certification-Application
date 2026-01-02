@@ -46,6 +46,7 @@
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "artillery": "^2.0.27",
+    "bcryptjs": "^3.0.3",
     "eslint": "^9.39.2",
     "jest": "^29.7.0",
     "nodemon": "^3.1.7",

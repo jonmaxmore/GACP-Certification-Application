@@ -181,7 +181,7 @@ function authenticateDTAM(req, res, next) {
     // ใช้ DTAM JWT secret (แยกจาก public เพื่อความปลอดภัย)
     const decoded = jwtConfig.verifyToken(token, 'dtam', getActiveJwtConfig());
 
-    // Check role ต้องเป็น DTAM staff roles
+    // Check role ต้องเป็น DTAM staff roles (case-insensitive)
     const validDTAMRoles = [
       'DTAM_STAFF',
       'DTAM',
@@ -190,8 +190,22 @@ function authenticateDTAM(req, res, next) {
       'MANAGER',
       'INSPECTOR',
       'APPROVER',
+      'AUDITOR',
+      'SCHEDULER',
+      'ACCOUNTANT',
+      'SUPER_ADMIN',
+      // lowercase versions for compatibility
+      'admin',
+      'reviewer',
+      'manager',
+      'inspector',
+      'auditor',
+      'scheduler',
+      'accountant',
     ];
-    if (!decoded.role || !validDTAMRoles.includes(decoded.role)) {
+    const userRole = decoded.role?.toUpperCase() || '';
+    const isValidRole = validDTAMRoles.some(r => r.toUpperCase() === userRole);
+    if (!decoded.role || !isValidRole) {
       return res.status(403).json({
         success: false,
         error: 'Forbidden',

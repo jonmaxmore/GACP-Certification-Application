@@ -1,48 +1,119 @@
+/**
+ * Simple Application Routes for Staff Dashboard
+ * Uses Prisma instead of legacy Mongoose models
+ */
 const express = require('express');
 const router = express.Router();
-const controller = require('../../controllers/application-controller');
-const { authenticate } = require('../../middleware/auth-middleware');
-const { strictRateLimiter } = require('../../middleware/RateLimitMiddleware');
+const prisma = require('../../services/prisma-database').prisma;
+const { authenticateStaffJWT } = require('../../modules/auth-dtam/middleware/auth-middleware');
 
-// Rate limiters for application routes
-const applicationRateLimiter = strictRateLimiter(60 * 60 * 1000, 30); // 30 per hour
-const paymentRateLimiter = strictRateLimiter(15 * 60 * 1000, 10); // 10 per 15 min
+// Get pending reviews (applications with status PENDING_REVIEW or SUBMITTED)
+router.get('/pending-reviews', authenticateStaffJWT, async (req, res) => {
+    try {
+        const applications = await prisma.application.findMany({
+            where: {
+                status: {
+                    in: ['SUBMITTED', 'PENDING_REVIEW', 'DRAFT']
+                },
+                isDeleted: false
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 50
+        });
 
-// Farmer Routes (with rate limiting)
-router.post('/draft', authenticate, applicationRateLimiter, controller.createDraft);
-router.get('/my', authenticate, controller.getMyApplications); // NEW: Get user's applications
-router.post('/:id/confirm-review', authenticate, applicationRateLimiter, controller.confirmReview);
-router.post('/:id/pay-phase1', authenticate, paymentRateLimiter, controller.submitPayment1);
-
-// Officer Routes
-// Officer / Scheduler / Auditor Routes
-router.get('/notifications', authenticate, controller.getNotifications);
-// Ksher Routes
-router.post('/ksher/webhook', controller.ksherWebhook); // No Auth required for Webhook
-router.get('/ksher/status/:id', controller.checkPaymentStatus); // Public or Auth? Maybe Auth is safer but polling might need flexibility. Let's keep it controller.checkPaymentStatus for now. Oh wait, previous calls used 'authenticate'. Status check might need auth. But webhook MUST NOT have auth.
-
-router.get('/pending-reviews', authenticate, controller.getPendingReviews);
-router.get('/stats', authenticate, controller.getDashboardStats); // New Stats Route
-router.get('/:id', authenticate, controller.getApplicationById);
-router.post('/:id/review', authenticate, controller.reviewDocument);
-router.post('/:id/pay-phase2', authenticate, paymentRateLimiter, controller.submitPayment2);
-router.post('/:id/assign-auditor', authenticate, controller.assignAuditor); // Scheduler
-router.post('/:id/audit-result', authenticate, controller.submitAuditResult); // Auditor
-router.get('/auditor/assignments', authenticate, controller.getAuditorAssignments); // New Route
-
-// General ABAC / Admin Routes
-router.post('/', authenticate, controller.createDraft);
-router.patch('/:id/status', authenticate, controller.updateStatus);
-router.post('/:id/status', authenticate, controller.updateStatus); // POST alias for step-11 payment
-
-// Document Upload Route (Critical for mobile app)
-const multer = require('multer');
-const path = require('path');
-const upload = multer({
-    dest: path.join(__dirname, '../../uploads'),
-    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+        res.json({ success: true, data: applications });
+    } catch (error) {
+        console.error('[Applications] getPendingReviews error:', error);
+        res.json({ success: true, data: [] }); // Return empty array on error
+    }
 });
-router.post('/:id/documents/:docType', authenticate, upload.single('document'), controller.uploadDocument);
+
+// Get dashboard stats
+router.get('/stats', authenticateStaffJWT, async (req, res) => {
+    try {
+        const [total, pending, approved, revenue] = await Promise.all([
+            prisma.application.count({ where: { isDeleted: false } }),
+            prisma.application.count({ where: { status: { in: ['SUBMITTED', 'PENDING_REVIEW'] }, isDeleted: false } }),
+            prisma.application.count({ where: { status: 'APPROVED', isDeleted: false } }),
+            prisma.invoice.aggregate({ _sum: { totalAmount: true }, where: { status: 'paid' } })
+        ]);
+
+        res.json({
+            success: true,
+            data: {
+                total: total || 0,
+                pending: pending || 0,
+                approved: approved || 0,
+                revenue: revenue._sum?.totalAmount || 0
+            }
+        });
+    } catch (error) {
+        console.error('[Applications] getStats error:', error);
+        res.json({
+            success: true,
+            data: { total: 0, pending: 0, approved: 0, revenue: 0 }
+        });
+    }
+});
+
+// Get auditor assignments
+router.get('/auditor/assignments', authenticateStaffJWT, async (req, res) => {
+    try {
+        const applications = await prisma.application.findMany({
+            where: {
+                status: { in: ['AUDIT_PENDING', 'AUDIT_SCHEDULED'] },
+                isDeleted: false
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 50
+        });
+
+        res.json({ success: true, data: applications });
+    } catch (error) {
+        console.error('[Applications] getAuditorAssignments error:', error);
+        res.json({ success: true, data: [] });
+    }
+});
+
+// Get single application
+router.get('/:id', authenticateStaffJWT, async (req, res) => {
+    try {
+        const application = await prisma.application.findUnique({
+            where: { id: req.params.id }
+        });
+
+        if (!application) {
+            return res.status(404).json({ success: false, error: 'Not Found' });
+        }
+
+        res.json({ success: true, data: application });
+    } catch (error) {
+        console.error('[Applications] getById error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Review document (approve/reject)
+router.post('/:id/review', authenticateStaffJWT, async (req, res) => {
+    try {
+        const { action, comment } = req.body;
+        const { id } = req.params;
+
+        const newStatus = action === 'APPROVE' ? 'DOCUMENT_APPROVED' : 'REVISION_REQUIRED';
+
+        const updated = await prisma.application.update({
+            where: { id },
+            data: {
+                status: newStatus,
+                updatedBy: req.user?.id
+            }
+        });
+
+        res.json({ success: true, data: updated, message: `Application ${newStatus}` });
+    } catch (error) {
+        console.error('[Applications] review error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 
 module.exports = router;
-

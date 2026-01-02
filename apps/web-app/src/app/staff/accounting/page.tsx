@@ -53,7 +53,7 @@ export default function AccountingDashboard() {
         setIsLoading(true);
         try {
             // Fetch payment summary from API
-            const summaryResult = await api.get<{ data: PaymentSummary }>(`/v2/payments/summary?startDate=${dateRange.start}&endDate=${dateRange.end}`);
+            const summaryResult = await api.get<{ data: PaymentSummary }>(`/v2/invoices/summary?startDate=${dateRange.start}&endDate=${dateRange.end}`);
             if (summaryResult.success && summaryResult.data?.data) {
                 setSummary(summaryResult.data.data);
             } else {

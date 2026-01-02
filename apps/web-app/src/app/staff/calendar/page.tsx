@@ -58,6 +58,9 @@ export default function StaffCalendarPage() {
     const [auditMode, setAuditMode] = useState<"ONLINE" | "ONSITE">("ONLINE");
     const [vdoLink, setVdoLink] = useState("");
     const [location, setLocation] = useState("");
+    const [inspectors, setInspectors] = useState<{ id: string; name: string }[]>([]);
+    const [selectedInspector, setSelectedInspector] = useState("");
+
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -96,6 +99,16 @@ export default function StaffCalendarPage() {
             } else {
                 setPendingApplications([]);
             }
+
+            // Fetch inspectors for dropdown
+            const inspectorsResult = await api.get<{ data: { id: string; firstName?: string; lastName?: string; role: string }[] }>('/v2/staff/inspectors');
+            if (inspectorsResult.success && inspectorsResult.data?.data) {
+                const mappedInspectors = inspectorsResult.data.data.map(i => ({
+                    id: i.id,
+                    name: `${i.firstName || ''} ${i.lastName || ''}`.trim() || 'ผู้ตรวจ'
+                }));
+                setInspectors(mappedInspectors);
+            }
         } catch (error) {
             console.error("Error fetching data:", error);
             setAudits([]);
@@ -131,6 +144,7 @@ export default function StaffCalendarPage() {
         setAuditMode("ONLINE");
         setVdoLink("");
         setLocation("");
+        setSelectedInspector("");
         setShowScheduleModal(true);
     };
 
@@ -156,7 +170,8 @@ export default function StaffCalendarPage() {
                 scheduledTime: scheduleTime,
                 auditMode,
                 meetingUrl: auditMode === "ONLINE" ? vdoLink : undefined,
-                auditorId: user?.id,
+                location: auditMode === "ONSITE" ? location : undefined,
+                auditorId: selectedInspector || user?.id,
             });
 
             if (result.success) {
@@ -368,7 +383,26 @@ export default function StaffCalendarPage() {
                                 </div>
                             </div>
 
-                            {/* Audit Mode */}
+                            {/* Inspector Selection */}
+                            <div>
+                                <label className="block text-sm text-slate-600 mb-1">ผู้ตรวจประเมิน</label>
+                                <select
+                                    value={selectedInspector}
+                                    onChange={(e) => setSelectedInspector(e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-lg"
+                                >
+                                    <option value="">-- เลือกผู้ตรวจ --</option>
+                                    {inspectors.map(inspector => (
+                                        <option key={inspector.id} value={inspector.id}>
+                                            {inspector.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {inspectors.length === 0 && (
+                                    <p className="text-xs text-slate-400 mt-1">กำลังโหลดรายชื่อผู้ตรวจ...</p>
+                                )}
+                            </div>
+
                             <div>
                                 <label className="block text-sm text-slate-600 mb-2">รูปแบบการตรวจ</label>
                                 <div className="flex gap-4">

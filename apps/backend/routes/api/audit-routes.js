@@ -38,7 +38,7 @@ router.get('/scheduled', authenticateDTAM, async (req, res) => {
 
         // Date filter for calendar view
         if (startDate && endDate) {
-            where.auditScheduledAt = {
+            where.scheduledDate = {
                 gte: new Date(startDate),
                 lte: new Date(endDate)
             };
@@ -46,7 +46,7 @@ router.get('/scheduled', authenticateDTAM, async (req, res) => {
 
         const audits = await prisma.application.findMany({
             where,
-            orderBy: { auditScheduledAt: 'asc' },
+            orderBy: { scheduledDate: 'asc' },
             take: 100
         });
 
@@ -72,13 +72,21 @@ router.post('/schedule', authenticateDTAM, async (req, res) => {
         // Combine date and time
         const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime || '09:00'}:00`);
 
+        // Get existing formData first
+        const existing = await prisma.application.findUnique({ where: { id: applicationId } });
+        const existingFormData = (typeof existing?.formData === 'object' && existing?.formData) ? existing.formData : {};
+
         const updated = await prisma.application.update({
             where: { id: applicationId },
             data: {
                 status: 'AUDIT_SCHEDULED',
-                auditScheduledAt: scheduledDateTime,
-                auditMode: auditMode || 'ONSITE',
-                assignedAuditorId: auditorId || null,
+                scheduledDate: scheduledDateTime,
+                auditorId: auditorId || null,
+                formData: {
+                    ...existingFormData,
+                    auditMode: auditMode || 'ONSITE',
+                    meetingUrl: meetingUrl || undefined
+                },
                 updatedBy: req.user?.id
             }
         });
@@ -104,10 +112,9 @@ router.patch('/:id/schedule', authenticateDTAM, async (req, res) => {
 
         if (scheduledDate) {
             const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime || '09:00'}:00`);
-            updateData.auditScheduledAt = scheduledDateTime;
+            updateData.scheduledDate = scheduledDateTime;
         }
-        if (auditorId) updateData.assignedAuditorId = auditorId;
-        if (auditMode) updateData.auditMode = auditMode;
+        if (auditorId) updateData.auditorId = auditorId;
 
         const updated = await prisma.application.update({
             where: { id },

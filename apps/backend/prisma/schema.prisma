@@ -698,6 +698,11 @@ model DTAMStaff {
   createdBy String?
   updatedBy String?
 
+  // MFA (Multi-Factor Authentication)
+  mfaEnabled     Boolean @default(false)
+  mfaSecret      String?
+  mfaBackupCodes String? // JSON array of hashed codes
+
   // Soft Delete
   isDeleted Boolean   @default(false)
   deletedAt DateTime?

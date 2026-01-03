@@ -16,12 +16,7 @@ const SITE_TYPES = [
     { id: 'GREENHOUSE' as SiteType, label: 'โรงเรือนทั่วไป', icon: '🌿', desc: 'Greenhouse' },
 ];
 
-// Fee configuration: (5,000 + 25,000) × number of areas = 30,000 × areas
-const FEE_CONFIG = {
-    docReviewPerArea: 5000,     // ค่าตรวจเอกสารต่อพื้นที่
-    inspectionPerArea: 25000,   // ค่าตรวจประเมินแปลงต่อพื้นที่
-    totalPerArea: 30000,        // รวมต่อพื้นที่
-};
+const FEE_CONFIG = { docReviewPerArea: 5000, inspectionPerArea: 25000, totalPerArea: 30000 };
 
 export default function Step1Purpose() {
     const router = useRouter();
@@ -33,9 +28,6 @@ export default function Step1Purpose() {
 
     const plant = PLANTS.find(p => p.id === state.plantId);
     const isHighControl = plant?.group === 'HIGH_CONTROL';
-    const needsLicense = purpose === 'COMMERCIAL' || purpose === 'EXPORT';
-
-    // Calculate fee: 30,000 × number of areas
     const totalFee = FEE_CONFIG.totalPerArea * siteTypes.length;
 
     useEffect(() => {
@@ -45,160 +37,72 @@ export default function Step1Purpose() {
     }, [state.certificationPurpose, state.siteTypes]);
 
     useEffect(() => {
-        // Only redirect if fully loaded AND no plant selected after a longer delay
-        // This prevents race condition when state is being loaded from localStorage
         if (isLoaded) {
             const timer = setTimeout(() => {
-                // Re-check state from localStorage directly to avoid stale state
                 const saved = localStorage.getItem('gacp_wizard_state');
                 const savedState = saved ? JSON.parse(saved) : null;
-
-                if (!state.plantId && !savedState?.plantId) {
-                    router.replace('/applications/new/step-0');
-                }
+                if (!state.plantId && !savedState?.plantId) router.replace('/applications/new/step-0');
             }, 300);
             return () => clearTimeout(timer);
         }
     }, [isLoaded, state.plantId, router]);
 
-    const handlePurposeSelect = (p: CertificationPurpose) => {
-        setPurpose(p);
-        setCertificationPurpose(p);
-    };
-
-    const toggleSiteType = (type: SiteType) => {
-        const newTypes = siteTypes.includes(type)
-            ? siteTypes.filter(t => t !== type)
-            : [...siteTypes, type];
-        setLocalSiteTypes(newTypes);
-        setSiteTypes(newTypes);
-    };
-
+    const handlePurposeSelect = (p: CertificationPurpose) => { setPurpose(p); setCertificationPurpose(p); };
+    const toggleSiteType = (type: SiteType) => { const newTypes = siteTypes.includes(type) ? siteTypes.filter(t => t !== type) : [...siteTypes, type]; setLocalSiteTypes(newTypes); setSiteTypes(newTypes); };
     const canProceed = purpose && siteTypes.length > 0 && !isNavigating;
-    const handleNext = () => {
-        if (canProceed) {
-            setIsNavigating(true);
-            router.push('/applications/new/step-2');
-        }
-    };
-    const handleBack = () => {
-        setIsNavigating(true);
-        router.push('/applications/new/step-0');
-    };
+    const handleNext = () => { if (canProceed) { setIsNavigating(true); router.push('/applications/new/step-2'); } };
+    const handleBack = () => { setIsNavigating(true); router.push('/applications/new/step-0'); };
 
-    if (!isLoaded) return <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>กำลังโหลด...</div>;
+    if (!isLoaded) return <div className="text-center py-16 text-slate-500">กำลังโหลด...</div>;
 
     return (
-        <div style={{ fontFamily: "'Kanit', sans-serif" }}>
+        <div>
             {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <div style={{
-                    width: '48px', height: '48px',
-                    background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)',
-                    borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    margin: '0 auto 12px', boxShadow: '0 6px 20px rgba(59, 130, 246, 0.3)',
-                }}>
-                    <span style={{ fontSize: '20px' }}>🎯</span>
-                </div>
-                <h2 style={{ fontSize: '18px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827', margin: 0 }}>
-                    วัตถุประสงค์และลักษณะพื้นที่
-                </h2>
-                {plant && (
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: isDark ? 'rgba(16,185,129,0.15)' : '#ECFDF5', borderRadius: '16px', marginTop: '8px' }}>
-                        <span>{plant.icon}</span>
-                        <span style={{ fontSize: '12px', color: '#059669', fontWeight: 500 }}>{plant.name}</span>
-                    </div>
-                )}
+            <div className="text-center mb-5">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/30"><span className="text-xl">🎯</span></div>
+                <h2 className={`text-lg font-semibold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>วัตถุประสงค์และลักษณะพื้นที่</h2>
+                {plant && <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full mt-2 ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'}`}><span>{plant.icon}</span><span className="text-xs text-emerald-600 font-medium">{plant.name}</span></div>}
             </div>
 
             {/* Purpose Selection */}
-            <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827', marginBottom: '10px' }}>
-                    วัตถุประสงค์ในการขอใบรับรอง *
-                </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="mb-5">
+                <label className={`block text-sm font-semibold mb-2.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>วัตถุประสงค์ในการขอใบรับรอง *</label>
+                <div className="flex flex-col gap-2">
                     {PURPOSES.map(p => (
-                        <button key={p.id} onClick={() => handlePurposeSelect(p.id)} style={{
-                            display: 'flex', alignItems: 'center', gap: '12px', padding: '14px',
-                            borderRadius: '12px', textAlign: 'left', cursor: 'pointer',
-                            border: purpose === p.id ? '2px solid #3B82F6' : `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
-                            background: purpose === p.id ? (isDark ? 'rgba(59,130,246,0.15)' : '#EFF6FF') : 'transparent',
-                        }}>
-                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: isDark ? '#374151' : '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
-                                {p.icon}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: '14px', fontWeight: 500, color: isDark ? '#F9FAFB' : '#111827' }}>{p.label}</div>
-                                <div style={{ fontSize: '12px', color: isDark ? '#9CA3AF' : '#6B7280' }}>{p.desc}</div>
-                            </div>
-                            {purpose === p.id && (
-                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px' }}>✓</div>
-                            )}
+                        <button key={p.id} onClick={() => handlePurposeSelect(p.id)} className={`flex items-center gap-3 p-3.5 rounded-xl text-left transition-all ${purpose === p.id ? (isDark ? 'bg-blue-900/30 border-2 border-blue-500' : 'bg-blue-50 border-2 border-blue-500') : (isDark ? 'bg-transparent border border-slate-700' : 'bg-transparent border border-slate-200')}`}>
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}>{p.icon}</div>
+                            <div className="flex-1"><div className={`text-sm font-medium ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{p.label}</div><div className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{p.desc}</div></div>
+                            {purpose === p.id && <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs">✓</div>}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* License Upload Warning - specific requirements based on purpose */}
+            {/* License Warning */}
             {(purpose === 'COMMERCIAL' || purpose === 'EXPORT') && (
-                <div style={{
-                    background: isDark ? 'rgba(245,158,11,0.15)' : '#FFFBEB',
-                    border: '1px solid #F59E0B',
-                    borderRadius: '12px',
-                    padding: '14px',
-                    marginBottom: '16px'
-                }}>
-                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#B45309', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 8px 0' }}>
-                        ⚠️ เอกสารใบอนุญาตที่ต้องเตรียม:
-                    </p>
-                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12px', color: isDark ? '#D97706' : '#92400E' }}>
-                        {isHighControl && (
-                            <li style={{ marginBottom: '4px' }}>
-                                <strong>บท.11</strong> - ใบอนุญาตปลูก (บังคับสำหรับพืชควบคุม)
-                            </li>
-                        )}
-                        {purpose === 'COMMERCIAL' && (
-                            <li style={{ marginBottom: '4px' }}>
-                                <strong>บท.13</strong> - ใบอนุญาตแปรรูปผลิตภัณฑ์ (บังคับ ✓)
-                            </li>
-                        )}
-                        {purpose === 'EXPORT' && (
-                            <>
-                                <li style={{ marginBottom: '4px' }}>
-                                    <strong>บท.13</strong> - ใบอนุญาตแปรรูปผลิตภัณฑ์ (ถ้ามีการแปรรูป)
-                                </li>
-                                <li style={{ marginBottom: '4px' }}>
-                                    <strong>บท.16</strong> - ใบอนุญาตส่งออก (บังคับ ✓)
-                                </li>
-                            </>
-                        )}
+                <div className={`rounded-xl p-3.5 mb-4 border ${isDark ? 'bg-amber-900/20 border-amber-700' : 'bg-amber-50 border-amber-400'}`}>
+                    <p className="text-sm font-semibold text-amber-600 flex items-center gap-2 mb-2">⚠️ เอกสารใบอนุญาตที่ต้องเตรียม:</p>
+                    <ul className={`pl-5 text-xs list-disc ${isDark ? 'text-amber-500' : 'text-amber-700'}`}>
+                        {isHighControl && <li className="mb-1"><strong>บท.11</strong> - ใบอนุญาตปลูก (บังคับสำหรับพืชควบคุม)</li>}
+                        {purpose === 'COMMERCIAL' && <li className="mb-1"><strong>บท.13</strong> - ใบอนุญาตแปรรูปผลิตภัณฑ์ (บังคับ ✓)</li>}
+                        {purpose === 'EXPORT' && <><li className="mb-1"><strong>บท.13</strong> - ใบอนุญาตแปรรูปผลิตภัณฑ์ (ถ้ามีการแปรรูป)</li><li className="mb-1"><strong>บท.16</strong> - ใบอนุญาตส่งออก (บังคับ ✓)</li></>}
                     </ul>
-                    <p style={{ fontSize: '11px', color: isDark ? '#9CA3AF' : '#6B7280', margin: '8px 0 0 0', fontStyle: 'italic' }}>
-                        📌 อัปโหลดเอกสารในขั้นตอนถัดไป - หากไม่มีใบอนุญาต กรุณาติดต่อกรมการแพทย์แผนไทยฯ
-                    </p>
+                    <p className={`text-xs mt-2 italic ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>📌 อัปโหลดเอกสารในขั้นตอนถัดไป</p>
                 </div>
             )}
 
             {/* Site Type Selection */}
-            <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827', marginBottom: '10px' }}>
-                    ลักษณะพื้นที่ * (เลือกได้หลายรายการ)
-                </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+            <div className="mb-4">
+                <label className={`block text-sm font-semibold mb-2.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>ลักษณะพื้นที่ * (เลือกได้หลายรายการ)</label>
+                <div className="grid grid-cols-3 gap-2">
                     {SITE_TYPES.map(type => {
                         const isSelected = siteTypes.includes(type.id);
                         return (
-                            <button key={type.id} onClick={() => toggleSiteType(type.id)} style={{
-                                padding: '14px 8px', borderRadius: '12px', textAlign: 'center', cursor: 'pointer',
-                                border: isSelected ? '2px solid #10B981' : `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
-                                background: isSelected ? (isDark ? 'rgba(16,185,129,0.15)' : '#ECFDF5') : 'transparent',
-                            }}>
-                                <div style={{ fontSize: '24px', marginBottom: '4px' }}>{type.icon}</div>
-                                <div style={{ fontSize: '12px', fontWeight: 500, color: isDark ? '#F9FAFB' : '#111827' }}>{type.label}</div>
-                                <div style={{ fontSize: '10px', color: isDark ? '#9CA3AF' : '#6B7280' }}>{type.desc}</div>
-                                {isSelected && (
-                                    <div style={{ marginTop: '4px', fontSize: '10px', color: '#10B981', fontWeight: 600 }}>✓ เลือก</div>
-                                )}
+                            <button key={type.id} onClick={() => toggleSiteType(type.id)} className={`p-3.5 rounded-xl text-center transition-all ${isSelected ? (isDark ? 'bg-emerald-900/30 border-2 border-emerald-500' : 'bg-emerald-50 border-2 border-emerald-500') : (isDark ? 'bg-transparent border border-slate-700' : 'bg-transparent border border-slate-200')}`}>
+                                <div className="text-2xl mb-1">{type.icon}</div>
+                                <div className={`text-xs font-medium ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{type.label}</div>
+                                <div className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{type.desc}</div>
+                                {isSelected && <div className="mt-1 text-[10px] text-emerald-500 font-semibold">✓ เลือก</div>}
                             </button>
                         );
                     })}
@@ -207,95 +111,30 @@ export default function Step1Purpose() {
 
             {/* Fee Display */}
             {siteTypes.length > 0 && (
-                <div style={{
-                    background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
-                    borderRadius: '12px', padding: '16px', marginBottom: '20px', color: 'white',
-                }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>
-                        💰 ประมาณการค่าธรรมเนียมและใบรับรอง
-                    </div>
-
-                    {/* Per-area breakdown */}
-                    {siteTypes.map((type, idx) => {
-                        const areaLabel = SITE_TYPES.find(s => s.id === type)?.label || type;
-                        return (
-                            <div key={type} style={{
-                                background: 'rgba(255,255,255,0.1)',
-                                borderRadius: '8px',
-                                padding: '10px 12px',
-                                marginBottom: '8px',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
-                                <div>
-                                    <div style={{ fontSize: '13px', fontWeight: 500 }}>
-                                        📜 ใบรับรอง #{idx + 1}: {areaLabel}
-                                    </div>
-                                    <div style={{ fontSize: '10px', opacity: 0.8 }}>
-                                        ตรวจเอกสาร 5,000 + ตรวจแปลง 25,000
-                                    </div>
-                                </div>
-                                <div style={{ fontSize: '16px', fontWeight: 600 }}>
-                                    ฿30,000
-                                </div>
-                            </div>
-                        );
-                    })}
-
-                    {/* Total */}
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        borderTop: '1px solid rgba(255,255,255,0.3)',
-                        paddingTop: '12px',
-                        marginTop: '8px'
-                    }}>
-                        <div>
-                            <div style={{ fontSize: '14px', fontWeight: 600 }}>
-                                รวมทั้งสิ้น ({siteTypes.length} ใบรับรอง)
-                            </div>
-                            <div style={{ fontSize: '11px', opacity: 0.8 }}>
-                                ชำระเงินรวมครั้งเดียว
-                            </div>
+                <div className="bg-gradient-to-br from-emerald-600 to-emerald-500 rounded-xl p-4 mb-5 text-white">
+                    <div className="text-sm font-semibold mb-3">💰 ประมาณการค่าธรรมเนียมและใบรับรอง</div>
+                    {siteTypes.map((type, idx) => (
+                        <div key={type} className="bg-white/10 rounded-lg p-2.5 mb-2 flex justify-between items-center">
+                            <div><div className="text-sm font-medium">📜 ใบรับรอง #{idx + 1}: {SITE_TYPES.find(s => s.id === type)?.label}</div><div className="text-[10px] opacity-80">ตรวจเอกสาร 5,000 + ตรวจแปลง 25,000</div></div>
+                            <div className="text-base font-semibold">฿30,000</div>
                         </div>
-                        <div style={{ fontSize: '28px', fontWeight: 700 }}>
-                            ฿{totalFee.toLocaleString()}
-                        </div>
+                    ))}
+                    <div className="flex justify-between items-center border-t border-white/30 pt-3 mt-2">
+                        <div><div className="text-sm font-semibold">รวมทั้งสิ้น ({siteTypes.length} ใบรับรอง)</div><div className="text-xs opacity-80">ชำระเงินรวมครั้งเดียว</div></div>
+                        <div className="text-3xl font-bold">฿{totalFee.toLocaleString()}</div>
                     </div>
                 </div>
             )}
 
             {/* Navigation */}
-            <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={handleBack} style={{
-                    flex: 1, padding: '12px', borderRadius: '10px',
-                    border: `1px solid ${isDark ? '#4B5563' : '#E5E7EB'}`,
-                    background: isDark ? '#374151' : 'white',
-                    color: isDark ? '#F9FAFB' : '#374151',
-                    fontSize: '14px', fontWeight: 500, cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg>
-                    ย้อนกลับ
+            <div className="flex gap-2.5">
+                <button onClick={handleBack} className={`flex-1 py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1 border ${isDark ? 'bg-slate-700 border-slate-600 text-slate-100' : 'bg-white border-slate-200 text-slate-700'}`}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg> ย้อนกลับ
                 </button>
-                <button onClick={handleNext} disabled={!canProceed} style={{
-                    flex: 2, padding: '12px', borderRadius: '10px', border: 'none',
-                    background: canProceed ? 'linear-gradient(135deg, #059669 0%, #10B981 100%)' : (isDark ? '#4B5563' : '#E5E7EB'),
-                    color: canProceed ? 'white' : (isDark ? '#9CA3AF' : '#9CA3AF'),
-                    fontSize: '14px', fontWeight: 600, cursor: canProceed ? 'pointer' : 'not-allowed',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                    boxShadow: canProceed ? '0 4px 16px rgba(16, 185, 129, 0.35)' : 'none',
-                }}>
-                    {isNavigating ? (
-                        <><div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> กำลังโหลด...</>
-                    ) : (
-                        <>ถัดไป <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg></>
-                    )}
+                <button onClick={handleNext} disabled={!canProceed} className={`flex-[2] py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-1 transition-all ${canProceed ? 'bg-gradient-to-br from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/35' : (isDark ? 'bg-slate-700 text-slate-500' : 'bg-slate-200 text-slate-400') + ' cursor-not-allowed'}`}>
+                    {isNavigating ? (<><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> กำลังโหลด...</>) : (<>ถัดไป <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg></>)}
                 </button>
             </div>
         </div>
     );
 }
-

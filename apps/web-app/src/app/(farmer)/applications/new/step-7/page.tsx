@@ -4,14 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWizardStore } from '../hooks/useWizardStore';
 
-interface DocSlot {
-    id: string;
-    label: string;
-    required: boolean;
-    hint?: string;
-    uploaded?: boolean;
-    isUrl?: boolean;
-}
+interface DocSlot { id: string; label: string; required: boolean; hint?: string; uploaded?: boolean; isUrl?: boolean; }
 
 const DOCUMENTS: DocSlot[] = [
     { id: 'form_registration', label: '1. แบบลงทะเบียนยื่นคำขอ', required: true, hint: 'ดาวน์โหลดแบบฟอร์มจากเว็บไซต์กรมฯ' },
@@ -49,110 +42,67 @@ export default function Step7Documents() {
 
     useEffect(() => {
         setIsDark(localStorage.getItem("theme") === "dark");
-        if (state.documents?.length) {
-            setDocs(DOCUMENTS.map(d => ({
-                ...d,
-                uploaded: state.documents.some(sd => sd.id === d.id && sd.uploaded)
-            })));
-        }
+        if (state.documents?.length) setDocs(DOCUMENTS.map(d => ({ ...d, uploaded: state.documents.some(sd => sd.id === d.id && sd.uploaded) })));
     }, [state.documents]);
 
-    useEffect(() => {
-        if (isLoaded && !state.siteData) router.replace('/applications/new/step-0');
-    }, [isLoaded, state.siteData, router]);
+    useEffect(() => { if (isLoaded && !state.siteData) router.replace('/applications/new/step-0'); }, [isLoaded, state.siteData, router]);
 
-    const handleUpload = (docId: string) => {
-        setDocs(prev => {
-            const updated = prev.map(d => d.id === docId ? { ...d, uploaded: true } : d);
-            setDocuments(updated.filter(d => d.uploaded).map(d => ({ id: d.id, uploaded: true })));
-            return updated;
-        });
-    };
-
-    const handleRemove = (docId: string) => {
-        setDocs(prev => {
-            const updated = prev.map(d => d.id === docId ? { ...d, uploaded: false } : d);
-            setDocuments(updated.filter(d => d.uploaded).map(d => ({ id: d.id, uploaded: true })));
-            return updated;
-        });
-    };
+    const handleUpload = (docId: string) => setDocs(prev => { const updated = prev.map(d => d.id === docId ? { ...d, uploaded: true } : d); setDocuments(updated.filter(d => d.uploaded).map(d => ({ id: d.id, uploaded: true }))); return updated; });
+    const handleRemove = (docId: string) => setDocs(prev => { const updated = prev.map(d => d.id === docId ? { ...d, uploaded: false } : d); setDocuments(updated.filter(d => d.uploaded).map(d => ({ id: d.id, uploaded: true }))); return updated; });
 
     const uploadedCount = docs.filter(d => d.uploaded).length;
     const requiredUploaded = docs.filter(d => d.required && d.uploaded).length;
     const requiredTotal = docs.filter(d => d.required).length;
 
-    const handleNext = () => {
-        if (!isNavigating) {
-            setIsNavigating(true);
-            router.push('/applications/new/step-8');
-        }
-    };
-    const handleBack = () => {
-        setIsNavigating(true);
-        router.push('/applications/new/step-6');
-    };
+    const handleNext = () => { if (!isNavigating) { setIsNavigating(true); router.push('/applications/new/step-8'); } };
+    const handleBack = () => { setIsNavigating(true); router.push('/applications/new/step-6'); };
 
-    if (!isLoaded) return <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>กำลังโหลด...</div>;
+    if (!isLoaded) return <div className={`text-center py-16 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>กำลังโหลด...</div>;
 
     return (
         <div>
             {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <div style={{
-                    width: '56px', height: '56px',
-                    background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)',
-                    borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    margin: '0 auto 14px', boxShadow: '0 8px 24px rgba(139, 92, 246, 0.3)',
-                }}>
-                    <span style={{ fontSize: '24px' }}>📄</span>
+            <div className="text-center mb-5">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3.5 shadow-lg shadow-violet-500/30 ${isDark ? 'bg-gradient-to-br from-violet-600 to-violet-500' : 'bg-gradient-to-br from-violet-500 to-violet-400'}`}>
+                    <span className="text-2xl">📄</span>
                 </div>
-                <h2 style={{ fontSize: '20px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827', marginBottom: '6px' }}>อัปโหลดเอกสาร</h2>
-                <p style={{ fontSize: '13px', color: isDark ? '#9CA3AF' : '#6B7280' }}>รายการเอกสารประกอบคำขอ 22 รายการ</p>
+                <h2 className={`text-xl font-semibold mb-1.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>อัปโหลดเอกสาร</h2>
+                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>รายการเอกสารประกอบคำขอ 22 รายการ</p>
             </div>
 
             {/* Progress */}
-            <div style={{ background: isDark ? '#374151' : '#F3F4F6', borderRadius: '12px', padding: '14px 16px', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '13px', color: '#10B981', fontWeight: 500 }}>✅ อัปโหลดแล้ว {uploadedCount}/22</span>
-                    <span style={{ fontSize: '12px', color: isDark ? '#9CA3AF' : '#6B7280' }}>บังคับ: {requiredUploaded}/{requiredTotal}</span>
+            <div className={`rounded-xl px-4 py-3.5 mb-4 ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}>
+                <div className="flex justify-between mb-2">
+                    <span className="text-sm text-emerald-500 font-medium">✅ อัปโหลดแล้ว {uploadedCount}/22</span>
+                    <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>บังคับ: {requiredUploaded}/{requiredTotal}</span>
                 </div>
-                <div style={{ height: '6px', background: isDark ? '#4B5563' : '#E5E7EB', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${(uploadedCount / 22) * 100}%`, background: 'linear-gradient(90deg, #10B981, #34D399)', borderRadius: '3px', transition: 'width 0.3s' }} />
+                <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-slate-600' : 'bg-slate-200'}`}>
+                    <div className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-300" style={{ width: `${(uploadedCount / 22) * 100}%` }} />
                 </div>
             </div>
 
             {/* Document List */}
-            <div style={{ maxHeight: '320px', overflowY: 'auto', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="max-h-80 overflow-y-auto mb-5 flex flex-col gap-2">
                 {docs.map(doc => (
-                    <div key={doc.id} style={{
-                        display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px',
-                        background: doc.uploaded ? (isDark ? 'rgba(16,185,129,0.1)' : '#ECFDF5') : (isDark ? '#1F2937' : 'white'),
-                        border: `1px solid ${doc.uploaded ? '#10B981' : (isDark ? '#374151' : '#E5E7EB')}`,
-                        borderRadius: '12px',
-                    }}>
-                        <div style={{
-                            width: '32px', height: '32px', borderRadius: '8px',
-                            background: doc.uploaded ? '#10B981' : (isDark ? '#374151' : '#F3F4F6'),
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: doc.uploaded ? 'white' : (isDark ? '#9CA3AF' : '#6B7280'),
-                            fontSize: '14px', fontWeight: 600, flexShrink: 0,
-                        }}>
+                    <div key={doc.id} className={`flex items-center gap-3 px-3.5 py-3 rounded-xl border transition-all ${doc.uploaded ? `${isDark ? 'bg-emerald-500/10' : 'bg-emerald-50'} border-emerald-500` : `${isDark ? 'bg-slate-800' : 'bg-white'} ${isDark ? 'border-slate-700' : 'border-slate-200'}`}`}>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold flex-shrink-0 ${doc.uploaded ? 'bg-emerald-500 text-white' : (isDark ? 'bg-slate-700 text-slate-400' : 'bg-slate-100 text-slate-500')}`}>
                             {doc.uploaded ? '✓' : doc.label.split('.')[0]}
                         </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '13px', fontWeight: 500, color: isDark ? '#F9FAFB' : '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {doc.label.split('. ')[1]} {doc.required && <span style={{ color: '#EF4444' }}>*</span>}
+                        <div className="flex-1 min-w-0">
+                            <div className={`text-sm font-medium truncate ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+                                {doc.label.split('. ')[1]} {doc.required && <span className="text-red-500">*</span>}
                             </div>
                         </div>
                         {doc.isUrl ? (
-                            <input type="url" value={doc.id === 'video_url' ? videoUrl : ''} onChange={e => { setVideoUrl(e.target.value); if (e.target.value) handleUpload(doc.id); else handleRemove(doc.id); }} placeholder="https://..." style={{ width: '120px', padding: '6px 10px', borderRadius: '6px', border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`, fontSize: '12px', background: isDark ? '#1F2937' : 'white', color: isDark ? '#F9FAFB' : '#111827' }} />
+                            <input type="url" value={doc.id === 'video_url' ? videoUrl : ''} onChange={e => { setVideoUrl(e.target.value); if (e.target.value) handleUpload(doc.id); else handleRemove(doc.id); }}
+                                placeholder="https://..." className={`w-28 px-2.5 py-1.5 rounded-md border text-xs ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`} />
                         ) : (
                             <>
-                                <input ref={el => { inputRefs.current[doc.id] = el; }} type="file" accept="image/*,.pdf" onChange={() => handleUpload(doc.id)} style={{ display: 'none' }} />
+                                <input ref={el => { inputRefs.current[doc.id] = el; }} type="file" accept="image/*,.pdf" onChange={() => handleUpload(doc.id)} className="hidden" />
                                 {doc.uploaded ? (
-                                    <button onClick={() => handleRemove(doc.id)} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: isDark ? 'rgba(239,68,68,0.2)' : '#FEE2E2', color: '#DC2626', fontSize: '12px', cursor: 'pointer' }}>ลบ</button>
+                                    <button onClick={() => handleRemove(doc.id)} className={`px-3 py-1.5 rounded-md text-xs ${isDark ? 'bg-red-500/20' : 'bg-red-50'} text-red-500`}>ลบ</button>
                                 ) : (
-                                    <button onClick={() => inputRefs.current[doc.id]?.click()} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: '#10B981', color: 'white', fontSize: '12px', cursor: 'pointer' }}>เลือก</button>
+                                    <button onClick={() => inputRefs.current[doc.id]?.click()} className="px-3 py-1.5 rounded-md bg-emerald-500 text-white text-xs">เลือก</button>
                                 )}
                             </>
                         )}
@@ -161,20 +111,15 @@ export default function Step7Documents() {
             </div>
 
             {/* Navigation */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={handleBack} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: `1px solid ${isDark ? '#4B5563' : '#E5E7EB'}`, background: isDark ? '#374151' : 'white', color: isDark ? '#F9FAFB' : '#374151', fontSize: '15px', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg>
-                    ย้อนกลับ
+            <div className="flex gap-3">
+                <button onClick={handleBack} className={`flex-1 py-3.5 rounded-xl text-base font-medium flex items-center justify-center gap-1.5 border ${isDark ? 'bg-slate-700 border-slate-600 text-slate-100' : 'bg-white border-slate-200 text-slate-700'}`}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg> ย้อนกลับ
                 </button>
-                <button onClick={handleNext} disabled={isNavigating} style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: isNavigating ? '#9CA3AF' : 'linear-gradient(135deg, #059669 0%, #10B981 100%)', color: 'white', fontSize: '15px', fontWeight: 600, cursor: isNavigating ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: isNavigating ? 'none' : '0 4px 20px rgba(16, 185, 129, 0.4)' }}>
-                    {isNavigating ? (
-                        <><div style={{ width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> กำลังโหลด...</>
-                    ) : (
-                        <>ถัดไป <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg></>
-                    )}
+                <button onClick={handleNext} disabled={isNavigating}
+                    className={`flex-[2] py-3.5 rounded-xl text-base font-semibold flex items-center justify-center gap-1.5 transition-all ${isNavigating ? 'bg-slate-400 text-white cursor-not-allowed' : 'bg-gradient-to-br from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/40'}`}>
+                    {isNavigating ? (<><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> กำลังโหลด...</>) : (<>ถัดไป <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg></>)}
                 </button>
             </div>
         </div>
     );
 }
-

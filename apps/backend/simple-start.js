@@ -64,9 +64,14 @@ try {
     console.log('✅ Establishment Routes loaded');
 
     // Staff Management Routes
-    const StaffRoutes = require('./routes/api/StaffRoutes');
+    const StaffRoutes = require('./routes/api/staff-routes');
     app.use('/api/v2/staff', StaffRoutes);
     console.log('✅ Staff Routes loaded');
+
+    // DTAM Staff Authentication Routes
+    const AuthDtamRoutes = require('./routes/api/auth-dtam-routes');
+    app.use('/api/auth-dtam', AuthDtamRoutes);
+    console.log('✅ Auth DTAM Routes loaded');
 
     // Accounting Routes
     const AccountingRoutes = require('./routes/api/AccountingRoutes');

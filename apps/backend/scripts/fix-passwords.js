@@ -1,5 +1,5 @@
 /**
- * Fix password hash for test users
+ * Fix password hash and unlock accounts for test users
  */
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
@@ -14,11 +14,13 @@ async function fixPasswords() {
         },
         data: {
             password: correctHash,
-            isActive: true  // Also ensure account is active
+            isActive: true,
+            failedLoginAttempts: 0,
+            lockedAt: null
         }
     });
 
-    console.log('Updated', result.count, 'users with correct password hash and isActive=true');
+    console.log('Updated', result.count, 'users: password, isActive=true, failedAttempts=0, lockedAt=null');
     await prisma.$disconnect();
 }
 

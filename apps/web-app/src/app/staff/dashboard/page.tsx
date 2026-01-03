@@ -30,8 +30,12 @@ const ROLE_LABELS: Record<string, { label: string; icon: string }> = {
     ACCOUNTANT: { label: "พนักงานบัญชี", icon: "💰" },
     ADMIN: { label: "ผู้ดูแลระบบ", icon: "⚙️" },
     SUPER_ADMIN: { label: "ผู้ดูแลสูงสุด", icon: "🔐" },
-    // Legacy roles
+    // Consolidated roles (lowercase)
+    assessor: { label: "ผู้ตรวจสอบ/ตรวจประเมิน", icon: "📋" },
+    scheduler: { label: "เจ้าหน้าที่จัดคิว", icon: "📅" },
+    accountant: { label: "พนักงานบัญชี", icon: "💰" },
     admin: { label: "ผู้ดูแลระบบ", icon: "⚙️" },
+    // Legacy roles
     reviewer: { label: "ผู้ตรวจสอบ", icon: "📋" },
     manager: { label: "ผู้จัดการ", icon: "👔" },
     inspector: { label: "ผู้ตรวจประเมิน", icon: "🔍" },
@@ -56,9 +60,15 @@ export default function StaffDashboardPage() {
 
         try {
             const parsedUser = JSON.parse(userData);
-            // Staff roles check - case-insensitive
-            const staffRoles = ['REVIEWER_AUDITOR', 'SCHEDULER', 'ACCOUNTANT', 'ADMIN', 'SUPER_ADMIN'];
-            if (!staffRoles.includes(parsedUser.role.toUpperCase())) {
+            // Staff roles check - case-insensitive, include all consolidated roles
+            const staffRoles = [
+                'REVIEWER_AUDITOR', 'SCHEDULER', 'ACCOUNTANT', 'ADMIN', 'SUPER_ADMIN',
+                // Consolidated roles (lowercase)
+                'assessor', 'scheduler', 'accountant', 'admin'
+            ];
+            const userRoleUpper = parsedUser.role.toUpperCase();
+            const userRoleLower = parsedUser.role.toLowerCase();
+            if (!staffRoles.some(r => r.toUpperCase() === userRoleUpper || r.toLowerCase() === userRoleLower)) {
                 router.push("/staff/login");
                 return;
             }

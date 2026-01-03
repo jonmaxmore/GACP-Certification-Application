@@ -70,9 +70,14 @@ export default function StaffLoginPage() {
 
             const { user, token } = result.data;
 
-            // Validate staff role
-            const staffRoles = ['REVIEWER_AUDITOR', 'SCHEDULER', 'ACCOUNTANT', 'ADMIN', 'SUPER_ADMIN', 'admin', 'reviewer', 'manager', 'inspector'];
-            if (!staffRoles.includes(user.role)) {
+            // Validate staff role (case-insensitive)
+            const staffRoles = [
+                'reviewer_auditor', 'scheduler', 'accountant', 'admin', 'super_admin',
+                'REVIEWER_AUDITOR', 'SCHEDULER', 'ACCOUNTANT', 'ADMIN', 'SUPER_ADMIN',
+                'reviewer', 'manager', 'inspector', 'auditor'
+            ];
+            const userRole = (user.role || '').toLowerCase();
+            if (!staffRoles.map(r => r.toLowerCase()).includes(userRole)) {
                 setError("บัญชีนี้ไม่ใช่บัญชีเจ้าหน้าที่");
                 setIsLoading(false);
                 return;

@@ -7,12 +7,13 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../../services/prisma-database').prisma;
+const { authLimiter } = require('../../middleware/rate-limiter');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'gacp-jwt-secret-key-2024';
 const JWT_EXPIRES_IN = '8h';
 
-// POST /auth-dtam/login
-router.post('/login', async (req, res) => {
+// POST /auth-dtam/login - 🛡️ Rate limited: 5 attempts per 15 minutes
+router.post('/login', authLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
 

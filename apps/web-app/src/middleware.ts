@@ -30,16 +30,39 @@ const protectedStaffRoutes = [
 const authRoutes = ['/login', '/register', '/forgot-password'];
 const staffAuthRoutes = ['/staff/login'];
 
-// Security headers for all responses
+// 🛡️ Enhanced Security Headers (OWASP + Apple Standards)
 const securityHeaders = {
     'X-Frame-Options': 'DENY',
     'X-Content-Type-Options': 'nosniff',
     'X-XSS-Protection': '1; mode=block',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+    'Content-Security-Policy': [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob: https:",
+        "font-src 'self' data:",
+        "connect-src 'self' http://47.129.167.71 http://localhost:* https:",
+        "frame-ancestors 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+    ].join('; '),
 };
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
+
+    // ========================================
+    // 🛡️ CVE-2025-29927 Protection
+    // Block x-middleware-subrequest header bypass attack
+    // ========================================
+    const subrequestHeader = request.headers.get('x-middleware-subrequest');
+    if (subrequestHeader) {
+        console.warn(`[SECURITY] Blocked middleware bypass attempt: ${subrequestHeader}`);
+        return new NextResponse('Forbidden', { status: 403 });
+    }
 
     // Loading page at / handles redirect to /login itself
     // No middleware redirect needed for root

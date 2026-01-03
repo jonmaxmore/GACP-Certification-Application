@@ -54,10 +54,23 @@ export default function DashboardPage() {
         setMounted(true);
         setIsDark(localStorage.getItem("theme") === "dark");
         const userData = localStorage.getItem("user");
-        if (!userData) { setIsRedirecting(true); window.location.href = "/login"; return; }
+        if (!userData) {
+            setIsRedirecting(true);
+            // Clear any stale cookies by calling logout API before redirect
+            fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
+                window.location.href = "/login";
+            });
+            return;
+        }
         try { setUser(JSON.parse(userData)); loadApplications(); }
-        catch { setIsRedirecting(true); window.location.href = "/login"; }
+        catch {
+            setIsRedirecting(true);
+            fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
+                window.location.href = "/login";
+            });
+        }
     }, []);
+
 
     const toggleTheme = () => { const newTheme = !isDark; setIsDark(newTheme); localStorage.setItem("theme", newTheme ? "dark" : "light"); };
 

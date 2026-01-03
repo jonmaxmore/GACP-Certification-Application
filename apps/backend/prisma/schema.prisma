@@ -537,6 +537,36 @@ model AuditLog {
 }
 
 // =============================================================================
+// USER CONSENT MODEL (PDPA Compliance)
+// =============================================================================
+model UserConsent {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // User relation
+  userId String
+
+  // Consent details
+  category   String   // TERMS_OF_SERVICE, PRIVACY_POLICY, MARKETING_EMAIL, etc
+  version    String   // Version of consent document
+  granted    Boolean  @default(false)
+  grantedAt  DateTime?
+  withdrawnAt DateTime?
+
+  // Context
+  ipAddress String?
+  userAgent String?
+  metadata  Json?
+
+  @@unique([userId, category])
+  @@index([userId])
+  @@index([category])
+  @@index([granted])
+  @@map("user_consents")
+}
+
+// =============================================================================
 // PLANT SPECIES MODEL (พันธุ์พืช)
 // =============================================================================
 model PlantSpecies {

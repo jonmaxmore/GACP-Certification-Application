@@ -12,10 +12,13 @@ async function fixPasswords() {
         where: {
             username: { in: ['accountant', 'scheduler', 'admin', 'inspector1', 'auditor1', 'reviewer1'] }
         },
-        data: { password: correctHash }
+        data: {
+            password: correctHash,
+            isActive: true  // Also ensure account is active
+        }
     });
 
-    console.log('Updated', result.count, 'users with correct password hash');
+    console.log('Updated', result.count, 'users with correct password hash and isActive=true');
     await prisma.$disconnect();
 }
 

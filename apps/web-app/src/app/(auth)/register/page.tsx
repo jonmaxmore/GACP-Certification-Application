@@ -4,10 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api from "@/services/api-client";
-import { colors } from "@/lib/design-tokens";
-import { formatThaiId, validateThaiId } from "@/utils/thai-id-validator";
-import { translateError } from "@/utils/error-translator";
-
+import { formatThaiId } from "@/utils/thai-id-validator";
 
 const ACCOUNT_TYPES = [
     { type: "INDIVIDUAL", label: "บุคคลธรรมดา", subtitle: "เกษตรกรรายย่อย", idLabel: "เลขบัตรประชาชน 13 หลัก", idHint: "1-2345-67890-12-3" },
@@ -79,21 +76,15 @@ export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [email, setEmail] = useState("");
-
-    // Field-level errors for inline validation
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-    // PDPA fallback timer - in case scroll detection fails
     useEffect(() => {
         if (step === 0 && !pdpaScrolled) {
-            const timer = setTimeout(() => {
-                setPdpaScrolled(true);
-            }, 3000); // Enable after 3 seconds as fallback
+            const timer = setTimeout(() => setPdpaScrolled(true), 3000);
             return () => clearTimeout(timer);
         }
     }, [step, pdpaScrolled]);
 
-    // Auto-save form data to localStorage
     useEffect(() => {
         const savedData = localStorage.getItem("register_draft");
         if (savedData) {
@@ -115,32 +106,21 @@ export default function RegisterPage() {
         }
     }, []);
 
-    // Save to localStorage on every change
     useEffect(() => {
-        const data = {
-            step, accountType, identifier, firstName, lastName,
-            companyName, representativeName, communityName, phone, email,
-            pdpaAccepted, pdpaScrolled
-        };
+        const data = { step, accountType, identifier, firstName, lastName, companyName, representativeName, communityName, phone, email, pdpaAccepted, pdpaScrolled };
         localStorage.setItem("register_draft", JSON.stringify(data));
     }, [step, accountType, identifier, firstName, lastName, companyName, representativeName, communityName, phone, email, pdpaAccepted, pdpaScrolled]);
 
-
-    // Thai ID checksum validation (Modulo 11)
     const validateThaiId = (id: string): boolean => {
         const digits = id.replace(/-/g, "");
         if (digits.length !== 13 || !/^\d{13}$/.test(digits)) return false;
-
         let sum = 0;
-        for (let i = 0; i < 12; i++) {
-            sum += parseInt(digits[i]) * (13 - i);
-        }
+        for (let i = 0; i < 12; i++) sum += parseInt(digits[i]) * (13 - i);
         const checkDigit = (11 - (sum % 11)) % 10;
         return checkDigit === parseInt(digits[12]);
     };
 
-    // Password strength calculation
-    const getPasswordStrength = (pwd: string): { level: number; label: string; color: string } => {
+    const getPasswordStrength = (pwd: string) => {
         let score = 0;
         if (pwd.length >= 8) score++;
         if (pwd.length >= 12) score++;
@@ -148,59 +128,37 @@ export default function RegisterPage() {
         if (/\d/.test(pwd)) score++;
         if (/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) score++;
 
-        if (score <= 1) return { level: 1, label: "อ่อนมาก", color: "#EF4444" };
-        if (score === 2) return { level: 2, label: "อ่อน", color: "#F97316" };
-        if (score === 3) return { level: 3, label: "ปานกลาง", color: "#EAB308" };
-        if (score === 4) return { level: 4, label: "แข็งแกร่ง", color: "#22C55E" };
-        return { level: 5, label: "แข็งแกร่งมาก", color: "#059669" };
+        if (score <= 1) return { level: 1, label: "อ่อนมาก", color: "bg-red-500" };
+        if (score === 2) return { level: 2, label: "อ่อน", color: "bg-orange-500" };
+        if (score === 3) return { level: 3, label: "ปานกลาง", color: "bg-yellow-500" };
+        if (score === 4) return { level: 4, label: "แข็งแกร่ง", color: "bg-green-500" };
+        return { level: 5, label: "แข็งแกร่งมาก", color: "bg-emerald-600" };
     };
 
-    // Real-time field validation
     const validateField = (field: string, value: string) => {
         const errors = { ...fieldErrors };
-
         switch (field) {
             case 'identifier':
                 const cleanId = value.replace(/-/g, "");
                 if (accountType === "INDIVIDUAL" && cleanId.length === 13) {
-                    if (!validateThaiId(value)) {
-                        errors.identifier = "เลขบัตรประชาชนไม่ถูกต้อง กรุณาตรวจสอบ";
-                    } else {
-                        delete errors.identifier;
-                    }
+                    if (!validateThaiId(value)) errors.identifier = "เลขบัตรประชาชนไม่ถูกต้อง";
+                    else delete errors.identifier;
                 } else if (cleanId.length > 0 && cleanId.length < 13) {
                     errors.identifier = `กรอกแล้ว ${cleanId.length}/13 หลัก`;
-                } else {
-                    delete errors.identifier;
-                }
+                } else delete errors.identifier;
                 break;
             case 'phone':
-                if (value.length > 0 && value.length < 10) {
-                    errors.phone = `กรอกแล้ว ${value.length}/10 หลัก`;
-                } else if (value.length === 10) {
-                    if (!/^0[689]\d{8}$/.test(value)) {
-                        errors.phone = "เบอร์โทรศัพท์ต้องขึ้นต้นด้วย 06, 08, หรือ 09";
-                    } else {
-                        delete errors.phone;
-                    }
-                } else {
-                    delete errors.phone;
-                }
+                if (value.length > 0 && value.length < 10) errors.phone = `กรอกแล้ว ${value.length}/10 หลัก`;
+                else if (value.length === 10 && !/^0[689]\d{8}$/.test(value)) errors.phone = "เบอร์ต้องขึ้นต้นด้วย 06, 08, หรือ 09";
+                else delete errors.phone;
                 break;
             case 'confirmPassword':
-                if (value && value !== password) {
-                    errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
-                } else {
-                    delete errors.confirmPassword;
-                }
+                if (value && value !== password) errors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
+                else delete errors.confirmPassword;
                 break;
             case 'email':
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (value && !emailRegex.test(value)) {
-                    errors.email = "รูปแบบอีเมลไม่ถูกต้อง";
-                } else {
-                    delete errors.email;
-                }
+                if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) errors.email = "รูปแบบอีเมลไม่ถูกต้อง";
+                else delete errors.email;
                 break;
         }
         setFieldErrors(errors);
@@ -208,20 +166,16 @@ export default function RegisterPage() {
 
     const currentConfig = ACCOUNT_TYPES.find((t) => t.type === accountType);
 
-    // translateError imported from @/utils/error-translator
-
-    // formatThaiId imported from @/utils/thai-id-validator
-
     const canProceed = () => {
         switch (step) {
-            case 0: return pdpaAccepted; // PDPA consent
-            case 1: return accountType !== ""; // Account type
-            case 2: return identifier.replace(/-/g, "").length >= 10; // Identifier
-            case 3: // Personal info
+            case 0: return pdpaAccepted;
+            case 1: return accountType !== "";
+            case 2: return identifier.replace(/-/g, "").length >= 10;
+            case 3:
                 if (accountType === "INDIVIDUAL") return firstName && lastName && phone.length >= 10;
                 if (accountType === "JURISTIC") return companyName && representativeName && phone.length >= 10;
                 return communityName && representativeName && phone.length >= 10;
-            case 4: return password.length >= 8 && password === confirmPassword && acceptTerms; // Password
+            case 4: return password.length >= 8 && password === confirmPassword && acceptTerms;
             default: return false;
         }
     };
@@ -230,49 +184,26 @@ export default function RegisterPage() {
         setError("");
         setIsLoading(true);
 
-        // Input sanitization - prevent XSS
         const sanitize = (str: string) => str.trim().replace(/[<>'"&]/g, "");
         const cleanIdentifier = identifier.replace(/-/g, "").replace(/[<>'"&]/g, "");
         const cleanPhone = phone.replace(/[<>'"&]/g, "");
         const cleanPassword = password.trim();
 
-        // Client-side validation before API call
-        if (!cleanIdentifier || cleanIdentifier.length < 10) {
-            setError("กรุณากรอกเลขประจำตัวให้ครบถ้วน (อย่างน้อย 10 หลัก)");
-            setIsLoading(false);
-            return;
-        }
-        if (!cleanPhone || cleanPhone.length !== 10) {
-            setError("เบอร์โทรศัพท์ต้องมี 10 หลัก");
-            setIsLoading(false);
-            return;
-        }
-        if (!cleanPassword || cleanPassword.length < 8) {
-            setError("รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร");
-            setIsLoading(false);
-            return;
-        }
+        if (!cleanIdentifier || cleanIdentifier.length < 10) { setError("กรุณากรอกเลขประจำตัวให้ครบถ้วน"); setIsLoading(false); return; }
+        if (!cleanPhone || cleanPhone.length !== 10) { setError("เบอร์โทรศัพท์ต้องมี 10 หลัก"); setIsLoading(false); return; }
+        if (!cleanPassword || cleanPassword.length < 8) { setError("รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร"); setIsLoading(false); return; }
 
         const data: Record<string, string> = { accountType, identifier: cleanIdentifier, phoneNumber: cleanPhone, password: cleanPassword };
         if (accountType === "INDIVIDUAL") { data.firstName = sanitize(firstName); data.lastName = sanitize(lastName); data.idCard = cleanIdentifier; }
         else if (accountType === "JURISTIC") { data.companyName = sanitize(companyName); data.representativeName = sanitize(representativeName); data.taxId = cleanIdentifier; }
         else { data.communityName = sanitize(communityName); data.representativeName = sanitize(representativeName); data.communityRegistrationNo = identifier.replace(/[<>'"&]/g, ""); }
 
-        // Use centralized API client with automatic retry and error handling
         const result = await api.post<{ success: boolean }>("/auth-farmer/register", data);
-
-        if (!result.success) {
-            setError(result.error);
-            setIsLoading(false);
-            return;
-        }
+        if (!result.success) { setError(result.error); setIsLoading(false); return; }
 
         setIsLoading(false);
-        // Clear saved draft
         localStorage.removeItem("register_draft");
-        // Redirect to success page with user info
-        const name = accountType === "INDIVIDUAL" ? `${firstName} ${lastName}` :
-            accountType === "JURISTIC" ? companyName : communityName;
+        const name = accountType === "INDIVIDUAL" ? `${firstName} ${lastName}` : accountType === "JURISTIC" ? companyName : communityName;
         const formattedId = identifier.includes("-") ? identifier : formatThaiId(identifier);
         router.push(`/register/success?type=${accountType}&id=${encodeURIComponent(formattedId)}&name=${encodeURIComponent(name)}`);
     };
@@ -287,112 +218,72 @@ export default function RegisterPage() {
         }
     };
 
-    const inputStyle: React.CSSProperties = { width: "100%", padding: "14px 16px", border: `1px solid ${colors.border}`, borderRadius: "12px", fontSize: "16px", outline: "none" };
-    const labelStyle: React.CSSProperties = { fontSize: "13px", fontWeight: 600, color: colors.primary, display: "block", marginBottom: "8px" };
+    const inputClass = "w-full py-3.5 px-4 border border-slate-200 rounded-xl text-base outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100";
+    const labelClass = "text-sm font-semibold text-emerald-700 block mb-2";
 
     return (
-        <div style={{ minHeight: "100vh", backgroundColor: colors.background, padding: "24px", fontFamily: "'Sarabun', sans-serif" }}>
-            <div style={{ maxWidth: "420px", margin: "0 auto" }}>
+        <div className="min-h-screen bg-stone-50 p-6">
+            <div className="max-w-md mx-auto">
                 {/* Header */}
-                <div style={{ marginBottom: "24px" }}>
-                    <Link href="/login" style={{ fontSize: "14px", color: colors.textGray, textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.textGray} strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg>
+                <div className="mb-6">
+                    <Link href="/login" className="text-sm text-slate-500 flex items-center gap-1 hover:text-emerald-600">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg>
                         กลับไปหน้าเข้าสู่ระบบ
                     </Link>
-                    <h1 style={{ fontSize: "26px", fontWeight: 900, color: colors.primary, marginTop: "16px" }}>ลงทะเบียนผู้ใช้ใหม่</h1>
+                    <h1 className="text-2xl font-black text-emerald-700 mt-4">ลงทะเบียนผู้ใช้ใหม่</h1>
                 </div>
 
                 {/* Progress Steps */}
-                <div style={{ display: "flex", gap: "4px", marginBottom: "24px" }}>
+                <div className="flex gap-1 mb-6">
                     {STEPS.map((s, i) => (
-                        <div key={s} style={{ flex: 1 }}>
-                            <div style={{ height: "6px", borderRadius: "3px", backgroundColor: i <= step ? colors.primary : colors.border, transition: "background-color 0.3s" }} />
-                            <p style={{ fontSize: "10px", textAlign: "center", marginTop: "6px", color: i <= step ? colors.primary : colors.textGray, fontWeight: i <= step ? 700 : 400 }}>{s}</p>
+                        <div key={s} className="flex-1">
+                            <div className={`h-1.5 rounded transition-colors ${i <= step ? 'bg-emerald-600' : 'bg-slate-200'}`} />
+                            <p className={`text-[10px] text-center mt-1.5 ${i <= step ? 'text-emerald-700 font-bold' : 'text-slate-400'}`}>{s}</p>
                         </div>
                     ))}
                 </div>
 
                 {/* Card */}
-                <div style={{ backgroundColor: colors.card, borderRadius: "16px", padding: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
-                    {error && <div style={{ padding: "12px 16px", backgroundColor: colors.errorBg, borderRadius: "12px", color: colors.error, fontSize: "14px", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.error} strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 8V12M12 16H12.01" /></svg>
-                        {error}
-                    </div>}
+                <div className="bg-white rounded-2xl p-6 shadow-lg">
+                    {error && (
+                        <div className="p-3 bg-red-50 rounded-xl text-red-600 text-sm mb-4 flex items-center gap-2 border border-red-100">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 8V12M12 16H12.01" /></svg>
+                            {error}
+                        </div>
+                    )}
 
-                    {/* Step 0: PDPA Consent */}
+                    {/* Step 0: PDPA */}
                     {step === 0 && (
                         <div>
-                            <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "16px", color: colors.textDark }}>ยินยอมข้อมูลส่วนบุคคล (PDPA)</h2>
-
+                            <h2 className="text-lg font-bold text-slate-800 mb-4">ยินยอมข้อมูลส่วนบุคคล (PDPA)</h2>
                             <div
                                 onScroll={(e) => {
                                     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-                                    if (scrollTop + clientHeight >= scrollHeight - 20) {
-                                        setPdpaScrolled(true);
-                                    }
+                                    if (scrollTop + clientHeight >= scrollHeight - 20) setPdpaScrolled(true);
                                 }}
-                                style={{
-                                    maxHeight: "280px",
-                                    overflowY: "auto",
-                                    padding: "16px",
-                                    backgroundColor: "#FAFAFA",
-                                    borderRadius: "12px",
-                                    marginBottom: "16px",
-                                    fontSize: "14px",
-                                    lineHeight: 1.7,
-                                    color: colors.textGray
-                                }}>
-                                <p style={{ fontWeight: 700, color: colors.textDark, marginBottom: "12px" }}>📋 วัตถุประสงค์ในการเก็บรวบรวมข้อมูล</p>
-                                <p style={{ marginBottom: "12px" }}>กรมการแพทย์แผนไทยและการแพทย์ทางเลือก (กระทรวงสาธารณสุข) มีความจำเป็นต้องเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของท่านเพื่อวัตถุประสงค์ดังต่อไปนี้:</p>
-                                <ul style={{ paddingLeft: "20px", marginBottom: "12px" }}>
+                                className="max-h-72 overflow-y-auto p-4 bg-slate-50 rounded-xl mb-4 text-sm text-slate-600 leading-relaxed"
+                            >
+                                <p className="font-bold text-slate-800 mb-3">📋 วัตถุประสงค์ในการเก็บรวบรวมข้อมูล</p>
+                                <p className="mb-3">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก มีความจำเป็นต้องเก็บข้อมูลส่วนบุคคลเพื่อ:</p>
+                                <ul className="list-disc pl-5 mb-3 space-y-1">
                                     <li>การยื่นขอการรับรองมาตรฐาน GACP</li>
                                     <li>การตรวจสอบและประเมินแหล่งปลูกพืชสมุนไพร</li>
                                     <li>การออกใบรับรองมาตรฐาน และการติดตามผล</li>
-                                    <li>การติดต่อสื่อสารเกี่ยวกับการรับรอง</li>
                                 </ul>
-
-                                <p style={{ fontWeight: 700, color: colors.textDark, marginBottom: "12px" }}>🔒 ข้อมูลที่จัดเก็บ</p>
-                                <ul style={{ paddingLeft: "20px", marginBottom: "12px" }}>
-                                    <li>ข้อมูลส่วนตัว: ชื่อ-นามสกุล, เลขบัตรประชาชน/ทะเบียนนิติบุคคล</li>
-                                    <li>ข้อมูลการติดต่อ: ที่อยู่, เบอร์โทรศัพท์, อีเมล</li>
+                                <p className="font-bold text-slate-800 mb-3">🔒 ข้อมูลที่จัดเก็บ</p>
+                                <ul className="list-disc pl-5 mb-3 space-y-1">
+                                    <li>ข้อมูลส่วนตัว: ชื่อ-นามสกุล, เลขบัตรประชาชน</li>
+                                    <li>ข้อมูลการติดต่อ: ที่อยู่, เบอร์โทร, อีเมล</li>
                                     <li>ข้อมูลสถานประกอบการ: พิกัด GPS, รูปถ่าย</li>
                                 </ul>
-
-                                <p style={{ fontWeight: 700, color: colors.textDark, marginBottom: "12px" }}>⏰ ระยะเวลาจัดเก็บ</p>
-                                <p style={{ marginBottom: "12px" }}>ข้อมูลจะถูกเก็บรักษาตลอดระยะเวลาที่ใบรับรองมีผลบังคับใช้ และอีก 5 ปีหลังจากหมดอายุ ตามกฎหมายที่เกี่ยวข้อง</p>
-
-                                <p style={{ fontWeight: 700, color: colors.textDark, marginBottom: "12px" }}>✅ สิทธิของท่าน</p>
-                                <p>ท่านมีสิทธิในการเข้าถึง แก้ไข ลบ หรือร้องขอให้ระงับการใช้ข้อมูลส่วนบุคคลของท่านได้ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</p>
+                                <p className="font-bold text-slate-800 mb-3">✅ สิทธิของท่าน</p>
+                                <p>ท่านมีสิทธิในการเข้าถึง แก้ไข ลบ หรือร้องขอให้ระงับการใช้ข้อมูลได้ตาม พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</p>
                             </div>
-
-                            {/* Scroll Indicator */}
-                            {!pdpaScrolled && (
-                                <p style={{ fontSize: "12px", color: colors.textGray, marginBottom: "12px", textAlign: "center" }}>
-                                    ⬇️ กรุณาเลื่อนอ่านข้อความด้านบนให้จบก่อน
-                                </p>
-                            )}
-
-                            <label style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "12px",
-                                padding: "16px",
-                                backgroundColor: pdpaAccepted ? "#E8F5E9" : pdpaScrolled ? "#FAFAFA" : "#F5F5F5",
-                                borderRadius: "12px",
-                                cursor: pdpaScrolled ? "pointer" : "not-allowed",
-                                border: pdpaAccepted ? `2px solid ${colors.primary}` : "2px solid transparent",
-                                transition: "all 0.2s",
-                                opacity: pdpaScrolled ? 1 : 0.6,
-                            }}>
-                                <input
-                                    type="checkbox"
-                                    checked={pdpaAccepted}
-                                    onChange={(e) => pdpaScrolled && setPdpaAccepted(e.target.checked)}
-                                    disabled={!pdpaScrolled}
-                                    style={{ width: "24px", height: "24px", marginTop: "2px", accentColor: colors.primary }}
-                                />
-                                <span style={{ fontSize: "14px", color: pdpaScrolled ? colors.textDark : colors.textGray, lineHeight: 1.5, fontWeight: 500 }}>
-                                    ข้าพเจ้าได้อ่านและยินยอมให้กรมการแพทย์แผนไทยและการแพทย์ทางเลือก เก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของข้าพเจ้าตามวัตถุประสงค์ที่ระบุไว้ข้างต้น
+                            {!pdpaScrolled && <p className="text-xs text-slate-400 mb-3 text-center">⬇️ กรุณาเลื่อนอ่านข้อความให้จบก่อน</p>}
+                            <label className={`flex items-start gap-3 p-4 rounded-xl cursor-pointer transition-all border-2 ${pdpaAccepted ? 'bg-emerald-50 border-emerald-500' : pdpaScrolled ? 'bg-slate-50 border-transparent hover:border-slate-200' : 'bg-slate-100 border-transparent opacity-60'}`}>
+                                <input type="checkbox" checked={pdpaAccepted} onChange={(e) => pdpaScrolled && setPdpaAccepted(e.target.checked)} disabled={!pdpaScrolled} className="w-6 h-6 mt-0.5 accent-emerald-600" />
+                                <span className={`text-sm leading-relaxed ${pdpaScrolled ? 'text-slate-700' : 'text-slate-400'}`}>
+                                    ข้าพเจ้าได้อ่านและยินยอมให้เก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลตามวัตถุประสงค์ที่ระบุ
                                 </span>
                             </label>
                         </div>
@@ -401,24 +292,21 @@ export default function RegisterPage() {
                     {/* Step 1: Account Type */}
                     {step === 1 && (
                         <div>
-                            <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "16px", color: colors.textDark }}>เลือกประเภทบัญชี</h2>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                            <h2 className="text-lg font-bold text-slate-800 mb-4">เลือกประเภทบัญชี</h2>
+                            <div className="flex flex-col gap-3">
                                 {ACCOUNT_TYPES.map((type) => {
                                     const isSelected = accountType === type.type;
                                     return (
-                                        <button key={type.type} type="button" onClick={() => setAccountType(type.type)} style={{
-                                            display: "flex", alignItems: "center", gap: "16px", padding: "16px", borderRadius: "12px",
-                                            border: isSelected ? "none" : `1px solid ${colors.border}`,
-                                            backgroundColor: isSelected ? colors.primary : colors.card, cursor: "pointer", textAlign: "left"
-                                        }}>
-                                            <div style={{ width: "48px", height: "48px", borderRadius: "12px", backgroundColor: isSelected ? "rgba(255,255,255,0.2)" : "#F5F5F5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <button key={type.type} type="button" onClick={() => setAccountType(type.type)}
+                                            className={`flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${isSelected ? 'bg-emerald-700 border-emerald-700' : 'bg-white border-slate-200 hover:border-emerald-300'}`}>
+                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isSelected ? 'bg-white/20' : 'bg-slate-100'}`}>
                                                 {getIcon(type.type, isSelected)}
                                             </div>
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ fontWeight: 700, color: isSelected ? "#FFFFFF" : colors.textDark }}>{type.label}</div>
-                                                <div style={{ fontSize: "12px", color: isSelected ? "rgba(255,255,255,0.8)" : colors.textGray }}>{type.subtitle}</div>
+                                            <div className="flex-1">
+                                                <div className={`font-bold ${isSelected ? 'text-white' : 'text-slate-800'}`}>{type.label}</div>
+                                                <div className={`text-xs ${isSelected ? 'text-white/80' : 'text-slate-500'}`}>{type.subtitle}</div>
                                             </div>
-                                            {isSelected && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg>}
+                                            {isSelected && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg>}
                                         </button>
                                     );
                                 })}
@@ -429,57 +317,27 @@ export default function RegisterPage() {
                     {/* Step 2: Identifier */}
                     {step === 2 && currentConfig && (
                         <div>
-                            <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "8px", color: colors.textDark }}>ยืนยันตัวตน</h2>
-                            <p style={{ color: colors.textGray, marginBottom: "16px", fontSize: "14px" }}>กรอก{currentConfig.idLabel}</p>
-                            <div style={{ position: "relative" }}>
-                                <div style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)" }}><PersonIcon color={colors.primary} /></div>
-                                <input
-                                    type="text"
-                                    value={identifier}
-                                    onChange={(e) => {
-                                        const formatted = formatThaiId(e.target.value);
-                                        setIdentifier(formatted);
-                                        validateField('identifier', formatted);
-                                    }}
-                                    placeholder={currentConfig.idHint}
-                                    maxLength={17}
-                                    style={{
-                                        ...inputStyle,
-                                        paddingLeft: "48px",
-                                        paddingRight: "48px",
-                                        fontFamily: "monospace",
-                                        letterSpacing: "1px",
-                                        borderColor: fieldErrors.identifier?.includes("ไม่ถูกต้อง") ? colors.error :
-                                            identifier.replace(/-/g, "").length === 13 && !fieldErrors.identifier ? "#22C55E" : colors.border,
-                                        borderWidth: "2px"
-                                    }}
+                            <h2 className="text-lg font-bold text-slate-800 mb-2">ยืนยันตัวตน</h2>
+                            <p className="text-slate-500 mb-4 text-sm">กรอก{currentConfig.idLabel}</p>
+                            <div className="relative">
+                                <div className="absolute left-3.5 top-1/2 -translate-y-1/2"><PersonIcon color="#059669" /></div>
+                                <input type="text" value={identifier}
+                                    onChange={(e) => { const formatted = formatThaiId(e.target.value); setIdentifier(formatted); validateField('identifier', formatted); }}
+                                    placeholder={currentConfig.idHint} maxLength={17}
+                                    className={`${inputClass} pl-12 pr-12 font-mono tracking-wider border-2 ${fieldErrors.identifier?.includes("ไม่ถูกต้อง") ? 'border-red-500' : identifier.replace(/-/g, "").length === 13 && !fieldErrors.identifier ? 'border-green-500' : 'border-slate-200'}`}
                                 />
-                                {/* Validation icon */}
-                                <div style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)" }}>
+                                <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
                                     {identifier.replace(/-/g, "").length === 13 && !fieldErrors.identifier?.includes("ไม่ถูกต้อง") && (
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg>
                                     )}
                                     {fieldErrors.identifier?.includes("ไม่ถูกต้อง") && (
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={colors.error} strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M15 9L9 15M9 9L15 15" /></svg>
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M15 9L9 15M9 9L15 15" /></svg>
                                     )}
                                 </div>
                             </div>
-                            {/* Inline error message */}
-                            {fieldErrors.identifier && (
-                                <p style={{
-                                    fontSize: "13px",
-                                    marginTop: "8px",
-                                    color: fieldErrors.identifier.includes("ไม่ถูกต้อง") ? colors.error : colors.textGray,
-                                    display: "flex", alignItems: "center", gap: "4px"
-                                }}>
-                                    {fieldErrors.identifier.includes("ไม่ถูกต้อง") && (
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={colors.error} strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 8v4m0 4h.01" /></svg>
-                                    )}
-                                    {fieldErrors.identifier}
-                                </p>
-                            )}
-                            <div style={{ marginTop: "16px", padding: "12px 16px", backgroundColor: colors.infoBg, borderRadius: "12px", color: colors.primary, fontSize: "13px", display: "flex", alignItems: "center", gap: "8px" }}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={colors.primary} strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 16V12M12 8H12.01" /></svg>
+                            {fieldErrors.identifier && <p className={`text-sm mt-2 ${fieldErrors.identifier.includes("ไม่ถูกต้อง") ? 'text-red-500' : 'text-slate-500'}`}>{fieldErrors.identifier}</p>}
+                            <div className="mt-4 p-3 bg-emerald-50 rounded-xl text-emerald-700 text-sm flex items-center gap-2">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 16V12M12 8H12.01" /></svg>
                                 หมายเลขนี้จะใช้เป็น Username ในการเข้าสู่ระบบ
                             </div>
                         </div>
@@ -488,57 +346,43 @@ export default function RegisterPage() {
                     {/* Step 3: Info */}
                     {step === 3 && (
                         <div>
-                            <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "16px", color: colors.textDark }}>{accountType === "INDIVIDUAL" ? "ข้อมูลส่วนตัว" : "ข้อมูลองค์กร"}</h2>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                                {accountType === "INDIVIDUAL" && (<><div><label style={labelStyle}>ชื่อ</label><input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="สมชาย" style={inputStyle} /></div><div><label style={labelStyle}>นามสกุล</label><input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="ใจดี" style={inputStyle} /></div></>)}
-                                {accountType === "JURISTIC" && (<><div><label style={labelStyle}>ชื่อบริษัท/นิติบุคคล</label><input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="บริษัท ABC จำกัด" style={inputStyle} /></div><div><label style={labelStyle}>ชื่อผู้มีอำนาจ</label><input type="text" value={representativeName} onChange={(e) => setRepresentativeName(e.target.value)} placeholder="นายสมชาย ใจดี" style={inputStyle} /></div></>)}
-                                {accountType === "COMMUNITY_ENTERPRISE" && (<><div><label style={labelStyle}>ชื่อวิสาหกิจชุมชน</label><input type="text" value={communityName} onChange={(e) => setCommunityName(e.target.value)} placeholder="กลุ่มเกษตรกรบ้านป่า" style={inputStyle} /></div><div><label style={labelStyle}>ชื่อผู้ติดต่อ</label><input type="text" value={representativeName} onChange={(e) => setRepresentativeName(e.target.value)} placeholder="นายสมชาย ใจดี" style={inputStyle} /></div></>)}
+                            <h2 className="text-lg font-bold text-slate-800 mb-4">{accountType === "INDIVIDUAL" ? "ข้อมูลส่วนตัว" : "ข้อมูลองค์กร"}</h2>
+                            <div className="space-y-4">
+                                {accountType === "INDIVIDUAL" && (
+                                    <>
+                                        <div><label className={labelClass}>ชื่อ</label><input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="สมชาย" className={inputClass} /></div>
+                                        <div><label className={labelClass}>นามสกุล</label><input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="ใจดี" className={inputClass} /></div>
+                                    </>
+                                )}
+                                {accountType === "JURISTIC" && (
+                                    <>
+                                        <div><label className={labelClass}>ชื่อบริษัท/นิติบุคคล</label><input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="บริษัท ABC จำกัด" className={inputClass} /></div>
+                                        <div><label className={labelClass}>ชื่อผู้มีอำนาจ</label><input type="text" value={representativeName} onChange={(e) => setRepresentativeName(e.target.value)} placeholder="นายสมชาย ใจดี" className={inputClass} /></div>
+                                    </>
+                                )}
+                                {accountType === "COMMUNITY_ENTERPRISE" && (
+                                    <>
+                                        <div><label className={labelClass}>ชื่อวิสาหกิจชุมชน</label><input type="text" value={communityName} onChange={(e) => setCommunityName(e.target.value)} placeholder="กลุ่มเกษตรกรบ้านป่า" className={inputClass} /></div>
+                                        <div><label className={labelClass}>ชื่อผู้ติดต่อ</label><input type="text" value={representativeName} onChange={(e) => setRepresentativeName(e.target.value)} placeholder="นายสมชาย ใจดี" className={inputClass} /></div>
+                                    </>
+                                )}
                                 <div>
-                                    <label style={labelStyle}>เบอร์โทรศัพท์</label>
-                                    <input
-                                        type="tel"
-                                        value={phone}
-                                        onChange={(e) => {
-                                            const val = e.target.value.replace(/\D/g, "").slice(0, 10);
-                                            setPhone(val);
-                                            validateField('phone', val);
-                                        }}
+                                    <label className={labelClass}>เบอร์โทรศัพท์</label>
+                                    <input type="tel" value={phone}
+                                        onChange={(e) => { const val = e.target.value.replace(/\D/g, "").slice(0, 10); setPhone(val); validateField('phone', val); }}
                                         placeholder="0812345678"
-                                        style={{
-                                            ...inputStyle,
-                                            borderColor: fieldErrors.phone?.includes("ต้องขึ้นต้น") ? colors.error :
-                                                phone.length === 10 && !fieldErrors.phone ? "#22C55E" : colors.border,
-                                            borderWidth: "2px"
-                                        }}
+                                        className={`${inputClass} border-2 ${fieldErrors.phone?.includes("ต้องขึ้นต้น") ? 'border-red-500' : phone.length === 10 && !fieldErrors.phone ? 'border-green-500' : 'border-slate-200'}`}
                                     />
-                                    {fieldErrors.phone && (
-                                        <p style={{ fontSize: "13px", marginTop: "6px", color: fieldErrors.phone.includes("ต้องขึ้นต้น") ? colors.error : colors.textGray }}>
-                                            {fieldErrors.phone}
-                                        </p>
-                                    )}
+                                    {fieldErrors.phone && <p className={`text-sm mt-1.5 ${fieldErrors.phone.includes("ต้องขึ้นต้น") ? 'text-red-500' : 'text-slate-500'}`}>{fieldErrors.phone}</p>}
                                 </div>
                                 <div>
-                                    <label style={labelStyle}>อีเมล <span style={{ color: colors.textGray, fontWeight: 400 }}>(ไม่บังคับ - สำหรับกู้คืนรหัสผ่าน)</span></label>
-                                    <input
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) => {
-                                            setEmail(e.target.value);
-                                            validateField('email', e.target.value);
-                                        }}
+                                    <label className={labelClass}>อีเมล <span className="text-slate-400 font-normal">(ไม่บังคับ)</span></label>
+                                    <input type="email" value={email}
+                                        onChange={(e) => { setEmail(e.target.value); validateField('email', e.target.value); }}
                                         placeholder="email@example.com"
-                                        style={{
-                                            ...inputStyle,
-                                            borderColor: fieldErrors.email ? colors.error :
-                                                email && !fieldErrors.email ? "#22C55E" : colors.border,
-                                            borderWidth: email ? "2px" : "1px"
-                                        }}
+                                        className={`${inputClass} ${email ? 'border-2' : ''} ${fieldErrors.email ? 'border-red-500' : email && !fieldErrors.email ? 'border-green-500' : ''}`}
                                     />
-                                    {fieldErrors.email && (
-                                        <p style={{ fontSize: "13px", marginTop: "6px", color: colors.error }}>
-                                            {fieldErrors.email}
-                                        </p>
-                                    )}
+                                    {fieldErrors.email && <p className="text-sm mt-1.5 text-red-500">{fieldErrors.email}</p>}
                                 </div>
                             </div>
                         </div>
@@ -547,142 +391,69 @@ export default function RegisterPage() {
                     {/* Step 4: Password */}
                     {step === 4 && (
                         <div>
-                            <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "16px", color: colors.textDark }}>ตั้งรหัสผ่าน</h2>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                            <h2 className="text-lg font-bold text-slate-800 mb-4">ตั้งรหัสผ่าน</h2>
+                            <div className="space-y-4">
                                 <div>
-                                    <label style={labelStyle}>รหัสผ่าน</label>
-                                    <div style={{ position: "relative" }}>
-                                        <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="อย่างน้อย 8 ตัวอักษร" style={{ ...inputStyle, paddingRight: "48px" }} />
-                                        <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer" }}><EyeIcon open={showPassword} /></button>
+                                    <label className={labelClass}>รหัสผ่าน</label>
+                                    <div className="relative">
+                                        <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="อย่างน้อย 8 ตัวอักษร" className={`${inputClass} pr-12`} />
+                                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1"><EyeIcon open={showPassword} /></button>
                                     </div>
-                                    {/* Password Strength Indicator */}
                                     {password && (
-                                        <div style={{ marginTop: "8px" }}>
-                                            <div style={{ display: "flex", gap: "4px", marginBottom: "6px" }}>
+                                        <div className="mt-2">
+                                            <div className="flex gap-1 mb-1.5">
                                                 {[1, 2, 3, 4, 5].map(i => (
-                                                    <div key={i} style={{
-                                                        flex: 1, height: "4px", borderRadius: "2px",
-                                                        backgroundColor: i <= getPasswordStrength(password).level ? getPasswordStrength(password).color : "#E5E7EB"
-                                                    }} />
+                                                    <div key={i} className={`flex-1 h-1 rounded ${i <= getPasswordStrength(password).level ? getPasswordStrength(password).color : 'bg-slate-200'}`} />
                                                 ))}
                                             </div>
-                                            <p style={{ fontSize: "12px", color: getPasswordStrength(password).color, fontWeight: 500, marginBottom: "8px" }}>
-                                                ความแข็งแกร่ง: {getPasswordStrength(password).label}
-                                            </p>
-                                            {/* Password Requirements Checklist */}
-                                            <div style={{ fontSize: "12px", display: "flex", flexDirection: "column", gap: "4px" }}>
-                                                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: password.length >= 8 ? "#22C55E" : colors.textGray }}>
-                                                    {password.length >= 8 ? "✅" : "⬜"} อย่างน้อย 8 ตัวอักษร
-                                                </div>
-                                                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: /[a-z]/.test(password) && /[A-Z]/.test(password) ? "#22C55E" : colors.textGray }}>
-                                                    {/[a-z]/.test(password) && /[A-Z]/.test(password) ? "✅" : "⬜"} มีตัวพิมพ์เล็กและใหญ่
-                                                </div>
-                                                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: /\d/.test(password) ? "#22C55E" : colors.textGray }}>
-                                                    {/\d/.test(password) ? "✅" : "⬜"} มีตัวเลข
-                                                </div>
-                                                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: /[!@#$%^&*(),.?":{}|<>]/.test(password) ? "#22C55E" : colors.textGray }}>
-                                                    {/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "✅" : "⬜"} มีอักขระพิเศษ (!@#$%...)
-                                                </div>
+                                            <p className={`text-xs font-medium ${getPasswordStrength(password).color.replace('bg-', 'text-')}`}>ความแข็งแกร่ง: {getPasswordStrength(password).label}</p>
+                                            <div className="text-xs mt-2 space-y-1">
+                                                <div className={`flex items-center gap-1.5 ${password.length >= 8 ? 'text-green-500' : 'text-slate-400'}`}>{password.length >= 8 ? "✅" : "⬜"} อย่างน้อย 8 ตัวอักษร</div>
+                                                <div className={`flex items-center gap-1.5 ${/[a-z]/.test(password) && /[A-Z]/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>{/[a-z]/.test(password) && /[A-Z]/.test(password) ? "✅" : "⬜"} มีตัวพิมพ์เล็กและใหญ่</div>
+                                                <div className={`flex items-center gap-1.5 ${/\d/.test(password) ? 'text-green-500' : 'text-slate-400'}`}>{/\d/.test(password) ? "✅" : "⬜"} มีตัวเลข</div>
                                             </div>
                                         </div>
                                     )}
                                 </div>
                                 <div>
-                                    <label style={labelStyle}>ยืนยันรหัสผ่าน</label>
-                                    <div style={{ position: "relative" }}>
-                                        <input
-                                            type={showConfirmPassword ? "text" : "password"}
-                                            value={confirmPassword}
-                                            onChange={(e) => {
-                                                setConfirmPassword(e.target.value);
-                                                validateField('confirmPassword', e.target.value);
-                                            }}
+                                    <label className={labelClass}>ยืนยันรหัสผ่าน</label>
+                                    <div className="relative">
+                                        <input type={showConfirmPassword ? "text" : "password"} value={confirmPassword}
+                                            onChange={(e) => { setConfirmPassword(e.target.value); validateField('confirmPassword', e.target.value); }}
                                             placeholder="กรอกรหัสผ่านอีกครั้ง"
-                                            style={{
-                                                ...inputStyle,
-                                                paddingRight: "48px",
-                                                borderColor: confirmPassword && password !== confirmPassword ? colors.error :
-                                                    confirmPassword && password === confirmPassword ? "#22C55E" : colors.border,
-                                                borderWidth: "2px"
-                                            }}
+                                            className={`${inputClass} pr-12 border-2 ${confirmPassword && password !== confirmPassword ? 'border-red-500' : confirmPassword && password === confirmPassword ? 'border-green-500' : 'border-slate-200'}`}
                                         />
-                                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer" }}><EyeIcon open={showConfirmPassword} /></button>
+                                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1"><EyeIcon open={showConfirmPassword} /></button>
                                     </div>
-                                    {confirmPassword && password !== confirmPassword && (
-                                        <p style={{ color: colors.error, fontSize: "12px", marginTop: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={colors.error} strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M15 9L9 15M9 9L15 15" /></svg>
-                                            รหัสผ่านไม่ตรงกัน
-                                        </p>
-                                    )}
-                                    {confirmPassword && password === confirmPassword && (
-                                        <p style={{ color: "#22C55E", fontSize: "12px", marginTop: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg>
-                                            รหัสผ่านตรงกัน
-                                        </p>
-                                    )}
+                                    {confirmPassword && password !== confirmPassword && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">❌ รหัสผ่านไม่ตรงกัน</p>}
+                                    {confirmPassword && password === confirmPassword && <p className="text-green-500 text-xs mt-1.5 flex items-center gap-1">✅ รหัสผ่านตรงกัน</p>}
                                 </div>
-                                <label style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "16px", backgroundColor: "#FAFAFA", borderRadius: "12px", cursor: "pointer" }}>
-                                    <input type="checkbox" checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} style={{ width: "20px", height: "20px", marginTop: "2px", accentColor: colors.primary }} />
-                                    <span style={{ fontSize: "14px", color: colors.textGray, lineHeight: 1.5 }}>ข้าพเจ้ายอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว</span>
+                                <label className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl cursor-pointer">
+                                    <input type="checkbox" checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} className="w-5 h-5 mt-0.5 accent-emerald-600" />
+                                    <span className="text-sm text-slate-600">ข้าพเจ้ายอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว</span>
                                 </label>
                             </div>
                         </div>
                     )}
 
-                    {/* Navigation - 🍎 Liquid Glass */}
-                    <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
-                        {step > 0 && <button type="button" onClick={() => setStep(step - 1)} style={{
-                            flex: 1, padding: "16px", border: `1px solid ${colors.border}`,
-                            backgroundColor: "transparent", color: colors.textDark, borderRadius: "14px",
-                            fontSize: "15px", fontWeight: 600, cursor: "pointer",
-                            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
-                        }}>ย้อนกลับ</button>}
-                        <button type="button" onClick={() => step < 4 ? setStep(step + 1) : handleSubmit()} disabled={!canProceed() || isLoading} style={{
-                            flex: 1, padding: "18px",
-                            backgroundColor: !canProceed() || isLoading ? "#94A3B8" : colors.primary,
-                            color: "#FFFFFF", border: "none", borderRadius: "14px",
-                            fontSize: "16px", fontWeight: 700,
-                            cursor: !canProceed() || isLoading ? "not-allowed" : "pointer",
-                            display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                            boxShadow: !canProceed() || isLoading ? "none" : "0 4px 14px rgba(27, 94, 32, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1)",
-                            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                            minHeight: "54px"
-                        }}>
-                            {isLoading ? <span className="spinner"></span> : step < 4 ? <>ถัดไป <span style={{ fontSize: "18px" }}>→</span></> : <>ลงทะเบียน <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg></>}
+                    {/* Navigation */}
+                    <div className="flex gap-3 mt-6">
+                        {step > 0 && (
+                            <button type="button" onClick={() => setStep(step - 1)}
+                                className="flex-1 py-4 border border-slate-200 bg-transparent text-slate-700 rounded-2xl text-sm font-semibold hover:bg-slate-50 transition-colors">
+                                ย้อนกลับ
+                            </button>
+                        )}
+                        <button type="button" onClick={() => step < 4 ? setStep(step + 1) : handleSubmit()} disabled={!canProceed() || isLoading}
+                            className={`flex-1 py-4 rounded-2xl text-white text-base font-bold flex items-center justify-center gap-2 transition-all ${!canProceed() || isLoading ? 'bg-slate-400 cursor-not-allowed' : 'bg-emerald-700 hover:bg-emerald-800 shadow-lg shadow-emerald-700/30'}`}>
+                            {isLoading ? <span className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                                : step < 4 ? <>ถัดไป <span className="text-lg">→</span></> : <>ลงทะเบียน ✓</>}
                         </button>
                     </div>
                 </div>
 
-                {/* Footer */}
-                <div style={{ marginTop: "24px", textAlign: "center", color: colors.textGray, fontSize: "12px" }}>
-                    <p>🔒 ข้อมูลของคุณจะถูกเก็บรักษาอย่างปลอดภัย</p>
-                </div>
+                <div className="mt-6 text-center text-slate-400 text-xs">🔒 ข้อมูลของคุณจะถูกเก็บรักษาอย่างปลอดภัย</div>
             </div>
-
-            <style jsx global>{`
-                @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;900&display=swap');
-                * { box-sizing: border-box; margin: 0; padding: 0; }
-                input:focus { border-color: ${colors.primary} !important; box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.15); }
-                
-                /* 🍎 Liquid Glass Button Effects */
-                button[type="button"]:not(:disabled):hover {
-                    transform: scale(1.02) translateY(-1px);
-                    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-                }
-                button[type="button"]:not(:disabled):active {
-                    transform: scale(0.98);
-                }
-                
-                .spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
-                @keyframes spin { to { transform: rotate(360deg); } }
-                @keyframes shake {
-                    0%, 100% { transform: translateX(0); }
-                    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-                    20%, 40%, 60%, 80% { transform: translateX(4px); }
-                }
-                .shake { animation: shake 0.5s ease-in-out; }
-            `}</style>
         </div>
     );
 }
-

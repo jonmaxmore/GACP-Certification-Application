@@ -3,8 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import api from "@/services/api-client";
-import { colors } from "@/lib/design-tokens";
-
 
 export default function ForgotPasswordPage() {
     const [input, setInput] = useState("");
@@ -13,20 +11,14 @@ export default function ForgotPasswordPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // Validation  
     const validatePhone = (value: string) => /^0[689]\d{8}$/.test(value);
     const validateEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-
-    const isValid = inputType === "phone"
-        ? validatePhone(input)
-        : validateEmail(input);
+    const isValid = inputType === "phone" ? validatePhone(input) : validateEmail(input);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!isValid) {
-            setError(inputType === "phone"
-                ? "กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (เช่น 0812345678)"
-                : "กรุณากรอกอีเมลให้ถูกต้อง");
+            setError(inputType === "phone" ? "กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (เช่น 0812345678)" : "กรุณากรอกอีเมลให้ถูกต้อง");
             return;
         }
 
@@ -34,15 +26,9 @@ export default function ForgotPasswordPage() {
         setError("");
 
         try {
-            const result = await api.post("/auth-farmer/reset-password", {
-                [inputType]: input
-            });
-
-            if (result.success) {
-                setSent(true);
-            } else {
-                setError(result.error || "ไม่สามารถส่งลิงก์รีเซ็ตได้ กรุณาลองใหม่");
-            }
+            const result = await api.post("/auth-farmer/reset-password", { [inputType]: input });
+            if (result.success) setSent(true);
+            else setError(result.error || "ไม่สามารถส่งลิงก์รีเซ็ตได้ กรุณาลองใหม่");
         } catch {
             setError("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่");
         } finally {
@@ -51,72 +37,46 @@ export default function ForgotPasswordPage() {
     };
 
     return (
-        <div style={{ minHeight: "100vh", backgroundColor: colors.background, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px", fontFamily: "'Kanit', sans-serif" }}>
-            <div style={{ maxWidth: "400px", width: "100%" }}>
-                <div style={{ textAlign: "center", marginBottom: "32px" }}>
-                    <div style={{ fontSize: "48px", marginBottom: "16px" }}>🔐</div>
-                    <h1 style={{ fontSize: "26px", fontWeight: 700, color: colors.primary }}>ลืมรหัสผ่าน</h1>
-                    <p style={{ color: colors.textGray, marginTop: "8px" }}>กรอกข้อมูลเพื่อรับลิงก์รีเซ็ตรหัสผ่าน</p>
+        <div className="min-h-screen bg-stone-50 flex items-center justify-center p-6">
+            <div className="max-w-md w-full">
+                <div className="text-center mb-8">
+                    <div className="text-5xl mb-4">🔐</div>
+                    <h1 className="text-2xl font-bold text-emerald-700">ลืมรหัสผ่าน</h1>
+                    <p className="text-slate-500 mt-2">กรอกข้อมูลเพื่อรับลิงก์รีเซ็ตรหัสผ่าน</p>
                 </div>
 
-                <div style={{ backgroundColor: colors.card, borderRadius: "16px", padding: "24px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
+                <div className="bg-white rounded-2xl p-6 shadow-lg">
                     {sent ? (
-                        <div style={{ textAlign: "center", padding: "20px 0" }}>
-                            <div style={{
-                                width: "64px", height: "64px",
-                                background: colors.successBg,
-                                borderRadius: "50%",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                margin: "0 auto 16px",
-                            }}>
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={colors.success} strokeWidth="2">
+                        <div className="text-center py-5">
+                            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2">
                                     <path d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <h2 style={{ color: colors.success, marginBottom: "8px", fontWeight: 600 }}>ส่งลิงก์เรียบร้อยแล้ว!</h2>
-                            <p style={{ color: colors.textGray, fontSize: "14px", marginBottom: "16px" }}>
+                            <h2 className="text-emerald-600 font-semibold mb-2">ส่งลิงก์เรียบร้อยแล้ว!</h2>
+                            <p className="text-slate-500 text-sm mb-4">
                                 {inputType === "phone" ? "กรุณาตรวจสอบ SMS ของคุณ" : "กรุณาตรวจสอบอีเมลของคุณ"}
                             </p>
-                            <button onClick={() => { setSent(false); setInput(""); }} style={{
-                                padding: "10px 20px",
-                                background: "transparent",
-                                border: `1px solid ${colors.primary}`,
-                                borderRadius: "8px",
-                                color: colors.primary,
-                                fontSize: "14px",
-                                cursor: "pointer",
-                                fontFamily: "'Kanit', sans-serif",
-                            }}>
+                            <button onClick={() => { setSent(false); setInput(""); }}
+                                className="px-5 py-2.5 bg-transparent border border-emerald-600 rounded-lg text-emerald-600 text-sm hover:bg-emerald-50 transition-colors">
                                 ส่งอีกครั้ง
                             </button>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit}>
                             {/* Input Type Selector */}
-                            <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
-                                <button type="button" onClick={() => { setInputType("phone"); setInput(""); setError(""); }} style={{
-                                    flex: 1, padding: "10px", borderRadius: "8px",
-                                    border: inputType === "phone" ? `2px solid ${colors.primary}` : "1px solid #E0E0E0",
-                                    background: inputType === "phone" ? "#E8F5E9" : "white",
-                                    color: inputType === "phone" ? colors.primary : colors.textGray,
-                                    fontSize: "13px", fontWeight: 500, cursor: "pointer",
-                                    fontFamily: "'Kanit', sans-serif",
-                                }}>
+                            <div className="flex gap-2 mb-4">
+                                <button type="button" onClick={() => { setInputType("phone"); setInput(""); setError(""); }}
+                                    className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${inputType === "phone" ? 'bg-emerald-50 border-2 border-emerald-600 text-emerald-700' : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300'}`}>
                                     📱 เบอร์โทรศัพท์
                                 </button>
-                                <button type="button" onClick={() => { setInputType("email"); setInput(""); setError(""); }} style={{
-                                    flex: 1, padding: "10px", borderRadius: "8px",
-                                    border: inputType === "email" ? `2px solid ${colors.primary}` : "1px solid #E0E0E0",
-                                    background: inputType === "email" ? "#E8F5E9" : "white",
-                                    color: inputType === "email" ? colors.primary : colors.textGray,
-                                    fontSize: "13px", fontWeight: 500, cursor: "pointer",
-                                    fontFamily: "'Kanit', sans-serif",
-                                }}>
+                                <button type="button" onClick={() => { setInputType("email"); setInput(""); setError(""); }}
+                                    className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${inputType === "email" ? 'bg-emerald-50 border-2 border-emerald-600 text-emerald-700' : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300'}`}>
                                     ✉️ อีเมล
                                 </button>
                             </div>
 
-                            <label style={{ fontSize: "13px", fontWeight: 600, color: colors.primary, display: "block", marginBottom: "8px" }}>
+                            <label className="text-sm font-semibold text-emerald-700 block mb-2">
                                 {inputType === "phone" ? "เบอร์โทรศัพท์" : "อีเมล"}
                             </label>
                             <input
@@ -124,74 +84,47 @@ export default function ForgotPasswordPage() {
                                 value={input}
                                 onChange={(e) => { setInput(e.target.value); setError(""); }}
                                 placeholder={inputType === "phone" ? "0812345678" : "example@email.com"}
-                                style={{
-                                    width: "100%", padding: "14px 16px",
-                                    border: `1px solid ${error ? colors.error : isValid && input ? colors.success : "#E0E0E0"}`,
-                                    borderRadius: "12px", fontSize: "16px", marginBottom: "8px",
-                                    outline: "none",
-                                }}
+                                className={`w-full py-3.5 px-4 border rounded-xl text-base outline-none focus:ring-2 focus:ring-emerald-100 mb-2 ${error ? 'border-red-500' : isValid && input ? 'border-green-500' : 'border-slate-200'} focus:border-emerald-500`}
                                 required
                             />
 
-                            {/* Validation Hint */}
                             {input && !isValid && (
-                                <p style={{ fontSize: "12px", color: colors.textGray, marginBottom: "12px" }}>
+                                <p className="text-xs text-slate-500 mb-3">
                                     {inputType === "phone" ? `กรอกแล้ว ${input.length}/10 หลัก` : "รูปแบบอีเมลไม่ถูกต้อง"}
                                 </p>
                             )}
 
-                            {/* Error Message */}
                             {error && (
-                                <div style={{
-                                    padding: "12px", backgroundColor: colors.errorBg,
-                                    borderRadius: "8px", marginBottom: "16px",
-                                    display: "flex", alignItems: "center", gap: "8px",
-                                }}>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={colors.error} strokeWidth="2">
+                                <div className="p-3 bg-red-50 rounded-lg mb-4 flex items-center gap-2 border border-red-100">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2">
                                         <circle cx="12" cy="12" r="10" /><path d="M12 8v4m0 4h.01" />
                                     </svg>
-                                    <span style={{ color: colors.error, fontSize: "13px" }}>{error}</span>
+                                    <span className="text-red-600 text-sm">{error}</span>
                                 </div>
                             )}
 
-                            <button type="submit" disabled={isLoading || !isValid} style={{
-                                width: "100%", padding: "16px",
-                                backgroundColor: isLoading || !isValid ? "#9CA3AF" : colors.primary,
-                                color: "#FFF", fontSize: "16px", fontWeight: 600,
-                                border: "none", borderRadius: "12px",
-                                cursor: isLoading || !isValid ? "not-allowed" : "pointer",
-                                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                                fontFamily: "'Kanit', sans-serif",
-                            }}>
+                            <button type="submit" disabled={isLoading || !isValid}
+                                className={`w-full py-4 rounded-xl text-white text-base font-semibold flex items-center justify-center gap-2 transition-all ${isLoading || !isValid ? 'bg-slate-400 cursor-not-allowed' : 'bg-emerald-700 hover:bg-emerald-800 shadow-lg shadow-emerald-700/30'}`}>
                                 {isLoading ? (
                                     <>
-                                        <div style={{ width: "18px", height: "18px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "white", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                         กำลังส่ง...
                                     </>
-                                ) : (
-                                    "ส่งลิงก์รีเซ็ต"
-                                )}
+                                ) : "ส่งลิงก์รีเซ็ต"}
                             </button>
                         </form>
                     )}
                 </div>
 
-                <div style={{ textAlign: "center", marginTop: "24px" }}>
-                    <Link href="/login" style={{ color: colors.primary, textDecoration: "none", fontSize: "14px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={colors.primary} strokeWidth="2">
+                <div className="text-center mt-6">
+                    <Link href="/login" className="text-emerald-600 text-sm inline-flex items-center gap-1 hover:underline">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M15 18L9 12L15 6" />
                         </svg>
                         กลับไปหน้าเข้าสู่ระบบ
                     </Link>
                 </div>
             </div>
-
-            <style jsx global>{`
-                @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
-                * { box-sizing: border-box; margin: 0; padding: 0; }
-                @keyframes spin { to { transform: rotate(360deg); } }
-            `}</style>
         </div>
     );
 }
-

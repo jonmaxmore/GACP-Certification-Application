@@ -70,11 +70,12 @@ export default function StaffLoginPage() {
 
             const { user, token } = result.data;
 
-            // Validate staff role (case-insensitive)
+            // Validate staff role (case-insensitive) - 4 roles: admin, scheduler, assessor, accountant
             const staffRoles = [
-                'reviewer_auditor', 'scheduler', 'accountant', 'admin', 'super_admin',
-                'REVIEWER_AUDITOR', 'SCHEDULER', 'ACCOUNTANT', 'ADMIN', 'SUPER_ADMIN',
-                'reviewer', 'manager', 'inspector', 'auditor'
+                'admin', 'scheduler', 'assessor', 'accountant',
+                'ADMIN', 'SCHEDULER', 'ASSESSOR', 'ACCOUNTANT',
+                // Legacy roles (for backward compatibility during transition)
+                'inspector', 'auditor', 'reviewer', 'manager'
             ];
             const userRole = (user.role || '').toLowerCase();
             if (!staffRoles.map(r => r.toLowerCase()).includes(userRole)) {

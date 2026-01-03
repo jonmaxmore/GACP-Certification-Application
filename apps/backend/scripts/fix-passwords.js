@@ -16,7 +16,7 @@ async function fixPasswords() {
 
     const result = await prisma.dTAMStaff.updateMany({
         where: {
-            username: { in: ['accountant', 'scheduler', 'admin', 'inspector1', 'auditor1', 'reviewer1'] }
+            username: { in: ['admin', 'assessor', 'accountant', 'scheduler', 'inspector1', 'auditor1', 'reviewer1'] }
         },
         data: {
             password: freshHash,

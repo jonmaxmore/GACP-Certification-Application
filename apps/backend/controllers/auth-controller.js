@@ -1,5 +1,6 @@
 // Using Prisma (PostgreSQL) instead of MongoDB
 const AuthService = require('../services/prisma-auth-service');
+const { auditLogger, AuditCategory, AuditSeverity } = require('../middleware/audit-logger');
 
 const fs = require('fs');
 
@@ -56,6 +57,17 @@ class AuthController {
             }
 
             const user = await AuthService.register(userData);
+
+            // 🔒 ISO 27799: Log successful registration
+            await auditLogger.logAuth(
+                'REGISTER_SUCCESS',
+                user.id,
+                'FARMER',
+                'SUCCESS',
+                req.ip || req.connection?.remoteAddress,
+                req.headers['user-agent'],
+                { accountType }
+            );
 
             res.status(201).json({
                 success: true,
@@ -152,8 +164,31 @@ class AuthController {
                 }
             });
 
+            // 🔒 ISO 27799: Log successful authentication
+            await auditLogger.logAuth(
+                'LOGIN_SUCCESS',
+                result.user.id,
+                result.user.role,
+                'SUCCESS',
+                req.ip || req.connection?.remoteAddress,
+                req.headers['user-agent'],
+                { accountType, identifier: loginId?.substring(0, 4) + '****' }
+            );
+
         } catch (error) {
             console.error('[AuthController] Login Error:', error.message);
+
+            // 🔒 ISO 27799: Log failed authentication
+            await auditLogger.logAuth(
+                'LOGIN_FAILURE',
+                'ANONYMOUS',
+                'UNKNOWN',
+                'FAILURE',
+                req.ip || req.connection?.remoteAddress,
+                req.headers['user-agent'],
+                { reason: error.message, accountType }
+            );
+
             res.status(401).json({
                 success: false,
                 error: error.message

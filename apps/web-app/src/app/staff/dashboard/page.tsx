@@ -189,8 +189,9 @@ export default function StaffDashboardPage() {
 
     if (!user) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-900">
-                <div className="animate-spin text-4xl">⏳</div>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 text-emerald-800 gap-4">
+                <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+                <p className="animate-pulse">กำลังโหลดข้อมูล...</p>
             </div>
         );
     }
@@ -198,25 +199,25 @@ export default function StaffDashboardPage() {
     const roleInfo = ROLE_LABELS[user.role] || { label: user.role, icon: "👤" };
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            {/* Header */}
-            <header className="bg-slate-800 text-white shadow-lg">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div className="min-h-screen bg-stone-50 text-slate-800">
+            {/* 🌿 Eco-Professional Header */}
+            <header className="bg-emerald-700 text-white shadow-md sticky top-0 z-10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                        <span className="text-2xl">🛡️</span>
+                        <span className="text-2xl">🌿</span>
                         <div>
-                            <h1 className="font-bold">GACP Staff Portal</h1>
-                            <p className="text-xs text-slate-400">ระบบเจ้าหน้าที่</p>
+                            <h1 className="text-xl font-bold">ระบบตรวจสอบ GACP</h1>
+                            <p className="text-xs text-emerald-100">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="text-right">
-                            <p className="font-semibold">{user.firstName} {user.lastName}</p>
-                            <p className="text-xs text-emerald-400">{roleInfo.icon} {roleInfo.label}</p>
+                        <div className="text-right hidden sm:block">
+                            <p className="font-semibold">{user.firstName || 'เจ้าหน้าที่'} {user.lastName || ''}</p>
+                            <p className="text-xs text-emerald-200">{roleInfo.icon} {roleInfo.label}</p>
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-colors text-sm"
+                            className="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors text-sm border border-white/20"
                         >
                             ออกจากระบบ
                         </button>
@@ -225,44 +226,65 @@ export default function StaffDashboardPage() {
             </header>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-6 py-8">
-                {/* KPI Snapshot */}
-                <div className="bg-white rounded-xl shadow p-4 mb-6 flex gap-8">
-                    <div className="text-center">
-                        <p className="text-2xl font-bold text-slate-800">{pendingDocuments.length + pendingAudits.length}</p>
-                        <p className="text-xs text-slate-500">รอดำเนินการ</p>
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+                {/* 📊 Dashboard Stats Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div className="p-4 rounded-xl bg-white border border-slate-200">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-xs text-slate-500 mb-1">รอดำเนินการ</p>
+                                <p className="text-2xl font-bold text-slate-800">{pendingDocuments.length + pendingAudits.length}</p>
+                            </div>
+                            <span className="text-xl opacity-80">📂</span>
+                        </div>
                     </div>
-                    <div className="text-center">
-                        <p className="text-2xl font-bold text-blue-600">{dashboardStats.todayChecked}</p>
-                        <p className="text-xs text-slate-500">ตรวจวันนี้</p>
+                    <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 shadow-md ring-1 ring-amber-200">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-xs text-slate-500 mb-1">รอตรวจเอกสาร</p>
+                                <p className="text-2xl font-bold text-amber-700">{pendingDocuments.length}</p>
+                            </div>
+                            <span className="text-xl opacity-80">👀</span>
+                        </div>
                     </div>
-                    <div className="text-center">
-                        <p className="text-2xl font-bold text-green-600">{dashboardStats.approved}</p>
-                        <p className="text-xs text-slate-500">อนุมัติแล้ว</p>
+                    <div className="p-4 rounded-xl bg-white border border-slate-200">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-xs text-slate-500 mb-1">รอตรวจแปลง</p>
+                                <p className="text-2xl font-bold text-purple-700">{pendingAudits.length}</p>
+                            </div>
+                            <span className="text-xl opacity-80">🚜</span>
+                        </div>
                     </div>
-                    <div className="ml-auto flex items-center gap-2 text-sm text-slate-500">
-                        <span className="animate-pulse w-2 h-2 bg-green-500 rounded-full"></span>
-                        Real-time
+                    <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-xs text-slate-500 mb-1">อนุมัติแล้ว</p>
+                                <p className="text-2xl font-bold text-emerald-700">{dashboardStats.approved}</p>
+                            </div>
+                            <span className="text-xl opacity-80">🏆</span>
+                        </div>
                     </div>
                 </div>
 
                 {/* Dual-Mode Tabs for REVIEWER_AUDITOR */}
+                {/* 🎛️ Mode Tabs */}
                 {user.role === "REVIEWER_AUDITOR" && (
-                    <div className="flex gap-2 mb-6">
+                    <div className="flex gap-2 mb-6 flex-wrap">
                         <button
                             onClick={() => setActiveTab("documents")}
-                            className={`px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === "documents"
-                                ? "bg-slate-800 text-white"
-                                : "bg-white text-slate-600 hover:bg-slate-100"
+                            className={`px-6 py-3 rounded-full font-semibold transition-all border ${activeTab === "documents"
+                                ? "bg-emerald-600 border-emerald-600 text-white shadow-md"
+                                : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-700"
                                 }`}
                         >
                             📄 รอตรวจเอกสาร ({pendingDocuments.length})
                         </button>
                         <button
                             onClick={() => setActiveTab("audits")}
-                            className={`px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === "audits"
-                                ? "bg-slate-800 text-white"
-                                : "bg-white text-slate-600 hover:bg-slate-100"
+                            className={`px-6 py-3 rounded-full font-semibold transition-all border ${activeTab === "audits"
+                                ? "bg-emerald-600 border-emerald-600 text-white shadow-md"
+                                : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-700"
                                 }`}
                         >
                             🔍 รอตรวจประเมิน ({pendingAudits.length})

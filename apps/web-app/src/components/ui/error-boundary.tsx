@@ -1,7 +1,6 @@
 "use client";
 
 import { Component, ReactNode } from "react";
-import { colors } from "@/lib/design-tokens";
 
 interface ErrorBoundaryProps {
     children: ReactNode;
@@ -15,8 +14,8 @@ interface ErrorBoundaryState {
 }
 
 /**
- * 🍎 Apple-standard Error Boundary
- * Catches JavaScript errors in child component tree
+ * 🌿 Eco-Professional Error Boundary
+ * Catches JavaScript errors with Tailwind CSS styling
  */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     constructor(props: ErrorBoundaryProps) {
@@ -40,31 +39,17 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             }
 
             return (
-                <div style={{
-                    padding: 24,
-                    textAlign: "center",
-                    backgroundColor: "#FEF2F2",
-                    borderRadius: 12,
-                    margin: 16,
-                }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
-                    <h3 style={{ color: "#DC2626", marginBottom: 8 }}>
+                <div className="p-6 text-center bg-red-50 rounded-xl m-4 border border-red-100">
+                    <div className="text-5xl mb-4">⚠️</div>
+                    <h3 className="text-red-600 font-bold text-lg mb-2">
                         เกิดข้อผิดพลาด
                     </h3>
-                    <p style={{ color: colors.textGray, marginBottom: 16 }}>
+                    <p className="text-slate-500 mb-4">
                         กรุณาลองใหม่อีกครั้ง หรือติดต่อผู้ดูแลระบบ
                     </p>
                     <button
                         onClick={() => this.setState({ hasError: false })}
-                        style={{
-                            padding: "10px 20px",
-                            backgroundColor: colors.primary,
-                            color: "white",
-                            border: "none",
-                            borderRadius: 8,
-                            cursor: "pointer",
-                            fontWeight: 600,
-                        }}
+                        className="px-5 py-2.5 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors cursor-pointer border-none"
                     >
                         ลองใหม่
                     </button>

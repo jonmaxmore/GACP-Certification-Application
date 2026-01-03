@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 
 /**
- * 🍎 Back Button Component
- * Apple HIG Navigation - Always provide clear back navigation
+ * 🌿 Back Button Component
+ * Eco-Professional Navigation with Tailwind CSS
  */
 
 interface BackButtonProps {
@@ -32,27 +32,13 @@ export default function BackButton({
     return (
         <button
             onClick={handleClick}
-            className={`nav-back-btn ${className}`}
-            style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 16px',
-                borderRadius: '10px',
-                color: '#1B5E20',
-                fontWeight: 500,
-                fontSize: '15px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                background: 'transparent',
-                border: 'none',
-            }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(27, 94, 32, 0.1)';
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-            }}
+            className={`
+                inline-flex items-center gap-2 px-4 py-2.5 rounded-xl
+                text-emerald-700 font-medium text-sm
+                bg-transparent hover:bg-emerald-50
+                transition-all duration-200 cursor-pointer border-none
+                ${className}
+            `}
         >
             <svg
                 width="20"

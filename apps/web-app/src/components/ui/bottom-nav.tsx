@@ -53,6 +53,10 @@ interface BottomNavProps {
     isDark?: boolean;
 }
 
+/**
+ * 🌿 Eco-Professional Bottom Navigation
+ * Mobile-first with Tailwind CSS
+ */
 export function BottomNav({ isDark = false }: BottomNavProps) {
     const pathname = usePathname();
 
@@ -61,70 +65,44 @@ export function BottomNav({ isDark = false }: BottomNavProps) {
         return null;
     }
 
-    const activeColor = '#10B981';
-    const inactiveColor = isDark ? '#6B7280' : '#9CA3AF';
-    const bgColor = isDark ? '#1F2937' : '#FFFFFF';
-    const borderColor = isDark ? '#374151' : '#E5E7EB';
-
     return (
         <>
-            <nav style={{
-                position: 'fixed',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '72px',
-                backgroundColor: bgColor,
-                borderTop: `1px solid ${borderColor}`,
-                display: 'flex',
-                justifyContent: 'space-around',
-                alignItems: 'center',
-                padding: '0 8px',
-                zIndex: 100,
-                fontFamily: "'Kanit', sans-serif",
-            }} className="bottom-nav">
+            <nav className={`
+                fixed bottom-0 left-0 right-0 h-[72px] z-50
+                flex justify-around items-center px-2
+                border-t md:hidden
+                ${isDark
+                    ? 'bg-slate-800 border-slate-700'
+                    : 'bg-white border-slate-200'
+                }
+            `}>
                 {NAV_ITEMS.map((item) => {
                     const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                    const activeColor = '#10B981';
+                    const inactiveColor = isDark ? '#6B7280' : '#9CA3AF';
+
                     return (
-                        <Link key={item.href} href={item.href} style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '4px',
-                            padding: '8px 12px',
-                            textDecoration: 'none',
-                            position: 'relative',
-                            minWidth: '56px',
-                        }}>
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className="flex flex-col items-center gap-1 py-2 px-3 min-w-[56px] relative no-underline"
+                        >
                             {isActive && (
-                                <span style={{
-                                    position: 'absolute',
-                                    top: '-1px',
-                                    left: '50%',
-                                    transform: 'translateX(-50%)',
-                                    width: '24px',
-                                    height: '3px',
-                                    backgroundColor: activeColor,
-                                    borderRadius: '0 0 4px 4px',
-                                }} />
+                                <span className="absolute -top-px left-1/2 -translate-x-1/2 w-6 h-0.5 bg-emerald-500 rounded-b" />
                             )}
-                            <span style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '10px',
-                                backgroundColor: isActive ? (isDark ? 'rgba(16, 185, 129, 0.15)' : '#ECFDF5') : 'transparent',
-                                transition: 'all 0.2s ease',
-                            }}>
+                            <span className={`
+                                flex items-center justify-center w-8 h-8 rounded-xl transition-all
+                                ${isActive
+                                    ? isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'
+                                    : 'bg-transparent'
+                                }
+                            `}>
                                 {item.icon(isActive ? activeColor : inactiveColor)}
                             </span>
-                            <span style={{
-                                fontSize: '10px',
-                                fontWeight: isActive ? 600 : 500,
-                                color: isActive ? activeColor : inactiveColor,
-                            }}>
+                            <span className={`
+                                text-[10px] font-medium
+                                ${isActive ? 'text-emerald-500 font-semibold' : isDark ? 'text-slate-400' : 'text-slate-400'}
+                            `}>
                                 {item.label}
                             </span>
                         </Link>
@@ -132,23 +110,10 @@ export function BottomNav({ isDark = false }: BottomNavProps) {
                 })}
             </nav>
 
-            {/* Spacer for bottom nav */}
-            <div style={{ height: '72px' }} className="bottom-nav-spacer" />
-
-            {/* Mobile-only styles */}
-            <style jsx global>{`
-                @media (min-width: 768px) {
-                    .bottom-nav {
-                        display: none !important;
-                    }
-                    .bottom-nav-spacer {
-                        display: none !important;
-                    }
-                }
-            `}</style>
+            {/* Spacer for bottom nav (mobile only) */}
+            <div className="h-[72px] md:hidden" />
         </>
     );
 }
 
 export default BottomNav;
-

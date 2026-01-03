@@ -22,7 +22,7 @@ interface DataTableProps<T extends { id: string }> {
 
 /**
  * DataTable Component
- * 🍎 Apple Design: Consistent table styling across staff pages
+ * 🌿 Eco-Professional with Pure Tailwind CSS
  */
 export function DataTable<T extends { id: string }>({
     columns,
@@ -35,24 +35,10 @@ export function DataTable<T extends { id: string }>({
 
     if (loading) {
         return (
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: '60px 0',
-                color: '#6B7280',
-            }}>
-                <div style={{ textAlign: 'center' }}>
-                    <div style={{
-                        width: 40,
-                        height: 40,
-                        border: '3px solid #E5E7EB',
-                        borderTopColor: '#3B82F6',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                        margin: '0 auto 16px'
-                    }} />
-                    กำลังโหลด...
+            <div className="flex justify-center items-center py-16 text-slate-500">
+                <div className="text-center">
+                    <div className="w-10 h-10 border-3 border-slate-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4" />
+                    <p className="animate-pulse">กำลังโหลด...</p>
                 </div>
             </div>
         );
@@ -60,13 +46,9 @@ export function DataTable<T extends { id: string }>({
 
     if (data.length === 0) {
         return (
-            <div style={{
-                textAlign: 'center',
-                padding: '60px 20px',
-                color: '#6B7280',
-            }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div>
-                {emptyMessage}
+            <div className="text-center py-16 px-5 text-slate-500">
+                <div className="text-5xl mb-4">🍃</div>
+                <p>{emptyMessage}</p>
             </div>
         );
     }
@@ -87,19 +69,12 @@ export function DataTable<T extends { id: string }>({
     };
 
     const RowWrapper = ({ item, children }: { item: T; children: React.ReactNode }) => {
-        const rowStyle = {
-            borderBottom: '1px solid #E5E7EB',
-            transition: 'background 0.15s',
-            cursor: linkPrefix || onRowClick ? 'pointer' : 'default',
-        };
+        const cursorClass = linkPrefix || onRowClick ? 'cursor-pointer' : '';
 
         if (linkPrefix) {
             return (
-                <Link
-                    href={`${linkPrefix}/${item.id}`}
-                    style={{ display: 'contents' }}
-                >
-                    <tr style={rowStyle} className="hover:bg-gray-50">
+                <Link href={`${linkPrefix}/${item.id}`} className="contents">
+                    <tr className={`border-b border-slate-100 transition-colors hover:bg-emerald-50/30 ${cursorClass}`}>
                         {children}
                     </tr>
                 </Link>
@@ -108,8 +83,7 @@ export function DataTable<T extends { id: string }>({
 
         return (
             <tr
-                style={rowStyle}
-                className="hover:bg-gray-50"
+                className={`border-b border-slate-100 transition-colors hover:bg-emerald-50/30 ${cursorClass}`}
                 onClick={() => onRowClick?.(item)}
             >
                 {children}
@@ -118,24 +92,15 @@ export function DataTable<T extends { id: string }>({
     };
 
     return (
-        <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
                 <thead>
-                    <tr style={{
-                        backgroundColor: '#F9FAFB',
-                        borderBottom: '2px solid #E5E7EB',
-                    }}>
+                    <tr className="bg-slate-50 border-b-2 border-slate-200">
                         {columns.map((column) => (
                             <th
                                 key={String(column.key)}
-                                style={{
-                                    padding: '12px 16px',
-                                    textAlign: 'left',
-                                    fontWeight: 600,
-                                    fontSize: 13,
-                                    color: '#374151',
-                                    width: column.width,
-                                }}
+                                className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider"
+                                style={column.width ? { width: column.width } : undefined}
                             >
                                 {column.label}
                             </th>
@@ -148,11 +113,7 @@ export function DataTable<T extends { id: string }>({
                             {columns.map((column) => (
                                 <td
                                     key={String(column.key)}
-                                    style={{
-                                        padding: '14px 16px',
-                                        fontSize: 14,
-                                        color: '#1F2937',
-                                    }}
+                                    className="px-4 py-3.5 text-sm text-slate-800"
                                 >
                                     {renderCell(item, column)}
                                 </td>

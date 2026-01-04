@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 
 /// 🍎 Replacement Certificate Screen
 /// หน้าขอใบแทนใบรับรอง - matches /applications/replacement
@@ -28,7 +29,7 @@ class _ReplacementCertificateScreenState
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         title: const Text('ขอใบแทนใบรับรอง'),
-        backgroundColor: Colors.teal,
+        backgroundColor: AppTheme.primaryGreen,
         foregroundColor: Colors.white,
       ),
       body: Form(
@@ -176,7 +177,7 @@ class _ReplacementCertificateScreenState
                   onPressed:
                       _replacementReason.isNotEmpty ? _submitReplacement : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: AppTheme.primaryGreen,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -199,7 +200,7 @@ class _ReplacementCertificateScreenState
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected ? Colors.teal : Colors.transparent,
+          color: isSelected ? AppTheme.primaryGreen : Colors.transparent,
           width: 2,
         ),
       ),
@@ -209,12 +210,13 @@ class _ReplacementCertificateScreenState
         onChanged: (v) => setState(() => _replacementReason = v ?? ''),
         title: Row(
           children: [
-            Icon(reason['icon'], color: isSelected ? Colors.teal : Colors.grey),
+            Icon(reason['icon'],
+                color: isSelected ? AppTheme.primaryGreen : Colors.grey),
             const SizedBox(width: 12),
             Text(reason['title']),
           ],
         ),
-        activeColor: Colors.teal,
+        activeColor: AppTheme.primaryGreen,
       ),
     );
   }

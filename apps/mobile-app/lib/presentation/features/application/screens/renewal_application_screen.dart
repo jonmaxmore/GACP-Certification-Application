@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 
 /// 🍎 Renewal Application Screen
 /// หน้าต่ออายุใบรับรอง - matches /applications/renewal
@@ -20,7 +21,7 @@ class _RenewalApplicationScreenState extends State<RenewalApplicationScreen> {
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         title: const Text('ต่ออายุใบรับรอง'),
-        backgroundColor: Colors.teal,
+        backgroundColor: AppTheme.primaryGreen,
         foregroundColor: Colors.white,
       ),
       body: Stepper(
@@ -46,7 +47,7 @@ class _RenewalApplicationScreenState extends State<RenewalApplicationScreen> {
                   child: ElevatedButton(
                     onPressed: details.onStepContinue,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
+                      backgroundColor: AppTheme.primaryGreen,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),

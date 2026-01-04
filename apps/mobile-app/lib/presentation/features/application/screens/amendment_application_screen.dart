@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 
 /// 🍎 Amendment Application Screen
 /// หน้าแก้ไขข้อมูลใบรับรอง - matches /applications/amendment
@@ -29,7 +30,7 @@ class _AmendmentApplicationScreenState
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         title: const Text('แก้ไขข้อมูลใบรับรอง'),
-        backgroundColor: Colors.teal,
+        backgroundColor: AppTheme.primaryGreen,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -51,11 +52,11 @@ class _AmendmentApplicationScreenState
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.teal.shade50,
+                            color: AppTheme.primaryGreen.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(Icons.edit_document,
-                              color: Colors.teal.shade600),
+                              color: AppTheme.primaryGreen),
                         ),
                         const SizedBox(width: 16),
                         const Expanded(
@@ -136,7 +137,7 @@ class _AmendmentApplicationScreenState
                 onPressed:
                     _selectedAmendments.isNotEmpty ? _submitAmendment : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: AppTheme.primaryGreen,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -158,7 +159,7 @@ class _AmendmentApplicationScreenState
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected ? Colors.teal : Colors.transparent,
+          color: isSelected ? AppTheme.primaryGreen : Colors.transparent,
           width: 2,
         ),
       ),
@@ -177,7 +178,8 @@ class _AmendmentApplicationScreenState
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(type['icon'], color: isSelected ? Colors.teal : Colors.grey),
+              Icon(type['icon'],
+                  color: isSelected ? AppTheme.primaryGreen : Colors.grey),
               const SizedBox(width: 16),
               Expanded(child: Text(type['title'])),
               Checkbox(
@@ -191,7 +193,7 @@ class _AmendmentApplicationScreenState
                     }
                   });
                 },
-                activeColor: Colors.teal,
+                activeColor: AppTheme.primaryGreen,
               ),
             ],
           ),

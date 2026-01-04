@@ -1,10 +1,9 @@
 @import "tailwindcss";
+/* NOTE: Google Fonts loaded via <link> tag in layout.tsx for compatibility */
 
 /* ============ Eco-Premium Design System 2025 ============ */
 /* Philosophy: "Trust in Nature" - Apple-style with Thai CI */
-
-/* Google Fonts: Sarabun (Thai-friendly) */
-@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+/* NOTE: All @import statements must come first before any other CSS rules */
 
 :root {
   /* Primary - Emerald (สมุนไพร/ความปลอดภัย) */

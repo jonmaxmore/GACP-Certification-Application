@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Kanit } from "next/font/google";
+import { Kanit, Sarabun, Inter } from "next/font/google";
 import "./globals.css";
 import SystemGuard from "@/components/system-guard";
 
@@ -7,6 +7,20 @@ const kanit = Kanit({
   variable: "--font-kanit",
   subsets: ["thai", "latin"],
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+const sarabun = Sarabun({
+  variable: "--font-sarabun",
+  subsets: ["thai", "latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -22,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th">
-      <body className={`${kanit.variable} font-kanit antialiased`} suppressHydrationWarning>
+      <body className={`${kanit.variable} ${sarabun.variable} ${inter.variable} font-kanit antialiased`} suppressHydrationWarning>
         <SystemGuard>
           {children}
         </SystemGuard>

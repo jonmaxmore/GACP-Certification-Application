@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import api from "@/services/api-client";
+import StaffLayout from "../components/StaffLayout";
 
 interface StaffUser {
     id: string;
@@ -23,22 +23,15 @@ interface PendingItem {
     waitTime: string;
 }
 
-// Role labels
 const ROLE_LABELS: Record<string, { label: string; icon: string }> = {
     REVIEWER_AUDITOR: { label: "ผู้ตรวจเอกสาร/ตรวจประเมิน", icon: "📋" },
     SCHEDULER: { label: "เจ้าหน้าที่จัดคิว", icon: "📅" },
     ACCOUNTANT: { label: "พนักงานบัญชี", icon: "💰" },
     ADMIN: { label: "ผู้ดูแลระบบ", icon: "⚙️" },
-    SUPER_ADMIN: { label: "ผู้ดูแลสูงสุด", icon: "🔐" },
-    // Consolidated roles (lowercase)
-    assessor: { label: "ผู้ตรวจสอบ/ตรวจประเมิน", icon: "📋" },
+    assessor: { label: "ผู้ตรวจสอบ", icon: "📋" },
     scheduler: { label: "เจ้าหน้าที่จัดคิว", icon: "📅" },
     accountant: { label: "พนักงานบัญชี", icon: "💰" },
     admin: { label: "ผู้ดูแลระบบ", icon: "⚙️" },
-    // Legacy roles
-    reviewer: { label: "ผู้ตรวจสอบ", icon: "📋" },
-    manager: { label: "ผู้จัดการ", icon: "👔" },
-    inspector: { label: "ผู้ตรวจประเมิน", icon: "🔍" },
 };
 
 export default function StaffDashboardPage() {
@@ -47,399 +40,210 @@ export default function StaffDashboardPage() {
     const [activeTab, setActiveTab] = useState<"documents" | "audits">("documents");
     const [pendingDocuments, setPendingDocuments] = useState<PendingItem[]>([]);
     const [pendingAudits, setPendingAudits] = useState<PendingItem[]>([]);
-    const [dashboardStats, setDashboardStats] = useState<{ total: number; pending: number; approved: number; todayChecked: number }>({ total: 0, pending: 0, approved: 0, todayChecked: 0 });
+    const [dashboardStats, setDashboardStats] = useState({ total: 0, pending: 0, approved: 0, todayChecked: 0 });
+    const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {
+        setIsDark(localStorage.getItem("theme") === "dark");
         const token = localStorage.getItem("staff_token");
         const userData = localStorage.getItem("staff_user");
-
-        if (!token || !userData) {
-            router.push("/staff/login");
-            return;
-        }
-
+        if (!token || !userData) { router.push("/staff/login"); return; }
         try {
-            const parsedUser = JSON.parse(userData);
-            // Staff roles check - case-insensitive, include all consolidated roles
-            const staffRoles = [
-                'REVIEWER_AUDITOR', 'SCHEDULER', 'ACCOUNTANT', 'ADMIN', 'SUPER_ADMIN',
-                // Consolidated roles (lowercase)
-                'assessor', 'scheduler', 'accountant', 'admin'
-            ];
-            const userRoleUpper = parsedUser.role.toUpperCase();
-            const userRoleLower = parsedUser.role.toLowerCase();
-            if (!staffRoles.some(r => r.toUpperCase() === userRoleUpper || r.toLowerCase() === userRoleLower)) {
-                router.push("/staff/login");
-                return;
-            }
-            setUser(parsedUser);
-
-            // Set default tab based on role
-            if (parsedUser.role === "SCHEDULER") {
-                setActiveTab("audits");
-            }
-        } catch {
-            router.push("/staff/login");
-        }
-
-        // Fetch real data from API
-        fetchPendingData();
+            const parsed = JSON.parse(userData);
+            setUser(parsed);
+            if (parsed.role === "SCHEDULER") setActiveTab("audits");
+            fetchPendingData(token);
+        } catch { router.push("/staff/login"); }
     }, [router]);
 
-    const fetchPendingData = async () => {
-        const token = localStorage.getItem("staff_token");
-        if (!token) return;
-
+    const fetchPendingData = async (token: string) => {
         try {
-            // Fetch pending reviews from real API
-            const pendingRes = await fetch('/api/applications/pending-reviews', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const [pendingRes, auditsRes, statsRes] = await Promise.all([
+                fetch('/api/applications/pending-reviews', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('/api/applications/auditor/assignments', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('/api/applications/stats', { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
+
             if (pendingRes.ok) {
                 const result = await pendingRes.json();
-                if (result.success && result.data) {
-                    setPendingDocuments(result.data.map((app: { _id: string; applicationNumber: string; data?: { applicantInfo?: { name?: string }; formData?: { plantId?: string } }; status: string; createdAt: string; rejectCount?: number }) => ({
-                        id: app._id || app.applicationNumber,
-                        applicantName: app.data?.applicantInfo?.name || 'ไม่ระบุชื่อ',
-                        plantType: app.data?.formData?.plantId || 'ไม่ระบุ',
-                        status: app.status,
-                        submittedAt: app.createdAt,
-                        submissionCount: (app.rejectCount || 0) + 1,
-                        waitTime: getWaitTime(app.createdAt)
-                    })));
-                }
+                if (result.success) setPendingDocuments(result.data?.map((app: any) => ({
+                    id: app._id || app.applicationNumber, applicantName: app.data?.applicantInfo?.name || 'ไม่ระบุ',
+                    plantType: app.data?.formData?.plantId || 'ไม่ระบุ', status: app.status,
+                    submittedAt: app.createdAt, submissionCount: (app.rejectCount || 0) + 1, waitTime: getWaitTime(app.createdAt)
+                })) || []);
             }
-
-            // Fetch pending audits
-            const auditsRes = await fetch('/api/applications/auditor/assignments', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
             if (auditsRes.ok) {
                 const result = await auditsRes.json();
-                if (result.success && result.data) {
-                    setPendingAudits(result.data.map((app: { _id: string; applicationNumber: string; data?: { applicantInfo?: { name?: string }; formData?: { plantId?: string } }; status: string; createdAt: string; audit?: { scheduledDate?: string } }) => ({
-                        id: app._id || app.applicationNumber,
-                        applicantName: app.data?.applicantInfo?.name || 'ไม่ระบุชื่อ',
-                        plantType: app.data?.formData?.plantId || 'ไม่ระบุ',
-                        status: app.status,
-                        submittedAt: app.audit?.scheduledDate || app.createdAt,
-                        waitTime: getWaitTime(app.createdAt)
-                    })));
-                }
+                if (result.success) setPendingAudits(result.data?.map((app: any) => ({
+                    id: app._id || app.applicationNumber, applicantName: app.data?.applicantInfo?.name || 'ไม่ระบุ',
+                    plantType: app.data?.formData?.plantId || 'ไม่ระบุ', status: app.status,
+                    submittedAt: app.audit?.scheduledDate || app.createdAt, waitTime: getWaitTime(app.createdAt)
+                })) || []);
             }
-
-            // Fetch dashboard stats
-            const statsRes = await fetch('/api/applications/stats', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
             if (statsRes.ok) {
                 const result = await statsRes.json();
-                if (result.success && result.data) {
-                    console.log('[Dashboard] Stats:', result.data);
-                    setDashboardStats({
-                        total: result.data.total || 0,
-                        pending: result.data.pending || 0,
-                        approved: result.data.approved || 0,
-                        todayChecked: result.data.todayChecked || 0
-                    });
-                }
+                if (result.success) setDashboardStats({ total: result.data?.total || 0, pending: result.data?.pending || 0, approved: result.data?.approved || 0, todayChecked: result.data?.todayChecked || 0 });
             }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            setPendingDocuments([]);
-            setPendingAudits([]);
-        }
+        } catch (e) { console.error('Error:', e); }
     };
 
-    const getWaitTime = (submittedAt: string): string => {
-        const submitted = new Date(submittedAt);
-        const now = new Date();
-        const diffMs = now.getTime() - submitted.getTime();
-        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-        if (diffHours < 24) return `${diffHours} ชั่วโมง`;
-        const diffDays = Math.floor(diffHours / 24);
-        return `${diffDays} วัน`;
+    const getWaitTime = (date: string) => {
+        const diff = Date.now() - new Date(date).getTime();
+        const hours = Math.floor(diff / 3600000);
+        return hours < 24 ? `${hours} ชั่วโมง` : `${Math.floor(hours / 24)} วัน`;
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem("staff_token");
-        localStorage.removeItem("staff_user");
-        router.push("/staff/login");
-    };
-
-    const getSubmissionBadge = (count?: number) => {
-        if (!count) return null;
-        if (count === 1) return <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">ครั้งแรก</span>;
-        if (count === 2) return <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs">แก้ไขรอบ 1</span>;
-        return <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">แก้ไขรอบ 2 ⚠️</span>;
-    };
-
-    const getAuditStatusBadge = (status: string) => {
-        switch (status) {
-            case "WAITING_SCHEDULE":
-                return <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">รอจัดคิว</span>;
-            case "SCHEDULED":
-                return <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">รอนัดหมาย</span>;
-            case "WAITING_RESULT":
-                return <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs">รอผล</span>;
-            default:
-                return null;
-        }
-    };
-
-    if (!user) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 text-emerald-800 gap-4">
-                <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
-                <p className="animate-pulse">กำลังโหลดข้อมูล...</p>
-            </div>
-        );
-    }
+    if (!user) return null;
 
     const roleInfo = ROLE_LABELS[user.role] || { label: user.role, icon: "👤" };
 
     return (
-        <div className="min-h-screen bg-stone-50 text-slate-800">
-            {/* 🌿 Eco-Professional Header */}
-            <header className="bg-emerald-700 text-white shadow-md sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <span className="text-2xl">🌿</span>
-                        <div>
-                            <h1 className="text-xl font-bold">ระบบตรวจสอบ GACP</h1>
-                            <p className="text-xs text-emerald-100">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</p>
+        <StaffLayout title={`สวัสดี, ${user.firstName || 'เจ้าหน้าที่'}`} subtitle={`${roleInfo.icon} ${roleInfo.label}`}>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                {[
+                    { label: "รอดำเนินการ", value: pendingDocuments.length + pendingAudits.length, icon: "📂", color: "slate" },
+                    { label: "รอตรวจเอกสาร", value: pendingDocuments.length, icon: "👀", color: "amber" },
+                    { label: "รอตรวจแปลง", value: pendingAudits.length, icon: "🚜", color: "purple" },
+                    { label: "อนุมัติแล้ว", value: dashboardStats.approved, icon: "🏆", color: "primary" },
+                ].map((stat, i) => (
+                    <div key={i} className={`p-5 rounded-2xl border transition-all hover:-translate-y-0.5 ${stat.color === "amber"
+                            ? 'bg-secondary-50 border-secondary-200 shadow-md'
+                            : stat.color === "primary"
+                                ? 'bg-primary-50 border-primary-200'
+                                : isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'
+                        }`}>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-xs text-slate-500 mb-1">{stat.label}</p>
+                                <p className={`text-2xl font-bold ${stat.color === "amber" ? 'text-secondary-700'
+                                        : stat.color === "purple" ? 'text-violet-700'
+                                            : stat.color === "primary" ? 'text-primary-700'
+                                                : ''
+                                    }`}>{stat.value}</p>
+                            </div>
+                            <span className="text-xl opacity-80">{stat.icon}</span>
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <div className="text-right hidden sm:block">
-                            <p className="font-semibold">{user.firstName || 'เจ้าหน้าที่'} {user.lastName || ''}</p>
-                            <p className="text-xs text-emerald-200">{roleInfo.icon} {roleInfo.label}</p>
-                        </div>
-                        <button
-                            onClick={handleLogout}
-                            className="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors text-sm border border-white/20"
-                        >
-                            ออกจากระบบ
-                        </button>
-                    </div>
-                </div>
-            </header>
+                ))}
+            </div>
 
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-                {/* 📊 Dashboard Stats Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div className="p-4 rounded-xl bg-white border border-slate-200">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-xs text-slate-500 mb-1">รอดำเนินการ</p>
-                                <p className="text-2xl font-bold text-slate-800">{pendingDocuments.length + pendingAudits.length}</p>
-                            </div>
-                            <span className="text-xl opacity-80">📂</span>
-                        </div>
-                    </div>
-                    <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 shadow-md ring-1 ring-amber-200">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-xs text-slate-500 mb-1">รอตรวจเอกสาร</p>
-                                <p className="text-2xl font-bold text-amber-700">{pendingDocuments.length}</p>
-                            </div>
-                            <span className="text-xl opacity-80">👀</span>
-                        </div>
-                    </div>
-                    <div className="p-4 rounded-xl bg-white border border-slate-200">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-xs text-slate-500 mb-1">รอตรวจแปลง</p>
-                                <p className="text-2xl font-bold text-purple-700">{pendingAudits.length}</p>
-                            </div>
-                            <span className="text-xl opacity-80">🚜</span>
-                        </div>
-                    </div>
-                    <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-xs text-slate-500 mb-1">อนุมัติแล้ว</p>
-                                <p className="text-2xl font-bold text-emerald-700">{dashboardStats.approved}</p>
-                            </div>
-                            <span className="text-xl opacity-80">🏆</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Dual-Mode Tabs for REVIEWER_AUDITOR */}
-                {/* 🎛️ Mode Tabs */}
-                {user.role === "REVIEWER_AUDITOR" && (
-                    <div className="flex gap-2 mb-6 flex-wrap">
+            {/* Tab Buttons */}
+            {user.role === "REVIEWER_AUDITOR" && (
+                <div className="flex gap-2 mb-6">
+                    {[
+                        { key: "documents", label: `📄 รอตรวจเอกสาร (${pendingDocuments.length})` },
+                        { key: "audits", label: `🔍 รอตรวจประเมิน (${pendingAudits.length})` }
+                    ].map(tab => (
                         <button
-                            onClick={() => setActiveTab("documents")}
-                            className={`px-6 py-3 rounded-full font-semibold transition-all border ${activeTab === "documents"
-                                ? "bg-emerald-600 border-emerald-600 text-white shadow-md"
-                                : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-700"
+                            key={tab.key}
+                            onClick={() => setActiveTab(tab.key as any)}
+                            className={`px-6 py-3 rounded-full font-semibold transition-all ${activeTab === tab.key
+                                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
+                                    : `${isDark ? 'bg-slate-800 text-slate-300' : 'bg-white text-slate-600 border border-surface-200'} hover:border-primary-300`
                                 }`}
                         >
-                            📄 รอตรวจเอกสาร ({pendingDocuments.length})
+                            {tab.label}
                         </button>
-                        <button
-                            onClick={() => setActiveTab("audits")}
-                            className={`px-6 py-3 rounded-full font-semibold transition-all border ${activeTab === "audits"
-                                ? "bg-emerald-600 border-emerald-600 text-white shadow-md"
-                                : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-700"
-                                }`}
-                        >
-                            🔍 รอตรวจประเมิน ({pendingAudits.length})
-                        </button>
-                    </div>
-                )}
+                    ))}
+                </div>
+            )}
 
-                {/* Document Review Table */}
-                {(activeTab === "documents" || user.role === "SCHEDULER") && (
-                    <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
-                        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                            <h3 className="text-lg font-semibold text-slate-800">
-                                📄 {user.role === "SCHEDULER" ? "รอจัดคิวนัดหมาย" : "รอตรวจเอกสาร"}
-                            </h3>
-                            <span className="text-sm text-slate-500">เรียงตามรอนานที่สุด</span>
-                        </div>
-                        <table className="w-full">
-                            <thead className="bg-slate-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Job ID</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">ผู้ยื่น</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">พืช</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">สถานะแก้ไข</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">รอมานาน</th>
-                                    <th className="px-6 py-3"></th>
+            {/* Data Table */}
+            <div className={`rounded-2xl shadow-card overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
+                <div className={`px-6 py-4 border-b flex justify-between items-center ${isDark ? 'border-slate-700' : 'border-surface-200'}`}>
+                    <h3 className="text-lg font-semibold">
+                        {activeTab === "documents" ? "📄 รอตรวจเอกสาร" : "🔍 รอตรวจประเมิน"}
+                    </h3>
+                    <span className="text-sm text-slate-500">เรียงตามรอนานที่สุด</span>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead className={isDark ? 'bg-slate-700' : 'bg-surface-100'}>
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Job ID</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">ผู้ยื่น</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">พืช</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">สถานะ</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">รอมานาน</th>
+                                <th className="px-6 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-surface-200'}`}>
+                            {(activeTab === "documents" ? pendingDocuments : pendingAudits).map(item => (
+                                <tr key={item.id} className={`${isDark ? 'hover:bg-slate-700/50' : 'hover:bg-surface-50'} transition-colors`}>
+                                    <td className="px-6 py-4 text-sm font-mono text-slate-500">{item.id?.slice(-8)}</td>
+                                    <td className="px-6 py-4 text-sm font-medium">{item.applicantName}</td>
+                                    <td className="px-6 py-4 text-sm text-slate-500">{item.plantType}</td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${item.submissionCount === 1 ? 'bg-primary-100 text-primary-700'
+                                                : item.submissionCount === 2 ? 'bg-secondary-100 text-secondary-700'
+                                                    : 'bg-red-100 text-red-700'
+                                            }`}>
+                                            {item.submissionCount === 1 ? 'ครั้งแรก' : `แก้ไขรอบ ${(item.submissionCount || 1) - 1}`}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-secondary-600 font-medium">{item.waitTime}</td>
+                                    <td className="px-6 py-4">
+                                        <Link href={`/staff/applications/${item.id}`} className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors">
+                                            ⚡ ตรวจสอบ
+                                        </Link>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {(user.role === "SCHEDULER" ? pendingAudits : pendingDocuments).map((item) => (
-                                    <tr key={item.id} className="hover:bg-slate-50">
-                                        <td className="px-6 py-4 text-sm font-mono text-slate-600">{item.id}</td>
-                                        <td className="px-6 py-4 text-sm text-slate-800 font-medium">{item.applicantName}</td>
-                                        <td className="px-6 py-4 text-sm text-slate-600">{item.plantType}</td>
-                                        <td className="px-6 py-4">
-                                            {user.role === "SCHEDULER" ? getAuditStatusBadge(item.status) : getSubmissionBadge(item.submissionCount)}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-amber-600 font-medium">{item.waitTime}</td>
-                                        <td className="px-6 py-4">
-                                            <Link
-                                                href={`/staff/applications/${item.id}`}
-                                                className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700 transition-colors"
-                                            >
-                                                {user.role === "SCHEDULER" ? "📅 ลงนัด" : "⚡ ตรวจสอบ"}
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-
-                {/* Audit Table for REVIEWER_AUDITOR */}
-                {activeTab === "audits" && user.role === "REVIEWER_AUDITOR" && (
-                    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                            <h3 className="text-lg font-semibold text-slate-800">🔍 รอนัด & รอตรวจประเมิน</h3>
-                            <Link href="/staff/calendar" className="text-emerald-600 text-sm hover:underline">
-                                📅 ดูปฏิทิน →
-                            </Link>
-                        </div>
-                        <table className="w-full">
-                            <thead className="bg-slate-50">
+                            ))}
+                            {(activeTab === "documents" ? pendingDocuments : pendingAudits).length === 0 && (
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Job ID</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">ผู้ยื่น</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">พืช</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">สถานะ</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">นัดหมาย/รอ</th>
-                                    <th className="px-6 py-3"></th>
+                                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                                        <div className="text-4xl mb-2">✅</div>
+                                        ไม่มีรายการรอดำเนินการ
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {pendingAudits.map((item) => (
-                                    <tr key={item.id} className="hover:bg-slate-50">
-                                        <td className="px-6 py-4 text-sm font-mono text-slate-600">{item.id}</td>
-                                        <td className="px-6 py-4 text-sm text-slate-800 font-medium">{item.applicantName}</td>
-                                        <td className="px-6 py-4 text-sm text-slate-600">{item.plantType}</td>
-                                        <td className="px-6 py-4">{getAuditStatusBadge(item.status)}</td>
-                                        <td className="px-6 py-4 text-sm text-purple-600 font-medium">{item.waitTime}</td>
-                                        <td className="px-6 py-4">
-                                            {item.status === "WAITING_RESULT" ? (
-                                                <Link
-                                                    href={`/staff/audits/${item.id}`}
-                                                    className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700 transition-colors"
-                                                >
-                                                    📝 บันทึกผล
-                                                </Link>
-                                            ) : (
-                                                <Link
-                                                    href={`/staff/applications/${item.id}`}
-                                                    className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300 transition-colors"
-                                                >
-                                                    👁️ ดูข้อมูล
-                                                </Link>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-                {/* Quick Links for Admin */}
-                {(user.role === "ADMIN" || user.role === "SUPER_ADMIN") && (
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-                        <Link href="/admin/users" className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition-all">
-                            <div className="text-3xl mb-2">👥</div>
-                            <h3 className="font-semibold">จัดการบัญชี</h3>
-                            <p className="text-sm text-slate-500">สร้าง/แก้ไขเจ้าหน้าที่</p>
+            {/* Quick Actions for Admin/Accountant */}
+            {(user.role === "ADMIN" || user.role === "admin" || user.role === "SUPER_ADMIN") && (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                    {[
+                        { href: "/staff/management", icon: "👥", title: "จัดการบัญชี", desc: "สร้าง/แก้ไขเจ้าหน้าที่" },
+                        { href: "/staff/analytics", icon: "📊", title: "สถิติ", desc: "ดูรายงานและสถิติ" },
+                        { href: "/staff/accounting", icon: "💰", title: "ระบบบัญชี", desc: "จัดการใบแจ้งหนี้" },
+                        { href: "/staff/calendar", icon: "📅", title: "ปฏิทิน", desc: "ตารางนัดหมาย" },
+                    ].map((action, i) => (
+                        <Link key={i} href={action.href} className={`p-5 rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-lg ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-surface-200'}`}>
+                            <div className="text-3xl mb-2">{action.icon}</div>
+                            <h3 className="font-semibold">{action.title}</h3>
+                            <p className="text-sm text-slate-500">{action.desc}</p>
                         </Link>
-                        <Link href="/admin/kpi" className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition-all">
+                    ))}
+                </div>
+            )}
+
+            {user.role === "ACCOUNTANT" || user.role === "accountant" ? (
+                <div className="mt-8">
+                    <h3 className="text-lg font-semibold mb-4">💰 ระบบบัญชีและการเงิน</h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <Link href="/staff/accounting" className="p-6 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-500 text-white shadow-lg hover:-translate-y-0.5 transition-all">
+                            <div className="text-3xl mb-2">📋</div>
+                            <h3 className="font-semibold text-lg">ใบแจ้งหนี้</h3>
+                            <p className="text-primary-100 text-sm">จัดการใบแจ้งหนี้ทั้งหมด</p>
+                        </Link>
+                        <Link href="/staff/accounting?tab=pending" className={`p-6 rounded-2xl border-2 border-secondary-200 transition-all hover:-translate-y-0.5 ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
+                            <div className="text-3xl mb-2">⏳</div>
+                            <h3 className="font-semibold text-secondary-700">รอชำระ</h3>
+                            <p className="text-sm text-slate-500">ตรวจสอบรายการค้างชำระ</p>
+                        </Link>
+                        <Link href="/staff/analytics" className={`p-6 rounded-2xl transition-all hover:-translate-y-0.5 ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-surface-200'}`}>
                             <div className="text-3xl mb-2">📊</div>
-                            <h3 className="font-semibold">KPI Dashboard</h3>
-                            <p className="text-sm text-slate-500">ดูสถิติและรายงาน</p>
-                        </Link>
-                        <Link href="/staff/accounting" className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition-all">
-                            <div className="text-3xl mb-2">💰</div>
-                            <h3 className="font-semibold">ระบบบัญชี</h3>
-                            <p className="text-sm text-slate-500">จัดการใบแจ้งหนี้/ชำระเงิน</p>
-                        </Link>
-                        <Link href="/admin/settings" className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition-all">
-                            <div className="text-3xl mb-2">⚙️</div>
-                            <h3 className="font-semibold">ตั้งค่าระบบ</h3>
-                            <p className="text-sm text-slate-500">ปรับ Flow/Config</p>
+                            <h3 className="font-semibold">รายงาน</h3>
+                            <p className="text-sm text-slate-500">สรุปรายได้และสถิติ</p>
                         </Link>
                     </div>
-                )}
-
-                {/* Quick Actions for ACCOUNTANT */}
-                {user.role === "ACCOUNTANT" && (
-                    <div className="mt-6">
-                        <h3 className="text-lg font-semibold text-slate-800 mb-4">💰 ระบบบัญชีและการเงิน</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Link href="/staff/accounting" className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all">
-                                <div className="text-3xl mb-2">📋</div>
-                                <h3 className="font-semibold text-lg">ใบแจ้งหนี้</h3>
-                                <p className="text-emerald-100 text-sm">จัดการใบแจ้งหนี้ทั้งหมด</p>
-                            </Link>
-                            <Link href="/staff/accounting?tab=pending" className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition-all border-2 border-amber-200">
-                                <div className="text-3xl mb-2">⏳</div>
-                                <h3 className="font-semibold text-amber-700">รอชำระ</h3>
-                                <p className="text-sm text-slate-500">ตรวจสอบรายการค้างชำระ</p>
-                            </Link>
-                            <Link href="/staff/analytics" className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition-all">
-                                <div className="text-3xl mb-2">📊</div>
-                                <h3 className="font-semibold">รายงาน</h3>
-                                <p className="text-sm text-slate-500">สรุปรายได้และสถิติ</p>
-                            </Link>
-                        </div>
-                    </div>
-                )}
-            </main>
-        </div>
+                </div>
+            ) : null}
+        </StaffLayout>
     );
 }
-

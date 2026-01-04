@@ -29,6 +29,16 @@ class AppTheme {
   static const Color successLight = Color(0xFFE8F5E9); // Light green bg
   static const Color successTeal = Color(0xFFB2DFDB); // Teal accent
 
+  // Dark Mode Colors
+  static const Color darkBg = Color(0xFF0F172A); // Slate 900 - dark background
+  static const Color darkGreenAccent =
+      Color(0xFF10B981); // Emerald 500 - dark active
+  static const Color darkGreenLight =
+      Color(0xFF34D399); // Emerald 400 - dark gradient
+  static const Color darkInactive =
+      Color(0xFF64748B); // Slate 500 - dark inactive
+  static const Color lightInactive = Color(0xFF8A8A8A); // Light inactive
+
   // Text Colors
   static const Color textMuted = Color(0xFF64748B); // Slate 500
   static const Color textEmerald = Color(0xFF047857); // Emerald 700

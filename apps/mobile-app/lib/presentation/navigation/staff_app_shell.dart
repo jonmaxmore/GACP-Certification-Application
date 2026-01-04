@@ -114,7 +114,7 @@ class _StaffAppShellState extends ConsumerState<StaffAppShell> {
       body: widget.child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF0F172A) : Colors.white,
+          color: isDark ? AppTheme.darkBg : Colors.white,
           border: Border(
             top: BorderSide(
               color: isDark

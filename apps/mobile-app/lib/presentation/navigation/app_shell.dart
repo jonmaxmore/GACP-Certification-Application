@@ -65,7 +65,7 @@ class _MobileShell extends StatelessWidget {
       body: child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF0F172A) : Colors.white,
+          color: isDark ? AppTheme.darkBg : Colors.white,
           border: Border(
             top: BorderSide(
               color: isDark
@@ -118,9 +118,9 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final activeColor =
-        isDark ? const Color(0xFF10B981) : AppTheme.primaryGreen;
+        isDark ? AppTheme.darkGreenAccent : AppTheme.primaryGreen;
     final inactiveColor =
-        isDark ? const Color(0xFF64748B) : const Color(0xFF8A8A8A);
+        isDark ? AppTheme.darkInactive : AppTheme.lightInactive;
 
     return InkWell(
       onTap: onTap,
@@ -160,7 +160,7 @@ class _DesktopShell extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final activeColor =
-        isDark ? const Color(0xFF10B981) : AppTheme.primaryGreen;
+        isDark ? AppTheme.darkGreenAccent : AppTheme.primaryGreen;
 
     return Scaffold(
       body: Row(
@@ -169,7 +169,7 @@ class _DesktopShell extends StatelessWidget {
           Container(
             width: 72,
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF0F172A) : Colors.white,
+              color: isDark ? AppTheme.darkBg : Colors.white,
               border: Border(
                 right: BorderSide(
                   color: isDark
@@ -190,8 +190,8 @@ class _DesktopShell extends StatelessWidget {
                       colors: [
                         activeColor,
                         isDark
-                            ? const Color(0xFF34D399)
-                            : const Color(0xFF22C55E),
+                            ? AppTheme.darkGreenLight
+                            : AppTheme.primaryGreenLight,
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -259,9 +259,9 @@ class _SidebarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final activeColor =
-        isDark ? const Color(0xFF10B981) : AppTheme.primaryGreen;
+        isDark ? AppTheme.darkGreenAccent : AppTheme.primaryGreen;
     final inactiveColor =
-        isDark ? const Color(0xFF64748B) : const Color(0xFF8A8A8A);
+        isDark ? AppTheme.darkInactive : AppTheme.lightInactive;
 
     return InkWell(
       onTap: onTap,

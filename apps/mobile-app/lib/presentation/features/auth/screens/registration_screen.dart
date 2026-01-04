@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../providers/auth_provider.dart';
+import '../../../../core/theme/app_theme.dart';
 
 /// GACP Official Registration Screen
 /// Multi-Account Type: Individual, Juristic, Community Enterprise
@@ -329,7 +330,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                   Text('ลงทะเบียนสำเร็จ!'),
                 ],
               ),
-              backgroundColor: const Color(0xFF1B5E20),
+              backgroundColor: AppTheme.primaryGreenDark,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
@@ -370,7 +371,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1B5E20)),
+          icon: const Icon(Icons.arrow_back_ios, color: AppTheme.primaryGreenDark),
           onPressed: () {
             if (_currentStep > 0) {
               _goToStep(_currentStep - 1);
@@ -382,7 +383,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         title: Text(
           'ลงทะเบียนผู้ใช้ใหม่',
           style: GoogleFonts.sarabun(
-            color: const Color(0xFF1B5E20),
+            color: AppTheme.primaryGreenDark,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -435,7 +436,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                   height: 4,
                   decoration: BoxDecoration(
                     color: isActive
-                        ? const Color(0xFF1B5E20)
+                        ? AppTheme.primaryGreenDark
                         : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(2),
                   ),
@@ -445,7 +446,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                   _stepLabels[index],
                   style: TextStyle(
                     fontSize: 10,
-                    color: isActive ? const Color(0xFF1B5E20) : Colors.grey,
+                    color: isActive ? AppTheme.primaryGreenDark : Colors.grey,
                     fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
@@ -668,14 +669,14 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1B5E20).withOpacity(0.1),
+                  color: AppTheme.primaryGreenDark.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   _accountType == 'INDIVIDUAL'
                       ? Icons.person_outline
                       : Icons.business_center_outlined,
-                  color: const Color(0xFF1B5E20),
+                  color: AppTheme.primaryGreenDark,
                   size: 28,
                 ),
               ),
@@ -789,11 +790,11 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1B5E20).withOpacity(0.1),
+                  color: AppTheme.primaryGreenDark.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.lock_outline,
-                    color: Color(0xFF1B5E20), size: 28),
+                    color: AppTheme.primaryGreenDark, size: 28),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -871,7 +872,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
               title: const Text(
                   'ข้าพเจ้ายอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว',
                   style: TextStyle(fontSize: 13)),
-              activeColor: const Color(0xFF1B5E20),
+              activeColor: AppTheme.primaryGreenDark,
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: const EdgeInsets.symmetric(horizontal: 8),
               shape: RoundedRectangleBorder(
@@ -891,8 +892,8 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
             child: OutlinedButton(
               onPressed: () => _goToStep(_currentStep - 1),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF1B5E20),
-                side: const BorderSide(color: Color(0xFF1B5E20)),
+                foregroundColor: AppTheme.primaryGreenDark,
+                side: const BorderSide(color: AppTheme.primaryGreenDark),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
@@ -929,13 +930,13 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                     }
                   },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1B5E20),
+              backgroundColor: AppTheme.primaryGreenDark,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               elevation: 4,
-              shadowColor: const Color(0xFF1B5E20).withOpacity(0.4),
+              shadowColor: AppTheme.primaryGreenDark.withOpacity(0.4),
               disabledBackgroundColor: Colors.grey.shade300,
             ),
             child: _isLoading
@@ -979,7 +980,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           onPressed: () => context.go('/login'),
           child: const Text('มีบัญชีแล้ว? เข้าสู่ระบบ',
               style: TextStyle(
-                  color: Color(0xFF1B5E20), fontWeight: FontWeight.bold)),
+                  color: AppTheme.primaryGreenDark, fontWeight: FontWeight.bold)),
         ),
       ],
     );
@@ -1004,7 +1005,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     return InputDecoration(
       labelText: label,
       hintText: hint,
-      prefixIcon: Icon(icon, color: const Color(0xFF1B5E20)),
+      prefixIcon: Icon(icon, color: AppTheme.primaryGreenDark),
       filled: true,
       fillColor: Colors.grey.shade50,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -1015,13 +1016,13 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           borderSide: BorderSide(color: Colors.grey.shade200)),
       focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFF1B5E20), width: 2)),
+          borderSide: const BorderSide(color: AppTheme.primaryGreenDark, width: 2)),
       errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: Colors.red, width: 1.5)),
       labelStyle: TextStyle(color: Colors.grey.shade600),
       floatingLabelStyle: const TextStyle(
-          color: Color(0xFF1B5E20), fontWeight: FontWeight.bold),
+          color: AppTheme.primaryGreenDark, fontWeight: FontWeight.bold),
     );
   }
 

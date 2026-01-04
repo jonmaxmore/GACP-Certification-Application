@@ -14,7 +14,7 @@ class RegisterSuccessScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFE8F5E9), Color(0xFFB2DFDB)],
+            colors: [AppTheme.successLight, AppTheme.successTeal],
           ),
         ),
         child: SafeArea(

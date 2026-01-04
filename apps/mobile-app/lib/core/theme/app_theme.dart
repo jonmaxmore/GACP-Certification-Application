@@ -23,6 +23,11 @@ class AppTheme {
   // Info/Blue Colors
   static const Color infoBlue = Color(0xFF2563EB); // Primary blue
   static const Color infoBlueDark = Color(0xFF1E40AF); // Dark blue
+  static const Color staffBlueDark = Color(0xFF0D47A1); // Staff dark blue
+
+  // Success Gradient Colors
+  static const Color successLight = Color(0xFFE8F5E9); // Light green bg
+  static const Color successTeal = Color(0xFFB2DFDB); // Teal accent
 
   // Text Colors
   static const Color textMuted = Color(0xFF64748B); // Slate 500

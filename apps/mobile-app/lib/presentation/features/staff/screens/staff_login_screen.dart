@@ -45,7 +45,7 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
             gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF1565C0), Color(0xFF0D47A1)])),
+                colors: [AppTheme.accountJuristic, AppTheme.staffBlueDark])),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(

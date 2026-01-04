@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useWizardStore, PLANTS } from '../hooks/useWizardStore';
+import { useWizardStore } from '../hooks/useWizardStore';
 import api from '@/services/api-client';
 
 const FEE_PER_SITE_TYPE = 5000;
@@ -14,152 +14,71 @@ export default function Step11Payment() {
     const [processing, setProcessing] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<'QR' | 'CARD'>('QR');
     const [isNavigating, setIsNavigating] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [paymentStep, setPaymentStep] = useState<'idle' | 'confirming' | 'paying' | 'completing'>('idle');
 
     useEffect(() => { setIsDark(localStorage.getItem("theme") === "dark"); }, []);
-    useEffect(() => {
-        // Don't redirect if we're navigating to success page
-        if (isLoaded && !state.siteData && !isNavigating) {
-            router.replace('/applications/new/step-0');
-        }
-    }, [isLoaded, state.siteData, router, isNavigating]);
+    useEffect(() => { if (isLoaded && !state.siteData && !isNavigating) router.replace('/applications/new/step-0'); }, [isLoaded, state.siteData, router, isNavigating]);
 
     const siteTypesCount = state.siteTypes?.length || 1;
     const installment1Fee = FEE_PER_SITE_TYPE * siteTypesCount;
     const invoiceId = `GI-${Date.now().toString(36).toUpperCase().slice(-8)}`;
     const docDate = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
-
-    const applicantName = state.applicantData?.applicantType === 'INDIVIDUAL'
-        ? `${state.applicantData?.firstName || ''} ${state.applicantData?.lastName || ''}`
-        : state.applicantData?.applicantType === 'COMMUNITY'
-            ? state.applicantData?.communityName || ''
-            : state.applicantData?.companyName || '';
+    const applicantName = state.applicantData?.applicantType === 'INDIVIDUAL' ? `${state.applicantData?.firstName || ''} ${state.applicantData?.lastName || ''}` : state.applicantData?.applicantType === 'COMMUNITY' ? state.applicantData?.communityName || '' : state.applicantData?.companyName || '';
 
     const handlePayment = async () => {
         setProcessing(true);
         setIsNavigating(true);
-        setError(null);
-
         try {
             const appId = state.applicationId;
-
-            if (!appId) {
-                setError('ไม่พบรหัสคำขอ กรุณาย้อนกลับไปตรวจสอบข้อมูล');
-                setProcessing(false);
-                setIsNavigating(false);
-                return;
-            }
-
-            // Step 1: Confirm review (unlock payment)
-            setPaymentStep('confirming');
-            const confirmResult = await api.post(`/v2/applications/${appId}/confirm-review`, {});
-
-            if (!confirmResult.success) {
-                console.log('Confirm review result:', confirmResult);
-                // Continue even if confirm fails (might already be confirmed)
-            }
-
-            // Step 2: Demo payment simulation
-            setPaymentStep('paying');
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate payment processing
-
-            // Step 3: Update status to SUBMITTED (demo mode - bypass actual payment)
-            setPaymentStep('completing');
-            const statusResult = await api.post(`/v2/applications/${appId}/status`, {
-                status: 'SUBMITTED',
-                notes: 'Demo payment completed',
-            });
-
-            // Even if status update fails, continue to success page
-            // because in production this would be handled by webhook
-            console.log('Status update result:', statusResult);
-
+            if (!appId) { setProcessing(false); setIsNavigating(false); return; }
+            await api.post(`/v2/applications/${appId}/confirm-review`, {});
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            await api.post(`/v2/applications/${appId}/status`, { status: 'SUBMITTED', notes: 'Demo payment completed' });
             resetWizard();
             router.replace('/applications/new/success');
-
-        } catch (err) {
-            console.error('Payment error:', err);
-            setError('เกิดข้อผิดพลาดในการชำระเงิน กรุณาลองใหม่อีกครั้ง');
-            setProcessing(false);
-            setIsNavigating(false);
-            setPaymentStep('idle');
-        }
+        } catch { setProcessing(false); setIsNavigating(false); }
     };
 
-    const handleBack = () => router.push('/applications/new/step-10');
-
-    if (!isLoaded) return <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>กำลังโหลด...</div>;
+    if (!isLoaded) return <div className="text-center py-16 text-slate-500">กำลังโหลด...</div>;
 
     return (
-        <div style={{ fontFamily: "'Kanit', sans-serif" }}>
+        <div className="font-sans">
             {/* Official Header Card */}
-            <div style={{
-                background: 'white', borderRadius: '12px', padding: '20px',
-                marginBottom: '16px', border: '1px solid #E5E7EB',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            }}>
-                {/* Header with Logo */}
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '16px', paddingBottom: '12px', borderBottom: '2px solid #1E3A5F' }}>
-                    <img src="/images/dtam-logo.png" alt="DTAM" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />
-                    <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '15px', fontWeight: 700, color: '#1E3A5F' }}>กองกัญชาทางการแพทย์</div>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#1E3A5F' }}>กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+            <div className="bg-white rounded-xl p-5 mb-4 border border-surface-200 shadow-sm">
+                <div className="flex gap-3 items-start mb-4 pb-3 border-b-2 border-slate-800">
+                    <img src="/images/dtam-logo.png" alt="DTAM" className="w-12 h-12 object-contain" />
+                    <div className="flex-1">
+                        <div className="text-[15px] font-bold text-slate-800">กองกัญชาทางการแพทย์</div>
+                        <div className="text-xs font-semibold text-slate-800">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                        <div style={{ background: '#10B981', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '12px', fontWeight: 600 }}>ชำระเงิน</div>
-                        <div style={{ fontSize: '10px', color: '#6B7280', marginTop: '4px' }}>งวดที่ 1</div>
+                    <div className="text-right">
+                        <div className="bg-primary-600 text-white px-2.5 py-1 rounded text-xs font-semibold">ชำระเงิน</div>
+                        <div className="text-[10px] text-slate-500 mt-1">งวดที่ 1</div>
                     </div>
                 </div>
 
-                {/* Recipient Info */}
-                <div style={{ fontSize: '12px', marginBottom: '12px', color: '#374151' }}>
+                <div className="text-xs mb-3 text-slate-700">
                     <div><strong>ผู้รับบริการ:</strong> {applicantName}</div>
                     <div><strong>เลขที่ใบวางบิล:</strong> {invoiceId}</div>
                     <div><strong>วันที่:</strong> {docDate}</div>
                 </div>
 
-                {/* Fee Summary */}
-                <div style={{ background: '#ECFDF5', borderRadius: '8px', padding: '12px', marginBottom: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '8px' }}>
-                        <span style={{ color: '#374151' }}>ค่าตรวจสอบและประเมินคำขอเบื้องต้น</span>
-                        <span style={{ fontWeight: 600, color: '#111827' }}>฿{installment1Fee.toLocaleString()}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#6B7280', marginBottom: '8px' }}>
-                        <span>จำนวน {siteTypesCount} ลักษณะพื้นที่ × ฿5,000</span>
-                    </div>
-                    <div style={{ borderTop: '1px solid #D1FAE5', paddingTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#065F46' }}>ยอดชำระงวดที่ 1</span>
-                        <span style={{ fontSize: '20px', fontWeight: 700, color: '#059669' }}>฿{installment1Fee.toLocaleString()}</span>
-                    </div>
+                <div className="bg-primary-50 rounded-lg p-3 mb-3">
+                    <div className="flex justify-between text-sm mb-2"><span className="text-slate-700">ค่าตรวจสอบและประเมินคำขอเบื้องต้น</span><span className="font-semibold text-slate-900">฿{installment1Fee.toLocaleString()}</span></div>
+                    <div className="text-[10px] text-slate-500 mb-2">จำนวน {siteTypesCount} ลักษณะพื้นที่ × ฿5,000</div>
+                    <div className="border-t border-primary-200 pt-2 flex justify-between"><span className="text-sm font-semibold text-primary-800">ยอดชำระงวดที่ 1</span><span className="text-xl font-bold text-primary-600">฿{installment1Fee.toLocaleString()}</span></div>
                 </div>
-
-                {/* Thai text amount */}
-                <div style={{ fontSize: '11px', color: '#1E40AF', textAlign: 'center', marginBottom: '8px' }}>
-                    ({installment1Fee === 5000 ? 'ห้าพันบาทถ้วน' : installment1Fee === 10000 ? 'หนึ่งหมื่นบาทถ้วน' : 'หนึ่งหมื่นห้าพันบาทถ้วน'})
-                </div>
+                <div className="text-[11px] text-blue-700 text-center">({installment1Fee === 5000 ? 'ห้าพันบาทถ้วน' : installment1Fee === 10000 ? 'หนึ่งหมื่นบาทถ้วน' : 'หนึ่งหมื่นห้าพันบาทถ้วน'})</div>
             </div>
 
             {/* Payment Method */}
-            <div style={{ marginBottom: '16px' }}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827', marginBottom: '10px' }}>
-                    เลือกช่องทางชำระเงิน
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div className="mb-4">
+                <div className={`text-sm font-semibold mb-2.5 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>เลือกช่องทางชำระเงิน</div>
+                <div className="grid grid-cols-2 gap-2.5">
                     {(['QR', 'CARD'] as const).map(method => (
-                        <button key={method} onClick={() => setPaymentMethod(method)} style={{
-                            padding: '16px', borderRadius: '12px',
-                            border: `2px solid ${paymentMethod === method ? '#10B981' : (isDark ? '#4B5563' : '#E5E7EB')}`,
-                            background: paymentMethod === method ? (isDark ? 'rgba(16,185,129,0.1)' : '#ECFDF5') : (isDark ? '#374151' : 'white'),
-                            cursor: 'pointer', textAlign: 'center',
-                        }}>
-                            <div style={{ fontSize: '28px', marginBottom: '6px' }}>{method === 'QR' ? '📱' : '💳'}</div>
-                            <div style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#F9FAFB' : '#111827' }}>
-                                {method === 'QR' ? 'QR PromptPay' : 'บัตรเครดิต/เดบิต'}
-                            </div>
-                            <div style={{ fontSize: '10px', color: '#6B7280' }}>
-                                {method === 'QR' ? 'สะดวก รวดเร็ว' : 'Visa / MasterCard'}
-                            </div>
+                        <button key={method} onClick={() => setPaymentMethod(method)} className={`p-4 rounded-xl text-center border-2 ${paymentMethod === method ? 'border-primary-600 bg-primary-50' : (isDark ? 'border-slate-600 bg-slate-700' : 'border-surface-200 bg-white')}`}>
+                            <div className="text-3xl mb-1.5">{method === 'QR' ? '📱' : '💳'}</div>
+                            <div className={`text-sm font-semibold ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>{method === 'QR' ? 'QR PromptPay' : 'บัตรเครดิต/เดบิต'}</div>
+                            <div className="text-[10px] text-slate-500">{method === 'QR' ? 'สะดวก รวดเร็ว' : 'Visa / MasterCard'}</div>
                         </button>
                     ))}
                 </div>
@@ -167,96 +86,39 @@ export default function Step11Payment() {
 
             {/* QR Code */}
             {paymentMethod === 'QR' && (
-                <div style={{
-                    background: 'white', borderRadius: '12px', padding: '20px', marginBottom: '16px',
-                    textAlign: 'center', border: '1px solid #E5E7EB',
-                }}>
-                    <div style={{ fontSize: '12px', color: '#374151', marginBottom: '12px', fontWeight: 600 }}>
-                        สแกน QR Code เพื่อชำระเงิน
+                <div className="bg-white rounded-xl p-5 mb-4 text-center border border-surface-200">
+                    <div className="text-xs text-slate-700 font-semibold mb-3">สแกน QR Code เพื่อชำระเงิน</div>
+                    <div className="w-44 h-44 bg-surface-100 rounded-xl mx-auto mb-3 flex items-center justify-center border-2 border-dashed border-surface-300">
+                        <div className="text-center text-slate-500"><div className="text-5xl mb-1">📲</div><div className="text-[11px]">QR Code</div></div>
                     </div>
-                    <div style={{
-                        width: '180px', height: '180px', background: '#F9FAFB', borderRadius: '12px',
-                        margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        border: '2px dashed #D1D5DB',
-                    }}>
-                        <div style={{ textAlign: 'center', color: '#6B7280' }}>
-                            <div style={{ fontSize: '48px', marginBottom: '4px' }}>📲</div>
-                            <div style={{ fontSize: '11px' }}>QR Code</div>
-                            <div style={{ fontSize: '10px' }}>สำหรับชำระเงิน</div>
-                        </div>
-                    </div>
-                    <div style={{ fontSize: '11px', color: '#374151', background: '#FEF3C7', padding: '10px', borderRadius: '6px' }}>
-                        <strong>โอนเข้าบัญชี:</strong><br />
-                        ชื่อบัญชี: เงินบำรุงศูนย์พัฒนายาไทยและสมุนไพร<br />
-                        ธ.กรุงไทย เลขที่ <strong>4750134376</strong>
-                    </div>
+                    <div className="text-[11px] text-slate-700 bg-secondary-50 p-2.5 rounded-md"><strong>โอนเข้าบัญชี:</strong><br />ชื่อบัญชี: เงินบำรุงศูนย์พัฒนายาไทยและสมุนไพร<br />ธ.กรุงไทย เลขที่ <strong>4750134376</strong></div>
                 </div>
             )}
 
             {/* Card Form */}
             {paymentMethod === 'CARD' && (
-                <div style={{
-                    background: isDark ? '#374151' : 'white', borderRadius: '12px', padding: '16px', marginBottom: '16px',
-                    border: `1px solid ${isDark ? '#4B5563' : '#E5E7EB'}`,
-                }}>
-                    <div style={{ marginBottom: '12px' }}>
-                        <label style={{ fontSize: '11px', color: isDark ? '#9CA3AF' : '#6B7280', display: 'block', marginBottom: '4px' }}>หมายเลขบัตร</label>
-                        <input type="text" placeholder="0000 0000 0000 0000" style={{
-                            width: '100%', padding: '12px', borderRadius: '8px',
-                            border: `1px solid ${isDark ? '#4B5563' : '#E5E7EB'}`,
-                            background: isDark ? '#1F2937' : '#F9FAFB', color: isDark ? '#F9FAFB' : '#111827',
-                            fontSize: '14px', boxSizing: 'border-box',
-                        }} />
+                <div className={`rounded-xl p-4 mb-4 border ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-white border-surface-200'}`}>
+                    <div className="mb-3">
+                        <label className={`text-[11px] block mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>หมายเลขบัตร</label>
+                        <input type="text" placeholder="0000 0000 0000 0000" className={`w-full p-3 rounded-lg border text-sm ${isDark ? 'bg-slate-800 border-slate-600 text-surface-100' : 'bg-surface-100 border-surface-200 text-slate-900'}`} />
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                        <div>
-                            <label style={{ fontSize: '11px', color: isDark ? '#9CA3AF' : '#6B7280', display: 'block', marginBottom: '4px' }}>วันหมดอายุ</label>
-                            <input type="text" placeholder="MM/YY" style={{
-                                width: '100%', padding: '12px', borderRadius: '8px',
-                                border: `1px solid ${isDark ? '#4B5563' : '#E5E7EB'}`,
-                                background: isDark ? '#1F2937' : '#F9FAFB', color: isDark ? '#F9FAFB' : '#111827',
-                                fontSize: '14px', boxSizing: 'border-box',
-                            }} />
-                        </div>
-                        <div>
-                            <label style={{ fontSize: '11px', color: isDark ? '#9CA3AF' : '#6B7280', display: 'block', marginBottom: '4px' }}>CVV</label>
-                            <input type="text" placeholder="123" style={{
-                                width: '100%', padding: '12px', borderRadius: '8px',
-                                border: `1px solid ${isDark ? '#4B5563' : '#E5E7EB'}`,
-                                background: isDark ? '#1F2937' : '#F9FAFB', color: isDark ? '#F9FAFB' : '#111827',
-                                fontSize: '14px', boxSizing: 'border-box',
-                            }} />
-                        </div>
+                    <div className="grid grid-cols-2 gap-2.5">
+                        <div><label className={`text-[11px] block mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>วันหมดอายุ</label><input type="text" placeholder="MM/YY" className={`w-full p-3 rounded-lg border text-sm ${isDark ? 'bg-slate-800 border-slate-600 text-surface-100' : 'bg-surface-100 border-surface-200 text-slate-900'}`} /></div>
+                        <div><label className={`text-[11px] block mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>CVV</label><input type="text" placeholder="123" className={`w-full p-3 rounded-lg border text-sm ${isDark ? 'bg-slate-800 border-slate-600 text-surface-100' : 'bg-surface-100 border-surface-200 text-slate-900'}`} /></div>
                     </div>
                 </div>
             )}
 
-            {/* Security Notice */}
-            <div style={{
-                fontSize: '10px', color: '#6B7280', textAlign: 'center', marginBottom: '16px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-            }}>
-                🔒 การชำระเงินปลอดภัยด้วยระบบเข้ารหัส SSL
-            </div>
+            {/* Security */}
+            <div className="text-[10px] text-slate-500 text-center mb-4 flex items-center justify-center gap-1.5">🔒 การชำระเงินปลอดภัยด้วยระบบเข้ารหัส SSL</div>
 
             {/* Navigation */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={handleBack} disabled={processing} style={{
-                    flex: 1, padding: '14px', borderRadius: '12px',
-                    border: `1px solid ${isDark ? '#4B5563' : '#E5E7EB'}`,
-                    background: isDark ? '#374151' : 'white', color: isDark ? '#F9FAFB' : '#374151',
-                    fontSize: '14px', fontWeight: 500, cursor: 'pointer', opacity: processing ? 0.5 : 1,
-                }}>ย้อนกลับ</button>
-                <button onClick={handlePayment} disabled={processing} style={{
-                    flex: 2, padding: '14px', borderRadius: '12px', border: 'none',
-                    background: processing ? '#9CA3AF' : 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
-                    color: 'white', fontSize: '14px', fontWeight: 600, cursor: processing ? 'wait' : 'pointer',
-                    boxShadow: processing ? 'none' : '0 4px 20px rgba(16, 185, 129, 0.4)',
-                }}>
+            <div className="flex gap-3">
+                <button onClick={() => router.push('/applications/new/step-10')} disabled={processing} className={`flex-1 py-3.5 rounded-xl text-sm font-medium border ${isDark ? 'border-slate-600 bg-slate-700 text-surface-100' : 'border-surface-200 bg-white text-slate-700'} ${processing ? 'opacity-50' : ''}`}>ย้อนกลับ</button>
+                <button onClick={handlePayment} disabled={processing} className={`flex-[2] py-3.5 rounded-xl text-sm font-semibold ${processing ? 'bg-slate-400 cursor-wait' : 'bg-gradient-to-br from-primary-700 to-primary-500 shadow-lg shadow-primary-500/40'} text-white`}>
                     {processing ? '⏳ กำลังดำเนินการ...' : `✓ ยืนยันชำระเงิน ฿${installment1Fee.toLocaleString()}`}
                 </button>
             </div>
         </div>
     );
 }
-

@@ -5,102 +5,57 @@ import { useRouter } from 'next/navigation';
 import { useWizardStore, PLANTS } from '../hooks/useWizardStore';
 import api from '@/services/api-client';
 
-const SITE_TYPE_LABELS: Record<string, string> = {
-    OUTDOOR: 'กลางแจ้ง (Outdoor)',
-    INDOOR: 'โรงเรือนระบบปิด (Indoor)',
-    GREENHOUSE: 'โรงเรือนทั่วไป (Greenhouse)',
-};
-
-const PURPOSE_LABELS: Record<string, string> = {
-    RESEARCH: 'เพื่อการศึกษาวิจัย',
-    COMMERCIAL: 'เพื่อการพาณิชย์ (จำหน่าย/แปรรูป)',
-    EXPORT: 'เพื่อการพาณิชย์ (ส่งออก)',
-};
-
-const PROPAGATION_LABELS: Record<string, string> = {
-    SEED: 'เมล็ด',
-    CUTTING: 'ปักชำ',
-    TISSUE: 'เพาะเลี้ยงเนื้อเยื่อ',
-};
-
-const PLANT_PART_LABELS: Record<string, string> = {
-    SEED: 'เมล็ด', STEM: 'ลำต้น', FLOWER: 'ช่อดอก', LEAF: 'ใบ', ROOT: 'ราก/หัว', OTHER: 'อื่นๆ',
-};
-
+const SITE_TYPE_LABELS: Record<string, string> = { OUTDOOR: 'กลางแจ้ง (Outdoor)', INDOOR: 'โรงเรือนระบบปิด (Indoor)', GREENHOUSE: 'โรงเรือนทั่วไป (Greenhouse)' };
+const PURPOSE_LABELS: Record<string, string> = { RESEARCH: 'เพื่อการศึกษาวิจัย', COMMERCIAL: 'เพื่อการพาณิชย์ (จำหน่าย/แปรรูป)', EXPORT: 'เพื่อการพาณิชย์ (ส่งออก)' };
+const PROPAGATION_LABELS: Record<string, string> = { SEED: 'เมล็ด', CUTTING: 'ปักชำ', TISSUE: 'เพาะเลี้ยงเนื้อเยื่อ' };
+const PLANT_PART_LABELS: Record<string, string> = { SEED: 'เมล็ด', STEM: 'ลำต้น', FLOWER: 'ช่อดอก', LEAF: 'ใบ', ROOT: 'ราก/หัว', OTHER: 'อื่นๆ' };
 const FEE_PER_SITE_TYPE = 5000;
 
-// Official Header Component
 const OfficialHeader = ({ docType, docNumber }: { docType: string; docNumber: string }) => (
-    <div style={{ borderBottom: '2px solid #000', paddingBottom: '12px', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            {/* Left: Logo & Organization */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                <div style={{
-                    width: '50px', height: '50px', border: '2px solid #000', borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-                }}>
-                    <img src="/images/dtam-logo.png" alt="DTAM" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
+    <div className="border-b-2 border-black pb-3 mb-4">
+        <div className="flex justify-between items-start">
+            <div className="flex items-start gap-3">
+                <div className="w-12 h-12 border-2 border-black rounded-full flex items-center justify-center overflow-hidden">
+                    <img src="/images/dtam-logo.png" alt="DTAM" className="w-11 h-11 object-contain" />
                 </div>
                 <div>
-                    <div style={{ fontSize: '13px', fontWeight: 700 }}>กองกัญชาทางการแพทย์</div>
-                    <div style={{ fontSize: '12px', fontWeight: 600 }}>กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
-                    <div style={{ fontSize: '9px', color: '#374151', marginTop: '2px' }}>
-                        88/23 หมู่ 4 ถนนติวานนท์ ตำบลตลาดขวัญ อำเภอเมือง จังหวัดนนทบุรี 11000
-                    </div>
-                    <div style={{ fontSize: '9px', color: '#374151' }}>
-                        โทรศัพท์ (02) 5647889 หรือ 061-4219701 อีเมล tdc.cannabis.gacp@gmail.com
-                    </div>
+                    <div className="text-sm font-bold">กองกัญชาทางการแพทย์</div>
+                    <div className="text-xs font-semibold">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
+                    <div className="text-[9px] text-slate-700 mt-0.5">88/23 หมู่ 4 ถนนติวานนท์ ตำบลตลาดขวัญ อำเภอเมือง จังหวัดนนทบุรี 11000</div>
+                    <div className="text-[9px] text-slate-700">โทรศัพท์ (02) 5647889 หรือ 061-4219701 อีเมล tdc.cannabis.gacp@gmail.com</div>
                 </div>
             </div>
-            {/* Right: Document Type */}
-            <div style={{ textAlign: 'right' }}>
-                <div style={{ background: '#000', color: '#fff', padding: '4px 12px', fontSize: '12px', fontWeight: 600 }}>
-                    {docType}
-                </div>
-                <div style={{ fontSize: '9px', color: '#6B7280', marginTop: '4px' }}>
-                    {new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </div>
+            <div className="text-right">
+                <div className="bg-black text-white px-3 py-1 text-xs font-semibold">{docType}</div>
+                <div className="text-[9px] text-slate-500 mt-1">{new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
             </div>
         </div>
     </div>
 );
 
-// Footer with signature areas
 const OfficialFooter = ({ applicantName }: { applicantName: string }) => (
-    <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px dashed #374151' }}>
-        {/* หมายเหตุ */}
-        <div style={{ background: '#F9FAFB', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '9px', color: '#374151' }}>
-            <div style={{ fontWeight: 600, marginBottom: '4px' }}>หมายเหตุ:</div>
+    <div className="mt-6 pt-4 border-t border-dashed border-slate-600">
+        <div className="bg-surface-100 p-2.5 rounded-md mb-4 text-[9px] text-slate-700">
+            <div className="font-semibold mb-1">หมายเหตุ:</div>
             <div>1. การชำระเงิน: ภายใน 3 วัน หลังได้รับใบวางบิล/ใบแจ้งหนี้</div>
-            <div style={{ marginLeft: '12px' }}>โอนเงินเข้าบัญชี: ชื่อบัญชีเงินบำรุงศูนย์พัฒนายาไทยและสมุนไพร</div>
-            <div style={{ marginLeft: '12px' }}>บัญชีธนาคารกรุงไทย เลขที่ 4750134376 สาขามหาวิทยาลัยธรรมศาสตร์ รังสิต</div>
-            <div style={{ marginLeft: '12px' }}>เลขประจำตัวผู้เสียภาษี 0994000036540</div>
+            <div className="ml-3">โอนเงินเข้าบัญชี: ชื่อบัญชีเงินบำรุงศูนย์พัฒนายาไทยและสมุนไพร</div>
+            <div className="ml-3">บัญชีธนาคารกรุงไทย เลขที่ 4750134376 สาขามหาวิทยาลัยธรรมศาสตร์ รังสิต</div>
+            <div className="ml-3">เลขประจำตัวผู้เสียภาษี 0994000036540</div>
             <div>2. เมื่อชำระเงินแล้วกรุณาส่ง ชื่อ-ที่อยู่ในการออกใบเสร็จรับเงิน และการส่งหลักฐานชำระเงิน</div>
         </div>
-        {/* Signatures */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', fontSize: '10px' }}>
-            <div style={{ textAlign: 'center', border: '1px solid #E5E7EB', padding: '12px', borderRadius: '6px' }}>
-                <div style={{ fontWeight: 600, marginBottom: '8px' }}>ผู้รับบริการ</div>
-                <div style={{ height: '40px', borderBottom: '1px solid #374151', marginBottom: '4px' }}></div>
-                <div>(.......................................)</div>
-                <div style={{ fontSize: '9px', color: '#6B7280' }}>ตำแหน่ง...</div>
-                <div style={{ fontSize: '9px', color: '#6B7280' }}>วันที่........./........../...........</div>
-            </div>
-            <div style={{ textAlign: 'center', border: '1px solid #E5E7EB', padding: '12px', borderRadius: '6px' }}>
-                <div style={{ fontWeight: 600, marginBottom: '8px' }}>ผู้ให้บริการ</div>
-                <div style={{ height: '40px', borderBottom: '1px solid #374151', marginBottom: '4px' }}></div>
-                <div>(นายรชต ไมตรีมิตร)</div>
-                <div style={{ fontSize: '9px', color: '#6B7280' }}>ตำแหน่ง นักวิชาการสาธารณสุข</div>
-                <div style={{ fontSize: '9px', color: '#6B7280' }}>วันที่........./........../...........</div>
-                <div style={{ fontSize: '9px', color: '#6B7280' }}>กองกัญชาทางการแพทย์</div>
-            </div>
-            <div style={{ textAlign: 'center', border: '1px solid #E5E7EB', padding: '12px', borderRadius: '6px' }}>
-                <div style={{ fontWeight: 600, marginBottom: '8px' }}>ผู้มีอำนาจลงนาม</div>
-                <div style={{ height: '40px', borderBottom: '1px solid #374151', marginBottom: '4px' }}></div>
-                <div>(นายปริชา พนูทิม)</div>
-                <div style={{ fontSize: '9px', color: '#6B7280' }}>ตำแหน่ง ผู้อำนวยการกองกัญชาทางการแพทย์</div>
-                <div style={{ fontSize: '9px', color: '#6B7280' }}>ปฏิบัติราชการแทน อธิบดีกรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
-            </div>
+        <div className="grid grid-cols-3 gap-4 text-[10px]">
+            {[{ title: 'ผู้รับบริการ', name: '(.......................................)', pos: 'ตำแหน่ง...' },
+            { title: 'ผู้ให้บริการ', name: '(นายรชต ไมตรีมิตร)', pos: 'ตำแหน่ง นักวิชาการสาธารณสุข' },
+            { title: 'ผู้มีอำนาจลงนาม', name: '(นายปริชา พนูทิม)', pos: 'ตำแหน่ง ผู้อำนวยการกองกัญชาทางการแพทย์' }
+            ].map((sig, i) => (
+                <div key={i} className="text-center border border-surface-200 p-3 rounded-md">
+                    <div className="font-semibold mb-2">{sig.title}</div>
+                    <div className="h-10 border-b border-slate-600 mb-1"></div>
+                    <div>{sig.name}</div>
+                    <div className="text-[9px] text-slate-500">{sig.pos}</div>
+                    <div className="text-[9px] text-slate-500">วันที่........./........../...........</div>
+                </div>
+            ))}
         </div>
     </div>
 );
@@ -114,158 +69,81 @@ export default function Step8Review() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => { setIsDark(localStorage.getItem("theme") === "dark"); }, []);
-    useEffect(() => {
-        if (isLoaded && !state.siteData) router.replace('/applications/new/step-0');
-    }, [isLoaded, state.siteData, router]);
+    useEffect(() => { if (isLoaded && !state.siteData) router.replace('/applications/new/step-0'); }, [isLoaded, state.siteData, router]);
 
-    // Create draft in backend and navigate to step-9
     const handleNext = async () => {
-        setSubmitting(true);
-        setError(null);
-
+        setSubmitting(true); setError(null);
         try {
-            // If we already have an applicationId, skip creation
-            if (state.applicationId) {
-                router.push('/applications/new/step-9');
-                return;
-            }
-
-            // Prepare data for backend API
-            const applicantName = state.applicantData?.applicantType === 'INDIVIDUAL'
-                ? `${state.applicantData?.firstName || ''} ${state.applicantData?.lastName || ''}`
-                : state.applicantData?.applicantType === 'COMMUNITY'
-                    ? state.applicantData?.communityName || ''
-                    : state.applicantData?.companyName || '';
-
-            const draftData = {
-                requestType: state.serviceType || 'NEW',
-                certificationType: 'GACP',
-                objective: state.certificationPurpose,
-                applicantType: state.applicantData?.applicantType || 'INDIVIDUAL',
-                applicantInfo: {
-                    name: applicantName,
-                    ...state.applicantData,
-                },
-                siteInfo: state.siteData,
-                formData: {
-                    plantId: state.plantId,
-                    siteTypes: state.siteTypes,
-                    production: state.productionData,
-                    documents: state.documents,
-                    consentedPDPA: state.consentedPDPA,
-                    acknowledgedStandards: state.acknowledgedStandards,
-                },
-            };
-
-            // Call backend API to create draft
-            console.log('[Step-8] Creating draft with data:', draftData);
+            if (state.applicationId) { router.push('/applications/new/step-9'); return; }
+            const applicantName = state.applicantData?.applicantType === 'INDIVIDUAL' ? `${state.applicantData?.firstName || ''} ${state.applicantData?.lastName || ''}` : state.applicantData?.applicantType === 'COMMUNITY' ? state.applicantData?.communityName || '' : state.applicantData?.companyName || '';
+            const draftData = { requestType: state.serviceType || 'NEW', certificationType: 'GACP', objective: state.certificationPurpose, applicantType: state.applicantData?.applicantType || 'INDIVIDUAL', applicantInfo: { name: applicantName, ...state.applicantData }, siteInfo: state.siteData, formData: { plantId: state.plantId, siteTypes: state.siteTypes, production: state.productionData, documents: state.documents, consentedPDPA: state.consentedPDPA, acknowledgedStandards: state.acknowledgedStandards } };
             const result = await api.post<{ success: boolean; data: { _id: string; applicationNumber?: string }; error?: string }>('/v2/applications/draft', draftData);
-            console.log('[Step-8] API Response:', result);
-
-            // Handle different response structures
             if (result.success) {
-                // Try different response paths - use type assertion for nested data
                 const responseData = result.data as { _id?: string; data?: { _id: string } };
                 const appId = responseData?.data?._id || responseData?._id;
-                console.log('[Step-8] Application ID:', appId);
-
-                if (appId) {
-                    setApplicationId(appId);
-                    router.push('/applications/new/step-9');
-                } else {
-                    console.error('[Step-8] No application ID in response:', result);
-                    setError('สร้างคำขอสำเร็จแต่ไม่พบรหัสคำขอ');
-                }
-            } else {
-                console.error('[Step-8] API call failed:', result);
-                setError(`ไม่สามารถบันทึกคำขอได้: ${result.error || 'Unknown error'}`);
-            }
-        } catch (err) {
-            console.error('Error creating draft:', err);
-            setError('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
-        } finally {
-            setSubmitting(false);
-        }
+                if (appId) { setApplicationId(appId); router.push('/applications/new/step-9'); }
+                else setError('สร้างคำขอสำเร็จแต่ไม่พบรหัสคำขอ');
+            } else setError(`ไม่สามารถบันทึกคำขอได้: ${result.error || 'Unknown error'}`);
+        } catch { setError('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์'); }
+        finally { setSubmitting(false); }
     };
 
     const handleBack = () => router.push('/applications/new/step-7');
     const handlePrint = () => window.print();
-
     const plant = PLANTS.find(p => p.id === state.plantId);
     const uploadedDocs = state.documents?.filter(d => d.uploaded) || [];
     const siteTypesCount = state.siteTypes?.length || 1;
     const totalFee = FEE_PER_SITE_TYPE * siteTypesCount;
     const appId = state.applicationId || `G-${Date.now().toString(36).toUpperCase()}`;
+    const applicantName = state.applicantData?.applicantType === 'INDIVIDUAL' ? `${state.applicantData?.firstName || ''} ${state.applicantData?.lastName || ''}` : state.applicantData?.applicantType === 'COMMUNITY' ? state.applicantData?.communityName || '' : state.applicantData?.companyName || '';
 
-    const applicantName = state.applicantData?.applicantType === 'INDIVIDUAL'
-        ? `${state.applicantData?.firstName || ''} ${state.applicantData?.lastName || ''}`
-        : state.applicantData?.applicantType === 'COMMUNITY'
-            ? state.applicantData?.communityName || ''
-            : state.applicantData?.companyName || '';
-
-    if (!isLoaded) return <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>กำลังโหลด...</div>;
+    if (!isLoaded) return <div className="text-center py-16 text-slate-500">กำลังโหลด...</div>;
 
     const FormField = ({ label, value, colSpan = 1 }: { label: string; value?: string; colSpan?: number }) => (
-        <div style={{ gridColumn: colSpan > 1 ? `span ${colSpan}` : undefined, marginBottom: '6px' }}>
-            <div style={{ fontSize: '9px', color: '#6B7280', marginBottom: '1px' }}>{label}</div>
-            <div style={{
-                minHeight: '24px', padding: '3px 6px', fontSize: '11px',
-                borderBottom: '1px solid #374151', fontWeight: 500, color: '#111827',
-                background: value ? 'transparent' : '#FEF3C7',
-            }}>
-                {value || '(ไม่ได้กรอก)'}
-            </div>
+        <div className={colSpan > 1 ? 'col-span-2' : ''}>
+            <div className="text-[9px] text-slate-500 mb-0.5">{label}</div>
+            <div className={`min-h-[24px] px-1.5 py-0.5 text-[11px] border-b border-slate-600 font-medium text-slate-900 ${value ? '' : 'bg-secondary-100'}`}>{value || '(ไม่ได้กรอก)'}</div>
         </div>
     );
 
+    const SectionHeader = ({ title, color = 'primary' }: { title: string; color?: 'primary' | 'secondary' }) => (
+        <div className={`${color === 'secondary' ? 'bg-secondary-500' : 'bg-primary-600'} text-white px-2.5 py-1.5 text-[11px] font-semibold rounded-t`}>{title}</div>
+    );
+
     return (
-        <div style={{ fontFamily: "'Kanit', sans-serif" }}>
+        <div className="font-sans">
             {/* Action Bar */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginBottom: '12px' }}>
-                <button onClick={handlePrint} style={{
-                    padding: '8px 16px', borderRadius: '8px', border: '1px solid #10B981',
-                    background: 'white', color: '#10B981', fontSize: '12px', fontWeight: 500, cursor: 'pointer',
-                }}>
-                    📥 ดาวน์โหลด/พิมพ์
-                </button>
+            <div className="flex justify-end gap-2 mb-3">
+                <button onClick={handlePrint} className="px-4 py-2 rounded-lg border border-primary-600 bg-white text-primary-600 text-xs font-medium hover:bg-primary-50">📥 ดาวน์โหลด/พิมพ์</button>
             </div>
 
-            {/* ===== OFFICIAL DOCUMENT: แบบ ภท.11 ===== */}
-            <div id="official-document" style={{
-                background: 'white', color: '#111827', padding: '20px',
-                border: '2px solid #10B981', borderRadius: '8px', marginBottom: '16px',
-            }}>
+            {/* Official Document */}
+            <div id="official-document" className="bg-white text-slate-900 p-5 border-2 border-primary-600 rounded-lg mb-4 print:border-0 print:p-0">
                 <OfficialHeader docType="แบบ ภท.11" docNumber={appId} />
 
-                {/* Document Title */}
-                <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-                    <h1 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 4px 0' }}>
-                        คำขอใบรับรองมาตรฐานแหล่งผลิตและเก็บเกี่ยวที่ดีของพืชสมุนไพร
-                    </h1>
-                    <div style={{ fontSize: '11px', color: '#059669' }}>
-                        Good Agricultural and Collection Practices (GACP)
-                    </div>
+                {/* Title */}
+                <div className="text-center mb-4">
+                    <h1 className="text-sm font-bold mb-1">คำขอใบรับรองมาตรฐานแหล่งผลิตและเก็บเกี่ยวที่ดีของพืชสมุนไพร</h1>
+                    <div className="text-[11px] text-primary-600">Good Agricultural and Collection Practices (GACP)</div>
                 </div>
 
-                {/* Applicant Info Header */}
-                <div style={{ background: '#F9FAFB', padding: '10px', borderRadius: '6px', marginBottom: '12px', fontSize: '10px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                {/* Quick Info */}
+                <div className="bg-surface-100 p-2.5 rounded-md mb-3 text-[10px]">
+                    <div className="grid grid-cols-2 gap-2">
                         <div><strong>เรียน</strong> ประธานกรรมการ กองกัญชาทางการแพทย์</div>
-                        <div style={{ textAlign: 'right' }}><strong>เลขที่เอกสาร:</strong> {appId}</div>
+                        <div className="text-right"><strong>เลขที่เอกสาร:</strong> {appId}</div>
                         <div><strong>หน่วยงานผู้รับบริการ:</strong> {applicantName}</div>
-                        <div style={{ textAlign: 'right' }}><strong>วันที่เอกสาร:</strong> {new Date().toLocaleDateString('th-TH')}</div>
+                        <div className="text-right"><strong>วันที่เอกสาร:</strong> {new Date().toLocaleDateString('th-TH')}</div>
                         <div><strong>เลขประจำตัวผู้เสียภาษี:</strong> {state.applicantData?.registrationNumber || state.applicantData?.idCard || '-'}</div>
-                        <div style={{ textAlign: 'right' }}><strong>พืชสมุนไพร:</strong> {plant?.icon} {plant?.name}</div>
+                        <div className="text-right"><strong>พืชสมุนไพร:</strong> {plant?.icon} {plant?.name}</div>
                     </div>
                 </div>
 
                 {/* Section 1: Purpose */}
-                <div style={{ marginBottom: '12px' }}>
-                    <div style={{ background: '#10B981', color: 'white', padding: '6px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '4px 4px 0 0' }}>
-                        ส่วนที่ 1: วัตถุประสงค์และลักษณะพื้นที่
-                    </div>
-                    <div style={{ border: '1px solid #E5E7EB', borderTop: 'none', padding: '10px', borderRadius: '0 0 4px 4px' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                <div className="mb-3">
+                    <SectionHeader title="ส่วนที่ 1: วัตถุประสงค์และลักษณะพื้นที่" />
+                    <div className="border border-surface-200 border-t-0 p-2.5 rounded-b">
+                        <div className="grid grid-cols-2 gap-1.5">
                             <FormField label="วัตถุประสงค์" value={state.certificationPurpose ? PURPOSE_LABELS[state.certificationPurpose] : undefined} />
                             <FormField label="ประเภทบริการ" value={state.serviceType === 'NEW' ? 'ขอรับรองใหม่' : state.serviceType === 'RENEWAL' ? 'ต่ออายุ' : state.serviceType ?? undefined} />
                             <FormField label="ลักษณะพื้นที่" value={state.siteTypes?.map(t => SITE_TYPE_LABELS[t]).join(', ')} colSpan={2} />
@@ -274,56 +152,22 @@ export default function Step8Review() {
                 </div>
 
                 {/* Section 2: Applicant */}
-                <div style={{ marginBottom: '12px' }}>
-                    <div style={{ background: '#10B981', color: 'white', padding: '6px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '4px 4px 0 0' }}>
-                        ส่วนที่ 2: ข้อมูลผู้ขอใบรับรอง ({state.applicantData?.applicantType === 'INDIVIDUAL' ? 'บุคคลธรรมดา' : state.applicantData?.applicantType === 'COMMUNITY' ? 'วิสาหกิจชุมชน' : 'นิติบุคคล'})
-                    </div>
-                    <div style={{ border: '1px solid #E5E7EB', borderTop: 'none', padding: '10px', borderRadius: '0 0 4px 4px' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                            {state.applicantData?.applicantType === 'INDIVIDUAL' && (
-                                <>
-                                    <FormField label="ชื่อ-นามสกุล" value={`${state.applicantData?.firstName || ''} ${state.applicantData?.lastName || ''}`} />
-                                    <FormField label="เลขบัตรประชาชน" value={state.applicantData?.idCard} />
-                                    <FormField label="โทรศัพท์" value={state.applicantData?.phone} />
-                                    <FormField label="Line ID" value={state.applicantData?.lineId} />
-                                    <FormField label="อีเมล" value={state.applicantData?.email} colSpan={2} />
-                                </>
-                            )}
-                            {state.applicantData?.applicantType === 'COMMUNITY' && (
-                                <>
-                                    <FormField label="ชื่อวิสาหกิจชุมชน" value={state.applicantData?.communityName} colSpan={2} />
-                                    <FormField label="ชื่อประธาน" value={state.applicantData?.presidentName} />
-                                    <FormField label="เลขบัตรประชาชน" value={state.applicantData?.presidentIdCard} />
-                                    <FormField label="รหัส สวช.01" value={state.applicantData?.registrationSVC01} />
-                                    <FormField label="รหัส ท.ว.ช.3" value={state.applicantData?.registrationTVC3} />
-                                    <FormField label="เลขรหัสประจำบ้าน" value={state.applicantData?.houseRegistrationCode} />
-                                    <FormField label="โทรศัพท์" value={state.applicantData?.phone} />
-                                    <FormField label="อีเมล" value={state.applicantData?.email} />
-                                    <FormField label="Line ID" value={state.applicantData?.lineId} />
-                                </>
-                            )}
-                            {state.applicantData?.applicantType === 'JURISTIC' && (
-                                <>
-                                    <FormField label="ชื่อบริษัท/สถานประกอบการ" value={state.applicantData?.companyName} colSpan={2} />
-                                    <FormField label="ที่อยู่" value={state.applicantData?.companyAddress} colSpan={2} />
-                                    <FormField label="โทรศัพท์สถานที่" value={state.applicantData?.companyPhone} />
-                                    <FormField label="เลขทะเบียนนิติบุคคล" value={state.applicantData?.registrationNumber} />
-                                    <FormField label="ชื่อประธานกรรมการ" value={state.applicantData?.directorName} />
-                                    <FormField label="โทรศัพท์ประธาน" value={state.applicantData?.directorPhone} />
-                                    <FormField label="อีเมล" value={state.applicantData?.directorEmail} colSpan={2} />
-                                </>
-                            )}
+                <div className="mb-3">
+                    <SectionHeader title={`ส่วนที่ 2: ข้อมูลผู้ขอใบรับรอง (${state.applicantData?.applicantType === 'INDIVIDUAL' ? 'บุคคลธรรมดา' : state.applicantData?.applicantType === 'COMMUNITY' ? 'วิสาหกิจชุมชน' : 'นิติบุคคล'})`} />
+                    <div className="border border-surface-200 border-t-0 p-2.5 rounded-b">
+                        <div className="grid grid-cols-2 gap-1.5">
+                            {state.applicantData?.applicantType === 'INDIVIDUAL' && (<><FormField label="ชื่อ-นามสกุล" value={`${state.applicantData?.firstName || ''} ${state.applicantData?.lastName || ''}`} /><FormField label="เลขบัตรประชาชน" value={state.applicantData?.idCard} /><FormField label="โทรศัพท์" value={state.applicantData?.phone} /><FormField label="Line ID" value={state.applicantData?.lineId} /><FormField label="อีเมล" value={state.applicantData?.email} colSpan={2} /></>)}
+                            {state.applicantData?.applicantType === 'COMMUNITY' && (<><FormField label="ชื่อวิสาหกิจชุมชน" value={state.applicantData?.communityName} colSpan={2} /><FormField label="ชื่อประธาน" value={state.applicantData?.presidentName} /><FormField label="เลขบัตรประชาชน" value={state.applicantData?.presidentIdCard} /><FormField label="รหัส สวช.01" value={state.applicantData?.registrationSVC01} /><FormField label="รหัส ท.ว.ช.3" value={state.applicantData?.registrationTVC3} /><FormField label="โทรศัพท์" value={state.applicantData?.phone} /><FormField label="อีเมล" value={state.applicantData?.email} /></>)}
+                            {state.applicantData?.applicantType === 'JURISTIC' && (<><FormField label="ชื่อบริษัท/สถานประกอบการ" value={state.applicantData?.companyName} colSpan={2} /><FormField label="ที่อยู่" value={state.applicantData?.companyAddress} colSpan={2} /><FormField label="โทรศัพท์สถานที่" value={state.applicantData?.companyPhone} /><FormField label="เลขทะเบียนนิติบุคคล" value={state.applicantData?.registrationNumber} /><FormField label="ชื่อประธานกรรมการ" value={state.applicantData?.directorName} /><FormField label="โทรศัพท์ประธาน" value={state.applicantData?.directorPhone} /><FormField label="อีเมล" value={state.applicantData?.directorEmail} colSpan={2} /></>)}
                         </div>
                     </div>
                 </div>
 
                 {/* Section 3: Site */}
-                <div style={{ marginBottom: '12px' }}>
-                    <div style={{ background: '#10B981', color: 'white', padding: '6px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '4px 4px 0 0' }}>
-                        ส่วนที่ 3: ข้อมูลสถานที่ปลูก/เก็บเกี่ยว
-                    </div>
-                    <div style={{ border: '1px solid #E5E7EB', borderTop: 'none', padding: '10px', borderRadius: '0 0 4px 4px' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                <div className="mb-3">
+                    <SectionHeader title="ส่วนที่ 3: ข้อมูลสถานที่ปลูก/เก็บเกี่ยว" />
+                    <div className="border border-surface-200 border-t-0 p-2.5 rounded-b">
+                        <div className="grid grid-cols-2 gap-1.5">
                             <FormField label="ชื่อสถานที่/ฟาร์ม" value={state.siteData?.siteName} colSpan={2} />
                             <FormField label="ที่อยู่" value={state.siteData?.address} colSpan={2} />
                             <FormField label="จังหวัด" value={state.siteData?.province} />
@@ -335,15 +179,11 @@ export default function Step8Review() {
                             <FormField label="ทิศตะวันออก จรด" value={state.siteData?.eastBorder} />
                             <FormField label="ทิศตะวันตก จรด" value={state.siteData?.westBorder} />
                         </div>
-                        {/* Map Preview */}
                         {state.siteData?.gpsLat && state.siteData?.gpsLng && (
-                            <div style={{ marginTop: '10px' }}>
-                                <div style={{ fontSize: '9px', color: '#6B7280', marginBottom: '4px' }}>📍 แผนที่ตำแหน่งสถานที่</div>
-                                <div style={{ borderRadius: '6px', overflow: 'hidden', border: '1px solid #E5E7EB' }}>
-                                    <iframe
-                                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(state.siteData.gpsLng) - 0.01}%2C${parseFloat(state.siteData.gpsLat) - 0.006}%2C${parseFloat(state.siteData.gpsLng) + 0.01}%2C${parseFloat(state.siteData.gpsLat) + 0.006}&layer=mapnik&marker=${state.siteData.gpsLat}%2C${state.siteData.gpsLng}`}
-                                        style={{ width: '100%', height: '120px', border: 'none' }} loading="lazy"
-                                    />
+                            <div className="mt-2.5">
+                                <div className="text-[9px] text-slate-500 mb-1">📍 แผนที่ตำแหน่งสถานที่</div>
+                                <div className="rounded-md overflow-hidden border border-surface-200">
+                                    <iframe src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(state.siteData.gpsLng) - 0.01}%2C${parseFloat(state.siteData.gpsLat) - 0.006}%2C${parseFloat(state.siteData.gpsLng) + 0.01}%2C${parseFloat(state.siteData.gpsLat) + 0.006}&layer=mapnik&marker=${state.siteData.gpsLat}%2C${state.siteData.gpsLng}`} className="w-full h-[120px] border-0" loading="lazy" />
                                 </div>
                             </div>
                         )}
@@ -351,142 +191,64 @@ export default function Step8Review() {
                 </div>
 
                 {/* Section 4: Production */}
-                <div style={{ marginBottom: '12px' }}>
-                    <div style={{ background: '#10B981', color: 'white', padding: '6px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '4px 4px 0 0' }}>
-                        ส่วนที่ 4: ข้อมูลการผลิต
-                    </div>
-                    <div style={{ border: '1px solid #E5E7EB', borderTop: 'none', padding: '10px', borderRadius: '0 0 4px 4px' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                <div className="mb-3">
+                    <SectionHeader title="ส่วนที่ 4: ข้อมูลการผลิต" />
+                    <div className="border border-surface-200 border-t-0 p-2.5 rounded-b">
+                        <div className="grid grid-cols-2 gap-1.5">
                             <FormField label="ส่วนของพืชที่ใช้ประโยชน์" value={state.productionData?.plantParts?.map(p => PLANT_PART_LABELS[p] || p).join(', ')} colSpan={2} />
                             <FormField label="วิธีการขยายพันธุ์" value={state.productionData?.propagationType ? PROPAGATION_LABELS[state.productionData.propagationType] : undefined} />
                             <FormField label="ที่มาของผลผลิต" value="ปลูกเอง (ในแหล่งผลิตนี้)" />
                             <FormField label="ชื่อสายพันธุ์" value={state.productionData?.varietyName} />
                             <FormField label="แหล่งที่มาสายพันธุ์" value={state.productionData?.varietySource} />
-                            <FormField label="แหล่งที่มาเมล็ดพันธุ์" value={state.productionData?.seedSource} colSpan={2} />
                             <FormField label="จำนวนต้นที่ปลูก" value={state.productionData?.quantityWithUnit} />
                             <FormField label="รอบการเก็บเกี่ยว/ปี" value={state.productionData?.harvestCycles ? `${state.productionData.harvestCycles} รอบ` : undefined} />
                             <FormField label="ผลผลิตคาดการณ์ (กก./ปี)" value={state.productionData?.estimatedYield?.toLocaleString()} />
-                            <FormField label="รายละเอียดเพิ่มเติม" value={state.productionData?.sourceDetail} />
                             <FormField label="ใบรับรอง GAP" value={state.productionData?.hasGAPCert ? '✓ มี' : '✗ ไม่มี'} />
-                            <FormField label="ใบรับรอง Organic" value={state.productionData?.hasOrganicCert ? '✓ มี' : '✗ ไม่มี'} />
                         </div>
                     </div>
                 </div>
 
-                {/* Section 5: Documents with Preview */}
-                <div style={{ marginBottom: '12px' }}>
-                    <div style={{ background: '#10B981', color: 'white', padding: '6px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '4px 4px 0 0' }}>
-                        ส่วนที่ 5: เอกสารประกอบ ({uploadedDocs.length} รายการ)
-                    </div>
-                    <div style={{ border: '1px solid #E5E7EB', borderTop: 'none', padding: '10px', borderRadius: '0 0 4px 4px' }}>
+                {/* Section 5: Documents */}
+                <div className="mb-3">
+                    <SectionHeader title={`ส่วนที่ 5: เอกสารประกอบ (${uploadedDocs.length} รายการ)`} />
+                    <div className="border border-surface-200 border-t-0 p-2.5 rounded-b">
                         {uploadedDocs.length > 0 ? (
                             <>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '10px' }}>
+                                <div className="grid grid-cols-4 gap-1.5 mb-2.5">
                                     {uploadedDocs.map((doc, i) => (
-                                        <div key={i} onClick={() => setSelectedDoc(selectedDoc === i ? null : i)}
-                                            style={{
-                                                border: selectedDoc === i ? '2px solid #10B981' : '1px solid #E5E7EB',
-                                                borderRadius: '6px', padding: '6px', textAlign: 'center', cursor: 'pointer',
-                                                background: selectedDoc === i ? '#ECFDF5' : '#F9FAFB',
-                                            }}>
-                                            <div style={{ fontSize: '20px', marginBottom: '2px' }}>
-                                                {doc.name?.includes('รูป') || doc.name?.includes('photo') ? '🖼️' : '📄'}
-                                            </div>
-                                            <div style={{ fontSize: '8px', color: '#374151', wordBreak: 'break-all', lineHeight: 1.2 }}>
-                                                {doc.name || `เอกสาร ${i + 1}`}
-                                            </div>
-                                            <div style={{ fontSize: '7px', color: '#10B981', marginTop: '2px' }}>✓ อัปโหลดแล้ว</div>
+                                        <div key={i} onClick={() => setSelectedDoc(selectedDoc === i ? null : i)} className={`p-1.5 rounded-md text-center cursor-pointer ${selectedDoc === i ? 'border-2 border-primary-600 bg-primary-50' : 'border border-surface-200 bg-surface-100'}`}>
+                                            <div className="text-xl mb-0.5">{doc.name?.includes('รูป') || doc.name?.includes('photo') ? '🖼️' : '📄'}</div>
+                                            <div className="text-[8px] text-slate-700 break-all leading-tight">{doc.name || `เอกสาร ${i + 1}`}</div>
+                                            <div className="text-[7px] text-primary-600 mt-0.5">✓ อัปโหลดแล้ว</div>
                                         </div>
                                     ))}
                                 </div>
-                                {/* Document Preview Area */}
                                 {selectedDoc !== null && uploadedDocs[selectedDoc] && (
-                                    <div style={{ border: '1px solid #E5E7EB', borderRadius: '6px', padding: '10px', background: '#F9FAFB' }}>
-                                        <div style={{ fontSize: '10px', fontWeight: 600, marginBottom: '6px' }}>
-                                            📎 พรีวิว: {uploadedDocs[selectedDoc].name || `เอกสาร ${selectedDoc + 1}`}
-                                        </div>
-                                        <div style={{
-                                            background: '#FFF', border: '1px solid #E5E7EB', borderRadius: '4px',
-                                            minHeight: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            padding: '16px', textAlign: 'center',
-                                        }}>
-                                            {uploadedDocs[selectedDoc].url ? (
-                                                <img
-                                                    src={uploadedDocs[selectedDoc].url}
-                                                    alt={uploadedDocs[selectedDoc].name}
-                                                    style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }}
-                                                    onError={(e) => {
-                                                        (e.target as HTMLImageElement).style.display = 'none';
-                                                    }}
-                                                />
-                                            ) : (
-                                                <div style={{ color: '#6B7280', fontSize: '11px' }}>
-                                                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>📄</div>
-                                                    <div>ไฟล์: {uploadedDocs[selectedDoc].name}</div>
-                                                    <div style={{ fontSize: '9px', color: '#9CA3AF', marginTop: '4px' }}>
-                                                        (พรีวิวจะแสดงเมื่อเชื่อมต่อกับระบบจัดเก็บไฟล์จริง)
-                                                    </div>
-                                                </div>
-                                            )}
+                                    <div className="border border-surface-200 rounded-md p-2.5 bg-surface-100">
+                                        <div className="text-[10px] font-semibold mb-1.5">📎 พรีวิว: {uploadedDocs[selectedDoc].name}</div>
+                                        <div className="bg-white border border-surface-200 rounded min-h-[100px] flex items-center justify-center p-4">
+                                            {uploadedDocs[selectedDoc].url ? <img src={uploadedDocs[selectedDoc].url} alt={uploadedDocs[selectedDoc].name} className="max-w-full max-h-[200px] object-contain" /> : <div className="text-center text-slate-500 text-[11px]"><div className="text-3xl mb-2">📄</div>ไฟล์: {uploadedDocs[selectedDoc].name}</div>}
                                         </div>
                                     </div>
                                 )}
                             </>
-                        ) : (
-                            <div style={{ textAlign: 'center', padding: '16px', color: '#9CA3AF', fontSize: '11px' }}>
-                                ⚠️ ยังไม่ได้อัปโหลดเอกสาร กรุณากลับไปอัปโหลดที่ขั้นตอนก่อนหน้า
-                            </div>
-                        )}
+                        ) : <div className="text-center py-4 text-slate-400 text-[11px]">⚠️ ยังไม่ได้อัปโหลดเอกสาร</div>}
                     </div>
                 </div>
 
                 {/* Fee Table */}
-                <div style={{ marginBottom: '12px' }}>
-                    <div style={{ background: '#F59E0B', color: 'white', padding: '6px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '4px 4px 0 0' }}>
-                        ค่าธรรมเนียม
-                    </div>
-                    <div style={{ border: '1px solid #E5E7EB', borderTop: 'none', borderRadius: '0 0 4px 4px', overflow: 'hidden' }}>
-                        <table style={{ width: '100%', fontSize: '10px', borderCollapse: 'collapse' }}>
-                            <thead style={{ background: '#F9FAFB' }}>
-                                <tr>
-                                    <th style={{ padding: '6px', textAlign: 'left', borderBottom: '1px solid #E5E7EB' }}>ลำดับที่</th>
-                                    <th style={{ padding: '6px', textAlign: 'left', borderBottom: '1px solid #E5E7EB' }}>รายการ</th>
-                                    <th style={{ padding: '6px', textAlign: 'center', borderBottom: '1px solid #E5E7EB' }}>จำนวน</th>
-                                    <th style={{ padding: '6px', textAlign: 'center', borderBottom: '1px solid #E5E7EB' }}>หน่วย</th>
-                                    <th style={{ padding: '6px', textAlign: 'right', borderBottom: '1px solid #E5E7EB' }}>ราคา/หน่วย</th>
-                                    <th style={{ padding: '6px', textAlign: 'right', borderBottom: '1px solid #E5E7EB' }}>จำนวนเงิน (บาท)</th>
-                                </tr>
-                            </thead>
+                <div className="mb-3">
+                    <SectionHeader title="ค่าธรรมเนียม" color="secondary" />
+                    <div className="border border-surface-200 border-t-0 rounded-b overflow-hidden">
+                        <table className="w-full text-[10px]">
+                            <thead className="bg-surface-100"><tr><th className="p-1.5 text-left border-b border-surface-200">ลำดับที่</th><th className="p-1.5 text-left border-b border-surface-200">รายการ</th><th className="p-1.5 text-center border-b border-surface-200">จำนวน</th><th className="p-1.5 text-center border-b border-surface-200">หน่วย</th><th className="p-1.5 text-right border-b border-surface-200">ราคา/หน่วย</th><th className="p-1.5 text-right border-b border-surface-200">จำนวนเงิน (บาท)</th></tr></thead>
                             <tbody>
-                                <tr style={{ borderBottom: '1px solid #E5E7EB' }}>
-                                    <td style={{ padding: '6px' }}>1.</td>
-                                    <td style={{ padding: '6px' }}>ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น</td>
-                                    <td style={{ padding: '6px', textAlign: 'center' }}>{siteTypesCount}</td>
-                                    <td style={{ padding: '6px', textAlign: 'center' }}>ต่อคำขอ</td>
-                                    <td style={{ padding: '6px', textAlign: 'right' }}>5,000.00</td>
-                                    <td style={{ padding: '6px', textAlign: 'right' }}>{totalFee.toLocaleString()}.00</td>
-                                </tr>
-                                <tr style={{ borderBottom: '1px solid #E5E7EB' }}>
-                                    <td style={{ padding: '6px' }}>2.</td>
-                                    <td style={{ padding: '6px' }}>ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน</td>
-                                    <td style={{ padding: '6px', textAlign: 'center' }}>1</td>
-                                    <td style={{ padding: '6px', textAlign: 'center' }}>ต่อคำขอ</td>
-                                    <td style={{ padding: '6px', textAlign: 'right' }}>25,000.00</td>
-                                    <td style={{ padding: '6px', textAlign: 'right' }}>25,000.00</td>
-                                </tr>
+                                <tr className="border-b border-surface-200"><td className="p-1.5">1.</td><td className="p-1.5">ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น</td><td className="p-1.5 text-center">{siteTypesCount}</td><td className="p-1.5 text-center">ต่อคำขอ</td><td className="p-1.5 text-right">5,000.00</td><td className="p-1.5 text-right">{totalFee.toLocaleString()}.00</td></tr>
+                                <tr className="border-b border-surface-200"><td className="p-1.5">2.</td><td className="p-1.5">ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน</td><td className="p-1.5 text-center">1</td><td className="p-1.5 text-center">ต่อคำขอ</td><td className="p-1.5 text-right">25,000.00</td><td className="p-1.5 text-right">25,000.00</td></tr>
                             </tbody>
-                            <tfoot style={{ background: '#FEF3C7' }}>
-                                <tr>
-                                    <td colSpan={5} style={{ padding: '8px', fontWeight: 600, textAlign: 'right' }}>จำนวนเงินทั้งสิ้น</td>
-                                    <td style={{ padding: '8px', fontWeight: 700, textAlign: 'right', fontSize: '12px' }}>
-                                        {(totalFee + 25000).toLocaleString()}.00
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colSpan={6} style={{ padding: '6px', fontSize: '9px', color: '#B45309' }}>
-                                        ({['สามหมื่น', 'สามหมื่นห้าพัน', 'สี่หมื่น', 'สี่หมื่นห้าพัน', 'ห้าหมื่น'][siteTypesCount - 1] || 'สามหมื่น'}บาทถ้วน)
-                                    </td>
-                                </tr>
+                            <tfoot className="bg-secondary-100">
+                                <tr><td colSpan={5} className="p-2 font-semibold text-right">จำนวนเงินทั้งสิ้น</td><td className="p-2 font-bold text-right text-xs">{(totalFee + 25000).toLocaleString()}.00</td></tr>
+                                <tr><td colSpan={6} className="p-1.5 text-[9px] text-secondary-700">({['สามหมื่น', 'สามหมื่นห้าพัน', 'สี่หมื่น', 'สี่หมื่นห้าพัน', 'ห้าหมื่น'][siteTypesCount - 1] || 'สามหมื่น'}บาทถ้วน)</td></tr>
                             </tfoot>
                         </table>
                     </div>
@@ -496,57 +258,17 @@ export default function Step8Review() {
             </div>
 
             {/* Error Message */}
-            {error && (
-                <div style={{
-                    background: '#FEE2E2', border: '1px solid #EF4444', borderRadius: '8px',
-                    padding: '12px', marginBottom: '12px', color: '#DC2626', fontSize: '13px',
-                    display: 'flex', alignItems: 'center', gap: '8px',
-                }}>
-                    ⚠️ {error}
-                </div>
-            )}
+            {error && <div className="bg-red-50 border border-red-500 rounded-lg p-3 mb-3 text-red-600 text-sm flex items-center gap-2">⚠️ {error}</div>}
 
             {/* Navigation */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={handleBack} disabled={submitting} style={{
-                    flex: 1, padding: '14px', borderRadius: '12px',
-                    border: `1px solid ${isDark ? '#4B5563' : '#E5E7EB'}`,
-                    background: isDark ? '#374151' : 'white',
-                    color: isDark ? '#F9FAFB' : '#374151',
-                    fontSize: '14px', fontWeight: 500, cursor: submitting ? 'not-allowed' : 'pointer',
-                    opacity: submitting ? 0.5 : 1,
-                }}>
-                    ย้อนกลับ
-                </button>
-                <button onClick={handleNext} disabled={submitting} style={{
-                    flex: 2, padding: '14px', borderRadius: '12px', border: 'none',
-                    background: submitting
-                        ? '#9CA3AF'
-                        : 'linear-gradient(135deg, #10B981 0%, #34D399 100%)',
-                    color: 'white', fontSize: '14px', fontWeight: 600,
-                    cursor: submitting ? 'not-allowed' : 'pointer',
-                    boxShadow: submitting ? 'none' : '0 4px 20px rgba(16, 185, 129, 0.4)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                }}>
-                    {submitting ? (
-                        <>
-                            <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span>
-                            กำลังบันทึกคำขอ...
-                        </>
-                    ) : (
-                        <>✅ ยืนยันและไปดูใบเสนอราคา</>
-                    )}
+            <div className="flex gap-3">
+                <button onClick={handleBack} disabled={submitting} className={`flex-1 py-3.5 rounded-xl font-medium border ${isDark ? 'bg-slate-700 border-slate-600 text-slate-100' : 'bg-white border-surface-200 text-slate-700'} disabled:opacity-50`}>ย้อนกลับ</button>
+                <button onClick={handleNext} disabled={submitting} className={`flex-[2] py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 ${submitting ? 'bg-slate-400' : 'bg-gradient-to-br from-primary-600 to-primary-500 shadow-lg shadow-primary-500/40'} text-white disabled:cursor-not-allowed`}>
+                    {submitting ? <><span className="animate-spin">⏳</span> กำลังบันทึกคำขอ...</> : <>✅ ยืนยันและไปดูใบเสนอราคา</>}
                 </button>
             </div>
 
-            <style jsx global>{`
-                @media print {
-                    body * { visibility: hidden; }
-                    #official-document, #official-document * { visibility: visible; }
-                    #official-document { position: absolute; left: 0; top: 0; width: 100%; }
-                }
-            `}</style>
+            <style jsx global>{`@media print { body * { visibility: hidden; } #official-document, #official-document * { visibility: visible; } #official-document { position: absolute; left: 0; top: 0; width: 100%; } }`}</style>
         </div>
     );
 }
-

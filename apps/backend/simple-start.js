@@ -52,7 +52,7 @@ try {
     console.log('✅ V2 Routes loaded (includes auth-staff)');
 
     // Farmer Auth Routes
-    const AuthFarmerRoutes = require('./routes/api/AuthFarmerRoutes');
+    const AuthFarmerRoutes = require('./routes/api/auth-farmer-routes');
     app.use('/api/auth-farmer', AuthFarmerRoutes);
     app.use('/api/auth/farmer', AuthFarmerRoutes);
     console.log('✅ Auth Farmer Routes loaded');
@@ -73,10 +73,10 @@ try {
     app.use('/api/auth-dtam', AuthDtamRoutes);
     console.log('✅ Auth DTAM Routes loaded');
 
-    // Accounting Routes
-    const AccountingRoutes = require('./routes/api/AccountingRoutes');
-    app.use('/api/v2/accounting', AccountingRoutes);
-    console.log('✅ Accounting Routes loaded');
+    // Accounting Routes - TEMPORARILY DISABLED (uses legacy Mongoose models)
+    // const AccountingRoutes = require('./routes/api/accounting-routes');
+    // app.use('/api/v2/accounting', AccountingRoutes);
+    console.log('⚠️ Accounting Routes SKIPPED (needs migration to Prisma)');
 
     console.log('✅ All routes loaded');
 } catch (error) {
@@ -129,16 +129,20 @@ server = app.listen(port, '0.0.0.0', () => {
     console.log(`📡 Health check: http://localhost:${port}/health`);
     console.log(`📡 Staff login: http://localhost:${port}/api/v2/auth-staff/login`);
 
-    // Connect to database in background
-    const databaseService = require('./services/ProductionDatabase');
-    databaseService.connect()
-        .then(() => {
-            global.dbReady = true;
-            console.log('✅ Database connected');
-        })
-        .catch(err => {
-            console.warn('⚠️ Database unavailable:', err.message);
-        });
+    // Connect to database in background (optional for testing)
+    try {
+        const databaseService = require('./services/prisma-database');
+        databaseService.connect()
+            .then(() => {
+                global.dbReady = true;
+                console.log('✅ Database connected');
+            })
+            .catch(err => {
+                console.warn('⚠️ Database unavailable:', err.message);
+            });
+    } catch (err) {
+        console.warn('⚠️ Database service not available:', err.message);
+    }
 
     // Redis (optional)
     if (process.env.REDIS_ENABLED !== 'false') {

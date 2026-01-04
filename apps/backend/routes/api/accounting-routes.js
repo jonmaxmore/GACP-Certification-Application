@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const accountingController = require('../../controllers/AccountingController');
+const accountingController = require('../../controllers/accounting-controller');
 const { authenticate, checkPermission } = require('../../middleware/auth-middleware');
 
 // All routes require authentication

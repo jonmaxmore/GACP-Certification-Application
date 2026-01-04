@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 
 /// 🍎 Application Detail Screen
 /// หน้าดูรายละเอียดคำขอ - matches /applications/[id]
@@ -49,7 +50,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         title: const Text('รายละเอียดคำขอ'),
-        backgroundColor: Colors.teal,
+        backgroundColor: AppTheme.primaryGreen,
         foregroundColor: Colors.white,
       ),
       body: _isLoading
@@ -165,7 +166,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                   icon: const Icon(Icons.chat),
                   label: const Text('ติดต่อเจ้าหน้าที่'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: AppTheme.primaryGreen,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
@@ -198,7 +199,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
           width: 24,
           height: 24,
           decoration: BoxDecoration(
-            color: completed ? Colors.teal : Colors.grey.shade300,
+            color: completed ? AppTheme.primaryGreen : Colors.grey.shade300,
             shape: BoxShape.circle,
           ),
           child: completed

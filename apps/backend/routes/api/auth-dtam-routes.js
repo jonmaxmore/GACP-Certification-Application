@@ -11,26 +11,79 @@ const { authLimiter } = require('../../middleware/rate-limiter');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'gacp-jwt-secret-key-2024';
 const JWT_EXPIRES_IN = '8h';
+const DEV_MODE = process.env.NODE_ENV !== 'production' || process.env.DEV_AUTH === 'true';
+
+// Mock staff accounts for development/testing
+const MOCK_STAFF = [
+    { id: 'mock-admin-001', uuid: 'mock-uuid-admin', username: 'admin', password: 'Admin@12345', email: 'admin@dtam.go.th', firstName: 'แอดมิน', lastName: 'ระบบ', role: 'admin', department: 'กรมการแพทย์แผนไทย' },
+    { id: 'mock-reviewer-001', uuid: 'mock-uuid-reviewer', username: 'reviewer', password: 'Test@12345', email: 'reviewer@dtam.go.th', firstName: 'ผู้ตรวจสอบ', lastName: 'เอกสาร', role: 'reviewer', department: 'กรมการแพทย์แผนไทย' },
+    { id: 'mock-auditor-001', uuid: 'mock-uuid-auditor', username: 'auditor', password: 'Test@12345', email: 'auditor@dtam.go.th', firstName: 'ผู้ตรวจ', lastName: 'พื้นที่', role: 'auditor', department: 'กรมการแพทย์แผนไทย' },
+    { id: 'mock-scheduler-001', uuid: 'mock-uuid-scheduler', username: 'scheduler', password: 'Test@12345', email: 'scheduler@dtam.go.th', firstName: 'ผู้จัดคิว', lastName: 'นัดหมาย', role: 'scheduler', department: 'กรมการแพทย์แผนไทย' },
+    { id: 'mock-accountant-001', uuid: 'mock-uuid-accountant', username: 'accountant', password: 'Test@12345', email: 'accountant@dtam.go.th', firstName: 'บัญชี', lastName: 'การเงิน', role: 'accountant', department: 'กรมการแพทย์แผนไทย' },
+];
 
 // POST /auth-dtam/login - 🛡️ Rate limited: 5 attempts per 15 minutes
 router.post('/login', authLimiter, async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, password, identifier } = req.body;
+        const loginId = username || identifier;
 
-        if (!username || !password) {
+        if (!loginId || !password) {
             return res.status(400).json({
                 success: false,
                 error: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'
             });
         }
 
-        // Find staff by username, email, or employeeId
+        // DEV MODE: Try mock authentication first
+        if (DEV_MODE) {
+            const mockStaff = MOCK_STAFF.find(s =>
+                (s.username === loginId || s.email === loginId) && s.password === password
+            );
+
+            if (mockStaff) {
+                const token = jwt.sign(
+                    {
+                        id: mockStaff.id,
+                        uuid: mockStaff.uuid,
+                        username: mockStaff.username,
+                        email: mockStaff.email,
+                        role: mockStaff.role,
+                        userType: 'DTAM_STAFF'
+                    },
+                    JWT_SECRET,
+                    { expiresIn: JWT_EXPIRES_IN }
+                );
+
+                console.log(`[Auth DEV] Mock staff login: ${mockStaff.username} (${mockStaff.role})`);
+
+                return res.json({
+                    success: true,
+                    data: {
+                        user: {
+                            id: mockStaff.id,
+                            uuid: mockStaff.uuid,
+                            username: mockStaff.username,
+                            email: mockStaff.email,
+                            firstName: mockStaff.firstName,
+                            lastName: mockStaff.lastName,
+                            role: mockStaff.role,
+                            department: mockStaff.department,
+                            dashboardUrl: '/staff/dashboard'
+                        },
+                        token
+                    }
+                });
+            }
+        }
+
+        // PRODUCTION: Database authentication
         const staff = await prisma.dTAMStaff.findFirst({
             where: {
                 OR: [
-                    { username: username },
-                    { email: username },
-                    { employeeId: username }
+                    { username: loginId },
+                    { email: loginId },
+                    { employeeId: loginId }
                 ],
                 isDeleted: false
             }

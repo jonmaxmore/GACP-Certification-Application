@@ -80,7 +80,7 @@ class ApplicationTrackingScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
+                    colors: [AppTheme.infoBlue, AppTheme.infoBlueDark],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),

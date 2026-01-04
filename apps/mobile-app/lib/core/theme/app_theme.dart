@@ -14,6 +14,20 @@ class AppTheme {
   static const Color bgLight = Color(0xFFF5F7FA); // Light gray background
   static const Color bgGray = Color(0xFFF5F5F5); // Neutral gray background
 
+  // Account Type Colors
+  static const Color accountIndividual =
+      Color(0xFF2E7D32); // Individual - green
+  static const Color accountJuristic = Color(0xFF1565C0); // Juristic - blue
+  static const Color accountCommunity = Color(0xFF7B1FA2); // Community - purple
+
+  // Info/Blue Colors
+  static const Color infoBlue = Color(0xFF2563EB); // Primary blue
+  static const Color infoBlueDark = Color(0xFF1E40AF); // Dark blue
+
+  // Text Colors
+  static const Color textMuted = Color(0xFF64748B); // Slate 500
+  static const Color textEmerald = Color(0xFF047857); // Emerald 700
+
   // Status Colors
   static const Color statusDraft = Color(0xFF8A8A8A);
   static const Color statusPending = Color(0xFFF59E0B);

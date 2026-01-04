@@ -281,7 +281,7 @@ class _CuteFarmEmptyState extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF047857), // Emerald 700
+              color: AppTheme.textEmerald, // Emerald 700
             ),
           ),
           const SizedBox(height: 8),
@@ -289,7 +289,7 @@ class _CuteFarmEmptyState extends StatelessWidget {
             'เริ่มต้นปลูกกัญชงคุณภาพได้ที่นี่',
             style: TextStyle(
               fontSize: 16,
-              color: Color(0xFF64748B), // Slate 500
+              color: AppTheme.textMuted, // Slate 500
             ),
           ),
           const SizedBox(height: 32),

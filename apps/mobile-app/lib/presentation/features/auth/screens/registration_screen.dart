@@ -141,7 +141,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       'label': 'บุคคลธรรมดา',
       'subtitle': 'เกษตรกรรายย่อย',
       'icon': Icons.person,
-      'color': Color(0xFF2E7D32),
+      'color': AppTheme.accountIndividual,
       'idLabel': 'เลขบัตรประชาชน 13 หลัก',
       'idHint': '1-2345-67890-12-3',
     },
@@ -150,7 +150,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       'label': 'นิติบุคคล',
       'subtitle': 'บริษัท / ห้างหุ้นส่วน',
       'icon': Icons.business,
-      'color': Color(0xFF1565C0),
+      'color': AppTheme.accountJuristic,
       'idLabel': 'เลขทะเบียนนิติบุคคล 13 หลัก',
       'idHint': '0-1055-12345-67-8',
     },
@@ -159,7 +159,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       'label': 'วิสาหกิจชุมชน',
       'subtitle': 'กลุ่มเกษตรกร',
       'icon': Icons.groups,
-      'color': Color(0xFF7B1FA2),
+      'color': AppTheme.accountCommunity,
       'idLabel': 'เลขทะเบียนวิสาหกิจชุมชน',
       'idHint': 'XXXX-XXXX-XXX',
     },
@@ -371,7 +371,8 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppTheme.primaryGreenDark),
+          icon: const Icon(Icons.arrow_back_ios,
+              color: AppTheme.primaryGreenDark),
           onPressed: () {
             if (_currentStep > 0) {
               _goToStep(_currentStep - 1);
@@ -980,7 +981,8 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           onPressed: () => context.go('/login'),
           child: const Text('มีบัญชีแล้ว? เข้าสู่ระบบ',
               style: TextStyle(
-                  color: AppTheme.primaryGreenDark, fontWeight: FontWeight.bold)),
+                  color: AppTheme.primaryGreenDark,
+                  fontWeight: FontWeight.bold)),
         ),
       ],
     );
@@ -1016,7 +1018,8 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           borderSide: BorderSide(color: Colors.grey.shade200)),
       focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppTheme.primaryGreenDark, width: 2)),
+          borderSide:
+              const BorderSide(color: AppTheme.primaryGreenDark, width: 2)),
       errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: Colors.red, width: 1.5)),

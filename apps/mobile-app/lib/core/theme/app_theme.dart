@@ -10,6 +10,10 @@ class AppTheme {
   static const Color primaryGreenLight = Color(0xFF22C55E);
   static const Color primaryGreenDark = Color(0xFF15803D);
 
+  // Background Colors
+  static const Color bgLight = Color(0xFFF5F7FA); // Light gray background
+  static const Color bgGray = Color(0xFFF5F5F5); // Neutral gray background
+
   // Status Colors
   static const Color statusDraft = Color(0xFF8A8A8A);
   static const Color statusPending = Color(0xFFF59E0B);

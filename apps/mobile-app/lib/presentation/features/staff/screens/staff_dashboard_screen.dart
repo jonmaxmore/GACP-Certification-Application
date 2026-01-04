@@ -51,7 +51,7 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen>
     final roleInfo = roleLabels[role] ?? roleLabels['REVIEWER_AUDITOR']!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.bgLight,
       appBar: AppBar(
         title: const Text('Staff Dashboard'),
         backgroundColor: AppTheme.primary,

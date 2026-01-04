@@ -26,7 +26,7 @@ class _ReplacementCertificateScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppTheme.bgGray,
       appBar: AppBar(
         title: const Text('ขอใบแทนใบรับรอง'),
         backgroundColor: AppTheme.primaryGreen,

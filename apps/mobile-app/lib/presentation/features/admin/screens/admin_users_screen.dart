@@ -78,7 +78,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppTheme.bgGray,
       appBar: AppBar(
         title: const Text('จัดการผู้ใช้'),
         backgroundColor: Colors.deepPurple,

@@ -366,7 +366,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.bgLight,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

@@ -27,7 +27,7 @@ class _AmendmentApplicationScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppTheme.bgGray,
       appBar: AppBar(
         title: const Text('แก้ไขข้อมูลใบรับรอง'),
         backgroundColor: AppTheme.primaryGreen,

@@ -45,7 +45,7 @@ class _Step0PlantSelectionState extends ConsumerState<Step0PlantSelection> {
         backgroundColor: AppTheme.primaryGreenDark,
         foregroundColor: Colors.white,
       ),
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.bgLight,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

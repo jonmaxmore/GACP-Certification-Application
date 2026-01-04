@@ -47,7 +47,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppTheme.bgGray,
       appBar: AppBar(
         title: const Text('รายละเอียดคำขอ'),
         backgroundColor: AppTheme.primaryGreen,

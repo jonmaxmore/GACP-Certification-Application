@@ -18,7 +18,7 @@
   --primary-700: #047857;
   --primary-800: #065f46;
   --primary-900: #064e3b;
-  
+
   /* Secondary - Gold (มาตรฐานระดับสูง) */
   --secondary-50: #fffbeb;
   --secondary-100: #fef3c7;
@@ -27,23 +27,23 @@
   --secondary-400: #fbbf24;
   --secondary-500: #f59e0b;
   --secondary-600: #d97706;
-  
+
   /* Surface - Stone (ถนอมสายตา) */
   --surface-50: #fafaf9;
   --surface-100: #f5f5f4;
   --surface-200: #e7e5e4;
-  
+
   /* Text */
   --text-primary: #1e293b;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
-  
+
   /* Shadows - Apple Style */
   --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   --shadow-float: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
   --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.06);
   --shadow-button: 0 4px 14px -2px rgba(16, 185, 129, 0.35);
-  
+
   /* Radius */
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
@@ -62,6 +62,196 @@
   --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.3);
 }
 
+/* ============ Tailwind Base Layer Fixes ============ */
+/* Fix #1: Contrast Issues - Force default readable colors */
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+
+  /* Fix headings - always dark and bold */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-slate-900 font-bold;
+  }
+
+  /* Fix #4: Typography System - Consistent sizing */
+  h1 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+
+  h3 {
+    @apply text-lg;
+  }
+
+  h4 {
+    @apply text-base font-semibold;
+  }
+
+  /* Paragraph base */
+  p {
+    @apply text-sm md:text-base text-slate-700;
+  }
+
+  /* Small/muted text */
+  small {
+    @apply text-xs text-slate-500;
+  }
+
+  /* Fix #4: Input fields - visible borders */
+  input,
+  select,
+  textarea {
+    @apply border border-slate-200 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed;
+  }
+
+  /* Fix labels */
+  label {
+    @apply text-sm font-medium text-slate-700;
+  }
+}
+
+/* ============ Tailwind Components Layer ============ */
+@layer components {
+
+  /* Fix #2: Button text visibility */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.98] disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-all duration-200;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm bg-white text-slate-700 border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700 active:scale-[0.98] disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all duration-200;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm bg-transparent text-emerald-600 border border-emerald-600 hover:bg-emerald-50 active:scale-[0.98] disabled:border-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-all duration-200;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm bg-red-600 text-white hover:bg-red-700 active:scale-[0.98] transition-all duration-200;
+  }
+
+  /* Fix #3: Clean Table Structure */
+  .table-container {
+    @apply overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-white;
+  }
+
+  .table-scroll {
+    @apply overflow-x-auto;
+  }
+
+  .table-base {
+    @apply w-full text-left text-sm text-slate-600;
+  }
+
+  .table-head {
+    @apply bg-slate-100 text-slate-800 uppercase font-semibold text-xs;
+  }
+
+  .table-th {
+    @apply px-6 py-4 border-b border-slate-200;
+  }
+
+  .table-body {
+    @apply divide-y divide-slate-100;
+  }
+
+  .table-row {
+    @apply hover:bg-slate-50 transition-colors;
+  }
+
+  .table-td {
+    @apply px-6 py-4;
+  }
+
+  .table-td-bold {
+    @apply px-6 py-4 font-medium text-slate-900;
+  }
+
+  /* Card component */
+  .card {
+    @apply bg-white rounded-xl border border-slate-200 shadow-sm p-6;
+  }
+
+  .card-hover {
+    @apply bg-white rounded-xl border border-slate-200 shadow-sm p-6 hover:shadow-md hover:border-emerald-200 transition-all duration-200;
+  }
+
+  /* Badge components */
+  .badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+
+  .badge-warning {
+    @apply bg-amber-100 text-amber-700;
+  }
+
+  .badge-error {
+    @apply bg-red-100 text-red-700;
+  }
+
+  .badge-info {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .badge-neutral {
+    @apply bg-slate-100 text-slate-700;
+  }
+
+  /* Error message */
+  .error-message {
+    @apply text-sm text-red-600 mt-1;
+  }
+
+  /* Help text */
+  .help-text {
+    @apply text-xs text-slate-500 mt-1;
+  }
+}
+
+/* ============ Dark Mode ============ */
+@layer base {
+  .dark body {
+    @apply bg-slate-900 text-slate-100;
+  }
+
+  .dark h1,
+  .dark h2,
+  .dark h3,
+  .dark h4,
+  .dark h5,
+  .dark h6 {
+    @apply text-slate-100;
+  }
+
+  .dark p {
+    @apply text-slate-300;
+  }
+
+  .dark input,
+  .dark select,
+  .dark textarea {
+    @apply bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-500;
+  }
+
+  .dark label {
+    @apply text-slate-300;
+  }
+}
+
+/* ============ Original Base Styles ============ */
 /* Base Styles */
 * {
   font-family: 'Sarabun', 'Inter', system-ui, -apple-system, sans-serif;
@@ -80,7 +270,9 @@ body {
 }
 
 /* Thai-friendly input styling */
-input, select, textarea {
+input,
+select,
+textarea {
   font-family: inherit;
 }
 
@@ -107,29 +299,66 @@ input, select, textarea {
 /* ============ Animations ============ */
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
 }
 
-.animate-fade-in { animation: fadeIn 0.3s ease-out; }
-.animate-slide-up { animation: slideUp 0.4s ease-out; }
-.animate-scale-in { animation: scaleIn 0.3s ease-out; }
-.animate-pulse-soft { animation: pulse 2s ease-in-out infinite; }
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.animate-pulse-soft {
+  animation: pulse 2s ease-in-out infinite;
+}
 
 /* ============ GACP Component Classes ============ */
 

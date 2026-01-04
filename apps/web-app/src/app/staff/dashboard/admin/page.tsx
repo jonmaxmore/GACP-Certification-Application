@@ -3,16 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-// Color palette
-const colors = {
-    primary: "#15803d",
-    secondary: "#22c55e",
-    background: "linear-gradient(135deg, #1a2e1a 0%, #0a1a0a 50%, #1a2e1a 100%)",
-    card: "rgba(21, 128, 61, 0.1)",
-    text: "#ffffff",
-    textMuted: "#a3a3a3",
-};
-
 interface StaffUser {
     username: string;
     email: string;
@@ -56,44 +46,33 @@ export default function AdminDashboardPage() {
         { action: "ออกใบรับรอง GACP-2024-001234", time: "2 ชั่วโมงที่แล้ว", user: "ผู้ตรวจสอบ B" },
     ];
 
+    const quickActions = [
+        { icon: "👥", label: "จัดการเจ้าหน้าที่", href: "/staff/applications" },
+        { icon: "📋", label: "ดูคำขอทั้งหมด", href: "/staff/applications" },
+        { icon: "📊", label: "รายงานสถิติ", href: "/staff/analytics" },
+        { icon: "📅", label: "ตารางนัดหมาย", href: "/staff/calendar" },
+        { icon: "💰", label: "บัญชี/การเงิน", href: "/staff/accounting" },
+        { icon: "⚙️", label: "ตั้งค่าระบบ", href: "/staff/dashboard" },
+    ];
+
     return (
-        <div style={{
-            minHeight: "100vh",
-            background: colors.background,
-            color: colors.text,
-            fontFamily: "'Prompt', sans-serif",
-        }}>
+        <div className="min-h-screen bg-gradient-to-br from-primary-900 via-slate-900 to-primary-900 text-white font-sans">
             {/* Header */}
-            <header style={{
-                padding: "1rem 2rem",
-                borderBottom: "1px solid rgba(34, 197, 94, 0.2)",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-            }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                    <span style={{ fontSize: "1.5rem" }}>🌿</span>
+            <header className="px-8 py-4 border-b border-primary-500/20 flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                    <span className="text-2xl">🌿</span>
                     <div>
-                        <h1 style={{ margin: 0, fontSize: "1.25rem" }}>GACP Admin Dashboard</h1>
-                        <p style={{ margin: 0, fontSize: "0.75rem", color: colors.textMuted }}>
-                            ระบบจัดการ GACP - ผู้ดูแลระบบ
-                        </p>
+                        <h1 className="text-xl font-semibold m-0">GACP Admin Dashboard</h1>
+                        <p className="text-xs text-slate-400 m-0">ระบบจัดการ GACP - ผู้ดูแลระบบ</p>
                     </div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                    <span style={{ color: colors.secondary }}>
+                <div className="flex items-center gap-4">
+                    <span className="text-primary-400">
                         👤 {user.firstName || user.username} ({user.role})
                     </span>
                     <button
                         onClick={handleLogout}
-                        style={{
-                            background: "transparent",
-                            border: "1px solid #ef4444",
-                            color: "#ef4444",
-                            padding: "0.5rem 1rem",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                        }}
+                        className="px-4 py-2 bg-transparent border border-red-500 text-red-500 rounded-lg hover:bg-red-500/10 transition-colors"
                     >
                         ออกจากระบบ
                     </button>
@@ -101,103 +80,61 @@ export default function AdminDashboardPage() {
             </header>
 
             {/* Main Content */}
-            <main style={{ padding: "2rem" }}>
+            <main className="p-8">
                 {/* Welcome */}
-                <div style={{ marginBottom: "2rem" }}>
-                    <h2 style={{ margin: 0, fontSize: "1.5rem" }}>
+                <div className="mb-8">
+                    <h2 className="text-2xl font-semibold m-0">
                         👋 สวัสดี, {user.firstName || user.username}!
                     </h2>
-                    <p style={{ color: colors.textMuted }}>
+                    <p className="text-slate-400 mt-1">
                         ยินดีต้อนรับเข้าสู่ระบบจัดการ GACP สำหรับผู้ดูแลระบบ
                     </p>
                 </div>
 
                 {/* Stats Grid */}
-                <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(4, 1fr)",
-                    gap: "1.5rem",
-                    marginBottom: "2rem",
-                }}>
+                <div className="grid grid-cols-4 gap-6 mb-8">
                     {stats.map((stat, i) => (
-                        <div key={i} style={{
-                            background: colors.card,
-                            border: "1px solid rgba(34, 197, 94, 0.3)",
-                            borderRadius: "12px",
-                            padding: "1.5rem",
-                            textAlign: "center",
-                        }}>
-                            <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>{stat.icon}</div>
-                            <div style={{ fontSize: "2rem", fontWeight: "bold", color: colors.secondary }}>
-                                {stat.value}
-                            </div>
-                            <div style={{ color: colors.textMuted, fontSize: "0.875rem" }}>
-                                {stat.label}
-                            </div>
+                        <div
+                            key={i}
+                            className="bg-primary-500/10 border border-primary-500/30 rounded-xl p-6 text-center hover:bg-primary-500/15 transition-colors"
+                        >
+                            <div className="text-3xl mb-2">{stat.icon}</div>
+                            <div className="text-3xl font-bold text-primary-400">{stat.value}</div>
+                            <div className="text-sm text-slate-400">{stat.label}</div>
                         </div>
                     ))}
                 </div>
 
-                {/* Quick Actions */}
-                <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "2fr 1fr",
-                    gap: "1.5rem",
-                }}>
+                {/* Quick Actions & Activity */}
+                <div className="grid grid-cols-3 gap-6">
                     {/* Quick Actions Panel */}
-                    <div style={{
-                        background: colors.card,
-                        border: "1px solid rgba(34, 197, 94, 0.3)",
-                        borderRadius: "12px",
-                        padding: "1.5rem",
-                    }}>
-                        <h3 style={{ margin: "0 0 1rem 0" }}>🚀 การดำเนินการด่วน</h3>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem" }}>
-                            {[
-                                { icon: "👥", label: "จัดการเจ้าหน้าที่", href: "/staff/applications" },
-                                { icon: "📋", label: "ดูคำขอทั้งหมด", href: "/staff/applications" },
-                                { icon: "📊", label: "รายงานสถิติ", href: "/staff/analytics" },
-                                { icon: "📅", label: "ตารางนัดหมาย", href: "/staff/calendar" },
-                                { icon: "💰", label: "บัญชี/การเงิน", href: "/staff/accounting" },
-                                { icon: "⚙️", label: "ตั้งค่าระบบ", href: "/staff/dashboard" },
-                            ].map((action, i) => (
+                    <div className="col-span-2 bg-primary-500/10 border border-primary-500/30 rounded-xl p-6">
+                        <h3 className="text-lg font-semibold mb-4">🚀 การดำเนินการด่วน</h3>
+                        <div className="grid grid-cols-3 gap-4">
+                            {quickActions.map((action, i) => (
                                 <button
                                     key={i}
                                     onClick={() => router.push(action.href)}
-                                    style={{
-                                        background: "rgba(34, 197, 94, 0.1)",
-                                        border: "1px solid rgba(34, 197, 94, 0.3)",
-                                        borderRadius: "8px",
-                                        padding: "1rem",
-                                        cursor: "pointer",
-                                        color: colors.text,
-                                        transition: "all 0.2s",
-                                    }}
+                                    className="p-4 bg-primary-500/10 border border-primary-500/30 rounded-lg text-white hover:bg-primary-500/20 hover:border-primary-400 transition-all cursor-pointer"
                                 >
-                                    <div style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>{action.icon}</div>
-                                    <div style={{ fontSize: "0.875rem" }}>{action.label}</div>
+                                    <div className="text-2xl mb-2">{action.icon}</div>
+                                    <div className="text-sm">{action.label}</div>
                                 </button>
                             ))}
                         </div>
                     </div>
 
                     {/* Recent Activity */}
-                    <div style={{
-                        background: colors.card,
-                        border: "1px solid rgba(34, 197, 94, 0.3)",
-                        borderRadius: "12px",
-                        padding: "1.5rem",
-                    }}>
-                        <h3 style={{ margin: "0 0 1rem 0" }}>📜 กิจกรรมล่าสุด</h3>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    <div className="bg-primary-500/10 border border-primary-500/30 rounded-xl p-6">
+                        <h3 className="text-lg font-semibold mb-4">📜 กิจกรรมล่าสุด</h3>
+                        <div className="flex flex-col gap-3">
                             {recentActivities.map((activity, i) => (
-                                <div key={i} style={{
-                                    padding: "0.75rem",
-                                    background: "rgba(0,0,0,0.2)",
-                                    borderRadius: "8px",
-                                }}>
-                                    <div style={{ fontSize: "0.875rem" }}>{activity.action}</div>
-                                    <div style={{ fontSize: "0.75rem", color: colors.textMuted }}>
+                                <div
+                                    key={i}
+                                    className="p-3 bg-black/20 rounded-lg"
+                                >
+                                    <div className="text-sm">{activity.action}</div>
+                                    <div className="text-xs text-slate-400 mt-1">
                                         {activity.user} • {activity.time}
                                     </div>
                                 </div>
@@ -209,4 +146,3 @@ export default function AdminDashboardPage() {
         </div>
     );
 }
-

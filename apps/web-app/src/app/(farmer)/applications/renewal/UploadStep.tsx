@@ -1,141 +1,70 @@
 "use client";
 
 import Link from 'next/link';
-import { Certificate, Theme, Icons, REQUIRED_DOCS } from './types';
+import { Certificate, REQUIRED_DOCS } from './types';
 
 interface UploadStepProps {
     certificate: Certificate | null;
     uploadedDocs: Record<string, boolean>;
     uploading: string | null;
-    t: Theme;
+    isDark: boolean;
     onUpload: (docId: string, file: File) => void;
     onSkipUpload: () => void;
     onProceed: () => void;
 }
 
-/**
- * Upload Step - Document Upload
- * 🍎 Apple Single Responsibility: Only handles document upload
- */
-export function UploadStep({
-    certificate,
-    uploadedDocs,
-    uploading,
-    t,
-    onUpload,
-    onSkipUpload,
-    onProceed
-}: UploadStepProps) {
+export function UploadStep({ certificate, uploadedDocs, uploading, isDark, onUpload, onSkipUpload, onProceed }: UploadStepProps) {
     const allRequiredUploaded = REQUIRED_DOCS.filter(d => d.required).every(d => uploadedDocs[d.id]);
 
     return (
-        <div style={{ minHeight: '100vh', backgroundColor: t.bg, fontFamily: "'Kanit', sans-serif", padding: '24px' }}>
-            <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-                <Link href="/certificates" style={{
-                    display: 'flex', alignItems: 'center', gap: '8px',
-                    padding: '8px 16px', borderRadius: '10px', border: `1px solid ${t.border}`,
-                    background: 'transparent', color: t.textSecondary, textDecoration: 'none', marginBottom: '24px', width: 'fit-content'
-                }}>
-                    {Icons.back(t.textMuted)} กลับหน้าใบรับรอง
+        <div className={`min-h-screen p-6 font-sans ${isDark ? 'bg-slate-900' : 'bg-surface-100'}`}>
+            <div className="max-w-2xl mx-auto">
+                <Link href="/certificates" className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border mb-6 ${isDark ? 'border-slate-700 text-slate-400' : 'border-surface-200 text-slate-600'}`}>
+                    ← กลับหน้าใบรับรอง
                 </Link>
 
-                <h1 style={{ fontSize: '24px', fontWeight: 600, color: t.text, marginBottom: '8px' }}>ต่ออายุใบรับรอง GACP</h1>
-                <p style={{ color: t.textMuted, marginBottom: '24px' }}>อัปโหลดเอกสารที่จำเป็นสำหรับการต่ออายุ</p>
+                <h1 className={`text-2xl font-semibold mb-2 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>ต่ออายุใบรับรอง GACP</h1>
+                <p className={`mb-6 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>อัปโหลดเอกสารที่จำเป็นสำหรับการต่ออายุ</p>
 
-                {/* Certificate Info */}
                 {certificate && (
-                    <div style={{
-                        background: t.accentBg, borderRadius: '16px', padding: '20px',
-                        border: `1px solid ${t.accent}30`, marginBottom: '24px'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                    <div className={`rounded-2xl p-5 mb-6 border ${isDark ? 'bg-primary-500/10 border-primary-500/30' : 'bg-primary-50 border-primary-200'}`}>
+                        <div className="flex justify-between items-center flex-wrap gap-3">
                             <div>
-                                <p style={{ fontSize: '13px', color: t.textMuted, marginBottom: '4px' }}>ใบรับรองเลขที่</p>
-                                <p style={{ fontSize: '18px', fontWeight: 600, color: t.accent }}>{certificate.certificateNumber}</p>
+                                <p className={`text-sm mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ใบรับรองเลขที่</p>
+                                <p className="text-lg font-semibold text-primary-600">{certificate.certificateNumber}</p>
                             </div>
-                            <div style={{ textAlign: 'right' }}>
-                                <p style={{ fontSize: '13px', color: t.textMuted, marginBottom: '4px' }}>สถานที่</p>
-                                <p style={{ fontSize: '14px', fontWeight: 500, color: t.text }}>{certificate.siteName}</p>
+                            <div className="text-right">
+                                <p className={`text-sm mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>สถานที่</p>
+                                <p className={`text-sm font-medium ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>{certificate.siteName}</p>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* Document Upload List */}
-                <div style={{ background: t.bgCard, borderRadius: '20px', border: `1px solid ${t.border}`, overflow: 'hidden', marginBottom: '24px' }}>
-                    <div style={{ padding: '20px', borderBottom: `1px solid ${t.border}` }}>
-                        <h3 style={{ fontSize: '16px', fontWeight: 600, color: t.text, margin: 0 }}>เอกสารที่ต้องอัปโหลด</h3>
+                <div className={`rounded-2xl border overflow-hidden mb-6 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
+                    <div className={`px-5 py-4 border-b ${isDark ? 'border-slate-700' : 'border-surface-200'}`}>
+                        <h3 className={`text-base font-semibold ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>เอกสารที่ต้องอัปโหลด</h3>
                     </div>
 
                     {REQUIRED_DOCS.map((doc, index) => (
-                        <div key={doc.id} style={{
-                            padding: '20px', borderBottom: index < REQUIRED_DOCS.length - 1 ? `1px solid ${t.border}` : 'none',
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px'
-                        }}>
-                            <div style={{ flex: 1 }}>
-                                <p style={{ fontSize: '14px', fontWeight: 500, color: t.text, marginBottom: '4px' }}>
-                                    {doc.name}
-                                    {doc.required && <span style={{ color: '#EF4444', marginLeft: '4px' }}>*</span>}
+                        <div key={doc.id} className={`p-5 flex items-center justify-between gap-4 ${index < REQUIRED_DOCS.length - 1 ? (isDark ? 'border-b border-slate-700' : 'border-b border-surface-200') : ''}`}>
+                            <div className="flex-1">
+                                <p className={`text-sm font-medium mb-1 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>
+                                    {doc.name} {doc.required && <span className="text-red-500">*</span>}
                                 </p>
-                                {uploadedDocs[doc.id] && (
-                                    <span style={{ fontSize: '12px', color: '#10B981', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        {Icons.check('#10B981')} อัปโหลดแล้ว
-                                    </span>
-                                )}
+                                {uploadedDocs[doc.id] && <span className="text-xs text-primary-600 flex items-center gap-1">✓ อัปโหลดแล้ว</span>}
                             </div>
-
-                            <label style={{
-                                padding: '10px 20px', borderRadius: '10px',
-                                border: uploadedDocs[doc.id] ? `1px solid #10B981` : `1px solid ${t.border}`,
-                                background: uploadedDocs[doc.id] ? '#ECFDF5' : 'transparent',
-                                color: uploadedDocs[doc.id] ? '#10B981' : t.textSecondary,
-                                fontSize: '13px', fontWeight: 500, cursor: 'pointer',
-                                display: 'flex', alignItems: 'center', gap: '6px',
-                                opacity: uploading === doc.id ? 0.6 : 1,
-                            }}>
-                                <input
-                                    type="file"
-                                    style={{ display: 'none' }}
-                                    onChange={(e) => e.target.files?.[0] && onUpload(doc.id, e.target.files[0])}
-                                    disabled={uploading !== null}
-                                    accept=".pdf,.jpg,.jpeg,.png"
-                                />
-                                {uploading === doc.id ? (
-                                    <>กำลังอัปโหลด...</>
-                                ) : uploadedDocs[doc.id] ? (
-                                    <>{Icons.check('#10B981')} อัปโหลดแล้ว</>
-                                ) : (
-                                    <>{Icons.upload(t.textMuted)} เลือกไฟล์</>
-                                )}
+                            <label className={`px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer flex items-center gap-1.5 ${uploadedDocs[doc.id] ? 'bg-primary-50 border border-primary-500 text-primary-600' : (isDark ? 'border border-slate-600 text-slate-400' : 'border border-surface-200 text-slate-600')} ${uploading === doc.id ? 'opacity-60' : ''}`}>
+                                <input type="file" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(doc.id, e.target.files[0])} disabled={uploading !== null} accept=".pdf,.jpg,.jpeg,.png" />
+                                {uploading === doc.id ? 'กำลังอัปโหลด...' : uploadedDocs[doc.id] ? '✓ อัปโหลดแล้ว' : '📤 เลือกไฟล์'}
                             </label>
                         </div>
                     ))}
                 </div>
 
-                {/* Actions */}
-                <div style={{ display: 'flex', gap: '12px' }}>
-                    <button onClick={onSkipUpload} style={{
-                        flex: 1, padding: '14px', borderRadius: '12px',
-                        border: `2px solid ${t.border}`, background: 'transparent',
-                        color: t.textSecondary, fontSize: '14px', fontWeight: 500, cursor: 'pointer'
-                    }}>
-                        ข้าม (Demo)
-                    </button>
-                    <button
-                        onClick={onProceed}
-                        disabled={!allRequiredUploaded}
-                        style={{
-                            flex: 2, padding: '14px', borderRadius: '12px', border: 'none',
-                            background: allRequiredUploaded
-                                ? `linear-gradient(135deg, ${t.accent} 0%, ${t.accentLight} 100%)`
-                                : '#E5E7EB',
-                            color: allRequiredUploaded ? '#FFF' : '#9CA3AF',
-                            fontSize: '14px', fontWeight: 600,
-                            cursor: allRequiredUploaded ? 'pointer' : 'not-allowed'
-                        }}
-                    >
-                        ดำเนินการต่อ →
-                    </button>
+                <div className="flex gap-3">
+                    <button onClick={onSkipUpload} className={`flex-1 py-3.5 rounded-xl text-sm font-medium border-2 ${isDark ? 'border-slate-600 text-slate-400' : 'border-surface-200 text-slate-600'}`}>ข้าม (Demo)</button>
+                    <button onClick={onProceed} disabled={!allRequiredUploaded} className={`flex-[2] py-3.5 rounded-xl text-sm font-semibold ${allRequiredUploaded ? 'bg-gradient-to-br from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-500/40' : 'bg-surface-200 text-slate-400 cursor-not-allowed'}`}>ดำเนินการต่อ →</button>
                 </div>
             </div>
         </div>

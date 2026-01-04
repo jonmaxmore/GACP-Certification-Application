@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 
 /// 🍎 Admin Dashboard Screen
 /// หน้า Dashboard สำหรับ Admin - matches /staff/dashboard/admin
@@ -92,8 +93,8 @@ class AdminDashboardScreen extends StatelessWidget {
                         'คำขอใหม่', '36', Icons.fiber_new, Colors.orange)),
                 const SizedBox(width: 12),
                 Expanded(
-                    child: _buildStatCard(
-                        'ใบรับรอง', '892', Icons.verified, Colors.teal)),
+                    child: _buildStatCard('ใบรับรอง', '892', Icons.verified,
+                        AppTheme.primaryGreen)),
               ],
             ),
             const SizedBox(height: 24),

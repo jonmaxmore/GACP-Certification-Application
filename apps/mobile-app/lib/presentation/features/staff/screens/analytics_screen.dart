@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 
 /// 🍎 Analytics Screen
 /// หน้าวิเคราะห์ข้อมูล - matches /staff/analytics
@@ -126,7 +127,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     ),
                     const SizedBox(height: 20),
                     _buildPlantTypeRow('กัญชา', 0.45, Colors.green),
-                    _buildPlantTypeRow('กระท่อม', 0.30, Colors.teal),
+                    _buildPlantTypeRow('กระท่อม', 0.30, AppTheme.primaryGreen),
                     _buildPlantTypeRow('ขมิ้นชัน', 0.15, Colors.orange),
                     _buildPlantTypeRow('ขิง', 0.10, Colors.amber),
                   ],

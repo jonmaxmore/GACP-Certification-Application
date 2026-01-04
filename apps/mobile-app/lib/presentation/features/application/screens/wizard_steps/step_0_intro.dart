@@ -219,12 +219,14 @@ class _Step0PlantSelectionState extends ConsumerState<Step0PlantSelection> {
                         CircleAvatar(
                           radius: 40,
                           backgroundColor: isHighControl
-                              ? Colors.teal.withOpacity(0.2)
+                              ? AppTheme.primaryGreen.withOpacity(0.2)
                               : Colors.orange.withOpacity(0.2),
                           child: Icon(
                             isHighControl ? Icons.security : Icons.spa,
                             size: 40,
-                            color: isHighControl ? Colors.teal : Colors.orange,
+                            color: isHighControl
+                                ? AppTheme.primaryGreen
+                                : Colors.orange,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -435,7 +437,7 @@ class _PlantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isHighControl = plant.group == PlantGroup.highControl;
-    final color = isHighControl ? Colors.teal : Colors.orange;
+    final color = isHighControl ? AppTheme.primaryGreen : Colors.orange;
 
     return Card(
       elevation: 4,

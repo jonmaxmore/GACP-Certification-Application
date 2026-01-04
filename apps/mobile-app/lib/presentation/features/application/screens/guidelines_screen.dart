@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
+import '../../../../core/theme/app_theme.dart';
 
 @widgetbook.UseCase(name: 'Default', type: GuidelinesScreen)
 Widget guidelinesScreenUseCase(BuildContext context) {
@@ -181,7 +182,9 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
           Text(
             title,
             style: const TextStyle(
-                fontSize: 16, fontWeight: FontWeight.bold, color: Colors.teal),
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryGreen),
           ),
           const SizedBox(height: 8),
           Text(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
+import '../../../../../core/theme/app_theme.dart';
 
 @widgetbook.UseCase(name: 'Tracking Timeline', type: ApplicationTrackingScreen)
 Widget trackingTimelineUseCase(BuildContext context) {

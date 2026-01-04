@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/ui/responsive_layout.dart';
 import '../providers/establishment_provider.dart';
 import '../../../../domain/entities/establishment_entity.dart';
@@ -297,14 +298,14 @@ class _CuteFarmEmptyState extends StatelessWidget {
             icon: const Icon(LucideIcons.plus),
             label: const Text('เพิ่มแปลงปลูกใหม่'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF10B981), // Emerald 500
+              backgroundColor: AppTheme.primaryGreen, // Emerald 500
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
               elevation: 4,
-              shadowColor: const Color(0xFF10B981).withValues(alpha: 0.4),
+              shadowColor: AppTheme.primaryGreen.withValues(alpha: 0.4),
             ),
           ),
         ],

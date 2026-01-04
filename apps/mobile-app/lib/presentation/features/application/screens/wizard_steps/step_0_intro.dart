@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/form_state_provider.dart';
 import '../../models/gacp_application_models.dart';
+import '../../../../../core/theme/app_theme.dart';
 
 class Step0PlantSelection extends ConsumerStatefulWidget {
   const Step0PlantSelection({super.key});
@@ -41,7 +42,7 @@ class _Step0PlantSelectionState extends ConsumerState<Step0PlantSelection> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('เลือกพืชที่ขอรับรอง'),
-        backgroundColor: const Color(0xFF1B5E20),
+        backgroundColor: AppTheme.primaryGreenDark,
         foregroundColor: Colors.white,
       ),
       backgroundColor: const Color(0xFFF5F7FA),
@@ -147,7 +148,7 @@ class _Step0PlantSelectionState extends ConsumerState<Step0PlantSelection> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF1B5E20) : Colors.grey.shade200,
+          color: isSelected ? AppTheme.primaryGreenDark : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -349,7 +350,7 @@ class _Step0PlantSelectionState extends ConsumerState<Step0PlantSelection> {
                           context.go('/applications/create/step1');
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1B5E20),
+                          backgroundColor: AppTheme.primaryGreenDark,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 
 /// 🍎 Forgot Password Screen
 /// ลืมรหัสผ่าน - Reset password flow
@@ -83,11 +84,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.teal.shade50,
+                  color: AppTheme.primaryGreen.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.lock_reset,
-                    size: 40, color: Colors.teal.shade600),
+                    size: 40, color: AppTheme.primaryGreen),
               ),
               const SizedBox(height: 24),
 
@@ -133,7 +134,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _handleSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: AppTheme.primaryGreen,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
@@ -197,7 +198,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: AppTheme.primaryGreen,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),

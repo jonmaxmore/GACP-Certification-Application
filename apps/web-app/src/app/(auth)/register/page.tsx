@@ -445,7 +445,7 @@ export default function RegisterPage() {
                             </button>
                         )}
                         <button type="button" onClick={() => step < 4 ? setStep(step + 1) : handleSubmit()} disabled={!canProceed() || isLoading}
-                            className={`flex-1 py-4 rounded-2xl text-white text-base font-bold flex items-center justify-center gap-2 transition-all ${!canProceed() || isLoading ? 'bg-slate-400 cursor-not-allowed' : 'bg-emerald-700 hover:bg-emerald-800 shadow-lg shadow-emerald-700/30'}`}>
+                            className={`flex-1 py-4 rounded-2xl text-white text-base font-bold flex items-center justify-center gap-2 transition-all ${!canProceed() || isLoading ? 'bg-slate-400 cursor-not-allowed' : 'bg-gradient-to-br from-emerald-600 to-emerald-500 shadow-lg shadow-emerald-600/25 hover:-translate-y-0.5'}`}>
                             {isLoading ? <span className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
                                 : step < 4 ? <>ถัดไป <span className="text-lg">→</span></> : <>ลงทะเบียน ✓</>}
                         </button>

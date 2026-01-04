@@ -182,8 +182,8 @@ export default function LoginPage() {
                                         type="button"
                                         onClick={() => { setAccountType(type.type); setIdentifier(""); }}
                                         className={`flex-1 py-3 px-2 rounded-xl border transition-all ${isSelected
-                                                ? 'bg-emerald-700 border-emerald-700'
-                                                : 'bg-white border-slate-200 hover:border-emerald-300'
+                                            ? 'bg-gradient-to-br from-emerald-600 to-emerald-500 border-emerald-600 shadow-md shadow-emerald-600/20'
+                                            : 'bg-white border-slate-200 hover:border-emerald-300 hover:shadow-sm'
                                             }`}
                                     >
                                         <div className="flex justify-center mb-1.5">
@@ -286,8 +286,8 @@ export default function LoginPage() {
                             type="submit"
                             disabled={isLoading}
                             className={`w-full py-4 rounded-2xl text-white text-lg font-bold flex items-center justify-center gap-2 transition-all ${isLoading
-                                    ? 'bg-slate-400 cursor-not-allowed'
-                                    : 'bg-emerald-700 hover:bg-emerald-800 shadow-lg shadow-emerald-700/30 hover:shadow-xl hover:shadow-emerald-700/40 active:scale-[0.98]'
+                                ? 'bg-slate-400 cursor-not-allowed'
+                                : 'bg-gradient-to-br from-emerald-600 to-emerald-500 shadow-lg shadow-emerald-600/25 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98]'
                                 }`}
                         >
                             {isLoading ? (

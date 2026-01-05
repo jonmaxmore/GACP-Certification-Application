@@ -270,7 +270,10 @@ export default function PaymentsPage() {
                             </div>
                         </div>
                         <div className="flex gap-3 p-4 border-t border-slate-200">
-                            <button onClick={() => window.print()} className="flex-1 py-3 rounded-xl bg-emerald-500 text-white font-medium">📥 ดาวน์โหลด PDF</button>
+                            <button onClick={() => window.print()} className="flex-1 py-3 rounded-xl bg-emerald-500 text-white font-medium flex items-center justify-center gap-1.5">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                                ดาวน์โหลด PDF
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -299,7 +302,10 @@ export default function PaymentsPage() {
                             </div>
                         </div>
                         <div className="p-4 border-t border-slate-200 flex flex-col gap-3">
-                            <button className="w-full py-3.5 rounded-xl bg-emerald-500 text-white font-semibold">📤 อัปโหลดหลักฐานการชำระ</button>
+                            <button className="w-full py-3.5 rounded-xl bg-emerald-500 text-white font-semibold flex items-center justify-center gap-1.5">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+                                อัปโหลดหลักฐานการชำระ
+                            </button>
                             <button onClick={() => setPayQR(null)} className="w-full py-3.5 rounded-xl border border-slate-200 text-slate-500 font-medium">ยกเลิก</button>
                         </div>
                     </div>

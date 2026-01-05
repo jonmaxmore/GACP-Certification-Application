@@ -275,7 +275,7 @@ export default function JobSheetPage() {
                                         doc.status === "issue" ? "bg-red-100" :
                                             "bg-amber-100"
                                         }`}>
-                                        <doc.status === "verified" ? <IconCheckCircle size={16} className="text-green-600" /> : doc.status === "issue" ? <IconX size={16} className="text-red-600" /> : <IconClock size={16} className="text-amber-600" />
+                                        {doc.status === "verified" ? <IconCheckCircle size={16} className="text-green-600" /> : doc.status === "issue" ? <IconX size={16} className="text-red-600" /> : <IconClock size={16} className="text-amber-600" />}
                                     </div>
                                     <div className="flex-1">
                                         <p className="font-medium">{doc.name}</p>

@@ -9,7 +9,7 @@ interface LoadingSpinnerProps {
 }
 
 /**
- * 🍎 Apple-standard Loading Spinner
+ * Apple-standard Loading Spinner
  * Used as Suspense fallback and loading states
  */
 export function LoadingSpinner({

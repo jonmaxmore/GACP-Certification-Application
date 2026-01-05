@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * 🍎 Custom 500 Error Page
+ * Custom 500 Error Page
  * Apple-Standard Global Error Handler with Thai locale
  */
 
@@ -19,7 +19,7 @@ export default function GlobalError({
                     <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
                         {/* Apple-style error illustration */}
                         <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
-                            <span className="text-6xl">⚠️</span>
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
                         </div>
 
                         <h1 className="text-6xl font-bold text-red-600 mb-2">500</h1>
@@ -47,13 +47,13 @@ export default function GlobalError({
                                 onClick={reset}
                                 className="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium"
                             >
-                                🔄 ลองใหม่
+                                ลองใหม่
                             </button>
                             <a
                                 href="/"
                                 className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
                             >
-                                🏠 กลับหน้าแรก
+                                กลับหน้าแรก
                             </a>
                         </div>
 

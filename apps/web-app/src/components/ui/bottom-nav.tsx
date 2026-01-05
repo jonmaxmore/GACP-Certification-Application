@@ -54,7 +54,7 @@ interface BottomNavProps {
 }
 
 /**
- * 🌿 Eco-Professional Bottom Navigation
+ * Eco-Professional Bottom Navigation
  * Mobile-first with Tailwind CSS
  */
 export function BottomNav({ isDark = false }: BottomNavProps) {

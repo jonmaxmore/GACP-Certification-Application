@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 
 /**
- * 🌿 Back Button Component
+ * Back Button Component
  * Eco-Professional Navigation with Tailwind CSS
  */
 

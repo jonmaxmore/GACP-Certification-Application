@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 /**
- * 🍎 GACP Loading Page - Eco-Premium Design System (2025)
+ * GACP Loading Page - Eco-Premium Design System (2025)
  * 
  * Design: Apple HIG + Thai Government CI
  * Colors: Emerald primary, Stone background

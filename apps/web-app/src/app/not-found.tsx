@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 /**
- * 🍎 Custom 404 Page
+ * Custom 404 Page
  * Apple-Standard "Page Not Found" with Thai locale
  */
 
@@ -11,7 +11,7 @@ export default function NotFound() {
             <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
                 {/* Apple-style 404 illustration */}
                 <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <span className="text-6xl">🔍</span>
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="1.5"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
                 </div>
 
                 <h1 className="text-6xl font-bold text-emerald-600 mb-2">404</h1>
@@ -32,13 +32,13 @@ export default function NotFound() {
                         href="/"
                         className="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium"
                     >
-                        🏠 กลับหน้าแรก
+                        กลับหน้าแรก
                     </Link>
                     <Link
                         href="/tracking"
                         className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
                     >
-                        📋 ติดตามคำขอ
+                        ติดตามคำขอ
                     </Link>
                 </div>
 

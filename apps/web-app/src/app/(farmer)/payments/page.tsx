@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import api from "@/services/api-client";
+import {
+    IconHome, IconDocument, IconCompass, IconCreditCard, IconUser,
+    IconSun, IconMoon, IconLogout, IconCheckCircle, IconClock, IconReceipt
+} from "@/components/ui/icons";
 
 interface PaymentRecord {
     id: string; type: "QUOTATION" | "INVOICE" | "RECEIPT"; documentNumber: string;
@@ -15,6 +19,14 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
     REJECTED: { label: "ไม่อนุมัติ", color: "red" }, PENDING: { label: "รอชำระ", color: "amber" },
     DELIVERED: { label: "วางบิลแล้ว", color: "emerald" }, ISSUED: { label: "ออกแล้ว", color: "emerald" }, CANCELLED: { label: "ยกเลิก", color: "red" },
 };
+
+const NAV_ITEMS = [
+    { href: "/dashboard", Icon: IconHome, label: "หน้าหลัก" },
+    { href: "/applications", Icon: IconDocument, label: "คำขอ" },
+    { href: "/tracking", Icon: IconCompass, label: "ติดตาม" },
+    { href: "/payments", Icon: IconCreditCard, label: "การเงิน", active: true },
+    { href: "/profile", Icon: IconUser, label: "โปรไฟล์" },
+];
 
 export default function PaymentsPage() {
     const [user, setUser] = useState<{ firstName?: string; lastName?: string } | null>(null);
@@ -50,14 +62,6 @@ export default function PaymentsPage() {
 
     if (!mounted) return null;
 
-    const navItems = [
-        { href: "/dashboard", icon: "🏠", label: "หน้าหลัก" },
-        { href: "/applications", icon: "📄", label: "คำขอ" },
-        { href: "/tracking", icon: "🧭", label: "ติดตาม" },
-        { href: "/payments", icon: "💳", label: "การเงิน", active: true },
-        { href: "/profile", icon: "👤", label: "โปรไฟล์" },
-    ];
-
     const filteredPayments = payments.filter(p => {
         if (filter === "ALL") return true;
         if (filter === "PENDING") return p.type === "INVOICE" && p.status === "PENDING";
@@ -85,84 +89,89 @@ export default function PaymentsPage() {
         return bg ? map[color]?.bg || 'bg-slate-100' : map[color]?.text || 'text-slate-600';
     };
 
-    return (
-        <div className={`min-h-screen transition-all duration-500 ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-gradient-to-br from-stone-50 via-emerald-50/30 to-stone-100 text-slate-900'}`}>
-            {/* Decorative Background */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className={`absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-emerald-900/20' : 'bg-emerald-200/40'}`} />
-                <div className={`absolute top-1/2 -left-40 w-80 h-80 rounded-full blur-3xl ${isDark ? 'bg-amber-900/10' : 'bg-amber-100/40'}`} />
-            </div>
+    const stats = [
+        { label: "ยอดรับเข้าทั้งหมด", value: `${formatAmount(totalReceipts)} ฿`, Icon: IconCheckCircle, color: "bg-emerald-500" },
+        { label: "รอชำระ", value: `${formatAmount(pendingInvoices)} ฿`, Icon: IconClock, color: "bg-amber-500" },
+        { label: "จำนวนใบเสร็จ", value: receiptCount, Icon: IconReceipt, color: "bg-blue-500" },
+    ];
 
-            {/* Sidebar - Glassmorphism */}
-            <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 w-[76px] flex-col items-center py-6 border-r z-50 backdrop-blur-xl ${isDark ? 'bg-slate-800/80 border-slate-700/50' : 'bg-white/70 border-slate-200/50'}`}>
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-xl font-bold text-white mb-8 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all duration-300">G</div>
-                <nav className="flex-1 flex flex-col gap-2 w-full px-2">
-                    {navItems.map(item => (
-                        <Link key={item.href} href={item.href} className={`group flex flex-col items-center gap-1.5 py-3 rounded-2xl transition-all duration-300 relative ${item.active
-                            ? (isDark ? 'bg-emerald-500/20 shadow-lg shadow-emerald-500/10' : 'bg-emerald-50 shadow-md shadow-emerald-500/10')
-                            : 'hover:bg-slate-100/80 dark:hover:bg-slate-700/50'}`}>
-                            {item.active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-emerald-400 to-emerald-600 rounded-r-full" />}
-                            <span className={`text-xl transition-transform duration-300 ${item.active ? 'scale-110' : 'group-hover:scale-110'}`}>{item.icon}</span>
-                            <span className={`text-[10px] font-semibold tracking-wide ${item.active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`}>{item.label}</span>
+    return (
+        <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-slate-900 text-white' : 'bg-stone-50 text-slate-900'}`}>
+            {/* Sidebar - iOS Style */}
+            <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 w-20 flex-col items-center py-6 border-r ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+                <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-lg font-semibold text-white mb-8">G</div>
+                <nav className="flex-1 flex flex-col gap-1 w-full px-3">
+                    {NAV_ITEMS.map(item => (
+                        <Link key={item.href} href={item.href}
+                            className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all relative ${item.active
+                                ? (isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600')
+                                : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100')
+                                }`}>
+                            {item.active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-emerald-500 rounded-r" />}
+                            <item.Icon size={22} />
+                            <span className="text-[10px] font-medium">{item.label}</span>
                         </Link>
                     ))}
                 </nav>
-                <div className="flex flex-col gap-3">
-                    <button onClick={toggleTheme} className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-105 ${isDark ? 'bg-emerald-500/20 hover:bg-emerald-500/30' : 'bg-emerald-50 hover:bg-emerald-100'}`}>{isDark ? '☀️' : '🌙'}</button>
-                    <button onClick={handleLogout} className="w-11 h-11 rounded-2xl flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 transition-all duration-300">🚪</button>
+                <div className="flex flex-col gap-2">
+                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}>
+                        {isDark ? <IconSun size={20} /> : <IconMoon size={20} />}
+                    </button>
+                    <button onClick={handleLogout} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'text-slate-400 hover:text-red-400 hover:bg-red-500/10' : 'text-slate-500 hover:text-red-500 hover:bg-red-50'}`}>
+                        <IconLogout size={20} />
+                    </button>
                 </div>
             </aside>
 
-            {/* Mobile Nav - Glassmorphism */}
-            <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-20 flex justify-around items-center z-50 border-t backdrop-blur-xl ${isDark ? 'bg-slate-800/90 border-slate-700/50' : 'bg-white/80 border-slate-200/50'}`}>
-                {navItems.map(item => (
-                    <Link key={item.href} href={item.href} className={`flex flex-col items-center gap-1 py-2 px-4 rounded-2xl transition-all duration-300 ${item.active ? (isDark ? 'bg-emerald-500/20' : 'bg-emerald-50') : ''}`}>
-                        <span className={`text-xl ${item.active ? 'scale-110' : ''} transition-transform`}>{item.icon}</span>
-                        <span className={`text-[10px] font-semibold ${item.active ? 'text-emerald-500' : 'text-slate-500'}`}>{item.label}</span>
+            {/* Mobile Nav - iOS Tab Bar */}
+            <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-20 flex justify-around items-center border-t ${isDark ? 'bg-slate-900/95 border-slate-800 backdrop-blur-lg' : 'bg-white/95 border-slate-200 backdrop-blur-lg'}`}>
+                {NAV_ITEMS.map(item => (
+                    <Link key={item.href} href={item.href} className={`flex flex-col items-center gap-1 py-2 px-4 min-w-[64px] ${item.active ? 'text-emerald-500' : (isDark ? 'text-slate-500' : 'text-slate-400')
+                        }`}>
+                        <item.Icon size={24} />
+                        <span className="text-[10px] font-medium">{item.label}</span>
                     </Link>
                 ))}
             </nav>
 
             {/* Main Content */}
-            <main className="lg:ml-[76px] p-6 lg:p-10 pb-28 lg:pb-10 max-w-6xl relative z-10">
-                {/* Header with Glass Card */}
-                <header className={`mb-10 p-6 rounded-3xl backdrop-blur-sm ${isDark ? 'bg-slate-800/50' : 'bg-white/50'}`}>
-                    <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">ประวัติการชำระเงิน</h1>
-                    <p className={`text-sm mt-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ใบเสนอราคา, ใบแจ้งหนี้, และใบเสร็จรับเงิน</p>
+            <main className="lg:ml-20 p-6 lg:p-8 pb-28 lg:pb-8 max-w-5xl mx-auto">
+                {/* Header */}
+                <header className="mb-8">
+                    <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight">ประวัติการชำระเงิน</h1>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ใบเสนอราคา, ใบแจ้งหนี้, และใบเสร็จรับเงิน</p>
                 </header>
 
-                {/* Stats with Gradient Icons */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    {[{ icon: "✅", label: "ยอดรับเข้าทั้งหมด", value: `${formatAmount(totalReceipts)} ฿`, gradient: "from-emerald-500 to-green-500" },
-                    { icon: "💳", label: "รอชำระ", value: `${formatAmount(pendingInvoices)} ฿`, gradient: "from-amber-500 to-orange-500" },
-                    { icon: "🧾", label: "จำนวนใบเสร็จ", value: receiptCount, gradient: "from-blue-500 to-indigo-500" }
-                    ].map((stat, i) => (
-                        <div key={i} className={`p-5 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white/60 border-slate-200/50'}`}>
-                            <div className="flex justify-between items-start mb-3">
-                                <span className={`text-xs font-medium uppercase tracking-wider ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</span>
-                                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center text-lg shadow-lg`}>{stat.icon}</div>
+                {/* Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
+                    {stats.map((stat, i) => (
+                        <div key={i} className={`p-4 rounded-xl border transition-all hover:shadow-md ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
+                            <div className="flex items-center justify-between mb-3">
+                                <span className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</span>
+                                <div className={`w-8 h-8 rounded-lg ${stat.color} flex items-center justify-center`}>
+                                    <stat.Icon size={16} className="text-white" />
+                                </div>
                             </div>
-                            <div className="text-3xl font-bold">{stat.value}</div>
+                            <div className="text-2xl font-semibold">{stat.value}</div>
                         </div>
                     ))}
                 </div>
 
-                {/* Filter Tabs - Premium Pills */}
-                <div className="flex gap-3 mb-6">
-                    {[{ key: "ALL", label: "ทั้งหมด", icon: "📋" }, { key: "PENDING", label: "รอชำระ", icon: "⏳" }, { key: "PAID", label: "ชำระแล้ว", icon: "✅" }].map(tab => (
+                {/* Filter Tabs */}
+                <div className="flex gap-2 mb-6">
+                    {[{ key: "ALL", label: "ทั้งหมด" }, { key: "PENDING", label: "รอชำระ" }, { key: "PAID", label: "ชำระแล้ว" }].map(tab => (
                         <button key={tab.key} onClick={() => setFilter(tab.key as "ALL" | "PENDING" | "PAID")}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 ${filter === tab.key
-                                ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/30 scale-105'
-                                : (isDark ? 'bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:border-emerald-500/30' : 'bg-white/60 border border-slate-200/50 text-slate-600 hover:border-emerald-300')}`}>
-                            <span>{tab.icon}</span>
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${filter === tab.key
+                                ? 'bg-emerald-600 text-white'
+                                : (isDark ? 'bg-slate-800 border border-slate-700 text-slate-400 hover:border-emerald-500/30' : 'bg-white border border-slate-200 text-slate-600 hover:border-emerald-300')}`}>
                             {tab.label}
-                            <span className={`px-2 py-0.5 rounded-full text-xs ${filter === tab.key ? 'bg-white/20' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'}`}>{counts[tab.key as keyof typeof counts]}</span>
+                            <span className={`px-2 py-0.5 rounded-md text-xs ${filter === tab.key ? 'bg-white/20' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'}`}>{counts[tab.key as keyof typeof counts]}</span>
                         </button>
                     ))}
                 </div>
 
-                {/* Payment List - Glass Card */}
-                <div className={`rounded-3xl overflow-hidden backdrop-blur-sm shadow-lg ${isDark ? 'bg-slate-800/50 border border-slate-700/50' : 'bg-white/60 border border-slate-200/50'}`}>
+                {/* Payment List */}
+                <div className={`rounded-xl overflow-hidden border ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
                     <table className="w-full text-sm">
                         <thead>
                             <tr className={`border-b ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
@@ -182,7 +191,9 @@ export default function PaymentsPage() {
                                     <tr key={p.id} className={`border-b last:border-b-0 ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getColorCls(typeCfg.color, true)}`}>📄</div>
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getColorCls(typeCfg.color, true)}`}>
+                                                    <IconDocument size={18} className={getColorCls(typeCfg.color)} />
+                                                </div>
                                                 <div>
                                                     <p className="font-medium">{p.documentNumber}</p>
                                                     <p className="text-xs text-slate-500">{p.createdAt}</p>
@@ -192,26 +203,29 @@ export default function PaymentsPage() {
                                         <td className="p-4 hidden md:table-cell">
                                             {p.applicationId ? (
                                                 <Link href={`/tracking?appId=${p.applicationId}`} className={`px-3 py-1 rounded-lg text-xs font-medium ${isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
-                                                    📋 {p.applicationId.substring(0, 8)}...
+                                                    {p.applicationId.substring(0, 8)}...
                                                 </Link>
                                             ) : <span className="text-slate-500">-</span>}
                                         </td>
-                                        <td className="p-4 hidden sm:table-cell"><span className={`px-3 py-1 rounded-full text-xs font-medium ${getColorCls(typeCfg.color, true)} ${getColorCls(typeCfg.color)}`}>{typeCfg.label}</span></td>
+                                        <td className="p-4 hidden sm:table-cell"><span className={`px-3 py-1 rounded-lg text-xs font-medium ${getColorCls(typeCfg.color, true)} ${getColorCls(typeCfg.color)}`}>{typeCfg.label}</span></td>
                                         <td className="p-4 text-right font-semibold">{formatAmount(p.amount)} ฿</td>
-                                        <td className="p-4 text-center"><span className={`px-3 py-1 rounded-full text-xs font-medium ${getColorCls(statusCfg.color, true)} ${getColorCls(statusCfg.color)}`}>{statusCfg.label}</span></td>
+                                        <td className="p-4 text-center"><span className={`px-3 py-1 rounded-lg text-xs font-medium ${getColorCls(statusCfg.color, true)} ${getColorCls(statusCfg.color)}`}>{statusCfg.label}</span></td>
                                         <td className="p-4">
                                             <div className="flex gap-2 justify-center">
-                                                <button onClick={() => setViewDoc(p)} className={`px-3 py-2 rounded-lg text-xs font-medium ${isDark ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}`}>👁️ ดู</button>
+                                                <button onClick={() => setViewDoc(p)} className={`px-3 py-2 rounded-lg text-xs font-medium ${isDark ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>ดู</button>
                                                 {p.type === "INVOICE" && p.status === "PENDING" && (
-                                                    <button onClick={() => setPayQR(p)} className="px-3 py-2 rounded-lg bg-gradient-to-br from-emerald-600 to-emerald-500 text-white text-xs font-semibold">💳 ชำระ</button>
+                                                    <button onClick={() => setPayQR(p)} className="px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700">ชำระ</button>
                                                 )}
-                                                <button className={`px-3 py-2 rounded-lg text-xs font-medium ${isDark ? 'bg-slate-700 text-slate-400' : 'bg-slate-100 text-slate-600'}`}>📥 PDF</button>
+                                                <button className={`px-3 py-2 rounded-lg text-xs font-medium ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>PDF</button>
                                             </div>
                                         </td>
                                     </tr>
                                 );
                             }) : (
-                                <tr><td colSpan={6} className="p-12 text-center text-slate-500">📄<p className="mt-3">ไม่พบรายการ</p></td></tr>
+                                <tr><td colSpan={6} className="p-12 text-center">
+                                    <IconDocument size={32} className="mx-auto text-slate-400 mb-3" />
+                                    <p className="text-slate-500">ไม่พบรายการ</p>
+                                </td></tr>
                             )}
                         </tbody>
                     </table>

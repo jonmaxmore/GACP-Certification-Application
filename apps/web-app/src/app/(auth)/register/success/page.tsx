@@ -49,7 +49,7 @@ function RegisterSuccessContent() {
                     {/* User Info Summary */}
                     {(identifier || name) && (
                         <div className="bg-surface-100 rounded-xl p-4 mb-6 text-left">
-                            <p className="text-sm font-semibold text-slate-500 mb-3">📋 ข้อมูลบัญชีของคุณ</p>
+                            <p className="text-sm font-semibold text-slate-500 mb-3">ข้อมูลบัญชีของคุณ</p>
                             {accountType && (
                                 <div className="flex justify-between mb-2">
                                     <span className="text-sm text-slate-500">ประเภทบัญชี:</span>
@@ -73,7 +73,7 @@ function RegisterSuccessContent() {
 
                     {/* Next Steps */}
                     <div className="bg-primary-50 rounded-xl p-4 mb-6 text-left">
-                        <p className="text-sm font-semibold text-primary-700 mb-3">📝 ขั้นตอนถัดไป</p>
+                        <p className="text-sm font-semibold text-primary-700 mb-3">ขั้นตอนถัดไป</p>
                         <ol className="pl-5 space-y-2">
                             <li className="text-sm text-slate-700">เข้าสู่ระบบด้วยเลขประจำตัวและรหัสผ่าน</li>
                             <li className="text-sm text-slate-700">เพิ่มข้อมูลสถานประกอบการ</li>
@@ -95,7 +95,7 @@ function RegisterSuccessContent() {
 
                 {/* Footer */}
                 <div className="mt-6 text-center">
-                    <p className="text-xs text-slate-400">🔒 ข้อมูลของคุณถูกเก็บรักษาอย่างปลอดภัย</p>
+                    <p className="text-xs text-slate-400">ข้อมูลของคุณถูกเก็บรักษาอย่างปลอดภัย</p>
                 </div>
             </div>
         </div>

@@ -40,7 +40,9 @@ export default function ForgotPasswordPage() {
         <div className="min-h-screen bg-stone-50 flex items-center justify-center p-6">
             <div className="max-w-md w-full">
                 <div className="text-center mb-8">
-                    <div className="text-5xl mb-4">🔐</div>
+                    <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                    </div>
                     <h1 className="text-2xl font-bold text-emerald-700">ลืมรหัสผ่าน</h1>
                     <p className="text-slate-500 mt-2">กรอกข้อมูลเพื่อรับลิงก์รีเซ็ตรหัสผ่าน</p>
                 </div>
@@ -68,11 +70,11 @@ export default function ForgotPasswordPage() {
                             <div className="flex gap-2 mb-4">
                                 <button type="button" onClick={() => { setInputType("phone"); setInput(""); setError(""); }}
                                     className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${inputType === "phone" ? 'bg-emerald-50 border-2 border-emerald-600 text-emerald-700' : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300'}`}>
-                                    📱 เบอร์โทรศัพท์
+                                    เบอร์โทรศัพท์
                                 </button>
                                 <button type="button" onClick={() => { setInputType("email"); setInput(""); setError(""); }}
                                     className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${inputType === "email" ? 'bg-emerald-50 border-2 border-emerald-600 text-emerald-700' : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300'}`}>
-                                    ✉️ อีเมล
+                                    อีเมล
                                 </button>
                             </div>
 

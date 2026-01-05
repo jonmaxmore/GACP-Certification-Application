@@ -25,7 +25,7 @@ const paddingClasses = {
 
 /**
  * Card Component
- * 🌿 Eco-Professional Design with Tailwind CSS
+ * Eco-Professional Design with Tailwind CSS
  */
 export function Card({
     children,
@@ -61,12 +61,12 @@ interface StatCardProps {
 
 /**
  * StatCard Component
- * 🌿 Eco-Professional Dashboard Statistics Card
+ * Eco-Professional Dashboard Statistics Card
  */
 export function StatCard({
     title,
     value,
-    icon = '📊',
+    icon = '',
     trend,
     highlight = false,
     onClick,

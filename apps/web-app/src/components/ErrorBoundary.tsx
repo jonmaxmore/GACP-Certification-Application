@@ -3,7 +3,7 @@
 import React, { Component, ReactNode } from 'react';
 
 /**
- * 🍎 Global Error Boundary
+ * Global Error Boundary
  * Apple-Standard Error Handling for Zero-Crash Production
  * 
  * Catches JavaScript errors anywhere in child component tree,
@@ -37,7 +37,7 @@ class ErrorBoundary extends Component<Props, State> {
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         // Log to error reporting service
-        console.error('🍎 Error Boundary Caught:', error);
+        console.error('Error Boundary Caught:', error);
         console.error('Component Stack:', errorInfo.componentStack);
 
         this.setState({ errorInfo });
@@ -73,7 +73,7 @@ class ErrorBoundary extends Component<Props, State> {
                     <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
                         {/* Apple-style error icon */}
                         <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
-                            <span className="text-4xl">⚠️</span>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-500"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                         </div>
 
                         <h1 className="text-2xl font-bold text-gray-800 mb-2">
@@ -101,13 +101,13 @@ class ErrorBoundary extends Component<Props, State> {
                                 onClick={this.handleRetry}
                                 className="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium"
                             >
-                                🔄 ลองใหม่
+                                ลองใหม่
                             </button>
                             <button
                                 onClick={this.handleGoHome}
                                 className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
                             >
-                                🏠 กลับหน้าแรก
+                                กลับหน้าแรก
                             </button>
                         </div>
 

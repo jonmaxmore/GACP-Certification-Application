@@ -64,7 +64,7 @@ export default function Step7Documents() {
             {/* Header */}
             <div className="text-center mb-5">
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3.5 shadow-lg shadow-violet-500/30 ${isDark ? 'bg-gradient-to-br from-violet-600 to-violet-500' : 'bg-gradient-to-br from-violet-500 to-violet-400'}`}>
-                    <span className="text-2xl">📄</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>
                 </div>
                 <h2 className={`text-xl font-semibold mb-1.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>อัปโหลดเอกสาร</h2>
                 <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>รายการเอกสารประกอบคำขอ 22 รายการ</p>
@@ -73,7 +73,7 @@ export default function Step7Documents() {
             {/* Progress */}
             <div className={`rounded-xl px-4 py-3.5 mb-4 ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}>
                 <div className="flex justify-between mb-2">
-                    <span className="text-sm text-emerald-500 font-medium">✅ อัปโหลดแล้ว {uploadedCount}/22</span>
+                    <span className="text-sm text-emerald-500 font-medium">อัปโหลดแล้ว {uploadedCount}/22</span>
                     <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>บังคับ: {requiredUploaded}/{requiredTotal}</span>
                 </div>
                 <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-slate-600' : 'bg-slate-200'}`}>
@@ -86,7 +86,7 @@ export default function Step7Documents() {
                 {docs.map(doc => (
                     <div key={doc.id} className={`flex items-center gap-3 px-3.5 py-3 rounded-xl border transition-all ${doc.uploaded ? `${isDark ? 'bg-emerald-500/10' : 'bg-emerald-50'} border-emerald-500` : `${isDark ? 'bg-slate-800' : 'bg-white'} ${isDark ? 'border-slate-700' : 'border-slate-200'}`}`}>
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold flex-shrink-0 ${doc.uploaded ? 'bg-emerald-500 text-white' : (isDark ? 'bg-slate-700 text-slate-400' : 'bg-slate-100 text-slate-500')}`}>
-                            {doc.uploaded ? '✓' : doc.label.split('.')[0]}
+                            {doc.uploaded ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg> : doc.label.split('.')[0]}
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className={`text-sm font-medium truncate ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>

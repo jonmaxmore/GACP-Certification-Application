@@ -5,16 +5,16 @@ import { useRouter } from 'next/navigation';
 import { useWizardStore, SiteData, PLANTS } from '../hooks/useWizardStore';
 
 const LAND_TYPES = [
-    { id: 'OWN', label: 'เจ้าของ', icon: '🏠' },
-    { id: 'RENT', label: 'เช่า', icon: '📝' },
-    { id: 'CONSENT', label: 'ได้รับยินยอม', icon: '🤝' },
+    { id: 'OWN', label: 'เจ้าของ' },
+    { id: 'RENT', label: 'เช่า' },
+    { id: 'CONSENT', label: 'ได้รับยินยอม' },
 ] as const;
 
 const SECURITY_ITEMS = [
-    { id: 'hasCCTV', label: 'กล้อง CCTV', icon: '📹' },
-    { id: 'hasFence2m', label: 'รั้วสูง 2 ม.', icon: '🚧' },
-    { id: 'hasAccessLog', label: 'สมุดลงชื่อ', icon: '📋' },
-    { id: 'hasBiometric', label: 'สแกนนิ้ว/ใบหน้า', icon: '👆', highControl: true },
+    { id: 'hasCCTV', label: 'กล้อง CCTV' },
+    { id: 'hasFence2m', label: 'รั้วสูง 2 ม.' },
+    { id: 'hasAccessLog', label: 'สมุดลงชื่อ' },
+    { id: 'hasBiometric', label: 'สแกนนิ้ว/ใบหน้า', highControl: true },
 ];
 
 export default function Step5Site() {
@@ -60,7 +60,7 @@ export default function Step5Site() {
             {/* Header */}
             <div className="text-center mb-5">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-400 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/30">
-                    <span className="text-xl">📍</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
                 </div>
                 <h2 className={`text-lg font-semibold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>สถานที่ & ความปลอดภัย</h2>
             </div>
@@ -71,9 +71,9 @@ export default function Step5Site() {
             {/* GPS Section */}
             <div className={sectionCls}>
                 <div className="flex justify-between items-center mb-2.5">
-                    <span className={`text-sm font-semibold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>🛰️ พิกัด GPS</span>
+                    <span className={`text-sm font-semibold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>พิกัด GPS</span>
                     <button onClick={getLocation} disabled={locating} className="px-3 py-1.5 rounded-2xl bg-blue-500 text-white text-xs font-medium">
-                        {locating ? '⏳ หาตำแหน่ง...' : '📍 ปักหมุด'}
+                        {locating ? 'หาตำแหน่ง...' : 'ปักหมุด'}
                     </button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -84,8 +84,8 @@ export default function Step5Site() {
                 {form.gpsLat && form.gpsLng && (
                     <div className={`mt-3 rounded-lg overflow-hidden border ${isDark ? 'border-slate-600' : 'border-slate-200'}`}>
                         <div className={`px-2.5 py-2 flex justify-between items-center ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`}>
-                            <span className={`text-xs font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>📍 ตำแหน่งที่ปักหมุด</span>
-                            <a href={`https://www.google.com/maps?q=${form.gpsLat},${form.gpsLng}`} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 font-medium">🔗 เปิดใน Maps</a>
+                            <span className={`text-xs font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>ตำแหน่งที่ปักหมุด</span>
+                            <a href={`https://www.google.com/maps?q=${form.gpsLat},${form.gpsLng}`} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 font-medium">เปิดใน Maps</a>
                         </div>
                         <iframe src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(form.gpsLng) - 0.005}%2C${parseFloat(form.gpsLat) - 0.003}%2C${parseFloat(form.gpsLng) + 0.005}%2C${parseFloat(form.gpsLat) + 0.003}&layer=mapnik&marker=${form.gpsLat}%2C${form.gpsLng}`} className="w-full h-40 border-0" loading="lazy" />
                     </div>
@@ -101,7 +101,7 @@ export default function Step5Site() {
 
             {/* Borders */}
             <div className={sectionCls}>
-                <span className={`block text-sm font-semibold mb-2.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>🧭 ทิศที่ตั้งจรด</span>
+                <span className={`block text-sm font-semibold mb-2.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>ทิศที่ตั้งจรด</span>
                 <div className="grid grid-cols-2 gap-2">
                     <div><label className={`${labelCls} text-xs`}>ทิศเหนือ</label><input type="text" value={form.northBorder || ''} onChange={e => handleChange('northBorder', e.target.value)} placeholder="ถนนสาธารณะ" className={`${inputCls} text-sm py-2`} /></div>
                     <div><label className={`${labelCls} text-xs`}>ทิศใต้</label><input type="text" value={form.southBorder || ''} onChange={e => handleChange('southBorder', e.target.value)} placeholder="ที่ดินนาย ก." className={`${inputCls} text-sm py-2`} /></div>
@@ -117,8 +117,7 @@ export default function Step5Site() {
                     {LAND_TYPES.map(type => (
                         <button key={type.id} onClick={() => handleChange('landOwnership', type.id)}
                             className={`py-2.5 px-2 rounded-lg text-center transition-all ${form.landOwnership === type.id ? 'border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : `border ${isDark ? 'border-slate-600' : 'border-slate-200'}`}`}>
-                            <div className="text-base">{type.icon}</div>
-                            <div className={`text-xs font-medium mt-0.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{type.label}</div>
+                            <div className={`text-xs font-medium ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{type.label}</div>
                         </button>
                     ))}
                 </div>
@@ -126,12 +125,12 @@ export default function Step5Site() {
 
             {/* Security */}
             <div className={`rounded-xl p-4 mb-4 ${isDark ? 'bg-emerald-500/10' : 'bg-emerald-50'}`}>
-                <span className="block text-sm font-semibold text-emerald-600 mb-2.5">🔒 มาตรการความปลอดภัย</span>
+                <span className="block text-sm font-semibold text-emerald-600 mb-2.5">มาตรการความปลอดภัย</span>
                 <div className="grid grid-cols-2 gap-2">
                     {SECURITY_ITEMS.filter(item => !item.highControl || isHighControl).map(item => (
                         <label key={item.id} className={`flex items-center gap-2 px-2.5 py-2 rounded-lg cursor-pointer text-xs border ${form[item.id as keyof SiteData] ? `border-emerald-500 ${isDark ? 'bg-slate-700' : 'bg-white'}` : isDark ? 'border-slate-600' : 'border-slate-300'}`}>
                             <input type="checkbox" checked={!!form[item.id as keyof SiteData]} onChange={e => handleChange(item.id as keyof SiteData, e.target.checked)} className="w-4 h-4 accent-emerald-500" />
-                            <span className={isDark ? 'text-slate-100' : 'text-slate-900'}>{item.icon} {item.label}</span>
+                            <span className={isDark ? 'text-slate-100' : 'text-slate-900'}>{item.label}</span>
                         </label>
                     ))}
                 </div>

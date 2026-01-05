@@ -5,22 +5,22 @@ import { useRouter } from 'next/navigation';
 import { useWizardStore, ProductionData } from '../hooks/useWizardStore';
 
 const PLANT_PARTS = [
-    { id: 'SEED', label: 'เมล็ด', icon: '🌰' },
-    { id: 'STEM', label: 'ลำต้น', icon: '🌿' },
-    { id: 'FLOWER', label: 'ช่อดอก', icon: '🌸' },
-    { id: 'LEAF', label: 'ใบ', icon: '🍃' },
-    { id: 'ROOT', label: 'ราก/หัว', icon: '🥕' },
-    { id: 'OTHER', label: 'อื่นๆ', icon: '📦' },
+    { id: 'SEED', label: 'เมล็ด' },
+    { id: 'STEM', label: 'ลำต้น' },
+    { id: 'FLOWER', label: 'ช่อดอก' },
+    { id: 'LEAF', label: 'ใบ' },
+    { id: 'ROOT', label: 'ราก/หัว' },
+    { id: 'OTHER', label: 'อื่นๆ' },
 ];
 
 const PROPAGATION_TYPES = [
-    { id: 'SEED', label: 'เมล็ด', icon: '🌱' },
-    { id: 'CUTTING', label: 'ปักชำ', icon: '✂️' },
-    { id: 'TISSUE', label: 'เพาะเนื้อเยื่อ', icon: '🧫' },
+    { id: 'SEED', label: 'เมล็ด' },
+    { id: 'CUTTING', label: 'ปักชำ' },
+    { id: 'TISSUE', label: 'เพาะเนื้อเยื่อ' },
 ];
 
 const SOURCE_TYPES = [
-    { id: 'SELF', label: 'ปลูกเอง', icon: '🏠', desc: 'เราปลูกเองในแหล่งผลิตนี้' },
+    { id: 'SELF', label: 'ปลูกเอง', desc: 'เราปลูกเองในแหล่งผลิตนี้' },
 ];
 
 export default function Step6Production() {
@@ -55,7 +55,7 @@ export default function Step6Production() {
             {/* Header */}
             <div className="text-center mb-5">
                 <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-400 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-500/30">
-                    <span className="text-xl">🌱</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M12 2L12 6M12 18L12 22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12L6 12M18 12L22 12M4.93 19.07L7.76 16.24M16.24 7.76L19.07 4.93" /><circle cx="12" cy="12" r="4" /></svg>
                 </div>
                 <h2 className={`text-lg font-semibold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>ข้อมูลการผลิต</h2>
             </div>
@@ -67,8 +67,7 @@ export default function Step6Production() {
                     {PLANT_PARTS.map(part => (
                         <button key={part.id} onClick={() => togglePart(part.id)}
                             className={`py-2 px-1.5 rounded-lg text-center transition-all ${(form.plantParts || []).includes(part.id) ? 'border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : `border ${isDark ? 'border-slate-600' : 'border-slate-200'}`}`}>
-                            <div className="text-base">{part.icon}</div>
-                            <div className={`text-[10px] font-medium mt-0.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{part.label}</div>
+                            <div className={`text-[10px] font-medium ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{part.label}</div>
                         </button>
                     ))}
                 </div>
@@ -81,8 +80,7 @@ export default function Step6Production() {
                     {PROPAGATION_TYPES.map(type => (
                         <button key={type.id} onClick={() => handleChange('propagationType', type.id)}
                             className={`py-2.5 px-1.5 rounded-lg text-center transition-all ${form.propagationType === type.id ? 'border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : `border ${isDark ? 'border-slate-600' : 'border-slate-200'}`}`}>
-                            <div className="text-lg">{type.icon}</div>
-                            <div className={`text-xs font-medium mt-1 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{type.label}</div>
+                            <div className={`text-xs font-medium ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{type.label}</div>
                         </button>
                     ))}
                 </div>
@@ -96,7 +94,7 @@ export default function Step6Production() {
 
             {/* Quantity Section */}
             <div className={sectionCls}>
-                <span className={`block text-sm font-semibold mb-2.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>📊 ปริมาณการผลิต</span>
+                <span className={`block text-sm font-semibold mb-2.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>ปริมาณการผลิต</span>
                 <div className="grid grid-cols-2 gap-2">
                     <div><label className={`${labelCls} text-xs`}>ปริมาณ (ระบุหน่วย) *</label><input type="text" value={form.quantityWithUnit || ''} onChange={e => handleChange('quantityWithUnit', e.target.value)} placeholder="100 ต้น" className={`${inputCls} text-sm py-2`} /></div>
                     <div><label className={`${labelCls} text-xs`}>รอบเก็บเกี่ยว (ครั้ง/ปี)</label><input type="number" value={form.harvestCycles || 1} onChange={e => handleChange('harvestCycles', parseInt(e.target.value) || 1)} min={1} max={12} className={`${inputCls} text-sm py-2`} /></div>
@@ -111,8 +109,7 @@ export default function Step6Production() {
                     {SOURCE_TYPES.map(type => (
                         <button key={type.id} onClick={() => handleChange('sourceType', type.id)}
                             className={`py-2.5 px-1.5 rounded-lg text-center transition-all ${form.sourceType === type.id ? 'border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : `border ${isDark ? 'border-slate-600' : 'border-slate-200'}`}`}>
-                            <div className="text-base">{type.icon}</div>
-                            <div className={`text-xs font-medium mt-0.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{type.label}</div>
+                            <div className={`text-xs font-medium ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{type.label}</div>
                         </button>
                     ))}
                 </div>
@@ -120,7 +117,7 @@ export default function Step6Production() {
 
             {/* Certifications */}
             <div className={`rounded-xl p-4 mb-4 ${isDark ? 'bg-emerald-500/10' : 'bg-emerald-50'}`}>
-                <span className="block text-sm font-semibold text-emerald-600 mb-2.5">📋 ใบรับรอง (ถ้ามี)</span>
+                <span className="block text-sm font-semibold text-emerald-600 mb-2.5">ใบรับรอง (ถ้ามี)</span>
                 <div className="flex gap-4">
                     <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" checked={form.hasGAPCert || false} onChange={e => handleChange('hasGAPCert', e.target.checked)} className="w-4 h-4 accent-emerald-500" />
@@ -133,7 +130,7 @@ export default function Step6Production() {
                 </div>
             </div>
 
-            {!isValid && <p className="text-xs text-red-500 mb-3 text-center">⚠️ กรุณาเลือกส่วนของพืชอย่างน้อย 1 รายการ</p>}
+            {!isValid && <p className="text-xs text-red-500 mb-3 text-center">กรุณาเลือกส่วนของพืชอย่างน้อย 1 รายการ</p>}
 
             {/* Navigation */}
             <div className="flex gap-2.5">

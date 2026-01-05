@@ -64,7 +64,7 @@ export default function Step10Invoice() {
                 </div>
 
                 {/* Installment Info */}
-                <div className="text-xs mb-4 p-2.5 bg-blue-100 rounded-md text-blue-800"><strong>📋 งวดที่ 1:</strong> ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น (ชำระก่อนเริ่มตรวจสอบเอกสาร)</div>
+                <div className="text-xs mb-4 p-2.5 bg-blue-100 rounded-md text-blue-800"><strong>งวดที่ 1:</strong> ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น (ชำระก่อนเริ่มตรวจสอบเอกสาร)</div>
 
                 {/* Fee Table */}
                 <table className="w-full border-collapse text-xs mb-3">
@@ -109,7 +109,10 @@ export default function Step10Invoice() {
             </div>
 
             {/* Print Button */}
-            <button onClick={() => window.print()} className="w-full py-3 rounded-lg mb-3 border border-blue-500 bg-blue-50 text-blue-700 text-sm font-medium flex items-center justify-center gap-2">🖨️ พิมพ์</button>
+            <button onClick={() => window.print()} className="w-full py-3 rounded-lg mb-3 border border-blue-500 bg-blue-50 text-blue-700 text-sm font-medium flex items-center justify-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" /></svg>
+                พิมพ์
+            </button>
 
             {/* Accept Checkbox */}
             <div className={`rounded-lg p-3.5 mb-3.5 border border-blue-500 ${isDark ? 'bg-blue-500/10' : 'bg-blue-50'}`}>
@@ -123,7 +126,7 @@ export default function Step10Invoice() {
             <div className="flex gap-3">
                 <button onClick={handleBack} className={`flex-1 py-3.5 rounded-lg text-sm font-medium border ${isDark ? 'border-slate-600 bg-slate-700 text-surface-100' : 'border-surface-200 bg-white text-slate-700'}`}>ย้อนกลับ</button>
                 <button onClick={handleNext} disabled={!accepted || isNavigating} className={`flex-[2] py-3.5 rounded-lg text-sm font-semibold ${accepted && !isNavigating ? 'bg-gradient-to-br from-blue-700 to-blue-500 text-white shadow-lg shadow-blue-500/40' : 'bg-surface-200 text-slate-400 cursor-not-allowed'}`}>
-                    {isNavigating ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full mr-2" />กำลังโหลด...</> : '💳 ยอมรับและไปชำระเงิน'}
+                    {isNavigating ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full mr-2" />กำลังโหลด...</> : 'ยอมรับและไปชำระเงิน'}
                 </button>
             </div>
 

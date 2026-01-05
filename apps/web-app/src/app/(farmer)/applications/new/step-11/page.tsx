@@ -76,7 +76,7 @@ export default function Step11Payment() {
                 <div className="grid grid-cols-2 gap-2.5">
                     {(['QR', 'CARD'] as const).map(method => (
                         <button key={method} onClick={() => setPaymentMethod(method)} className={`p-4 rounded-xl text-center border-2 ${paymentMethod === method ? 'border-primary-600 bg-primary-50' : (isDark ? 'border-slate-600 bg-slate-700' : 'border-surface-200 bg-white')}`}>
-                            <div className="text-3xl mb-1.5">{method === 'QR' ? '📱' : '💳'}</div>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto mb-1.5">{method === 'QR' ? <><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></> : <><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></>}</svg>
                             <div className={`text-sm font-semibold ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>{method === 'QR' ? 'QR PromptPay' : 'บัตรเครดิต/เดบิต'}</div>
                             <div className="text-[10px] text-slate-500">{method === 'QR' ? 'สะดวก รวดเร็ว' : 'Visa / MasterCard'}</div>
                         </button>
@@ -89,7 +89,7 @@ export default function Step11Payment() {
                 <div className="bg-white rounded-xl p-5 mb-4 text-center border border-surface-200">
                     <div className="text-xs text-slate-700 font-semibold mb-3">สแกน QR Code เพื่อชำระเงิน</div>
                     <div className="w-44 h-44 bg-surface-100 rounded-xl mx-auto mb-3 flex items-center justify-center border-2 border-dashed border-surface-300">
-                        <div className="text-center text-slate-500"><div className="text-5xl mb-1">📲</div><div className="text-[11px]">QR Code</div></div>
+                        <div className="text-center text-slate-500"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mx-auto mb-1"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg><div className="text-[11px]">QR Code</div></div>
                     </div>
                     <div className="text-[11px] text-slate-700 bg-secondary-50 p-2.5 rounded-md"><strong>โอนเข้าบัญชี:</strong><br />ชื่อบัญชี: เงินบำรุงศูนย์พัฒนายาไทยและสมุนไพร<br />ธ.กรุงไทย เลขที่ <strong>4750134376</strong></div>
                 </div>
@@ -110,13 +110,16 @@ export default function Step11Payment() {
             )}
 
             {/* Security */}
-            <div className="text-[10px] text-slate-500 text-center mb-4 flex items-center justify-center gap-1.5">🔒 การชำระเงินปลอดภัยด้วยระบบเข้ารหัส SSL</div>
+            <div className="text-[10px] text-slate-500 text-center mb-4 flex items-center justify-center gap-1.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                การชำระเงินปลอดภัยด้วยระบบเข้ารหัส SSL
+            </div>
 
             {/* Navigation */}
             <div className="flex gap-3">
                 <button onClick={() => router.push('/applications/new/step-10')} disabled={processing} className={`flex-1 py-3.5 rounded-xl text-sm font-medium border ${isDark ? 'border-slate-600 bg-slate-700 text-surface-100' : 'border-surface-200 bg-white text-slate-700'} ${processing ? 'opacity-50' : ''}`}>ย้อนกลับ</button>
                 <button onClick={handlePayment} disabled={processing} className={`flex-[2] py-3.5 rounded-xl text-sm font-semibold ${processing ? 'bg-slate-400 cursor-wait' : 'bg-gradient-to-br from-primary-700 to-primary-500 shadow-lg shadow-primary-500/40'} text-white`}>
-                    {processing ? '⏳ กำลังดำเนินการ...' : `✓ ยืนยันชำระเงิน ฿${installment1Fee.toLocaleString()}`}
+                    {processing ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> กำลังดำเนินการ...</> : `ยืนยันชำระเงิน ฿${installment1Fee.toLocaleString()}`}
                 </button>
             </div>
         </div>

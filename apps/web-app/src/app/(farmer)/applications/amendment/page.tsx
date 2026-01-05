@@ -74,7 +74,7 @@ function AmendmentContent() {
                 <div className="flex gap-2 mb-8">
                     {stepLabels.map((label, idx) => (
                         <div key={label} className="flex-1 text-center">
-                            <div className={`w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center text-sm font-semibold ${idx < stepIndex ? 'bg-primary-600 text-white' : idx === stepIndex ? 'bg-blue-600 text-white' : isDark ? 'bg-slate-700 text-slate-400' : 'bg-surface-200 text-slate-500'}`}>{idx < stepIndex ? '✓' : idx + 1}</div>
+                            <div className={`w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center text-sm font-semibold ${idx < stepIndex ? 'bg-primary-600 text-white' : idx === stepIndex ? 'bg-blue-600 text-white' : isDark ? 'bg-slate-700 text-slate-400' : 'bg-surface-200 text-slate-500'}`}>{idx + 1}</div>
                             <div className={`text-xs ${idx === stepIndex ? 'text-blue-600' : isDark ? 'text-slate-500' : 'text-slate-400'}`}>{label}</div>
                         </div>
                     ))}
@@ -83,7 +83,7 @@ function AmendmentContent() {
                 {/* Step: Edit */}
                 {(step === 'select' || step === 'edit') && (
                     <div className={`rounded-2xl p-6 border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
-                        <h3 className={`text-base font-semibold mb-4 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>✏️ แก้ไขข้อมูลที่ต้องการเปลี่ยนแปลง</h3>
+                        <h3 className={`text-base font-semibold mb-4 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>แก้ไขข้อมูลที่ต้องการเปลี่ยนแปลง</h3>
                         <div className="space-y-4 mb-6">
                             {fields.map(field => (
                                 <div key={field.key}>
@@ -105,7 +105,7 @@ function AmendmentContent() {
                 {step === 'confirm' && (
                     <div className={`rounded-2xl p-6 border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
                         <h3 className={`text-base font-semibold mb-4 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>ยืนยันการแก้ไข</h3>
-                        <div className="bg-secondary-50 border border-secondary-500 rounded-xl p-4 mb-6"><p className="text-sm text-secondary-800">⚠️ หลังจากส่งคำขอ ทีมงานจะประเมินและส่งใบเสนอราคาให้ท่านผ่านระบบ</p></div>
+                        <div className="bg-secondary-50 border border-secondary-500 rounded-xl p-4 mb-6"><p className="text-sm text-secondary-800">หลังจากส่งคำขอ ทีมงานจะประเมินและส่งใบเสนอราคาให้ท่านผ่านระบบ</p></div>
                         <h4 className={`text-sm font-semibold mb-3 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>รายการที่แก้ไข:</h4>
                         <div className="space-y-2 mb-6">
                             {modifiedFields.map(field => (

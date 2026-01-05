@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import StaffLayout from "../components/StaffLayout";
+import {
+    IconDocument, IconSearch, IconChart, IconCreditCard, IconCalendar,
+    IconCheckCircle, IconClock, IconUser
+} from "@/components/ui/icons";
 
 interface StaffUser {
     id: string;
@@ -23,15 +27,15 @@ interface PendingItem {
     waitTime: string;
 }
 
-const ROLE_LABELS: Record<string, { label: string; icon: string }> = {
-    REVIEWER_AUDITOR: { label: "ผู้ตรวจเอกสาร/ตรวจประเมิน", icon: "📋" },
-    SCHEDULER: { label: "เจ้าหน้าที่จัดคิว", icon: "📅" },
-    ACCOUNTANT: { label: "พนักงานบัญชี", icon: "💰" },
-    ADMIN: { label: "ผู้ดูแลระบบ", icon: "⚙️" },
-    assessor: { label: "ผู้ตรวจสอบ", icon: "📋" },
-    scheduler: { label: "เจ้าหน้าที่จัดคิว", icon: "📅" },
-    accountant: { label: "พนักงานบัญชี", icon: "💰" },
-    admin: { label: "ผู้ดูแลระบบ", icon: "⚙️" },
+const ROLE_LABELS: Record<string, { label: string }> = {
+    REVIEWER_AUDITOR: { label: "ผู้ตรวจเอกสาร/ตรวจประเมิน" },
+    SCHEDULER: { label: "เจ้าหน้าที่จัดคิว" },
+    ACCOUNTANT: { label: "พนักงานบัญชี" },
+    ADMIN: { label: "ผู้ดูแลระบบ" },
+    assessor: { label: "ผู้ตรวจสอบ" },
+    scheduler: { label: "เจ้าหน้าที่จัดคิว" },
+    accountant: { label: "พนักงานบัญชี" },
+    admin: { label: "ผู้ดูแลระบบ" },
 };
 
 export default function StaffDashboardPage() {
@@ -95,35 +99,26 @@ export default function StaffDashboardPage() {
 
     if (!user) return null;
 
-    const roleInfo = ROLE_LABELS[user.role] || { label: user.role, icon: "👤" };
+    const roleInfo = ROLE_LABELS[user.role] || { label: user.role };
 
     return (
-        <StaffLayout title={`สวัสดี, ${user.firstName || 'เจ้าหน้าที่'}`} subtitle={`${roleInfo.icon} ${roleInfo.label}`}>
+        <StaffLayout title={`สวัสดี, ${user.firstName || 'เจ้าหน้าที่'}`} subtitle={roleInfo.label}>
             {/* Stats Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 {[
-                    { label: "รอดำเนินการ", value: pendingDocuments.length + pendingAudits.length, icon: "📂", color: "slate" },
-                    { label: "รอตรวจเอกสาร", value: pendingDocuments.length, icon: "👀", color: "amber" },
-                    { label: "รอตรวจแปลง", value: pendingAudits.length, icon: "🚜", color: "purple" },
-                    { label: "อนุมัติแล้ว", value: dashboardStats.approved, icon: "🏆", color: "emerald" },
+                    { label: "รอดำเนินการ", value: pendingDocuments.length + pendingAudits.length, Icon: IconClock, bgColor: "bg-slate-600" },
+                    { label: "รอตรวจเอกสาร", value: pendingDocuments.length, Icon: IconDocument, bgColor: "bg-amber-500" },
+                    { label: "รอตรวจแปลง", value: pendingAudits.length, Icon: IconSearch, bgColor: "bg-violet-500" },
+                    { label: "อนุมัติแล้ว", value: dashboardStats.approved, Icon: IconCheckCircle, bgColor: "bg-emerald-500" },
                 ].map((stat, i) => (
-                    <div key={i} className={`p-5 rounded-2xl border transition-all hover:-translate-y-0.5 ${stat.color === "amber"
-                        ? 'bg-amber-50 border-amber-200 shadow-md'
-                        : stat.color === "emerald"
-                            ? 'bg-emerald-50 border-emerald-200'
-                            : isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'
-                        }`}>
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-xs text-slate-500 mb-1">{stat.label}</p>
-                                <p className={`text-2xl font-bold ${stat.color === "amber" ? 'text-amber-700'
-                                    : stat.color === "purple" ? 'text-violet-700'
-                                        : stat.color === "emerald" ? 'text-emerald-700'
-                                            : ''
-                                    }`}>{stat.value}</p>
+                    <div key={i} className={`p-4 rounded-xl border transition-all hover:shadow-md ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
+                        <div className="flex items-center justify-between mb-3">
+                            <span className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</span>
+                            <div className={`w-8 h-8 rounded-lg ${stat.bgColor} flex items-center justify-center`}>
+                                <stat.Icon size={16} className="text-white" />
                             </div>
-                            <span className="text-xl opacity-80">{stat.icon}</span>
                         </div>
+                        <p className="text-2xl font-semibold">{stat.value}</p>
                     </div>
                 ))}
             </div>
@@ -132,8 +127,8 @@ export default function StaffDashboardPage() {
             {user.role === "REVIEWER_AUDITOR" && (
                 <div className="flex gap-2 mb-6">
                     {[
-                        { key: "documents", label: `📄 รอตรวจเอกสาร (${pendingDocuments.length})` },
-                        { key: "audits", label: `🔍 รอตรวจประเมิน (${pendingAudits.length})` }
+                        { key: "documents", label: `รอตรวจเอกสาร (${pendingDocuments.length})` },
+                        { key: "audits", label: `รอตรวจประเมิน (${pendingAudits.length})` }
                     ].map(tab => (
                         <button
                             key={tab.key}
@@ -153,7 +148,7 @@ export default function StaffDashboardPage() {
             <div className={`rounded-2xl shadow-lg overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
                 <div className={`px-6 py-4 border-b flex justify-between items-center ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
                     <h3 className="text-lg font-semibold">
-                        {activeTab === "documents" ? "📄 รอตรวจเอกสาร" : "🔍 รอตรวจประเมิน"}
+                        {activeTab === "documents" ? "รอตรวจเอกสาร" : "รอตรวจประเมิน"}
                     </h3>
                     <span className="text-sm text-slate-500">เรียงตามรอนานที่สุด</span>
                 </div>
@@ -186,7 +181,7 @@ export default function StaffDashboardPage() {
                                     <td className="px-6 py-4 text-sm text-amber-600 font-medium">{item.waitTime}</td>
                                     <td className="px-6 py-4">
                                         <Link href={`/staff/applications/${item.id}`} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
-                                            ⚡ ตรวจสอบ
+                                            ตรวจสอบ
                                         </Link>
                                     </td>
                                 </tr>
@@ -194,7 +189,7 @@ export default function StaffDashboardPage() {
                             {(activeTab === "documents" ? pendingDocuments : pendingAudits).length === 0 && (
                                 <tr>
                                     <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                                        <div className="text-4xl mb-2">✅</div>
+                                        <IconCheckCircle size={32} className="mx-auto text-emerald-500 mb-3" />
                                         ไม่มีรายการรอดำเนินการ
                                     </td>
                                 </tr>
@@ -208,13 +203,13 @@ export default function StaffDashboardPage() {
             {(user.role === "ADMIN" || user.role === "admin" || user.role === "SUPER_ADMIN") && (
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
                     {[
-                        { href: "/staff/management", icon: "👥", title: "จัดการบัญชี", desc: "สร้าง/แก้ไขเจ้าหน้าที่" },
-                        { href: "/staff/analytics", icon: "📊", title: "สถิติ", desc: "ดูรายงานและสถิติ" },
-                        { href: "/staff/accounting", icon: "💰", title: "ระบบบัญชี", desc: "จัดการใบแจ้งหนี้" },
-                        { href: "/staff/calendar", icon: "📅", title: "ปฏิทิน", desc: "ตารางนัดหมาย" },
+                        { href: "/staff/management", Icon: IconUser, title: "จัดการบัญชี", desc: "สร้าง/แก้ไขเจ้าหน้าที่", color: "bg-slate-600" },
+                        { href: "/staff/analytics", Icon: IconChart, title: "สถิติ", desc: "ดูรายงานและสถิติ", color: "bg-blue-500" },
+                        { href: "/staff/accounting", Icon: IconCreditCard, title: "ระบบบัญชี", desc: "จัดการใบแจ้งหนี้", color: "bg-amber-500" },
+                        { href: "/staff/calendar", Icon: IconCalendar, title: "ปฏิทิน", desc: "ตารางนัดหมาย", color: "bg-emerald-500" },
                     ].map((action, i) => (
-                        <Link key={i} href={action.href} className={`p-5 rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-lg ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}`}>
-                            <div className="text-3xl mb-2">{action.icon}</div>
+                        <Link key={i} href={action.href} className={`p-5 rounded-xl transition-all hover:shadow-md ${isDark ? 'bg-slate-800/50 border border-slate-700/50' : 'bg-white border border-slate-200'}`}>
+                            <div className={`w-10 h-10 rounded-lg ${action.color} flex items-center justify-center mb-3`}><action.Icon size={20} className="text-white" /></div>
                             <h3 className="font-semibold">{action.title}</h3>
                             <p className="text-sm text-slate-500">{action.desc}</p>
                         </Link>
@@ -224,20 +219,20 @@ export default function StaffDashboardPage() {
 
             {user.role === "ACCOUNTANT" || user.role === "accountant" ? (
                 <div className="mt-8">
-                    <h3 className="text-lg font-semibold mb-4">💰 ระบบบัญชีและการเงิน</h3>
+                    <h3 className="text-lg font-semibold mb-4">ระบบบัญชีและการเงิน</h3>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                        <Link href="/staff/accounting" className="p-6 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-500 text-white shadow-lg hover:-translate-y-0.5 transition-all">
-                            <div className="text-3xl mb-2">📋</div>
+                        <Link href="/staff/accounting" className="p-6 rounded-xl bg-emerald-600 text-white shadow-md hover:bg-emerald-700 transition-colors">
+                            <IconDocument size={28} className="mb-3" />
                             <h3 className="font-semibold text-lg">ใบแจ้งหนี้</h3>
                             <p className="text-emerald-100 text-sm">จัดการใบแจ้งหนี้ทั้งหมด</p>
                         </Link>
-                        <Link href="/staff/accounting?tab=pending" className={`p-6 rounded-2xl border-2 border-amber-200 transition-all hover:-translate-y-0.5 ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
-                            <div className="text-3xl mb-2">⏳</div>
+                        <Link href="/staff/accounting?tab=pending" className={`p-6 rounded-xl border transition-all hover:shadow-md ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-amber-200'}`}>
+                            <IconClock size={28} className="mb-3 text-amber-500" />
                             <h3 className="font-semibold text-amber-700">รอชำระ</h3>
                             <p className="text-sm text-slate-500">ตรวจสอบรายการค้างชำระ</p>
                         </Link>
-                        <Link href="/staff/analytics" className={`p-6 rounded-2xl transition-all hover:-translate-y-0.5 ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}`}>
-                            <div className="text-3xl mb-2">📊</div>
+                        <Link href="/staff/analytics" className={`p-6 rounded-xl border transition-all hover:shadow-md ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
+                            <IconChart size={28} className="mb-3 text-blue-500" />
                             <h3 className="font-semibold">รายงาน</h3>
                             <p className="text-sm text-slate-500">สรุปรายได้และสถิติ</p>
                         </Link>

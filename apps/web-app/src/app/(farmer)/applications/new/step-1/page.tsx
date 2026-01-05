@@ -67,7 +67,7 @@ export default function Step1Purpose() {
                     </svg>
                 </div>
                 <h2 className={`text-lg font-semibold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>วัตถุประสงค์และลักษณะพื้นที่</h2>
-                {plant && <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full mt-2 ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'}`}><span>{plant.icon}</span><span className="text-xs text-emerald-600 font-medium">{plant.name}</span></div>}
+                {plant && <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full mt-2 ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'}`}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-emerald-500"><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l2.3 2.3a2.4 2.4 0 0 0 3.4-3.4L15.4 14.6l6-6c4.5-4.5.5-8.5-4-4l-6.3 6.3-2.4-2.4a2.4 2.4 0 0 0-3.4 3.4L7.7 14.3l-4 4a2.4 2.4 0 0 0 0 3.4l2.6-1.4z" /></svg><span className="text-xs text-emerald-600 font-medium">{plant.name}</span></div>}
             </div>
 
             {/* Purpose Selection */}

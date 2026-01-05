@@ -3,12 +3,12 @@ import { useState, useCallback } from 'react';
 
 // Plant definitions
 export const PLANTS = [
-    { id: 'CAN', name: 'กัญชา', group: 'HIGH_CONTROL', icon: '🌿' },
-    { id: 'KRA', name: 'กระท่อม', group: 'HIGH_CONTROL', icon: '🍃' },
-    { id: 'TUR', name: 'ขมิ้นชัน', group: 'GENERAL', icon: '🟡' },
-    { id: 'GIN', name: 'ขิง', group: 'GENERAL', icon: '🟤' },
-    { id: 'GAL', name: 'กระชายดำ', group: 'GENERAL', icon: '⚫' },
-    { id: 'PLA', name: 'ไพล', group: 'GENERAL', icon: '🟢' },
+    { id: 'CAN', name: 'กัญชา', group: 'HIGH_CONTROL', icon: '' },
+    { id: 'KRA', name: 'กระท่อม', group: 'HIGH_CONTROL', icon: '' },
+    { id: 'TUR', name: 'ขมิ้นชัน', group: 'GENERAL', icon: '' },
+    { id: 'GIN', name: 'ขิง', group: 'GENERAL', icon: '' },
+    { id: 'GAL', name: 'กระชายดำ', group: 'GENERAL', icon: '' },
+    { id: 'PLA', name: 'ไพล', group: 'GENERAL', icon: '' },
 ] as const;
 
 export type PlantId = typeof PLANTS[number]['id'];

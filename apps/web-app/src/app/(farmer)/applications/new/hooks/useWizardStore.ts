@@ -17,12 +17,12 @@ export interface Plant {
 }
 
 export const PLANTS: Plant[] = [
-    { id: 'cannabis', name: 'กัญชา', icon: '🌿', group: 'HIGH_CONTROL' },
-    { id: 'kratom', name: 'กระท่อม', icon: '🌱', group: 'HIGH_CONTROL' },
-    { id: 'turmeric', name: 'ขมิ้นชัน', icon: '🟡', group: 'GENERAL' },
-    { id: 'ginger', name: 'ขิง', icon: '🟤', group: 'GENERAL' },
-    { id: 'black_galangal', name: 'กระชายดำ', icon: '⚫', group: 'GENERAL' },
-    { id: 'plai', name: 'ไพล', icon: '🟢', group: 'GENERAL' },
+    { id: 'cannabis', name: 'กัญชา', icon: '', group: 'HIGH_CONTROL' },
+    { id: 'kratom', name: 'กระท่อม', icon: '', group: 'HIGH_CONTROL' },
+    { id: 'turmeric', name: 'ขมิ้นชัน', icon: '', group: 'GENERAL' },
+    { id: 'ginger', name: 'ขิง', icon: '', group: 'GENERAL' },
+    { id: 'black_galangal', name: 'กระชายดำ', icon: '', group: 'GENERAL' },
+    { id: 'plai', name: 'ไพล', icon: '', group: 'GENERAL' },
 ];
 
 // Expanded ApplicantData with all fields for INDIVIDUAL, JURISTIC, COMMUNITY

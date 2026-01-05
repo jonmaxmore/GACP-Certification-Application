@@ -16,9 +16,9 @@ interface StaffUser {
 }
 
 const STAFF_ROLES = [
-    { value: "REVIEWER_AUDITOR", label: "ผู้ตรวจเอกสาร/ตรวจประเมิน", icon: "📋", color: "blue" },
-    { value: "SCHEDULER", label: "เจ้าหน้าที่จัดคิว", icon: "📅", color: "purple" },
-    { value: "ADMIN", label: "ผู้ดูแลระบบ", icon: "⚙️", color: "amber" },
+    { value: "REVIEWER_AUDITOR", label: "ผู้ตรวจเอกสาร/ตรวจประเมิน", icon: "", color: "blue" },
+    { value: "SCHEDULER", label: "เจ้าหน้าที่จัดคิว", icon: "", color: "purple" },
+    { value: "ADMIN", label: "ผู้ดูแลระบบ", icon: "", color: "amber" },
 ];
 
 export default function AdminUsersPage() {
@@ -167,7 +167,7 @@ export default function AdminUsersPage() {
     if (!currentUser) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-900">
-                <div className="animate-spin text-4xl">⏳</div>
+                <div className="w-10 h-10 border-3 border-slate-200 border-t-emerald-600 rounded-full animate-spin" />
             </div>
         );
     }
@@ -183,7 +183,6 @@ export default function AdminUsersPage() {
                         </Link>
                         <div className="h-6 w-px bg-slate-600" />
                         <div className="flex items-center gap-3">
-                            <span className="text-2xl">👥</span>
                             <div>
                                 <h1 className="font-bold">จัดการบัญชีเจ้าหน้าที่</h1>
                                 <p className="text-xs text-slate-400">Admin Panel</p>
@@ -194,7 +193,7 @@ export default function AdminUsersPage() {
                         onClick={() => setShowCreateModal(true)}
                         className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm flex items-center gap-2"
                     >
-                        <span>➕</span>
+                        +
                         สร้างบัญชีใหม่
                     </button>
                 </div>
@@ -210,15 +209,15 @@ export default function AdminUsersPage() {
                     </div>
                     <div className="bg-white rounded-xl p-4 shadow">
                         <p className="text-2xl font-bold text-blue-600">{users.filter(u => u.role === "REVIEWER_AUDITOR").length}</p>
-                        <p className="text-sm text-slate-500">📋 ผู้ตรวจเอกสาร/ประเมิน</p>
+                        <p className="text-sm text-slate-500">ผู้ตรวจเอกสาร/ประเมิน</p>
                     </div>
                     <div className="bg-white rounded-xl p-4 shadow">
                         <p className="text-2xl font-bold text-purple-600">{users.filter(u => u.role === "SCHEDULER").length}</p>
-                        <p className="text-sm text-slate-500">📅 เจ้าหน้าที่จัดคิว</p>
+                        <p className="text-sm text-slate-500">เจ้าหน้าที่จัดคิว</p>
                     </div>
                     <div className="bg-white rounded-xl p-4 shadow">
                         <p className="text-2xl font-bold text-amber-600">{users.filter(u => u.role === "ADMIN").length}</p>
-                        <p className="text-sm text-slate-500">⚙️ ผู้ดูแลระบบ</p>
+                        <p className="text-sm text-slate-500">ผู้ดูแลระบบ</p>
                     </div>
                 </div>
 
@@ -240,9 +239,7 @@ export default function AdminUsersPage() {
                                 <tr key={user.id} className="hover:bg-slate-50">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-lg">
-                                                👤
-                                            </div>
+                                            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.5"><circle cx="12" cy="7" r="4" /><path d="M5.5 21a7.5 7.5 0 0 1 13 0" /></svg></div>
                                             <p className="font-medium text-slate-800">{user.firstName} {user.lastName}</p>
                                         </div>
                                     </td>
@@ -253,7 +250,7 @@ export default function AdminUsersPage() {
                                     </td>
                                     <td className="px-6 py-4 text-sm text-slate-500">{user.createdAt}</td>
                                     <td className="px-6 py-4">
-                                        <button className="text-slate-400 hover:text-slate-600">⚙️</button>
+                                        <button className="text-slate-400 hover:text-slate-600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg></button>
                                     </td>
                                 </tr>
                             ))}
@@ -272,7 +269,7 @@ export default function AdminUsersPage() {
                         </div>
                         <form onSubmit={handleCreateUser} className="p-6 space-y-4">
                             {error && (
-                                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">⚠️ {error}</div>
+                                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">{error}</div>
                             )}
 
                             <div className="grid grid-cols-2 gap-4">

@@ -113,7 +113,7 @@ export default function AdminReportsPage() {
     if (isLoading || !stats) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-900">
-                <div className="animate-spin text-4xl">⏳</div>
+                <div className="w-10 h-10 border-3 border-slate-200 border-t-emerald-600 rounded-full animate-spin" />
             </div>
         );
     }
@@ -129,7 +129,6 @@ export default function AdminReportsPage() {
                         </Link>
                         <div className="h-6 w-px bg-slate-600" />
                         <div className="flex items-center gap-3">
-                            <span className="text-2xl">📊</span>
                             <div>
                                 <h1 className="font-bold">รายงานสรุป</h1>
                                 <p className="text-xs text-slate-400">Admin Reports</p>
@@ -142,8 +141,8 @@ export default function AdminReportsPage() {
                                 key={range}
                                 onClick={() => setDateRange(range)}
                                 className={`px-4 py-2 rounded-lg text-sm transition-colors ${dateRange === range
-                                        ? "bg-emerald-600 text-white"
-                                        : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                                    ? "bg-emerald-600 text-white"
+                                    : "bg-slate-700 text-slate-300 hover:bg-slate-600"
                                     }`}
                             >
                                 {range === "week" ? "สัปดาห์" : range === "month" ? "เดือน" : "ปี"}
@@ -159,7 +158,7 @@ export default function AdminReportsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     <div className="bg-white rounded-xl p-6 shadow">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-2xl">📋</div>
+                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg></div>
                             <div>
                                 <p className="text-3xl font-bold text-slate-800">{stats.applications.total}</p>
                                 <p className="text-sm text-slate-500">คำขอทั้งหมด</p>
@@ -168,7 +167,7 @@ export default function AdminReportsPage() {
                     </div>
                     <div className="bg-white rounded-xl p-6 shadow">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-2xl">⏳</div>
+                            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg></div>
                             <div>
                                 <p className="text-3xl font-bold text-amber-600">{stats.applications.pending}</p>
                                 <p className="text-sm text-slate-500">รอดำเนินการ</p>
@@ -177,7 +176,7 @@ export default function AdminReportsPage() {
                     </div>
                     <div className="bg-white rounded-xl p-6 shadow">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-2xl">✅</div>
+                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg></div>
                             <div>
                                 <p className="text-3xl font-bold text-green-600">{stats.applications.approved}</p>
                                 <p className="text-sm text-slate-500">อนุมัติแล้ว</p>
@@ -186,7 +185,7 @@ export default function AdminReportsPage() {
                     </div>
                     <div className="bg-white rounded-xl p-6 shadow">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-2xl">💰</div>
+                            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9333ea" strokeWidth="1.5"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg></div>
                             <div>
                                 <p className="text-3xl font-bold text-purple-600">
                                     {stats.revenue.total.toLocaleString('th-TH')}
@@ -200,7 +199,7 @@ export default function AdminReportsPage() {
                 {/* Revenue Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <div className="bg-white rounded-2xl shadow-lg p-6">
-                        <h3 className="text-lg font-semibold mb-4">💵 สรุปรายได้</h3>
+                        <h3 className="text-lg font-semibold mb-4">สรุปรายได้</h3>
                         <div className="space-y-4">
                             <div className="flex justify-between items-center p-4 bg-green-50 rounded-xl">
                                 <span className="text-slate-600">รายได้รับแล้ว</span>
@@ -224,7 +223,7 @@ export default function AdminReportsPage() {
                     </div>
 
                     <div className="bg-white rounded-2xl shadow-lg p-6">
-                        <h3 className="text-lg font-semibold mb-4">📈 กิจกรรมวันนี้</h3>
+                        <h3 className="text-lg font-semibold mb-4">กิจกรรมวันนี้</h3>
                         <div className="space-y-4">
                             <div className="flex justify-between items-center p-4 bg-blue-50 rounded-xl">
                                 <span className="text-slate-600">ตรวจสอบเอกสาร</span>
@@ -250,26 +249,22 @@ export default function AdminReportsPage() {
 
                 {/* Quick Links */}
                 <div className="bg-white rounded-2xl shadow-lg p-6">
-                    <h3 className="text-lg font-semibold mb-4">🔗 เมนูลัด</h3>
+                    <h3 className="text-lg font-semibold mb-4">เมนูลัด</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <Link href="/staff/applications"
                             className="p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors text-center">
-                            <span className="text-2xl">📋</span>
                             <p className="font-medium mt-2">คำขอทั้งหมด</p>
                         </Link>
                         <Link href="/staff/calendar"
                             className="p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors text-center">
-                            <span className="text-2xl">📅</span>
                             <p className="font-medium mt-2">ปฏิทิน</p>
                         </Link>
                         <Link href="/staff/accounting"
                             className="p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors text-center">
-                            <span className="text-2xl">💰</span>
                             <p className="font-medium mt-2">การเงิน</p>
                         </Link>
                         <Link href="/admin/users"
                             className="p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors text-center">
-                            <span className="text-2xl">👥</span>
                             <p className="font-medium mt-2">จัดการผู้ใช้</p>
                         </Link>
                     </div>

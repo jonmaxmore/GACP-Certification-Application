@@ -5,18 +5,18 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 const STEPS = [
-    { id: 0, path: 'step-0', label: 'เลือกพืช', icon: '🌿' },
-    { id: 1, path: 'step-1', label: 'วัตถุประสงค์', icon: '🎯' },
-    { id: 2, path: 'step-2', label: 'บริการ', icon: '🔖' },
-    { id: 3, path: 'step-3', label: 'ยินยอม', icon: '✅' },
-    { id: 4, path: 'step-4', label: 'ผู้ยื่น', icon: '👤' },
-    { id: 5, path: 'step-5', label: 'สถานที่', icon: '📍' },
-    { id: 6, path: 'step-6', label: 'การผลิต', icon: '🌱' },
-    { id: 7, path: 'step-7', label: 'เอกสาร', icon: '📄' },
-    { id: 8, path: 'step-8', label: 'ตรวจสอบ', icon: '🔍' },
-    { id: 9, path: 'step-9', label: 'ใบเสนอราคา', icon: '📝' },
-    { id: 10, path: 'step-10', label: 'ใบวางบิล', icon: '📋' },
-    { id: 11, path: 'step-11', label: 'ชำระเงิน', icon: '💳' },
+    { id: 0, path: 'step-0', label: 'เลือกพืช' },
+    { id: 1, path: 'step-1', label: 'วัตถุประสงค์' },
+    { id: 2, path: 'step-2', label: 'บริการ' },
+    { id: 3, path: 'step-3', label: 'ยินยอม' },
+    { id: 4, path: 'step-4', label: 'ผู้ยื่น' },
+    { id: 5, path: 'step-5', label: 'สถานที่' },
+    { id: 6, path: 'step-6', label: 'การผลิต' },
+    { id: 7, path: 'step-7', label: 'เอกสาร' },
+    { id: 8, path: 'step-8', label: 'ตรวจสอบ' },
+    { id: 9, path: 'step-9', label: 'ใบเสนอราคา' },
+    { id: 10, path: 'step-10', label: 'ใบวางบิล' },
+    { id: 11, path: 'step-11', label: 'ชำระเงิน' },
 ];
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
@@ -55,7 +55,9 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                     <div className="mb-8">
                         <Link href="/dashboard" className="flex items-center gap-3">
                             <div className="w-11 h-11 bg-gradient-to-br from-primary-600 to-primary-500 rounded-xl flex items-center justify-center">
-                                <span className="text-xl">🌿</span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l2.3 2.3a2.4 2.4 0 0 0 3.4-3.4L15.4 14.6l6-6c4.5-4.5.5-8.5-4-4l-6.3 6.3-2.4-2.4a2.4 2.4 0 0 0-3.4 3.4L7.7 14.3l-4 4a2.4 2.4 0 0 0 0 3.4l2.6-1.4z" />
+                                </svg>
                             </div>
                             <div>
                                 <div className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>GACP</div>
@@ -73,25 +75,25 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                             const isCompleted = i < currentStep;
                             const isCurrent = i === currentStep;
                             const stepClasses = `flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 transition-all ${isCurrent
-                                    ? (isDark ? 'bg-primary-500/15' : 'bg-primary-50')
-                                    : 'bg-transparent'
+                                ? (isDark ? 'bg-primary-500/15' : 'bg-primary-50')
+                                : 'bg-transparent'
                                 } ${i > currentStep ? 'opacity-50' : ''} ${isCompleted ? 'cursor-pointer hover:bg-primary-50' : ''}`;
 
                             const stepContent = (
                                 <>
                                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm font-semibold ${isCompleted
-                                            ? 'bg-primary-500 text-white'
-                                            : isCurrent
-                                                ? 'bg-gradient-to-br from-primary-600 to-primary-500 text-white'
-                                                : (isDark ? 'bg-slate-700 text-slate-400' : 'bg-surface-200 text-slate-500')
+                                        ? 'bg-primary-500 text-white'
+                                        : isCurrent
+                                            ? 'bg-gradient-to-br from-primary-600 to-primary-500 text-white'
+                                            : (isDark ? 'bg-slate-700 text-slate-400' : 'bg-surface-200 text-slate-500')
                                         }`}>
-                                        {isCompleted ? '✓' : step.icon}
+                                        {isCompleted ? '✓' : step.id + 1}
                                     </div>
                                     <span className={`text-sm ${isCurrent
-                                            ? 'text-primary-500 font-semibold'
-                                            : isCompleted
-                                                ? 'text-primary-600'
-                                                : (isDark ? 'text-slate-300' : 'text-slate-600')
+                                        ? 'text-primary-500 font-semibold'
+                                        : isCompleted
+                                            ? 'text-primary-600'
+                                            : (isDark ? 'text-slate-300' : 'text-slate-600')
                                         }`}>
                                         {step.label}
                                     </span>
@@ -118,7 +120,12 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                     {/* Help Link */}
                     <div className={`mt-auto p-4 rounded-xl ${isDark ? 'bg-slate-700' : 'bg-surface-100'}`}>
                         <p className={`text-xs mb-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ต้องการความช่วยเหลือ?</p>
-                        <a href="tel:02-123-4567" className="text-sm text-primary-500 font-medium">📞 02-123-4567</a>
+                        <a href="tel:02-123-4567" className="flex items-center gap-2 text-sm text-primary-500 font-medium">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                            </svg>
+                            02-123-4567
+                        </a>
                     </div>
                 </aside>
 
@@ -139,7 +146,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                                 </div>
                             </div>
                             <h1 className="text-white text-lg font-semibold mb-1">ยื่นขอรับรอง GACP</h1>
-                            <p className="text-white/85 text-sm mb-4">{STEPS[currentStep]?.icon} {STEPS[currentStep]?.label}</p>
+                            <p className="text-white/85 text-sm mb-4">ขั้นตอนที่ {currentStep + 1}: {STEPS[currentStep]?.label}</p>
                             <div className="h-1.5 bg-white/30 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-white rounded-full transition-all duration-500"
@@ -155,7 +162,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h1 className={`text-xl font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                                        {STEPS[currentStep]?.icon} {STEPS[currentStep]?.label}
+                                        {STEPS[currentStep]?.label}
                                     </h1>
                                     <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                                         ขั้นตอนที่ {currentStep + 1} จาก {STEPS.length}
@@ -188,7 +195,13 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] animate-fade-in">
                     <div className={`rounded-2xl p-6 max-w-sm w-[90%] shadow-2xl animate-scale-in ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
                         <div className="text-center mb-4">
-                            <div className="text-5xl mb-3">⚠️</div>
+                            <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-3">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
+                            </div>
                             <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>ยกเลิกคำขอ?</h3>
                             <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                                 ข้อมูลที่กรอกจะถูกบันทึกไว้ คุณสามารถกลับมาดำเนินการต่อได้

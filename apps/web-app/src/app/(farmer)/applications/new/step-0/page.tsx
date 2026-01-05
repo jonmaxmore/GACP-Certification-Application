@@ -44,7 +44,9 @@ export default function Step0Plant() {
             {/* Header */}
             <div className="text-center mb-6">
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3.5 shadow-lg shadow-emerald-500/25 ${isDark ? 'bg-gradient-to-br from-emerald-600 to-emerald-500' : 'bg-gradient-to-br from-emerald-500 to-emerald-400'}`}>
-                    <span className="text-2xl">🌿</span>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l2.3 2.3a2.4 2.4 0 0 0 3.4-3.4L15.4 14.6l6-6c4.5-4.5.5-8.5-4-4l-6.3 6.3-2.4-2.4a2.4 2.4 0 0 0-3.4 3.4L7.7 14.3l-4 4a2.4 2.4 0 0 0 0 3.4l2.6-1.4z" />
+                    </svg>
                 </div>
                 <h2 className={`text-xl font-semibold mb-1.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>เลือกชนิดพืชสมุนไพร</h2>
                 <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>เลือกพืชที่ต้องการขอรับรองมาตรฐาน GACP</p>
@@ -53,7 +55,13 @@ export default function Step0Plant() {
             {/* High Control Section */}
             <div className="mb-5">
                 <div className="flex items-center gap-2 mb-2.5">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-600'}`}>🔒 สมุนไพรควบคุม</span>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-600'}`}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        สมุนไพรควบคุม
+                    </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2.5">
                     {highControlPlants.map(plant => {
@@ -62,7 +70,7 @@ export default function Step0Plant() {
                             <button key={plant.id} onClick={() => handleSelect(plant.id)} className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all min-h-28 ${isSelected ? (isDark ? 'bg-emerald-900/30 border-2 border-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-emerald-50 border-2 border-emerald-500 shadow-lg shadow-emerald-500/20') : (isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200')} `}>
                                 <div className="text-emerald-500">{PlantIcons[plant.id]}</div>
                                 <span className={`text-sm font-medium ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{plant.name}</span>
-                                {isSelected && <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-lg text-xs font-medium">✓ เลือก</span>}
+                                {isSelected && <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-lg text-xs font-medium">เลือกแล้ว</span>}
                             </button>
                         );
                     })}
@@ -72,7 +80,12 @@ export default function Step0Plant() {
             {/* General Plants Section */}
             <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2.5">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${isDark ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>🌱 สมุนไพรทั่วไป</span>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${isDark ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                        สมุนไพรทั่วไป
+                    </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2.5">
                     {generalPlants.map(plant => {
@@ -81,7 +94,7 @@ export default function Step0Plant() {
                             <button key={plant.id} onClick={() => handleSelect(plant.id)} className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all min-h-28 ${isSelected ? (isDark ? 'bg-emerald-900/30 border-2 border-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-emerald-50 border-2 border-emerald-500 shadow-lg shadow-emerald-500/20') : (isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200')} `}>
                                 <div className={plant.id === 'turmeric' || plant.id === 'ginger' ? 'text-amber-500' : 'text-emerald-500'}>{PlantIcons[plant.id]}</div>
                                 <span className={`text-sm font-medium ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{plant.name}</span>
-                                {isSelected && <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-lg text-xs font-medium">✓ เลือก</span>}
+                                {isSelected && <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-lg text-xs font-medium">เลือกแล้ว</span>}
                             </button>
                         );
                     })}

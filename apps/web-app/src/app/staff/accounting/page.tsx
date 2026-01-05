@@ -4,6 +4,38 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/services/api-client";
 import StaffLayout from "../components/StaffLayout";
+import { IconDocument, IconCreditCard, IconCheckCircle, IconClock } from "@/components/ui/icons";
+
+// Additional icons
+const IconDollar = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <line x1="12" y1="1" x2="12" y2="23" />
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+);
+
+const IconWarning = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+);
+
+const IconDownload = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+);
+
+const IconEye = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+        <circle cx="12" cy="12" r="3" />
+    </svg>
+);
 
 interface InvoiceItem {
     _id: string;
@@ -67,63 +99,55 @@ export default function AccountingDashboard() {
 
     const getStatusBadge = (status: string) => {
         const config: Record<string, { color: string; label: string }> = {
-            PENDING: { color: "bg-secondary-100 text-secondary-700", label: "รอชำระ" },
-            PAID: { color: "bg-primary-100 text-primary-700", label: "ชำระแล้ว" },
+            PENDING: { color: "bg-amber-100 text-amber-700", label: "รอชำระ" },
+            PAID: { color: "bg-emerald-100 text-emerald-700", label: "ชำระแล้ว" },
             OVERDUE: { color: "bg-red-100 text-red-700", label: "เกินกำหนด" },
             CANCELLED: { color: "bg-slate-100 text-slate-700", label: "ยกเลิก" },
         };
         const c = config[status] || { color: "bg-gray-100", label: status };
-        return <span className={`px-3 py-1 rounded-full text-xs font-semibold ${c.color}`}>{c.label}</span>;
+        return <span className={`px-3 py-1 rounded-lg text-xs font-medium ${c.color}`}>{c.label}</span>;
     };
 
     const filteredInvoices = invoices.filter(inv => activeTab === "all" || inv.status === activeTab.toUpperCase());
 
+    const stats = [
+        { label: "รายได้รวม", value: summary ? formatCurrency(summary.totalRevenue) : "฿0", Icon: IconDollar, bgColor: "bg-emerald-500", sub: `${summary?.invoiceCount.paid || 0} ใบเสร็จ` },
+        { label: "รอชำระ", value: summary ? formatCurrency(summary.pendingAmount) : "฿0", Icon: IconClock, bgColor: "bg-amber-500", sub: `${summary?.invoiceCount.pending || 0} รายการ` },
+        { label: "เกินกำหนด", value: summary ? formatCurrency(summary.overdueAmount) : "฿0", Icon: IconWarning, bgColor: "bg-red-500", sub: `${summary?.invoiceCount.overdue || 0} รายการ` },
+        { label: "รายได้เดือนนี้", value: summary ? formatCurrency(summary.monthlyRevenue) : "฿0", Icon: IconCreditCard, bgColor: "bg-blue-500", sub: "ม.ค. 2569" },
+    ];
+
     if (isLoading) {
         return (
-            <StaffLayout title="💰 ระบบบัญชี" subtitle="กำลังโหลด...">
+            <StaffLayout title="ระบบบัญชี" subtitle="กำลังโหลด...">
                 <div className="flex justify-center py-20">
-                    <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+                    <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
                 </div>
             </StaffLayout>
         );
     }
 
     return (
-        <StaffLayout title="💰 ระบบบัญชีและการเงิน" subtitle="Accountant Dashboard">
+        <StaffLayout title="ระบบบัญชีและการเงิน" subtitle="Accountant Dashboard">
             {/* Summary Cards */}
-            {summary && (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    {[
-                        { label: "รายได้รวม", value: formatCurrency(summary.totalRevenue), icon: "💵", color: "primary", sub: `${summary.invoiceCount.paid} ใบเสร็จ` },
-                        { label: "รอชำระ", value: formatCurrency(summary.pendingAmount), icon: "⏳", color: "secondary", sub: `${summary.invoiceCount.pending} รายการ` },
-                        { label: "เกินกำหนด", value: formatCurrency(summary.overdueAmount), icon: "⚠️", color: "red", sub: `${summary.invoiceCount.overdue} รายการ` },
-                        { label: "รายได้เดือนนี้", value: formatCurrency(summary.monthlyRevenue), icon: "📊", color: "blue", sub: "ม.ค. 2569" },
-                    ].map((card, i) => (
-                        <div key={i} className={`p-5 rounded-2xl shadow-card ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
-                            <div className="flex justify-between">
-                                <div>
-                                    <p className="text-sm text-slate-500">{card.label}</p>
-                                    <p className={`text-2xl font-bold ${card.color === 'primary' ? 'text-primary-600'
-                                            : card.color === 'secondary' ? 'text-secondary-600'
-                                                : card.color === 'red' ? 'text-red-600'
-                                                    : 'text-blue-600'
-                                        }`}>{card.value}</p>
-                                </div>
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${card.color === 'primary' ? 'bg-primary-100'
-                                        : card.color === 'secondary' ? 'bg-secondary-100'
-                                            : card.color === 'red' ? 'bg-red-100'
-                                                : 'bg-blue-100'
-                                    }`}>{card.icon}</div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                {stats.map((stat, i) => (
+                    <div key={i} className={`p-4 rounded-xl border transition-all hover:shadow-md ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
+                        <div className="flex items-center justify-between mb-3">
+                            <span className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</span>
+                            <div className={`w-8 h-8 rounded-lg ${stat.bgColor} flex items-center justify-center`}>
+                                <stat.Icon size={16} className="text-white" />
                             </div>
-                            <p className="text-xs text-slate-400 mt-2">{card.sub}</p>
                         </div>
-                    ))}
-                </div>
-            )}
+                        <p className="text-xl font-semibold">{stat.value}</p>
+                        <p className="text-xs text-slate-400 mt-1">{stat.sub}</p>
+                    </div>
+                ))}
+            </div>
 
             {/* Invoice Table */}
-            <div className={`rounded-2xl shadow-card overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
-                <div className={`px-6 py-4 border-b flex items-center justify-between flex-wrap gap-4 ${isDark ? 'border-slate-700' : 'border-surface-200'}`}>
+            <div className={`rounded-xl overflow-hidden border ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
+                <div className={`px-6 py-4 border-b flex items-center justify-between flex-wrap gap-4 ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
                     <div className="flex gap-2">
                         {[
                             { key: "all", label: "ทั้งหมด", count: invoices.length },
@@ -134,19 +158,21 @@ export default function AccountingDashboard() {
                             <button
                                 key={tab.key}
                                 onClick={() => setActiveTab(tab.key as typeof activeTab)}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.key ? "bg-primary-600 text-white" : `${isDark ? 'bg-slate-700 text-slate-300' : 'bg-surface-100 text-slate-600'} hover:bg-slate-200`
+                                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === tab.key ? "bg-emerald-600 text-white" : `${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'} hover:bg-slate-200`
                                     }`}
                             >
                                 {tab.label} ({tab.count})
                             </button>
                         ))}
                     </div>
-                    <button className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700">📥 ส่งออก Excel</button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm hover:bg-emerald-700">
+                        <IconDownload size={16} /> ส่งออก Excel
+                    </button>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className={isDark ? 'bg-slate-700' : 'bg-surface-100'}>
+                        <thead className={isDark ? 'bg-slate-700' : 'bg-slate-50'}>
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">เลขที่ใบแจ้งหนี้</th>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">ผู้ประกอบการ</th>
@@ -156,9 +182,9 @@ export default function AccountingDashboard() {
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">การดำเนินการ</th>
                             </tr>
                         </thead>
-                        <tbody className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-surface-200'}`}>
+                        <tbody className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-slate-200'}`}>
                             {filteredInvoices.map(inv => (
-                                <tr key={inv._id} className={`${isDark ? 'hover:bg-slate-700/50' : 'hover:bg-surface-50'} transition-colors`}>
+                                <tr key={inv._id} className={`${isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'} transition-colors`}>
                                     <td className="px-6 py-4">
                                         <p className="font-mono text-sm font-semibold">{inv.invoiceNumber}</p>
                                         <p className="text-xs text-slate-400">{inv.applicationNumber}</p>
@@ -168,13 +194,17 @@ export default function AccountingDashboard() {
                                     <td className="px-6 py-4">{getStatusBadge(inv.status)}</td>
                                     <td className="px-6 py-4">
                                         <p className="text-sm">{formatDate(inv.dueDate)}</p>
-                                        {inv.paidAt && <p className="text-xs text-primary-600">ชำระ: {formatDate(inv.paidAt)}</p>}
+                                        {inv.paidAt && <p className="text-xs text-emerald-600">ชำระ: {formatDate(inv.paidAt)}</p>}
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex gap-2">
-                                            <button className={`px-3 py-1 text-xs rounded-lg ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-surface-100 text-slate-700'}`}>👁️ ดู</button>
+                                            <button className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-700'}`}>
+                                                <IconEye size={12} /> ดู
+                                            </button>
                                             {inv.status === "PENDING" && (
-                                                <button className="px-3 py-1 text-xs bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200">✅ ยืนยันชำระ</button>
+                                                <button className="flex items-center gap-1 px-3 py-1.5 text-xs bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200">
+                                                    <IconCheckCircle size={12} /> ยืนยันชำระ
+                                                </button>
                                             )}
                                         </div>
                                     </td>
@@ -185,7 +215,7 @@ export default function AccountingDashboard() {
                 </div>
                 {filteredInvoices.length === 0 && (
                     <div className="p-12 text-center text-slate-400">
-                        <p className="text-5xl mb-4">📋</p>
+                        <IconDocument size={32} className="mx-auto mb-3" />
                         <p>ไม่พบรายการ</p>
                     </div>
                 )}

@@ -46,11 +46,11 @@ export default function StaffManagementPage() {
     const filteredStaff = staff.filter(m => (m.name.toLowerCase().includes(searchTerm.toLowerCase()) || m.email.toLowerCase().includes(searchTerm.toLowerCase())) && (filterRole === 'ALL' || m.role === filterRole));
 
     if (loading) {
-        return <StaffLayout title="👥 จัดการพนักงาน"><div className="flex justify-center py-20"><div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" /></div></StaffLayout>;
+        return <StaffLayout title="จัดการพนักงาน"><div className="flex justify-center py-20"><div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" /></div></StaffLayout>;
     }
 
     return (
-        <StaffLayout title="👥 จัดการพนักงาน" subtitle="จัดการบัญชีพนักงานในระบบ GACP">
+        <StaffLayout title="จัดการพนักงาน" subtitle="จัดการบัญชีพนักงานในระบบ GACP">
             {/* Filters */}
             <div className={`rounded-2xl shadow-card p-4 mb-6 ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
                 <div className="flex flex-wrap gap-4">

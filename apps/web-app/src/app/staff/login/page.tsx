@@ -21,6 +21,21 @@ const ShieldIcon = () => (
     </svg>
 );
 
+const WarningIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+);
+
+const LockKeyIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+);
+
 export default function StaffLoginPage() {
     const router = useRouter();
     const [loginId, setLoginId] = useState("");
@@ -102,7 +117,7 @@ export default function StaffLoginPage() {
                 <div className="bg-white rounded-2xl p-6 shadow-lg">
                     {/* Warning Badge */}
                     <div className="flex items-center gap-2.5 p-3 bg-amber-50 rounded-xl mb-5 border border-amber-200">
-                        <span className="text-xl">⚠️</span>
+                        <WarningIcon />
                         <span className="text-sm text-amber-800 font-medium">
                             สำหรับเจ้าหน้าที่ที่ได้รับอนุญาตเท่านั้น
                         </span>
@@ -110,8 +125,8 @@ export default function StaffLoginPage() {
 
                     {/* Error */}
                     {error && (
-                        <div className="p-3 bg-red-50 rounded-xl text-red-600 text-sm mb-4 border border-red-100">
-                            ⚠️ {error}
+                        <div className="flex items-center gap-2 p-3 bg-red-50 rounded-xl text-red-600 text-sm mb-4 border border-red-100">
+                            <WarningIcon /> {error}
                         </div>
                     )}
 
@@ -169,8 +184,8 @@ export default function StaffLoginPage() {
                             type="submit"
                             disabled={isLoading}
                             className={`w-full py-4 rounded-xl text-white text-base font-bold flex items-center justify-center gap-2 transition-all ${isLoading
-                                    ? 'bg-slate-400 cursor-not-allowed'
-                                    : 'bg-emerald-700 hover:bg-emerald-800 shadow-lg shadow-emerald-700/30'
+                                ? 'bg-slate-400 cursor-not-allowed'
+                                : 'bg-emerald-700 hover:bg-emerald-800 shadow-lg shadow-emerald-700/30'
                                 }`}
                         >
                             {isLoading ? (
@@ -179,7 +194,7 @@ export default function StaffLoginPage() {
                                     กำลังตรวจสอบ...
                                 </>
                             ) : (
-                                <>🔐 เข้าสู่ระบบเจ้าหน้าที่</>
+                                <>เข้าสู่ระบบเจ้าหน้าที่</>
                             )}
                         </button>
                     </form>
@@ -198,7 +213,7 @@ export default function StaffLoginPage() {
 
                 {/* Footer */}
                 <div className="text-center mt-8">
-                    <p className="text-xs text-slate-400">🔒 ระบบรักษาความปลอดภัยระดับสูง</p>
+                    <p className="text-xs text-slate-400"><LockKeyIcon /> ระบบรักษาความปลอดภัยระดับสูง</p>
                     <p className="text-[11px] text-slate-400 mt-1">Staff Portal v2.6.0</p>
                 </div>
             </div>

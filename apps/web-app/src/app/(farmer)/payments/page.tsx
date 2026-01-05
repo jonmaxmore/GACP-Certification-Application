@@ -86,71 +86,83 @@ export default function PaymentsPage() {
     };
 
     return (
-        <div className={`min-h-screen font-[Kanit] transition-all ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-stone-50 text-slate-900'}`}>
-            {/* Sidebar */}
-            <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 w-[72px] flex-col items-center py-5 border-r z-50 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-400 flex items-center justify-center text-xl font-semibold text-white mb-8">G</div>
-                <nav className="flex-1 flex flex-col gap-1 w-full px-2">
+        <div className={`min-h-screen transition-all duration-500 ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-gradient-to-br from-stone-50 via-emerald-50/30 to-stone-100 text-slate-900'}`}>
+            {/* Decorative Background */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className={`absolute -top-40 -right-40 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-emerald-900/20' : 'bg-emerald-200/40'}`} />
+                <div className={`absolute top-1/2 -left-40 w-80 h-80 rounded-full blur-3xl ${isDark ? 'bg-amber-900/10' : 'bg-amber-100/40'}`} />
+            </div>
+
+            {/* Sidebar - Glassmorphism */}
+            <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 w-[76px] flex-col items-center py-6 border-r z-50 backdrop-blur-xl ${isDark ? 'bg-slate-800/80 border-slate-700/50' : 'bg-white/70 border-slate-200/50'}`}>
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-xl font-bold text-white mb-8 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all duration-300">G</div>
+                <nav className="flex-1 flex flex-col gap-2 w-full px-2">
                     {navItems.map(item => (
-                        <Link key={item.href} href={item.href} className={`flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all relative ${item.active ? (isDark ? 'bg-emerald-500/15 border border-emerald-500/30' : 'bg-emerald-50 border border-emerald-500/30') : 'hover:bg-slate-100 dark:hover:bg-slate-700'}`}>
-                            {item.active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-emerald-500 rounded-r" />}
-                            <span className="text-lg">{item.icon}</span>
-                            <span className={`text-[10px] font-medium ${item.active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`}>{item.label}</span>
+                        <Link key={item.href} href={item.href} className={`group flex flex-col items-center gap-1.5 py-3 rounded-2xl transition-all duration-300 relative ${item.active
+                            ? (isDark ? 'bg-emerald-500/20 shadow-lg shadow-emerald-500/10' : 'bg-emerald-50 shadow-md shadow-emerald-500/10')
+                            : 'hover:bg-slate-100/80 dark:hover:bg-slate-700/50'}`}>
+                            {item.active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-emerald-400 to-emerald-600 rounded-r-full" />}
+                            <span className={`text-xl transition-transform duration-300 ${item.active ? 'scale-110' : 'group-hover:scale-110'}`}>{item.icon}</span>
+                            <span className={`text-[10px] font-semibold tracking-wide ${item.active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`}>{item.label}</span>
                         </Link>
                     ))}
                 </nav>
                 <div className="flex flex-col gap-3">
-                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-emerald-500/15 border border-emerald-500/30' : 'bg-emerald-50 border border-emerald-500/30'}`}>{isDark ? '☀️' : '🌙'}</button>
-                    <button onClick={handleLogout} className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500">🚪</button>
+                    <button onClick={toggleTheme} className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-105 ${isDark ? 'bg-emerald-500/20 hover:bg-emerald-500/30' : 'bg-emerald-50 hover:bg-emerald-100'}`}>{isDark ? '☀️' : '🌙'}</button>
+                    <button onClick={handleLogout} className="w-11 h-11 rounded-2xl flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 transition-all duration-300">🚪</button>
                 </div>
             </aside>
 
-            {/* Mobile Nav */}
-            <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-[72px] flex justify-around items-center z-50 border-t ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+            {/* Mobile Nav - Glassmorphism */}
+            <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-20 flex justify-around items-center z-50 border-t backdrop-blur-xl ${isDark ? 'bg-slate-800/90 border-slate-700/50' : 'bg-white/80 border-slate-200/50'}`}>
                 {navItems.map(item => (
-                    <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 py-2 px-3">
-                        <span className="text-lg">{item.icon}</span>
-                        <span className={`text-[10px] font-medium ${item.active ? 'text-emerald-500' : 'text-slate-500'}`}>{item.label}</span>
+                    <Link key={item.href} href={item.href} className={`flex flex-col items-center gap-1 py-2 px-4 rounded-2xl transition-all duration-300 ${item.active ? (isDark ? 'bg-emerald-500/20' : 'bg-emerald-50') : ''}`}>
+                        <span className={`text-xl ${item.active ? 'scale-110' : ''} transition-transform`}>{item.icon}</span>
+                        <span className={`text-[10px] font-semibold ${item.active ? 'text-emerald-500' : 'text-slate-500'}`}>{item.label}</span>
                     </Link>
                 ))}
             </nav>
 
-            {/* Main */}
-            <main className="lg:ml-[72px] p-6 lg:p-10 pb-24 lg:pb-10 max-w-6xl">
-                <header className="mb-7">
-                    <h1 className="text-2xl lg:text-3xl font-medium">ประวัติการชำระเงิน</h1>
-                    <p className="text-sm text-slate-500 mt-1">ใบเสนอราคา, ใบแจ้งหนี้, และใบเสร็จรับเงิน</p>
+            {/* Main Content */}
+            <main className="lg:ml-[76px] p-6 lg:p-10 pb-28 lg:pb-10 max-w-6xl relative z-10">
+                {/* Header with Glass Card */}
+                <header className={`mb-10 p-6 rounded-3xl backdrop-blur-sm ${isDark ? 'bg-slate-800/50' : 'bg-white/50'}`}>
+                    <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">ประวัติการชำระเงิน</h1>
+                    <p className={`text-sm mt-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ใบเสนอราคา, ใบแจ้งหนี้, และใบเสร็จรับเงิน</p>
                 </header>
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-7">
-                    {[{ icon: "✅", label: "ยอดรับเข้าทั้งหมด", value: `${formatAmount(totalReceipts)} ฿`, color: "emerald" },
-                    { icon: "💳", label: "รอชำระ", value: `${formatAmount(pendingInvoices)} ฿`, color: "amber" },
-                    { icon: "🧾", label: "จำนวนใบเสร็จ", value: receiptCount, color: "blue" }
+                {/* Stats with Gradient Icons */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    {[{ icon: "✅", label: "ยอดรับเข้าทั้งหมด", value: `${formatAmount(totalReceipts)} ฿`, gradient: "from-emerald-500 to-green-500" },
+                    { icon: "💳", label: "รอชำระ", value: `${formatAmount(pendingInvoices)} ฿`, gradient: "from-amber-500 to-orange-500" },
+                    { icon: "🧾", label: "จำนวนใบเสร็จ", value: receiptCount, gradient: "from-blue-500 to-indigo-500" }
                     ].map((stat, i) => (
-                        <div key={i} className={`p-5 rounded-2xl ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}`}>
+                        <div key={i} className={`p-5 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white/60 border-slate-200/50'}`}>
                             <div className="flex justify-between items-start mb-3">
-                                <span className="text-xs text-slate-500 font-medium">{stat.label}</span>
-                                <span className="text-lg">{stat.icon}</span>
+                                <span className={`text-xs font-medium uppercase tracking-wider ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</span>
+                                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center text-lg shadow-lg`}>{stat.icon}</div>
                             </div>
-                            <div className={`text-2xl font-semibold ${getColorCls(stat.color)}`}>{stat.value}</div>
+                            <div className="text-3xl font-bold">{stat.value}</div>
                         </div>
                     ))}
                 </div>
 
-                {/* Filter Tabs */}
-                <div className="flex gap-2 mb-5">
-                    {[{ key: "ALL", label: "ทั้งหมด" }, { key: "PENDING", label: "รอชำระ" }, { key: "PAID", label: "ชำระแล้ว" }].map(tab => (
+                {/* Filter Tabs - Premium Pills */}
+                <div className="flex gap-3 mb-6">
+                    {[{ key: "ALL", label: "ทั้งหมด", icon: "📋" }, { key: "PENDING", label: "รอชำระ", icon: "⏳" }, { key: "PAID", label: "ชำระแล้ว", icon: "✅" }].map(tab => (
                         <button key={tab.key} onClick={() => setFilter(tab.key as "ALL" | "PENDING" | "PAID")}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${filter === tab.key ? 'bg-emerald-500 text-white' : (isDark ? 'bg-slate-800 border border-slate-700 text-slate-400' : 'bg-white border border-slate-200 text-slate-600')}`}>
+                            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 ${filter === tab.key
+                                ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/30 scale-105'
+                                : (isDark ? 'bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:border-emerald-500/30' : 'bg-white/60 border border-slate-200/50 text-slate-600 hover:border-emerald-300')}`}>
+                            <span>{tab.icon}</span>
                             {tab.label}
-                            <span className={`px-2 py-0.5 rounded-full text-xs ${filter === tab.key ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'}`}>{counts[tab.key as keyof typeof counts]}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-xs ${filter === tab.key ? 'bg-white/20' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'}`}>{counts[tab.key as keyof typeof counts]}</span>
                         </button>
                     ))}
                 </div>
 
-                {/* Payment List */}
-                <div className={`rounded-2xl overflow-hidden ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}`}>
+                {/* Payment List - Glass Card */}
+                <div className={`rounded-3xl overflow-hidden backdrop-blur-sm shadow-lg ${isDark ? 'bg-slate-800/50 border border-slate-700/50' : 'bg-white/60 border border-slate-200/50'}`}>
                     <table className="w-full text-sm">
                         <thead>
                             <tr className={`border-b ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>

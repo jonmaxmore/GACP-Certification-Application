@@ -105,21 +105,21 @@ export default function StaffDashboardPage() {
                     { label: "รอดำเนินการ", value: pendingDocuments.length + pendingAudits.length, icon: "📂", color: "slate" },
                     { label: "รอตรวจเอกสาร", value: pendingDocuments.length, icon: "👀", color: "amber" },
                     { label: "รอตรวจแปลง", value: pendingAudits.length, icon: "🚜", color: "purple" },
-                    { label: "อนุมัติแล้ว", value: dashboardStats.approved, icon: "🏆", color: "primary" },
+                    { label: "อนุมัติแล้ว", value: dashboardStats.approved, icon: "🏆", color: "emerald" },
                 ].map((stat, i) => (
                     <div key={i} className={`p-5 rounded-2xl border transition-all hover:-translate-y-0.5 ${stat.color === "amber"
-                            ? 'bg-secondary-50 border-secondary-200 shadow-md'
-                            : stat.color === "primary"
-                                ? 'bg-primary-50 border-primary-200'
-                                : isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'
+                        ? 'bg-amber-50 border-amber-200 shadow-md'
+                        : stat.color === "emerald"
+                            ? 'bg-emerald-50 border-emerald-200'
+                            : isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'
                         }`}>
                         <div className="flex justify-between items-start">
                             <div>
                                 <p className="text-xs text-slate-500 mb-1">{stat.label}</p>
-                                <p className={`text-2xl font-bold ${stat.color === "amber" ? 'text-secondary-700'
-                                        : stat.color === "purple" ? 'text-violet-700'
-                                            : stat.color === "primary" ? 'text-primary-700'
-                                                : ''
+                                <p className={`text-2xl font-bold ${stat.color === "amber" ? 'text-amber-700'
+                                    : stat.color === "purple" ? 'text-violet-700'
+                                        : stat.color === "emerald" ? 'text-emerald-700'
+                                            : ''
                                     }`}>{stat.value}</p>
                             </div>
                             <span className="text-xl opacity-80">{stat.icon}</span>
@@ -139,8 +139,8 @@ export default function StaffDashboardPage() {
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key as any)}
                             className={`px-6 py-3 rounded-full font-semibold transition-all ${activeTab === tab.key
-                                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
-                                    : `${isDark ? 'bg-slate-800 text-slate-300' : 'bg-white text-slate-600 border border-surface-200'} hover:border-primary-300`
+                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30'
+                                : `${isDark ? 'bg-slate-800 text-slate-300' : 'bg-white text-slate-600 border border-slate-200'} hover:border-emerald-300`
                                 }`}
                         >
                             {tab.label}
@@ -150,8 +150,8 @@ export default function StaffDashboardPage() {
             )}
 
             {/* Data Table */}
-            <div className={`rounded-2xl shadow-card overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
-                <div className={`px-6 py-4 border-b flex justify-between items-center ${isDark ? 'border-slate-700' : 'border-surface-200'}`}>
+            <div className={`rounded-2xl shadow-lg overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
+                <div className={`px-6 py-4 border-b flex justify-between items-center ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
                     <h3 className="text-lg font-semibold">
                         {activeTab === "documents" ? "📄 รอตรวจเอกสาร" : "🔍 รอตรวจประเมิน"}
                     </h3>
@@ -159,7 +159,7 @@ export default function StaffDashboardPage() {
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className={isDark ? 'bg-slate-700' : 'bg-surface-100'}>
+                        <thead className={isDark ? 'bg-slate-700' : 'bg-slate-100'}>
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Job ID</th>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">ผู้ยื่น</th>
@@ -169,23 +169,23 @@ export default function StaffDashboardPage() {
                                 <th className="px-6 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-surface-200'}`}>
+                        <tbody className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-slate-200'}`}>
                             {(activeTab === "documents" ? pendingDocuments : pendingAudits).map(item => (
-                                <tr key={item.id} className={`${isDark ? 'hover:bg-slate-700/50' : 'hover:bg-surface-50'} transition-colors`}>
+                                <tr key={item.id} className={`${isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'} transition-colors`}>
                                     <td className="px-6 py-4 text-sm font-mono text-slate-500">{item.id?.slice(-8)}</td>
                                     <td className="px-6 py-4 text-sm font-medium">{item.applicantName}</td>
                                     <td className="px-6 py-4 text-sm text-slate-500">{item.plantType}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${item.submissionCount === 1 ? 'bg-primary-100 text-primary-700'
-                                                : item.submissionCount === 2 ? 'bg-secondary-100 text-secondary-700'
-                                                    : 'bg-red-100 text-red-700'
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${item.submissionCount === 1 ? 'bg-emerald-100 text-emerald-700'
+                                            : item.submissionCount === 2 ? 'bg-amber-100 text-amber-700'
+                                                : 'bg-red-100 text-red-700'
                                             }`}>
                                             {item.submissionCount === 1 ? 'ครั้งแรก' : `แก้ไขรอบ ${(item.submissionCount || 1) - 1}`}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-secondary-600 font-medium">{item.waitTime}</td>
+                                    <td className="px-6 py-4 text-sm text-amber-600 font-medium">{item.waitTime}</td>
                                     <td className="px-6 py-4">
-                                        <Link href={`/staff/applications/${item.id}`} className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors">
+                                        <Link href={`/staff/applications/${item.id}`} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
                                             ⚡ ตรวจสอบ
                                         </Link>
                                     </td>
@@ -213,7 +213,7 @@ export default function StaffDashboardPage() {
                         { href: "/staff/accounting", icon: "💰", title: "ระบบบัญชี", desc: "จัดการใบแจ้งหนี้" },
                         { href: "/staff/calendar", icon: "📅", title: "ปฏิทิน", desc: "ตารางนัดหมาย" },
                     ].map((action, i) => (
-                        <Link key={i} href={action.href} className={`p-5 rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-lg ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-surface-200'}`}>
+                        <Link key={i} href={action.href} className={`p-5 rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-lg ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}`}>
                             <div className="text-3xl mb-2">{action.icon}</div>
                             <h3 className="font-semibold">{action.title}</h3>
                             <p className="text-sm text-slate-500">{action.desc}</p>
@@ -226,17 +226,17 @@ export default function StaffDashboardPage() {
                 <div className="mt-8">
                     <h3 className="text-lg font-semibold mb-4">💰 ระบบบัญชีและการเงิน</h3>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                        <Link href="/staff/accounting" className="p-6 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-500 text-white shadow-lg hover:-translate-y-0.5 transition-all">
+                        <Link href="/staff/accounting" className="p-6 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-500 text-white shadow-lg hover:-translate-y-0.5 transition-all">
                             <div className="text-3xl mb-2">📋</div>
                             <h3 className="font-semibold text-lg">ใบแจ้งหนี้</h3>
-                            <p className="text-primary-100 text-sm">จัดการใบแจ้งหนี้ทั้งหมด</p>
+                            <p className="text-emerald-100 text-sm">จัดการใบแจ้งหนี้ทั้งหมด</p>
                         </Link>
-                        <Link href="/staff/accounting?tab=pending" className={`p-6 rounded-2xl border-2 border-secondary-200 transition-all hover:-translate-y-0.5 ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
+                        <Link href="/staff/accounting?tab=pending" className={`p-6 rounded-2xl border-2 border-amber-200 transition-all hover:-translate-y-0.5 ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
                             <div className="text-3xl mb-2">⏳</div>
-                            <h3 className="font-semibold text-secondary-700">รอชำระ</h3>
+                            <h3 className="font-semibold text-amber-700">รอชำระ</h3>
                             <p className="text-sm text-slate-500">ตรวจสอบรายการค้างชำระ</p>
                         </Link>
-                        <Link href="/staff/analytics" className={`p-6 rounded-2xl transition-all hover:-translate-y-0.5 ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-surface-200'}`}>
+                        <Link href="/staff/analytics" className={`p-6 rounded-2xl transition-all hover:-translate-y-0.5 ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}`}>
                             <div className="text-3xl mb-2">📊</div>
                             <h3 className="font-semibold">รายงาน</h3>
                             <p className="text-sm text-slate-500">สรุปรายได้และสถิติ</p>

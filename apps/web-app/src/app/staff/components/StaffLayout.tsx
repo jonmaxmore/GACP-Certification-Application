@@ -91,17 +91,17 @@ export default function StaffLayout({ children, title, subtitle }: StaffLayoutPr
 
     if (!mounted) {
         return (
-            <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-slate-900' : 'bg-surface-50'}`}>
-                <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+            <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-slate-900' : 'bg-stone-50'}`}>
+                <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className={`min-h-screen font-sans transition-colors ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-surface-50 text-slate-900'}`}>
+        <div className={`min-h-screen font-sans transition-colors ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-stone-50 text-slate-900'}`}>
             {/* Sidebar - Desktop */}
-            <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 w-[72px] flex-col items-center py-5 border-r z-50 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
-                <Link href="/staff/dashboard" className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary-700 to-primary-500 flex items-center justify-center text-xl font-bold text-white mb-8 shadow-lg shadow-primary-500/30">
+            <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 w-[72px] flex-col items-center py-5 border-r z-50 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                <Link href="/staff/dashboard" className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-700 to-emerald-500 flex items-center justify-center text-xl font-bold text-white mb-8 shadow-lg shadow-emerald-500/30">
                     G
                 </Link>
                 <nav className="flex-1 flex flex-col gap-1 w-full px-2">
@@ -112,19 +112,19 @@ export default function StaffLayout({ children, title, subtitle }: StaffLayoutPr
                                 key={item.href}
                                 href={item.href}
                                 className={`flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all relative ${isActive
-                                        ? (isDark ? 'bg-primary-500/15 border border-primary-500/30' : 'bg-primary-50 border border-primary-200')
-                                        : 'hover:bg-slate-100 dark:hover:bg-slate-700'
+                                    ? (isDark ? 'bg-emerald-500/15 border border-emerald-500/30' : 'bg-emerald-50 border border-emerald-200')
+                                    : 'hover:bg-slate-100 dark:hover:bg-slate-700'
                                     }`}
                             >
-                                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-primary-500 rounded-r" />}
+                                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-emerald-500 rounded-r" />}
                                 <span className="text-lg">{item.icon}</span>
-                                <span className={`text-[10px] font-medium ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500'}`}>{item.label}</span>
+                                <span className={`text-[10px] font-medium ${isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`}>{item.label}</span>
                             </Link>
                         );
                     })}
                 </nav>
                 <div className="flex flex-col items-center gap-3">
-                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-primary-500/15 hover:bg-primary-500/25' : 'bg-primary-50 hover:bg-primary-100'}`}>
+                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-emerald-500/15 hover:bg-emerald-500/25' : 'bg-emerald-50 hover:bg-emerald-100'}`}>
                         {isDark ? '☀️' : '🌙'}
                     </button>
                     <Link href="/staff/profile" className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}>
@@ -137,13 +137,13 @@ export default function StaffLayout({ children, title, subtitle }: StaffLayoutPr
             </aside>
 
             {/* Mobile Bottom Nav */}
-            <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-[72px] flex justify-around items-center z-50 border-t ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
+            <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-[72px] flex justify-around items-center z-50 border-t ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                 {filteredNavItems.slice(0, 5).map(item => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                     return (
                         <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 py-2 px-3">
                             <span className="text-lg">{item.icon}</span>
-                            <span className={`text-[10px] font-medium ${isActive ? 'text-primary-500' : 'text-slate-500'}`}>{item.label}</span>
+                            <span className={`text-[10px] font-medium ${isActive ? 'text-emerald-500' : 'text-slate-500'}`}>{item.label}</span>
                         </Link>
                     );
                 })}
@@ -159,7 +159,7 @@ export default function StaffLayout({ children, title, subtitle }: StaffLayoutPr
                             {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
                         </div>
                         {user && (
-                            <div className={`hidden lg:flex items-center gap-3 px-4 py-2 rounded-xl ${isDark ? 'bg-slate-800' : 'bg-white border border-surface-200'}`}>
+                            <div className={`hidden lg:flex items-center gap-3 px-4 py-2 rounded-xl ${isDark ? 'bg-slate-800' : 'bg-white border border-slate-200'}`}>
                                 <div className="text-right">
                                     <p className="text-sm font-semibold">{user.firstName || 'เจ้าหน้าที่'} {user.lastName || ''}</p>
                                     <p className="text-xs text-slate-500">{roleInfo.icon} {roleInfo.label}</p>

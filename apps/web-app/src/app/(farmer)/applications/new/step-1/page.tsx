@@ -84,7 +84,7 @@ export default function Step1Purpose() {
                                 </svg>
                             </div>
                             <div className="flex-1"><div className={`text-sm font-medium ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{p.label}</div><div className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{p.desc}</div></div>
-                            {purpose === p.id && <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs">✓</div>}
+                            {purpose === p.id && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center p-1"><path d="M20 6L9 17L4 12" /></svg>}
                         </button>
                     ))}
                 </div>
@@ -96,8 +96,8 @@ export default function Step1Purpose() {
                     <p className="text-sm font-semibold text-amber-600 flex items-center gap-2 mb-2">เอกสารใบอนุญาตที่ต้องเตรียม:</p>
                     <ul className={`pl-5 text-xs list-disc ${isDark ? 'text-amber-500' : 'text-amber-700'}`}>
                         {isHighControl && <li className="mb-1"><strong>บท.11</strong> - ใบอนุญาตปลูก (บังคับสำหรับพืชควบคุม)</li>}
-                        {purpose === 'COMMERCIAL' && <li className="mb-1"><strong>บท.13</strong> - ใบอนุญาตแปรรูปผลิตภัณฑ์ (บังคับ ✓)</li>}
-                        {purpose === 'EXPORT' && <><li className="mb-1"><strong>บท.13</strong> - ใบอนุญาตแปรรูปผลิตภัณฑ์ (ถ้ามีการแปรรูป)</li><li className="mb-1"><strong>บท.16</strong> - ใบอนุญาตส่งออก (บังคับ ✓)</li></>}
+                        {purpose === 'COMMERCIAL' && <li className="mb-1"><strong>บท.13</strong> - ใบอนุญาตแปรรูปผลิตภัณฑ์ (บังคับ)</li>}
+                        {purpose === 'EXPORT' && <><li className="mb-1"><strong>บท.13</strong> - ใบอนุญาตแปรรูปผลิตภัณฑ์ (ถ้ามีการแปรรูป)</li><li className="mb-1"><strong>บท.16</strong> - ใบอนุญาตส่งออก (บังคับ)</li></>}
                     </ul>
                     <p className={`text-xs mt-2 italic ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>อัปโหลดเอกสารในขั้นตอนถัดไป</p>
                 </div>

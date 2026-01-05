@@ -87,7 +87,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                                             ? 'bg-gradient-to-br from-primary-600 to-primary-500 text-white'
                                             : (isDark ? 'bg-slate-700 text-slate-400' : 'bg-surface-200 text-slate-500')
                                         }`}>
-                                        {isCompleted ? '✓' : step.id + 1}
+                                        {isCompleted ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg> : step.id + 1}
                                     </div>
                                     <span className={`text-sm ${isCurrent
                                         ? 'text-primary-500 font-semibold'
@@ -97,11 +97,13 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                                         }`}>
                                         {step.label}
                                     </span>
-                                    {isCompleted && (
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" className="ml-auto">
-                                            <path d="M9 18L15 12L9 6" />
-                                        </svg>
-                                    )}
+                                    {
+                                        isCompleted && (
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" className="ml-auto">
+                                                <path d="M9 18L15 12L9 6" />
+                                            </svg>
+                                        )
+                                    }
                                 </>
                             );
 
@@ -188,52 +190,56 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                         </div>
                     </div>
                 </main>
-            </div>
+            </div >
 
             {/* Exit Confirmation Dialog */}
-            {showExitDialog && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] animate-fade-in">
-                    <div className={`rounded-2xl p-6 max-w-sm w-[90%] shadow-2xl animate-scale-in ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
-                        <div className="text-center mb-4">
-                            <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-3">
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                                    <line x1="12" y1="9" x2="12" y2="13" />
-                                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                                </svg>
+            {
+                showExitDialog && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] animate-fade-in">
+                        <div className={`rounded-2xl p-6 max-w-sm w-[90%] shadow-2xl animate-scale-in ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
+                            <div className="text-center mb-4">
+                                <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-3">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                        <line x1="12" y1="9" x2="12" y2="13" />
+                                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                                    </svg>
+                                </div>
+                                <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>ยกเลิกคำขอ?</h3>
+                                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    ข้อมูลที่กรอกจะถูกบันทึกไว้ คุณสามารถกลับมาดำเนินการต่อได้
+                                </p>
                             </div>
-                            <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>ยกเลิกคำขอ?</h3>
-                            <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                                ข้อมูลที่กรอกจะถูกบันทึกไว้ คุณสามารถกลับมาดำเนินการต่อได้
-                            </p>
-                        </div>
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setShowExitDialog(false)}
-                                className={`flex-1 py-3 rounded-xl font-medium border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-surface-200 text-slate-600'}`}
-                            >
-                                ดำเนินการต่อ
-                            </button>
-                            <Link
-                                href="/dashboard"
-                                className="flex-1 py-3 rounded-xl font-semibold bg-red-500 text-white text-center"
-                            >
-                                ออกจากหน้านี้
-                            </Link>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowExitDialog(false)}
+                                    className={`flex-1 py-3 rounded-xl font-medium border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-surface-200 text-slate-600'}`}
+                                >
+                                    ดำเนินการต่อ
+                                </button>
+                                <Link
+                                    href="/dashboard"
+                                    className="flex-1 py-3 rounded-xl font-semibold bg-red-500 text-white text-center"
+                                >
+                                    ออกจากหน้านี้
+                                </Link>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Auto-Save Indicator */}
-            {!isSuccess && lastSaved && (
-                <div className={`fixed bottom-5 right-5 px-4 py-2 rounded-lg text-xs text-primary-600 flex items-center gap-1.5 z-50 animate-fade-in ${isDark ? 'bg-primary-500/20 border border-primary-500' : 'bg-primary-50 border border-primary-200'}`}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2">
-                        <path d="M5 13l4 4L19 7" />
-                    </svg>
-                    บันทึกอัตโนมัติ {lastSaved}
-                </div>
-            )}
-        </div>
+            {
+                !isSuccess && lastSaved && (
+                    <div className={`fixed bottom-5 right-5 px-4 py-2 rounded-lg text-xs text-primary-600 flex items-center gap-1.5 z-50 animate-fade-in ${isDark ? 'bg-primary-500/20 border border-primary-500' : 'bg-primary-50 border border-primary-200'}`}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2">
+                            <path d="M5 13l4 4L19 7" />
+                        </svg>
+                        บันทึกอัตโนมัติ {lastSaved}
+                    </div>
+                )
+            }
+        </div >
     );
 }

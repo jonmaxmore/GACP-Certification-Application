@@ -72,7 +72,10 @@ export function QuotationStep({ certificate, renewalId, isDark, onBack, onProcee
 
                 {/* Actions */}
                 <div className="flex gap-3">
-                    <button onClick={() => window.print()} className="flex-1 py-3.5 rounded-xl border-2 border-primary-600 text-primary-600 text-sm font-semibold">🖨️ พิมพ์ใบเสนอราคา</button>
+                    <button onClick={() => window.print()} className="flex-1 py-3.5 rounded-xl border-2 border-primary-600 text-primary-600 text-sm font-semibold flex items-center justify-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" /></svg>
+                        พิมพ์ใบเสนอราคา
+                    </button>
                     <button onClick={onProceed} className="flex-1 py-3.5 rounded-xl bg-gradient-to-br from-primary-600 to-primary-500 text-white text-sm font-semibold shadow-lg shadow-primary-500/40">ยืนยันและออกใบวางบิล →</button>
                 </div>
             </div>

@@ -46,7 +46,7 @@ function ReplacementContent() {
                 <div className="flex gap-2 mb-8">
                     {stepLabels.map((label, idx) => (
                         <div key={label} className="flex-1 text-center">
-                            <div className={`w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center text-sm font-semibold ${idx < stepIndex ? 'bg-primary-600 text-white' : idx === stepIndex ? 'bg-blue-600 text-white' : isDark ? 'bg-slate-700 text-slate-400' : 'bg-surface-200 text-slate-500'}`}>{idx < stepIndex ? '✓' : idx + 1}</div>
+                            <div className={`w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center text-sm font-semibold ${idx < stepIndex ? 'bg-primary-600 text-white' : idx === stepIndex ? 'bg-blue-600 text-white' : isDark ? 'bg-slate-700 text-slate-400' : 'bg-surface-200 text-slate-500'}`}>{idx + 1}</div>
                             <div className={`text-xs ${idx === stepIndex ? 'text-blue-600' : isDark ? 'text-slate-500' : 'text-slate-400'}`}>{label}</div>
                         </div>
                     ))}
@@ -74,7 +74,7 @@ function ReplacementContent() {
                     <div className={`rounded-2xl p-6 border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
                         <h3 className={`text-base font-semibold mb-4 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>{reason === 'lost' ? 'แนบใบแจ้งความ' : 'แนบใบรับรองที่ชำรุด'}</h3>
                         <label className={`flex flex-col items-center gap-3 p-8 rounded-xl border-2 border-dashed cursor-pointer mb-6 ${isDark ? 'border-slate-600' : 'border-surface-200'}`}>
-                            <span className="text-3xl">📤</span>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={isDark ? 'text-slate-400' : 'text-slate-500'}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
                             <span className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{reason === 'lost' ? (policeReport ? policeReport.name : 'คลิกเพื่ออัปโหลดใบแจ้งความ') : (damagedCert ? damagedCert.name : 'คลิกเพื่ออัปโหลดใบรับรองที่ชำรุด')}</span>
                             <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) reason === 'lost' ? setPoliceReport(file) : setDamagedCert(file); }} />
                         </label>
@@ -89,7 +89,7 @@ function ReplacementContent() {
                 {step === 'confirm' && (
                     <div className={`rounded-2xl p-6 border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
                         <h3 className={`text-base font-semibold mb-4 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>ยืนยันข้อมูล</h3>
-                        <div className="bg-secondary-50 border border-secondary-500 rounded-xl p-4 mb-6"><p className="text-sm text-secondary-800">⚠️ หลังจากส่งคำขอ ทีมงานจะประเมินและส่งใบเสนอราคาให้ท่านผ่านระบบ</p></div>
+                        <div className="bg-secondary-50 border border-secondary-500 rounded-xl p-4 mb-6"><p className="text-sm text-secondary-800">หลังจากส่งคำขอ ทีมงานจะประเมินและส่งใบเสนอราคาให้ท่านผ่านระบบ</p></div>
                         <table className="w-full text-sm mb-6">
                             <tbody>
                                 <tr><td className={`py-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ใบรับรองเดิม:</td><td className={`py-2 font-medium ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>{certificate?.certificateNumber || '-'}</td></tr>

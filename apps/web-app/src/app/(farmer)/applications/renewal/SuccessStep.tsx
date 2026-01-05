@@ -25,7 +25,7 @@ export function SuccessStep({ certificate, renewalId, isDark }: SuccessStepProps
                     <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M20 6L9 17L4 12" /></svg>
                 </div>
 
-                <h1 className={`text-2xl font-bold mb-2 ${isDark ? 'text-surface-100' : 'text-primary-800'}`}>🎉 ต่อสัญญาสำเร็จ!</h1>
+                <h1 className={`text-2xl font-bold mb-2 ${isDark ? 'text-surface-100' : 'text-primary-800'}`}>ต่อสัญญาสำเร็จ!</h1>
                 <p className={`text-sm mb-5 ${isDark ? 'text-slate-400' : 'text-primary-600'}`}>ขอบคุณสำหรับการต่ออายุใบรับรอง GACP</p>
 
                 {/* Case Number */}
@@ -36,7 +36,7 @@ export function SuccessStep({ certificate, renewalId, isDark }: SuccessStepProps
 
                 {/* Summary Card */}
                 <div className={`rounded-2xl p-6 max-w-md mx-auto mb-6 text-left shadow-lg border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
-                    <h3 className={`text-sm font-semibold mb-4 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>📋 สรุปการต่อสัญญา</h3>
+                    <h3 className={`text-sm font-semibold mb-4 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>สรุปการต่อสัญญา</h3>
                     <div className="grid gap-3">
                         <div className={`p-3 rounded-lg ${isDark ? 'bg-primary-500/15' : 'bg-primary-50'}`}>
                             <div className={`text-xs mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ใบรับรองเลขที่</div>
@@ -55,8 +55,14 @@ export function SuccessStep({ certificate, renewalId, isDark }: SuccessStepProps
 
                 {/* Actions */}
                 <div className="flex flex-col gap-3 max-w-md mx-auto">
-                    <Link href="/tracking" className="py-4 px-6 rounded-xl bg-gradient-to-r from-primary-700 to-primary-600 text-white text-base font-semibold text-center flex items-center justify-center gap-2.5 shadow-xl shadow-primary-500/40">📍 ติดตามสถานะ</Link>
-                    <Link href="/dashboard" className={`py-4 px-6 rounded-xl text-center text-sm font-medium flex items-center justify-center border-2 ${isDark ? 'bg-slate-700 border-slate-600 text-surface-100' : 'bg-white border-surface-200 text-slate-700'}`}>🏠 กลับหน้าหลัก</Link>
+                    <Link href="/tracking" className="py-4 px-6 rounded-xl bg-gradient-to-r from-primary-700 to-primary-600 text-white text-base font-semibold text-center flex items-center justify-center gap-2.5 shadow-xl shadow-primary-500/40">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                        ติดตามสถานะ
+                    </Link>
+                    <Link href="/dashboard" className={`py-4 px-6 rounded-xl text-center text-sm font-medium flex items-center justify-center gap-2 border-2 ${isDark ? 'bg-slate-700 border-slate-600 text-surface-100' : 'bg-white border-surface-200 text-slate-700'}`}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                        กลับหน้าหลัก
+                    </Link>
                 </div>
             </div>
 

@@ -52,11 +52,11 @@ export function UploadStep({ certificate, uploadedDocs, uploading, isDark, onUpl
                                 <p className={`text-sm font-medium mb-1 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>
                                     {doc.name} {doc.required && <span className="text-red-500">*</span>}
                                 </p>
-                                {uploadedDocs[doc.id] && <span className="text-xs text-primary-600 flex items-center gap-1">✓ อัปโหลดแล้ว</span>}
+                                {uploadedDocs[doc.id] && <span className="text-xs text-primary-600 flex items-center gap-1">อัปโหลดแล้ว</span>}
                             </div>
                             <label className={`px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer flex items-center gap-1.5 ${uploadedDocs[doc.id] ? 'bg-primary-50 border border-primary-500 text-primary-600' : (isDark ? 'border border-slate-600 text-slate-400' : 'border border-surface-200 text-slate-600')} ${uploading === doc.id ? 'opacity-60' : ''}`}>
                                 <input type="file" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(doc.id, e.target.files[0])} disabled={uploading !== null} accept=".pdf,.jpg,.jpeg,.png" />
-                                {uploading === doc.id ? 'กำลังอัปโหลด...' : uploadedDocs[doc.id] ? '✓ อัปโหลดแล้ว' : '📤 เลือกไฟล์'}
+                                {uploading === doc.id ? 'กำลังอัปโหลด...' : uploadedDocs[doc.id] ? 'อัปโหลดแล้ว' : 'เลือกไฟล์'}
                             </label>
                         </div>
                     ))}

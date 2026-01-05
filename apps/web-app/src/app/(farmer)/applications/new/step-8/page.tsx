@@ -114,7 +114,10 @@ export default function Step8Review() {
         <div className="font-sans">
             {/* Action Bar */}
             <div className="flex justify-end gap-2 mb-3">
-                <button onClick={handlePrint} className="px-4 py-2 rounded-lg border border-primary-600 bg-white text-primary-600 text-xs font-medium hover:bg-primary-50">📥 ดาวน์โหลด/พิมพ์</button>
+                <button onClick={handlePrint} className="px-4 py-2 rounded-lg border border-primary-600 bg-white text-primary-600 text-xs font-medium hover:bg-primary-50 flex items-center gap-1.5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                    ดาวน์โหลด/พิมพ์
+                </button>
             </div>
 
             {/* Official Document */}
@@ -181,7 +184,7 @@ export default function Step8Review() {
                         </div>
                         {state.siteData?.gpsLat && state.siteData?.gpsLng && (
                             <div className="mt-2.5">
-                                <div className="text-[9px] text-slate-500 mb-1">📍 แผนที่ตำแหน่งสถานที่</div>
+                                <div className="text-[9px] text-slate-500 mb-1">แผนที่ตำแหน่งสถานที่</div>
                                 <div className="rounded-md overflow-hidden border border-surface-200">
                                     <iframe src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(state.siteData.gpsLng) - 0.01}%2C${parseFloat(state.siteData.gpsLat) - 0.006}%2C${parseFloat(state.siteData.gpsLng) + 0.01}%2C${parseFloat(state.siteData.gpsLat) + 0.006}&layer=mapnik&marker=${state.siteData.gpsLat}%2C${state.siteData.gpsLng}`} className="w-full h-[120px] border-0" loading="lazy" />
                                 </div>
@@ -203,7 +206,7 @@ export default function Step8Review() {
                             <FormField label="จำนวนต้นที่ปลูก" value={state.productionData?.quantityWithUnit} />
                             <FormField label="รอบการเก็บเกี่ยว/ปี" value={state.productionData?.harvestCycles ? `${state.productionData.harvestCycles} รอบ` : undefined} />
                             <FormField label="ผลผลิตคาดการณ์ (กก./ปี)" value={state.productionData?.estimatedYield?.toLocaleString()} />
-                            <FormField label="ใบรับรอง GAP" value={state.productionData?.hasGAPCert ? '✓ มี' : '✗ ไม่มี'} />
+                            <FormField label="ใบรับรอง GAP" value={state.productionData?.hasGAPCert ? 'มี' : 'ไม่มี'} />
                         </div>
                     </div>
                 </div>
@@ -217,22 +220,24 @@ export default function Step8Review() {
                                 <div className="grid grid-cols-4 gap-1.5 mb-2.5">
                                     {uploadedDocs.map((doc, i) => (
                                         <div key={i} onClick={() => setSelectedDoc(selectedDoc === i ? null : i)} className={`p-1.5 rounded-md text-center cursor-pointer ${selectedDoc === i ? 'border-2 border-primary-600 bg-primary-50' : 'border border-surface-200 bg-surface-100'}`}>
-                                            <div className="text-xl mb-0.5">{doc.name?.includes('รูป') || doc.name?.includes('photo') ? '🖼️' : '📄'}</div>
+                                            <div className="text-xl mb-0.5">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>
+                                            </div>
                                             <div className="text-[8px] text-slate-700 break-all leading-tight">{doc.name || `เอกสาร ${i + 1}`}</div>
-                                            <div className="text-[7px] text-primary-600 mt-0.5">✓ อัปโหลดแล้ว</div>
+                                            <div className="text-[7px] text-primary-600 mt-0.5">อัปโหลดแล้ว</div>
                                         </div>
                                     ))}
                                 </div>
                                 {selectedDoc !== null && uploadedDocs[selectedDoc] && (
                                     <div className="border border-surface-200 rounded-md p-2.5 bg-surface-100">
-                                        <div className="text-[10px] font-semibold mb-1.5">📎 พรีวิว: {uploadedDocs[selectedDoc].name}</div>
+                                        <div className="text-[10px] font-semibold mb-1.5">พรีวิว: {uploadedDocs[selectedDoc].name}</div>
                                         <div className="bg-white border border-surface-200 rounded min-h-[100px] flex items-center justify-center p-4">
-                                            {uploadedDocs[selectedDoc].url ? <img src={uploadedDocs[selectedDoc].url} alt={uploadedDocs[selectedDoc].name} className="max-w-full max-h-[200px] object-contain" /> : <div className="text-center text-slate-500 text-[11px]"><div className="text-3xl mb-2">📄</div>ไฟล์: {uploadedDocs[selectedDoc].name}</div>}
+                                            {uploadedDocs[selectedDoc].url ? <img src={uploadedDocs[selectedDoc].url} alt={uploadedDocs[selectedDoc].name} className="max-w-full max-h-[200px] object-contain" /> : <div className="text-center text-slate-500 text-[11px]"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.5" className="mx-auto mb-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>ไฟล์: {uploadedDocs[selectedDoc].name}</div>}
                                         </div>
                                     </div>
                                 )}
                             </>
-                        ) : <div className="text-center py-4 text-slate-400 text-[11px]">⚠️ ยังไม่ได้อัปโหลดเอกสาร</div>}
+                        ) : <div className="text-center py-4 text-slate-400 text-[11px]">ยังไม่ได้อัปโหลดเอกสาร</div>}
                     </div>
                 </div>
 
@@ -258,13 +263,13 @@ export default function Step8Review() {
             </div>
 
             {/* Error Message */}
-            {error && <div className="bg-red-50 border border-red-500 rounded-lg p-3 mb-3 text-red-600 text-sm flex items-center gap-2">⚠️ {error}</div>}
+            {error && <div className="bg-red-50 border border-red-500 rounded-lg p-3 mb-3 text-red-600 text-sm flex items-center gap-2">{error}</div>}
 
             {/* Navigation */}
             <div className="flex gap-3">
                 <button onClick={handleBack} disabled={submitting} className={`flex-1 py-3.5 rounded-xl font-medium border ${isDark ? 'bg-slate-700 border-slate-600 text-slate-100' : 'bg-white border-surface-200 text-slate-700'} disabled:opacity-50`}>ย้อนกลับ</button>
                 <button onClick={handleNext} disabled={submitting} className={`flex-[2] py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 ${submitting ? 'bg-slate-400' : 'bg-gradient-to-br from-primary-600 to-primary-500 shadow-lg shadow-primary-500/40'} text-white disabled:cursor-not-allowed`}>
-                    {submitting ? <><span className="animate-spin">⏳</span> กำลังบันทึกคำขอ...</> : <>✅ ยืนยันและไปดูใบเสนอราคา</>}
+                    {submitting ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> กำลังบันทึกคำขอ...</> : <>ยืนยันและไปดูใบเสนอราคา</>}
                 </button>
             </div>
 

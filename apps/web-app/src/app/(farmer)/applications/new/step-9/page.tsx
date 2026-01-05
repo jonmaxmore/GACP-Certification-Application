@@ -100,7 +100,10 @@ export default function Step9Quote() {
             </div>
 
             {/* Print Button */}
-            <button onClick={() => window.print()} className="w-full py-3 rounded-lg mb-3 border border-secondary-500 bg-secondary-50 text-secondary-700 text-sm font-medium flex items-center justify-center gap-2">🖨️ พิมพ์</button>
+            <button onClick={() => window.print()} className="w-full py-3 rounded-lg mb-3 border border-secondary-500 bg-secondary-50 text-secondary-700 text-sm font-medium flex items-center justify-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" /></svg>
+                พิมพ์
+            </button>
 
             {/* Accept Checkbox */}
             <div className={`rounded-lg p-3.5 mb-3.5 border border-primary-600 ${isDark ? 'bg-primary-500/10' : 'bg-primary-50'}`}>
@@ -114,7 +117,7 @@ export default function Step9Quote() {
             <div className="flex gap-3">
                 <button onClick={handleBack} className={`flex-1 py-3.5 rounded-lg text-sm font-medium border ${isDark ? 'border-slate-600 bg-slate-700 text-surface-100' : 'border-surface-200 bg-white text-slate-700'}`}>ย้อนกลับ</button>
                 <button onClick={handleNext} disabled={!accepted || isNavigating} className={`flex-[2] py-3.5 rounded-lg text-sm font-semibold ${accepted && !isNavigating ? 'bg-gradient-to-br from-primary-700 to-primary-500 text-white shadow-lg shadow-primary-500/40' : 'bg-surface-200 text-slate-400 cursor-not-allowed'}`}>
-                    {isNavigating ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full mr-2" />กำลังโหลด...</> : '✓ ยอมรับและดำเนินการต่อ'}
+                    {isNavigating ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full mr-2" />กำลังโหลด...</> : 'ยอมรับและดำเนินการต่อ'}
                 </button>
             </div>
 

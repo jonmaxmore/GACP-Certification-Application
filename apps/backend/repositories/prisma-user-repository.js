@@ -76,6 +76,15 @@ class UserRepository {
     }
 
     /**
+     * Find user by Community Registration No hash
+     */
+    async findByCommunityHash(communityHash) {
+        return prisma.user.findUnique({
+            where: { communityRegistrationNoHash: communityHash },
+        });
+    }
+
+    /**
      * Update user
      */
     async update(id, updateData) {

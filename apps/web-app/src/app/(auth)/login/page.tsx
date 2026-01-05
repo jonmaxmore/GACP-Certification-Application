@@ -25,6 +25,18 @@ export default function LoginPage() {
     const [capsLockOn, setCapsLockOn] = useState(false);
 
     useEffect(() => {
+        // Check if already logged in
+        const existingUser = localStorage.getItem("user");
+        if (existingUser) {
+            try {
+                const userData = JSON.parse(existingUser);
+                if (userData && userData.id) {
+                    window.location.href = "/dashboard";
+                    return;
+                }
+            } catch { }
+        }
+
         const remembered = localStorage.getItem("remember_login");
         if (remembered) {
             try {

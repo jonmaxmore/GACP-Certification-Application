@@ -103,9 +103,10 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
     }
 
-    if (isAuthRoute && token) {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
+    // NOTE: Disabled to prevent redirect loop when cookie exists but localStorage empty
+    // if (isAuthRoute && token) {
+    //     return NextResponse.redirect(new URL('/dashboard', request.url));
+    // }
 
     // ========================================
     // 🔐 Staff Route Protection

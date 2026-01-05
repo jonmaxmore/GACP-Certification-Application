@@ -37,7 +37,7 @@ export default function Step3PDPA() {
             {/* Header */}
             <div className="text-center mb-6">
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-500/30 ${isDark ? 'bg-gradient-to-br from-violet-600 to-violet-500' : 'bg-gradient-to-br from-violet-400 to-violet-300'}`}>
-                    <span className="text-2xl">🔐</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                 </div>
                 <h2 className={`text-xl font-semibold mb-1.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>ยินยอมข้อมูลส่วนบุคคล</h2>
                 <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</p>
@@ -64,7 +64,7 @@ export default function Step3PDPA() {
 
             {/* Rights Info */}
             <div className={`rounded-xl px-4 py-3.5 mb-5 flex items-start gap-3 ${isDark ? 'bg-blue-500/10' : 'bg-blue-50'}`}>
-                <span className="text-xl">ℹ️</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#93C5FD' : '#2563EB'} strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
                 <div>
                     <p className={`text-sm font-medium mb-1 ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>สิทธิของท่าน</p>
                     <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ท่านมีสิทธิขอเข้าถึง แก้ไข ลบ หรือระงับการใช้ข้อมูลส่วนบุคคลของท่านได้ตลอดเวลา</p>

@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useWizardStore, ServiceType } from '../hooks/useWizardStore';
 
 const SERVICE_TYPES = [
-    { id: 'NEW' as ServiceType, title: 'ขอรับรองใหม่', desc: 'สำหรับผู้ที่ยังไม่เคยได้รับใบรับรอง GACP', icon: '🆕', color: '#10B981', bgClass: 'bg-emerald-50 dark:bg-emerald-900/20', borderClass: 'border-emerald-500' },
-    { id: 'RENEWAL' as ServiceType, title: 'ต่ออายุใบรับรอง', desc: 'สำหรับใบรับรองที่จะหมดอายุภายใน 90 วัน', icon: '🔄', color: '#F59E0B', bgClass: 'bg-amber-50 dark:bg-amber-900/20', borderClass: 'border-amber-500' },
-    { id: 'MODIFY' as ServiceType, title: 'แก้ไขข้อมูล', desc: 'เปลี่ยนแปลงข้อมูลในใบรับรองที่มีอยู่', icon: '✏️', color: '#3B82F6', bgClass: 'bg-blue-50 dark:bg-blue-900/20', borderClass: 'border-blue-500' },
-    { id: 'REPLACEMENT' as ServiceType, title: 'ขอใบรับรองทดแทน', desc: 'กรณีใบรับรองสูญหายหรือชำรุด', icon: '📄', color: '#8B5CF6', bgClass: 'bg-violet-50 dark:bg-violet-900/20', borderClass: 'border-violet-500' },
+    { id: 'NEW' as ServiceType, title: 'ขอรับรองใหม่', desc: 'สำหรับผู้ที่ยังไม่เคยได้รับใบรับรอง GACP', color: '#10B981', bgClass: 'bg-emerald-50 dark:bg-emerald-900/20', borderClass: 'border-emerald-500' },
+    { id: 'RENEWAL' as ServiceType, title: 'ต่ออายุใบรับรอง', desc: 'สำหรับใบรับรองที่จะหมดอายุภายใน 90 วัน', color: '#F59E0B', bgClass: 'bg-amber-50 dark:bg-amber-900/20', borderClass: 'border-amber-500' },
+    { id: 'MODIFY' as ServiceType, title: 'แก้ไขข้อมูล', desc: 'เปลี่ยนแปลงข้อมูลในใบรับรองที่มีอยู่', color: '#3B82F6', bgClass: 'bg-blue-50 dark:bg-blue-900/20', borderClass: 'border-blue-500' },
+    { id: 'REPLACEMENT' as ServiceType, title: 'ขอใบรับรองทดแทน', desc: 'กรณีใบรับรองสูญหายหรือชำรุด', color: '#8B5CF6', bgClass: 'bg-violet-50 dark:bg-violet-900/20', borderClass: 'border-violet-500' },
 ];
 
 export default function Step2Service() {
@@ -38,7 +38,7 @@ export default function Step2Service() {
             {/* Header */}
             <div className="text-center mb-7">
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30 ${isDark ? 'bg-gradient-to-br from-blue-600 to-blue-500' : 'bg-gradient-to-br from-blue-400 to-blue-300'}`}>
-                    <span className="text-2xl">🔖</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
                 </div>
                 <h2 className={`text-xl font-semibold mb-1.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>เลือกประเภทบริการ</h2>
                 <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>เลือกบริการที่ต้องการดำเนินการ</p>
@@ -51,14 +51,14 @@ export default function Step2Service() {
                     return (
                         <button key={type.id} onClick={() => handleSelect(type.id)}
                             className={`flex items-center gap-4 p-4 rounded-2xl text-left transition-all ${isSelected ? `${type.bgClass} border-2 ${type.borderClass} shadow-lg` : (isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200')}`}>
-                            <div className={`w-13 h-13 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}>
-                                {type.icon}
+                            <div className={`w-13 h-13 rounded-xl flex items-center justify-center flex-shrink-0 ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={type.color} strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                             </div>
                             <div className="flex-1">
                                 <h3 className={`text-base font-semibold mb-1 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{type.title}</h3>
                                 <p className={`text-sm leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{type.desc}</p>
                             </div>
-                            {isSelected && <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0" style={{ backgroundColor: type.color }}>✓</div>}
+                            {isSelected && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: type.color }}><path d="M20 6L9 17L4 12" /></svg>}
                         </button>
                     );
                 })}

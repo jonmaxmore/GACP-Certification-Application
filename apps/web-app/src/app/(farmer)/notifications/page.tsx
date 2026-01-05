@@ -103,12 +103,12 @@ export default function NotificationsPage() {
     const filteredNotifications = filter === 'UNREAD' ? notifications.filter(n => !n.read) : notifications;
 
     const navItems = [
-        { href: "/dashboard", icon: "🏠", label: "หน้าหลัก" },
-        { href: "/applications", icon: "📄", label: "คำขอ" },
-        { href: "/certificates", icon: "🏅", label: "ใบรับรอง" },
-        { href: "/tracking", icon: "🧭", label: "ติดตาม" },
-        { href: "/payments", icon: "💳", label: "การเงิน" },
-        { href: "/profile", icon: "👤", label: "โปรไฟล์" },
+        { href: "/dashboard", label: "หน้าหลัก" },
+        { href: "/applications", label: "คำขอ" },
+        { href: "/certificates", label: "ใบรับรอง" },
+        { href: "/tracking", label: "ติดตาม" },
+        { href: "/payments", label: "การเงิน" },
+        { href: "/profile", label: "โปรไฟล์" },
     ];
 
     return (
@@ -119,14 +119,17 @@ export default function NotificationsPage() {
                 <nav className="flex-1 flex flex-col gap-1 w-full px-2">
                     {navItems.map(item => (
                         <Link key={item.href} href={item.href} className={`flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all hover:bg-slate-100 dark:hover:bg-slate-700`}>
-                            <span className="text-lg">{item.icon}</span>
                             <span className="text-[10px] font-medium text-slate-500">{item.label}</span>
                         </Link>
                     ))}
                 </nav>
                 <div className="flex flex-col gap-3">
-                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-primary-500/15' : 'bg-primary-50'}`}>{isDark ? '☀️' : '🌙'}</button>
-                    <button onClick={handleLogout} className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500">🚪</button>
+                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-primary-500/15' : 'bg-primary-50'}`}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">{isDark ? <><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /></> : <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />}</svg>
+                    </button>
+                    <button onClick={handleLogout} className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                    </button>
                 </div>
             </aside>
 
@@ -134,7 +137,6 @@ export default function NotificationsPage() {
             <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-[72px] flex justify-around items-center z-50 border-t ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
                 {navItems.slice(0, 5).map(item => (
                     <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 py-2 px-3">
-                        <span className="text-lg">{item.icon}</span>
                         <span className="text-[10px] font-medium text-slate-500">{item.label}</span>
                     </Link>
                 ))}
@@ -155,7 +157,7 @@ export default function NotificationsPage() {
                     </div>
                     {unreadCount > 0 && (
                         <button onClick={markAllAsRead} className={`px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-white border border-surface-200 text-slate-600'}`}>
-                            ✓✓ อ่านทั้งหมด
+                            อ่านทั้งหมด
                         </button>
                     )}
                 </header>
@@ -187,7 +189,7 @@ export default function NotificationsPage() {
                                 {!n.read && <div className={`absolute top-5 right-5 w-2.5 h-2.5 rounded-full ${getDotColor(n.type)}`} />}
                                 <div className="flex gap-4">
                                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-xl ${getIconBg(n.type)}`}>
-                                        {n.type === 'SUCCESS' ? '✓' : n.type === 'WARNING' ? '⚠️' : n.type === 'DANGER' ? '✕' : 'ℹ️'}
+                                        {n.type === 'SUCCESS' ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg> : n.type === 'WARNING' ? '!' : n.type === 'DANGER' ? 'X' : 'i'}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start gap-4">
@@ -207,7 +209,9 @@ export default function NotificationsPage() {
                     </div>
                 ) : (
                     <div className={`rounded-2xl p-16 text-center ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-surface-200'}`}>
-                        <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-5 text-4xl ${isDark ? 'bg-primary-500/15' : 'bg-primary-50'}`}>🔔</div>
+                        <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-5 ${isDark ? 'bg-primary-500/15' : 'bg-primary-50'}`}>
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
+                        </div>
                         <h3 className="text-lg font-medium mb-2">{filter === 'UNREAD' ? "ไม่มีการแจ้งเตือนที่ยังไม่อ่าน" : "ไม่มีการแจ้งเตือน"}</h3>
                         <p className="text-sm text-slate-500">เมื่อมีการแจ้งเตือนใหม่ จะแสดงที่นี่</p>
                     </div>

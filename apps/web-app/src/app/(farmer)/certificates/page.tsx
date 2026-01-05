@@ -47,12 +47,12 @@ export default function CertificatesPage() {
     if (!mounted) return null;
 
     const navItems = [
-        { href: "/dashboard", icon: "🏠", label: "หน้าหลัก" },
-        { href: "/applications", icon: "📄", label: "คำขอ" },
-        { href: "/certificates", icon: "🏅", label: "ใบรับรอง", active: true },
-        { href: "/tracking", icon: "🧭", label: "ติดตาม" },
-        { href: "/payments", icon: "💳", label: "การเงิน" },
-        { href: "/profile", icon: "👤", label: "โปรไฟล์" },
+        { href: "/dashboard", label: "หน้าหลัก" },
+        { href: "/applications", label: "คำขอ" },
+        { href: "/certificates", label: "ใบรับรอง", active: true },
+        { href: "/tracking", label: "ติดตาม" },
+        { href: "/payments", label: "การเงิน" },
+        { href: "/profile", label: "โปรไฟล์" },
     ];
 
     const filteredCerts = certificates.filter(c => filter === 'ALL' || c.status === filter);
@@ -66,14 +66,17 @@ export default function CertificatesPage() {
                     {navItems.map(item => (
                         <Link key={item.href} href={item.href} className={`flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all relative ${item.active ? (isDark ? 'bg-emerald-500/15 border border-emerald-500/30' : 'bg-emerald-50 border border-emerald-500/30') : 'hover:bg-slate-100 dark:hover:bg-slate-700'}`}>
                             {item.active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-emerald-500 rounded-r" />}
-                            <span className="text-lg">{item.icon}</span>
                             <span className={`text-[10px] font-medium ${item.active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`}>{item.label}</span>
                         </Link>
                     ))}
                 </nav>
                 <div className="flex flex-col gap-3">
-                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-emerald-500/15 border border-emerald-500/30' : 'bg-emerald-50 border border-emerald-500/30'}`}>{isDark ? '☀️' : '🌙'}</button>
-                    <button onClick={handleLogout} className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500">🚪</button>
+                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-emerald-500/15 border border-emerald-500/30' : 'bg-emerald-50 border border-emerald-500/30'}`}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">{isDark ? <circle cx="12" cy="12" r="5" /> : <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />}</svg>
+                    </button>
+                    <button onClick={handleLogout} className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                    </button>
                 </div>
             </aside>
 
@@ -81,7 +84,6 @@ export default function CertificatesPage() {
             <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-[72px] flex justify-around items-center z-50 border-t ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                 {navItems.slice(0, 5).map(item => (
                     <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 py-2 px-3">
-                        <span className="text-lg">{item.icon}</span>
                         <span className={`text-[10px] font-medium ${item.active ? 'text-emerald-500' : 'text-slate-500'}`}>{item.label}</span>
                     </Link>
                 ))}
@@ -116,7 +118,9 @@ export default function CertificatesPage() {
                             return (
                                 <div key={cert._id} className={`rounded-2xl overflow-hidden ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}`}>
                                     <div className={`p-6 text-white relative ${isActive ? 'bg-gradient-to-br from-emerald-600 to-emerald-400' : 'bg-gradient-to-br from-slate-500 to-slate-400'}`}>
-                                        <span className="absolute top-5 right-5 text-3xl opacity-20">🏅</span>
+                                        <span className="absolute top-5 right-5 text-3xl opacity-20">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="8" r="6" /><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" /></svg>
+                                        </span>
                                         <p className="text-xs opacity-80 mb-1">เลขที่ใบรับรอง</p>
                                         <h3 className="text-xl font-semibold">{cert.certificateNumber}</h3>
                                     </div>
@@ -128,7 +132,7 @@ export default function CertificatesPage() {
                                             <div>
                                                 <p className="text-xs text-slate-500">สถานะ</p>
                                                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400'}`}>
-                                                    {isActive ? '✓ ใช้งานได้' : 'หมดอายุ'}
+                                                    {isActive ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="inline"><polyline points="20 6 9 17 4 12" /></svg> ใช้งานได้</> : 'หมดอายุ'}
                                                 </span>
                                             </div>
                                             <div><p className="text-xs text-slate-500">วันที่ออก</p><p className="text-sm">{formatDate(cert.issuedDate)}</p></div>
@@ -139,13 +143,15 @@ export default function CertificatesPage() {
                                             </div>
                                         </div>
                                         <div className={`flex gap-2 pt-4 border-t ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
-                                            <button onClick={() => setViewCert(cert)} className={`flex-1 py-2.5 rounded-lg text-sm flex items-center justify-center gap-1.5 ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>👁️ ดู</button>
-                                            <button onClick={() => setShowQR(cert)} className={`flex-1 py-2.5 rounded-lg text-sm flex items-center justify-center gap-1.5 ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>📲 QR</button>
-                                            <button className="px-4 py-2.5 rounded-lg bg-emerald-500 text-white text-sm">📥</button>
+                                            <button onClick={() => setViewCert(cert)} className={`flex-1 py-2.5 rounded-lg text-sm flex items-center justify-center gap-1.5 ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>ดู</button>
+                                            <button onClick={() => setShowQR(cert)} className={`flex-1 py-2.5 rounded-lg text-sm flex items-center justify-center gap-1.5 ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>QR</button>
+                                            <button className="px-4 py-2.5 rounded-lg bg-emerald-500 text-white text-sm">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                                            </button>
                                         </div>
                                         {(daysLeft <= 90 || cert.status === 'EXPIRED') && (
                                             <Link href={`/applications/renewal?certId=${cert._id}`} className={`flex items-center justify-center gap-2 mt-3 py-3 rounded-xl text-white text-sm font-semibold shadow-lg ${cert.status === 'EXPIRED' ? 'bg-gradient-to-br from-amber-500 to-amber-400 shadow-amber-500/30' : 'bg-gradient-to-br from-emerald-600 to-emerald-400 shadow-emerald-500/30'}`}>
-                                                🔄 {cert.status === 'EXPIRED' ? 'ต่อสัญญาเลย' : 'ต่อสัญญาก่อนหมดอายุ'}
+                                                {cert.status === 'EXPIRED' ? 'ต่อสัญญาเลย' : 'ต่อสัญญาก่อนหมดอายุ'}
                                             </Link>
                                         )}
                                     </div>
@@ -155,7 +161,9 @@ export default function CertificatesPage() {
                     </div>
                 ) : (
                     <div className={`rounded-2xl p-16 text-center ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}`}>
-                        <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-5 text-4xl ${isDark ? 'bg-emerald-500/15' : 'bg-emerald-50'}`}>🏅</div>
+                        <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-5 ${isDark ? 'bg-emerald-500/15' : 'bg-emerald-50'}`}>
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="8" r="6" /><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" /></svg>
+                        </div>
                         <h3 className="text-lg font-medium mb-2">ยังไม่มีใบรับรอง</h3>
                         <p className="text-sm text-slate-500 mb-5">เมื่อคำขอได้รับการอนุมัติ ใบรับรองจะแสดงที่นี่</p>
                         <Link href="/applications/new" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-500 text-white font-medium shadow-lg shadow-emerald-500/30">ยื่นคำขอใหม่</Link>
@@ -169,7 +177,7 @@ export default function CertificatesPage() {
                     <div className="w-full max-w-lg max-h-[90vh] overflow-auto bg-white rounded-2xl" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-between items-center p-4 border-b border-slate-200">
                             <h3 className="text-lg font-semibold text-slate-900">ใบรับรอง GACP</h3>
-                            <button onClick={() => setViewCert(null)} className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm">✕ ปิด</button>
+                            <button onClick={() => setViewCert(null)} className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm">ปิด</button>
                         </div>
                         <div className="p-6 bg-slate-100">
                             <div className="bg-white border-2 border-emerald-500 rounded-xl p-8 text-center">
@@ -191,8 +199,14 @@ export default function CertificatesPage() {
                             </div>
                         </div>
                         <div className="flex gap-3 p-4 border-t border-slate-200">
-                            <button className="flex-1 py-3 rounded-xl border border-emerald-500 text-emerald-500 font-medium">🖨️ พิมพ์</button>
-                            <button className="flex-1 py-3 rounded-xl bg-emerald-500 text-white font-medium">📥 ดาวน์โหลด PDF</button>
+                            <button className="flex-1 py-3 rounded-xl border border-emerald-500 text-emerald-500 font-medium flex items-center justify-center gap-1.5">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" /></svg>
+                                พิมพ์
+                            </button>
+                            <button className="flex-1 py-3 rounded-xl bg-emerald-500 text-white font-medium flex items-center justify-center gap-1.5">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                                ดาวน์โหลด PDF
+                            </button>
                         </div>
                     </div>
                 </div>

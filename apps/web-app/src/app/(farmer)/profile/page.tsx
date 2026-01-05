@@ -64,9 +64,9 @@ export default function ProfilePage() {
             const updatedUser = { ...user, firstName, lastName, email, phone, companyName };
             localStorage.setItem("user", JSON.stringify(updatedUser));
             setUser(updatedUser);
-            setMessage("✅ บันทึกข้อมูลเรียบร้อยแล้ว");
+            setMessage("บันทึกข้อมูลเรียบร้อยแล้ว");
             setIsEditing(false);
-        } else { setMessage("❌ " + (result.error || "เกิดข้อผิดพลาด")); }
+        } else { setMessage((result.error || "เกิดข้อผิดพลาด")); }
         setIsSaving(false);
     };
 
@@ -118,7 +118,7 @@ export default function ProfilePage() {
             <main className="lg:ml-[72px] p-6 lg:p-8 max-w-4xl pb-24 lg:pb-8">
                 <header className="mb-7"><h1 className="text-2xl lg:text-3xl font-medium">ตั้งค่าบัญชี</h1><p className={`text-sm mt-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>จัดการข้อมูลส่วนตัวและการตั้งค่าบัญชี</p></header>
 
-                {message && <div className={`p-3.5 rounded-xl mb-5 text-sm flex items-center gap-2 ${message.includes('✅') ? (isDark ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-50 text-emerald-600') : (isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-600')}`}>{Icons.check(message.includes('✅') ? accentColor : "#EF4444")} {message}</div>}
+                {message && <div className={`p-3.5 rounded-xl mb-5 text-sm flex items-center gap-2 ${message.includes('เรียบร้อย') ? (isDark ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-50 text-emerald-600') : (isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-600')}`}>{Icons.check(message.includes('เรียบร้อย') ? accentColor : "#EF4444")} {message}</div>}
 
                 {/* Personal Info Card */}
                 <div className={`rounded-2xl p-6 mb-5 border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
@@ -134,7 +134,7 @@ export default function ProfilePage() {
                         {(user.companyName || user.communityName) && <div className="md:col-span-2"><label className={`text-sm block mb-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>ชื่อองค์กร/บริษัท</label><input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!isEditing} className={inputClass} /></div>}
                     </div>
                     <div className="mt-5 flex justify-between items-center">
-                        {hasChanges && <span className="text-xs text-amber-500">⚠️ มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก</span>}
+                        {hasChanges && <span className="text-xs text-amber-500">มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก</span>}
                         {!hasChanges && <div />}
                         <div className="flex gap-3">
                             {isEditing ? (<>

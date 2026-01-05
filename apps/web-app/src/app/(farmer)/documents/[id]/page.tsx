@@ -66,8 +66,14 @@ export default function DocumentViewerPage() {
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
                             </button>
                         </div>
-                        <button onClick={() => window.print()} className={`px-4 py-2 rounded-lg text-sm flex items-center gap-1.5 border ${isDark ? 'border-slate-600' : 'border-surface-200'}`}>🖨️ พิมพ์</button>
-                        <button onClick={handleDownload} className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 bg-primary-600 text-white">📥 ดาวน์โหลด</button>
+                        <button onClick={() => window.print()} className={`px-4 py-2 rounded-lg text-sm flex items-center gap-1.5 border ${isDark ? 'border-slate-600' : 'border-surface-200'}`}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" /></svg>
+                            พิมพ์
+                        </button>
+                        <button onClick={handleDownload} className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 bg-primary-600 text-white">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                            ดาวน์โหลด
+                        </button>
                     </div>
                 )}
             </header>
@@ -81,7 +87,7 @@ export default function DocumentViewerPage() {
                     </div>
                 ) : error ? (
                     <div className={`rounded-2xl p-16 text-center border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
-                        <p className="text-red-500 font-medium">⚠️ {error}</p>
+                        <p className="text-red-500 font-medium">{error}</p>
                         <Link href="/applications" className="inline-block mt-4 px-5 py-2.5 rounded-lg bg-primary-600 text-white">กลับ</Link>
                     </div>
                 ) : document ? (
@@ -99,7 +105,10 @@ export default function DocumentViewerPage() {
                                 </div>
                                 <h3 className="text-lg font-medium mb-2">{document.name}</h3>
                                 <p className={`text-sm mb-5 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>ไม่สามารถแสดงตัวอย่างได้</p>
-                                <button onClick={handleDownload} className="px-6 py-3 rounded-xl bg-primary-600 text-white font-medium inline-flex items-center gap-2">📥 ดาวน์โหลดเพื่อดู</button>
+                                <button onClick={handleDownload} className="px-6 py-3 rounded-xl bg-primary-600 text-white font-medium inline-flex items-center gap-2">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                                    ดาวน์โหลดเพื่อดู
+                                </button>
                             </div>
                         )}
                     </div>

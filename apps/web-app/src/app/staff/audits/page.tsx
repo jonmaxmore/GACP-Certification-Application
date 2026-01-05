@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "@/services/api-client";
 import StaffLayout from "../components/StaffLayout";
+import { IconCalendar, IconSearch } from "@/components/ui/icons";
 
 interface Audit {
     id: string;
@@ -17,11 +18,11 @@ interface Audit {
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-    WAITING_SCHEDULE: { label: "รอจัดคิว", color: "bg-secondary-100 text-secondary-700" },
+    WAITING_SCHEDULE: { label: "รอจัดคิว", color: "bg-amber-100 text-amber-700" },
     SCHEDULED: { label: "นัดหมายแล้ว", color: "bg-blue-100 text-blue-700" },
     IN_PROGRESS: { label: "กำลังตรวจ", color: "bg-violet-100 text-violet-700" },
     WAITING_RESULT: { label: "รอบันทึกผล", color: "bg-slate-100 text-slate-700" },
-    PASSED: { label: "ผ่าน", color: "bg-primary-100 text-primary-700" },
+    PASSED: { label: "ผ่าน", color: "bg-emerald-100 text-emerald-700" },
     FAILED: { label: "ไม่ผ่าน", color: "bg-red-100 text-red-700" },
 };
 
@@ -56,16 +57,16 @@ export default function StaffAuditsPage() {
 
     if (isLoading) {
         return (
-            <StaffLayout title="🔍 การตรวจประเมิน" subtitle="กำลังโหลด...">
+            <StaffLayout title="การตรวจประเมิน" subtitle="กำลังโหลด...">
                 <div className="flex justify-center py-20">
-                    <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+                    <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
                 </div>
             </StaffLayout>
         );
     }
 
     return (
-        <StaffLayout title="🔍 การตรวจประเมินทั้งหมด" subtitle="Field Audits Management">
+        <StaffLayout title="การตรวจประเมินทั้งหมด" subtitle="Field Audits Management">
             {/* Header Actions */}
             <div className="flex justify-between items-center flex-wrap gap-4 mb-6">
                 <div className="flex gap-2 flex-wrap">
@@ -79,25 +80,25 @@ export default function StaffAuditsPage() {
                         <button
                             key={f.key}
                             onClick={() => setFilter(f.key)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filter === f.key
-                                    ? "bg-primary-600 text-white"
-                                    : `${isDark ? 'bg-slate-800' : 'bg-white border border-surface-200'} text-slate-600 hover:bg-slate-100`
+                            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${filter === f.key
+                                ? "bg-emerald-600 text-white"
+                                : `${isDark ? 'bg-slate-800' : 'bg-white border border-slate-200'} text-slate-600 hover:bg-slate-100`
                                 }`}
                         >
                             {f.label}
                         </button>
                     ))}
                 </div>
-                <Link href="/staff/calendar" className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700 flex items-center gap-2">
-                    📅 ปฏิทินนัดหมาย
+                <Link href="/staff/calendar" className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm hover:bg-emerald-700">
+                    <IconCalendar size={16} /> ปฏิทินนัดหมาย
                 </Link>
             </div>
 
             {/* Table */}
-            <div className={`rounded-2xl shadow-card overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
+            <div className={`rounded-xl overflow-hidden border ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className={isDark ? 'bg-slate-700' : 'bg-surface-100'}>
+                        <thead className={isDark ? 'bg-slate-700' : 'bg-slate-50'}>
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">หมายเลข</th>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">ผู้ยื่น</th>
@@ -107,24 +108,24 @@ export default function StaffAuditsPage() {
                                 <th className="px-6 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-surface-200'}`}>
+                        <tbody className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-slate-200'}`}>
                             {filteredAudits.map(audit => {
                                 const status = STATUS_LABELS[audit.status] || { label: audit.status, color: "bg-slate-100" };
                                 return (
-                                    <tr key={audit.id} className={`${isDark ? 'hover:bg-slate-700/50' : 'hover:bg-surface-50'} transition-colors`}>
+                                    <tr key={audit.id} className={`${isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'} transition-colors`}>
                                         <td className="px-6 py-4 font-mono text-sm text-slate-500">{audit.id}</td>
                                         <td className="px-6 py-4 font-medium">{audit.applicantName}</td>
                                         <td className="px-6 py-4 text-slate-500">{audit.plantType}</td>
                                         <td className="px-6 py-4">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}>{status.label}</span>
+                                            <span className={`px-3 py-1 rounded-lg text-xs font-medium ${status.color}`}>{status.label}</span>
                                         </td>
                                         <td className="px-6 py-4 text-slate-500">
                                             {audit.scheduledDate || "-"}
                                             {audit.inspector && <span className="block text-xs">{audit.inspector}</span>}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <Link href={`/staff/audits/${audit.id}`} className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700">
-                                                ดูรายละเอียด →
+                                            <Link href={`/staff/audits/${audit.id}`} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700">
+                                                ดูรายละเอียด
                                             </Link>
                                         </td>
                                     </tr>
@@ -135,7 +136,7 @@ export default function StaffAuditsPage() {
                 </div>
                 {filteredAudits.length === 0 && (
                     <div className="p-12 text-center text-slate-400">
-                        <p className="text-5xl mb-4">🔍</p>
+                        <IconSearch size={32} className="mx-auto mb-3" />
                         <p>ไม่พบรายการตรวจประเมิน</p>
                     </div>
                 )}

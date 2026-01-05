@@ -9,3 +9,8 @@ export { ThemeToggle } from './theme-toggle';
 export { GACPButton } from './gacp-button';
 export { GACPInput } from './gacp-input';
 export { GACPCard } from './gacp-card';
+
+// New Login-Style Components (emerald gradient design)
+export { PageContainer, FormCard, PageHeader } from './page-components';
+export { Button, LinkButton } from './button';
+export { Input, Select } from './form-input';

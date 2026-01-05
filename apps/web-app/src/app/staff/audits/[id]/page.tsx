@@ -4,6 +4,37 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "@/services/api-client";
+import { IconDocument, IconCheckCircle } from "@/components/ui/icons";
+
+// Additional icons for this page
+const IconVideo = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polygon points="23 7 16 12 23 17 23 7" />
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+    </svg>
+);
+
+const IconMapPin = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+        <circle cx="12" cy="10" r="3" />
+    </svg>
+);
+
+const IconX = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+);
+
+const IconWarning = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+);
 
 interface ChecklistItem {
     itemCode: string;
@@ -132,7 +163,7 @@ export default function AuditDetailPage() {
     };
 
     if (isLoading || !audit) {
-        return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin text-4xl">⏳</div></div>;
+        return <div className="min-h-screen flex items-center justify-center"><div className="w-10 h-10 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div></div>;
     }
 
     const completedChecks = audit.responses.filter((r: ChecklistItem) => r.response !== "PENDING").length;
@@ -159,7 +190,7 @@ export default function AuditDetailPage() {
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
                             >
-                                <span className="text-xl">📹</span>
+                                <IconVideo size={20} />
                                 <span>เข้าห้อง VDO Call</span>
                             </a>
                         )}
@@ -173,7 +204,7 @@ export default function AuditDetailPage() {
                     <div className="lg:col-span-1 space-y-6">
                         {/* Appointment Info */}
                         <div className="bg-white rounded-2xl shadow-lg p-6">
-                            <h3 className="font-semibold mb-4">📋 ข้อมูลนัดหมาย</h3>
+                            <h3 className="flex items-center gap-2 font-semibold mb-4"><IconDocument size={18} className="text-emerald-600" /> ข้อมูลนัดหมาย</h3>
                             <div className="space-y-3">
                                 <div className="flex justify-between">
                                     <span className="text-slate-500">พืช:</span>
@@ -191,7 +222,7 @@ export default function AuditDetailPage() {
                                     <span className="text-slate-500">รูปแบบ:</span>
                                     <span className={`px-2 py-1 rounded-full text-xs ${audit.auditMode === "ONLINE" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"
                                         }`}>
-                                        {audit.auditMode === "ONLINE" ? "📹 VDO Call" : "📍 ลงพื้นที่"}
+                                        {audit.auditMode === "ONLINE" ? <><IconVideo size={12} /> VDO Call</> : <><IconMapPin size={12} /> ลงพื้นที่</>}
                                     </span>
                                 </div>
                             </div>
@@ -208,7 +239,7 @@ export default function AuditDetailPage() {
 
                         {/* Template Info */}
                         <div className="bg-white rounded-2xl shadow-lg p-6">
-                            <h3 className="font-semibold mb-4">📄 ข้อมูล Template</h3>
+                            <h3 className="flex items-center gap-2 font-semibold mb-4"><IconDocument size={18} className="text-emerald-600" /> ข้อมูล Template</h3>
                             <div className="space-y-2">
                                 {template ? (
                                     <>
@@ -220,8 +251,8 @@ export default function AuditDetailPage() {
                                                     key={cat.categoryCode}
                                                     onClick={() => setActiveCategory(cat.categoryCode)}
                                                     className={`px-2 py-1 text-xs rounded ${activeCategory === cat.categoryCode
-                                                            ? "bg-emerald-600 text-white"
-                                                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                                        ? "bg-emerald-600 text-white"
+                                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                                         }`}
                                                 >
                                                     {cat.nameTh}
@@ -240,7 +271,7 @@ export default function AuditDetailPage() {
                     <div className="lg:col-span-2">
                         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                             <div className="px-6 py-4 border-b flex justify-between items-center">
-                                <h3 className="font-semibold">✅ Checklist การตรวจประเมิน</h3>
+                                <h3 className="flex items-center gap-2 font-semibold"><IconCheckCircle size={18} className="text-emerald-600" /> Checklist การตรวจประเมิน</h3>
                                 <span className="text-sm text-slate-500">
                                     {completedChecks}/{audit.responses.length} รายการ | ผ่าน {passedChecks} รายการ
                                 </span>
@@ -262,7 +293,7 @@ export default function AuditDetailPage() {
                                                             : "bg-green-100 text-green-700 hover:bg-green-200"
                                                             }`}
                                                     >
-                                                        ✅ ผ่าน
+                                                        ผ่าน
                                                     </button>
                                                     <button
                                                         onClick={() => updateResponse(item.itemCode, "FAIL")}
@@ -271,7 +302,7 @@ export default function AuditDetailPage() {
                                                             : "bg-red-100 text-red-700 hover:bg-red-200"
                                                             }`}
                                                     >
-                                                        ❌ ไม่ผ่าน
+                                                        ไม่ผ่าน
                                                     </button>
                                                     <button
                                                         onClick={() => updateResponse(item.itemCode, "NA")}
@@ -305,19 +336,19 @@ export default function AuditDetailPage() {
                                 onClick={() => { setResult("PASS"); setShowResultModal(true); }}
                                 className="flex-1 py-4 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700"
                             >
-                                ✅ ผ่าน - ออกใบรับรอง
+                                ผ่าน - ออกใบรับรอง
                             </button>
                             <button
                                 onClick={() => { setResult("MINOR"); setShowResultModal(true); }}
                                 className="flex-1 py-4 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600"
                             >
-                                ⚠️ แก้ไขเล็กน้อย (Minor)
+                                แก้ไขเล็กน้อย (Minor)
                             </button>
                             <button
                                 onClick={() => { setResult("MAJOR"); setShowResultModal(true); }}
                                 className="flex-1 py-4 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700"
                             >
-                                ❌ ไม่ผ่าน/นัดใหม่ (Major)
+                                ไม่ผ่าน/นัดใหม่ (Major)
                             </button>
                         </div>
                     </div>
@@ -330,11 +361,11 @@ export default function AuditDetailPage() {
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
                         <div className="px-6 py-4 border-b flex justify-between items-center">
                             <h3 className="text-lg font-semibold">
-                                {result === "PASS" && "✅ ยืนยันอนุมัติ"}
-                                {result === "MINOR" && "⚠️ ขอข้อมูลเพิ่มเติม"}
-                                {result === "MAJOR" && "❌ ไม่ผ่าน - ออก CARs"}
+                                {result === "PASS" && "ยืนยันอนุมัติ"}
+                                {result === "MINOR" && "ขอข้อมูลเพิ่มเติม"}
+                                {result === "MAJOR" && "ไม่ผ่าน - ออก CARs"}
                             </h3>
-                            <button onClick={() => setShowResultModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+                            <button onClick={() => setShowResultModal(false)} className="text-slate-400 hover:text-slate-600"><IconX size={20} /></button>
                         </div>
                         <div className="p-6 space-y-4">
                             <textarea

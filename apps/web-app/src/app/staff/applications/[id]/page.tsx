@@ -1,8 +1,44 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { IconDocument, IconCheckCircle, IconSearch } from "@/components/ui/icons";
+
+// Additional icons
+const IconClock = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+    </svg>
+);
+
+const IconX = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+);
+
+const IconEye = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+        <circle cx="12" cy="12" r="3" />
+    </svg>
+);
+
+const IconWarning = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+);
+
+const IconReturn = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polyline points="9 10 4 15 9 20" />
+        <path d="M20 4v7a4 4 0 0 1-4 4H4" />
+    </svg>
+);
 
 interface Application {
     id: string;
@@ -92,8 +128,8 @@ export default function JobSheetPage() {
         const now = new Date();
         const diffDays = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
         if (diffDays <= 3) return `${diffDays} วัน`;
-        if (diffDays <= 5) return `${diffDays} วัน ⚠️`;
-        return `${diffDays} วัน 🔴 เกิน SLA`;
+        if (diffDays <= 5) return `${diffDays} วัน`;
+        return `${diffDays} วัน - เกิน SLA`;
     };
 
     const handleAction = (type: "approve" | "reject") => {
@@ -137,7 +173,7 @@ export default function JobSheetPage() {
     };
 
     if (!app) {
-        return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin text-4xl">⏳</div></div>;
+        return <div className="min-h-screen flex items-center justify-center"><div className="w-10 h-10 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div></div>;
     }
 
     const statusInfo = STATUS_LABELS[app.status] || { label: app.status, color: "bg-slate-100" };
@@ -197,9 +233,9 @@ export default function JobSheetPage() {
                 {/* Tabs */}
                 <div className="flex gap-2 mb-6">
                     {[
-                        { id: "documents", label: "📄 เอกสาร", count: app.documents.length },
-                        { id: "history", label: "📋 ประวัติ", count: app.reviewHistory.length },
-                        { id: "audit", label: "🔍 ผลตรวจประเมิน", disabled: app.phase < 2 },
+                        { id: "documents", label: "เอกสาร", count: app.documents.length, Icon: IconDocument },
+                        { id: "history", label: "ประวัติ", count: app.reviewHistory.length, Icon: IconDocument },
+                        { id: "audit", label: "ผลตรวจประเมิน", disabled: app.phase < 2, Icon: IconSearch },
                     ].map((tab) => (
                         <button
                             key={tab.id}
@@ -222,7 +258,7 @@ export default function JobSheetPage() {
                             "bg-green-100 text-green-700"
                         }`}>
                         ส่งครั้งที่: {app.submissionCount}/3
-                        {app.submissionCount >= 3 && " ⚠️ ครบโควตาฟรี"}
+                        {app.submissionCount >= 3 && " (ครบโควตาฟรี)"}
                     </div>
                 </div>
 
@@ -239,7 +275,7 @@ export default function JobSheetPage() {
                                         doc.status === "issue" ? "bg-red-100" :
                                             "bg-amber-100"
                                         }`}>
-                                        {doc.status === "verified" ? "✅" : doc.status === "issue" ? "❌" : "⏳"}
+                                        <doc.status === "verified" ? <IconCheckCircle size={16} className="text-green-600" /> : doc.status === "issue" ? <IconX size={16} className="text-red-600" /> : <IconClock size={16} className="text-amber-600" />
                                     </div>
                                     <div className="flex-1">
                                         <p className="font-medium">{doc.name}</p>
@@ -250,8 +286,8 @@ export default function JobSheetPage() {
                                             {doc.status === "verified" ? "ถูกต้อง" : doc.status === "issue" ? "ต้องแก้ไข" : "รอตรวจสอบ"}
                                         </p>
                                     </div>
-                                    <button className="px-4 py-2 bg-slate-100 rounded-lg hover:bg-slate-200 text-sm">
-                                        👁️ Preview
+                                    <button className="flex items-center gap-1.5 px-4 py-2 bg-slate-100 rounded-lg hover:bg-slate-200 text-sm">
+                                        <IconEye size={14} /> Preview
                                     </button>
                                 </div>
                             ))}
@@ -295,13 +331,13 @@ export default function JobSheetPage() {
                                 onClick={() => handleAction("reject")}
                                 className="px-8 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 flex items-center gap-2"
                             >
-                                ↩️ ส่งคืนแก้ไข
+                                <IconReturn size={16} /> ส่งคืนแก้ไข
                             </button>
                             <button
                                 onClick={() => handleAction("approve")}
                                 className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 flex items-center gap-2"
                             >
-                                ✅ อนุมัติเอกสาร
+                                <IconCheckCircle size={16} /> อนุมัติเอกสาร
                             </button>
                         </div>
                     </div>
@@ -314,13 +350,13 @@ export default function JobSheetPage() {
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
                         <div className="px-6 py-4 border-b">
                             <h3 className="text-lg font-semibold">
-                                {actionType === "approve" ? "✅ ยืนยันอนุมัติเอกสาร" : "↩️ ส่งคืนแก้ไข"}
+                                {actionType === "approve" ? <><IconCheckCircle size={16} /> ยืนยันอนุมัติเอกสาร</> : <><IconReturn size={16} /> ส่งคืนแก้ไข</>}
                             </h3>
                         </div>
                         <div className="p-6 space-y-4">
                             {actionType === "reject" && (
-                                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm">
-                                    ⚠️ ผู้สมัครแก้ไขฟรี {3 - app.submissionCount} ครั้ง หลังจากนั้นต้องชำระค่าธรรมเนียมใหม่
+                                <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm">
+                                    <IconWarning size={16} /> ผู้สมัครแก้ไขฟรี {3 - app.submissionCount} ครั้ง หลังจากนั้นต้องชำระค่าธรรมเนียมใหม่
                                 </div>
                             )}
                             <textarea

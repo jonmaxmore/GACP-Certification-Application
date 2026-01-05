@@ -36,12 +36,12 @@ const getTheme = (isDark: boolean) => isDark ? {
 
 // Plant options (6 สมุนไพร)
 const PLANTS = [
-    { id: 'cannabis', label: 'กัญชา', emoji: '🌿' },
-    { id: 'kratom', label: 'กระท่อม', emoji: '🍃' },
-    { id: 'turmeric', label: 'ขมิ้นชัน', emoji: '🟡' },
-    { id: 'ginger', label: 'ขิง', emoji: '🫚' },
-    { id: 'black_galingale', label: 'กระชายดำ', emoji: '🟤' },
-    { id: 'plai', label: 'ไพล', emoji: '🌱' }
+    { id: 'cannabis', label: 'กัญชา', emoji: '' },
+    { id: 'kratom', label: 'กระท่อม', emoji: '' },
+    { id: 'turmeric', label: 'ขมิ้นชัน', emoji: '' },
+    { id: 'ginger', label: 'ขิง', emoji: '' },
+    { id: 'black_galingale', label: 'กระชายดำ', emoji: '' },
+    { id: 'plai', label: 'ไพล', emoji: '' }
 ];
 
 interface ApplicationSelectorProps {
@@ -235,7 +235,7 @@ export default function ApplicationSelector({
                     border: `1px solid ${t.accent}30`
                 }}>
                     <div style={{ fontSize: '14px', fontWeight: 600, color: t.text, marginBottom: '12px' }}>
-                        💰 สรุปค่าธรรมเนียม
+                        สรุปค่าธรรมเนียม
                     </div>
 
                     {fee.items.map((item, idx) => (
@@ -269,7 +269,7 @@ export default function ApplicationSelector({
                     background: '#FEF3C7', border: '1px solid #F59E0B'
                 }}>
                     <div style={{ fontSize: '14px', color: '#92400E' }}>
-                        ⚠️ {fee.message || 'ทีมงานจะประเมินและส่งใบเสนอราคาให้ภายหลัง'}
+                        {fee.message || 'ทีมงานจะประเมินและส่งใบเสนอราคาให้ภายหลัง'}
                     </div>
                 </div>
             )}

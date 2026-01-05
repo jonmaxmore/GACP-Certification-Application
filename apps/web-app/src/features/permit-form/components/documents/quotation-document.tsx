@@ -66,7 +66,7 @@ export default function QuotationDocument({
                         border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer"
                     }}
                 >
-                    🖨️ พิมพ์เอกสาร / ดาวน์โหลด PDF
+                    พิมพ์เอกสาร / ดาวน์โหลด PDF
                 </button>
             </div>
 

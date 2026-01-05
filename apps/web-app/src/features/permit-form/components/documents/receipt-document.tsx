@@ -68,7 +68,7 @@ export default function ReceiptDocument({
                         border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer"
                     }}
                 >
-                    🖨️ พิมพ์เอกสาร / ดาวน์โหลด PDF
+                    พิมพ์เอกสาร / ดาวน์โหลด PDF
                 </button>
             </div>
 
@@ -131,7 +131,7 @@ export default function ReceiptDocument({
                     alignItems: "center",
                     gap: "16px"
                 }}>
-                    <div style={{ fontSize: "40px" }}>✅</div>
+                    <div style={{ width: "40px", height: "40px", display: "flex", alignItems: "center", justifyContent: "center" }}><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#34C759" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg></div>
                     <div>
                         <div style={{ fontSize: "18pt", fontWeight: 700, color: colors.success }}>ชำระเงินเรียบร้อยแล้ว</div>
                         <div style={{ fontSize: "12pt", color: "#666" }}>Payment Successful</div>

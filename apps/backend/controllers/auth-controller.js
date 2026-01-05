@@ -186,7 +186,7 @@ class AuthController {
                 'FAILURE',
                 req.ip || req.connection?.remoteAddress,
                 req.headers['user-agent'],
-                { reason: error.message, accountType }
+                { reason: error.message, accountType: req.body.accountType }
             );
 
             res.status(401).json({

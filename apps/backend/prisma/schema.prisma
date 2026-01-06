@@ -92,7 +92,6 @@ model User {
   invoices      Invoice[]
   notifications Notification[]
   farms         Farm[]
-  auditLogs     AuditLog[]
 
   @@index([email])
   @@index([role, status])
@@ -508,10 +507,9 @@ model AuditLog {
   action   String
   severity String @default("INFO") // INFO, WARNING, ERROR, CRITICAL
 
-  // Actor
-  actorId    String
-  actor      User   @relation(fields: [actorId], references: [id])
-  actorType  String @default("USER") // USER, SERVICE, SYSTEM
+  // Actor (no FK - can be User or DTAMStaff or SYSTEM)
+  actorId    String        // UUID of actor (User.id or DTAMStaff.id)
+  actorType  String @default("USER") // USER, DTAM_STAFF, SERVICE, SYSTEM
   actorEmail String?
   actorRole  String
 

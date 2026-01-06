@@ -49,7 +49,7 @@ export default function PaymentsPage() {
     const loadPayments = async () => {
         setLoading(true);
         try {
-            const result = await api.get<{ data: PaymentRecord[] }>("/v2/payments/my");
+            const result = await api.get<{ data: PaymentRecord[] }>("/api/v2/payments/my");
             if (result.success && result.data?.data) setPayments(result.data.data);
             else setPayments([]);
         } catch { setPayments([]); }

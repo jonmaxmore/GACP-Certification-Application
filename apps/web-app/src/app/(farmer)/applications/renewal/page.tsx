@@ -43,7 +43,7 @@ function RenewalContent() {
     const loadCertificate = async (id: string) => {
         setLoading(true);
         try {
-            const result = await api.get<{ data: Certificate }>(`/v2/certificates/${id}`);
+            const result = await api.get<{ data: Certificate }>(`/api/v2/certificates/${id}`);
             if (result.success && result.data?.data) setCertificate(result.data.data);
         } catch { console.error('Failed to load certificate'); }
         finally { setLoading(false); }
@@ -65,7 +65,7 @@ function RenewalContent() {
         let newRenewalId = `RNW-${Date.now().toString(36).toUpperCase()}`;
         if (certificate) {
             try {
-                const result = await api.post<{ data: { applicationId: string } }>('/v2/applications/renewal', { previousApplicationId: certificate.applicationId, certificateId: certificate._id, documentIds: Object.keys(uploadedDocs).filter(k => uploadedDocs[k]) });
+                const result = await api.post<{ data: { applicationId: string } }>('/api/v2/applications/renewal', { previousApplicationId: certificate.applicationId, certificateId: certificate._id, documentIds: Object.keys(uploadedDocs).filter(k => uploadedDocs[k]) });
                 if (result.success && result.data?.data?.applicationId) newRenewalId = result.data.data.applicationId;
             } catch { console.warn('[Renewal] API failed, using demo ID'); }
         }
@@ -74,7 +74,7 @@ function RenewalContent() {
     };
 
     const handlePaymentConfirm = async () => {
-        try { await api.post('/v2/payments/confirm', { applicationId: renewalId, phase: 'renewal', amount: RENEWAL_FEE }); }
+        try { await api.post('/api/v2/payments/confirm', { applicationId: renewalId, phase: 'renewal', amount: RENEWAL_FEE }); }
         catch { console.warn('Payment confirmation failed'); }
         localStorage.setItem('last_renewal_id', renewalId || '');
         localStorage.setItem('last_renewal_payment', JSON.stringify({ amount: RENEWAL_FEE, certificateNumber: certificate?.certificateNumber, siteName: certificate?.siteName, paidAt: new Date().toISOString() }));

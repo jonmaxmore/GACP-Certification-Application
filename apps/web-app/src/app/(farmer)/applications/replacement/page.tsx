@@ -26,7 +26,7 @@ function ReplacementContent() {
     const handleSubmit = async () => {
         setSubmitting(true);
         try {
-            const result = await api.post<any>('/v2/applications', { serviceType: 'replacement', originalCertificateId: certId, data: { replacementReason: reason, applicantInfo: certificate?.applicantInfo } });
+            const result = await api.post<any>('/api/v2/applications', { serviceType: 'replacement', originalCertificateId: certId, data: { replacementReason: reason, applicantInfo: certificate?.applicantInfo } });
             if (result.success && result.data?.data) setStep('submitted');
         } catch { } finally { setSubmitting(false); }
     };

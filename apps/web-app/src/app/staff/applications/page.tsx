@@ -45,7 +45,7 @@ export default function StaffApplicationsPage() {
     const fetchApplications = async () => {
         setIsLoading(true);
         try {
-            const result = await api.get<{ data: { applications: Application[] } }>('/v2/applications');
+            const result = await api.get<{ data: { applications: Application[] } }>('/api/v2/applications');
             if (result.success && result.data?.data?.applications) {
                 setApplications(result.data.data.applications);
             } else {

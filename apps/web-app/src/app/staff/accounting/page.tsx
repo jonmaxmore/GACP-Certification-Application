@@ -69,8 +69,8 @@ export default function AccountingDashboard() {
         setIsLoading(true);
         try {
             const [summaryRes, invoicesRes] = await Promise.all([
-                api.get<{ data: PaymentSummary }>('/v2/invoices/summary'),
-                api.get<{ data: { invoices: InvoiceItem[] } }>('/v2/invoices')
+                api.get<{ data: PaymentSummary }>('/api/v2/invoices/summary'),
+                api.get<{ data: { invoices: InvoiceItem[] } }>('/api/v2/invoices')
             ]);
             if (summaryRes.success && summaryRes.data?.data) setSummary(summaryRes.data.data);
             else setSummary({ totalRevenue: 0, pendingAmount: 0, overdueAmount: 0, monthlyRevenue: 0, invoiceCount: { total: 0, pending: 0, paid: 0, overdue: 0 } });

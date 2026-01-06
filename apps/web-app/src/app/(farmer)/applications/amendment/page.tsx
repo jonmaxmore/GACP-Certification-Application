@@ -45,7 +45,7 @@ function AmendmentContent() {
         setSubmitting(true);
         try {
             const changes = modifiedFields.reduce((acc, f) => { acc[f.key] = { from: f.originalValue, to: f.value }; return acc; }, {} as Record<string, { from: string; to: string }>);
-            const result = await api.post<any>('/v2/applications', { serviceType: 'amendment', originalCertificateId: certId, data: { changes, changeDescription, applicantInfo: certificate?.applicantInfo } });
+            const result = await api.post<any>('/api/v2/applications', { serviceType: 'amendment', originalCertificateId: certId, data: { changes, changeDescription, applicantInfo: certificate?.applicantInfo } });
             if (result.success) setStep('submitted');
         } catch { } finally { setSubmitting(false); }
     };

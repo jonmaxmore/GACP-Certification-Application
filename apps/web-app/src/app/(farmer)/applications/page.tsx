@@ -50,7 +50,7 @@ export default function ApplicationsPage() {
 
     const loadApplications = async () => {
         setLoading(true);
-        const result = await api.get<{ data: Application[] }>("/v2/applications/my");
+        const result = await api.get<{ data: Application[] }>("/api/v2/applications/my");
         if (result.success && result.data?.data) setApplications(result.data.data);
         setLoading(false);
     };
@@ -82,8 +82,8 @@ export default function ApplicationsPage() {
                     {NAV_ITEMS.map(item => (
                         <Link key={item.href} href={item.href}
                             className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all relative ${item.active
-                                    ? (isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600')
-                                    : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100')
+                                ? (isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600')
+                                : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100')
                                 }`}>
                             {item.active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-emerald-500 rounded-r" />}
                             <item.Icon size={22} className={item.active ? '' : ''} />
@@ -105,8 +105,8 @@ export default function ApplicationsPage() {
             <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-20 flex justify-around items-center border-t safe-area-pb ${isDark ? 'bg-slate-900/95 border-slate-800 backdrop-blur-lg' : 'bg-white/95 border-slate-200 backdrop-blur-lg'}`}>
                 {NAV_ITEMS.map(item => (
                     <Link key={item.href} href={item.href} className={`flex flex-col items-center gap-1 py-2 px-4 min-w-[64px] ${item.active
-                            ? 'text-emerald-500'
-                            : (isDark ? 'text-slate-500' : 'text-slate-400')
+                        ? 'text-emerald-500'
+                        : (isDark ? 'text-slate-500' : 'text-slate-400')
                         }`}>
                         <item.Icon size={24} />
                         <span className="text-[10px] font-medium">{item.label}</span>

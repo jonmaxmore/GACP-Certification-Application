@@ -76,7 +76,7 @@ export default function DashboardPage() {
 
     const loadApplications = async () => {
         setLoadError(null);
-        const result = await api.get<{ data: Application[] }>("/v2/applications/my");
+        const result = await api.get<{ data: Application[] }>("/api/v2/applications/my");
         if (result.success && result.data?.data) setApplications(result.data.data);
         else setLoadError("ไม่สามารถโหลดข้อมูลคำขอได้");
     };

@@ -17,6 +17,7 @@ const STEPS = [
     { id: 9, path: 'step-9', label: 'ใบเสนอราคา' },
     { id: 10, path: 'step-10', label: 'ใบวางบิล' },
     { id: 11, path: 'step-11', label: 'ชำระเงิน' },
+    { id: 12, path: 'step-12', label: 'เกณฑ์เสริม', optional: true },
 ];
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {

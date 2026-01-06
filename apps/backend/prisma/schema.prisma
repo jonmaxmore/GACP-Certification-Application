@@ -156,6 +156,10 @@ model Application {
   // Workflow History (JSON array)
   workflowHistory Json?
 
+  // เกณฑ์เสริม (Supplementary Criteria - Optional)
+  supplementaryCriteria Json?    // JSON object with optional fields
+  supplementarySkipped  Boolean @default(false) // User chose to skip
+
   // Document Integrity
   submissionHash        String?
   officialReceiptNumber String?

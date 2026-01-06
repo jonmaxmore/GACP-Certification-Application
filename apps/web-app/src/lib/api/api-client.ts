@@ -165,6 +165,18 @@ class ApiClient {
     async delete<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, { ...options, method: 'DELETE' });
     }
+
+    /**
+     * Health check - for backwards compatibility
+     */
+    async health(): Promise<boolean> {
+        try {
+            const response = await this.get('/api/v2/health', { skipAuth: true, timeout: 5000 });
+            return response.success;
+        } catch {
+            return false;
+        }
+    }
 }
 
 // Export singleton instance

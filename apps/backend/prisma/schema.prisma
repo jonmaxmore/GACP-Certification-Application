@@ -283,6 +283,9 @@ model Certificate {
   @@index([certificateNumber])
   @@index([expiryDate])
   @@index([isDeleted])
+
+  // Planting Cycles using this certificate
+  plantingCycles PlantingCycle[]
   @@map("certificates")
 }
 
@@ -456,7 +459,8 @@ model Farm {
   deleteReason String?
 
   // Relations
-  harvestBatches HarvestBatch[]
+  harvestBatches   HarvestBatch[]
+  plantingCycles   PlantingCycle[]
 
   @@index([ownerId])
   @@index([status])
@@ -617,8 +621,9 @@ model PlantSpecies {
   harvestCycle        String?
   
   // Relations
-  harvestBatches      HarvestBatch[]
+  harvestBatches       HarvestBatch[]
   documentRequirements DocumentRequirement[]
+  plantingCycles       PlantingCycle[]
   
   // Status
   isActive  Boolean @default(true)

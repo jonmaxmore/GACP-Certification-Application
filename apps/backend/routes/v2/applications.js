@@ -5,7 +5,10 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticateFarmer } = require('../../middleware/auth-middleware');
+const authModule = require('../../middleware/auth-middleware');
+console.log('DEBUG: Auth Module Path:', require.resolve('../../middleware/auth-middleware'));
+console.log('DEBUG: Auth Module Exports:', Object.keys(authModule));
+const { authenticateFarmer } = authModule;
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();

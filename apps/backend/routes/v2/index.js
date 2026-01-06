@@ -17,6 +17,11 @@ const harvestBatchesRouter = require('./harvest-batches');
 const validationRouter = require('./validation');
 const auditRouter = require('./audit');
 const applicationsRouter = require('./applications');
+const invoicesRouter = require('./invoices');
+const staffRouter = require('./staff');
+const auditsRouter = require('./audits');
+const certificatesRouter = require('./certificates');
+const paymentsRouter = require('./payments');
 
 // Mount V2 routes
 router.use('/notifications', notificationsRouter);
@@ -28,6 +33,11 @@ router.use('/harvest-batches', harvestBatchesRouter);
 router.use('/validation', validationRouter);
 router.use('/audit', auditRouter);
 router.use('/applications', applicationsRouter);
+router.use('/invoices', invoicesRouter);
+router.use('/staff', staffRouter);
+router.use('/audits', auditsRouter);
+router.use('/certificates', certificatesRouter);
+router.use('/payments', paymentsRouter);
 
 // Health check with version info
 router.get('/health', (req, res) => {

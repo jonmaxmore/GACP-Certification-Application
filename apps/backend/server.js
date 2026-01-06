@@ -23,9 +23,10 @@ const AuthDTAMRoutes = require('./modules/auth-dtam/routes/dtam-auth');
 const v2Routes = require('./routes/v2');
 const EstablishmentRoutes = require('./modules/Establishment');
 // const ApplicationRoutes = require('./routes/api/application-routes'); // Migrated to v2
-const InvoiceRoutes = require('./routes/api/invoice-routes');
-const StaffRoutes = require('./routes/api/staff-routes');
-const AuditRoutes = require('./routes/api/audit-routes');
+// Migrated to v2
+// const InvoiceRoutes = require('./routes/api/invoice-routes');
+// const StaffRoutes = require('./routes/api/staff-routes');
+// const AuditRoutes = require('./routes/api/audit-routes');
 
 const app = express();
 const port = process.env.PORT || 3000; // Backend API port
@@ -110,9 +111,9 @@ app.use('/api/v2', v2Routes);
 app.use('/api/establishments', EstablishmentRoutes);
 app.use('/api/v2/establishments', EstablishmentRoutes);
 // app.use('/api/applications', ApplicationRoutes);  // Migrated to v2
-app.use('/api/v2/invoices', InvoiceRoutes);        // Invoice/accounting routes
-app.use('/api/v2/staff', StaffRoutes);             // Staff management routes
-app.use('/api/v2/audits', AuditRoutes);            // Audit scheduling routes
+// app.use('/api/v2/invoices', InvoiceRoutes);     // Migrated to v2
+// app.use('/api/v2/staff', StaffRoutes);          // Migrated to v2
+// app.use('/api/v2/audits', AuditRoutes);         // Migrated to v2
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Health Check - Both /health and /api/health for compatibility

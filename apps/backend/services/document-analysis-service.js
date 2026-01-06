@@ -300,6 +300,58 @@ class DocumentAnalysisService {
             })),
         };
     }
+
+    /**
+     * Verify an uploaded document using OCR and AI classification
+     * @param {Buffer|string} fileInput - File buffer or path
+     * @param {string} expectedDocType - Expected document type (e.g., 'ID_CARD', 'LAND_TITLE')
+     * @returns {Promise<Object>} Verification result with confidence and extracted data
+     */
+    async verifyUploadedDocument(fileInput, expectedDocType) {
+        const tesseractService = require('./ocr/tesseract-service');
+        const documentClassifier = require('./ai/document-classifier');
+
+        try {
+            // Step 1: Extract text using OCR
+            const extraction = await tesseractService.extractText(fileInput);
+
+            if (!extraction.success) {
+                return {
+                    valid: false,
+                    error: 'OCR extraction failed',
+                    details: extraction.error,
+                    confidence: 0
+                };
+            }
+
+            // Step 2: Classify the extracted text
+            const classification = documentClassifier.classify(extraction.text, expectedDocType);
+
+            // Step 3: Extract structured data
+            const extractedData = documentClassifier.extractData(extraction.text, expectedDocType);
+
+            return {
+                valid: classification.valid,
+                expectedType: expectedDocType,
+                expectedTypeTH: classification.expectedTypeTH,
+                confidence: classification.confidence,
+                confidencePercent: classification.confidencePercent,
+                extractedData,
+                issues: classification.issues,
+                ocrConfidence: extraction.confidence,
+                ocrDuration: extraction.duration,
+                keywordsFound: classification.keywordsFound,
+                totalKeywords: classification.totalKeywords
+            };
+        } catch (error) {
+            return {
+                valid: false,
+                error: 'Verification failed',
+                details: error.message,
+                confidence: 0
+            };
+        }
+    }
 }
 
 module.exports = new DocumentAnalysisService();

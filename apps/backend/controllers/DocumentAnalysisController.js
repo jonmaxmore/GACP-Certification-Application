@@ -137,6 +137,55 @@ class DocumentAnalysisController {
             });
         }
     }
+
+    /**
+     * POST /api/v2/documents/verify
+     * Verify an uploaded document using OCR and AI classification
+     * Expects multipart/form-data with 'file' and 'expectedType' fields
+     */
+    async verifyDocument(req, res) {
+        try {
+            const { expectedType } = req.body;
+            const file = req.file;
+
+            if (!file) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'No file uploaded. Use multipart/form-data with "file" field.'
+                });
+            }
+
+            if (!expectedType) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'expectedType is required (e.g., ID_CARD, LAND_TITLE, HOUSE_REGISTRATION)'
+                });
+            }
+
+            // Use file buffer for verification
+            const verification = await documentAnalysisService.verifyUploadedDocument(
+                file.buffer,
+                expectedType.toUpperCase()
+            );
+
+            res.json({
+                success: true,
+                data: {
+                    filename: file.originalname,
+                    mimetype: file.mimetype,
+                    size: file.size,
+                    verification
+                }
+            });
+        } catch (error) {
+            console.error('Error verifying document:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Failed to verify document',
+                error: error.message
+            });
+        }
+    }
 }
 
 module.exports = new DocumentAnalysisController();

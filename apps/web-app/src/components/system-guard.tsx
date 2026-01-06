@@ -45,16 +45,10 @@ export default function SystemGuard({ children }: SystemGuardProps) {
         // Initial check
         checkServer();
 
-        // Subscribe to status changes
-        const unsubscribe = api.onStatusChange((online) => {
-            setIsOnline(online);
-        });
-
         // Periodic health check every 30 seconds
         const interval = setInterval(checkServer, 30000);
 
         return () => {
-            unsubscribe();
             clearInterval(interval);
         };
     }, [checkServer]);

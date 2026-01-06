@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PersonIcon, BuildingIcon, GroupIcon, LockIcon, EyeIcon } from "@/components/ui/icons";
 import { formatThaiId } from "@/utils/thai-id-validator";
+import { AuthService } from "@/lib/services/auth-service";
 
 const ACCOUNT_TYPES = [
     { type: "INDIVIDUAL", label: "บุคคลธรรมดา", subtitle: "เกษตรกรรายย่อย", idLabel: "เลขบัตรประชาชน 13 หลัก", idHint: "1-2345-67890-12-3" },
@@ -25,26 +26,18 @@ export default function LoginPage() {
     const [capsLockOn, setCapsLockOn] = useState(false);
 
     useEffect(() => {
-        // Check if already logged in
-        const existingUser = localStorage.getItem("user");
-        if (existingUser) {
-            try {
-                const userData = JSON.parse(existingUser);
-                if (userData && userData.id) {
-                    window.location.href = "/dashboard";
-                    return;
-                }
-            } catch { }
+        // Check if already logged in using centralized AuthService
+        if (AuthService.isAuthenticated()) {
+            window.location.href = "/dashboard";
+            return;
         }
 
-        const remembered = localStorage.getItem("remember_login");
+        // Check remember me preference
+        const remembered = AuthService.getRememberMe();
         if (remembered) {
-            try {
-                const data = JSON.parse(remembered);
-                setAccountType(data.accountType || "INDIVIDUAL");
-                setIdentifier(data.identifier || "");
-                setRememberMe(true);
-            } catch { }
+            setAccountType(remembered.accountType || "INDIVIDUAL");
+            setIdentifier(remembered.identifier || "");
+            setRememberMe(true);
         }
     }, []);
 
@@ -107,11 +100,18 @@ export default function LoginPage() {
                 return;
             }
 
-            localStorage.setItem("user", JSON.stringify(responseData?.user || {}));
+            // Save session using centralized AuthService (fixes token not being saved)
+            AuthService.saveSession({
+                token,
+                tokens: responseData?.tokens,
+                user: responseData?.user,
+            });
+
+            // Handle remember me preference
             if (rememberMe) {
-                localStorage.setItem("remember_login", JSON.stringify({ accountType, identifier: cleanIdentifier }));
+                AuthService.saveRememberMe(accountType, cleanIdentifier);
             } else {
-                localStorage.removeItem("remember_login");
+                AuthService.clearRememberMe();
             }
 
             setIsLoading(false);

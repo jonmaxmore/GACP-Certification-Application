@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import api from "@/services/api-client";
+import { apiClient } from "@/lib/api";
 import { formatThaiId } from "@/utils/thai-id-validator";
 
 const ACCOUNT_TYPES = [
@@ -198,8 +198,8 @@ export default function RegisterPage() {
         else if (accountType === "JURISTIC") { data.companyName = sanitize(companyName); data.representativeName = sanitize(representativeName); data.taxId = cleanIdentifier; }
         else { data.communityName = sanitize(communityName); data.representativeName = sanitize(representativeName); data.communityRegistrationNo = identifier.replace(/[<>'"&]/g, ""); }
 
-        const result = await api.post<{ success: boolean }>("/auth-farmer/register", data);
-        if (!result.success) { setError(result.error); setIsLoading(false); return; }
+        const result = await apiClient.post<{ success: boolean }>("/auth-farmer/register", data);
+        if (!result.success) { setError(result.error || "เกิดข้อผิดพลาดในการลงทะเบียน"); setIsLoading(false); return; }
 
         setIsLoading(false);
         localStorage.removeItem("register_draft");

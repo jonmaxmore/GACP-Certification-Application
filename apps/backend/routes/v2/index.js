@@ -25,6 +25,10 @@ const mfaRouter = require('./mfa');
 const publicRouter = require('./public');
 const consentRouter = require('./consent');
 const documentsRouter = require('./documents');
+const standardsRouter = require('./standards');
+const plantingCyclesRouter = require('./planting-cycles');
+const lotsRouter = require('./lots');
+const traceRouter = require('./trace');
 
 // Mount V2 routes
 router.use('/notifications', notificationsRouter);
@@ -49,6 +53,10 @@ router.use('/mfa', mfaRouter);
 router.use('/public', publicRouter);
 router.use('/consent', consentRouter);
 router.use('/documents', documentsRouter);
+router.use('/standards', standardsRouter);
+router.use('/planting-cycles', plantingCyclesRouter);
+router.use('/lots', lotsRouter);
+router.use('/trace', traceRouter);
 
 // Health check with version info
 router.get('/health', (req, res) => {

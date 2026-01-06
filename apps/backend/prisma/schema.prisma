@@ -120,6 +120,10 @@ model Application {
   serviceType String @default("new_application") // new_application, renewal, replacement, amendment
   areaType    String // OUTDOOR, INDOOR, GREENHOUSE
 
+  // Certification Standard
+  standardCode String?                // 'THAI_GACP', 'FDA', 'WHO', 'ASEAN'
+  standard     CertificationStandard? @relation(fields: [standardCode], references: [code])
+
   // Status
   status      String @default("DRAFT")
   rejectCount Int    @default(0)
@@ -218,10 +222,12 @@ model Certificate {
   subDistrict String
   address     String?
 
-  // Standard
-  standardId   String
-  standardName String
-  score        Float
+  // Standard (Certification Standard Relation)
+  standardCode   String?                // 'THAI_GACP', 'FDA', 'WHO', 'ASEAN'
+  certStandard   CertificationStandard? @relation(fields: [standardCode], references: [code])
+  standardId     String                 // Legacy - can be removed later
+  standardName   String
+  score          Float
 
   // Status & Dates
   status        String   @default("active") // active, expired, revoked, renewed
@@ -656,6 +662,72 @@ model DocumentRequirement {
 }
 
 // =============================================================================
+// PLANTING CYCLE MODEL (รอบการปลูก)
+// =============================================================================
+model PlantingCycle {
+  id        String   @id @default(uuid())
+  uuid      String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // รหัสรอบ
+  cycleName   String  // "รอบที่ 1/2569", "Winter 2026"
+  cycleNumber Int     @default(1) // 1, 2, 3...
+
+  // ความสัมพันธ์กับฟาร์มและใบรับรอง
+  farmId        String
+  farm          Farm        @relation(fields: [farmId], references: [id])
+  certificateId String?
+  certificate   Certificate? @relation(fields: [certificateId], references: [id])
+
+  // ข้อมูลพืช
+  plantSpeciesId String
+  plantSpecies   PlantSpecies @relation(fields: [plantSpeciesId], references: [id])
+  varietyName    String?      // พันธุ์ (ถ้ามี)
+
+  // ข้อมูลแปลง
+  plotName  String?  // ชื่อแปลง
+  plotArea  Float?   // พื้นที่ปลูก
+  areaUnit  String   @default("rai")
+
+  // วันที่
+  startDate           DateTime   // วันเริ่มปลูก
+  expectedHarvestDate DateTime?  // กำหนดเก็บเกี่ยว
+  actualHarvestDate   DateTime?  // วันเก็บจริง
+
+  // ข้อมูลการปลูก
+  seedSource     String?  // แหล่งเมล็ดพันธุ์
+  seedQuantity   Float?   // ปริมาณเมล็ด (กก.)
+  cultivationType String  @default("SELF_GROWN") // ปลูกเอง
+  soilType       String?  // ประเภทดิน
+  irrigationType String?  // ระบบน้ำ
+
+  // ผลผลิต
+  estimatedYield Float?  // ผลผลิตคาดการณ์ (กก.)
+  actualYield    Float?  // ผลผลิตจริง (กก.)
+
+  // สถานะ
+  status String @default("PLANNING")
+  // PLANNING → PLANTED → GROWING → READY_HARVEST → HARVESTED → COMPLETED
+
+  // หมายเหตุ
+  notes String?
+
+  // ความสัมพันธ์
+  batches HarvestBatch[]
+
+  // Soft Delete
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([farmId])
+  @@index([certificateId])
+  @@index([status])
+  @@index([isDeleted])
+  @@map("planting_cycles")
+}
+
+// =============================================================================
 // HARVEST BATCH MODEL (Lot การเก็บเกี่ยว)
 // =============================================================================
 model HarvestBatch {
@@ -667,11 +739,13 @@ model HarvestBatch {
   // รหัส Lot
   batchNumber String @unique // เช่น "LOT-2025-001"
   
-  // ความสัมพันธ์
+  // ความสัมพันธ์ (เพิ่ม cycleId)
   farmId    String
   farm      Farm         @relation(fields: [farmId], references: [id])
   speciesId String
   species   PlantSpecies @relation(fields: [speciesId], references: [id])
+  cycleId   String?
+  cycle     PlantingCycle? @relation(fields: [cycleId], references: [id])
   
   // ข้อมูลการปลูก
   plantingDate    DateTime  // วันปลูก
@@ -695,6 +769,13 @@ model HarvestBatch {
   
   // หมายเหตุ
   notes           String?
+  
+  // QR Code Tracking
+  qrCode      String? @unique // UUID for public lookup
+  trackingUrl String?         // Full URL with domain
+
+  // Related Lots
+  lots Lot[]
   
   // Soft Delete
   isDeleted Boolean   @default(false)
@@ -756,4 +837,121 @@ model DTAMStaff {
   @@index([role])
   @@index([isActive])
   @@map("dtam_staff")
+}
+
+// =============================================================================
+// CERTIFICATION STANDARD MODEL (มาตรฐานการรับรอง)
+// =============================================================================
+model CertificationStandard {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Standard Info
+  code        String  @unique // 'THAI_GACP', 'FDA', 'WHO', 'ASEAN'
+  name        String           // 'Thai GACP'
+  nameTH      String           // 'มาตรฐาน GACP ไทย'
+  description String?
+  version     String  @default("v2024") // Standard version
+
+  // Configuration
+  isActive    Boolean @default(true)
+  sortOrder   Int     @default(0)
+  logoUrl     String? // URL to standard logo
+
+  // Target Market
+  targetMarket String? // 'DOMESTIC', 'USA', 'GLOBAL', 'ASEAN'
+
+  // Relations
+  requirements StandardRequirement[]
+  applications Application[]
+  certificates Certificate[]
+
+  @@index([code])
+  @@index([isActive])
+  @@map("certification_standards")
+}
+
+// =============================================================================
+// STANDARD REQUIREMENT MODEL (ข้อกำหนดมาตรฐาน)
+// =============================================================================
+model StandardRequirement {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation to Standard
+  standardId String
+  standard   CertificationStandard @relation(fields: [standardId], references: [id])
+
+  // Requirement Info
+  category    String  // 'FACILITY', 'DOCUMENTATION', 'TESTING', 'PROCESS'
+  name        String
+  nameTH      String
+  description String?
+  
+  // Validation
+  isRequired  Boolean @default(true)
+  sortOrder   Int     @default(0)
+
+  @@index([standardId])
+  @@index([category])
+  @@map("standard_requirements")
+}
+
+// =============================================================================
+// LOT MODEL (ล็อตย่อย - Package Level Tracking)
+// =============================================================================
+model Lot {
+  id        String   @id @default(uuid())
+  uuid      String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Lot Number
+  lotNumber String @unique // 'LOT-2026-001-A'
+
+  // Relation to Batch
+  batchId String
+  batch   HarvestBatch @relation(fields: [batchId], references: [id])
+
+  // Packaging Info
+  packageType   String  // 'BAG_1KG', 'BOX_5KG', 'BOTTLE_100ML'
+  quantity      Int     // Number of packages
+  unitWeight    Float   // Weight per package (kg)
+  totalWeight   Float?  // Total weight
+
+  // QR Code Tracking
+  qrCode      String @unique // UUID for public lookup
+  trackingUrl String?        // Full URL with domain
+
+  // Processing
+  processedAt DateTime?
+  packagedAt  DateTime?
+  expiryDate  DateTime?
+
+  // Lab Test
+  labTestReportUrl String?
+  thcContent       Float?
+  cbdContent       Float?
+  moistureContent  Float?
+  testStatus       String? // 'PENDING', 'PASSED', 'FAILED'
+
+  // Destination
+  destinationType String? // 'DOMESTIC', 'EXPORT'
+  destination     String? // Customer/Country
+  shippedAt       DateTime?
+
+  // Status
+  status String @default("CREATED") // CREATED, PACKAGED, TESTED, SHIPPED
+
+  // Soft Delete
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([batchId])
+  @@index([qrCode])
+  @@index([status])
+  @@index([isDeleted])
+  @@map("lots")
 }

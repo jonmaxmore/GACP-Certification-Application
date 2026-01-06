@@ -49,6 +49,52 @@ export default function Step4Applicant() {
     useEffect(() => { setIsDark(localStorage.getItem("theme") === "dark"); if (state.applicantData) setForm(state.applicantData); }, [state.applicantData]);
     useEffect(() => { if (isLoaded && !state.consentedPDPA) router.replace('/applications/new/step-0'); }, [isLoaded, state.consentedPDPA, router]);
 
+    // Auto-fill user profile data on first load
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            // Skip if already has data
+            if (state.applicantData?.firstName || state.applicantData?.companyName || state.applicantData?.communityName) return;
+
+            try {
+                const response = await fetch('/api/auth-farmer/me', { credentials: 'include' });
+                if (!response.ok) return;
+
+                const data = await response.json();
+                if (!data.success || !data.data?.user) return;
+
+                const user = data.data.user;
+                const updatedForm: ApplicantData = { ...form };
+
+                if (user.accountType === 'INDIVIDUAL') {
+                    updatedForm.applicantType = 'INDIVIDUAL';
+                    updatedForm.firstName = user.firstName || '';
+                    updatedForm.lastName = user.lastName || '';
+                    updatedForm.phone = user.phoneNumber || '';
+                    updatedForm.email = user.email || '';
+                } else if (user.accountType === 'JURISTIC') {
+                    updatedForm.applicantType = 'JURISTIC';
+                    updatedForm.companyName = user.companyName || '';
+                    updatedForm.directorName = user.representativeName || '';
+                    updatedForm.phone = user.phoneNumber || '';
+                    updatedForm.directorEmail = user.email || '';
+                } else if (user.accountType === 'COMMUNITY_ENTERPRISE') {
+                    updatedForm.applicantType = 'COMMUNITY';
+                    updatedForm.communityName = user.communityName || '';
+                    updatedForm.presidentName = user.representativeName || '';
+                    updatedForm.phone = user.phoneNumber || '';
+                    updatedForm.email = user.email || '';
+                }
+
+                setForm(updatedForm);
+                setApplicantData(updatedForm);
+            } catch (error) {
+                console.error('[Step4] Failed to fetch user profile:', error);
+            }
+        };
+        fetchUserProfile();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isLoaded]);
+
     const handleChange = (field: keyof ApplicantData, value: string) => { const updated = { ...form, [field]: value }; setForm(updated); setApplicantData(updated); validateField(field, value); };
     const handleNext = () => { if (!isNavigating) { setIsNavigating(true); router.push('/applications/new/step-5'); } };
     const handleBack = () => { setIsNavigating(true); router.push('/applications/new/step-3'); };

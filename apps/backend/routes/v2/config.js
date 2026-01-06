@@ -18,10 +18,9 @@ const {
     canProceedWithObjectives
 } = require('../../constants/document-slots');
 
-const cannabisTemplates = require('../../../../config/cannabisTemplates');
-
-// Get templates data safely
-const cannabisTemplatesData = cannabisTemplates.cannabisTemplates || [];
+// LEGACY: cannabisTemplates was in root config/, now deleted
+// TODO: Migrate form templates to Prisma database
+const cannabisTemplatesData = [];
 
 // ============================================================================
 // DOCUMENT SLOTS API

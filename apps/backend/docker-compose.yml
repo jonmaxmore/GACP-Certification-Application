@@ -1,26 +1,54 @@
 version: '3.8'
 
 services:
+  # 1. Backend Service
   backend:
+    container_name: gacp_backend
     build: .
     ports:
       - "3000:3000"
     environment:
-      - PORT=3000
-      - MONGO_URI=mongodb://mongo:27017/gacp_production
-      - JWT_SECRET=change_this_to_a_secure_random_string
       - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://gacp_user:gacp_password@postgres:5432/gacp_prod
+      - REDIS_URL=redis://redis:6379
     depends_on:
-      - mongo
+      - postgres
+      - redis
     restart: always
+    networks:
+      - gacp_network
 
-  mongo:
-    image: mongo:6.0
-    ports:
-      - "27017:27017"
+  # 2. Database Service (PostgreSQL)
+  postgres:
+    image: postgres:15
+    container_name: gacp_postgres
+    environment:
+      - POSTGRES_USER=gacp_user
+      - POSTGRES_PASSWORD=gacp_password
+      - POSTGRES_DB=gacp_prod
     volumes:
-      - mongo_data:/data/db
+      - postgres_data:/var/lib/postgresql/data
     restart: always
+    networks:
+      - gacp_network
+
+  # 3. Cache Service (Redis)
+  redis:
+    image: redis:7-alpine
+    container_name: gacp_redis
+    ports:
+      - "6379:6379" # Exposed for monitoring, can be closed if internal only
+    volumes:
+      - redis_data:/data
+    restart: always
+    networks:
+      - gacp_network
+
+networks:
+  gacp_network:
+    driver: bridge
 
 volumes:
-  mongo_data:
+  postgres_data:
+  redis_data:

@@ -11,13 +11,13 @@ const { auditLogger, AuditCategory } = require('../../middleware/audit-logger');
 const prisma = require('../../services/prisma-database').prisma;
 
 // Middleware to ensure user is Staff
-const authenticateStaff = require('../../middleware/auth-middleware').authenticateStaff;
+const { authenticateDTAM } = require('../../middleware/auth-middleware');
 
 /**
  * POST /setup
  * Initialize MFA setup for staff user
  */
-router.post('/setup', authenticateStaff, async (req, res) => {
+router.post('/setup', authenticateDTAM, async (req, res) => {
     try {
         const userId = req.user.id;
         const email = req.user.email;
@@ -65,7 +65,7 @@ router.post('/setup', authenticateStaff, async (req, res) => {
  * POST /verify-setup
  * Verify MFA setup with first code
  */
-router.post('/verify-setup', authenticateStaff, async (req, res) => {
+router.post('/verify-setup', authenticateDTAM, async (req, res) => {
     try {
         const { code } = req.body;
         const userId = req.user.id;
@@ -239,7 +239,7 @@ router.post('/verify', async (req, res) => {
  * DELETE /disable
  * Disable MFA (requires current code)
  */
-router.delete('/disable', authenticateStaff, async (req, res) => {
+router.delete('/disable', authenticateDTAM, async (req, res) => {
     try {
         const { code } = req.body;
         const userId = req.user.id;

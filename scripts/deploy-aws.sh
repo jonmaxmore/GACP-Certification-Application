@@ -16,16 +16,20 @@ APP_DIR="/home/ec2-user/gacp"
 REPO_URL="https://github.com/jonmaxmore/GACP-Certification-Application.git"
 
 echo ""
-echo "📋 Step 1: Connecting to Server ($SERVER_IP)..."
-# Note: This script is intended to be run either ON the server or with SSH keys set up.
-# Using 'git pull' assumption that we are ON the server or remote execution.
-# Let's assume this script is run ON the server based on previous structure, 
-# but previous script had confusing mix of local/remote commands (it tried to install nodejs?).
-# The previous script looked like a "User Data" or "Setup" script.
-# I will make this a "Update & Restart" script for the user to run ON THE SERVER.
+# Note: This script assumes you have SSHed into the server and are running it from the project root.
+# It handles the full update cycle for the unified V2 architecture.
 
-echo "⚠️  Ensure you are running this script ON the production server."
-echo "⚠️  Ensure you are in the application root directory."
+# Check if running on Windows (Git Bash/MinGW)
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+  echo "❌ ERROR: You are running this on WINDOWS."
+  echo "👉 Step 1: Find your .pem key (e.g., Downloads folder)."
+  echo "👉 Step 2: ssh -i key.pem ec2-user@47.129.167.71"
+  echo "👉 Step 3: Run this script ON THE SERVER."
+  exit 1
+fi
+
+echo "⚠️  CRITICAL: Run this script ON the production server."
+echo "⚠️  Ensure you are in the application root directory (e.g., ~/gacp-certification-application)."
 
 echo ""
 echo "📋 Step 2: Pulling latest changes..."

@@ -1,8 +1,3 @@
-/**
- * V2 API Router - Simplified for PostgreSQL
- * Main router for V2 endpoints (Closed-loop Ecosystem)
- */
-
 const express = require('express');
 const router = express.Router();
 const logger = require('../../shared/logger');
@@ -29,9 +24,7 @@ const authDtamRouter = require('./auth-dtam');
 const mfaRouter = require('./mfa');
 const publicRouter = require('./public');
 const consentRouter = require('./consent');
-const plantsRouter = require('./plants');
 const documentsRouter = require('./documents');
-const staffRouter = require('./staff'); // Ensure this is imported if not already
 
 // Mount V2 routes
 router.use('/notifications', notificationsRouter);
@@ -55,9 +48,7 @@ router.use('/auth-dtam', authDtamRouter);
 router.use('/mfa', mfaRouter);
 router.use('/public', publicRouter);
 router.use('/consent', consentRouter);
-router.use('/plants', plantsRouter);
 router.use('/documents', documentsRouter);
-router.use('/staff', staffRouter);
 
 // Health check with version info
 router.get('/health', (req, res) => {

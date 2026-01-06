@@ -1,36 +1,17 @@
 /**
- * Document Analysis Routes (V2 Wrapper)
- * Wraps legacy DocumentAnalysisController (Mongoose)
- * Base path: /api/v2/documents
+ * V2 Documents Route
+ * Maps V2 endpoints to DocumentAnalysisController (Prisma Refactored)
  */
 
 const express = require('express');
 const router = express.Router();
-const controller = require('../../controllers/DocumentAnalysisController'); // Renamed to PascalCase
-const { authenticateFarmer } = require('../../middleware/auth-middleware');
+const DocumentAnalysisController = require('../../controllers/DocumentAnalysisController');
+const authModule = require('../../middleware/auth-middleware');
 
-/**
- * GET /plants
- * Get all available plants
- */
-router.get('/plants', controller.getAvailablePlants);
-
-/**
- * GET /requirements/:plantId
- * Get base document requirements for a plant type
- */
-router.get('/requirements/:plantId', controller.getPlantRequirements);
-
-/**
- * POST /analyze
- * Analyze required documents based on application data
- */
-router.post('/analyze', authenticateFarmer, controller.analyzeDocuments);
-
-/**
- * POST /validate
- * Validate that all required documents have been uploaded
- */
-router.post('/validate', authenticateFarmer, controller.validateDocuments);
+// Public/Protected endpoints
+router.get('/requirements/:plantId', DocumentAnalysisController.getPlantRequirements);
+router.post('/analyze', DocumentAnalysisController.analyzeDocuments);
+router.post('/validate', DocumentAnalysisController.validateDocuments);
+router.get('/plants', DocumentAnalysisController.getAvailablePlants);
 
 module.exports = router;

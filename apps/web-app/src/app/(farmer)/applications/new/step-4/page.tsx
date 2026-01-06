@@ -75,7 +75,8 @@ export default function Step4Applicant() {
                     updatedForm.applicantType = 'JURISTIC';
                     updatedForm.companyName = user.companyName || '';
                     updatedForm.directorName = user.representativeName || '';
-                    updatedForm.phone = user.phoneNumber || '';
+                    updatedForm.companyPhone = user.phoneNumber || '';
+                    updatedForm.directorPhone = user.phoneNumber || '';
                     updatedForm.directorEmail = user.email || '';
                 } else if (user.accountType === 'COMMUNITY_ENTERPRISE') {
                     updatedForm.applicantType = 'COMMUNITY';

@@ -1,6 +1,6 @@
 /**
  * Seed Test Farmer Accounts for Cannabis Application Testing
- * Run: node scripts/seed-test-farmers.js
+ * Run from apps/backend: node seed-test-farmers.js
  */
 
 const { PrismaClient } = require('@prisma/client');
@@ -21,44 +21,41 @@ async function main() {
             password,
             accountType: 'INDIVIDUAL',
             idCard: '1234567890121', // Valid checksum
+            idCardHash: '1234567890121_hash',
             firstName: 'สมชาย',
             lastName: 'ทดสอบ',
-            phone: '0812345678',
+            phoneNumber: '0812345678',
             status: 'ACTIVE',
             role: 'FARMER',
             isEmailVerified: true,
-            pdpaConsent: true,
-            pdpaConsentAt: new Date(),
         },
         {
             // นิติบุคคล (Corporate)
             email: 'farmer.corporate@test.gacp.go.th',
             password,
-            accountType: 'JURISTIC_PERSON',
-            taxId: '0105556012345', // Company tax ID
+            accountType: 'JURISTIC',
+            taxId: '0105556012345',
+            taxIdHash: '0105556012345_hash',
             companyName: 'บริษัท ทดสอบสมุนไพร จำกัด',
             representativeName: 'นายประสิทธิ์ ทดสอบ',
-            phone: '0823456789',
+            phoneNumber: '0823456789',
             status: 'ACTIVE',
             role: 'FARMER',
             isEmailVerified: true,
-            pdpaConsent: true,
-            pdpaConsentAt: new Date(),
         },
         {
             // วิสาหกิจชุมชน (Community Enterprise)
             email: 'farmer.community@test.gacp.go.th',
             password,
             accountType: 'COMMUNITY_ENTERPRISE',
-            communityRegNo: '5-01-01-50/001',
+            communityRegistrationNo: '5-01-01-50/001',
+            communityRegistrationNoHash: '5010150001_hash',
             communityName: 'กลุ่มวิสาหกิจทดสอบสมุนไพร',
             representativeName: 'นางสาวสมหญิง ทดสอบ',
-            phone: '0834567890',
+            phoneNumber: '0834567890',
             status: 'ACTIVE',
             role: 'FARMER',
             isEmailVerified: true,
-            pdpaConsent: true,
-            pdpaConsentAt: new Date(),
         }
     ];
 
@@ -75,13 +72,11 @@ async function main() {
             }
 
             // Create user
-            const user = await prisma.user.create({
-                data: farmer
-            });
+            await prisma.user.create({ data: farmer });
 
             console.log(`✅ Created ${farmer.accountType}:`);
             console.log(`   Email: ${farmer.email}`);
-            console.log(`   ID: ${farmer.idCard || farmer.taxId || farmer.communityRegNo}`);
+            console.log(`   ID: ${farmer.idCard || farmer.taxId || farmer.communityRegistrationNo}`);
             console.log(`   Password: Test1234\n`);
 
         } catch (error) {

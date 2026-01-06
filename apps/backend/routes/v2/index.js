@@ -24,6 +24,14 @@ const certificatesRouter = require('./certificates');
 const paymentsRouter = require('./payments');
 const quotesRouter = require('./quotes');
 const accountingRouter = require('./accounting');
+const authFarmerRouter = require('./auth-farmer');
+const authDtamRouter = require('./auth-dtam');
+const mfaRouter = require('./mfa');
+const publicRouter = require('./public');
+const consentRouter = require('./consent');
+const plantsRouter = require('./plants');
+const documentsRouter = require('./documents');
+const staffRouter = require('./staff'); // Ensure this is imported if not already
 
 // Mount V2 routes
 router.use('/notifications', notificationsRouter);
@@ -42,6 +50,14 @@ router.use('/certificates', certificatesRouter);
 router.use('/payments', paymentsRouter);
 router.use('/quotes', quotesRouter);
 router.use('/accounting', accountingRouter);
+router.use('/auth-farmer', authFarmerRouter);
+router.use('/auth-dtam', authDtamRouter);
+router.use('/mfa', mfaRouter);
+router.use('/public', publicRouter);
+router.use('/consent', consentRouter);
+router.use('/plants', plantsRouter);
+router.use('/documents', documentsRouter);
+router.use('/staff', staffRouter);
 
 // Health check with version info
 router.get('/health', (req, res) => {

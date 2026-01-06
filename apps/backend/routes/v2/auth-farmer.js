@@ -18,4 +18,3 @@ router.post('/check-identifier', (req, res) => AuthController.checkIdentifier(re
 router.get('/me', authenticateFarmer, (req, res) => AuthController.getMe(req, res));
 
 module.exports = router;
-

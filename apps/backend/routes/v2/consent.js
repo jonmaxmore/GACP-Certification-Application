@@ -1,6 +1,7 @@
 /**
- * 📋 Consent API Routes
+ * Consent API Routes (V2)
  * PDPA-compliant consent management endpoints
+ * Uses Prisma (via consent-manager middleware)
  */
 
 const express = require('express');
@@ -9,7 +10,7 @@ const { authenticateFarmer } = require('../../middleware/auth-middleware');
 const { consentManager, ConsentCategory, RequiredConsents } = require('../../middleware/consent-manager');
 
 /**
- * GET /api/consent
+ * GET /
  * Get current user's consent status
  */
 router.get('/', authenticateFarmer, async (req, res) => {
@@ -31,7 +32,7 @@ router.get('/', authenticateFarmer, async (req, res) => {
 });
 
 /**
- * POST /api/consent
+ * POST /
  * Record consent (grant or withdraw)
  */
 router.post('/', authenticateFarmer, async (req, res) => {
@@ -64,7 +65,7 @@ router.post('/', authenticateFarmer, async (req, res) => {
 });
 
 /**
- * POST /api/consent/bulk
+ * POST /bulk
  * Record multiple consents at once (registration)
  */
 router.post('/bulk', async (req, res) => {
@@ -96,7 +97,7 @@ router.post('/bulk', async (req, res) => {
 });
 
 /**
- * DELETE /api/consent/:category
+ * DELETE /:category
  * Withdraw consent (PDPA right)
  */
 router.delete('/:category', authenticateFarmer, async (req, res) => {
@@ -122,7 +123,7 @@ router.delete('/:category', authenticateFarmer, async (req, res) => {
 });
 
 /**
- * GET /api/consent/document/:category
+ * GET /document/:category
  * Get consent document content
  */
 router.get('/document/:category', (req, res) => {

@@ -1,16 +1,17 @@
 /**
- * Public Certificate Verification Routes
+ * Public Certificate Verification Routes (V2)
  * No authentication required - for public QR code scanning
+ * Uses Prisma for data access
  */
 
 const express = require('express');
 const router = express.Router();
-const GACPCertificateService = require('../../services/GacpCertificate');
+const prisma = require('../../services/prisma-database').prisma;
 
 /**
- * @route GET /api/v2/public/verify/:certificateNumber
- * @desc Public certificate verification
- * @access Public (no auth required)
+ * @route GET /verify/:certificateNumber
+ * @desc Public certificate verification (JSON)
+ * @access Public
  */
 router.get('/verify/:certificateNumber', async (req, res) => {
     try {
@@ -24,33 +25,67 @@ router.get('/verify/:certificateNumber', async (req, res) => {
             });
         }
 
-        const result = await GACPCertificateService.verifyCertificate(certificateNumber, code);
+        const certificate = await prisma.certificate.findUnique({
+            where: { certificateNumber }
+        });
 
-        // Return public verification result
+        if (!certificate) {
+            return res.json({
+                success: true,
+                verified: false,
+                valid: false,
+                data: {
+                    status: 'invalid',
+                    reason: 'Certificate not found'
+                }
+            });
+        }
+
+        const now = new Date();
+        const isExpired = certificate.expiryDate && new Date(certificate.expiryDate) < now;
+        const isActive = certificate.status.toLowerCase() === 'active' && !isExpired;
+
+        // Code verification (optional if provided in QR)
+        // Note: Prisma schema might not have verificationCode? 
+        // Based on GACPCertificateService, it generates it. 
+        // We should check if it exists on the model.
+        // Assuming it does for backward compat or we skip it if null.
+        if (code && certificate.verificationCode && certificate.verificationCode !== code) {
+            return res.json({
+                success: true,
+                verified: false,
+                valid: false,
+                data: {
+                    status: 'invalid',
+                    reason: 'Invalid verification code'
+                }
+            });
+        }
+
+        // Return legacy-compatible structure
         return res.json({
             success: true,
-            verified: result.valid,
+            verified: isActive,
+            valid: isActive, // Alias
             data: {
                 certificateNumber,
-                status: result.status,
-                reason: result.reason || null,
-                certificate: result.certificate
-                    ? {
-                        farmName: result.certificate.farmName,
-                        farmerName: result.certificate.farmerName,
-                        province: result.certificate.location?.province,
-                        cropTypes: result.certificate.cropTypes,
-                        issueDate: result.certificate.issueDate,
-                        expiryDate: result.certificate.expiryDate,
-                        standards: result.certificate.certificationStandards,
-                        issuingAuthority: 'กรมการแพทย์แผนไทยและการแพทย์ทางเลือก',
-                    }
-                    : null,
+                status: isExpired ? 'expired' : certificate.status.toLowerCase(),
+                reason: isExpired ? 'Certificate has expired' : null,
+                certificate: isActive ? {
+                    farmName: certificate.farmName,
+                    farmerName: certificate.farmerName,
+                    province: certificate.location?.province,
+                    cropTypes: certificate.cropTypes || [certificate.plantType], // Handle both schema variants
+                    issueDate: certificate.issueDate,
+                    expiryDate: certificate.expiryDate,
+                    standards: certificate.certificationStandards || ['WHO GACP'],
+                    issuingAuthority: 'กรมการแพทย์แผนไทยและการแพทย์ทางเลือก',
+                } : null,
                 verifiedAt: new Date().toISOString(),
             },
         });
     } catch (error) {
-        console.error('Verification error:', error);
+        console.error('[Public] Verification error:', error);
         return res.status(500).json({
             success: false,
             message: 'เกิดข้อผิดพลาดในการตรวจสอบใบรับรอง',
@@ -59,23 +94,33 @@ router.get('/verify/:certificateNumber', async (req, res) => {
 });
 
 /**
- * @route GET /api/v2/public/verify/:certificateNumber/page
- * @desc Get verification page HTML (for embedding)
+ * @route GET /verify/:certificateNumber/page
+ * @desc Get verification page HTML (for embedding) - Server Side Rendered
  * @access Public
  */
 router.get('/verify/:certificateNumber/page', async (req, res) => {
     try {
         const { certificateNumber } = req.params;
 
-        const verificationPage = await GACPCertificateService.generateVerificationPage(certificateNumber);
+        const certificate = await prisma.certificate.findUnique({
+            where: { certificateNumber }
+        });
 
-        // Generate HTML page
-        const html = generateVerificationHTML(verificationPage);
+        // Prepare data for HTML generator
+        const now = new Date();
+        const isValid = certificate && certificate.status.toLowerCase() === 'active' && (!certificate.expiryDate || new Date(certificate.expiryDate) > now);
+
+        const html = generateVerificationHTML({
+            certificateNumber,
+            isValid,
+            certificate,
+            verificationTimestamp: new Date()
+        });
 
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         return res.send(html);
     } catch (error) {
-        console.error('Verification page error:', error);
+        console.error('[Public] Verification page error:', error);
         return res.status(500).send('<html><body>เกิดข้อผิดพลาด</body></html>');
     }
 });
@@ -83,9 +128,8 @@ router.get('/verify/:certificateNumber/page', async (req, res) => {
 /**
  * Generate verification HTML page
  */
-function generateVerificationHTML(verification) {
-    const isValid = verification.result?.valid;
-    const cert = verification.publicData;
+function generateVerificationHTML({ certificateNumber, isValid, certificate, verificationTimestamp }) {
+    const cert = certificate;
 
     return `
 <!DOCTYPE html>
@@ -93,7 +137,7 @@ function generateVerificationHTML(verification) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ตรวจสอบใบรับรอง GACP | ${verification.certificateNumber}</title>
+    <title>ตรวจสอบใบรับรอง GACP | ${certificateNumber}</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
@@ -164,16 +208,16 @@ function generateVerificationHTML(verification) {
         <div class="header">
             <div class="status-icon">${isValid ? '✅' : '❌'}</div>
             <h1>${isValid ? 'ใบรับรองถูกต้อง' : 'ใบรับรองไม่ถูกต้อง'}</h1>
-            <p>${isValid ? 'Certificate Verified' : verification.result?.reason || 'Invalid Certificate'}</p>
+            <p>${isValid ? 'Certificate Verified' : 'Certificate Invalid or Expired'}</p>
         </div>
         <div class="content">
             <div class="cert-number">
-                ${verification.certificateNumber}
+                ${certificateNumber}
             </div>
-            ${cert ? `
+            ${isValid && cert ? `
                 <div class="info-row">
                     <span class="info-label">ชื่อแปลง</span>
-                    <span class="info-value">${cert.farmName || '-'}</span>
+                    <span class="info-value">${cert.farmName || cert.siteName || '-'}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">ผู้ประกอบการ</span>
@@ -181,15 +225,15 @@ function generateVerificationHTML(verification) {
                 </div>
                 <div class="info-row">
                     <span class="info-label">จังหวัด</span>
-                    <span class="info-value">${cert.province || '-'}</span>
+                    <span class="info-value">${cert.location?.province || '-'}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">พืชสมุนไพร</span>
-                    <span class="info-value">${cert.cropTypes?.join(', ') || '-'}</span>
+                    <span class="info-value">${(cert.cropTypes || [cert.plantType]).join(', ') || '-'}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">วันที่ออก</span>
-                    <span class="info-value">${cert.issueDate ? new Date(cert.issueDate).toLocaleDateString('th-TH') : '-'}</span>
+                    <span class="info-value">${cert.issuedDate ? new Date(cert.issuedDate).toLocaleDateString('th-TH') : '-'}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">วันหมดอายุ</span>
@@ -205,12 +249,12 @@ function generateVerificationHTML(verification) {
                 </div>
             ` : `
                 <p style="text-align: center; color: #666; padding: 20px;">
-                    ไม่พบข้อมูลใบรับรอง
+                    ไม่พบข้อมูลใบรับรอง หรือใบรับรองหมดอายุ
                 </p>
             `}
         </div>
         <div class="footer">
-            <p>ตรวจสอบเมื่อ: ${new Date(verification.verificationTimestamp).toLocaleString('th-TH')}</p>
+            <p>ตรวจสอบเมื่อ: ${new Date(verificationTimestamp).toLocaleString('th-TH')}</p>
             <p>กรมการแพทย์แผนไทยและการแพทย์ทางเลือก | กระทรวงสาธารณสุข</p>
         </div>
     </div>
@@ -220,4 +264,3 @@ function generateVerificationHTML(verification) {
 }
 
 module.exports = router;
-

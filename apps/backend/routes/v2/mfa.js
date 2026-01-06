@@ -1,19 +1,20 @@
 /**
- * 🔐 MFA API Routes
+ * MFA API Routes (V2)
  * For DTAM Staff Multi-Factor Authentication
+ * Prisma Implementation
  */
 
 const express = require('express');
 const router = express.Router();
 const { mfaService } = require('../../middleware/mfa-service');
-const { authenticateStaff } = require('../../middleware/auth-middleware');
-const { PrismaClient } = require('@prisma/client');
 const { auditLogger, AuditCategory } = require('../../middleware/audit-logger');
+const prisma = require('../../services/prisma-database').prisma;
 
-const prisma = new PrismaClient();
+// Middleware to ensure user is Staff
+const authenticateStaff = require('../../middleware/auth-middleware').authenticateStaff;
 
 /**
- * POST /api/mfa/setup
+ * POST /setup
  * Initialize MFA setup for staff user
  */
 router.post('/setup', authenticateStaff, async (req, res) => {
@@ -61,7 +62,7 @@ router.post('/setup', authenticateStaff, async (req, res) => {
 });
 
 /**
- * POST /api/mfa/verify-setup
+ * POST /verify-setup
  * Verify MFA setup with first code
  */
 router.post('/verify-setup', authenticateStaff, async (req, res) => {
@@ -151,7 +152,7 @@ router.post('/verify-setup', authenticateStaff, async (req, res) => {
 });
 
 /**
- * POST /api/mfa/verify
+ * POST /verify
  * Verify MFA code during login
  */
 router.post('/verify', async (req, res) => {
@@ -235,7 +236,7 @@ router.post('/verify', async (req, res) => {
 });
 
 /**
- * DELETE /api/mfa/disable
+ * DELETE /disable
  * Disable MFA (requires current code)
  */
 router.delete('/disable', authenticateStaff, async (req, res) => {

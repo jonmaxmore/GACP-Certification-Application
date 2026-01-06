@@ -1,14 +1,14 @@
 /**
- * NotificationService - Helper for creating notifications
+ * NotificationService - Helper for creating notifications (Prisma Version)
  * 
  * Usage:
- *   const { sendNotification, NotifyType } = require('./services/NotificationService');
+ *   const { sendNotification, NotifyType } = require('./notification-service');
  *   await sendNotification(userId, NotifyType.QUOTE_RECEIVED, { quoteId: '...' });
  */
 
-const Notification = require('./models/NotificationModel');
+const prisma = require('./prisma-database').prisma;
 
-// Notification types matching NotificationModel enum
+// Notification types
 const NotifyType = {
     // General
     INFO: 'info',
@@ -61,7 +61,7 @@ const NotifyTemplates = {
 
 /**
  * Send a notification to a user
- * @param {string|ObjectId} recipientId - User ID
+ * @param {string} recipientId - User ID
  * @param {string} type - Notification type from NotifyType
  * @param {Object} data - Additional data (quoteId, invoiceId, etc.)
  * @param {Object} overrides - Override title/message
@@ -77,21 +77,24 @@ async function sendNotification(recipientId, type, data = {}, overrides = {}) {
         const template = NotifyTemplates[type];
         const templateResult = template ? template(data) : {};
 
-        const notification = new Notification({
-            recipient: recipientId,
-            type,
-            title: overrides.title || templateResult.title || 'การแจ้งเตือนใหม่',
-            message: overrides.message || templateResult.message || 'คุณมีการแจ้งเตือนใหม่',
+        // Use Prisma to create notification
+        const notification = await prisma.notification.create({
             data: {
-                ...data,
-                timestamp: new Date().toISOString()
+                userId: recipientId,
+                type: type || 'INFO',
+                title: overrides.title || templateResult.title || 'การแจ้งเตือนใหม่',
+                message: overrides.message || templateResult.message || 'คุณมีการแจ้งเตือนใหม่',
+                metadata: { // Map 'data' to 'metadata' JSON field
+                    ...data,
+                    timestamp: new Date().toISOString()
+                },
+                isRead: false
             }
         });
 
-        await notification.save();
         console.log(`[NotificationService] Sent ${type} notification to user ${recipientId}`);
-
         return notification;
+
     } catch (error) {
         console.error('[NotificationService] Error sending notification:', error.message);
         return null;
@@ -116,4 +119,3 @@ module.exports = {
     NotifyType,
     NotifyTemplates
 };
-

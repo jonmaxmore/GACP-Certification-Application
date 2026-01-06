@@ -1,171 +1,142 @@
 /**
- * Document Analysis Controller
- * API endpoints for document requirement analysis
+ * Document Analysis Controller - API endpoints for document verification (Prisma Refactor)
+ * 
+ * POST /api/v2/documents/analyze - Analyze required documents
+ * POST /api/v2/documents/validate - Validate uploaded documents
+ * GET /api/v2/documents/requirements - Get base requirements
  */
 
-const DocumentAnalysisService = require('../services/document-analysis-service');
-const PlantMaster = require('../models-mongoose-legacy/PlantMaster-model');
+const documentAnalysisService = require('../services/document-analysis-service');
+const { prisma } = require('../services/prisma-database');
 
-/**
- * GET /api/v2/documents/requirements/:plantId
- * Get base document requirements for a plant type
- */
-async function getPlantRequirements(req, res) {
-    try {
-        const { plantId } = req.params;
-        const { requestType = 'NEW' } = req.query;
+class DocumentAnalysisController {
+    /**
+     * GET /api/v2/documents/plants
+     * Get all available plants for documentation
+     */
+    async getAvailablePlants(req, res) {
+        try {
+            const plants = await prisma.plantSpecies.findMany({
+                where: { isActive: true },
+                orderBy: { sortOrder: 'asc' },
+                select: {
+                    code: true,
+                    nameTH: true,
+                    nameEN: true,
+                    group: true
+                }
+            });
 
-        // Validate plant exists
-        const plant = await PlantMaster.getPlantById(plantId);
-        if (!plant) {
-            return res.status(404).json({
+            res.json({
+                success: true,
+                data: plants.map(p => ({
+                    id: p.code,
+                    code: p.code,
+                    nameTH: p.nameTH,
+                    nameEN: p.nameEN,
+                    group: p.group
+                }))
+            });
+        } catch (error) {
+            console.error('Error fetching plants:', error);
+            res.status(500).json({
                 success: false,
-                error: 'PLANT_NOT_FOUND',
-                message: `Plant with ID '${plantId}' not found`,
+                message: 'Failed to fetch plants',
+                error: error.message
             });
         }
+    }
 
-        const requirements = await DocumentAnalysisService.getBaseRequirements(plantId, requestType);
+    /**
+     * GET /api/v2/documents/requirements/:plantId
+     * Get base document requirements for a plant type
+     */
+    async getPlantRequirements(req, res) {
+        try {
+            const { plantId } = req.params;
+            const { requestType = 'NEW' } = req.query;
 
-        return res.json({
-            success: true,
-            data: {
-                plantId: plant.plantId,
-                plantName: plant.nameEN,
-                plantNameTH: plant.nameTH,
-                plantGroup: plant.group,
-                requestType,
-                requirements,
-            },
-        });
-    } catch (error) {
-        console.error('[DocumentAnalysisController] getPlantRequirements error:', error);
-        return res.status(500).json({
-            success: false,
-            error: 'SERVER_ERROR',
-            message: 'Failed to fetch document requirements',
-        });
+            const requirements = await documentAnalysisService.getBaseRequirements(plantId, requestType.toUpperCase());
+
+            res.json({
+                success: true,
+                data: requirements
+            });
+        } catch (error) {
+            console.error('Error fetching requirements:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Failed to fetch requirements',
+                error: error.message
+            });
+        }
+    }
+
+    /**
+     * POST /api/v2/documents/analyze
+     * Analyze required documents based on application data
+     */
+    async analyzeDocuments(req, res) {
+        try {
+            const { plantId, requestType, applicationData } = req.body;
+
+            if (!plantId || !requestType) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'plantId and requestType are required'
+                });
+            }
+
+            const analysis = await documentAnalysisService.analyzeRequiredDocuments(
+                plantId,
+                requestType.toUpperCase(),
+                applicationData || {}
+            );
+
+            res.json({
+                success: true,
+                data: analysis
+            });
+        } catch (error) {
+            console.error('Error analyzing documents:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Failed to analyze documents',
+                error: error.message
+            });
+        }
+    }
+
+    /**
+     * POST /api/v2/documents/validate
+     * Validate that all required documents have been uploaded
+     */
+    async validateDocuments(req, res) {
+        try {
+            const { uploadedDocs, requirements } = req.body;
+
+            if (!Array.isArray(uploadedDocs) || !Array.isArray(requirements)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'uploadedDocs and requirements must be arrays'
+                });
+            }
+
+            const validation = documentAnalysisService.validateDocuments(uploadedDocs, requirements);
+
+            res.json({
+                success: true,
+                data: validation
+            });
+        } catch (error) {
+            console.error('Error validating documents:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Failed to validate documents',
+                error: error.message
+            });
+        }
     }
 }
 
-/**
- * POST /api/v2/documents/analyze
- * Analyze required documents based on application data
- */
-async function analyzeDocuments(req, res) {
-    try {
-        const { plantId, requestType = 'NEW', applicationData = {} } = req.body;
-
-        if (!plantId) {
-            return res.status(400).json({
-                success: false,
-                error: 'VALIDATION_ERROR',
-                message: 'plantId is required',
-            });
-        }
-
-        const analysis = await DocumentAnalysisService.analyzeRequiredDocuments(
-            plantId,
-            requestType,
-            applicationData
-        );
-
-        return res.json({
-            success: true,
-            data: analysis,
-        });
-    } catch (error) {
-        console.error('[DocumentAnalysisController] analyzeDocuments error:', error);
-
-        if (error.message?.includes('not found')) {
-            return res.status(404).json({
-                success: false,
-                error: 'PLANT_NOT_FOUND',
-                message: error.message,
-            });
-        }
-
-        return res.status(500).json({
-            success: false,
-            error: 'SERVER_ERROR',
-            message: 'Failed to analyze document requirements',
-        });
-    }
-}
-
-/**
- * POST /api/v2/documents/validate
- * Validate that all required documents have been uploaded
- */
-async function validateDocuments(req, res) {
-    try {
-        const { plantId, requestType = 'NEW', applicationData = {}, uploadedDocs = [] } = req.body;
-
-        if (!plantId) {
-            return res.status(400).json({
-                success: false,
-                error: 'VALIDATION_ERROR',
-                message: 'plantId is required',
-            });
-        }
-
-        const analysis = await DocumentAnalysisService.analyzeRequiredDocuments(
-            plantId,
-            requestType,
-            applicationData
-        );
-
-        const validation = DocumentAnalysisService.validateDocuments(
-            uploadedDocs,
-            analysis.documents
-        );
-
-        return res.json({
-            success: true,
-            data: validation,
-        });
-    } catch (error) {
-        console.error('[DocumentAnalysisController] validateDocuments error:', error);
-        return res.status(500).json({
-            success: false,
-            error: 'SERVER_ERROR',
-            message: 'Failed to validate documents',
-        });
-    }
-}
-
-/**
- * GET /api/v2/documents/plants
- * Get all available plants for document configuration
- */
-async function getAvailablePlants(req, res) {
-    try {
-        const plants = await PlantMaster.getActivePlants();
-
-        return res.json({
-            success: true,
-            data: plants.map(p => ({
-                plantId: p.plantId,
-                nameEN: p.nameEN,
-                nameTH: p.nameTH,
-                group: p.group,
-                requiresStrictLicense: p.requiresStrictLicense,
-            })),
-        });
-    } catch (error) {
-        console.error('[DocumentAnalysisController] getAvailablePlants error:', error);
-        return res.status(500).json({
-            success: false,
-            error: 'SERVER_ERROR',
-            message: 'Failed to fetch plants',
-        });
-    }
-}
-
-module.exports = {
-    getPlantRequirements,
-    analyzeDocuments,
-    validateDocuments,
-    getAvailablePlants,
-};
-
+module.exports = new DocumentAnalysisController();

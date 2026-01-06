@@ -6,8 +6,7 @@
  * and can be updated without releasing a new app version.
  */
 
-const DocumentRequirement = require('../models-mongoose-legacy/DocumentRequirement-model');
-const PlantMaster = require('../models-mongoose-legacy/PlantMaster-model');
+const { prisma } = require('./prisma-database');
 
 class DocumentAnalysisService {
     /**
@@ -17,15 +16,24 @@ class DocumentAnalysisService {
      * @returns {Promise<Array>} List of document requirements
      */
     async getBaseRequirements(plantId, requestType = 'NEW') {
-        const docs = await DocumentRequirement.getRequirementsForPlant(plantId, requestType);
+        const docs = await prisma.documentRequirement.findMany({
+            where: {
+                plantCode: plantId,
+                requestType: requestType
+            },
+            orderBy: {
+                sortOrder: 'asc'
+            }
+        });
+
         return docs.map(doc => ({
-            id: doc._id.toString(),
+            id: doc.id,
             slotId: doc.documentName.toLowerCase().replace(/\s+/g, '_'),
             name: doc.documentName,
             nameTH: doc.documentNameTH,
             category: doc.category,
             isRequired: doc.isRequired,
-            description: doc.description || doc.descriptionTH,
+            description: doc.description,
             allowedFileTypes: doc.allowedFileTypes || ['pdf', 'jpg', 'png'],
             maxFileSizeMB: doc.maxFileSizeMB || 10,
         }));
@@ -42,7 +50,10 @@ class DocumentAnalysisService {
      */
     async analyzeRequiredDocuments(plantId, requestType, applicationData = {}) {
         // 1. Get plant configuration
-        const plant = await PlantMaster.getPlantById(plantId);
+        const plant = await prisma.plantSpecies.findUnique({
+            where: { code: plantId }
+        });
+
         if (!plant) {
             throw new Error(`Plant not found: ${plantId}`);
         }

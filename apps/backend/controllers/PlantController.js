@@ -1,13 +1,13 @@
 /**
- * Plant Controller - API endpoints for plant data
+ * Plant Controller - API endpoints for plant data (Prisma Refactor)
  * 
  * GET /api/v2/plants - Get all active plants
  * GET /api/v2/plants/:plantId - Get single plant by ID
  * GET /api/v2/plants/:plantId/documents - Get document requirements for plant
  */
 
-const PlantMaster = require('../models-mongoose-legacy/PlantMaster-model');
-const DocumentRequirement = require('../models-mongoose-legacy/DocumentRequirement-model');
+const { prisma } = require('../services/prisma-database');
+const documentAnalysisService = require('../services/document-analysis-service');
 
 class PlantController {
     /**
@@ -18,17 +18,28 @@ class PlantController {
         try {
             const { group } = req.query;
 
-            let plants;
+            const where = { isActive: true };
             if (group) {
-                plants = await PlantMaster.getPlantsByGroup(group.toUpperCase());
-            } else {
-                plants = await PlantMaster.getActivePlants();
+                where.group = group.toUpperCase();
             }
+
+            const plants = await prisma.plantSpecies.findMany({
+                where,
+                orderBy: { sortOrder: 'asc' }
+            });
+
+            // Map to legacy format for frontend compatibility if needed, 
+            // but the new schema is very similar. 
+            // The frontend likely expects 'plantId' property instead of 'code'.
+            const mappedPlants = plants.map(p => ({
+                ...p,
+                plantId: p.code // Alias code to plantId
+            }));
 
             res.json({
                 success: true,
-                data: plants,
-                count: plants.length,
+                data: mappedPlants,
+                count: mappedPlants.length,
             });
         } catch (error) {
             console.error('Error fetching plants:', error);
@@ -48,7 +59,9 @@ class PlantController {
         try {
             const { plantId } = req.params;
 
-            const plant = await PlantMaster.getPlantById(plantId);
+            const plant = await prisma.plantSpecies.findUnique({
+                where: { code: plantId }
+            });
 
             if (!plant) {
                 return res.status(404).json({
@@ -59,7 +72,10 @@ class PlantController {
 
             res.json({
                 success: true,
-                data: plant,
+                data: {
+                    ...plant,
+                    plantId: plant.code
+                },
             });
         } catch (error) {
             console.error('Error fetching plant:', error);
@@ -81,7 +97,10 @@ class PlantController {
             const { requestType = 'NEW' } = req.query;
 
             // Verify plant exists
-            const plant = await PlantMaster.getPlantById(plantId);
+            const plant = await prisma.plantSpecies.findUnique({
+                where: { code: plantId }
+            });
+
             if (!plant) {
                 return res.status(404).json({
                     success: false,
@@ -89,7 +108,8 @@ class PlantController {
                 });
             }
 
-            const documents = await DocumentRequirement.getRequirementsForPlant(plantId, requestType.toUpperCase());
+            // Use the service to get base requirements
+            const documents = await documentAnalysisService.getBaseRequirements(plantId, requestType.toUpperCase());
 
             // Group by category
             const grouped = documents.reduce((acc, doc) => {
@@ -104,7 +124,7 @@ class PlantController {
             res.json({
                 success: true,
                 data: {
-                    plantId: plant.plantId,
+                    plantId: plant.code,
                     plantName: plant.nameTH,
                     requestType: requestType.toUpperCase(),
                     documents: documents,
@@ -130,7 +150,9 @@ class PlantController {
         try {
             const { plantId } = req.params;
 
-            const plant = await PlantMaster.getPlantById(plantId);
+            const plant = await prisma.plantSpecies.findUnique({
+                where: { code: plantId }
+            });
 
             if (!plant) {
                 return res.status(404).json({
@@ -142,7 +164,7 @@ class PlantController {
             res.json({
                 success: true,
                 data: {
-                    plantId: plant.plantId,
+                    plantId: plant.code,
                     plantName: plant.nameTH,
                     group: plant.group,
                     units: plant.units,
@@ -167,15 +189,18 @@ class PlantController {
      */
     async getPlantsSummary(req, res) {
         try {
-            const plants = await PlantMaster.getActivePlants();
+            const plants = await prisma.plantSpecies.findMany({
+                where: { isActive: true },
+                orderBy: { sortOrder: 'asc' }
+            });
 
             const summary = plants.map(p => ({
-                id: p.plantId,
+                id: p.code, // Frontend uses 'id' for value
                 nameTH: p.nameTH,
                 nameEN: p.nameEN,
                 group: p.group,
-                requiresLicense: p.requiresStrictLicense,
-                unit: p.units[0] || 'ไร่',
+                requiresLicense: p.requiresLicense,
+                unit: (p.units && p.units.length > 0) ? p.units[0] : 'ไร่',
             }));
 
             res.json({
@@ -195,4 +220,3 @@ class PlantController {
 }
 
 module.exports = new PlantController();
-

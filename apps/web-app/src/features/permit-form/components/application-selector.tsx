@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import api from '@/services/api-client';
+import { apiClient as api } from '@/lib/api';
 
 interface PricingConfig {
     config: {

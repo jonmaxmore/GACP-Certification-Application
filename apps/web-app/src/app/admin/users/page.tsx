@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import api from "@/services/api-client";
+import { apiClient as api } from "@/lib/api";
 
 interface StaffUser {
     id: string;

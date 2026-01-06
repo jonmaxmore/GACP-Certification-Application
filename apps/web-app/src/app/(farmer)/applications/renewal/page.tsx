@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import api from '@/services/api-client';
+import { apiClient as api } from '@/lib/api';
 import { Certificate, RENEWAL_FEE, REQUIRED_DOCS, RenewalStep } from './types';
 import { UploadStep } from './UploadStep';
 import { QuotationStep } from './QuotationStep';

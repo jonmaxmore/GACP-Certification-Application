@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/services/api-client';
+import { apiClient as api } from '@/lib/api';
 
 // Role labels
 export const ROLE_LABELS: Record<string, { label: string; icon: string }> = {

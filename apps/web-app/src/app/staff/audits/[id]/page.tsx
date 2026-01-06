@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import api from "@/services/api-client";
+import { apiClient as api } from "@/lib/api";
 import { IconDocument, IconCheckCircle } from "@/components/ui/icons";
 
 // Additional icons for this page

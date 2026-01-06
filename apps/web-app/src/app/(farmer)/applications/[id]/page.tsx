@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import api from "@/services/api-client";
+import { apiClient as api } from "@/lib/api";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; step: number }> = {
     DRAFT: { label: "ร่าง", color: "#8A8A8A", step: 1 },

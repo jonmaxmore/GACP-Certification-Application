@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, ReactNode, useCallback } from "react";
-import api from "@/services/api-client";
+import { apiClient as api } from "@/lib/api";
 import { colors } from "@/lib/design-tokens";
 
 interface SystemGuardProps {

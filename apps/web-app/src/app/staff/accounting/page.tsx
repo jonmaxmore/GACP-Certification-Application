@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import api from "@/services/api-client";
+import { apiClient as api } from "@/lib/api";
 import StaffLayout from "../components/StaffLayout";
 import { IconDocument, IconCreditCard, IconCheckCircle, IconClock } from "@/components/ui/icons";
 

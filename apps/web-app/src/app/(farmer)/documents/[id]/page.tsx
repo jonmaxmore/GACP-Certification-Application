@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import api from "@/services/api-client";
+import { apiClient as api } from "@/lib/api";
 
 interface DocumentInfo { _id: string; name: string; type: string; url: string; size: number; uploadedAt: string; applicationId: string; }
 

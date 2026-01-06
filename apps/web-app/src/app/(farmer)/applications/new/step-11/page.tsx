@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWizardStore } from '../hooks/useWizardStore';
-import api from '@/services/api-client';
+import { apiClient as api } from '@/lib/api';
 
 const FEE_PER_SITE_TYPE = 5000;
 

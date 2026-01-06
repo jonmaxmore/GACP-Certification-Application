@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWizardStore, PLANTS } from '../hooks/useWizardStore';
-import api from '@/services/api-client';
+import { apiClient as api } from '@/lib/api';
 
 const SITE_TYPE_LABELS: Record<string, string> = { OUTDOOR: 'กลางแจ้ง (Outdoor)', INDOOR: 'โรงเรือนระบบปิด (Indoor)', GREENHOUSE: 'โรงเรือนทั่วไป (Greenhouse)' };
 const PURPOSE_LABELS: Record<string, string> = { RESEARCH: 'เพื่อการศึกษาวิจัย', COMMERCIAL: 'เพื่อการพาณิชย์ (จำหน่าย/แปรรูป)', EXPORT: 'เพื่อการพาณิชย์ (ส่งออก)' };

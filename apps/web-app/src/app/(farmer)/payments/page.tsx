@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import api from "@/services/api-client";
+import { apiClient as api } from "@/lib/api";
 import {
     IconHome, IconDocument, IconCompass, IconCreditCard, IconUser,
     IconSun, IconMoon, IconLogout, IconCheckCircle, IconClock, IconReceipt

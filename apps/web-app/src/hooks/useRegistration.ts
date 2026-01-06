@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from 'react';
-import api from '@/services/api-client';
+import { apiClient as api } from '@/lib/api';
 
 // Account types
 export const ACCOUNT_TYPES = [

@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import api from "@/services/api-client";
+import { apiClient as api } from "@/lib/api";
 
 interface EditableField { key: string; label: string; value: string; originalValue: string; isModified: boolean; }
 

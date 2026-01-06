@@ -1,10 +1,11 @@
 /**
  * Seed Test Farmer Accounts for Cannabis Application Testing
- * Run from apps/backend: node seed-test-farmers.js
+ * Run from apps/backend: cp ../../scripts/seed-test-farmers.js . && node seed-test-farmers.js
  */
 
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
+const { hash } = require('./shared/encryption'); // Use same hash as auth service
 
 const prisma = new PrismaClient();
 
@@ -13,7 +14,7 @@ async function main() {
 
     const password = await bcrypt.hash('Test1234', 12);
 
-    // Test accounts for all 3 types
+    // Test accounts for all 3 types - using hash() function for proper lookups
     const testFarmers = [
         {
             // บุคคลธรรมดา (Individual)
@@ -21,7 +22,7 @@ async function main() {
             password,
             accountType: 'INDIVIDUAL',
             idCard: '1234567890121', // Valid checksum
-            idCardHash: '1234567890121_hash',
+            idCardHash: hash('1234567890121'), // Proper hash for lookup!
             firstName: 'สมชาย',
             lastName: 'ทดสอบ',
             phoneNumber: '0812345678',
@@ -35,7 +36,7 @@ async function main() {
             password,
             accountType: 'JURISTIC',
             taxId: '0105556012345',
-            taxIdHash: '0105556012345_hash',
+            taxIdHash: hash('0105556012345'), // Proper hash for lookup!
             companyName: 'บริษัท ทดสอบสมุนไพร จำกัด',
             representativeName: 'นายประสิทธิ์ ทดสอบ',
             phoneNumber: '0823456789',
@@ -49,7 +50,7 @@ async function main() {
             password,
             accountType: 'COMMUNITY_ENTERPRISE',
             communityRegistrationNo: '5-01-01-50/001',
-            communityRegistrationNoHash: '5010150001_hash',
+            communityRegistrationNoHash: hash('501015001'), // Proper hash (without dashes)
             communityName: 'กลุ่มวิสาหกิจทดสอบสมุนไพร',
             representativeName: 'นางสาวสมหญิง ทดสอบ',
             phoneNumber: '0834567890',
@@ -61,17 +62,17 @@ async function main() {
 
     for (const farmer of testFarmers) {
         try {
-            // Check if exists
+            // Delete existing account (if any)
             const existing = await prisma.user.findFirst({
                 where: { email: farmer.email }
             });
 
             if (existing) {
-                console.log(`⚠️  ${farmer.accountType} already exists: ${farmer.email}`);
-                continue;
+                await prisma.user.delete({ where: { id: existing.id } });
+                console.log(`🗑️  Deleted existing: ${farmer.email}`);
             }
 
-            // Create user
+            // Create fresh user
             await prisma.user.create({ data: farmer });
 
             console.log(`✅ Created ${farmer.accountType}:`);

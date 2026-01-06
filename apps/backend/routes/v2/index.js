@@ -22,6 +22,8 @@ const staffRouter = require('./staff');
 const auditsRouter = require('./audits');
 const certificatesRouter = require('./certificates');
 const paymentsRouter = require('./payments');
+const quotesRouter = require('./quotes');
+const accountingRouter = require('./accounting');
 
 // Mount V2 routes
 router.use('/notifications', notificationsRouter);
@@ -38,6 +40,8 @@ router.use('/staff', staffRouter);
 router.use('/audits', auditsRouter);
 router.use('/certificates', certificatesRouter);
 router.use('/payments', paymentsRouter);
+router.use('/quotes', quotesRouter);
+router.use('/accounting', accountingRouter);
 
 // Health check with version info
 router.get('/health', (req, res) => {

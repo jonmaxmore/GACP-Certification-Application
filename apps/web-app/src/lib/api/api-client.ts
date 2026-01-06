@@ -55,7 +55,9 @@ class ApiClient {
             ...(init.headers as Record<string, string>),
         };
 
-        // Auto-attach Authorization header (fixes "Broken Chain")
+        // Fallback: Only attach Authorization header if no httpOnly cookie available
+        // Primary auth is via httpOnly cookie (credentials: 'include')
+        // This fallback is for mobile apps that don't use cookies
         if (!skipAuth) {
             const token = AuthService.getToken();
             if (token) {
@@ -76,6 +78,7 @@ class ApiClient {
                 headers,
                 body: body ? JSON.stringify(body) : undefined,
                 signal: controller.signal,
+                credentials: 'include', // 🔐 Send httpOnly cookies automatically
             });
 
             clearTimeout(timeoutId);

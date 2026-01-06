@@ -5,7 +5,10 @@
 
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
-const { hash } = require('./shared/encryption'); // Use same hash as auth service
+const crypto = require('crypto');
+
+// Use same hash as auth service (SHA-256)
+const hash = (text) => crypto.createHash('sha256').update(String(text)).digest('hex');
 
 const prisma = new PrismaClient();
 
@@ -22,7 +25,7 @@ async function main() {
             password,
             accountType: 'INDIVIDUAL',
             idCard: '1234567890121', // Valid checksum
-            idCardHash: hash('1234567890121'), // Proper hash for lookup!
+            idCardHash: hash('1234567890121'), // Proper SHA-256 hash!
             firstName: 'สมชาย',
             lastName: 'ทดสอบ',
             phoneNumber: '0812345678',
@@ -36,7 +39,7 @@ async function main() {
             password,
             accountType: 'JURISTIC',
             taxId: '0105556012345',
-            taxIdHash: hash('0105556012345'), // Proper hash for lookup!
+            taxIdHash: hash('0105556012345'), // Proper SHA-256 hash!
             companyName: 'บริษัท ทดสอบสมุนไพร จำกัด',
             representativeName: 'นายประสิทธิ์ ทดสอบ',
             phoneNumber: '0823456789',
@@ -50,7 +53,7 @@ async function main() {
             password,
             accountType: 'COMMUNITY_ENTERPRISE',
             communityRegistrationNo: '5-01-01-50/001',
-            communityRegistrationNoHash: hash('501015001'), // Proper hash (without dashes)
+            communityRegistrationNoHash: hash('501015001'), // Proper SHA-256 hash (without dashes)
             communityName: 'กลุ่มวิสาหกิจทดสอบสมุนไพร',
             representativeName: 'นางสาวสมหญิง ทดสอบ',
             phoneNumber: '0834567890',
@@ -78,6 +81,7 @@ async function main() {
             console.log(`✅ Created ${farmer.accountType}:`);
             console.log(`   Email: ${farmer.email}`);
             console.log(`   ID: ${farmer.idCard || farmer.taxId || farmer.communityRegistrationNo}`);
+            console.log(`   Hash: ${farmer.idCardHash || farmer.taxIdHash || farmer.communityRegistrationNoHash}`);
             console.log(`   Password: Test1234\n`);
 
         } catch (error) {

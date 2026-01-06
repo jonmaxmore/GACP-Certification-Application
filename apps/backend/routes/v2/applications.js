@@ -6,11 +6,19 @@
 const express = require('express');
 const router = express.Router();
 const authModule = require('../../middleware/auth-middleware');
-console.log('DEBUG: Auth Module Path:', require.resolve('../../middleware/auth-middleware'));
-console.log('DEBUG: Auth Module Exports:', Object.keys(authModule));
-const { authenticateFarmer } = authModule;
-console.log('DEBUG: authenticateFarmer type:', typeof authenticateFarmer);
-if (typeof authenticateFarmer !== 'function') console.error('CRITICAL: authenticateFarmer is NOT a function');
+
+// Safe middleware wrapper to prevent startup crashes if module isn't fully loaded
+const authenticateFarmer = (req, res, next) => {
+    if (typeof authModule.authenticateFarmer === 'function') {
+        return authModule.authenticateFarmer(req, res, next);
+    }
+    console.error('CRITICAL: authenticateFarmer is not a function');
+    return res.status(500).json({
+        success: false,
+        error: 'Authentication system error'
+    });
+};
+
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
@@ -19,7 +27,7 @@ const prisma = new PrismaClient();
  * POST /api/v2/applications/draft
  * Save application as draft or submit for review
  */
-router.post('/draft', async (req, res) => {
+router.post('/draft', authenticateFarmer, async (req, res) => {
     try {
         const userId = req.user.id;
         const {
@@ -110,7 +118,7 @@ router.post('/draft', async (req, res) => {
  * GET /api/v2/applications/draft
  * Get current draft for user
  */
-router.get('/draft', async (req, res) => {
+router.get('/draft', authenticateFarmer, async (req, res) => {
     try {
         const userId = req.user.id;
 
@@ -164,7 +172,7 @@ router.get('/draft', async (req, res) => {
  * GET /api/v2/applications
  * List all applications for user
  */
-router.get('/', async (req, res) => {
+router.get('/', authenticateFarmer, async (req, res) => {
     try {
         const userId = req.user.id;
 

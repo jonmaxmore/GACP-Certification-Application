@@ -9,6 +9,8 @@ const authModule = require('../../middleware/auth-middleware');
 console.log('DEBUG: Auth Module Path:', require.resolve('../../middleware/auth-middleware'));
 console.log('DEBUG: Auth Module Exports:', Object.keys(authModule));
 const { authenticateFarmer } = authModule;
+console.log('DEBUG: authenticateFarmer type:', typeof authenticateFarmer);
+if (typeof authenticateFarmer !== 'function') console.error('CRITICAL: authenticateFarmer is NOT a function');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();

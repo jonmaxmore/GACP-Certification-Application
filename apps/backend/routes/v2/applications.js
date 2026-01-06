@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { authMiddleware } = require('../../middleware/auth-middleware');
+const { authenticateFarmer } = require('../../middleware/auth-middleware');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
  * POST /api/v2/applications/draft
  * Save application as draft or submit for review
  */
-router.post('/draft', authMiddleware, async (req, res) => {
+router.post('/draft', authenticateFarmer, async (req, res) => {
     try {
         const userId = req.user.id;
         const {
@@ -105,7 +105,7 @@ router.post('/draft', authMiddleware, async (req, res) => {
  * GET /api/v2/applications/draft
  * Get current draft for user
  */
-router.get('/draft', authMiddleware, async (req, res) => {
+router.get('/draft', authenticateFarmer, async (req, res) => {
     try {
         const userId = req.user.id;
 
@@ -159,7 +159,7 @@ router.get('/draft', authMiddleware, async (req, res) => {
  * GET /api/v2/applications
  * List all applications for user
  */
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authenticateFarmer, async (req, res) => {
     try {
         const userId = req.user.id;
 

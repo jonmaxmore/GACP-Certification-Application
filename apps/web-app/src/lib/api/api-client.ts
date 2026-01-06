@@ -65,8 +65,22 @@ class ApiClient {
             }
         }
 
+        // Smart Path Handling: Auto-prefix with /api/v2 if needed
+        let fullEndpoint = endpoint;
+        if (!endpoint.startsWith('http')) {
+            if (!endpoint.startsWith('/api')) {
+                // If it's a v2 style path (e.g. /applications, /auth-farmer), prepend /api/v2
+                // But check if it's already /v2 (legacy fix)
+                if (endpoint.startsWith('/v2/')) {
+                    fullEndpoint = `/api${endpoint}`;
+                } else {
+                    fullEndpoint = `/api/v2${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+                }
+            }
+        }
+
         // Build full URL
-        const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`;
+        const url = fullEndpoint.startsWith('http') ? fullEndpoint : `${this.baseUrl}${fullEndpoint}`;
 
         // Setup abort controller for timeout
         const controller = new AbortController();

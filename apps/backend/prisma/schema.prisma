@@ -299,6 +299,7 @@ model Invoice {
   farmerId      String
   farmer        User        @relation(fields: [farmerId], references: [id])
   quoteId       String?
+  quote         Quote?      @relation(fields: [quoteId], references: [id])
 
   // Service Type
   serviceType String
@@ -386,6 +387,9 @@ model Quote {
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
 
+  // Relations
+  invoices Invoice[]
+
   @@index([applicationId])
   @@index([status])
   @@index([isDeleted])
@@ -445,6 +449,9 @@ model Farm {
   deletedAt    DateTime?
   deletedBy    String?
   deleteReason String?
+
+  // Relations
+  harvestBatches HarvestBatch[]
 
   @@index([ownerId])
   @@index([status])
@@ -626,6 +633,7 @@ model HarvestBatch {
   
   // ความสัมพันธ์
   farmId    String
+  farm      Farm         @relation(fields: [farmId], references: [id])
   speciesId String
   species   PlantSpecies @relation(fields: [speciesId], references: [id])
   

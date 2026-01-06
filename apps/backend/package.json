@@ -41,7 +41,8 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^13.0.0",
-    "winston": "^3.15.0"
+    "winston": "^3.15.0",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",

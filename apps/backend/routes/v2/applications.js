@@ -19,7 +19,7 @@ const prisma = new PrismaClient();
  * POST /api/v2/applications/draft
  * Save application as draft or submit for review
  */
-router.post('/draft', authenticateFarmer, async (req, res) => {
+router.post('/draft', async (req, res) => {
     try {
         const userId = req.user.id;
         const {
@@ -110,7 +110,7 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
  * GET /api/v2/applications/draft
  * Get current draft for user
  */
-router.get('/draft', authenticateFarmer, async (req, res) => {
+router.get('/draft', async (req, res) => {
     try {
         const userId = req.user.id;
 
@@ -164,7 +164,7 @@ router.get('/draft', authenticateFarmer, async (req, res) => {
  * GET /api/v2/applications
  * List all applications for user
  */
-router.get('/', authenticateFarmer, async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const userId = req.user.id;
 

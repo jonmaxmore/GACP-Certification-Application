@@ -209,6 +209,47 @@ router.get('/', authenticateFarmer, async (req, res) => {
 
 
 /**
+ * GET /api/v2/applications/my
+ * Get current user's applications (for farmers)
+ * This MUST be defined before /:id route to avoid "my" being interpreted as an ID
+ */
+router.get('/my', authenticateFarmer, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const applications = await prisma.application.findMany({
+            where: {
+                userId
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 50
+        });
+
+        res.json({
+            success: true,
+            data: applications.map(app => ({
+                _id: app.id,
+                applicationNumber: app.applicationNumber,
+                plantName: app.plantName,
+                serviceType: app.serviceType,
+                status: app.status,
+                estimatedFee: app.estimatedFee,
+                createdAt: app.createdAt,
+                submittedAt: app.submittedAt
+            }))
+        });
+
+    } catch (error) {
+        console.error('[Applications My] Error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'ไม่สามารถดึงรายการคำขอได้'
+        });
+    }
+});
+
+
+/**
  * ==========================================
  * STAFF / DTAM ENDPOINTS (Migrated from v1)
  * ==========================================

@@ -5,21 +5,11 @@ const nextConfig: NextConfig = {
   output: 'standalone',
 
   // Backend API proxy configuration
+  // NOTE: v2, auth-farmer, auth-dtam are handled by API route handlers
+  // that properly forward Set-Cookie headers. Only establishments uses rewrite.
   async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    const backendUrl = 'http://127.0.0.1:5000';
     return [
-      {
-        source: '/api/v2/:path*',
-        destination: `${backendUrl}/api/v2/:path*`,
-      },
-      {
-        source: '/api/auth-farmer/:path*',
-        destination: `${backendUrl}/api/auth-farmer/:path*`,
-      },
-      {
-        source: '/api/auth-dtam/:path*',
-        destination: `${backendUrl}/api/auth-dtam/:path*`,
-      },
       {
         source: '/api/establishments/:path*',
         destination: `${backendUrl}/api/establishments/:path*`,

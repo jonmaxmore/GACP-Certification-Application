@@ -154,6 +154,15 @@ router.post('/login', authLimiter, async (req, res) => {
         });
     } catch (error) {
         console.error('[Auth] DTAM login error:', error);
+
+        if (error.message === 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' ||
+            error.message === 'บัญชีของคุณถูกระงับการใช้งาน') {
+            return res.status(401).json({
+                success: false,
+                error: error.message
+            });
+        }
+
         res.status(500).json({
             success: false,
             error: 'เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่'

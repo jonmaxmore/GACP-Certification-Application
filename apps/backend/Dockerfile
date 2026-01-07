@@ -1,29 +1,38 @@
+# ============================================================
+# GACP Backend - Production Dockerfile
+# ============================================================
 FROM node:20-alpine
 
 # Create app directory
 WORKDIR /usr/src/app
 
+# Install system dependencies
+RUN apk add --no-cache curl dumb-init
+
 # Install app dependencies
 COPY package*.json ./
-
-# Install production dependencies only
-RUN npm ci --only=production
+RUN npm ci --only=production && npm cache clean --force
 
 # Bundle app source
 COPY . .
 
-# Create uploads directory
-RUN mkdir -p uploads
+# Generate Prisma client
+RUN npx prisma generate
+
+# Create necessary directories
+RUN mkdir -p uploads logs certificates
 
 # Set environment
 ENV NODE_ENV=production
+ENV PORT=5000
 
-# Expose port
-EXPOSE 3000
+# Expose port (internal only - not accessible from public)
+EXPOSE 5000
 
-# Health check for AWS ECS/EKS
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:5000/health || exit 1
 
-# Start command
-CMD [ "node", "server.js" ]
+# Start with dumb-init for proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "server.js"]

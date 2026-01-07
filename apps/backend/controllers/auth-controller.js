@@ -85,24 +85,23 @@ class AuthController {
                 });
             }
 
-            // Handle MongoDB duplicate key error
+            // Handle Prisma duplicate key error (P2002)
             let errorMessage = error.message;
-            if (error.code === 11000 || error.message.includes('E11000')) {
-                // Parse which field caused the duplicate - use regex for actual index name
-                const indexMatch = error.message.match(/index: (\w+)/);
-                const indexName = indexMatch ? indexMatch[1] : '';
+            if (error.code === 'P2002') {
+                const target = error.meta?.target || [];
+                const targetField = Array.isArray(target) ? target[0] : target;
 
-                console.log('[AuthController] Duplicate Key Index:', indexName, 'KeyValue:', error.keyValue);
+                console.log('[AuthController] Duplicate Key Target:', targetField);
 
-                if (indexName.includes('idCardHash') || error.keyValue?.idCardHash) {
+                if (targetField === 'idCardHash' || targetField.includes('idCardHash')) {
                     errorMessage = 'เลขบัตรประชาชนนี้ถูกลงทะเบียนแล้ว';
-                } else if (indexName.includes('taxIdHash') || error.keyValue?.taxIdHash) {
+                } else if (targetField === 'taxIdHash' || targetField.includes('taxIdHash')) {
                     errorMessage = 'เลขทะเบียนนิติบุคคลนี้ถูกลงทะเบียนแล้ว';
-                } else if (indexName.includes('communityRegistrationNoHash') || error.keyValue?.communityRegistrationNoHash) {
+                } else if (targetField === 'communityRegistrationNoHash' || targetField.includes('communityRegistrationNoHash')) {
                     errorMessage = 'เลขทะเบียนวิสาหกิจชุมชนนี้ถูกลงทะเบียนแล้ว';
-                } else if (indexName.includes('phoneNumber') || error.keyValue?.phoneNumber) {
+                } else if (targetField === 'phoneNumber' || targetField.includes('phoneNumber')) {
                     errorMessage = 'เบอร์โทรศัพท์นี้ถูกใช้งานแล้ว';
-                } else if (indexName.includes('email') || error.keyValue?.email) {
+                } else if (targetField === 'email' || targetField.includes('email')) {
                     errorMessage = 'อีเมลนี้ถูกใช้งานแล้ว';
                 } else {
                     errorMessage = 'ข้อมูลนี้ถูกลงทะเบียนในระบบแล้ว';
@@ -178,20 +177,30 @@ class AuthController {
         } catch (error) {
             console.error('[AuthController] Login Error:', error.message);
 
-            // 🔒 ISO 27799: Log failed authentication
-            await auditLogger.logAuth(
-                'LOGIN_FAILURE',
-                'ANONYMOUS',
-                'UNKNOWN',
-                'FAILURE',
-                req.ip || req.connection?.remoteAddress,
-                req.headers['user-agent'],
-                { reason: error.message, accountType: req.body.accountType }
+            // Audit Log (Failed Login - System Error or Auth Failure)
+            await auditLogger.logActivity(
+                req,
+                'AUTH_LOGIN',
+                AuditCategory.AUTH,
+                AuditSeverity.WARNING,
+                'Login failed',
+                { error: error.message }
             );
 
-            res.status(401).json({
+            // Return 401 for known auth errors
+            if (error.message === 'ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง' ||
+                error.message === 'บัญชีถูกระงับการใช้งาน' ||
+                error.message === 'Identifier and password are required') {
+                return res.status(401).json({
+                    success: false,
+                    error: error.message
+                });
+            }
+
+            res.status(500).json({
                 success: false,
-                error: error.message
+                error: 'ระบบเกิดข้อผิดพลาด กรุณาลองใหม่',
+                // stack: error.stack // Hide stack in production/fixes
             });
         }
     }

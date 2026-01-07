@@ -6,7 +6,7 @@
  */
 
 const { prisma } = require('../services/prisma-database');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 
 class UserRepository {
@@ -63,6 +63,29 @@ class UserRepository {
     async findByIdCardHash(idCardHash) {
         return prisma.user.findUnique({
             where: { idCardHash },
+        });
+    }
+
+    /**
+     * Find user by ID card hash (Auth optimized: Lean Select)
+     */
+    async findAuthUserByIdCardHash(idCardHash) {
+        return prisma.user.findUnique({
+            where: { idCardHash },
+            select: {
+                id: true,
+                uuid: true,
+                password: true,
+                role: true,
+                status: true,
+                isLocked: true,
+                lockedUntil: true,
+                accountType: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                phoneNumber: true
+            }
         });
     }
 

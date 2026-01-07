@@ -11,7 +11,7 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { createLogger } = require('../shared/logger');
-const logger = createLogger('security-compliance');
+const logger = createLogger('security-compliance'); // uses bcryptjs
 
 class EncryptionService {
   constructor() {

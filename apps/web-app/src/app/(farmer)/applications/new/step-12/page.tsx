@@ -1,121 +1,93 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-interface SupplementaryCriteria {
-    // การทดสอบและตรวจสอบ
-    contaminantTesting: boolean;
-    contaminantTestingDoc: string;
-    identityTesting: boolean;
-    identityTestingDoc: string;
-    moistureTesting: boolean;
-    moistureTestingDoc: string;
-
-    // ขั้นตอนการผลิต
-    postHarvestProcessing: boolean;
-    postHarvestProcessingDoc: string;
-    masterManufacturingRecord: boolean;
-    masterManufacturingRecordDoc: string;
-
-    // แหล่งที่มา
-    seedSourceDocumentation: boolean;
-    seedSourceDocumentationDoc: string;
-    propagationRecords: boolean;
-    propagationRecordsDoc: string;
-
-    // สุขอนามัยและความปลอดภัย
-    personnelHygiene: boolean;
-    personnelHygieneDoc: string;
-    productRecallProcedure: boolean;
-    productRecallProcedureDoc: string;
-    complaintRecords: boolean;
-    complaintRecordsDoc: string;
+interface CriterionItem {
+    id: string;
+    code: string;
+    label: string;
+    description: string;
+    isRequired: boolean;
+    inputType: string;
 }
 
-const defaultCriteria: SupplementaryCriteria = {
-    contaminantTesting: false,
-    contaminantTestingDoc: '',
-    identityTesting: false,
-    identityTestingDoc: '',
-    moistureTesting: false,
-    moistureTestingDoc: '',
-    postHarvestProcessing: false,
-    postHarvestProcessingDoc: '',
-    masterManufacturingRecord: false,
-    masterManufacturingRecordDoc: '',
-    seedSourceDocumentation: false,
-    seedSourceDocumentationDoc: '',
-    propagationRecords: false,
-    propagationRecordsDoc: '',
-    personnelHygiene: false,
-    personnelHygieneDoc: '',
-    productRecallProcedure: false,
-    productRecallProcedureDoc: '',
-    complaintRecords: false,
-    complaintRecordsDoc: '',
-};
+interface CriteriaCategory {
+    category: string;
+    categoryTH: string;
+    icon: string;
+    items: CriterionItem[];
+}
 
-const criteriaItems = [
-    {
-        category: 'การทดสอบและตรวจสอบ',
-        icon: '🧪',
-        items: [
-            { key: 'contaminantTesting', label: 'ผลตรวจสารปนเปื้อน', description: 'รายงานการตรวจสารปนเปื้อน เช่น โลหะหนัก ยาฆ่าแมลง' },
-            { key: 'identityTesting', label: 'ผลตรวจอัตลักษณ์', description: 'รายงานยืนยันชนิดพืช/สายพันธุ์' },
-            { key: 'moistureTesting', label: 'ผลตรวจความชื้น', description: 'รายงานวัดความชื้นผลิตภัณฑ์' },
-        ]
-    },
-    {
-        category: 'ขั้นตอนการผลิต',
-        icon: '⚙️',
-        items: [
-            { key: 'postHarvestProcessing', label: 'บันทึกขั้นตอนหลังเก็บเกี่ยว', description: 'เอกสารกระบวนการอบแห้ง บรรจุ เก็บรักษา' },
-            { key: 'masterManufacturingRecord', label: 'บันทึกการผลิตหลัก', description: 'เอกสาร Master Manufacturing Record' },
-        ]
-    },
-    {
-        category: 'แหล่งที่มาเมล็ดพันธุ์',
-        icon: '🌱',
-        items: [
-            { key: 'seedSourceDocumentation', label: 'เอกสารแหล่งที่มาเมล็ดพันธุ์', description: 'ใบรับรองแหล่งที่มา/ใบเสร็จซื้อเมล็ด' },
-            { key: 'propagationRecords', label: 'บันทึกการขยายพันธุ์', description: 'เอกสารวิธีการขยายพันธุ์' },
-        ]
-    },
-    {
-        category: 'สุขอนามัยและความปลอดภัย',
-        icon: '🛡️',
-        items: [
-            { key: 'personnelHygiene', label: 'เอกสารสุขอนามัยพนักงาน', description: 'ใบรับรองสุขภาพ/การอบรมสุขอนามัย' },
-            { key: 'productRecallProcedure', label: 'แผนการเรียกคืนสินค้า', description: 'เอกสารขั้นตอนเรียกคืนสินค้า' },
-            { key: 'complaintRecords', label: 'ระบบบันทึกข้อร้องเรียน', description: 'เอกสารขั้นตอนรับเรื่องร้องเรียน' },
-        ]
-    },
-];
+interface CriteriaValues {
+    [code: string]: {
+        checked: boolean;
+        note: string;
+    };
+}
 
 export default function SupplementaryCriteriaPage() {
     const router = useRouter();
-    const [criteria, setCriteria] = useState<SupplementaryCriteria>(defaultCriteria);
+    const [categories, setCategories] = useState<CriteriaCategory[]>([]);
+    const [values, setValues] = useState<CriteriaValues>({});
+    const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleCheckboxChange = (key: string) => {
-        setCriteria(prev => ({
+    useEffect(() => {
+        fetchCriteria();
+    }, []);
+
+    async function fetchCriteria() {
+        try {
+            const res = await fetch('/api/proxy/v2/criteria');
+            const data = await res.json();
+
+            if (data.success && data.data) {
+                setCategories(data.data);
+
+                // Initialize values
+                const initialValues: CriteriaValues = {};
+                data.data.forEach((cat: CriteriaCategory) => {
+                    cat.items.forEach((item) => {
+                        initialValues[item.code] = { checked: false, note: '' };
+                    });
+                });
+                setValues(initialValues);
+            } else {
+                setError('ไม่สามารถโหลดข้อมูลเกณฑ์ได้');
+            }
+        } catch (err) {
+            console.error('Error fetching criteria:', err);
+            setError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const handleCheckChange = (code: string) => {
+        setValues(prev => ({
             ...prev,
-            [key]: !prev[key as keyof SupplementaryCriteria]
+            [code]: {
+                ...prev[code],
+                checked: !prev[code]?.checked
+            }
         }));
     };
 
-    const handleDocChange = (key: string, value: string) => {
-        setCriteria(prev => ({
+    const handleNoteChange = (code: string, note: string) => {
+        setValues(prev => ({
             ...prev,
-            [`${key}Doc`]: value
+            [code]: {
+                ...prev[code],
+                note
+            }
         }));
     };
 
     const handleSkip = async () => {
         setSaving(true);
         try {
-            // Save as skipped
             // TODO: Call API to save supplementarySkipped = true
             console.log('Skipping supplementary criteria');
             router.push('/applications/new/success');
@@ -129,9 +101,8 @@ export default function SupplementaryCriteriaPage() {
     const handleSubmit = async () => {
         setSaving(true);
         try {
-            // Save criteria
-            // TODO: Call API to save supplementaryCriteria = criteria
-            console.log('Saving supplementary criteria:', criteria);
+            // TODO: Call API to save supplementaryCriteria = values
+            console.log('Saving supplementary criteria:', values);
             router.push('/applications/new/success');
         } catch (error) {
             console.error('Error:', error);
@@ -140,9 +111,36 @@ export default function SupplementaryCriteriaPage() {
         }
     };
 
-    const filledCount = Object.entries(criteria).filter(
-        ([key, value]) => !key.endsWith('Doc') && value === true
-    ).length;
+    const filledCount = Object.values(values).filter(v => v.checked).length;
+    const totalCount = Object.keys(values).length;
+
+    if (loading) {
+        return (
+            <div className="max-w-4xl mx-auto p-6">
+                <div className="animate-pulse space-y-4">
+                    <div className="h-24 bg-gray-200 rounded-xl"></div>
+                    <div className="h-16 bg-gray-200 rounded-lg"></div>
+                    <div className="h-48 bg-gray-200 rounded-xl"></div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="max-w-4xl mx-auto p-6">
+                <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                    <p className="text-red-600">{error}</p>
+                    <button
+                        onClick={fetchCriteria}
+                        className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                    >
+                        ลองใหม่
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-4xl mx-auto">
@@ -168,53 +166,70 @@ export default function SupplementaryCriteriaPage() {
             <div className="bg-white rounded-lg p-4 mb-6 border shadow-sm">
                 <div className="flex justify-between items-center">
                     <span className="text-gray-600">กรอกไปแล้ว</span>
-                    <span className="font-bold text-blue-600">{filledCount} / {criteriaItems.reduce((acc, cat) => acc + cat.items.length, 0)} รายการ</span>
+                    <span className="font-bold text-blue-600">{filledCount} / {totalCount} รายการ</span>
                 </div>
             </div>
 
-            {/* Criteria Categories */}
-            <div className="space-y-6">
-                {criteriaItems.map((category, catIdx) => (
-                    <div key={catIdx} className="bg-white rounded-xl shadow-sm border overflow-hidden">
-                        <div className="bg-gray-50 px-6 py-4 border-b">
-                            <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                                <span className="text-xl">{category.icon}</span>
-                                {category.category}
-                            </h3>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            {category.items.map((item) => (
-                                <div key={item.key} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                                    <label className="flex items-start gap-4 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={criteria[item.key as keyof SupplementaryCriteria] as boolean}
-                                            onChange={() => handleCheckboxChange(item.key)}
-                                            className="mt-1 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                        />
-                                        <div className="flex-1">
-                                            <div className="font-medium text-gray-800">{item.label}</div>
-                                            <div className="text-sm text-gray-500">{item.description}</div>
-
-                                            {criteria[item.key as keyof SupplementaryCriteria] && (
-                                                <div className="mt-3">
-                                                    <input
-                                                        type="text"
-                                                        placeholder="หมายเหตุหรือเลขที่เอกสาร (ถ้ามี)"
-                                                        value={criteria[`${item.key}Doc` as keyof SupplementaryCriteria] as string}
-                                                        onChange={(e) => handleDocChange(item.key, e.target.value)}
-                                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                    />
+            {/* Dynamic Criteria Categories */}
+            {categories.length === 0 ? (
+                <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
+                    <p className="text-gray-500">ยังไม่มีเกณฑ์เสริมในระบบ</p>
+                    <button
+                        onClick={handleSkip}
+                        className="mt-4 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                    >
+                        ข้ามขั้นตอนนี้
+                    </button>
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    {categories.map((category) => (
+                        <div key={category.category} className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                            <div className="bg-gray-50 px-6 py-4 border-b">
+                                <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                                    <span className="text-xl">{category.icon}</span>
+                                    {category.categoryTH || category.category}
+                                </h3>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                {category.items.map((item) => (
+                                    <div key={item.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                                        <label className="flex items-start gap-4 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={values[item.code]?.checked || false}
+                                                onChange={() => handleCheckChange(item.code)}
+                                                className="mt-1 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <div className="flex-1">
+                                                <div className="font-medium text-gray-800">
+                                                    {item.label}
+                                                    {item.isRequired && <span className="text-red-500 ml-1">*</span>}
                                                 </div>
-                                            )}
-                                        </div>
-                                    </label>
-                                </div>
-                            ))}
+                                                {item.description && (
+                                                    <div className="text-sm text-gray-500">{item.description}</div>
+                                                )}
+
+                                                {values[item.code]?.checked && (
+                                                    <div className="mt-3">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="หมายเหตุหรือเลขที่เอกสาร (ถ้ามี)"
+                                                            value={values[item.code]?.note || ''}
+                                                            onChange={(e) => handleNoteChange(item.code, e.target.value)}
+                                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
 
             {/* Actions */}
             <div className="mt-8 bg-white rounded-xl shadow-sm border p-6">

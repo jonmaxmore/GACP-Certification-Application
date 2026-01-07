@@ -964,3 +964,42 @@ model Lot {
   @@index([isDeleted])
   @@map("lots")
 }
+
+// =============================================================================
+// SUPPLEMENTARY CRITERION MODEL (เกณฑ์เสริม)
+// =============================================================================
+model SupplementaryCriterion {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Category (หมวดหมู่)
+  category    String   // เช่น "การทดสอบ", "ขั้นตอนการผลิต", "สุขอนามัย"
+  categoryTH  String?  // ชื่อภาษาไทย
+
+  // Criterion details
+  code        String   @unique // รหัสเกณฑ์ เช่น "CONTAMINANT_TEST"
+  label       String   // ชื่อเกณฑ์ เช่น "ผลตรวจสารปนเปื้อน"
+  description String?  // คำอธิบายเพิ่มเติม
+
+  // Display settings
+  sortOrder   Int      @default(0)  // ลำดับการแสดง
+  icon        String?  // Emoji หรือ icon name
+
+  // Validation
+  isRequired  Boolean  @default(false)  // บังคับกรอก?
+  inputType   String   @default("checkbox") // checkbox, text, file, number
+
+  // Status
+  isActive    Boolean  @default(true)
+
+  // Audit
+  createdBy   String?
+  updatedBy   String?
+
+  @@index([category])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("supplementary_criteria")
+}
+

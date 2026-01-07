@@ -68,8 +68,8 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - NEXT_PUBLIC_API_URL=${PUBLIC_API_URL:-https://api.gacp.local}
-      - NEXT_PUBLIC_WEB_URL=${PUBLIC_WEB_URL:-https://farmer.gacp.local}
+      - NEXT_PUBLIC_API_URL=${PUBLIC_API_URL:-http://47.129.167.71/api}
+      - NEXT_PUBLIC_WEB_URL=${PUBLIC_WEB_URL:-http://47.129.167.71}
     depends_on:
       - backend
     networks:

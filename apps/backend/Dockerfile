@@ -16,6 +16,14 @@ COPY package.json ./
 RUN npm install --omit=dev && npm cache clean --force
 
 # Bundle app source
+# Bundle app source - Explicitly copy critical folders first to debug missing files
+COPY middleware ./middleware
+COPY routes ./routes
+COPY services ./services
+COPY shared ./shared
+COPY utils ./utils
+COPY config ./config
+COPY controllers ./controllers
 COPY . .
 
 # Generate Prisma client

@@ -1,18 +1,25 @@
 # ============================================================
 # GACP Backend - Production Dockerfile
 # ============================================================
-FROM node:20-alpine
+FROM node:20-slim
 
 # Create app directory
 WORKDIR /usr/src/app
 
-# Install system dependencies
-RUN apk add --no-cache curl dumb-init openssl compat-openssl11
+# Install system dependencies (Debian/Ubuntu style)
+# openssl, curl, dumb-init are usually available or easy to get
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  openssl \
+  curl \
+  dumb-init \
+  && rm -rf /var/lib/apt/lists/*
 
-# Copy package.json ONLY (Ignore lockfile for fresh install reliability)
+# Copy package.json ONLY (Ignore lockfile to avoid conflicts, use npm install)
 COPY package.json ./
 
-# Install app dependencies (using install instead of ci to ignore lockfile)
+# Install app dependencies
+# Use --omit=dev for production
+# Use --legacy-peer-deps to avoid ERESOLVE errors
 RUN npm install --omit=dev --legacy-peer-deps && npm cache clean --force
 
 # Bundle app source

@@ -362,4 +362,36 @@ router.post('/:id/review', authenticateDTAM, async (req, res) => {
     }
 });
 
+/**
+ * PATCH /api/v2/applications/:id/criteria
+ * Save supplementary criteria to application
+ */
+router.patch('/:id/criteria', authenticateFarmer, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { supplementaryCriteria, supplementarySkipped } = req.body;
+
+        const updated = await prisma.application.update({
+            where: { id },
+            data: {
+                supplementaryCriteria: supplementaryCriteria || undefined,
+                supplementarySkipped: supplementarySkipped || false
+            }
+        });
+
+        res.json({
+            success: true,
+            message: 'Supplementary criteria saved',
+            data: {
+                id: updated.id,
+                supplementarySkipped: updated.supplementarySkipped
+            }
+        });
+    } catch (error) {
+        console.error('[Applications] criteria save error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 module.exports = router;
+

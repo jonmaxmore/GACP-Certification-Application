@@ -88,11 +88,23 @@ export default function SupplementaryCriteriaPage() {
     const handleSkip = async () => {
         setSaving(true);
         try {
-            // TODO: Call API to save supplementarySkipped = true
-            console.log('Skipping supplementary criteria');
+            // Get applicationId from localStorage or URL
+            const applicationId = localStorage.getItem('currentApplicationId');
+            if (applicationId) {
+                await fetch(`/api/proxy/v2/applications/${applicationId}/criteria`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        supplementarySkipped: true,
+                        supplementaryCriteria: null
+                    })
+                });
+            }
             router.push('/applications/new/success');
         } catch (error) {
             console.error('Error:', error);
+            // Continue anyway
+            router.push('/applications/new/success');
         } finally {
             setSaving(false);
         }
@@ -101,11 +113,23 @@ export default function SupplementaryCriteriaPage() {
     const handleSubmit = async () => {
         setSaving(true);
         try {
-            // TODO: Call API to save supplementaryCriteria = values
-            console.log('Saving supplementary criteria:', values);
+            // Get applicationId from localStorage or URL
+            const applicationId = localStorage.getItem('currentApplicationId');
+            if (applicationId) {
+                await fetch(`/api/proxy/v2/applications/${applicationId}/criteria`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        supplementarySkipped: false,
+                        supplementaryCriteria: values
+                    })
+                });
+            }
             router.push('/applications/new/success');
         } catch (error) {
             console.error('Error:', error);
+            // Continue anyway
+            router.push('/applications/new/success');
         } finally {
             setSaving(false);
         }

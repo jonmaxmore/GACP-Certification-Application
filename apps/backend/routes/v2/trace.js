@@ -40,6 +40,19 @@ router.get('/:qrCode', async (req, res) => {
                                 nameTH: true,
                                 nameEN: true
                             }
+                        },
+                        cycle: {
+                            include: {
+                                certificate: {
+                                    select: {
+                                        id: true,
+                                        certificateNumber: true,
+                                        expiryDate: true,
+                                        issuedAt: true,
+                                        status: true
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -47,6 +60,7 @@ router.get('/:qrCode', async (req, res) => {
         });
 
         if (lot) {
+            const certificate = lot.batch?.cycle?.certificate;
             return res.json({
                 success: true,
                 type: 'LOT',
@@ -76,6 +90,13 @@ router.get('/:qrCode', async (req, res) => {
                     },
                     farm: lot.batch.farm,
                     plant: lot.batch.species,
+                    certificate: certificate ? {
+                        number: certificate.certificateNumber,
+                        expiryDate: certificate.expiryDate,
+                        issuedAt: certificate.issuedAt,
+                        status: certificate.status,
+                        isValid: certificate.status === 'ACTIVE' && new Date(certificate.expiryDate) > new Date()
+                    } : null,
                     verification: {
                         valid: true,
                         scannedAt: new Date().toISOString()

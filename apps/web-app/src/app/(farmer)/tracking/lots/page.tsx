@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface Lot {
     id: string;
@@ -30,6 +31,19 @@ interface Lot {
     };
 }
 
+interface HarvestBatch {
+    id: string;
+    batchNumber: string;
+    harvestDate: string;
+    status: string;
+    farm: {
+        farmName: string;
+    };
+    species: {
+        nameTH: string;
+    };
+}
+
 const packageTypes: Record<string, string> = {
     BAG_1KG: 'ถุง 1 กก.',
     BAG_500G: 'ถุง 500 กรัม',
@@ -39,19 +53,64 @@ const packageTypes: Record<string, string> = {
 };
 
 export default function LotsPage() {
+    const searchParams = useSearchParams();
+    const batchIdFromUrl = searchParams.get('batchId');
+
     const [lots, setLots] = useState<Lot[]>([]);
+    const [batches, setBatches] = useState<HarvestBatch[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedLot, setSelectedLot] = useState<Lot | null>(null);
     const [qrDataUrl, setQrDataUrl] = useState<string>('');
+    const [selectedBatchId, setSelectedBatchId] = useState<string>(batchIdFromUrl || '');
 
     useEffect(() => {
-        fetchLots();
+        fetchBatches();
     }, []);
 
-    async function fetchLots() {
-        // TODO: Get batchId from context or route
-        setLoading(false);
-        // For demo, show empty state
+    useEffect(() => {
+        if (selectedBatchId) {
+            fetchLots(selectedBatchId);
+        }
+    }, [selectedBatchId]);
+
+    async function fetchBatches() {
+        try {
+            const farmId = localStorage.getItem('currentFarmId') || localStorage.getItem('farmId');
+            if (!farmId) {
+                setLoading(false);
+                return;
+            }
+            const res = await fetch(`/api/proxy/v2/harvest-batches?farmId=${farmId}`);
+            const data = await res.json();
+            if (data.success) {
+                setBatches(data.data);
+                // Auto-select first batch if no batchId in URL
+                if (!batchIdFromUrl && data.data.length > 0) {
+                    setSelectedBatchId(data.data[0].id);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching batches:', error);
+        } finally {
+            if (!selectedBatchId) {
+                setLoading(false);
+            }
+        }
+    }
+
+    async function fetchLots(batchId: string) {
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/proxy/v2/lots/batch/${batchId}`);
+            const data = await res.json();
+            if (data.success) {
+                setLots(data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching lots:', error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const formatDate = (dateStr: string) => {
@@ -110,12 +169,37 @@ export default function LotsPage() {
                 </Link>
             </div>
 
+            {/* Batch Selector */}
+            {batches.length > 0 && (
+                <div className="bg-white rounded-xl shadow-sm border p-4 mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">เลือก Batch</label>
+                    <select
+                        value={selectedBatchId}
+                        onChange={(e) => setSelectedBatchId(e.target.value)}
+                        className="w-full md:w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500"
+                    >
+                        <option value="">-- เลือก Batch --</option>
+                        {batches.map(b => (
+                            <option key={b.id} value={b.id}>
+                                {b.batchNumber} • {b.species?.nameTH} • {formatDate(b.harvestDate)}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
+
             {/* Empty State */}
             {lots.length === 0 && (
                 <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
                     <div className="text-6xl mb-4">📦</div>
-                    <h3 className="text-xl font-semibold text-gray-700 mb-2">ยังไม่มีล็อตบรรจุภัณฑ์</h3>
-                    <p className="text-gray-500 mb-4">เริ่มต้นจากการสร้างรอบการปลูกและเก็บเกี่ยวก่อน</p>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                        {selectedBatchId ? 'ยังไม่มีล็อตใน Batch นี้' : 'ยังไม่มีล็อตบรรจุภัณฑ์'}
+                    </h3>
+                    <p className="text-gray-500 mb-4">
+                        {selectedBatchId
+                            ? 'สร้างล็อตใหม่จากหน้ารอบการปลูก'
+                            : 'เริ่มต้นจากการสร้างรอบการปลูกและเก็บเกี่ยวก่อน'}
+                    </p>
                     <Link
                         href="/tracking/cycles"
                         className="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -125,15 +209,15 @@ export default function LotsPage() {
                 </div>
             )}
 
-            {/* Lots List */}
+            {/* Lots Grid */}
             {lots.length > 0 && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {lots.map((lot) => (
                         <div key={lot.id} className="bg-white rounded-xl shadow-sm border p-6">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
                                     <h3 className="font-mono font-semibold text-lg">{lot.lotNumber}</h3>
-                                    <p className="text-gray-500">{lot.batch.species.nameTH}</p>
+                                    <p className="text-gray-500">{lot.batch?.species?.nameTH || '-'}</p>
                                 </div>
                                 <span className={`px-3 py-1 rounded-full text-sm ${lot.status === 'PACKAGED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
                                     }`}>
@@ -197,10 +281,10 @@ export default function LotsPage() {
                                 )}
                                 <div className="text-left">
                                     <div className="font-mono font-bold text-lg">{selectedLot.lotNumber}</div>
-                                    <div className="text-sm text-gray-600">{selectedLot.batch.species.nameTH}</div>
-                                    <div className="text-sm text-gray-600">{selectedLot.batch.farm.farmName}</div>
+                                    <div className="text-sm text-gray-600">{selectedLot.batch?.species?.nameTH}</div>
+                                    <div className="text-sm text-gray-600">{selectedLot.batch?.farm?.farmName}</div>
                                     <div className="text-sm mt-2">
-                                        <span className="text-gray-500">เก็บเกี่ยว:</span> {formatDate(selectedLot.batch.harvestDate)}
+                                        <span className="text-gray-500">เก็บเกี่ยว:</span> {formatDate(selectedLot.batch?.harvestDate)}
                                     </div>
                                     <div className="text-sm">
                                         <span className="text-gray-500">หมดอายุ:</span> {formatDate(selectedLot.expiryDate)}

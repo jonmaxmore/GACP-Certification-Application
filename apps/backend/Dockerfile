@@ -9,9 +9,11 @@ WORKDIR /usr/src/app
 # Install system dependencies
 RUN apk add --no-cache curl dumb-init
 
-# Install app dependencies
-COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+# Copy package.json ONLY (Ignore lockfile for fresh install reliability)
+COPY package.json ./
+
+# Install app dependencies (using install instead of ci to ignore lockfile)
+RUN npm install --omit=dev && npm cache clean --force
 
 # Bundle app source
 COPY . .

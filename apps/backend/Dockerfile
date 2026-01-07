@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   openssl \
   curl \
   dumb-init \
+  python3 \
+  make \
+  g++ \
   && rm -rf /var/lib/apt/lists/*
 
 # Copy package.json ONLY (Ignore lockfile to avoid conflicts, use npm install)

@@ -7,7 +7,7 @@ FROM node:20-alpine
 WORKDIR /usr/src/app
 
 # Install system dependencies
-RUN apk add --no-cache curl dumb-init openssl
+RUN apk add --no-cache curl dumb-init openssl compat-openssl11
 
 # Copy package.json ONLY (Ignore lockfile for fresh install reliability)
 COPY package.json ./

@@ -28,20 +28,20 @@ export async function POST(request: NextRequest) {
         // Set cookies from the same origin
         if (data.data?.tokens?.accessToken) {
             nextResponse.cookies.set('auth_token', data.data.tokens.accessToken, {
-                httpOnly: true,
-                secure: false, // Set to true when HTTPS is enabled
+                httpOnly: false, // Debugging: Check if cookie is set
+                secure: false,
                 sameSite: 'lax',
-                maxAge: 24 * 60 * 60, // 24 hours in seconds
+                maxAge: 24 * 60 * 60,
                 path: '/',
             });
         }
 
         if (data.data?.tokens?.refreshToken) {
             nextResponse.cookies.set('refresh_token', data.data.tokens.refreshToken, {
-                httpOnly: true,
-                secure: false, // Set to true when HTTPS is enabled
+                httpOnly: false, // Debugging
+                secure: false,
                 sameSite: 'lax',
-                maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+                maxAge: 7 * 24 * 60 * 60,
                 path: '/',
             });
         }

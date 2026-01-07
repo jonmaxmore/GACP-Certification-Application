@@ -13,7 +13,7 @@ RUN apk add --no-cache curl dumb-init
 COPY package.json ./
 
 # Install app dependencies (using install instead of ci to ignore lockfile)
-RUN npm install --omit=dev && npm cache clean --force
+RUN npm install --omit=dev --legacy-peer-deps && npm cache clean --force
 
 # Bundle app source
 # Bundle app source - Explicitly copy critical folders first to debug missing files

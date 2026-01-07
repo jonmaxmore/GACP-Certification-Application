@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api';
+// Use port 8000 for backend API
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 /**
  * GET /api/auth-farmer/me
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Forward request to backend with token
-        const response = await fetch(`${BACKEND_URL}/auth-farmer/me`, {
+        const response = await fetch(`${BACKEND_URL}/api/v2/auth-farmer/me`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authToken}`,

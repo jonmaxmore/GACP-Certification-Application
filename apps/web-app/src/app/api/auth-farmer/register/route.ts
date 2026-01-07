@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api';
+// Use port 8000 for backend API
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
 
         // Forward registration request to backend
-        const response = await fetch(`${BACKEND_URL}/auth-farmer/register`, {
+        const response = await fetch(`${BACKEND_URL}/api/v2/auth-farmer/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

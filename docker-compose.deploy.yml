@@ -1,0 +1,121 @@
+# ============================================================
+# GACP Platform - Deployment Docker Compose (Pre-built Images)
+# ============================================================
+# Use this for actual deployment with pre-built frontend image
+# ============================================================
+
+version: '3.8'
+
+services:
+  # ------------------------------------------------------------
+  # 1. NGINX GATEWAY
+  # ------------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: gacp-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/gacp.production.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - gacp-network
+
+  # ------------------------------------------------------------
+  # 2. BACKEND API (Built on server - it's small)
+  # ------------------------------------------------------------
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: gacp-backend
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DATABASE_URL=postgresql://${DB_USER:-gacp}:${DB_PASSWORD:-gacp2024}@postgres:5432/${DB_NAME:-gacp_db}?schema=public
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - DTAM_JWT_SECRET=${DTAM_JWT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - gacp-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+
+  # ------------------------------------------------------------
+  # 3. FRONTEND (Pre-built Image)
+  # ------------------------------------------------------------
+  frontend:
+    image: gacp-frontend:latest
+    pull_policy: never # Force use of local loaded image
+    container_name: gacp-frontend
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - NEXT_PUBLIC_API_URL=${PUBLIC_API_URL:-https://api.gacp.local}
+      - NEXT_PUBLIC_WEB_URL=${PUBLIC_WEB_URL:-https://farmer.gacp.local}
+    depends_on:
+      - backend
+    networks:
+      - gacp-network
+
+  # ------------------------------------------------------------
+  # 4. DATABASE
+  # ------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: gacp-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER:-gacp}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-gacp2024}
+      - POSTGRES_DB=${DB_NAME:-gacp_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - gacp-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-gacp} -d ${DB_NAME:-gacp_db}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ------------------------------------------------------------
+  # 5. CACHE
+  # ------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: gacp-redis
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - gacp-network
+
+networks:
+  gacp-network:
+    driver: bridge
+    name: gacp-network
+
+volumes:
+  postgres_data:
+    name: gacp-postgres-data
+  redis_data:
+    name: gacp-redis-data

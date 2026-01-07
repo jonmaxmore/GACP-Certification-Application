@@ -43,10 +43,11 @@ function forwardSetCookie(backendResponse: Response, nextResponse: NextResponse)
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { path: string[] } }
+    { params }: { params: Promise<{ path: string[] }> }
 ) {
+    const { path: pathArray } = await params;
     try {
-        const path = params.path.join('/');
+        const path = pathArray.join('/');
         const searchParams = request.nextUrl.searchParams.toString();
         const url = `${BACKEND_URL}/api/v2/${path}${searchParams ? `?${searchParams}` : ''}`;
 
@@ -70,10 +71,11 @@ export async function GET(
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { path: string[] } }
+    { params }: { params: Promise<{ path: string[] }> }
 ) {
+    const { path: pathArray } = await params;
     try {
-        const path = params.path.join('/');
+        const path = pathArray.join('/');
         const url = `${BACKEND_URL}/api/v2/${path}`;
 
         let body;
@@ -104,10 +106,11 @@ export async function POST(
 
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { path: string[] } }
+    { params }: { params: Promise<{ path: string[] }> }
 ) {
+    const { path: pathArray } = await params;
     try {
-        const path = params.path.join('/');
+        const path = pathArray.join('/');
         const url = `${BACKEND_URL}/api/v2/${path}`;
 
         let body;
@@ -138,10 +141,11 @@ export async function PATCH(
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { path: string[] } }
+    { params }: { params: Promise<{ path: string[] }> }
 ) {
+    const { path: pathArray } = await params;
     try {
-        const path = params.path.join('/');
+        const path = pathArray.join('/');
         const url = `${BACKEND_URL}/api/v2/${path}`;
 
         let body;
@@ -172,10 +176,11 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { path: string[] } }
+    { params }: { params: Promise<{ path: string[] }> }
 ) {
+    const { path: pathArray } = await params;
     try {
-        const path = params.path.join('/');
+        const path = pathArray.join('/');
         const url = `${BACKEND_URL}/api/v2/${path}`;
 
         const response = await fetch(url, {

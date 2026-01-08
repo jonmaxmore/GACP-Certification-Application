@@ -65,20 +65,25 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
         const applicationData = {
             farmerId,
             applicationNumber,
-            plantId,
-            plantName: plantName || plantId,
-            purpose,
-            areaType,
-            serviceType,
-            applicantData: JSON.stringify(applicantData || {}),
-            locationData: JSON.stringify(locationData || {}),
-            productionData: JSON.stringify(productionData || {}),
-            documents: JSON.stringify(documents || []),
-            estimatedFee: estimatedFee || 0,
-            estimatedProcessingDays: estimatedProcessingDays || 30,
-            requestedInspectionDate: requestedInspectionDate ? new Date(requestedInspectionDate) : null,
-            submittedAt: new Date(),
-            status: 'PENDING_REVIEW',
+            // Core fields present in schema
+            serviceType, // exists in schema
+            areaType,    // exists in schema
+            status: 'SUBMITTED', // Set status to SUBMITTED directly since this is submission
+
+            // All other complex data goes into formData JSON column
+            formData: {
+                plantId,
+                plantName: plantName || plantId,
+                purpose,
+                applicantData,
+                locationData,
+                productionData,
+                documents,
+                estimatedFee,
+                estimatedProcessingDays,
+                requestedInspectionDate,
+                submissionDate: new Date()
+            }
         };
 
         let application;

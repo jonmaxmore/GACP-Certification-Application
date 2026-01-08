@@ -66,7 +66,7 @@ export default function TracePage() {
 
         async function fetchTraceData() {
             try {
-                const res = await fetch(`/api/proxy/v2/trace/${qrCode}`);
+                const res = await fetch(`/api/proxy/trace/${qrCode}`);
                 const data = await res.json();
 
                 if (!data.success) {

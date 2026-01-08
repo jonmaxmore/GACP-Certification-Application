@@ -80,7 +80,7 @@ export default function LotsPage() {
                 setLoading(false);
                 return;
             }
-            const res = await fetch(`/api/proxy/v2/harvest-batches?farmId=${farmId}`);
+            const res = await fetch(`/api/proxy/harvest-batches?farmId=${farmId}`);
             const data = await res.json();
             if (data.success) {
                 setBatches(data.data);
@@ -101,7 +101,7 @@ export default function LotsPage() {
     async function fetchLots(batchId: string) {
         setLoading(true);
         try {
-            const res = await fetch(`/api/proxy/v2/lots/batch/${batchId}`);
+            const res = await fetch(`/api/proxy/lots/batch/${batchId}`);
             const data = await res.json();
             if (data.success) {
                 setLots(data.data);
@@ -125,7 +125,7 @@ export default function LotsPage() {
     async function showQRPrint(lot: Lot) {
         setSelectedLot(lot);
         try {
-            const res = await fetch(`/api/proxy/v2/lots/${lot.id}/qr/print`);
+            const res = await fetch(`/api/proxy/lots/${lot.id}/qr/print`);
             const data = await res.json();
             if (data.success) {
                 setQrDataUrl(data.data.label.qrCodeDataUrl);

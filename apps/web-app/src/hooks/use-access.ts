@@ -55,7 +55,7 @@ export function useAccessCheck(resource?: string): UseAccessCheckResult {
 
             const token = localStorage.getItem('staff_token') || localStorage.getItem('auth_token');
 
-            const response = await fetch(`${API_BASE}/v2/access/check`, {
+            const response = await fetch(`${API_BASE}/access/check`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ export function useVerifyStaff(role: string | null): UseVerifyStaffResult {
                 setLoading(true);
                 setError(null);
 
-                const response = await fetch(`${API_BASE}/v2/access/verify-staff`, {
+                const response = await fetch(`${API_BASE}/access/verify-staff`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -144,7 +144,7 @@ export function useVerifyStaff(role: string | null): UseVerifyStaffResult {
  */
 export async function verifyStaffRole(role: string): Promise<VerifyStaffResult | null> {
     try {
-        const response = await fetch(`${API_BASE}/v2/access/verify-staff`, {
+        const response = await fetch(`${API_BASE}/access/verify-staff`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

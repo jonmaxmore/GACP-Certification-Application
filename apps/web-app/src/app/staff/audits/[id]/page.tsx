@@ -106,14 +106,14 @@ export default function AuditDetailPage() {
         setIsLoading(true);
         try {
             // Fetch audit details
-            const auditResult = await api.get<{ data: AuditDetail }>(`/v2/field-audits/${params.id}`);
+            const auditResult = await api.get<{ data: AuditDetail }>(`/field-audits/${params.id}`);
             if (auditResult.success && auditResult.data?.data) {
                 setAudit(auditResult.data.data);
 
                 // Fetch template if needed
                 const templateCode = (auditResult.data.data as unknown as { templateCode?: string }).templateCode;
                 if (templateCode) {
-                    const templateResult = await api.get<{ data: AuditTemplate }>(`/v2/field-audits/templates/${templateCode}`);
+                    const templateResult = await api.get<{ data: AuditTemplate }>(`/field-audits/templates/${templateCode}`);
                     if (templateResult.success && templateResult.data?.data) {
                         setTemplate(templateResult.data.data);
                         setActiveCategory(templateResult.data.data.categories[0]?.categoryCode || "");
@@ -150,7 +150,7 @@ export default function AuditDetailPage() {
         if (!audit) return;
         setIsSaving(true);
         try {
-            await api.post(`/v2/field-audits/${audit._id}/complete`, {
+            await api.post(`/field-audits/${audit._id}/complete`, {
                 auditorNotes: resultNote,
             });
             router.push("/staff/dashboard");

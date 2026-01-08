@@ -73,7 +73,7 @@ export default function CriteriaManagementPage() {
 
     async function fetchCriteria() {
         try {
-            const res = await fetch('/api/proxy/v2/criteria/all');
+            const res = await fetch('/api/proxy/criteria/all');
             const data = await res.json();
             if (data.success) {
                 setCriteria(data.data);
@@ -115,8 +115,8 @@ export default function CriteriaManagementPage() {
 
         try {
             const url = editingId
-                ? `/api/proxy/v2/criteria/${editingId}`
-                : '/api/proxy/v2/criteria';
+                ? `/api/proxy/criteria/${editingId}`
+                : '/api/proxy/criteria';
 
             const res = await fetch(url, {
                 method: editingId ? 'PATCH' : 'POST',
@@ -144,7 +144,7 @@ export default function CriteriaManagementPage() {
         if (!confirm('ต้องการลบเกณฑ์นี้?')) return;
 
         try {
-            const res = await fetch(`/api/proxy/v2/criteria/${id}`, {
+            const res = await fetch(`/api/proxy/criteria/${id}`, {
                 method: 'DELETE'
             });
             const data = await res.json();
@@ -162,7 +162,7 @@ export default function CriteriaManagementPage() {
 
     async function handleToggleActive(id: string, isActive: boolean) {
         try {
-            const res = await fetch(`/api/proxy/v2/criteria/${id}`, {
+            const res = await fetch(`/api/proxy/criteria/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ isActive: !isActive })
@@ -391,8 +391,8 @@ export default function CriteriaManagementPage() {
                                         <button
                                             onClick={() => handleToggleActive(item.id, item.isActive)}
                                             className={`px-2 py-1 rounded text-xs font-medium ${item.isActive
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : 'bg-gray-200 text-gray-600'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-gray-200 text-gray-600'
                                                 }`}
                                         >
                                             {item.isActive ? '✓ เปิด' : '✗ ปิด'}

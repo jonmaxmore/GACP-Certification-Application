@@ -55,7 +55,7 @@ export function usePricing(): UsePricingResult {
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`${API_BASE}/v2/pricing/fees`);
+            const response = await fetch(`${API_BASE}/pricing/fees`);
             const data = await response.json();
 
             if (data.success) {
@@ -92,7 +92,7 @@ export function useInvoice(phase: 'phase1' | 'phase2'): UseInvoiceResult {
                 setLoading(true);
                 setError(null);
 
-                const response = await fetch(`${API_BASE}/v2/pricing/invoice/${phase}`);
+                const response = await fetch(`${API_BASE}/pricing/invoice/${phase}`);
                 const data = await response.json();
 
                 if (data.success) {

@@ -119,7 +119,7 @@ export default function StaffCalendarPage() {
         if (auditMode === "ONLINE" && !vdoLink) return;
         if (auditMode === "ONSITE" && !location) return;
         try {
-            const result = await api.post("/v2/audits/schedule", {
+            const result = await api.post("/audits/schedule", {
                 applicationId: selectedApp._id, scheduledDate: scheduleDate, scheduledTime: scheduleTime,
                 auditMode, meetingUrl: auditMode === "ONLINE" ? vdoLink : undefined,
                 location: auditMode === "ONSITE" ? location : undefined

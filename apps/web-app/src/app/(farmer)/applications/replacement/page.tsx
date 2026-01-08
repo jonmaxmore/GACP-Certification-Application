@@ -21,7 +21,7 @@ function ReplacementContent() {
 
     useEffect(() => { setIsDark(localStorage.getItem("theme") === "dark"); if (certId) loadCertificate(); }, [certId]);
 
-    const loadCertificate = async () => { if (!certId) return; const result = await api.get<any>(`/v2/certificates/${certId}`); if (result.success && result.data?.data) setCertificate(result.data.data); };
+    const loadCertificate = async () => { if (!certId) return; const result = await api.get<any>(`/certificates/${certId}`); if (result.success && result.data?.data) setCertificate(result.data.data); };
 
     const handleSubmit = async () => {
         setSubmitting(true);

@@ -99,7 +99,7 @@ export default function PlantingCyclesPage() {
                 setLoading(false);
                 return;
             }
-            const res = await fetch(`/api/proxy/v2/planting-cycles?farmId=${storedFarmId}`);
+            const res = await fetch(`/api/proxy/planting-cycles?farmId=${storedFarmId}`);
             const data = await res.json();
             if (data.success) {
                 setCycles(data.data);
@@ -113,7 +113,7 @@ export default function PlantingCyclesPage() {
 
     async function fetchSpecies() {
         try {
-            const res = await fetch('/api/proxy/v2/plants');
+            const res = await fetch('/api/proxy/plants');
             const data = await res.json();
             if (data.success) {
                 setSpecies(data.data);
@@ -125,7 +125,7 @@ export default function PlantingCyclesPage() {
 
     async function fetchCertificates() {
         try {
-            const res = await fetch('/api/proxy/v2/certificates/my');
+            const res = await fetch('/api/proxy/certificates/my');
             const data = await res.json();
             if (data.success) {
                 setCertificates(data.data);
@@ -155,7 +155,7 @@ export default function PlantingCyclesPage() {
         setMessage(null);
 
         try {
-            const res = await fetch('/api/proxy/v2/planting-cycles', {
+            const res = await fetch('/api/proxy/planting-cycles', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

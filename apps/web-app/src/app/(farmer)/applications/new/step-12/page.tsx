@@ -40,7 +40,7 @@ export default function SupplementaryCriteriaPage() {
 
     async function fetchCriteria() {
         try {
-            const res = await fetch('/api/proxy/v2/criteria');
+            const res = await fetch('/api/proxy/criteria');
             const data = await res.json();
 
             if (data.success && data.data) {
@@ -91,7 +91,7 @@ export default function SupplementaryCriteriaPage() {
             // Get applicationId from localStorage or URL
             const applicationId = localStorage.getItem('currentApplicationId');
             if (applicationId) {
-                await fetch(`/api/proxy/v2/applications/${applicationId}/criteria`, {
+                await fetch(`/api/proxy/applications/${applicationId}/criteria`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -116,7 +116,7 @@ export default function SupplementaryCriteriaPage() {
             // Get applicationId from localStorage or URL
             const applicationId = localStorage.getItem('currentApplicationId');
             if (applicationId) {
-                await fetch(`/api/proxy/v2/applications/${applicationId}/criteria`, {
+                await fetch(`/api/proxy/applications/${applicationId}/criteria`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

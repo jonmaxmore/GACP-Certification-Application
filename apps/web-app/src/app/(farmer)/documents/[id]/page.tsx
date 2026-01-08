@@ -26,7 +26,7 @@ export default function DocumentViewerPage() {
         setLoading(true);
         setError(null);
         try {
-            const result = await api.get<{ data: DocumentInfo }>(`/v2/documents/${id}`);
+            const result = await api.get<{ data: DocumentInfo }>(`/documents/${id}`);
             if (result.success && result.data?.data) { setDocument(result.data.data); }
             else { setDocument({ _id: id, name: "เอกสารประกอบคำขอ.pdf", type: "application/pdf", url: "/api/documents/" + id, size: 1024 * 1024 * 2.5, uploadedAt: new Date().toISOString(), applicationId: "app_12345" }); }
         } catch { setError("ไม่สามารถโหลดเอกสารได้"); }

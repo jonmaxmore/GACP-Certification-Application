@@ -38,7 +38,7 @@ export default function ApplicationDetailPage() {
         setLoading(true);
         setError(null);
         try {
-            const result = await api.get<{ data: ApplicationDetail }>(`/v2/applications/${id}`);
+            const result = await api.get<{ data: ApplicationDetail }>(`/applications/${id}`);
             if (result.success && result.data?.data) setApplication(result.data.data);
             else setError("ไม่พบคำขอนี้ในระบบ");
         } catch { setError("เกิดข้อผิดพลาดในการโหลดข้อมูล"); }

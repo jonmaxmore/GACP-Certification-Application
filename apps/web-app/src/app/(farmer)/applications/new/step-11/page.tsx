@@ -30,9 +30,9 @@ export default function Step11Payment() {
         try {
             const appId = state.applicationId;
             if (!appId) { setProcessing(false); setIsNavigating(false); return; }
-            await api.post(`/v2/applications/${appId}/confirm-review`, {});
+            await api.post(`/applications/${appId}/confirm-review`, {});
             await new Promise(resolve => setTimeout(resolve, 2000));
-            await api.post(`/v2/applications/${appId}/status`, { status: 'SUBMITTED', notes: 'Demo payment completed' });
+            await api.post(`/applications/${appId}/status`, { status: 'SUBMITTED', notes: 'Demo payment completed' });
             resetWizard();
             router.replace('/applications/new/success');
         } catch { setProcessing(false); setIsNavigating(false); }

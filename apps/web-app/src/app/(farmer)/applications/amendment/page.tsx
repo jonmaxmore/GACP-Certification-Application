@@ -24,7 +24,7 @@ function AmendmentContent() {
     const loadCertificate = async () => {
         if (!certId) return;
         setLoading(true);
-        const result = await api.get<any>(`/v2/certificates/${certId}`);
+        const result = await api.get<any>(`/certificates/${certId}`);
         if (result.success && result.data?.data) {
             const cert = result.data.data;
             setCertificate(cert);

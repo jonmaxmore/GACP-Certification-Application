@@ -14,7 +14,7 @@ jest.mock('../../middleware/AuthMiddleware', () => ({
     },
 }));
 
-const reportsRouter = require('../../routes/v2/reports');
+const reportsRouter = require('../../routes/api/reports');
 
 describe('Reports API', () => {
     let app;

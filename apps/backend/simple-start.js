@@ -47,12 +47,13 @@ try {
     console.log('📦 Loading routes...');
 
     // V2 Routes (includes auth-staff)
-    const v2Routes = require('./routes/v2');
+    const v2Routes = require('./routes/api');
     app.use('/api/v2', v2Routes);
-    console.log('✅ V2 Routes loaded (includes auth-staff)');
+    app.use('/api', v2Routes);  // Unified API - supports both /api and /api/v2
+    console.log('✅ V2 Routes loaded (includes auth-staff) - mounted on /api and /api/v2');
 
     // Farmer Auth Routes
-    const AuthFarmerRoutes = require('./routes/api/auth-farmer-routes');
+    const AuthFarmerRoutes = require('./routes/api/auth-farmer');
     app.use('/api/auth-farmer', AuthFarmerRoutes);
     app.use('/api/auth/farmer', AuthFarmerRoutes);
     console.log('✅ Auth Farmer Routes loaded');
@@ -64,12 +65,12 @@ try {
     console.log('✅ Establishment Routes loaded');
 
     // Staff Management Routes
-    const StaffRoutes = require('./routes/api/staff-routes');
+    const StaffRoutes = require('./routes/api/staff');
     app.use('/api/v2/staff', StaffRoutes);
     console.log('✅ Staff Routes loaded');
 
     // DTAM Staff Authentication Routes
-    const AuthDtamRoutes = require('./routes/api/auth-dtam-routes');
+    const AuthDtamRoutes = require('./routes/api/auth-dtam');
     app.use('/api/auth-dtam', AuthDtamRoutes);
     console.log('✅ Auth DTAM Routes loaded');
 

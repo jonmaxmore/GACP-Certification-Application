@@ -161,7 +161,7 @@ const loadRoute = (path, mountPath) => {
 loadRoute('./routes/api/auth-farmer-routes', '/api/auth-farmer');
 
 // V2 API Routes
-loadRoute('./routes/v2', '/api/v2');
+loadRoute('./routes/api', '/api');
 
 // Config Routes
 app.get('/api/v2/config/document-slots', (req, res) => {

@@ -18,9 +18,9 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 
 // Import Modules
-const AuthFarmerRoutes = require('./routes/v2/auth-farmer');
-const AuthDTAMRoutes = require('./routes/v2/auth-dtam');
-const v2Routes = require('./routes/v2');
+const AuthFarmerRoutes = require('./routes/api/auth-farmer');
+const AuthDTAMRoutes = require('./routes/api/auth-dtam');
+const v2Routes = require('./routes/api');
 const EstablishmentRoutes = require('./modules/Establishment');
 // const ApplicationRoutes = require('./routes/api/application-routes'); // Migrated to v2
 // Migrated to v2

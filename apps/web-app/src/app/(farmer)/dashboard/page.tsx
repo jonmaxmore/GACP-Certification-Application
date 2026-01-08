@@ -76,9 +76,19 @@ export default function DashboardPage() {
 
     const loadApplications = async () => {
         setLoadError(null);
-        const result = await api.get<{ data: Application[] }>("/api/v2/applications/my");
-        if (result.success && result.data?.data) setApplications(result.data.data);
-        else setLoadError("ไม่สามารถโหลดข้อมูลคำขอได้");
+        try {
+            const result = await api.get<Application[]>("/applications/my");
+            if (result.success && result.data) {
+                // Handle both array response and nested data response
+                const apps = Array.isArray(result.data) ? result.data : (result.data as any).data || [];
+                setApplications(apps);
+            } else {
+                setLoadError("ไม่สามารถโหลดข้อมูลคำขอได้");
+            }
+        } catch (error) {
+            console.error('[Dashboard] Load applications error:', error);
+            setLoadError("ไม่สามารถโหลดข้อมูลคำขอได้");
+        }
     };
 
     const handleLogout = () => {

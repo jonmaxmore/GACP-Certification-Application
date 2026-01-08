@@ -31,7 +31,7 @@ const prisma = new PrismaClient();
  */
 router.post('/draft', authenticateFarmer, async (req, res) => {
     try {
-        const userId = req.user.id;
+        const farmerId = req.user.id;
         const {
             plantId, plantName,
             purpose, areaType, serviceType,
@@ -52,18 +52,18 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
         // Check for existing draft
         const existingDraft = await prisma.application.findFirst({
             where: {
-                userId,
+                farmerId,
                 status: 'DRAFT'
             }
         });
 
         // Generate application number
         const year = new Date().getFullYear() + 543; // Buddhist year
-        const count = await prisma.application.count({ where: { userId } });
+        const count = await prisma.application.count({ where: { farmerId } });
         const applicationNumber = `GACP-${year}-${String(count + 1).padStart(6, '0')}`;
 
         const applicationData = {
-            userId,
+            farmerId,
             applicationNumber,
             plantId,
             plantName: plantName || plantId,
@@ -96,7 +96,7 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
             });
         }
 
-        console.log(`[Applications] Draft saved for user ${userId}: ${application.id}`);
+        console.log(`[Applications] Draft saved for user ${farmerId}: ${application.id}`);
 
         res.json({
             success: true,
@@ -122,11 +122,11 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
  */
 router.get('/draft', authenticateFarmer, async (req, res) => {
     try {
-        const userId = req.user.id;
+        const farmerId = req.user.id;
 
         const draft = await prisma.application.findFirst({
             where: {
-                userId,
+                farmerId,
                 status: 'DRAFT'
             },
             orderBy: {
@@ -176,10 +176,10 @@ router.get('/draft', authenticateFarmer, async (req, res) => {
  */
 router.get('/', authenticateFarmer, async (req, res) => {
     try {
-        const userId = req.user.id;
+        const farmerId = req.user.id;
 
         const applications = await prisma.application.findMany({
-            where: { userId },
+            where: { farmerId },
             orderBy: { createdAt: 'desc' },
             take: 50
         });
@@ -215,11 +215,11 @@ router.get('/', authenticateFarmer, async (req, res) => {
  */
 router.get('/my', authenticateFarmer, async (req, res) => {
     try {
-        const userId = req.user.id;
+        const farmerId = req.user.id;
 
         const applications = await prisma.application.findMany({
             where: {
-                userId
+                farmerId
             },
             orderBy: { createdAt: 'desc' },
             take: 50

@@ -107,9 +107,8 @@ app.use(cookieParser());
 // Mount Routes
 app.use('/api/auth-farmer', AuthFarmerRoutes);
 app.use('/api/auth-dtam', AuthDTAMRoutes); // DTAM staff authentication
-app.use('/api/v2', v2Routes);
+app.use('/api', v2Routes); // Unified API routes (no /v2 prefix)
 app.use('/api/establishments', EstablishmentRoutes);
-app.use('/api/v2/establishments', EstablishmentRoutes);
 // app.use('/api/applications', ApplicationRoutes);  // Migrated to v2
 // app.use('/api/v2/invoices', InvoiceRoutes);     // Migrated to v2
 // app.use('/api/v2/staff', StaffRoutes);          // Migrated to v2

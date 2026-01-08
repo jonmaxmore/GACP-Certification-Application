@@ -65,17 +65,12 @@ class ApiClient {
             }
         }
 
-        // Smart Path Handling: Auto-prefix with /api/v2 if needed
+        // Smart Path Handling: Auto-prefix with /api if needed
         let fullEndpoint = endpoint;
         if (!endpoint.startsWith('http')) {
             if (!endpoint.startsWith('/api')) {
-                // If it's a v2 style path (e.g. /applications, /auth-farmer), prepend /api/v2
-                // But check if it's already /v2 (legacy fix)
-                if (endpoint.startsWith('/v2/')) {
-                    fullEndpoint = `/api${endpoint}`;
-                } else {
-                    fullEndpoint = `/api/v2${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
-                }
+                // Prefix with /api for all paths
+                fullEndpoint = `/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
             }
         }
 

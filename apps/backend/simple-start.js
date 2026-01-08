@@ -147,7 +147,7 @@ server = app.listen(port, '0.0.0.0', () => {
 
     // Redis (optional)
     if (process.env.REDIS_ENABLED !== 'false') {
-        const redisService = require('./services/RedisService');
+        const redisService = require('./services/redis-service');
         redisService.connect().catch(err => {
             console.warn('⚠️ Redis unavailable:', err.message);
         });

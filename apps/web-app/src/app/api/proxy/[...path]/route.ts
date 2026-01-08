@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
+// Production Server - Always use this
+const BACKEND_URL = 'http://47.129.167.71';
 
 /**
  * Forward cookies and authorization headers to backend

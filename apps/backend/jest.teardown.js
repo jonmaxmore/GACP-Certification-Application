@@ -4,26 +4,14 @@
  */
 
 module.exports = async () => {
+  // Prisma cleanup (PostgreSQL)
   try {
-    const mongoManager = require('./config/MongodbManager');
-    if (mongoManager && typeof mongoManager.reset === 'function') {
-      await mongoManager.reset();
-    } else if (mongoManager && typeof mongoManager.disconnect === 'function') {
-      await mongoManager.disconnect();
-    }
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+    await prisma.$disconnect();
   } catch (error) {
-    console.warn(`[jest-teardown] MongoDB manager cleanup warning: ${error.message}`);
-  }
-
-  try {
-    const mongoose = require('mongoose');
-    if (mongoose.connection.readyState !== 0) {
-      await mongoose.connection.close(false);
-    }
-  } catch (error) {
-    console.warn(`[jest-teardown] Mongoose close warning: ${error.message}`);
+    console.warn(`[jest-teardown] Prisma disconnect warning: ${error.message}`);
   }
 
   await new Promise(resolve => setTimeout(resolve, 250));
 };
-

@@ -1,7 +1,7 @@
 /**
  * Jest test harness setup for the backend service.
  * - Normalises environment variables for integration tests
- * - Registers deterministic clean-up hooks for MongoDB, Redis, and Express servers
+ * - Registers deterministic clean-up hooks for Prisma (PostgreSQL), Redis, and Express servers
  * - Reduces noisy console output while preserving warnings/errors
  */
 
@@ -11,8 +11,8 @@ function safeRequire(modulePath) {
   try {
     return require(modulePath);
   } catch (error) {
-  const message = error && error.code === 'MODULE_NOT_FOUND' ? 'not found' : error.message;
-  console.warn(`[jest-setup] Optional module load skipped (${modulePath}): ${message}`);
+    const message = error && error.code === 'MODULE_NOT_FOUND' ? 'not found' : error.message;
+    console.warn(`[jest-setup] Optional module load skipped (${modulePath}): ${message}`);
     return null;
   }
 }
@@ -30,7 +30,7 @@ async function runCleanupTasks() {
       // eslint-disable-next-line no-await-in-loop
       await task();
     } catch (error) {
-  console.warn(`[jest-setup] Cleanup task failed: ${error.message}`);
+      console.warn(`[jest-setup] Cleanup task failed: ${error.message}`);
     }
   }
 }
@@ -43,21 +43,18 @@ process.env.STORAGE_LOCAL_PATH = './test-uploads';
 process.env.ENABLE_QUEUE = 'false';
 process.env.ENABLE_CACHE = 'false';
 
-const mongoManager = safeRequire('./config/mongodb-manager');
+// Prisma (PostgreSQL) cleanup
+const prisma = safeRequire('@prisma/client');
 const redisService = safeRequire('./services/redis-service');
 
-if (mongoManager && process.env.MONGODB_URI) {
-  mongoManager.configure({ uri: process.env.MONGODB_URI });
-}
-
-if (mongoManager) {
+if (prisma) {
   registerCleanup(async () => {
-    if (typeof mongoManager.reset === 'function') {
-      await mongoManager.reset();
-      return;
-    }
-    if (typeof mongoManager.disconnect === 'function') {
-      await mongoManager.disconnect();
+    try {
+      const { PrismaClient } = prisma;
+      const client = new PrismaClient();
+      await client.$disconnect();
+    } catch (e) {
+      console.warn(`[jest-setup] Prisma cleanup: ${e.message}`);
     }
   });
 }
@@ -101,4 +98,3 @@ afterAll(async () => {
 });
 
 jest.setTimeout(30000);
-

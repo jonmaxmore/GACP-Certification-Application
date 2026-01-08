@@ -12,7 +12,7 @@ scrape_configs:
   # GACP Backend Services
   - job_name: 'gacp-backend'
     static_configs:
-      - targets: ['backend:5000']
+      - targets: ['gacp-backend:5000']
     metrics_path: '/metrics'
     scrape_interval: 10s
 
@@ -36,7 +36,7 @@ scrape_configs:
   # Health Check Monitoring
   - job_name: 'gacp-health'
     static_configs:
-      - targets: ['backend:5000']
+      - targets: ['gacp-backend:5000']
     metrics_path: '/health'
     scrape_interval: 30s
 

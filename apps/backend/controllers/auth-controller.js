@@ -178,14 +178,19 @@ class AuthController {
             console.error('[AuthController] Login Error:', error.message);
 
             // Audit Log (Failed Login - System Error or Auth Failure)
-            await auditLogger.logActivity(
-                req,
-                'AUTH_LOGIN',
-                AuditCategory.AUTH,
-                AuditSeverity.WARNING,
-                'Login failed',
-                { error: error.message }
-            );
+            // Wrapped in try-catch to prevent crash if audit logging fails
+            try {
+                await auditLogger.logActivity(
+                    req,
+                    'AUTH_LOGIN',
+                    AuditCategory.AUTH,
+                    AuditSeverity.WARNING,
+                    'Login failed',
+                    { error: error.message }
+                );
+            } catch (auditError) {
+                console.error('[AuthController] Audit Log Error:', auditError.message);
+            }
 
             // Return 401 for known auth errors
             if (error.message === 'ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง' ||

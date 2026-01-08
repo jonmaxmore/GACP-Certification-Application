@@ -246,8 +246,6 @@ async function main() {
                     productionInputs: plant.productionInputs,
                     sortOrder: plant.sortOrder,
                     isActive: plant.isActive,
-                    // Basic defaults
-                    thaiName: plant.nameTH, // Legacy field
                     gacpCategory: plant.group === 'HIGH_CONTROL' ? 'HIGH_CONTROL' : 'MEDICINAL',
                 },
                 create: {
@@ -262,9 +260,6 @@ async function main() {
                     productionInputs: plant.productionInputs,
                     sortOrder: plant.sortOrder,
                     isActive: plant.isActive,
-                    // Basic defaults
-                    thaiName: plant.nameTH,
-                    scientificName: '', // Optional
                     gacpCategory: plant.group === 'HIGH_CONTROL' ? 'HIGH_CONTROL' : 'MEDICINAL',
                 }
             });

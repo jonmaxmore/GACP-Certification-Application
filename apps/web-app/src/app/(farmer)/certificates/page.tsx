@@ -32,7 +32,7 @@ export default function CertificatesPage() {
     const loadCertificates = async () => {
         setLoading(true);
         try {
-            const result = await api.get<{ data: Certificate[] }>("/api/v2/certificates/my");
+            const result = await api.get<{ data: Certificate[] }>("/api/certificates/my");
             if (result.success && result.data?.data) setCertificates(result.data.data);
             else setCertificates([]);
         } catch { setCertificates([]); }

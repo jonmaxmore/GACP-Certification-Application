@@ -63,7 +63,7 @@ export default function AdminReportsPage() {
             });
 
             // Fetch invoices
-            const invoicesRes = await fetch('/api/v2/invoices/summary', {
+            const invoicesRes = await fetch('/api/invoices/summary', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 

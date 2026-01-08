@@ -79,8 +79,8 @@ export default function StaffCalendarPage() {
         setIsLoading(true);
         try {
             const [auditsRes, appsRes] = await Promise.all([
-                api.get<{ data: AuditItem[] }>(`/api/v2/audits/scheduled?startDate=${selectedDate}&endDate=${selectedDate}`),
-                api.get<{ data: ApplicationItem[] }>('/api/v2/audits/pending-schedule')
+                api.get<{ data: AuditItem[] }>(`/api/audits/scheduled?startDate=${selectedDate}&endDate=${selectedDate}`),
+                api.get<{ data: ApplicationItem[] }>('/api/audits/pending-schedule')
             ]);
             if (auditsRes.success && auditsRes.data?.data) setAudits(auditsRes.data.data);
             else setAudits([]);

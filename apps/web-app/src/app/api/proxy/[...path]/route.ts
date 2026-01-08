@@ -49,7 +49,7 @@ export async function GET(
     try {
         const path = pathArray.join('/');
         const searchParams = request.nextUrl.searchParams.toString();
-        const url = `${BACKEND_URL}/api/v2/${path}${searchParams ? `?${searchParams}` : ''}`;
+        const url = `${BACKEND_URL}/api/${path}${searchParams ? `?${searchParams}` : ''}`;
 
         const response = await fetch(url, {
             headers: getForwardHeaders(request),
@@ -76,7 +76,7 @@ export async function POST(
     const { path: pathArray } = await params;
     try {
         const path = pathArray.join('/');
-        const url = `${BACKEND_URL}/api/v2/${path}`;
+        const url = `${BACKEND_URL}/api/${path}`;
 
         let body;
         try {
@@ -111,7 +111,7 @@ export async function PATCH(
     const { path: pathArray } = await params;
     try {
         const path = pathArray.join('/');
-        const url = `${BACKEND_URL}/api/v2/${path}`;
+        const url = `${BACKEND_URL}/api/${path}`;
 
         let body;
         try {
@@ -146,7 +146,7 @@ export async function PUT(
     const { path: pathArray } = await params;
     try {
         const path = pathArray.join('/');
-        const url = `${BACKEND_URL}/api/v2/${path}`;
+        const url = `${BACKEND_URL}/api/${path}`;
 
         let body;
         try {
@@ -181,7 +181,7 @@ export async function DELETE(
     const { path: pathArray } = await params;
     try {
         const path = pathArray.join('/');
-        const url = `${BACKEND_URL}/api/v2/${path}`;
+        const url = `${BACKEND_URL}/api/${path}`;
 
         const response = await fetch(url, {
             method: 'DELETE',

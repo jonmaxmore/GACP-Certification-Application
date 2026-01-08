@@ -42,7 +42,7 @@ export default function StaffAuditsPage() {
     const fetchAudits = async () => {
         setIsLoading(true);
         try {
-            const result = await api.get<{ data: { audits: Audit[] } }>('/api/v2/field-audits');
+            const result = await api.get<{ data: { audits: Audit[] } }>('/api/field-audits');
             if (result.success && result.data?.data?.audits) setAudits(result.data.data.audits);
             else setAudits([
                 { id: "AUD-001", applicationId: "APP-2024-001", applicantName: "นายสมชาย ใจดี", plantType: "กัญชา", status: "WAITING_SCHEDULE" },

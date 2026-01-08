@@ -77,7 +77,7 @@ export default function Step8Review() {
             if (state.applicationId) { router.push('/applications/new/step-9'); return; }
             const applicantName = state.applicantData?.applicantType === 'INDIVIDUAL' ? `${state.applicantData?.firstName || ''} ${state.applicantData?.lastName || ''}` : state.applicantData?.applicantType === 'COMMUNITY' ? state.applicantData?.communityName || '' : state.applicantData?.companyName || '';
             const draftData = { requestType: state.serviceType || 'NEW', certificationType: 'GACP', objective: state.certificationPurpose, applicantType: state.applicantData?.applicantType || 'INDIVIDUAL', applicantInfo: { name: applicantName, ...state.applicantData }, siteInfo: state.siteData, formData: { plantId: state.plantId, siteTypes: state.siteTypes, production: state.productionData, documents: state.documents, consentedPDPA: state.consentedPDPA, acknowledgedStandards: state.acknowledgedStandards } };
-            const result = await api.post<{ success: boolean; data: { _id: string; applicationNumber?: string }; error?: string }>('/api/v2/applications/draft', draftData);
+            const result = await api.post<{ success: boolean; data: { _id: string; applicationNumber?: string }; error?: string }>('/api/applications/draft', draftData);
             if (result.success) {
                 const responseData = result.data as { _id?: string; data?: { _id: string } };
                 const appId = responseData?.data?._id || responseData?._id;

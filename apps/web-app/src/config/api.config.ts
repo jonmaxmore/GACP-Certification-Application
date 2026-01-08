@@ -28,7 +28,7 @@ export const API_CONFIG = {
 
     // API endpoints
     apiBase: '/api',
-    v2Base: '/api/v2',
+    // Legacy v2Base removed - unified to /api
 
     // Health check endpoint
     healthEndpoint: '/health',
@@ -41,7 +41,7 @@ export const API_CONFIG = {
 // Get full API URL
 export const getApiUrl = (path: string = ''): string => {
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    return `${API_CONFIG.backendUrl}${API_CONFIG.v2Base}${cleanPath}`;
+    return `${API_CONFIG.backendUrl}${API_CONFIG.apiBase}${cleanPath}`;
 };
 
 // Get backend URL for direct calls

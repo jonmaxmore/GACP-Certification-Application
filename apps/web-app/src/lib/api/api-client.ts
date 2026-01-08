@@ -8,7 +8,7 @@
  *   import { apiClient } from '@/lib/api/api-client';
  *   
  *   // GET request:
- *   const data = await apiClient.get('/api/v2/users/me');
+ *   const data = await apiClient.get('/api/users/me');
  *   
  *   // POST request:
  *   const result = await apiClient.post('/api/applications', { name: 'test' });
@@ -183,7 +183,7 @@ class ApiClient {
      */
     async health(): Promise<boolean> {
         try {
-            const response = await this.get('/api/v2/health', { skipAuth: true, timeout: 5000 });
+            const response = await this.get('/api/health', { skipAuth: true, timeout: 5000 });
             return response.success;
         } catch {
             return false;

@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetch("/api/v2/reports/dashboard", { credentials: "include" });
+            const res = await fetch("/api/reports/dashboard", { credentials: "include" });
             const result = await res.json();
             if (result.success) setData(result.data);
             else setData({
@@ -79,7 +79,7 @@ export default function AnalyticsPage() {
 
     const handleExport = (format: 'csv' | 'json', type: string) => {
         setExporting(true);
-        window.open(`/api/v2/reports/export?format=${format}&type=${type}`, '_blank');
+        window.open(`/api/reports/export?format=${format}&type=${type}`, '_blank');
         setExporting(false);
     };
 

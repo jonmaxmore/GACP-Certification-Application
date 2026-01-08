@@ -41,7 +41,7 @@ export default function NotificationsPage() {
     const loadNotifications = async () => {
         setLoading(true);
         try {
-            const result = await api.get<{ data: Notification[] }>("/api/v2/notifications");
+            const result = await api.get<{ data: Notification[] }>("/api/notifications");
             if (result.success && result.data) {
                 setNotifications(result.data.data || []);
             } else {
@@ -54,12 +54,12 @@ export default function NotificationsPage() {
     };
 
     const markAsRead = async (id: string) => {
-        try { await api.post(`/api/v2/notifications/${id}/read`, {}); } catch { }
+        try { await api.post(`/api/notifications/${id}/read`, {}); } catch { }
         setNotifications(prev => prev.map(n => (n.id === id || n._id === id) ? { ...n, read: true } : n));
     };
 
     const markAllAsRead = async () => {
-        try { await api.post("/api/v2/notifications/read-all", {}); } catch { }
+        try { await api.post("/api/notifications/read-all", {}); } catch { }
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     };
 

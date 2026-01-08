@@ -61,7 +61,7 @@ export default function AdminUsersPage() {
         // Fetch real staff list from API
         const fetchStaff = async () => {
             try {
-                const res = await fetch('/api/v2/staff', {
+                const res = await fetch('/api/staff', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -92,7 +92,7 @@ export default function AdminUsersPage() {
 
         try {
             const token = localStorage.getItem("staff_token");
-            const res = await fetch('/api/v2/staff', {
+            const res = await fetch('/api/staff', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

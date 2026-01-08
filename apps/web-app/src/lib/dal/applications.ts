@@ -27,7 +27,7 @@ export async function getMyApplications(): Promise<SafeApplicationDTO[]> {
 
         const endpoint = session.userType === 'DTAM_STAFF'
             ? '/api/applications/pending-reviews'
-            : '/api/v2/applications/my';
+            : '/api/applications/my';
 
         const response = await fetch(`${API_BASE}${endpoint}`, {
             headers: {
@@ -73,7 +73,7 @@ export async function getApplicationById(id: string): Promise<SafeApplicationDTO
         const cookieStore = await cookies();
         const token = cookieStore.get('staff_token')?.value || cookieStore.get('auth_token')?.value;
 
-        const response = await fetch(`${API_BASE}/api/v2/applications/${id}`, {
+        const response = await fetch(`${API_BASE}/api/applications/${id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },

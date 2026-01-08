@@ -90,7 +90,7 @@ export default function ApplicationSelector({
 
     const loadConfig = async () => {
         try {
-            const result = await api.get<any>('/api/v2/pricing/fees');
+            const result = await api.get<any>('/api/pricing/fees');
             if (result.success && result.data?.data) {
                 setConfig(result.data.data);
             }
@@ -104,7 +104,7 @@ export default function ApplicationSelector({
     const calculateFee = async () => {
         setCalculating(true);
         try {
-            const result = await api.post<any>('/api/v2/pricing/calculate', {
+            const result = await api.post<any>('/api/pricing/calculate', {
                 serviceType,
                 areaTypes,
                 plantType: plant,

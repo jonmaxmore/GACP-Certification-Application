@@ -31,9 +31,8 @@ services:
   # 2. BACKEND API (Built on server - it's small)
   # ------------------------------------------------------------
   backend:
-    build:
-      context: ./apps/backend
-      dockerfile: Dockerfile
+    image: gacp-backend:latest
+    pull_policy: never
     container_name: gacp-backend
     restart: always
     environment:

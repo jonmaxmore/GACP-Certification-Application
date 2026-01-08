@@ -20,8 +20,43 @@ class PrismaAuthService {
     }
 
     async register(userData) {
-        // Pending Implementation for PostgreSQL
-        return {};
+        try {
+            const { accountType = 'INDIVIDUAL', identifier, password, phoneNumber } = userData;
+            const cleanId = identifier ? identifier.replace(/-/g, '') : null;
+            const idHash = cleanId ? hash(cleanId) : null;
+
+            // Build user data based on account type
+            const createData = {
+                password,
+                phoneNumber: phoneNumber?.replace(/-/g, ''),
+                accountType,
+                role: 'FARMER',
+                status: 'ACTIVE',
+            };
+
+            if (accountType === 'INDIVIDUAL') {
+                createData.idCardHash = idHash;
+                createData.firstName = userData.firstName;
+                createData.lastName = userData.lastName;
+            } else if (accountType === 'JURISTIC') {
+                createData.taxIdHash = idHash;
+                createData.companyName = userData.companyName;
+            } else if (accountType === 'COMMUNITY_ENTERPRISE') {
+                createData.communityRegistrationNoHash = idHash;
+                createData.communityName = userData.communityName;
+            }
+
+            if (userData.email) {
+                createData.email = userData.email.toLowerCase();
+            }
+
+            const user = await userRepository.create(createData);
+            logger.info(`[Auth] User registered: ${user.id}`);
+            return user;
+        } catch (error) {
+            logger.error(`[Auth] Register error: ${error.message}`);
+            throw error;
+        }
     }
 
     async login(identifier, password, accountType = 'INDIVIDUAL') {

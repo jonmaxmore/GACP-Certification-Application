@@ -28,8 +28,8 @@ async function proxyRequest(request: NextRequest, path: string, method: string) 
             headers['X-User-ID'] = testUserId;
         }
 
-        // Build the full backend URL
-        const backendUrl = `${BACKEND_URL}/api/v2/${path}`;
+        // Build the full backend URL (unified API without /v2 prefix)
+        const backendUrl = `${BACKEND_URL}/api/${path}`;
 
         // Forward request body for POST/PUT/PATCH
         let body: string | undefined;

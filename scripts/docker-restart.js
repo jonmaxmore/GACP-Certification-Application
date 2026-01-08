@@ -3,7 +3,9 @@
  */
 const { execSync } = require('child_process');
 
-const SSH_KEY = process.env.HOME + '/.ssh/2P_GACP_Application.pem';
+const path = require('path');
+const os = require('os');
+const SSH_KEY = path.join(os.homedir(), '.ssh', '2P_GACP_Application.pem');
 const SSH_HOST = 'ec2-user@ec2-47-129-167-71.ap-southeast-1.compute.amazonaws.com';
 
 console.log('🔄 Restarting all Docker containers on production server...\n');

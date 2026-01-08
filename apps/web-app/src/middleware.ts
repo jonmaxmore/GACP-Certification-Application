@@ -45,6 +45,7 @@ const securityHeaders = {
         "img-src 'self' data: blob: https:",
         "font-src 'self' data:",
         "connect-src 'self' http://47.129.167.71 http://localhost:* https:",
+        "frame-src 'self' https://*.openstreetmap.org",
         "frame-ancestors 'none'",
         "base-uri 'self'",
         "form-action 'self'",

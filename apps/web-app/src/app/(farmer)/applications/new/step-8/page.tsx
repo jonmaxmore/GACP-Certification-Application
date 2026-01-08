@@ -75,17 +75,66 @@ export default function Step8Review() {
         setSubmitting(true); setError(null);
         try {
             if (state.applicationId) { router.push('/applications/new/step-9'); return; }
-            const applicantName = state.applicantData?.applicantType === 'INDIVIDUAL' ? `${state.applicantData?.firstName || ''} ${state.applicantData?.lastName || ''}` : state.applicantData?.applicantType === 'COMMUNITY' ? state.applicantData?.communityName || '' : state.applicantData?.companyName || '';
-            const draftData = { requestType: state.serviceType || 'NEW', certificationType: 'GACP', objective: state.certificationPurpose, applicantType: state.applicantData?.applicantType || 'INDIVIDUAL', applicantInfo: { name: applicantName, ...state.applicantData }, siteInfo: state.siteData, formData: { plantId: state.plantId, siteTypes: state.siteTypes, production: state.productionData, documents: state.documents, consentedPDPA: state.consentedPDPA, acknowledgedStandards: state.acknowledgedStandards } };
+
+            const applicantName = state.applicantData?.applicantType === 'INDIVIDUAL'
+                ? `${state.applicantData?.firstName || ''} ${state.applicantData?.lastName || ''}`
+                : state.applicantData?.applicantType === 'COMMUNITY'
+                    ? state.applicantData?.communityName || ''
+                    : state.applicantData?.companyName || '';
+
+            // Flattened structure to match backend expectations (apps/backend/routes/api/applications.js)
+            const draftData = {
+                plantId: state.plantId,
+                plantName: plant?.name || state.plantId,
+                serviceType: state.serviceType || 'new_application',
+                purpose: state.certificationPurpose,
+                areaType: state.siteTypes?.[0] || 'OUTDOOR', // Default to first site type
+
+                applicantData: { name: applicantName, ...state.applicantData },
+                locationData: state.siteData,
+                productionData: state.productionData,
+                documents: state.documents,
+
+                estimatedFee: totalFee,
+                submissionDate: new Date(),
+
+                // Legacy fields kept for compatibility if needed elsewhere (optional)
+                requestType: state.serviceType || 'NEW',
+                certificationType: 'GACP',
+                objective: state.certificationPurpose,
+                applicantType: state.applicantData?.applicantType || 'INDIVIDUAL',
+            };
+
+            console.log('Submitting draftData:', draftData);
+
+            if (!draftData.plantId || !draftData.serviceType) {
+                console.error('Missing required fields:', { plantId: draftData.plantId, serviceType: draftData.serviceType });
+                setError('ข้อมูลพืชหรือประเภทบริการไม่ครบถ้วน กรุณากลับไปแก้ไขข้อมูล');
+                setSubmitting(false);
+                return;
+            }
+
             const result = await api.post<{ success: boolean; data: { _id: string; applicationNumber?: string }; error?: string }>('/api/applications/draft', draftData);
+
             if (result.success) {
                 const responseData = result.data as { _id?: string; data?: { _id: string } };
                 const appId = responseData?.data?._id || responseData?._id;
-                if (appId) { setApplicationId(appId); router.push('/applications/new/step-9'); }
-                else setError('สร้างคำขอสำเร็จแต่ไม่พบรหัสคำขอ');
-            } else setError(`ไม่สามารถบันทึกคำขอได้: ${result.error || 'Unknown error'}`);
-        } catch { setError('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์'); }
-        finally { setSubmitting(false); }
+
+                if (appId) {
+                    setApplicationId(appId);
+                    router.push('/applications/new/step-9');
+                } else {
+                    setError('สร้างคำขอสำเร็จแต่ไม่พบรหัสคำขอ');
+                }
+            } else {
+                setError(`ไม่สามารถบันทึกคำขอได้: ${result.error || 'Unknown error'}`);
+            }
+        } catch (err: any) {
+            console.error(err);
+            setError(`เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์: ${err.message || 'Unknown error'}`);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const handleBack = () => router.push('/applications/new/step-7');

@@ -19,11 +19,8 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 
 // Import Modules
-const AuthFarmerRoutes = require('./routes/api/auth-farmer');
-const AuthDTAMRoutes = require('./routes/api/auth-dtam');
 const apiRoutes = require('./routes/api');
 const uploadsRouter = require('./routes/api/uploads');
-const EstablishmentRoutes = require('./modules/Establishment');
 
 const app = express();
 const port = process.env.PORT || 3000; // NOTE: Database and Redis connection moved to after app.listen() for graceful degradation
@@ -41,11 +38,9 @@ app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Mount Routes
-app.use('/api/auth-farmer', AuthFarmerRoutes);
-app.use('/api/auth-dtam', AuthDTAMRoutes); // DTAM staff authentication
+// Mount Routes
 app.use('/api/uploads', uploadsRouter); // Generic uploads
 app.use('/api', apiRoutes); // Unified API routes (no /v2 prefix)
-app.use('/api/establishments', EstablishmentRoutes);
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

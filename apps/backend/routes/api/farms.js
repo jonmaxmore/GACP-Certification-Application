@@ -23,6 +23,12 @@ const authenticateFarmer = (req, res, next) => {
     return res.status(500).json({ success: false, message: 'Auth middleware error' });
 };
 
+// Configure Upload Middleware (using shared middleware or custom if needed)
+// Legacy module used 'uploads/establishments'
+const upload = require('../../middleware/upload-middleware');
+const fs = require('fs');
+const path = require('path');
+
 /**
  * GET /api/farms/my
  * Get all farms for the current authenticated farmer
@@ -128,8 +134,9 @@ router.get('/:id', authenticateFarmer, async (req, res) => {
 /**
  * POST /api/farms
  * Create a new farm
+ * Supports 'evidence_photo' file upload
  */
-router.post('/', authenticateFarmer, async (req, res) => {
+router.post('/', authenticateFarmer, upload.single('evidence_photo'), async (req, res) => {
     try {
         const {
             farmName,
@@ -178,7 +185,10 @@ router.post('/', authenticateFarmer, async (req, res) => {
                 irrigationType,
                 soilType,
                 waterSource,
-                landDocuments: landDocuments || null,
+                // Handle file upload or JSON body
+                landDocuments: req.file ? {
+                    images: [`/uploads/${req.file.filename}`]
+                } : (landDocuments || null),
                 status: 'DRAFT'
             }
         });

@@ -6,7 +6,7 @@ export { DataTable } from './DataTable';
 export { StatusBadge } from './StatusBadge';
 export { ErrorBoundary } from './error-boundary';
 export { default as FileUpload } from './file-upload';
-export { FormInput } from './form-input';
+export { Input as FormInput, Select as FormSelect } from './form-input';
 export { GACPButton } from './gacp-button';
 export { GACPCard } from './gacp-card';
 export { GACPInput } from './gacp-input';

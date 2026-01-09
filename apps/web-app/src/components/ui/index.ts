@@ -1,11 +1,11 @@
 // Re-export existing components
 export { Button } from './button';
 export { BottomNav } from './bottom-nav';
-export { BackButton } from './BackButton';
+export { default as BackButton } from './BackButton';
 export { DataTable } from './DataTable';
 export { StatusBadge } from './StatusBadge';
 export { ErrorBoundary } from './error-boundary';
-export { FileUpload } from './file-upload';
+export { default as FileUpload } from './file-upload';
 export { FormInput } from './form-input';
 export { GACPButton } from './gacp-button';
 export { GACPCard } from './gacp-card';

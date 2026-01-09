@@ -134,6 +134,19 @@ class PrismaAuthService {
     }
 
 
+    async getProfile(userId) {
+        try {
+            const user = await userRepository.findById(userId);
+            if (!user) {
+                throw new Error('User not found');
+            }
+            return this._sanitizeUser(user);
+        } catch (error) {
+            logger.error(`[Auth] getProfile error: ${error.message}`);
+            throw error;
+        }
+    }
+
     _sanitizeUser(user) {
         return {
             id: user.id,

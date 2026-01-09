@@ -224,7 +224,7 @@ router.post('/:id/send', authenticateDTAM, async (req, res) => {
         // Update Quote status
         const updatedQuote = await prisma.quote.update({
             where: { id },
-            data: { status: 'sent', sentAt: new Date() }
+            data: { status: 'sent' }
         });
 
         // Update Application Status (QUOTE_SENT is mapped to existing status? e.g. 'AWAITING_PAYMENT' or similar? 
@@ -235,12 +235,7 @@ router.post('/:id/send', authenticateDTAM, async (req, res) => {
         await prisma.application.update({
             where: { id: quote.applicationId },
             data: {
-                status: 'QUOTE_SENT', // Verify if this status exists in enum ApplicationStatus
-                teamQuote: {
-                    quoteId: quote.id,
-                    receivedAt: new Date(),
-                    amount: quote.totalAmount
-                }
+                status: 'QUOTE_SENT' // Verify if this status exists in enum ApplicationStatus
             }
         });
 
@@ -256,6 +251,8 @@ router.post('/:id/send', authenticateDTAM, async (req, res) => {
 
     } catch (error) {
         console.error('[Quotes] sendQuote error:', error);
+        console.error('[Quotes] sendQuote Code:', error.code);
+        console.error('[Quotes] sendQuote Meta:', error.meta && JSON.stringify(error.meta));
         res.status(500).json({ success: false, message: 'Failed to send quote' });
     }
 });
@@ -315,10 +312,7 @@ router.post('/:id/accept', authenticateFarmer, async (req, res) => {
         await prisma.application.update({
             where: { id: quote.applicationId },
             data: {
-                status: 'AWAITING_PAYMENT',
-                teamQuote: {
-                    acceptedAt: new Date()
-                }
+                status: 'AWAITING_PAYMENT'
             }
         });
 

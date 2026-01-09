@@ -91,10 +91,6 @@ try {
  */
 function authenticateFarmer(req, res, next) {
   try {
-    require('fs').appendFileSync('middleware_debug.log', `[DEBUG] authenticateFarmer called at ${new Date().toISOString()}\n`);
-  } catch (e) { }
-  console.error('[DEBUG] authenticateFarmer called. CWD:', process.cwd());
-  try {
     // Priority: 1. Cookie (web clients), 2. Authorization header (mobile apps)
     const cookieToken = req.cookies?.auth_token;
     const authHeader = req.headers['authorization'];
@@ -110,7 +106,7 @@ function authenticateFarmer(req, res, next) {
       });
     }
 
-    require('fs').appendFileSync('middleware_debug.log', `[DEBUG] Token source: ${cookieToken ? 'cookie' : 'header'}, prefix: ${token ? token.substring(0, 10) : 'NONE'}\n`);
+
     // ใช้ secure JWT secret จาก configuration
     const decoded = jwtConfig.verifyToken(token, 'public', getActiveJwtConfig());
 
@@ -119,11 +115,6 @@ function authenticateFarmer(req, res, next) {
     next();
   } catch (error) {
     logger.error('[AUTH] Farmer authentication failed:', error.message);
-    try {
-      require('fs').appendFileSync('middleware_debug.log', `[ERROR] ${new Date().toISOString()} Auth Failed: ${error.message}\nStack: ${error.stack}\n`);
-    } catch (e) {
-      console.error('Failed to write auth debug:', e);
-    }
 
     // Enhanced error response
     if (error.code === 'TOKEN_EXPIRED') {

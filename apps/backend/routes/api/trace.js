@@ -19,45 +19,51 @@ router.get('/:qrCode', async (req, res) => {
         const { qrCode } = req.params;
 
         // Try to find as a Lot first
-        let lot = await prisma.lot.findUnique({
-            where: { qrCode },
-            include: {
-                batch: {
-                    include: {
-                        farm: {
-                            select: {
-                                id: true,
-                                farmName: true,
-                                farmNameTH: true,
-                                province: true,
-                                district: true,
-                                status: true
-                            }
-                        },
-                        species: {
-                            select: {
-                                code: true,
-                                nameTH: true,
-                                nameEN: true
-                            }
-                        },
-                        cycle: {
-                            include: {
-                                certificate: {
-                                    select: {
-                                        id: true,
-                                        certificateNumber: true,
-                                        expiryDate: true,
-                                        issuedAt: true,
-                                        status: true
+        let lot = null;
+        try {
+            lot = await prisma.lot.findFirst({
+                where: { qrCode },
+                include: {
+                    batch: {
+                        include: {
+                            farm: {
+                                select: {
+                                    id: true,
+                                    farmName: true,
+                                    farmNameTH: true,
+                                    province: true,
+                                    district: true,
+                                    status: true
+                                }
+                            },
+                            species: {
+                                select: {
+                                    code: true,
+                                    nameTH: true,
+                                    nameEN: true
+                                }
+                            },
+                            cycle: {
+                                include: {
+                                    certificate: {
+                                        select: {
+                                            id: true,
+                                            certificateNumber: true,
+                                            expiryDate: true,
+                                            issuedAt: true,
+                                            status: true
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        } catch (e) {
+            // Lot table may not have qrCode field, continue to batch
+            lot = null;
+        }
 
         if (lot) {
             const certificate = lot.batch?.cycle?.certificate;
@@ -106,36 +112,42 @@ router.get('/:qrCode', async (req, res) => {
         }
 
         // Try to find as a Batch
-        let batch = await prisma.harvestBatch.findUnique({
-            where: { qrCode },
-            include: {
-                farm: {
-                    select: {
-                        id: true,
-                        farmName: true,
-                        farmNameTH: true,
-                        province: true,
-                        district: true,
-                        status: true
-                    }
-                },
-                species: {
-                    select: {
-                        code: true,
-                        nameTH: true,
-                        nameEN: true
-                    }
-                },
-                lots: {
-                    select: {
-                        lotNumber: true,
-                        packageType: true,
-                        quantity: true,
-                        status: true
+        let batch = null;
+        try {
+            batch = await prisma.harvestBatch.findFirst({
+                where: { qrCode },
+                include: {
+                    farm: {
+                        select: {
+                            id: true,
+                            farmName: true,
+                            farmNameTH: true,
+                            province: true,
+                            district: true,
+                            status: true
+                        }
+                    },
+                    species: {
+                        select: {
+                            code: true,
+                            nameTH: true,
+                            nameEN: true
+                        }
+                    },
+                    lots: {
+                        select: {
+                            lotNumber: true,
+                            packageType: true,
+                            quantity: true,
+                            status: true
+                        }
                     }
                 }
-            }
-        });
+            });
+        } catch (e) {
+            // HarvestBatch may not have qrCode field
+            batch = null;
+        }
 
         if (batch) {
             return res.json({

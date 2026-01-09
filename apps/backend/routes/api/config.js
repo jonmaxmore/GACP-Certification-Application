@@ -311,6 +311,158 @@ router.get('/standards/:code', (req, res) => {
 });
 
 // ============================================================================
+// APPLICATION FORM FIELD CONFIGURATIONS
+// ============================================================================
+
+/**
+ * @route   GET /api/config/service-types
+ * @desc    Get available service types for applications
+ * @access  Public
+ */
+router.get('/service-types', (req, res) => {
+    try {
+        const serviceTypes = [
+            { code: 'NEW', label: 'ขอใหม่', labelEN: 'New Application', description: 'ยื่นขอใบรับรอง GACP ใหม่' },
+            { code: 'RENEWAL', label: 'ต่ออายุ', labelEN: 'Renewal', description: 'ต่ออายุใบรับรอง GACP ที่หมดอายุ' },
+            { code: 'AMENDMENT', label: 'แก้ไข', labelEN: 'Amendment', description: 'แก้ไขข้อมูลใบรับรอง GACP' },
+            { code: 'EXPANSION', label: 'ขยายขอบเขต', labelEN: 'Scope Expansion', description: 'ขยายขอบเขตใบรับรอง GACP' }
+        ];
+
+        res.json({
+            success: true,
+            count: serviceTypes.length,
+            data: serviceTypes
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * @route   GET /api/config/purposes
+ * @desc    Get cultivation purposes
+ * @access  Public
+ */
+router.get('/purposes', (req, res) => {
+    try {
+        const purposes = [
+            { code: 'COMMERCIAL', label: 'เชิงพาณิชย์', labelEN: 'Commercial' },
+            { code: 'RESEARCH', label: 'วิจัยและพัฒนา', labelEN: 'Research & Development' },
+            { code: 'EDUCATION', label: 'การศึกษา', labelEN: 'Education' },
+            { code: 'EXPORT', label: 'ส่งออก', labelEN: 'Export' },
+            { code: 'PROCESSING', label: 'แปรรูป', labelEN: 'Processing' },
+            { code: 'MEDICAL', label: 'ทางการแพทย์', labelEN: 'Medical Use' }
+        ];
+
+        res.json({
+            success: true,
+            count: purposes.length,
+            data: purposes
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * @route   GET /api/config/cultivation-methods
+ * @desc    Get cultivation methods
+ * @access  Public
+ */
+router.get('/cultivation-methods', (req, res) => {
+    try {
+        const methods = [
+            { code: 'CONVENTIONAL', label: 'ทั่วไป', labelEN: 'Conventional' },
+            { code: 'ORGANIC', label: 'เกษตรอินทรีย์', labelEN: 'Organic' },
+            { code: 'GAP', label: 'GAP', labelEN: 'Good Agricultural Practice' },
+            { code: 'HYDROPONIC', label: 'ไฮโดรโปนิกส์', labelEN: 'Hydroponic' },
+            { code: 'SOILLESS', label: 'ไร้ดิน', labelEN: 'Soilless' },
+            { code: 'AEROPONIC', label: 'แอโรโปนิกส์', labelEN: 'Aeroponic' }
+        ];
+
+        res.json({
+            success: true,
+            count: methods.length,
+            data: methods
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * @route   GET /api/config/farm-types
+ * @desc    Get farm/establishment types
+ * @access  Public
+ */
+router.get('/farm-types', (req, res) => {
+    try {
+        const farmTypes = [
+            { code: 'CULTIVATION', label: 'แปลงปลูก', labelEN: 'Cultivation Farm' },
+            { code: 'PROCESSING', label: 'โรงแปรรูป', labelEN: 'Processing Facility' },
+            { code: 'STORAGE', label: 'คลังสินค้า', labelEN: 'Storage Facility' },
+            { code: 'NURSERY', label: 'เรือนเพาะชำ', labelEN: 'Nursery' },
+            { code: 'MIXED', label: 'ผสมผสาน', labelEN: 'Mixed Use' }
+        ];
+
+        res.json({
+            success: true,
+            count: farmTypes.length,
+            data: farmTypes
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * @route   GET /api/config/area-types
+ * @desc    Get cultivation area types (location types)
+ * @access  Public
+ */
+router.get('/area-types', (req, res) => {
+    try {
+        const areaTypes = [
+            { code: 'INDOOR', label: 'ในอาคาร', labelEN: 'Indoor', description: 'ปลูกในอาคารควบคุมสภาพแวดล้อม' },
+            { code: 'OUTDOOR', label: 'กลางแจ้ง', labelEN: 'Outdoor', description: 'ปลูกพื้นที่โล่งแจ้ง' },
+            { code: 'GREENHOUSE', label: 'โรงเรือน', labelEN: 'Greenhouse', description: 'ปลูกในโรงเรือนพลาสติก/กระจก' },
+            { code: 'CONTROLLED', label: 'สภาพแวดล้อมควบคุม', labelEN: 'Controlled Environment', description: 'ห้องปลูกควบคุมอุณหภูมิ/แสง' }
+        ];
+
+        res.json({
+            success: true,
+            count: areaTypes.length,
+            data: areaTypes
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * @route   GET /api/config/applicant-types
+ * @desc    Get applicant/account types
+ * @access  Public
+ */
+router.get('/applicant-types', (req, res) => {
+    try {
+        const applicantTypes = [
+            { code: 'INDIVIDUAL', label: 'บุคคลธรรมดา', labelEN: 'Individual' },
+            { code: 'JURISTIC', label: 'นิติบุคคล', labelEN: 'Juristic Person' },
+            { code: 'COMMUNITY_ENTERPRISE', label: 'วิสาหกิจชุมชน', labelEN: 'Community Enterprise' }
+        ];
+
+        res.json({
+            success: true,
+            count: applicantTypes.length,
+            data: applicantTypes
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================================
 // PRICING API
 // ============================================================================
 

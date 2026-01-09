@@ -13,8 +13,9 @@ const notificationController = {
     getNotifications: async (req, res) => {
         try {
             const prisma = prismaDatabase.getClient();
+            const userId = req.user.id || req.user.userId;
             const notifications = await prisma.notification.findMany({
-                where: { userId: req.user.userId },
+                where: { userId },
                 orderBy: { createdAt: 'desc' },
                 take: 50
             });
@@ -28,9 +29,10 @@ const notificationController = {
     getUnreadCount: async (req, res) => {
         try {
             const prisma = prismaDatabase.getClient();
+            const userId = req.user.id || req.user.userId;
             const count = await prisma.notification.count({
                 where: {
-                    userId: req.user.userId,
+                    userId,
                     isRead: false
                 }
             });
@@ -43,10 +45,11 @@ const notificationController = {
     markAsRead: async (req, res) => {
         try {
             const prisma = prismaDatabase.getClient();
+            const userId = req.user.id || req.user.userId;
             const notification = await prisma.notification.updateMany({
                 where: {
                     id: req.params.id,
-                    userId: req.user.userId
+                    userId
                 },
                 data: {
                     isRead: true,
@@ -67,9 +70,10 @@ const notificationController = {
     markAllAsRead: async (req, res) => {
         try {
             const prisma = prismaDatabase.getClient();
+            const userId = req.user.id || req.user.userId;
             await prisma.notification.updateMany({
                 where: {
-                    userId: req.user.userId,
+                    userId,
                     isRead: false
                 },
                 data: {
@@ -108,11 +112,11 @@ const notificationController = {
 // All routes require authentication
 router.use(authenticate);
 
-// GET /api/v2/notifications
-router.get('/', checkPermission('dashboard.view'), notificationController.getNotifications);
+// GET /api/notifications - All authenticated users can get their notifications
+router.get('/', notificationController.getNotifications);
 
-// GET /api/v2/notifications/unread-count
-router.get('/unread-count', checkPermission('dashboard.view'), notificationController.getUnreadCount);
+// GET /api/notifications/unread-count
+router.get('/unread-count', notificationController.getUnreadCount);
 
 // PUT /api/v2/notifications/:id/read
 router.put('/:id/read', checkPermission('dashboard.view'), notificationController.markAsRead);

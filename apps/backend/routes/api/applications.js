@@ -57,10 +57,11 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
             }
         });
 
-        // Generate application number
+        // Generate application number (unique globally)
         const year = new Date().getFullYear() + 543; // Buddhist year
-        const count = await prisma.application.count({ where: { farmerId } });
-        const applicationNumber = `GACP-${year}-${String(count + 1).padStart(6, '0')}`;
+        const globalCount = await prisma.application.count();
+        const timestamp = Date.now().toString(36).slice(-4).toUpperCase();
+        const applicationNumber = `GACP-${year}-${String(globalCount + 1).padStart(5, '0')}-${timestamp}`;
 
         const applicationData = {
             farmerId,
@@ -113,10 +114,17 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[Applications Draft] Error:', error);
+        console.error('[Applications Draft] Error:', error.message);
+        console.error('[Applications Draft] Code:', error.code);
+        console.error('[Applications Draft] Meta:', JSON.stringify(error.meta));
         res.status(500).json({
             success: false,
-            error: 'ไม่สามารถบันทึกคำขอได้'
+            error: 'ไม่สามารถบันทึกคำขอได้',
+            debug: process.env.NODE_ENV !== 'production' ? {
+                message: error.message,
+                code: error.code,
+                meta: error.meta
+            } : undefined
         });
     }
 });

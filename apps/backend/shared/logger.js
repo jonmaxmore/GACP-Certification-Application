@@ -25,6 +25,13 @@ const defaultLogger = winston.createLogger({
   ],
 });
 
+// Stream object for morgan middleware
+defaultLogger.stream = {
+  write: (message) => {
+    defaultLogger.info(message.trim());
+  }
+};
+
 module.exports = defaultLogger;
 module.exports.createLogger = createLogger;
 

@@ -6,6 +6,7 @@
 
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -20,99 +21,33 @@ const swaggerSpec = require('./config/swagger');
 // Import Modules
 const AuthFarmerRoutes = require('./routes/api/auth-farmer');
 const AuthDTAMRoutes = require('./routes/api/auth-dtam');
-const v2Routes = require('./routes/api');
+const apiRoutes = require('./routes/api');
+const uploadsRouter = require('./routes/api/uploads');
 const EstablishmentRoutes = require('./modules/Establishment');
-// const ApplicationRoutes = require('./routes/api/application-routes'); // Migrated to v2
-// Migrated to v2
-// const InvoiceRoutes = require('./routes/api/invoice-routes');
-// const StaffRoutes = require('./routes/api/staff-routes');
-// const AuditRoutes = require('./routes/api/audit-routes');
 
 const app = express();
-const port = process.env.PORT || 3000; // Backend API port
+const port = process.env.PORT || 3000; // NOTE: Database and Redis connection moved to after app.listen() for graceful degradation
 
-const path = require('path');
-
-// CORS Configuration - Environment Based
-const corsOptions = {
-    origin: (origin, callback) => {
-        // Allow requests with no origin (mobile apps, curl, PowerShell, etc.)
-        if (!origin) return callback(null, true);
-
-        // Always allow production server origin
-        const productionOrigins = [
-            'http://47.129.167.71',
-            'https://47.129.167.71',
-            'http://localhost:3001',
-            'http://localhost:3000',
-        ];
-
-        if (productionOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-
-        // In development, allow all origins
-        if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
-            return callback(null, true);
-        }
-
-        // In production, also check environment-configured origins
-        const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').filter(Boolean);
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-
-        logger.warn(`[CORS] Blocked request from: ${origin}`);
-        return callback(new Error('Not allowed by CORS'), false);
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-};
-
-// Trust proxy for AWS/Cloud deployment (required for HTTPS behind load balancer)
-if (process.env.NODE_ENV === 'production') {
-    app.set('trust proxy', 1);
-}
-
-// Security & Performance Middleware
-app.use(helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
-    hsts: process.env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
-}));
-app.use(cors(corsOptions));
-app.use(compression());
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-
-// CDN/Cache Middleware (temporarily disabled)
-// const { staticCacheMiddleware } = require('./middleware/CacheControlMiddleware');
-
-// Serve Static Files (Uploads)
-app.use('/uploads',
-    express.static(path.join(__dirname, 'uploads'), {
-        maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
-        etag: true,
-        lastModified: true,
-    })
-);
-
-// Body Parsing
+// Middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cors());
+app.use(helmet());
+app.use(compression());
+app.use(morgan('combined', { stream: logger.stream }));
 app.use(cookieParser());
 
-// NOTE: Database and Redis connection moved to after app.listen() for graceful degradation
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Mount Routes
 app.use('/api/auth-farmer', AuthFarmerRoutes);
 app.use('/api/auth-dtam', AuthDTAMRoutes); // DTAM staff authentication
-app.use('/api', v2Routes); // Unified API routes (no /v2 prefix)
+app.use('/api/uploads', uploadsRouter); // Generic uploads
+app.use('/api', apiRoutes); // Unified API routes (no /v2 prefix)
 app.use('/api/establishments', EstablishmentRoutes);
-// app.use('/api/applications', ApplicationRoutes);  // Migrated to v2
-// app.use('/api/v2/invoices', InvoiceRoutes);     // Migrated to v2
-// app.use('/api/v2/staff', StaffRoutes);          // Migrated to v2
-// app.use('/api/v2/audits', AuditRoutes);         // Migrated to v2
+
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Health Check - Both /health and /api/health for compatibility

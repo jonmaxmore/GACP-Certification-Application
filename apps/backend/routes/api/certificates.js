@@ -17,10 +17,39 @@ const authenticateFarmer = (req, res, next) => {
     return res.status(500).json({ error: 'Auth middleware not loaded' });
 };
 
+// Staff authentication wrapper (uses DTAM JWT secret)
+const authenticateStaff = (req, res, next) => {
+    if (typeof authModule.authenticateDTAM === 'function') {
+        return authModule.authenticateDTAM(req, res, next);
+    }
+    return res.status(500).json({ error: 'Auth middleware not loaded' });
+};
+
 /**
- * GET /api/v2/certificates/my
- * Get certificates for authenticated user
+ * GET /api/certificates
+ * Get all certificates (Staff only)
  */
+router.get('/', authenticateStaff, async (req, res) => {
+    try {
+        const certificates = await prisma.certificate.findMany({
+            where: { isDeleted: false },
+            orderBy: { issuedDate: 'desc' },
+            take: 100
+        });
+
+        res.json({
+            success: true,
+            count: certificates.length,
+            data: certificates
+        });
+    } catch (error) {
+        logger.error('[Certificates] getAll error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch certificates'
+        });
+    }
+});
 router.get('/my', authenticateFarmer, async (req, res) => {
     try {
         const userId = req.user.id;

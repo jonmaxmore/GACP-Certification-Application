@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   // NOTE: v2, auth-farmer, auth-dtam are handled by API route handlers
   // that properly forward Set-Cookie headers. Only establishments uses rewrite.
   async rewrites() {
-    const backendUrl = 'http://127.0.0.1:5000';
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
     return [
       {
         source: '/api/establishments/:path*',

@@ -24,12 +24,12 @@ const STATUS_CONFIG: Record<string, { label: string; Icon: React.FC<{ size?: num
     CERTIFIED: { label: "ได้รับการรับรอง", Icon: IconCertificate, bgClass: "bg-emerald-500" },
 };
 
-const NAV_ITEMS = [
-    { href: "/dashboard", Icon: IconHome, label: "หน้าหลัก" },
-    { href: "/applications", Icon: IconDocument, label: "คำขอ", active: true },
-    { href: "/tracking", Icon: IconCompass, label: "ติดตาม" },
-    { href: "/payments", Icon: IconCreditCard, label: "การเงิน" },
-    { href: "/profile", Icon: IconUser, label: "โปรไฟล์" },
+{ href: "/dashboard", Icon: IconHome, label: "หน้าหลัก" },
+{ href: "/applications", Icon: IconDocument, label: "คำขอ", active: true },
+{ href: "/establishments", Icon: IconLeaf, label: "แปลงปลูก" },
+{ href: "/tracking", Icon: IconCompass, label: "ติดตาม" },
+{ href: "/payments", Icon: IconCreditCard, label: "การเงิน" },
+{ href: "/profile", Icon: IconUser, label: "โปรไฟล์" },
 ];
 
 export default function ApplicationsPage() {

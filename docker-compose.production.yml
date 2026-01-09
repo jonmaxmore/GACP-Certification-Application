@@ -81,7 +81,7 @@ services:
       - NODE_ENV=production
       - PORT=3000
       # Subdomain Strategy: API is at api.DOMAIN
-      - NEXT_PUBLIC_API_URL=${PUBLIC_API_URL:-https://api.gacp.local}
+      - NEXT_PUBLIC_API_URL=http://47.129.167.71
       - NEXT_PUBLIC_WEB_URL=${PUBLIC_WEB_URL:-https://farmer.gacp.local}
     depends_on:
       - backend

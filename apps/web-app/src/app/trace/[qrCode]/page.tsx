@@ -4,8 +4,80 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 
 interface TraceData {
-    type: 'LOT' | 'BATCH';
+    type: 'PLANTING_CYCLE' | 'HARVEST_BATCH' | 'LOT';
     data: {
+        // Farm info
+        farm: {
+            name: string;
+            type?: string;
+            location: string;
+            address?: string;
+        };
+        // Plot info
+        plot?: {
+            name: string;
+            area?: number;
+            unit?: string;
+        };
+        // Plant info
+        plant: {
+            code?: string;
+            nameTH: string;
+            nameEN?: string;
+            scientificName?: string;
+            variety?: string;
+        };
+        // Cultivation info
+        cultivation?: {
+            method: string;
+            methodCode?: string;
+            seedSource?: string;
+            soilType?: string;
+            irrigationType?: string;
+            cycleName?: string;
+            cycleNumber?: number;
+        };
+        // Dates
+        dates?: {
+            planted?: string;
+            plantedTH?: string;
+            expectedHarvest?: string;
+            expectedHarvestTH?: string;
+            actualHarvest?: string;
+            actualHarvestTH?: string;
+        };
+        // Yield
+        yield?: {
+            estimated?: number;
+            actual?: number;
+            unit?: string;
+        };
+        // Status
+        status?: string;
+        // Batch info (for HARVEST_BATCH)
+        batch?: {
+            number?: string;
+            batchNumber?: string;
+            plantingDate?: string;
+            plantingDateTH?: string;
+            harvestDate?: string;
+            harvestDateTH?: string;
+            yield?: number;
+            yieldUnit?: string;
+            qualityGrade?: string;
+            status?: string;
+        };
+        // Harvests (for PLANTING_CYCLE)
+        harvests?: Array<{
+            batchNumber: string;
+            harvestDate?: string;
+            harvestDateTH?: string;
+            yield?: number;
+            yieldUnit?: string;
+            grade?: string;
+            status?: string;
+        }>;
+        // Lot info
         lot?: {
             lotNumber: string;
             packageType: string;
@@ -14,41 +86,30 @@ interface TraceData {
             status: string;
             packagedAt: string;
             expiryDate: string;
-            labTest: {
+            labTest?: {
                 status: string;
                 thcContent: number;
                 cbdContent: number;
                 moistureContent: number;
-                reportUrl: string;
             };
         };
-        batch?: {
-            batchNumber: string;
-            harvestDate: string;
-            plantingDate: string;
-            qualityGrade: string;
-            status: string;
-        };
-        farm: {
-            farmName: string;
-            farmNameTH: string;
-            province: string;
-            district: string;
-        };
-        plant: {
-            nameTH: string;
-            nameEN: string;
-        };
+        // Certificate
         certificate?: {
             number: string;
-            expiryDate: string;
-            issuedAt: string;
-            status: string;
+            standard?: string;
+            issuedDate?: string;
+            issuedDateTH?: string;
+            expiryDate?: string;
+            expiryDateTH?: string;
+            status?: string;
             isValid: boolean;
         };
+        // Verification
         verification: {
             valid: boolean;
+            certified?: boolean;
             scannedAt: string;
+            verifiedBy?: string;
         };
     };
 }
@@ -66,7 +127,8 @@ export default function TracePage() {
 
         async function fetchTraceData() {
             try {
-                const res = await fetch(`/api/proxy/trace/${qrCode}`);
+                // Direct API call (Nginx routes /api/* to backend)
+                const res = await fetch(`/api/trace/${qrCode}`);
                 const data = await res.json();
 
                 if (!data.success) {
@@ -124,6 +186,9 @@ export default function TracePage() {
 
     const { data, type } = traceData;
     const cert = data.certificate;
+    const isPlantingCycle = type === 'PLANTING_CYCLE';
+    const isHarvestBatch = type === 'HARVEST_BATCH';
+    const isLot = type === 'LOT';
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 py-8 px-4">
@@ -135,7 +200,9 @@ export default function TracePage() {
                             <svg className="w-8 h-8 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span className="text-lg font-semibold">ผลิตภัณฑ์ผ่านการรับรอง</span>
+                            <span className="text-lg font-semibold">
+                                {cert?.isValid ? 'ผ่านการรับรอง GACP' : 'ข้อมูลการผลิต'}
+                            </span>
                         </div>
                         <h1 className="text-2xl font-bold">
                             🌿 GACP Traceability
@@ -154,7 +221,7 @@ export default function TracePage() {
                     </div>
                 </div>
 
-                {/* GACP Certificate Badge - NEW! */}
+                {/* GACP Certificate Badge */}
                 {cert && (
                     <div className={`rounded-2xl shadow-lg p-6 mb-6 ${cert.isValid ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-gray-500 to-gray-600'}`}>
                         <div className="text-white text-center">
@@ -170,7 +237,7 @@ export default function TracePage() {
                                 {cert.number}
                             </div>
                             <div className="text-sm opacity-90">
-                                ออกเมื่อ: {formatDate(cert.issuedAt)} • หมดอายุ: {formatDate(cert.expiryDate)}
+                                ออกเมื่อ: {cert.issuedDateTH || formatDate(cert.issuedDate || '')} • หมดอายุ: {cert.expiryDateTH || formatDate(cert.expiryDate || '')}
                             </div>
                         </div>
                     </div>
@@ -183,7 +250,7 @@ export default function TracePage() {
                             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                             </svg>
-                            <span>ไม่พบข้อมูลใบรับรอง GACP</span>
+                            <span>อยู่ระหว่างดำเนินการขอรับรอง GACP</span>
                         </div>
                     </div>
                 )}
@@ -196,16 +263,30 @@ export default function TracePage() {
                     <div className="space-y-3">
                         <div className="flex justify-between">
                             <span className="text-gray-500">ชื่อฟาร์ม</span>
-                            <span className="font-medium text-gray-800">{data.farm.farmNameTH || data.farm.farmName}</span>
+                            <span className="font-medium text-gray-800">{data.farm.name}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-500">ที่ตั้ง</span>
-                            <span className="font-medium text-gray-800">{data.farm.district}, {data.farm.province}</span>
+                            <span className="font-medium text-gray-800">{data.farm.location}</span>
                         </div>
+                        {data.plot && (
+                            <>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">แปลง/โรงปลูก</span>
+                                    <span className="font-medium text-gray-800">{data.plot.name}</span>
+                                </div>
+                                {data.plot.area && (
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">พื้นที่</span>
+                                        <span className="font-medium text-gray-800">{data.plot.area} {data.plot.unit}</span>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
 
-                {/* Plant Info */}
+                {/* Plant & Variety Info */}
                 <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
                     <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
                         <span className="text-2xl mr-2">🌱</span> ข้อมูลพืช
@@ -213,29 +294,176 @@ export default function TracePage() {
                     <div className="space-y-3">
                         <div className="flex justify-between">
                             <span className="text-gray-500">ชนิดพืช</span>
-                            <span className="font-medium text-gray-800">{data.plant.nameTH} ({data.plant.nameEN})</span>
+                            <span className="font-medium text-gray-800">{data.plant.nameTH}</span>
                         </div>
-                        {data.batch && (
-                            <>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">วันปลูก</span>
-                                    <span className="font-medium text-gray-800">{formatDate(data.batch.plantingDate)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">วันเก็บเกี่ยว</span>
-                                    <span className="font-medium text-gray-800">{formatDate(data.batch.harvestDate)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">เกรด</span>
-                                    <span className="font-medium text-green-600">{data.batch.qualityGrade || '-'}</span>
-                                </div>
-                            </>
+                        {data.plant.nameEN && (
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">ชื่อภาษาอังกฤษ</span>
+                                <span className="font-medium text-gray-800">{data.plant.nameEN}</span>
+                            </div>
+                        )}
+                        {data.plant.scientificName && (
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">ชื่อวิทยาศาสตร์</span>
+                                <span className="font-medium text-gray-800 italic">{data.plant.scientificName}</span>
+                            </div>
+                        )}
+                        {data.plant.variety && (
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">พันธุ์</span>
+                                <span className="font-medium text-emerald-600">{data.plant.variety}</span>
+                            </div>
                         )}
                     </div>
                 </div>
 
-                {/* Lot Info (if LOT type) */}
-                {type === 'LOT' && data.lot && (
+                {/* Cultivation Method Info */}
+                {data.cultivation && (
+                    <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <span className="text-2xl mr-2">🌾</span> วิธีการปลูก
+                        </h2>
+                        <div className="space-y-3">
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">วิธีการ</span>
+                                <span className="font-medium text-gray-800">{data.cultivation.method}</span>
+                            </div>
+                            {data.cultivation.seedSource && data.cultivation.seedSource !== 'ไม่ระบุ' && (
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">แหล่งเมล็ดพันธุ์</span>
+                                    <span className="font-medium text-gray-800">{data.cultivation.seedSource}</span>
+                                </div>
+                            )}
+                            {data.cultivation.soilType && data.cultivation.soilType !== 'ไม่ระบุ' && (
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">ประเภทดิน</span>
+                                    <span className="font-medium text-gray-800">{data.cultivation.soilType}</span>
+                                </div>
+                            )}
+                            {data.cultivation.irrigationType && data.cultivation.irrigationType !== 'ไม่ระบุ' && (
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">ระบบน้ำ</span>
+                                    <span className="font-medium text-gray-800">{data.cultivation.irrigationType}</span>
+                                </div>
+                            )}
+                            {data.cultivation.cycleName && (
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">รอบการปลูก</span>
+                                    <span className="font-medium text-gray-800">{data.cultivation.cycleName}</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Dates Info */}
+                {(data.dates || data.batch) && (
+                    <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <span className="text-2xl mr-2">📅</span> วันที่สำคัญ
+                        </h2>
+                        <div className="space-y-3">
+                            {/* For PLANTING_CYCLE */}
+                            {data.dates && (
+                                <>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">วันเพาะปลูก</span>
+                                        <span className="font-medium text-emerald-600">
+                                            {data.dates.plantedTH || formatDate(data.dates.planted || '')}
+                                        </span>
+                                    </div>
+                                    {data.dates.expectedHarvest && (
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">กำหนดเก็บเกี่ยว</span>
+                                            <span className="font-medium text-gray-800">
+                                                {data.dates.expectedHarvestTH || formatDate(data.dates.expectedHarvest)}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {data.dates.actualHarvest && (
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">วันเก็บเกี่ยวจริง</span>
+                                            <span className="font-medium text-emerald-600">
+                                                {data.dates.actualHarvestTH || formatDate(data.dates.actualHarvest)}
+                                            </span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                            {/* For HARVEST_BATCH */}
+                            {data.batch && (
+                                <>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">วันปลูก</span>
+                                        <span className="font-medium text-gray-800">
+                                            {data.batch.plantingDateTH || formatDate(data.batch.plantingDate || '')}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">วันเก็บเกี่ยว</span>
+                                        <span className="font-medium text-emerald-600">
+                                            {data.batch.harvestDateTH || formatDate(data.batch.harvestDate || '')}
+                                        </span>
+                                    </div>
+                                    {data.batch.qualityGrade && (
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">เกรดคุณภาพ</span>
+                                            <span className="font-medium text-green-600">เกรด {data.batch.qualityGrade}</span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Yield Info */}
+                {data.yield && (data.yield.estimated || data.yield.actual) && (
+                    <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <span className="text-2xl mr-2">📊</span> ผลผลิต
+                        </h2>
+                        <div className="grid grid-cols-2 gap-4 text-center">
+                            {data.yield.estimated && (
+                                <div className="bg-blue-50 rounded-xl p-4">
+                                    <div className="text-2xl font-bold text-blue-600">{data.yield.estimated}</div>
+                                    <div className="text-xs text-gray-500">{data.yield.unit || 'กก.'} (คาดการณ์)</div>
+                                </div>
+                            )}
+                            {data.yield.actual && (
+                                <div className="bg-green-50 rounded-xl p-4">
+                                    <div className="text-2xl font-bold text-green-600">{data.yield.actual}</div>
+                                    <div className="text-xs text-gray-500">{data.yield.unit || 'กก.'} (จริง)</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Harvest History (for PLANTING_CYCLE) */}
+                {isPlantingCycle && data.harvests && data.harvests.length > 0 && (
+                    <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <span className="text-2xl mr-2">🧺</span> ประวัติการเก็บเกี่ยว
+                        </h2>
+                        <div className="space-y-3">
+                            {data.harvests.map((h, i) => (
+                                <div key={i} className="bg-gray-50 rounded-xl p-4">
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-mono text-sm">{h.batchNumber}</span>
+                                        {h.grade && <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">เกรด {h.grade}</span>}
+                                    </div>
+                                    <div className="text-sm text-gray-500 mt-1">
+                                        {h.harvestDateTH || formatDate(h.harvestDate || '')} • {h.yield} {h.yieldUnit}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Lot Info (for LOT type) */}
+                {isLot && data.lot && (
                     <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
                         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
                             <span className="text-2xl mr-2">📦</span> ข้อมูลล็อต
@@ -265,8 +493,8 @@ export default function TracePage() {
                     </div>
                 )}
 
-                {/* Lab Test Results */}
-                {type === 'LOT' && data.lot?.labTest && (
+                {/* Lab Test Results (for LOT) */}
+                {isLot && data.lot?.labTest && (
                     <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
                         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
                             <span className="text-2xl mr-2">🧪</span> ผลการตรวจ Lab

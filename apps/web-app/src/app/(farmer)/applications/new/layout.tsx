@@ -13,11 +13,11 @@ const STEPS = [
     { id: 5, path: 'step-5', label: 'สถานที่' },
     { id: 6, path: 'step-6', label: 'การผลิต' },
     { id: 7, path: 'step-7', label: 'เอกสาร' },
-    { id: 8, path: 'step-8', label: 'ตรวจสอบ' },
-    { id: 9, path: 'step-9', label: 'ใบเสนอราคา' },
-    { id: 10, path: 'step-10', label: 'ใบวางบิล' },
-    { id: 11, path: 'step-11', label: 'ชำระเงิน' },
-    { id: 12, path: 'step-12', label: 'เกณฑ์เสริม', optional: true },
+    { id: 8, path: 'step-8', label: 'เกณฑ์เสริม', optional: true },
+    { id: 9, path: 'step-9', label: 'ตรวจสอบ' },
+    { id: 10, path: 'step-10', label: 'ใบเสนอราคา' },
+    { id: 11, path: 'step-11', label: 'ใบวางบิล' },
+    { id: 12, path: 'step-12', label: 'ชำระเงิน' },
 ];
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {

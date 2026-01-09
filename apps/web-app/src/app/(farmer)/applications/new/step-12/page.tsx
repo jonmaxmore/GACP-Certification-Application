@@ -1,297 +1,126 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useWizardStore } from '../hooks/useWizardStore';
+import { apiClient as api } from '@/lib/api';
 
-interface CriterionItem {
-    id: string;
-    code: string;
-    label: string;
-    description: string;
-    isRequired: boolean;
-    inputType: string;
-}
+const FEE_PER_SITE_TYPE = 5000;
 
-interface CriteriaCategory {
-    category: string;
-    categoryTH: string;
-    icon: string;
-    items: CriterionItem[];
-}
-
-interface CriteriaValues {
-    [code: string]: {
-        checked: boolean;
-        note: string;
-    };
-}
-
-export default function SupplementaryCriteriaPage() {
+export default function Step12Payment() {
     const router = useRouter();
-    const [categories, setCategories] = useState<CriteriaCategory[]>([]);
-    const [values, setValues] = useState<CriteriaValues>({});
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const { state, resetWizard, isLoaded } = useWizardStore();
+    const [isDark, setIsDark] = useState(false);
+    const [processing, setProcessing] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState<'QR' | 'CARD'>('QR');
+    const [isNavigating, setIsNavigating] = useState(false);
 
-    useEffect(() => {
-        fetchCriteria();
-    }, []);
+    useEffect(() => { setIsDark(localStorage.getItem("theme") === "dark"); }, []);
+    useEffect(() => { if (isLoaded && !state.siteData && !isNavigating) router.replace('/applications/new/step-0'); }, [isLoaded, state.siteData, router, isNavigating]);
 
-    async function fetchCriteria() {
+    const siteTypesCount = state.siteTypes?.length || 1;
+    const installment1Fee = FEE_PER_SITE_TYPE * siteTypesCount;
+    const invoiceId = `GI-${Date.now().toString(36).toUpperCase().slice(-8)}`;
+    const docDate = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+    const applicantName = state.applicantData?.applicantType === 'INDIVIDUAL' ? `${state.applicantData?.firstName || ''} ${state.applicantData?.lastName || ''}` : state.applicantData?.applicantType === 'COMMUNITY' ? state.applicantData?.communityName || '' : state.applicantData?.companyName || '';
+
+    const handlePayment = async () => {
+        setProcessing(true);
+        setIsNavigating(true);
         try {
-            const res = await fetch('/api/proxy/criteria');
-            const data = await res.json();
-
-            if (data.success && data.data) {
-                setCategories(data.data);
-
-                // Initialize values
-                const initialValues: CriteriaValues = {};
-                data.data.forEach((cat: CriteriaCategory) => {
-                    cat.items.forEach((item) => {
-                        initialValues[item.code] = { checked: false, note: '' };
-                    });
-                });
-                setValues(initialValues);
-            } else {
-                setError('ไม่สามารถโหลดข้อมูลเกณฑ์ได้');
-            }
-        } catch (err) {
-            console.error('Error fetching criteria:', err);
-            setError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const handleCheckChange = (code: string) => {
-        setValues(prev => ({
-            ...prev,
-            [code]: {
-                ...prev[code],
-                checked: !prev[code]?.checked
-            }
-        }));
+            const appId = state.applicationId;
+            if (!appId) { setProcessing(false); setIsNavigating(false); return; }
+            await api.post(`/applications/${appId}/confirm-review`, {});
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            await api.post(`/applications/${appId}/status`, { status: 'SUBMITTED', notes: 'Demo payment completed' });
+            resetWizard();
+            router.replace('/applications/new/success');
+        } catch { setProcessing(false); setIsNavigating(false); }
     };
 
-    const handleNoteChange = (code: string, note: string) => {
-        setValues(prev => ({
-            ...prev,
-            [code]: {
-                ...prev[code],
-                note
-            }
-        }));
-    };
-
-    const handleSkip = async () => {
-        setSaving(true);
-        try {
-            // Get applicationId from localStorage or URL
-            const applicationId = localStorage.getItem('currentApplicationId');
-            if (applicationId) {
-                await fetch(`/api/proxy/applications/${applicationId}/criteria`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        supplementarySkipped: true,
-                        supplementaryCriteria: null
-                    })
-                });
-            }
-            router.push('/applications/new/success');
-        } catch (error) {
-            console.error('Error:', error);
-            // Continue anyway
-            router.push('/applications/new/success');
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleSubmit = async () => {
-        setSaving(true);
-        try {
-            // Get applicationId from localStorage or URL
-            const applicationId = localStorage.getItem('currentApplicationId');
-            if (applicationId) {
-                await fetch(`/api/proxy/applications/${applicationId}/criteria`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        supplementarySkipped: false,
-                        supplementaryCriteria: values
-                    })
-                });
-            }
-            router.push('/applications/new/success');
-        } catch (error) {
-            console.error('Error:', error);
-            // Continue anyway
-            router.push('/applications/new/success');
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const filledCount = Object.values(values).filter(v => v.checked).length;
-    const totalCount = Object.keys(values).length;
-
-    if (loading) {
-        return (
-            <div className="max-w-4xl mx-auto p-6">
-                <div className="animate-pulse space-y-4">
-                    <div className="h-24 bg-gray-200 rounded-xl"></div>
-                    <div className="h-16 bg-gray-200 rounded-lg"></div>
-                    <div className="h-48 bg-gray-200 rounded-xl"></div>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="max-w-4xl mx-auto p-6">
-                <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-                    <p className="text-red-600">{error}</p>
-                    <button
-                        onClick={fetchCriteria}
-                        className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                    >
-                        ลองใหม่
-                    </button>
-                </div>
-            </div>
-        );
-    }
+    if (!isLoaded) return <div className="text-center py-16 text-slate-500">กำลังโหลด...</div>;
 
     return (
-        <div className="max-w-4xl mx-auto">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border border-blue-100">
-                <div className="flex items-start gap-4">
-                    <div className="p-3 bg-blue-100 rounded-full">
-                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+        <div className="font-sans">
+            {/* Official Header Card */}
+            <div className="bg-white rounded-xl p-5 mb-4 border border-surface-200 shadow-sm">
+                <div className="flex gap-3 items-start mb-4 pb-3 border-b-2 border-slate-800">
+                    <img src="/images/dtam-logo.png" alt="DTAM" className="w-12 h-12 object-contain" />
+                    <div className="flex-1">
+                        <div className="text-[15px] font-bold text-slate-800">กองกัญชาทางการแพทย์</div>
+                        <div className="text-xs font-semibold text-slate-800">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</div>
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-800 mb-2">เกณฑ์เสริม (ไม่บังคับ)</h2>
-                        <p className="text-gray-600">
-                            ข้อมูลเพิ่มเติมเหล่านี้จะช่วยเสริมมาตรฐานการผลิตของคุณ
-                            <span className="font-medium text-blue-600"> หากไม่มี หรือไม่เข้าใจ สามารถข้ามขั้นตอนนี้ได้</span>
-                        </p>
+                    <div className="text-right">
+                        <div className="bg-primary-600 text-white px-2.5 py-1 rounded text-xs font-semibold">ชำระเงิน</div>
+                        <div className="text-[10px] text-slate-500 mt-1">งวดที่ 1</div>
                     </div>
                 </div>
+
+                <div className="text-xs mb-3 text-slate-700">
+                    <div><strong>ผู้รับบริการ:</strong> {applicantName}</div>
+                    <div><strong>เลขที่ใบวางบิล:</strong> {invoiceId}</div>
+                    <div><strong>วันที่:</strong> {docDate}</div>
+                </div>
+
+                <div className="bg-primary-50 rounded-lg p-3 mb-3">
+                    <div className="flex justify-between text-sm mb-2"><span className="text-slate-700">ค่าตรวจสอบและประเมินคำขอเบื้องต้น</span><span className="font-semibold text-slate-900">฿{installment1Fee.toLocaleString()}</span></div>
+                    <div className="text-[10px] text-slate-500 mb-2">จำนวน {siteTypesCount} ลักษณะพื้นที่ × ฿5,000</div>
+                    <div className="border-t border-primary-200 pt-2 flex justify-between"><span className="text-sm font-semibold text-primary-800">ยอดชำระงวดที่ 1</span><span className="text-xl font-bold text-primary-600">฿{installment1Fee.toLocaleString()}</span></div>
+                </div>
+                <div className="text-[11px] text-blue-700 text-center">({installment1Fee === 5000 ? 'ห้าพันบาทถ้วน' : installment1Fee === 10000 ? 'หนึ่งหมื่นบาทถ้วน' : 'หนึ่งหมื่นห้าพันบาทถ้วน'})</div>
             </div>
 
-            {/* Progress */}
-            <div className="bg-white rounded-lg p-4 mb-6 border shadow-sm">
-                <div className="flex justify-between items-center">
-                    <span className="text-gray-600">กรอกไปแล้ว</span>
-                    <span className="font-bold text-blue-600">{filledCount} / {totalCount} รายการ</span>
-                </div>
-            </div>
-
-            {/* Dynamic Criteria Categories */}
-            {categories.length === 0 ? (
-                <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
-                    <p className="text-gray-500">ยังไม่มีเกณฑ์เสริมในระบบ</p>
-                    <button
-                        onClick={handleSkip}
-                        className="mt-4 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-                    >
-                        ข้ามขั้นตอนนี้
-                    </button>
-                </div>
-            ) : (
-                <div className="space-y-6">
-                    {categories.map((category) => (
-                        <div key={category.category} className="bg-white rounded-xl shadow-sm border overflow-hidden">
-                            <div className="bg-gray-50 px-6 py-4 border-b">
-                                <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                                    <span className="text-xl">{category.icon}</span>
-                                    {category.categoryTH || category.category}
-                                </h3>
-                            </div>
-                            <div className="p-6 space-y-4">
-                                {category.items.map((item) => (
-                                    <div key={item.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                                        <label className="flex items-start gap-4 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={values[item.code]?.checked || false}
-                                                onChange={() => handleCheckChange(item.code)}
-                                                className="mt-1 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                            />
-                                            <div className="flex-1">
-                                                <div className="font-medium text-gray-800">
-                                                    {item.label}
-                                                    {item.isRequired && <span className="text-red-500 ml-1">*</span>}
-                                                </div>
-                                                {item.description && (
-                                                    <div className="text-sm text-gray-500">{item.description}</div>
-                                                )}
-
-                                                {values[item.code]?.checked && (
-                                                    <div className="mt-3">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="หมายเหตุหรือเลขที่เอกสาร (ถ้ามี)"
-                                                            value={values[item.code]?.note || ''}
-                                                            onChange={(e) => handleNoteChange(item.code, e.target.value)}
-                                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </label>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+            {/* Payment Method */}
+            <div className="mb-4">
+                <div className={`text-sm font-semibold mb-2.5 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>เลือกช่องทางชำระเงิน</div>
+                <div className="grid grid-cols-2 gap-2.5">
+                    {(['QR', 'CARD'] as const).map(method => (
+                        <button key={method} onClick={() => setPaymentMethod(method)} className={`p-4 rounded-xl text-center border-2 ${paymentMethod === method ? 'border-primary-600 bg-primary-50' : (isDark ? 'border-slate-600 bg-slate-700' : 'border-surface-200 bg-white')}`}>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto mb-1.5">{method === 'QR' ? <><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></> : <><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></>}</svg>
+                            <div className={`text-sm font-semibold ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>{method === 'QR' ? 'QR PromptPay' : 'บัตรเครดิต/เดบิต'}</div>
+                            <div className="text-[10px] text-slate-500">{method === 'QR' ? 'สะดวก รวดเร็ว' : 'Visa / MasterCard'}</div>
+                        </button>
                     ))}
+                </div>
+            </div>
+
+            {/* QR Code */}
+            {paymentMethod === 'QR' && (
+                <div className="bg-white rounded-xl p-5 mb-4 text-center border border-surface-200">
+                    <div className="text-xs text-slate-700 font-semibold mb-3">สแกน QR Code เพื่อชำระเงิน</div>
+                    <div className="w-44 h-44 bg-surface-100 rounded-xl mx-auto mb-3 flex items-center justify-center border-2 border-dashed border-surface-300">
+                        <div className="text-center text-slate-500"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mx-auto mb-1"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg><div className="text-[11px]">QR Code</div></div>
+                    </div>
+                    <div className="text-[11px] text-slate-700 bg-secondary-50 p-2.5 rounded-md"><strong>โอนเข้าบัญชี:</strong><br />ชื่อบัญชี: เงินบำรุงศูนย์พัฒนายาไทยและสมุนไพร<br />ธ.กรุงไทย เลขที่ <strong>4750134376</strong></div>
                 </div>
             )}
 
-            {/* Actions */}
-            <div className="mt-8 bg-white rounded-xl shadow-sm border p-6">
-                <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-                    <button
-                        onClick={handleSkip}
-                        disabled={saving}
-                        className="w-full sm:w-auto px-6 py-3 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                        </svg>
-                        ข้ามขั้นตอนนี้
-                    </button>
-
-                    <button
-                        onClick={handleSubmit}
-                        disabled={saving}
-                        className="w-full sm:w-auto px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 font-medium"
-                    >
-                        {saving ? (
-                            <>
-                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                                กำลังบันทึก...
-                            </>
-                        ) : (
-                            <>
-                                บันทึกและดำเนินการต่อ
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </>
-                        )}
-                    </button>
+            {/* Card Form */}
+            {paymentMethod === 'CARD' && (
+                <div className={`rounded-xl p-4 mb-4 border ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-white border-surface-200'}`}>
+                    <div className="mb-3">
+                        <label className={`text-[11px] block mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>หมายเลขบัตร</label>
+                        <input type="text" placeholder="0000 0000 0000 0000" className={`w-full p-3 rounded-lg border text-sm ${isDark ? 'bg-slate-800 border-slate-600 text-surface-100' : 'bg-surface-100 border-surface-200 text-slate-900'}`} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2.5">
+                        <div><label className={`text-[11px] block mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>วันหมดอายุ</label><input type="text" placeholder="MM/YY" className={`w-full p-3 rounded-lg border text-sm ${isDark ? 'bg-slate-800 border-slate-600 text-surface-100' : 'bg-surface-100 border-surface-200 text-slate-900'}`} /></div>
+                        <div><label className={`text-[11px] block mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>CVV</label><input type="text" placeholder="123" className={`w-full p-3 rounded-lg border text-sm ${isDark ? 'bg-slate-800 border-slate-600 text-surface-100' : 'bg-surface-100 border-surface-200 text-slate-900'}`} /></div>
+                    </div>
                 </div>
+            )}
+
+            {/* Security */}
+            <div className="text-[10px] text-slate-500 text-center mb-4 flex items-center justify-center gap-1.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                การชำระเงินปลอดภัยด้วยระบบเข้ารหัส SSL
+            </div>
+
+            {/* Navigation */}
+            <div className="flex gap-3">
+                <button onClick={() => router.push('/applications/new/step-11')} disabled={processing} className={`flex-1 py-3.5 rounded-xl text-sm font-medium border ${isDark ? 'border-slate-600 bg-slate-700 text-surface-100' : 'border-surface-200 bg-white text-slate-700'} ${processing ? 'opacity-50' : ''}`}>ย้อนกลับ</button>
+                <button onClick={handlePayment} disabled={processing} className={`flex-[2] py-3.5 rounded-xl text-sm font-semibold ${processing ? 'bg-slate-400 cursor-wait' : 'bg-gradient-to-br from-primary-700 to-primary-500 shadow-lg shadow-primary-500/40'} text-white`}>
+                    {processing ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> กำลังดำเนินการ...</> : `ยืนยันชำระเงิน ฿${installment1Fee.toLocaleString()}`}
+                </button>
             </div>
         </div>
     );

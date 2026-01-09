@@ -4,7 +4,17 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWizardStore } from '../hooks/useWizardStore';
 
-interface DocSlot { id: string; label: string; required: boolean; hint?: string; uploaded?: boolean; isUrl?: boolean; }
+interface DocSlot {
+    id: string;
+    label: string;
+    required: boolean;
+    hint?: string;
+    uploaded?: boolean;
+    isUrl?: boolean;
+    url?: string;
+    fileName?: string;
+    fileType?: string;
+}
 
 const DOCUMENTS: DocSlot[] = [
     { id: 'form_registration', label: '1. แบบลงทะเบียนยื่นคำขอ', required: true, hint: 'ดาวน์โหลดแบบฟอร์มจากเว็บไซต์กรมฯ' },
@@ -38,17 +48,153 @@ export default function Step7Documents() {
     const [isNavigating, setIsNavigating] = useState(false);
     const [docs, setDocs] = useState<DocSlot[]>(DOCUMENTS);
     const [videoUrl, setVideoUrl] = useState('');
+    const [uploading, setUploading] = useState<{ [key: string]: boolean }>({});
     const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
     useEffect(() => {
         setIsDark(localStorage.getItem("theme") === "dark");
-        if (state.documents?.length) setDocs(DOCUMENTS.map(d => ({ ...d, uploaded: state.documents.some(sd => sd.id === d.id && sd.uploaded) })));
+        if (state.documents?.length) {
+            setDocs(DOCUMENTS.map(d => {
+                const savedDoc = state.documents.find(sd => sd.id === d.id);
+                return {
+                    ...d,
+                    uploaded: !!savedDoc?.uploaded,
+                    url: savedDoc?.url,
+                    fileName: savedDoc?.name,
+                    fileType: savedDoc?.type
+                };
+            }));
+
+            // Restore video URL if present
+            const videoDoc = state.documents.find(sd => sd.id === 'video_url');
+            if (videoDoc?.url) {
+                setVideoUrl(videoDoc.url);
+            }
+        }
     }, [state.documents]);
 
     useEffect(() => { if (isLoaded && !state.siteData) router.replace('/applications/new/step-0'); }, [isLoaded, state.siteData, router]);
 
-    const handleUpload = (docId: string) => setDocs(prev => { const updated = prev.map(d => d.id === docId ? { ...d, uploaded: true } : d); setDocuments(updated.filter(d => d.uploaded).map(d => ({ id: d.id, uploaded: true }))); return updated; });
-    const handleRemove = (docId: string) => setDocs(prev => { const updated = prev.map(d => d.id === docId ? { ...d, uploaded: false } : d); setDocuments(updated.filter(d => d.uploaded).map(d => ({ id: d.id, uploaded: true }))); return updated; });
+    const updateStore = (currentDocs: DocSlot[]) => {
+        setDocuments(currentDocs.filter(d => d.uploaded).map(d => ({
+            id: d.id,
+            uploaded: true,
+            url: d.url,
+            name: d.fileName,
+            type: d.fileType
+        })));
+    };
+
+    const handleUpload = async (docId: string) => {
+        const fileInput = inputRefs.current[docId];
+        if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
+
+        const file = fileInput.files[0];
+
+        // Allowed types
+        const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('รองรับเฉพาะไฟล์ .jpg, .png และ .pdf เท่านั้น');
+            return;
+        }
+
+        // Max size 5MB
+        if (file.size > 5 * 1024 * 1024) {
+            alert('ขนาดไฟล์ต้องไม่เกิน 5MB');
+            return;
+        }
+
+        setUploading(prev => ({ ...prev, [docId]: true }));
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/uploads', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.error || 'Upload failed');
+            }
+
+            const { url, filename, mimetype } = result.data;
+
+            setDocs(prev => {
+                const updated = prev.map(d => d.id === docId ? {
+                    ...d,
+                    uploaded: true,
+                    url: url,
+                    fileName: filename,
+                    fileType: mimetype
+                } : d);
+
+                // Update global store
+                updateStore(updated);
+
+                return updated;
+            });
+
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์ กรุณาลองใหม่อีกครั้ง');
+        } finally {
+            setUploading(prev => ({ ...prev, [docId]: false }));
+            // Reset input value to allow re-uploading same file if needed
+            if (fileInput) fileInput.value = '';
+        }
+    };
+
+    const handleVideoUrlChange = (url: string) => {
+        setVideoUrl(url);
+        if (url && url.trim() !== '') {
+            setDocs(prev => {
+                const updated = prev.map(d => d.id === 'video_url' ? {
+                    ...d,
+                    uploaded: true,
+                    url: url,
+                    fileName: 'video_link',
+                    fileType: 'url'
+                } : d);
+                updateStore(updated);
+                return updated;
+            });
+        } else {
+            setDocs(prev => {
+                const updated = prev.map(d => d.id === 'video_url' ? {
+                    ...d,
+                    uploaded: false,
+                    url: undefined,
+                    fileName: undefined,
+                    fileType: undefined
+                } : d);
+                updateStore(updated);
+                return updated;
+            });
+        }
+    };
+
+    const handleRemove = (docId: string) => {
+        setDocs(prev => {
+            const updated = prev.map(d => d.id === docId ? {
+                ...d,
+                uploaded: false,
+                url: undefined,
+                fileName: undefined,
+                fileType: undefined
+            } : d);
+
+            updateStore(updated);
+
+            return updated;
+        });
+
+        if (docId === 'video_url') {
+            setVideoUrl('');
+        }
+    };
 
     const uploadedCount = docs.filter(d => d.uploaded).length;
     const requiredUploaded = docs.filter(d => d.required && d.uploaded).length;
@@ -92,14 +238,19 @@ export default function Step7Documents() {
                             <div className={`text-sm font-medium truncate ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                                 {doc.label.split('. ')[1]} {doc.required && <span className="text-red-500">*</span>}
                             </div>
+                            {doc.fileName && <div className="text-xs text-slate-400 truncate">{doc.fileName}</div>}
                         </div>
                         {doc.isUrl ? (
-                            <input type="url" value={doc.id === 'video_url' ? videoUrl : ''} onChange={e => { setVideoUrl(e.target.value); if (e.target.value) handleUpload(doc.id); else handleRemove(doc.id); }}
+                            <input type="url" value={doc.id === 'video_url' ? videoUrl : ''} onChange={e => handleVideoUrlChange(e.target.value)}
                                 placeholder="https://..." className={`w-28 px-2.5 py-1.5 rounded-md border text-xs ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`} />
                         ) : (
                             <>
                                 <input ref={el => { inputRefs.current[doc.id] = el; }} type="file" accept="image/*,.pdf" onChange={() => handleUpload(doc.id)} className="hidden" />
-                                {doc.uploaded ? (
+                                {uploading[doc.id] ? (
+                                    <div className="px-3 py-1.5 text-xs text-slate-500">
+                                        <div className="w-4 h-4 border-2 border-slate-300 border-t-emerald-500 rounded-full animate-spin" />
+                                    </div>
+                                ) : doc.uploaded ? (
                                     <button onClick={() => handleRemove(doc.id)} className={`px-3 py-1.5 rounded-md text-xs ${isDark ? 'bg-red-500/20' : 'bg-red-50'} text-red-500`}>ลบ</button>
                                 ) : (
                                     <button onClick={() => inputRefs.current[doc.id]?.click()} className="px-3 py-1.5 rounded-md bg-emerald-500 text-white text-xs">เลือก</button>

@@ -13,12 +13,14 @@
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
-const FormData = require('form-data');
+// const FormData = require('form-data'); // Use native FormData in Node 20
 const fs = require('fs');
 const path = require('path');
 
 // Load environment variables from backend root
-require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+// Try loading .env from current dir or parent
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 const prisma = new PrismaClient();
 // JWT Secrets - match jwt-security.js defaults

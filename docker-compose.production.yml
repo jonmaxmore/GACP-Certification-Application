@@ -84,6 +84,7 @@ services:
       # Subdomain Strategy: API is at api.DOMAIN
       - NEXT_PUBLIC_API_URL=http://47.129.167.71
       - NEXT_PUBLIC_WEB_URL=${PUBLIC_WEB_URL:-https://farmer.gacp.local}
+      - INTERNAL_API_URL=http://backend:5000
     depends_on:
       - backend
     networks:

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { apiClient as api } from "@/lib/api";
 import {
     IconHome, IconDocument, IconCompass, IconCreditCard, IconUser,
-    IconSun, IconMoon, IconLogout, IconCheckCircle, IconClock, IconReceipt
+    IconSun, IconMoon, IconLogout, IconCheckCircle, IconClock, IconReceipt, IconLeaf
 } from "@/components/ui/icons";
 
 interface PaymentRecord {
@@ -23,6 +23,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 const NAV_ITEMS = [
     { href: "/dashboard", Icon: IconHome, label: "หน้าหลัก" },
     { href: "/applications", Icon: IconDocument, label: "คำขอ" },
+    { href: "/establishments", Icon: IconLeaf, label: "แปลงปลูก" },
     { href: "/tracking", Icon: IconCompass, label: "ติดตาม" },
     { href: "/payments", Icon: IconCreditCard, label: "การเงิน", active: true },
     { href: "/profile", Icon: IconUser, label: "โปรไฟล์" },
@@ -49,8 +50,11 @@ export default function PaymentsPage() {
     const loadPayments = async () => {
         setLoading(true);
         try {
-            const result = await api.get<{ data: PaymentRecord[] }>("/api/payments/my");
-            if (result.success && result.data?.data) setPayments(result.data.data);
+            const result = await api.get<PaymentRecord[]>("/payments/my");
+            if (result.success && result.data) {
+                const data = Array.isArray(result.data) ? result.data : (result.data as any).data || [];
+                setPayments(data);
+            }
             else setPayments([]);
         } catch { setPayments([]); }
         finally { setLoading(false); }

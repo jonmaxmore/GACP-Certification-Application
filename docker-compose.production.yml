@@ -72,6 +72,7 @@ services:
   # 3. FRONTEND (Next.js)
   # ------------------------------------------------------------
   frontend:
+    image: gacp-frontend
     build:
       context: ./apps/web-app
       dockerfile: Dockerfile

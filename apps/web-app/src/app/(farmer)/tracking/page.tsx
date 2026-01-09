@@ -13,6 +13,7 @@ const Icons = {
     moon: (c: string) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>,
     sun: (c: string) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5"><circle cx="12" cy="12" r="5" /></svg>,
     compass: (c: string) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg>,
+    leaf: (c: string) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5"><path d="M6 3v12a6 6 0 006 6 6 6 0 006-6V3c-4 0-6 2-6 6 0-4-2-6-6-6z" /><path d="M12 21V9" /></svg>,
     compassLarge: (c: string) => <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg>,
     check: (c: string) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>,
     clock: (c: string) => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
@@ -57,8 +58,11 @@ export default function TrackingPage() {
     }, []);
 
     const loadApplications = async () => {
-        const result = await api.get<{ data: Application[] }>("/api/applications/my");
-        if (result.success && result.data?.data) setApplications(result.data.data);
+        const result = await api.get<Application[]>("/applications/my");
+        if (result.success && result.data) {
+            const apps = Array.isArray(result.data) ? result.data : (result.data as any).data || [];
+            setApplications(apps);
+        }
     };
 
     const toggleTheme = () => { setIsDark(!isDark); localStorage.setItem("theme", !isDark ? "dark" : "light"); };
@@ -73,6 +77,7 @@ export default function TrackingPage() {
     const navItems = [
         { href: "/dashboard", icon: Icons.home, label: "หน้าหลัก" },
         { href: "/applications", icon: Icons.fileText, label: "คำขอ" },
+        { href: "/establishments", icon: Icons.leaf, label: "แปลงปลูก" },
         { href: "/certificates", icon: Icons.award, label: "ใบรับรอง" },
         { href: "/tracking", icon: Icons.compass, label: "ติดตาม", active: true },
         { href: "/payments", icon: Icons.creditCard, label: "การเงิน" },

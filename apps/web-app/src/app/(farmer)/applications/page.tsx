@@ -51,8 +51,11 @@ export default function ApplicationsPage() {
 
     const loadApplications = async () => {
         setLoading(true);
-        const result = await api.get<{ data: Application[] }>("/api/applications/my");
-        if (result.success && result.data?.data) setApplications(result.data.data);
+        const result = await api.get<Application[]>("/applications/my");
+        if (result.success && result.data) {
+            const apps = Array.isArray(result.data) ? result.data : (result.data as any).data || [];
+            setApplications(apps);
+        }
         setLoading(false);
     };
 

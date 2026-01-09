@@ -1,16 +1,32 @@
 version: '3.8'
 
 services:
-  mongo:
-    image: mongo:7.0
-    container_name: gacp-mongo
+  postgres:
+    image: postgres:15-alpine
+    container_name: gacp-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: gacp_secure_password_2024
+      POSTGRES_DB: gacp_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: gacp-redis
     restart: always
     volumes:
-      - mongo_data:/data/db
-    # Port 27017 exposed for debugging/seed scripts if needed, 
-    # but application communicates via internal network
+      - redis_data:/data
     ports:
-      - "27017:27017"
+      - "6379:6379"
 
   backend:
     container_name: gacp-backend
@@ -21,11 +37,15 @@ services:
     environment:
       - PORT=5000
       - NODE_ENV=production
-      - MONGO_URI=mongodb://mongo:27017/gacp
+      - DATABASE_URL=postgresql://postgres:gacp_secure_password_2024@postgres:5432/gacp_db
+      - REDIS_URL=redis://redis:6379
       - JWT_SECRET=gacp_secret_prod_secure_2024
       - CORS_ORIGIN=http://47.129.167.71,http://localhost:3000,http://frontend:3000
     depends_on:
-      - mongo
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     ports:
       - "5000:5000"
 
@@ -35,13 +55,11 @@ services:
       context: ./apps/web-app
       dockerfile: Dockerfile
       args:
-        # Client-side API calls go to /api (relative), handled by Nginx
         NEXT_PUBLIC_API_URL: /api
     restart: always
     environment:
       - NODE_ENV=production
       - PORT=3000
-      # Server-side API calls go directly to backend container
       - BACKEND_URL=http://backend:5000
     ports:
       - "3000:3000"
@@ -61,4 +79,5 @@ services:
       - backend
 
 volumes:
-  mongo_data:
+  postgres_data:
+  redis_data:

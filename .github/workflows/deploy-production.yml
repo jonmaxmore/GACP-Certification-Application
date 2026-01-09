@@ -1,0 +1,101 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to AWS EC2
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: unnecessary
+          if_key_exists: replace
+
+      - name: Add Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          # SSH into server and pull latest changes, install deps, restart services
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST << 'ENDSSH'
+            echo "🚀 Starting deployment..."
+            
+            # Navigate to project directory
+            cd /var/www/gacp || cd ~/gacp || { echo "Project directory not found"; exit 1; }
+            
+            # Pull latest changes
+            echo "📥 Pulling latest changes..."
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # Install backend dependencies
+            echo "📦 Installing backend dependencies..."
+            cd apps/backend
+            npm ci --production
+            
+            # Install frontend dependencies and build
+            echo "📦 Installing frontend dependencies..."
+            cd ../web-app
+            npm ci
+            
+            echo "🏗️ Building frontend..."
+            npm run build
+            
+            # Restart services with PM2
+            echo "🔄 Restarting services..."
+            cd ~/
+            pm2 restart gacp-backend || pm2 start /var/www/gacp/apps/backend/server.js --name gacp-backend
+            pm2 restart gacp-frontend || pm2 start npm --name gacp-frontend -- start --cwd /var/www/gacp/apps/web-app
+            
+            pm2 save
+            
+            echo "✅ Deployment completed successfully!"
+          ENDSSH
+
+      - name: Verify Deployment
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          echo "🔍 Verifying deployment..."
+          sleep 10
+          
+          # Check if backend is responding
+          curl -s --max-time 30 http://$SSH_HOST:5000/api/health || echo "Backend health check failed"
+          
+          # Check if frontend is responding
+          curl -s --max-time 30 -o /dev/null -w "%{http_code}" http://$SSH_HOST:3000 || echo "Frontend check failed"
+          
+          echo "✅ Verification complete!"
+
+      - name: Notify on Success
+        if: success()
+        run: |
+          echo "🎉 Deployment to production successful!"
+          echo "🌐 Frontend: http://${{ secrets.SSH_HOST }}:3000"
+          echo "🔧 Backend: http://${{ secrets.SSH_HOST }}:5000"
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed! Check the logs above for details."

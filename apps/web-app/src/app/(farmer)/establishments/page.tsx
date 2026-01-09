@@ -1,7 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import {
+    IconHome, IconDocument, IconCompass, IconCreditCard, IconUser,
+    IconSun, IconMoon, IconLogout, IconLeaf, IconPlus
+} from "@/components/ui/icons";
+
+const NAV_ITEMS = [
+    { href: "/dashboard", Icon: IconHome, label: "หน้าหลัก" },
+    { href: "/applications", Icon: IconDocument, label: "คำขอ" },
+    { href: "/establishments", Icon: IconLeaf, label: "แปลงปลูก", active: true },
+    { href: "/tracking", Icon: IconCompass, label: "ติดตาม" },
+    { href: "/payments", Icon: IconCreditCard, label: "การเงิน" },
+    { href: "/profile", Icon: IconUser, label: "โปรไฟล์" },
+];
 
 export default function EstablishmentsPage() {
     const [mounted, setMounted] = useState(false);
@@ -17,46 +29,44 @@ export default function EstablishmentsPage() {
     const handleLogout = () => { localStorage.removeItem("user"); window.location.href = "/api/auth/logout"; };
 
     if (!mounted) return (
-        <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-slate-900' : 'bg-surface-50'}`}>
-            <div className="w-10 h-10 border-3 border-primary-500/30 border-t-primary-500 rounded-full animate-spin" />
+        <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-slate-900' : 'bg-stone-50'}`}>
+            <div className="w-10 h-10 border-3 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
         </div>
     );
 
-    const navItems = [
-        { href: "/dashboard", label: "หน้าหลัก" },
-        { href: "/applications", label: "คำขอ" },
-        { href: "/tracking", label: "ติดตาม" },
-        { href: "/payments", label: "การเงิน" },
-        { href: "/profile", label: "โปรไฟล์" },
-    ];
-
     return (
-        <div className={`min-h-screen font-sans transition-colors ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-surface-50 text-slate-900'}`}>
+        <div className={`min-h-screen font-sans transition-colors ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-stone-50 text-slate-900'}`}>
             {/* Sidebar */}
-            <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 w-[72px] flex-col items-center py-5 border-r z-50 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-400 flex items-center justify-center text-xl font-semibold text-white mb-8">G</div>
-                <nav className="flex-1 flex flex-col gap-1 w-full px-2">
-                    {navItems.map(item => (
-                        <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700">
-                            <span className="text-[10px] font-medium text-slate-500">{item.label}</span>
+            <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 w-20 flex-col items-center py-6 border-r z-50 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+                <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-lg font-semibold text-white mb-8">G</div>
+                <nav className="flex-1 flex flex-col gap-1 w-full px-3">
+                    {NAV_ITEMS.map(item => (
+                        <Link key={item.href} href={item.href} className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all relative ${item.active
+                            ? (isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600')
+                            : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100')
+                            }`}>
+                            {item.active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-emerald-500 rounded-r" />}
+                            <item.Icon size={22} />
+                            <span className="text-[10px] font-medium">{item.label}</span>
                         </Link>
                     ))}
                 </nav>
-                <div className="flex flex-col gap-3">
-                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-primary-500/15' : 'bg-primary-50'}`}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">{isDark ? <circle cx="12" cy="12" r="5" /> : <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />}</svg>
+                <div className="flex flex-col gap-2">
+                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}>
+                        {isDark ? <IconSun size={20} /> : <IconMoon size={20} />}
                     </button>
-                    <button onClick={handleLogout} className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                    <button onClick={handleLogout} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'text-slate-400 hover:text-red-400 hover:bg-red-500/10' : 'text-slate-500 hover:text-red-500 hover:bg-red-50'}`}>
+                        <IconLogout size={20} />
                     </button>
                 </div>
             </aside>
 
             {/* Mobile Nav */}
-            <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-[72px] flex justify-around items-center z-50 border-t ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
-                {navItems.map(item => (
-                    <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 py-2 px-3">
-                        <span className="text-[10px] font-medium text-slate-500">{item.label}</span>
+            <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-20 flex justify-around items-center border-t z-50 ${isDark ? 'bg-slate-900/95 border-slate-800 backdrop-blur-lg' : 'bg-white/95 border-slate-200 backdrop-blur-lg'}`}>
+                {NAV_ITEMS.map(item => (
+                    <Link key={item.href} href={item.href} className={`flex flex-col items-center gap-1 py-2 px-4 min-w-[64px] ${item.active ? 'text-emerald-500' : (isDark ? 'text-slate-500' : 'text-slate-400')}`}>
+                        <item.Icon size={24} />
+                        <span className="text-[10px] font-medium">{item.label}</span>
                     </Link>
                 ))}
             </nav>

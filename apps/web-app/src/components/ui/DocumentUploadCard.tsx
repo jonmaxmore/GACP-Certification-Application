@@ -266,4 +266,4 @@ export function DocumentUploadCard({
     );
 }
 
-export { FileUpload } from './file-upload';
+

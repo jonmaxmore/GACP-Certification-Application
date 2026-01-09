@@ -4,34 +4,31 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWizardStore, PLANTS, PlantId } from '../hooks/useWizardStore';
 
-// Modern Plant Icons as SVG
-const PlantIcons: Record<string, React.ReactNode> = {
-    cannabis: (<svg width="40" height="40" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" fill="currentColor" fillOpacity="0.1" /><path d="M24 10C24 10 27 16 27 19C27 22 25.5 24 24 25.5C22.5 24 21 22 21 19C21 16 24 10 24 10Z" fill="currentColor" /><path d="M17 15C17 15 20 18 21.5 21C23 24 21.5 27 21.5 27C18.5 25.5 15.5 22.5 15.5 19.5C15.5 16.5 17 15 17 15Z" fill="currentColor" fillOpacity="0.8" /><path d="M31 15C31 15 28 18 26.5 21C25 24 26.5 27 26.5 27C29.5 25.5 32.5 22.5 32.5 19.5C32.5 16.5 31 15 31 15Z" fill="currentColor" fillOpacity="0.8" /><rect x="22.5" y="25" width="3" height="10" rx="1.5" fill="currentColor" fillOpacity="0.6" /></svg>),
-    kratom: (<svg width="40" height="40" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" fill="currentColor" fillOpacity="0.1" /><ellipse cx="24" cy="21" rx="10" ry="7" fill="currentColor" /><path d="M24 28C24 28 21 31 21 34C21 35.5 22.5 37 24 37C25.5 37 27 35.5 27 34C27 31 24 28 24 28Z" fill="currentColor" fillOpacity="0.7" /></svg>),
-    turmeric: (<svg width="40" height="40" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" fill="#FCD34D" fillOpacity="0.2" /><ellipse cx="24" cy="26" rx="9" ry="5" fill="#F59E0B" /><ellipse cx="19" cy="23" rx="5" ry="3.5" fill="#FBBF24" /><ellipse cx="29" cy="23" rx="5" ry="3.5" fill="#FBBF24" /><path d="M24 14L25.5 19H22.5L24 14Z" fill="#10B981" /></svg>),
-    ginger: (<svg width="40" height="40" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" fill="#FCD34D" fillOpacity="0.15" /><ellipse cx="24" cy="27" rx="7" ry="4.5" fill="#D97706" /><ellipse cx="19" cy="24" rx="4.5" ry="3.5" fill="#F59E0B" /><ellipse cx="29" cy="24" rx="4.5" ry="3.5" fill="#F59E0B" /><ellipse cx="24" cy="21" rx="3.5" ry="2.5" fill="#FBBF24" /></svg>),
-    black_galangal: (<svg width="40" height="40" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" fill="#6B7280" fillOpacity="0.15" /><ellipse cx="24" cy="27" rx="9" ry="5" fill="#374151" /><ellipse cx="19" cy="24" rx="5" ry="3.5" fill="#4B5563" /><ellipse cx="29" cy="24" rx="5" ry="3.5" fill="#4B5563" /><path d="M24 14L25.5 19H22.5L24 14Z" fill="#10B981" /></svg>),
-    plai: (<svg width="40" height="40" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" fill="#10B981" fillOpacity="0.15" /><ellipse cx="24" cy="29" rx="7" ry="4.5" fill="#059669" /><ellipse cx="19" cy="26" rx="4.5" ry="3.5" fill="#10B981" /><ellipse cx="29" cy="26" rx="4.5" ry="3.5" fill="#10B981" /><path d="M23 14C23 14 24 20 24 23" stroke="#10B981" strokeWidth="2" strokeLinecap="round" /><path d="M25 14C25 14 24 20 24 23" stroke="#10B981" strokeWidth="2" strokeLinecap="round" /></svg>),
-};
-
 export default function Step0Plant() {
     const router = useRouter();
     const { state, setPlant, isLoaded } = useWizardStore();
     const [selectedPlant, setSelectedPlant] = useState<PlantId | null>(null);
-    const [isDark, setIsDark] = useState(false);
     const [isNavigating, setIsNavigating] = useState(false);
 
     useEffect(() => {
-        setIsDark(localStorage.getItem("theme") === "dark");
         if (state.plantId) setSelectedPlant(state.plantId);
     }, [state.plantId]);
 
-    const handleSelect = (plantId: PlantId) => { setSelectedPlant(plantId); setPlant(plantId); };
-    const handleNext = () => { if (selectedPlant && !isNavigating) { setIsNavigating(true); router.push('/applications/new/step-1'); } };
+    const handleSelect = (plantId: PlantId) => {
+        setSelectedPlant(plantId);
+        setPlant(plantId);
+    };
+
+    const handleNext = () => {
+        if (selectedPlant && !isNavigating) {
+            setIsNavigating(true);
+            router.push('/applications/new/step-1');
+        }
+    };
 
     if (!isLoaded) return (
-        <div className={`text-center py-16 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-            <div className="w-9 h-9 border-3 border-slate-200 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4" />
+        <div className="text-center py-16 text-gray-500">
+            <div className="w-10 h-10 border-4 border-gray-200 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4" />
             กำลังโหลด...
         </div>
     );
@@ -39,72 +36,128 @@ export default function Step0Plant() {
     const highControlPlants = PLANTS.filter(p => p.group === 'HIGH_CONTROL');
     const generalPlants = PLANTS.filter(p => p.group === 'GENERAL');
 
-    return (
-        <div>
-            {/* Header */}
-            <div className="text-center mb-6">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3.5 shadow-lg shadow-emerald-500/25 ${isDark ? 'bg-gradient-to-br from-emerald-600 to-emerald-500' : 'bg-gradient-to-br from-emerald-500 to-emerald-400'}`}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l2.3 2.3a2.4 2.4 0 0 0 3.4-3.4L15.4 14.6l6-6c4.5-4.5.5-8.5-4-4l-6.3 6.3-2.4-2.4a2.4 2.4 0 0 0-3.4 3.4L7.7 14.3l-4 4a2.4 2.4 0 0 0 0 3.4l2.6-1.4z" />
-                    </svg>
-                </div>
-                <h2 className={`text-xl font-semibold mb-1.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>เลือกชนิดพืชสมุนไพร</h2>
-                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>เลือกพืชที่ต้องการขอรับรองมาตรฐาน GACP</p>
+    const PlantCard = ({ plant, isSelected }: { plant: typeof PLANTS[0]; isSelected: boolean }) => (
+        <button
+            onClick={() => handleSelect(plant.id)}
+            className={`
+                relative flex flex-col items-center gap-3 p-5 rounded-2xl transition-all duration-200
+                ${isSelected
+                    ? 'bg-emerald-50 border-2 border-emerald-500 shadow-lg shadow-emerald-500/20 ring-4 ring-emerald-100'
+                    : 'bg-white border-2 border-gray-200 hover:border-emerald-300 hover:shadow-md'
+                }
+            `}
+        >
+            {/* Plant Emoji Icon */}
+            <div className={`text-4xl ${isSelected ? 'scale-110' : ''} transition-transform`}>
+                {plant.icon}
             </div>
 
-            {/* High Control Section */}
-            <div className="mb-5">
-                <div className="flex items-center gap-2 mb-2.5">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-600'}`}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            {/* Plant Name */}
+            <span className={`text-sm font-semibold ${isSelected ? 'text-emerald-700' : 'text-gray-800'}`}>
+                {plant.name}
+            </span>
+
+            {/* Selected Badge */}
+            {isSelected && (
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                        <path d="M20 6L9 17L4 12" />
+                    </svg>
+                </div>
+            )}
+        </button>
+    );
+
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-emerald-500/30">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <path d="M12 8v4m0 0v4m0-4h4m-4 0H8" />
+                    </svg>
+                </div>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">เลือกชนิดพืชสมุนไพร</h1>
+                <p className="text-gray-600">เลือกพืชที่ต้องการขอรับรองมาตรฐาน GACP</p>
+            </div>
+
+            {/* High Control Plants Section */}
+            <div>
+                <div className="flex items-center gap-2 mb-3">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                         </svg>
                         สมุนไพรควบคุม
                     </span>
                 </div>
-                <div className="grid grid-cols-2 gap-2.5">
-                    {highControlPlants.map(plant => {
-                        const isSelected = selectedPlant === plant.id;
-                        return (
-                            <button key={plant.id} onClick={() => handleSelect(plant.id)} className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all min-h-28 ${isSelected ? (isDark ? 'bg-emerald-900/30 border-2 border-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-emerald-50 border-2 border-emerald-500 shadow-lg shadow-emerald-500/20') : (isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200')} `}>
-                                <div className="text-emerald-500">{PlantIcons[plant.id]}</div>
-                                <span className={`text-sm font-medium ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{plant.name}</span>
-                                {isSelected && <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-lg text-xs font-medium">เลือกแล้ว</span>}
-                            </button>
-                        );
-                    })}
+                <div className="grid grid-cols-2 gap-3">
+                    {highControlPlants.map(plant => (
+                        <PlantCard key={plant.id} plant={plant} isSelected={selectedPlant === plant.id} />
+                    ))}
                 </div>
             </div>
 
             {/* General Plants Section */}
-            <div className="mb-6">
-                <div className="flex items-center gap-2 mb-2.5">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${isDark ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <div>
+                <div className="flex items-center gap-2 mb-3">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                         </svg>
                         สมุนไพรทั่วไป
                     </span>
                 </div>
-                <div className="grid grid-cols-2 gap-2.5">
-                    {generalPlants.map(plant => {
-                        const isSelected = selectedPlant === plant.id;
-                        return (
-                            <button key={plant.id} onClick={() => handleSelect(plant.id)} className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all min-h-28 ${isSelected ? (isDark ? 'bg-emerald-900/30 border-2 border-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-emerald-50 border-2 border-emerald-500 shadow-lg shadow-emerald-500/20') : (isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200')} `}>
-                                <div className={plant.id === 'turmeric' || plant.id === 'ginger' ? 'text-amber-500' : 'text-emerald-500'}>{PlantIcons[plant.id]}</div>
-                                <span className={`text-sm font-medium ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{plant.name}</span>
-                                {isSelected && <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-lg text-xs font-medium">เลือกแล้ว</span>}
-                            </button>
-                        );
-                    })}
+                <div className="grid grid-cols-2 gap-3">
+                    {generalPlants.map(plant => (
+                        <PlantCard key={plant.id} plant={plant} isSelected={selectedPlant === plant.id} />
+                    ))}
                 </div>
             </div>
 
+            {/* Selected Plant Info */}
+            {selectedPlant && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                        <span className="text-2xl">{PLANTS.find(p => p.id === selectedPlant)?.icon}</span>
+                    </div>
+                    <div className="flex-1">
+                        <div className="text-sm text-emerald-700 font-medium">พืชที่เลือก</div>
+                        <div className="text-lg font-bold text-emerald-900">{PLANTS.find(p => p.id === selectedPlant)?.name}</div>
+                    </div>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2">
+                        <path d="M20 6L9 17L4 12" />
+                    </svg>
+                </div>
+            )}
+
             {/* Next Button */}
-            <button onClick={handleNext} disabled={!selectedPlant || isNavigating}
-                className={`w-full py-3.5 rounded-xl text-base font-semibold flex items-center justify-center gap-2 transition-all ${selectedPlant && !isNavigating ? 'bg-gradient-to-br from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/35 cursor-pointer' : (isDark ? 'bg-slate-700 text-slate-500' : 'bg-slate-200 text-slate-400') + ' cursor-not-allowed'}`}>
-                {isNavigating ? (<><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> กำลังโหลด...</>) : (<>ถัดไป <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg></>)}
+            <button
+                onClick={handleNext}
+                disabled={!selectedPlant || isNavigating}
+                className={`
+                    w-full py-4 rounded-xl text-base font-bold flex items-center justify-center gap-2 transition-all
+                    ${selectedPlant && !isNavigating
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xl shadow-emerald-500/30 cursor-pointer'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }
+                `}
+            >
+                {isNavigating ? (
+                    <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        กำลังโหลด...
+                    </>
+                ) : (
+                    <>
+                        ถัดไป
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 18L15 12L9 6" />
+                        </svg>
+                    </>
+                )}
             </button>
         </div>
     );

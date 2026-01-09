@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWizardStore, ApplicantData, PLANTS } from '../hooks/useWizardStore';
 
@@ -9,6 +9,157 @@ const APPLICANT_TYPES = [
     { id: 'JURISTIC', label: 'นิติบุคคล' },
     { id: 'COMMUNITY', label: 'วิสาหกิจชุมชน' },
 ] as const;
+
+// Power of Attorney Upload Component with Preview
+function PowerOfAttorneyUpload({ isDark }: { isDark: boolean }) {
+    const [file, setFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const handleFile = (f: File) => {
+        setError(null);
+
+        // Validate file type
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+        if (!allowedTypes.includes(f.type)) {
+            setError('รองรับเฉพาะไฟล์ PDF, JPG, PNG');
+            return;
+        }
+
+        // Validate size (10MB max)
+        if (f.size > 10 * 1024 * 1024) {
+            setError('ขนาดไฟล์ต้องไม่เกิน 10MB');
+            return;
+        }
+
+        setFile(f);
+
+        // Create preview for images
+        if (f.type.startsWith('image/')) {
+            const url = URL.createObjectURL(f);
+            setPreviewUrl(url);
+        } else {
+            setPreviewUrl('pdf');
+        }
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const f = e.dataTransfer.files[0];
+        if (f) handleFile(f);
+    };
+
+    const handleRemove = () => {
+        if (previewUrl && previewUrl !== 'pdf') {
+            URL.revokeObjectURL(previewUrl);
+        }
+        setFile(null);
+        setPreviewUrl(null);
+        setError(null);
+    };
+
+    const formatSize = (bytes: number) => {
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    };
+
+    if (file && previewUrl) {
+        return (
+            <div className={`border-2 rounded-xl overflow-hidden ${isDark ? 'border-emerald-500 bg-emerald-900/20' : 'border-emerald-500 bg-emerald-50'}`}>
+                {/* Header */}
+                <div className={`flex items-center justify-between px-4 py-3 ${isDark ? 'bg-emerald-900/30 border-emerald-700' : 'bg-emerald-100/50'} border-b`}>
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                        </div>
+                        <div>
+                            <p className={`text-sm font-medium truncate max-w-[200px] ${isDark ? 'text-white' : 'text-gray-800'}`}>{file.name}</p>
+                            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>{formatSize(file.size)}</p>
+                        </div>
+                    </div>
+                    <button onClick={handleRemove} className={`px-3 py-1.5 rounded-lg text-xs font-medium ${isDark ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-600'} hover:opacity-80`}>
+                        ลบ
+                    </button>
+                </div>
+                {/* Preview */}
+                <div className="p-4">
+                    {previewUrl !== 'pdf' ? (
+                        <div className={`relative rounded-lg overflow-hidden border ${isDark ? 'border-slate-700 bg-slate-800' : 'border-gray-200 bg-white'}`}>
+                            <img src={previewUrl} alt="Preview" className="w-full h-40 object-contain" />
+                            <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/70 rounded-md flex items-center gap-1">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                                <span className="text-xs text-white">พร้อมให้ AI ตรวจสอบ</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className={`flex items-center justify-center h-32 rounded-lg border ${isDark ? 'border-slate-700 bg-slate-800' : 'border-gray-200 bg-white'}`}>
+                            <div className="text-center">
+                                <svg className="mx-auto text-red-500 mb-2" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                </svg>
+                                <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-700'}`}>PDF Document</p>
+                                <p className={`text-xs mt-1 flex items-center justify-center gap-1 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                                    พร้อมให้ AI ตรวจสอบ
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div>
+            <div
+                onClick={() => inputRef.current?.click()}
+                onDragEnter={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
+                className={`
+                    border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all
+                    ${isDragging
+                        ? (isDark ? 'border-emerald-500 bg-emerald-900/20' : 'border-emerald-500 bg-emerald-50')
+                        : (isDark ? 'border-slate-600 bg-slate-700 hover:border-emerald-500' : 'border-gray-300 bg-white hover:border-emerald-400 hover:bg-emerald-50/30')
+                    }
+                    ${error ? 'border-red-400 bg-red-50' : ''}
+                `}
+            >
+                <input
+                    ref={inputRef}
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); e.target.value = ''; }}
+                    className="hidden"
+                />
+                <svg className={`mx-auto mb-3 ${isDragging ? 'text-emerald-500' : isDark ? 'text-slate-400' : 'text-gray-400'}`} width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                <p className={`text-sm font-medium mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>
+                    {isDragging ? 'วางไฟล์ที่นี่' : 'ลากไฟล์มาวาง หรือคลิกเพื่อเลือก'}
+                </p>
+                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                    PDF, JPG, PNG • สูงสุด 10 MB
+                </p>
+            </div>
+            {error && (
+                <p className="mt-2 text-sm text-red-500 flex items-center gap-1">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                    {error}
+                </p>
+            )}
+        </div>
+    );
+}
+
 
 export default function Step4Applicant() {
     const router = useRouter();
@@ -100,20 +251,21 @@ export default function Step4Applicant() {
     const handleNext = () => { if (!isNavigating) { setIsNavigating(true); router.push('/applications/new/step-5'); } };
     const handleBack = () => { setIsNavigating(true); router.push('/applications/new/step-3'); };
 
-    if (!isLoaded) return <div className={`text-center py-16 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>กำลังโหลด...</div>;
+    if (!isLoaded) return <div className="text-center py-16 text-gray-500">กำลังโหลด...</div>;
 
-    const inputCls = `w-full px-3 py-2.5 rounded-lg border text-sm outline-none font-[Kanit] ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'bg-white border-slate-300 text-slate-900'}`;
-    const labelCls = `block text-xs font-medium mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`;
-    const sectionCls = `rounded-xl p-4 mb-4 ${isDark ? 'bg-slate-700' : 'bg-slate-50'}`;
+    const inputCls = `w-full px-4 py-3 rounded-xl border-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'bg-white border-gray-200 text-gray-900 focus:border-emerald-500'}`;
+    const labelCls = `block text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-gray-700'}`;
+    const sectionCls = `rounded-2xl p-5 mb-5 border-2 ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-white border-gray-200'}`;
 
     return (
-        <div className="font-[Kanit]">
+        <div className="space-y-6">
             {/* Header */}
-            <div className="text-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-400 rounded-xl flex items-center justify-center mx-auto mb-2.5 shadow-lg shadow-emerald-500/25">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+            <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-emerald-500/30">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                 </div>
-                <h2 className={`text-lg font-semibold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>ข้อมูลผู้ขอใบรับรอง</h2>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">ข้อมูลผู้ขอใบรับรอง</h1>
+                <p className="text-gray-600">กรอกข้อมูลผู้ยื่นคำขอ</p>
             </div>
 
             {/* Applicant Type Selection */}
@@ -201,14 +353,15 @@ export default function Step4Applicant() {
                         <div><label className={labelCls}>อีเมล<span className="text-red-500">*</span></label><input type="email" value={form.directorEmail || ''} onChange={e => handleChange('directorEmail', e.target.value)} placeholder="email@company.com" className={inputCls} /></div>
                     </div>
                     {/* Power of Attorney */}
-                    <div className={`rounded-lg p-3 mt-3 ${isDark ? 'bg-slate-800' : 'bg-amber-50'}`}>
-                        <div className="text-xs font-semibold text-amber-600 mb-2">กรณีมอบอำนาจให้กระทำการแทน</div>
-                        <div className="mb-2.5"><label className={labelCls}>หนังสือมอบอำนาจ (PDF)</label>
-                            <div className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${isDark ? 'border-slate-600 bg-slate-700' : 'border-slate-300 bg-white'}`}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#94A3B8' : '#64748B'} strokeWidth="1.5" className="mx-auto"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
-                                <div className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>คลิกเพื่ออัปโหลด PDF (Max 100MB)</div>
-                            </div>
+                    <div className={`rounded-lg p-4 mt-3 ${isDark ? 'bg-slate-800' : 'bg-amber-50'}`}>
+                        <div className="text-sm font-semibold text-amber-600 mb-3">กรณีมอบอำนาจให้กระทำการแทน</div>
+
+                        {/* File Upload with Preview */}
+                        <div className="mb-4">
+                            <label className={`${labelCls} mb-2 block`}>หนังสือมอบอำนาจ (PDF/รูปภาพ)</label>
+                            <PowerOfAttorneyUpload isDark={isDark} />
                         </div>
+
                         <div className="grid grid-cols-2 gap-2 mb-2">
                             <div><label className={labelCls}>ชื่อผู้ประสานงาน</label><input type="text" value={form.coordinatorName || ''} onChange={e => handleChange('coordinatorName', e.target.value)} placeholder="ชื่อ-นามสกุล" className={inputCls} /></div>
                             <div><label className={labelCls}>โทรศัพท์ผู้ประสานงาน</label><input type="tel" value={form.coordinatorPhone || ''} onChange={e => handleChange('coordinatorPhone', e.target.value)} placeholder="08X-XXX-XXXX" className={inputCls} /></div>
@@ -226,9 +379,21 @@ export default function Step4Applicant() {
             )}
 
             {/* Navigation */}
-            <div className="flex gap-2.5">
-                <button onClick={handleBack} className={`flex-1 py-3 rounded-lg text-sm font-medium border ${isDark ? 'bg-slate-700 border-slate-600 text-slate-100' : 'bg-white border-slate-200 text-slate-700'}`}>ย้อนกลับ</button>
-                <button onClick={handleNext} className="flex-[2] py-3 rounded-lg text-sm font-semibold bg-gradient-to-br from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/35">ถัดไป →</button>
+            <div className="flex gap-4 pt-4">
+                <button
+                    onClick={handleBack}
+                    className="flex-1 py-3.5 rounded-xl text-base font-semibold flex items-center justify-center gap-2 border-2 border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition-all"
+                >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg>
+                    ย้อนกลับ
+                </button>
+                <button
+                    onClick={handleNext}
+                    className="flex-[2] py-3.5 rounded-xl text-base font-bold flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xl shadow-emerald-500/30 transition-all"
+                >
+                    ถัดไป
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg>
+                </button>
             </div>
         </div>
     );

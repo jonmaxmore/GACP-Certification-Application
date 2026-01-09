@@ -10,44 +10,6 @@ const prisma = new PrismaClient();
 
 const STANDARDS = [
     {
-        code: 'THAI_GACP',
-        name: 'Thai GACP',
-        nameTH: 'มาตรฐาน GACP ไทย',
-        description: 'Good Agricultural and Collection Practice for Medicinal Plants - Thailand Department of Thai Traditional and Alternative Medicine',
-        version: 'v2024',
-        isActive: true,
-        sortOrder: 1,
-        logoUrl: null,
-        targetMarket: 'DOMESTIC',
-        requirements: [
-            { category: 'FACILITY', name: 'Farm Registration', nameTH: 'ทะเบียนฟาร์ม', isRequired: true },
-            { category: 'DOCUMENTATION', name: 'Cultivation Records', nameTH: 'บันทึกการเพาะปลูก', isRequired: true },
-            { category: 'PROCESS', name: 'Harvest Procedures', nameTH: 'ขั้นตอนการเก็บเกี่ยว', isRequired: true },
-            { category: 'TESTING', name: 'Quality Testing', nameTH: 'การตรวจสอบคุณภาพ', isRequired: true },
-            { category: 'DOCUMENTATION', name: 'Traceability Records', nameTH: 'บันทึกการตรวจสอบย้อนกลับ', isRequired: true },
-        ]
-    },
-    {
-        code: 'FDA',
-        name: 'FDA GMP/GAP',
-        nameTH: 'มาตรฐาน FDA สหรัฐอเมริกา',
-        description: 'US Food and Drug Administration Good Manufacturing Practice for Dietary Supplements (21 CFR Part 111)',
-        version: 'CFR-21-111',
-        isActive: true,
-        sortOrder: 2,
-        logoUrl: null,
-        targetMarket: 'USA',
-        requirements: [
-            { category: 'FACILITY', name: 'Master Manufacturing Record', nameTH: 'บันทึกการผลิตหลัก', isRequired: true },
-            { category: 'FACILITY', name: 'Batch Production Record', nameTH: 'บันทึกการผลิตแต่ละรุ่น', isRequired: true },
-            { category: 'PROCESS', name: 'Component Specifications', nameTH: 'ข้อกำหนดส่วนประกอบ', isRequired: true },
-            { category: 'TESTING', name: 'Identity Testing', nameTH: 'การทดสอบอัตลักษณ์', isRequired: true },
-            { category: 'TESTING', name: 'Contaminant Testing', nameTH: 'การทดสอบสารปนเปื้อน', isRequired: true },
-            { category: 'DOCUMENTATION', name: 'Complaint Records', nameTH: 'บันทึกการร้องเรียน', isRequired: true },
-            { category: 'DOCUMENTATION', name: 'Returned Product Records', nameTH: 'บันทึกสินค้าคืน', isRequired: true },
-        ]
-    },
-    {
         code: 'WHO',
         name: 'WHO GACP',
         nameTH: 'มาตรฐาน WHO',
@@ -58,13 +20,27 @@ const STANDARDS = [
         logoUrl: null,
         targetMarket: 'GLOBAL',
         requirements: [
-            { category: 'FACILITY', name: 'Site Selection', nameTH: 'การเลือกพื้นที่ปลูก', isRequired: true },
-            { category: 'PROCESS', name: 'Seeds and Propagation', nameTH: 'เมล็ดพันธุ์และการขยายพันธุ์', isRequired: true },
-            { category: 'PROCESS', name: 'Cultivation', nameTH: 'การเพาะปลูก', isRequired: true },
-            { category: 'PROCESS', name: 'Irrigation', nameTH: 'การชลประทาน', isRequired: true },
-            { category: 'PROCESS', name: 'Harvest', nameTH: 'การเก็บเกี่ยว', isRequired: true },
-            { category: 'PROCESS', name: 'Post-harvest Processing', nameTH: 'การแปรรูปหลังเก็บเกี่ยว', isRequired: true },
-            { category: 'TESTING', name: 'Quality Assurance', nameTH: 'การประกันคุณภาพ', isRequired: true },
+            { category: 'CONTAMINANT', name: 'Heavy Metals Analysis', nameTH: 'การวิเคราะห์โลหะหนัก', description: 'Must meet limits: Arsenic < 4.0 ppm, Cadmium < 0.3 ppm, Lead < 10.0 ppm, Mercury < 0.5 ppm', isRequired: true },
+            { category: 'CONTAMINANT', name: 'Pesticide Residues', nameTH: 'สารตกค้างกำจัดศัตรูพืช', description: 'No detection of prohibited pesticides. Limits for others must comply with WHO/FAO Codex Alimentarius.', isRequired: true },
+            { category: 'PROCESS', name: 'Drying Protocols', nameTH: 'กระบวนการตากแห้ง', description: 'Must prevent mycotoxin formation (Aflatoxins < 20 ppb). Controlled humidity and temperature records required.', isRequired: true },
+            { category: 'DOCUMENTATION', name: 'Batch Traceability', nameTH: 'การตรวจสอบย้อนกลับรุ่นผลิต', description: 'Full traceability from seed source to final harvest batch with unique batch numbering.', isRequired: true },
+        ]
+    },
+    {
+        code: 'FDA',
+        name: 'US FDA',
+        nameTH: 'มาตรฐาน FDA สหรัฐอเมริกา',
+        description: 'US Food and Drug Administration - FSMA & cGMP (21 CFR Part 111)',
+        version: 'CFR-21-111',
+        isActive: true,
+        sortOrder: 2,
+        logoUrl: null,
+        targetMarket: 'USA',
+        requirements: [
+            { category: 'SAFETY', name: 'Food Safety Plan (HACCP)', nameTH: 'แผนความปลอดภัยอาหาร (HACCP)', description: 'Must have a written Food Safety Plan including Hazard Analysis and Critical Control Points.', isRequired: true },
+            { category: 'FACILITY', name: 'Sanitary Facilities', nameTH: 'สถานที่มีสุขอนามัย', description: 'Toilet and hand-washing facilities must be readily accessible and separate from production areas.', isRequired: true },
+            { category: 'PROCESS', name: 'Water Quality', nameTH: 'คุณภาพน้ำ', description: 'Water used for irrigation and washing must be EPA-compliant for microbial quality (E. coli limits).', isRequired: true },
+            { category: 'DOCUMENTATION', name: 'Foreign Supplier Verification Program (FSVP)', nameTH: 'โปรแกรมตรวจสอบผู้จัดหาต่างประเทศ', description: 'Records demonstrating compliance with FSVP requirements for exporters to US.', isRequired: true },
         ]
     },
     {
@@ -78,11 +54,25 @@ const STANDARDS = [
         logoUrl: null,
         targetMarket: 'ASEAN',
         requirements: [
-            { category: 'FACILITY', name: 'Personnel Hygiene', nameTH: 'สุขอนามัยบุคลากร', isRequired: true },
-            { category: 'FACILITY', name: 'Premises and Facilities', nameTH: 'สถานที่และอุปกรณ์', isRequired: true },
-            { category: 'PROCESS', name: 'Production Control', nameTH: 'การควบคุมการผลิต', isRequired: true },
-            { category: 'TESTING', name: 'Quality Control', nameTH: 'การควบคุมคุณภาพ', isRequired: true },
-            { category: 'DOCUMENTATION', name: 'Product Recall', nameTH: 'การเรียกคืนสินค้า', isRequired: true },
+            { category: 'PERSONNEL', name: 'Health & Hygiene Training', nameTH: 'การฝึกอบรมสุขอนามัย', description: 'Annual training records for all personnel regarding personal hygiene and sanitation.', isRequired: true },
+            { category: 'FACILITY', name: 'Pest Control System', nameTH: 'ระบบควบคุมสัตว์พาหะ', description: 'Documented pest control program with bait map and regular monitoring records.', isRequired: true },
+            { category: 'PROCESS', name: 'Waste Management', nameTH: 'การจัดการของเสีย', description: 'Proper segregation and disposal of organic and inorganic waste away from production areas.', isRequired: true },
+            { category: 'DOCUMENTATION', name: 'Cleaning Records', nameTH: 'บันทึกการทำความสะอาด', description: 'Daily logs of cleaning and sanitization of equipment and facilities.', isRequired: true },
+        ]
+    },
+    {
+        code: 'THAI_GACP',
+        name: 'Thai GACP',
+        nameTH: 'มาตรฐาน GACP ไทย',
+        description: 'Good Agricultural and Collection Practice - Thailand',
+        version: 'v2024',
+        isActive: true,
+        sortOrder: 1,
+        logoUrl: null,
+        targetMarket: 'DOMESTIC',
+        requirements: [
+            { category: 'LEGAL', name: 'Farm Registration', nameTH: 'ทะเบียนเกษตรกร', description: 'Must register with Department of Agriculture extension office.', isRequired: true },
+            { category: 'PROCESS', name: 'GAP Guidelines', nameTH: 'แนวทาง GAP', description: 'Follow basic GAP guidelines for site selection and water sources.', isRequired: true },
         ]
     }
 ];
@@ -111,6 +101,7 @@ async function seedStandards() {
                     category: req.category,
                     name: req.name,
                     nameTH: req.nameTH,
+                    description: req.description,
                     isRequired: req.isRequired,
                     sortOrder: i + 1
                 }

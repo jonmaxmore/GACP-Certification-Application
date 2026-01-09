@@ -30,6 +30,7 @@ const lotsRouter = require('./lots');
 const traceRouter = require('./trace');
 const criteriaRouter = require('./criteria');
 const farmsRouter = require('./farms');
+const dashboardRouter = require('./dashboard');
 
 // Mount V2 routes
 router.use('/notifications', notificationsRouter);
@@ -57,8 +58,10 @@ router.use('/documents', documentsRouter);
 router.use('/planting-cycles', plantingCyclesRouter);
 router.use('/lots', lotsRouter);
 router.use('/trace', traceRouter);
-router.use('/criteria', criteriaRouter);
+router.use('/criteria', require('./criteria'));
+router.use('/standards', require('./standards'));
 router.use('/farms', farmsRouter);
+router.use('/dashboard', dashboardRouter);
 
 // Health check with version info
 router.get('/health', (req, res) => {

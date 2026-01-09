@@ -1,110 +1,85 @@
-"use client";
+'use client';
 
-import React from 'react';
+import { forwardRef, HTMLAttributes, ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
-interface CardProps {
-    children: React.ReactNode;
-    variant?: 'default' | 'elevated' | 'outlined';
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+    variant?: 'default' | 'elevated' | 'interactive' | 'bordered';
     padding?: 'none' | 'sm' | 'md' | 'lg';
-    className?: string;
-    onClick?: () => void;
+    header?: ReactNode;
+    footer?: ReactNode;
 }
 
-const variantClasses = {
-    default: 'bg-white border border-slate-200',
-    elevated: 'bg-white shadow-lg',
-    outlined: 'bg-transparent border-2 border-slate-200',
-};
+const Card = forwardRef<HTMLDivElement, CardProps>(
+    (
+        {
+            className,
+            variant = 'default',
+            padding = 'md',
+            header,
+            footer,
+            children,
+            ...props
+        },
+        ref
+    ) => {
+        const baseStyles = `
+            bg-white rounded-2xl
+            transition-all duration-200
+        `;
 
-const paddingClasses = {
-    none: 'p-0',
-    sm: 'p-3',
-    md: 'p-5',
-    lg: 'p-7',
-};
+        const variants = {
+            default: 'border border-gray-200 shadow-soft',
+            elevated: 'shadow-card',
+            interactive: `
+                border border-gray-200 shadow-soft
+                hover:shadow-card hover:border-primary-200
+                cursor-pointer
+            `,
+            bordered: 'border-2 border-gray-200',
+        };
 
-/**
- * Card Component
- * Eco-Professional Design with Tailwind CSS
- */
-export function Card({
-    children,
-    variant = 'default',
-    padding = 'md',
-    className = '',
-    onClick,
-}: CardProps) {
-    return (
-        <div
-            className={`
-                rounded-2xl transition-all duration-200
-                ${variantClasses[variant]}
-                ${paddingClasses[padding]}
-                ${onClick ? 'cursor-pointer hover:shadow-md' : ''}
-                ${className}
-            `}
-            onClick={onClick}
-        >
-            {children}
-        </div>
-    );
-}
+        const paddings = {
+            none: '',
+            sm: 'p-4',
+            md: 'p-6',
+            lg: 'p-8',
+        };
 
-interface StatCardProps {
-    title: string;
-    value: number | string;
-    icon?: string;
-    trend?: { value: number; isPositive: boolean };
-    highlight?: boolean;
-    onClick?: () => void;
-}
-
-/**
- * StatCard Component
- * Eco-Professional Dashboard Statistics Card
- */
-export function StatCard({
-    title,
-    value,
-    icon = '',
-    trend,
-    highlight = false,
-    onClick,
-}: StatCardProps) {
-    return (
-        <div
-            className={`
-                p-4 rounded-xl border transition-all duration-200
-                ${highlight
-                    ? 'bg-amber-50 border-amber-200 shadow-md ring-1 ring-amber-200'
-                    : 'bg-white border-slate-200 hover:shadow-md'
-                }
-                ${onClick ? 'cursor-pointer' : ''}
-            `}
-            onClick={onClick}
-        >
-            <div className="flex justify-between items-start">
-                <div>
-                    <p className="text-xs text-slate-500 mb-2 font-medium">
-                        {title}
-                    </p>
-                    <p className={`text-3xl font-bold leading-none ${highlight ? 'text-amber-700' : 'text-slate-800'}`}>
-                        {value}
-                    </p>
-                    {trend && (
-                        <p className={`text-xs mt-2 flex items-center gap-1 ${trend.isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
-                            <span>{trend.isPositive ? '↑' : '↓'}</span>
-                            {Math.abs(trend.value)}%
-                            <span className="text-slate-400">จากเดือนที่แล้ว</span>
-                        </p>
-                    )}
+        return (
+            <div
+                ref={ref}
+                className={cn(baseStyles, variants[variant], className)}
+                {...props}
+            >
+                {header && (
+                    <div className={cn(
+                        'border-b border-gray-100',
+                        padding === 'sm' && 'px-4 py-3',
+                        padding === 'md' && 'px-6 py-4',
+                        padding === 'lg' && 'px-8 py-5',
+                    )}>
+                        {header}
+                    </div>
+                )}
+                <div className={cn(paddings[padding])}>
+                    {children}
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-2xl">
-                    {icon}
-                </div>
+                {footer && (
+                    <div className={cn(
+                        'border-t border-gray-100 bg-gray-50/50',
+                        padding === 'sm' && 'px-4 py-3',
+                        padding === 'md' && 'px-6 py-4',
+                        padding === 'lg' && 'px-8 py-5',
+                    )}>
+                        {footer}
+                    </div>
+                )}
             </div>
-        </div>
-    );
-}
+        );
+    }
+);
 
-export default Card;
+Card.displayName = 'Card';
+
+export { Card };

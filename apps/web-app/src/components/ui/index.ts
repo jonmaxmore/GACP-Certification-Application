@@ -1,16 +1,25 @@
-// UI Components barrel export
-export { ModernButton } from './modern-button';
-export { ModernInput } from './modern-input';
-export { ModernCard } from './modern-card';
+// Re-export existing components
+export { Button } from './button';
 export { BottomNav } from './bottom-nav';
-export { ThemeToggle } from './theme-toggle';
-
-// GACP Eco-Premium Design System Components
+export { BackButton } from './BackButton';
+export { DataTable } from './DataTable';
+export { StatusBadge } from './StatusBadge';
+export { ErrorBoundary } from './error-boundary';
+export { FileUpload } from './file-upload';
+export { FormInput } from './form-input';
 export { GACPButton } from './gacp-button';
-export { GACPInput } from './gacp-input';
 export { GACPCard } from './gacp-card';
+export { GACPInput } from './gacp-input';
+export { LoadingSpinner } from './loading-spinner';
+export { ModernButton } from './modern-button';
+export { ModernCard } from './modern-card';
+export { ModernInput } from './modern-input';
+export { ThemeToggle } from './theme-toggle';
+export { DocumentUploadCard } from './DocumentUploadCard';
+export * from './icons';
+export * from './Skeleton';
+export * from './page-components';
 
-// New Login-Style Components (emerald gradient design)
-export { PageContainer, FormCard, PageHeader } from './page-components';
-export { Button, LinkButton } from './button';
-export { Input, Select } from './form-input';
+// New Card component (I created this earlier but it might conflict with gacp-card)
+// Using the name DesktopCard to avoid conflicts
+export { Card as DesktopCard } from './Card';

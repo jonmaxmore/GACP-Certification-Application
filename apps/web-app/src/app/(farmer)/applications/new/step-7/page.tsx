@@ -203,17 +203,22 @@ export default function Step7Documents() {
     const handleNext = () => { if (!isNavigating) { setIsNavigating(true); router.push('/applications/new/step-8'); } };
     const handleBack = () => { setIsNavigating(true); router.push('/applications/new/step-6'); };
 
-    if (!isLoaded) return <div className={`text-center py-16 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>กำลังโหลด...</div>;
+    if (!isLoaded) return <div className="text-center py-16 text-gray-500">กำลังโหลด...</div>;
 
     return (
-        <div>
+        <div className="space-y-6">
             {/* Header */}
-            <div className="text-center mb-5">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3.5 shadow-lg shadow-violet-500/30 ${isDark ? 'bg-gradient-to-br from-violet-600 to-violet-500' : 'bg-gradient-to-br from-violet-500 to-violet-400'}`}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>
+            <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-violet-500/30">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
                 </div>
-                <h2 className={`text-xl font-semibold mb-1.5 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>อัปโหลดเอกสาร</h2>
-                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>รายการเอกสารประกอบคำขอ 22 รายการ</p>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">อัปโหลดเอกสาร</h1>
+                <p className="text-gray-600">รายการเอกสารประกอบคำขอ 22 รายการ</p>
             </div>
 
             {/* Progress */}
@@ -262,13 +267,30 @@ export default function Step7Documents() {
             </div>
 
             {/* Navigation */}
-            <div className="flex gap-3">
-                <button onClick={handleBack} className={`flex-1 py-3.5 rounded-xl text-base font-medium flex items-center justify-center gap-1.5 border ${isDark ? 'bg-slate-700 border-slate-600 text-slate-100' : 'bg-white border-slate-200 text-slate-700'}`}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg> ย้อนกลับ
+            <div className="flex gap-4 pt-4">
+                <button
+                    onClick={handleBack}
+                    className="flex-1 py-3.5 rounded-xl text-base font-semibold flex items-center justify-center gap-2 border-2 border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition-all"
+                >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18L9 12L15 6" /></svg>
+                    ย้อนกลับ
                 </button>
-                <button onClick={handleNext} disabled={isNavigating}
-                    className={`flex-[2] py-3.5 rounded-xl text-base font-semibold flex items-center justify-center gap-1.5 transition-all ${isNavigating ? 'bg-slate-400 text-white cursor-not-allowed' : 'bg-gradient-to-br from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/40'}`}>
-                    {isNavigating ? (<><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> กำลังโหลด...</>) : (<>ถัดไป <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg></>)}
+                <button
+                    onClick={handleNext}
+                    disabled={isNavigating}
+                    className={`flex-[2] py-3.5 rounded-xl text-base font-bold flex items-center justify-center gap-2 transition-all ${isNavigating
+                            ? 'bg-gray-400 text-white cursor-not-allowed'
+                            : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xl shadow-emerald-500/30'
+                        }`}
+                >
+                    {isNavigating ? (
+                        <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> กำลังโหลด...</>
+                    ) : (
+                        <>
+                            ถัดไป
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18L15 12L9 6" /></svg>
+                        </>
+                    )}
                 </button>
             </div>
         </div>

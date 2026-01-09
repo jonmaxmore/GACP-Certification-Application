@@ -46,24 +46,25 @@ const STEPS = [
 export default function DashboardPage() {
     const [user, setUser] = useState<User | null>(null);
     const [applications, setApplications] = useState<Application[]>([]);
+    const [stats, setStats] = useState({ applications: 0, farms: 0, notices: 0 });
     const [mounted, setMounted] = useState(false);
     const [isDark, setIsDark] = useState(false);
     const [isRedirecting, setIsRedirecting] = useState(false);
     const [loadError, setLoadError] = useState<string | null>(null);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         setMounted(true);
         setIsDark(localStorage.getItem("theme") === "dark");
         const userData = localStorage.getItem("user");
         if (!userData) {
             setIsRedirecting(true);
-            // Clear any stale cookies by calling logout API before redirect
             fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
                 window.location.href = "/login";
             });
             return;
         }
-        try { setUser(JSON.parse(userData)); loadApplications(); }
+        try { setUser(JSON.parse(userData)); loadApplications(); loadStats(); }
         catch {
             setIsRedirecting(true);
             fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
@@ -72,16 +73,25 @@ export default function DashboardPage() {
         }
     }, []);
 
-
     const toggleTheme = () => { const newTheme = !isDark; setIsDark(newTheme); localStorage.setItem("theme", newTheme ? "dark" : "light"); };
+
+    const loadStats = async () => {
+        try {
+            const result = await api.get<{ applications: number, farms: number, notices: number }>("/dashboard/stats");
+            if (result.success && result.data) {
+                setStats(result.data);
+            }
+        } catch (error) {
+            console.error('Failed to load stats', error);
+        }
+    };
 
     const loadApplications = async () => {
         setLoadError(null);
         try {
             const result = await api.get<Application[]>("/applications/my");
             if (result.success && result.data) {
-                // Handle both array response and nested data response
-                const apps = Array.isArray(result.data) ? result.data : (result.data as any).data || [];
+                const apps = Array.isArray(result.data) ? result.data : (result.data as { data: Application[] }).data || [];
                 setApplications(apps);
             } else {
                 setLoadError("ไม่สามารถโหลดข้อมูลคำขอได้");
@@ -91,6 +101,8 @@ export default function DashboardPage() {
             setLoadError("ไม่สามารถโหลดข้อมูลคำขอได้");
         }
     };
+
+    // ... (rest of standard functions)
 
     const handleLogout = () => {
         localStorage.removeItem("user"); localStorage.removeItem("gacp_wizard_state"); sessionStorage.clear();
@@ -134,6 +146,7 @@ export default function DashboardPage() {
     const accentColor = isDark ? "#10B981" : "#16A34A";
     const mutedColor = isDark ? "#64748B" : "#9CA3AF";
 
+    // ... (Loading state return) ...
     if (!user || !mounted || isRedirecting) {
         return (
             <div className={`min-h-screen ${isDark ? 'bg-slate-900' : 'bg-stone-50'}`}>
@@ -228,9 +241,9 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
                     {[
                         { icon: Icons.file, label: "คำขอทั้งหมด", value: applications.length },
-                        { icon: Icons.clock, label: "รอดำเนินการ", value: applications.filter(a => !["CERTIFIED", "DRAFT"].includes(a.status)).length },
-                        { icon: Icons.award, label: "ได้รับรองแล้ว", value: applications.filter(a => a.status === "CERTIFIED").length },
-                        { icon: Icons.alertTriangle, label: "หมดอายุ", value: 0 },
+                        { icon: Icons.clock, label: "รอดำเนินการ", value: applications.filter(a => !["CERTIFIED", "DRAFT", "REJECTED"].includes(a.status)).length },
+                        { icon: Icons.award, label: "ได้รับการรับรอง", value: applications.filter(a => a.status === "CERTIFIED").length },
+                        { icon: Icons.leaf, label: "แปลงปลูก", value: stats.farms },
                     ].map((stat, i) => (
                         <div key={i} className={`rounded-2xl p-5 border transition-all hover:-translate-y-0.5 hover:shadow-lg ${isDark ? 'bg-slate-800 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-slate-300'}`}>
                             <div className="flex justify-between items-start mb-3">

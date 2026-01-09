@@ -93,6 +93,8 @@ export interface SiteData {
     eastBorder?: string;
     westBorder?: string;
     landOwnership?: 'OWN' | 'RENT' | 'CONSENT';
+    soilType?: string;          // Added for GACP
+    waterSource?: string;       // Added for GACP
     hasCCTV?: boolean;
     hasFence2m?: boolean;
     hasAccessLog?: boolean;
@@ -106,6 +108,8 @@ export interface ProductionData {
     plantParts?: string[];
     plantPartsOther?: string;
     propagationType?: 'SEED' | 'CUTTING' | 'TISSUE' | 'OTHER';
+    cultivationMethod?: 'OUTDOOR' | 'INDOOR' | 'GREENHOUSE'; // Added for GACP
+    irrigationType?: 'DRIP' | 'SPRINKLER' | 'MANUAL' | 'FLOOD'; // Added for GACP
     varietyName?: string;
     seedSource?: string;
     varietySource?: string;

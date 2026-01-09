@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
     IconHome, IconDocument, IconCompass, IconCreditCard, IconUser,
     IconSun, IconMoon, IconLogout, IconLeaf, IconPlus

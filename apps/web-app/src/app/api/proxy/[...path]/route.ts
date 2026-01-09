@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Production Server - Always use this
-// Production Server - Use INTERNAL_API_URL if available (Docker), otherwise fallback
-const BACKEND_URL = process.env.INTERNAL_API_URL || 'http://localhost:5000';
+// Production Server - Hardcoded for Docker internal network
+const BACKEND_URL = 'http://backend:5000';
 
 /**
  * Forward cookies and authorization headers to backend

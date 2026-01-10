@@ -20,7 +20,7 @@ const KEY = crypto.createHash('sha256').update(String(SECRET)).digest();
  * @returns {string} Encrypted text in format iv:encryptedData
  */
 function encrypt(text) {
-    if (!text) return text;
+    if (!text) {return text;}
     try {
         const iv = crypto.randomBytes(16);
         const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(KEY), iv);
@@ -39,7 +39,7 @@ function encrypt(text) {
  * @returns {string} Decrypted text
  */
 function decrypt(text) {
-    if (!text) return text;
+    if (!text) {return text;}
     // Check if text format is valid (iv:content)
     const parts = text.split(':');
     if (parts.length !== 2) {
@@ -68,7 +68,7 @@ function decrypt(text) {
  * @returns {string} SHA-256 hash of the text
  */
 function hash(text) {
-    if (!text) return null;
+    if (!text) {return null;}
     return crypto.createHash('sha256').update(String(text)).digest('hex');
 }
 

@@ -28,7 +28,7 @@ const requireRole = (allowedRoles) => {
           path: req.path,
         });
         throw new ForbiddenError(
-          `Access denied. Required roles: ${allowedRoles.join(', ')}`
+          `Access denied. Required roles: ${allowedRoles.join(', ')}`,
         );
       }
 

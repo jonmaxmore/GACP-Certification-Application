@@ -20,10 +20,10 @@ async function main() {
 
         console.log('Cleaning up old test data...');
         const existingByEmail = await prisma.user.findUnique({ where: { email } });
-        if (existingByEmail) await prisma.user.delete({ where: { email } });
+        if (existingByEmail) {await prisma.user.delete({ where: { email } });}
 
         const existingByHash = await prisma.user.findUnique({ where: { idCardHash } });
-        if (existingByHash) await prisma.user.delete({ where: { idCardHash } });
+        if (existingByHash) {await prisma.user.delete({ where: { idCardHash } });}
 
         console.log('Creating new user...');
         const user = await prisma.user.create({
@@ -35,8 +35,8 @@ async function main() {
                 accountType: 'INDIVIDUAL',
                 idCardHash,
                 firstName: 'Test',
-                lastName: 'User'
-            }
+                lastName: 'User',
+            },
         });
         console.log('User created:', user.id);
         console.log('Stored Hash:', user.password);

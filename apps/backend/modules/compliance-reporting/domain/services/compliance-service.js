@@ -13,7 +13,7 @@ class ComplianceService {
         const license = await Application.findOne({
             _id: data.licenseId,
             applicantId: userId,
-            status: 'approved'
+            status: 'approved',
         });
 
         if (!license) {
@@ -25,7 +25,7 @@ class ComplianceService {
             licenseId: data.licenseId,
             reportType: data.reportType,
             'period.month': data.period.month,
-            'period.year': data.period.year
+            'period.year': data.period.year,
         });
 
         if (existing && existing.status !== 'rejected') {
@@ -36,7 +36,7 @@ class ComplianceService {
             ...data,
             farmerId: userId,
             status: 'submitted',
-            submittedAt: new Date()
+            submittedAt: new Date(),
         });
 
         return await report.save();
@@ -49,7 +49,7 @@ class ComplianceService {
 
     async acknowledgeReport(reportId, officerId, comments) {
         const report = await ComplianceReport.findById(reportId);
-        if (!report) throw new Error('Report not found');
+        if (!report) {throw new Error('Report not found');}
 
         report.status = 'acknowledged';
         report.acknowledgedAt = new Date();

@@ -27,7 +27,7 @@ router.post('/', async (req, res) => {
             issuedDate,
             expiryDate,
             documentUrl,
-            sites
+            sites,
         } = req.body;
 
         const userId = req.body.userId || req.user?._id;
@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
         if (!userId) {
             return res.status(401).json({
                 success: false,
-                error: 'กรุณาเข้าสู่ระบบ'
+                error: 'กรุณาเข้าสู่ระบบ',
             });
         }
 
@@ -44,7 +44,7 @@ router.post('/', async (req, res) => {
         if (existing) {
             return res.status(400).json({
                 success: false,
-                error: 'เลขที่ใบอนุญาตนี้มีอยู่ในระบบแล้ว'
+                error: 'เลขที่ใบอนุญาตนี้มีอยู่ในระบบแล้ว',
             });
         }
 
@@ -59,19 +59,19 @@ router.post('/', async (req, res) => {
             sites: sites || [],
             // Auto-verified: ไม่ต้องมี admin verify แยก
             // License จะถูกตรวจพร้อมกับเอกสารอื่นใน document review
-            verificationStatus: 'pending' // จะเปลี่ยนเป็น verified เมื่อ application ผ่าน Phase 1
+            verificationStatus: 'pending', // จะเปลี่ยนเป็น verified เมื่อ application ผ่าน Phase 1
         });
 
         res.status(201).json({
             success: true,
             message: 'บันทึกข้อมูลใบอนุญาตเรียบร้อย',
-            data: license
+            data: license,
         });
     } catch (error) {
         console.error('Create license error:', error);
         res.status(500).json({
             success: false,
-            error: 'ไม่สามารถบันทึกใบอนุญาตได้'
+            error: 'ไม่สามารถบันทึกใบอนุญาตได้',
         });
     }
 });
@@ -87,7 +87,7 @@ router.get('/my', async (req, res) => {
         if (!userId) {
             return res.status(401).json({
                 success: false,
-                error: 'กรุณาเข้าสู่ระบบ'
+                error: 'กรุณาเข้าสู่ระบบ',
             });
         }
 
@@ -96,12 +96,12 @@ router.get('/my', async (req, res) => {
 
         res.json({
             success: true,
-            data: licenses
+            data: licenses,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: 'ไม่สามารถดึงข้อมูลใบอนุญาตได้'
+            error: 'ไม่สามารถดึงข้อมูลใบอนุญาตได้',
         });
     }
 });
@@ -118,7 +118,7 @@ router.get('/check/:plantType', async (req, res) => {
         const license = await License.findOne({
             userId,
             plantType: plantType.toLowerCase(),
-            isActive: true
+            isActive: true,
         });
 
         if (!license) {
@@ -126,8 +126,8 @@ router.get('/check/:plantType', async (req, res) => {
                 success: true,
                 data: {
                     hasLicense: false,
-                    message: 'ไม่พบใบอนุญาตสำหรับพืชชนิดนี้'
-                }
+                    message: 'ไม่พบใบอนุญาตสำหรับพืชชนิดนี้',
+                },
             });
         }
 
@@ -138,13 +138,13 @@ router.get('/check/:plantType', async (req, res) => {
                 licenseId: license._id,
                 licenseNumber: license.licenseNumber,
                 expiryDate: license.expiryDate,
-                note: 'ใบอนุญาตจะถูกตรวจสอบพร้อมกับเอกสารอื่นในขั้นตอน Document Review'
-            }
+                note: 'ใบอนุญาตจะถูกตรวจสอบพร้อมกับเอกสารอื่นในขั้นตอน Document Review',
+            },
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: 'เกิดข้อผิดพลาด'
+            error: 'เกิดข้อผิดพลาด',
         });
     }
 });
@@ -167,8 +167,8 @@ router.get('/required/:plantType', (req, res) => {
                 requiresLicense: true,
                 requiredTypes: ['BT11'], // ใบอนุญาตปลูก
                 optionalTypes: ['BT13', 'BT16'], // แปรรูป, ส่งออก
-                note: 'แนบเอกสารใบอนุญาตใน application form เพื่อตรวจพร้อมกัน'
-            }
+                note: 'แนบเอกสารใบอนุญาตใน application form เพื่อตรวจพร้อมกัน',
+            },
         });
     } else {
         res.json({
@@ -176,8 +176,8 @@ router.get('/required/:plantType', (req, res) => {
             data: {
                 requiresLicense: false,
                 requiredTypes: [],
-                note: 'พืชนี้ไม่ต้องการใบอนุญาตพิเศษ'
-            }
+                note: 'พืชนี้ไม่ต้องการใบอนุญาตพิเศษ',
+            },
         });
     }
 });

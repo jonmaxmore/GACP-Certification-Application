@@ -19,7 +19,7 @@ const DOCUMENT_SLOTS = {
         description: 'สำเนาใบอนุญาตปลูกพืชกัญชา/กระท่อม',
         required: true, // ✅ บังคับเสมอ สำหรับพืชควบคุม
         requiredFor: { plantTypes: ['cannabis', 'kratom'] },
-        warningText: '⚠️ พืชควบคุมต้องมีใบอนุญาต บท.11 จาก กรมการแพทย์แผนไทยฯ'
+        warningText: '⚠️ พืชควบคุมต้องมีใบอนุญาต บท.11 จาก กรมการแพทย์แผนไทยฯ',
     },
     LICENSE_BT13: {
         slotId: 'license_bt13',
@@ -28,7 +28,7 @@ const DOCUMENT_SLOTS = {
         required: false, // Optional by default
         conditionalRequired: true, // บังคับตามเงื่อนไข
         requiredFor: { objectives: ['PROCESSING', 'COMMERCIAL_PROCESSING'] },
-        warningText: '⚠️ หากเลือก "แปรรูปผลิตภัณฑ์" ต้องแนบใบอนุญาต บท.13'
+        warningText: '⚠️ หากเลือก "แปรรูปผลิตภัณฑ์" ต้องแนบใบอนุญาต บท.13',
     },
     LICENSE_BT16: {
         slotId: 'license_bt16',
@@ -37,7 +37,7 @@ const DOCUMENT_SLOTS = {
         required: false, // Optional by default
         conditionalRequired: true, // บังคับตามเงื่อนไข
         requiredFor: { objectives: ['EXPORT', 'COMMERCIAL_EXPORT'] },
-        warningText: '⚠️ หากเลือก "ส่งออกต่างประเทศ" ต้องแนบใบอนุญาต บท.16'
+        warningText: '⚠️ หากเลือก "ส่งออกต่างประเทศ" ต้องแนบใบอนุญาต บท.16',
     },
 
     // ===== เอกสารที่ดิน =====
@@ -45,13 +45,13 @@ const DOCUMENT_SLOTS = {
         slotId: 'land_deed',
         name: 'โฉนดที่ดิน / น.ส.3 / น.ส.4',
         description: 'สำเนาเอกสารสิทธิ์ที่ดิน',
-        required: true
+        required: true,
     },
     LAND_LEASE: {
         slotId: 'land_lease',
         name: 'สัญญาเช่าที่ดิน',
         description: 'สัญญาเช่า (กรณีเช่าที่ดิน)',
-        required: false
+        required: false,
     },
 
     // ===== เอกสารบุคคล/นิติบุคคล =====
@@ -59,13 +59,13 @@ const DOCUMENT_SLOTS = {
         slotId: 'id_card',
         name: 'สำเนาบัตรประชาชน',
         description: 'ผู้ยื่นขอหรือผู้มีอำนาจลงนาม',
-        required: true
+        required: true,
     },
     HOUSE_REG: {
         slotId: 'house_reg',
         name: 'สำเนาทะเบียนบ้าน',
         description: 'ทะเบียนบ้านผู้ยื่นขอ',
-        required: true
+        required: true,
     },
     COMPANY_REG: {
         slotId: 'company_reg',
@@ -73,7 +73,7 @@ const DOCUMENT_SLOTS = {
         description: 'กรณีนิติบุคคล (อายุไม่เกิน 6 เดือน)',
         required: false,
         conditionalRequired: true,
-        requiredFor: { applicantTypes: ['JURISTIC', 'COMMUNITY_ENTERPRISE'] }
+        requiredFor: { applicantTypes: ['JURISTIC', 'COMMUNITY_ENTERPRISE'] },
     },
     // NEW: DTAM Required Documents
     CRIMINAL_BG: {
@@ -81,7 +81,7 @@ const DOCUMENT_SLOTS = {
         name: 'ผลตรวจสอบประวัติอาชญากรรม',
         description: 'ใบรับรองความประพฤติจาก สตช. (อายุไม่เกิน 3 เดือน)',
         required: true,
-        warningText: '⚠️ กรมการแพทย์แผนไทยกำหนดให้ต้องมีผลตรวจประวัติอาชญากรรม'
+        warningText: '⚠️ กรมการแพทย์แผนไทยกำหนดให้ต้องมีผลตรวจประวัติอาชญากรรม',
     },
     LAND_CONSENT: {
         slotId: 'land_consent',
@@ -89,7 +89,7 @@ const DOCUMENT_SLOTS = {
         description: 'กรณีใช้ที่ดินของผู้อื่น (ไม่ใช่เจ้าของ/ไม่ใช่เช่า)',
         required: false,
         conditionalRequired: true,
-        requiredFor: { landOwnership: ['permitted_use'] }
+        requiredFor: { landOwnership: ['permitted_use'] },
     },
     GOV_SUPPORT: {
         slotId: 'gov_support',
@@ -97,7 +97,7 @@ const DOCUMENT_SLOTS = {
         description: 'กรณีวิสาหกิจชุมชน/บุคคลธรรมดาบางกรณี',
         required: false,
         conditionalRequired: true,
-        requiredFor: { applicantTypes: ['COMMUNITY_ENTERPRISE'] }
+        requiredFor: { applicantTypes: ['COMMUNITY_ENTERPRISE'] },
     },
 
     // ===== เอกสาร SOP =====
@@ -105,31 +105,31 @@ const DOCUMENT_SLOTS = {
         slotId: 'sop_cultivation',
         name: 'SOP การปลูก',
         description: 'มาตรฐานการปฏิบัติงานด้านการปลูก',
-        required: true
+        required: true,
     },
     SOP_HARVEST: {
         slotId: 'sop_harvest',
         name: 'SOP การเก็บเกี่ยว',
         description: 'มาตรฐานการเก็บเกี่ยว',
-        required: true
+        required: true,
     },
     SOP_PROCESSING: {
         slotId: 'sop_processing',
         name: 'SOP การแปรรูป',
         description: 'มาตรฐานการแปรรูป (ถ้ามี)',
-        required: false
+        required: false,
     },
     SOP_STORAGE: {
         slotId: 'sop_storage',
         name: 'SOP การเก็บรักษา',
         description: 'มาตรฐานการเก็บรักษาผลผลิต',
-        required: true
+        required: true,
     },
     SOP_PEST: {
         slotId: 'sop_pest',
         name: 'SOP การจัดการศัตรูพืช',
         description: 'การควบคุมศัตรูพืช/โรค',
-        required: true
+        required: true,
     },
 
     // ===== แผนผัง =====
@@ -137,13 +137,13 @@ const DOCUMENT_SLOTS = {
         slotId: 'site_map',
         name: 'แผนผังแปลงปลูก',
         description: 'แผนที่/แผนผังพื้นที่ปลูก',
-        required: true
+        required: true,
     },
     FACILITY_MAP: {
         slotId: 'facility_map',
         name: 'แผนผังอาคาร',
         description: 'แผนผังอาคารแปรรูป/เก็บ (ถ้ามี)',
-        required: false
+        required: false,
     },
 
     // ===== รูปถ่าย (แยกหมวด) =====
@@ -152,28 +152,28 @@ const DOCUMENT_SLOTS = {
         name: 'ภาพถ่ายภายนอก',
         description: 'ภาพถ่ายพื้นที่ภายนอก/แปลงปลูก',
         required: true,
-        category: 'photos'
+        category: 'photos',
     },
     PHOTOS_INTERIOR: {
         slotId: 'photos_interior',
         name: 'ภาพถ่ายภายใน',
         description: 'ภาพถ่ายภายในอาคาร/โรงเรือน',
         required: false,
-        category: 'photos'
+        category: 'photos',
     },
     PHOTOS_STORAGE: {
         slotId: 'photos_storage',
         name: 'ภาพถ่ายคลังเก็บ',
         description: 'ภาพถ่ายพื้นที่เก็บรักษาผลผลิต',
         required: false,
-        category: 'photos'
+        category: 'photos',
     },
     PHOTOS_SIGNAGE: {
         slotId: 'photos_signage',
         name: 'ภาพถ่ายป้าย',
         description: 'ป้ายชื่อสถานที่/ป้ายเตือน/ป้ายความปลอดภัย',
         required: true,
-        category: 'photos'
+        category: 'photos',
     },
     // Legacy photo slot (for backward compatibility)
     PHOTOS_SITE: {
@@ -181,7 +181,7 @@ const DOCUMENT_SLOTS = {
         name: 'ภาพถ่ายพื้นที่ (รวม)',
         description: 'ภาพถ่ายแปลงปลูกปัจจุบัน (deprecated - ใช้ photos แยกหมวดแทน)',
         required: false,
-        deprecated: true
+        deprecated: true,
     },
 
     // ===== เอกสารนิติบุคคล (เพิ่มเติม) =====
@@ -191,7 +191,7 @@ const DOCUMENT_SLOTS = {
         description: 'สำเนาหนังสือสำคัญแสดงการจดทะเบียน',
         required: false,
         conditionalRequired: true,
-        requiredFor: { applicantTypes: ['COMMUNITY_ENTERPRISE'] }
+        requiredFor: { applicantTypes: ['COMMUNITY_ENTERPRISE'] },
     },
     COOP_CERT: {
         slotId: 'coop_cert',
@@ -199,7 +199,7 @@ const DOCUMENT_SLOTS = {
         description: 'สำเนาหนังสือสำคัญสหกรณ์',
         required: false,
         conditionalRequired: true,
-        requiredFor: { applicantTypes: ['AGRICULTURAL_COOP'] }
+        requiredFor: { applicantTypes: ['AGRICULTURAL_COOP'] },
     },
 
     // ===== เอกสาร Renewal =====
@@ -209,7 +209,7 @@ const DOCUMENT_SLOTS = {
         description: 'รายงานผลการดำเนินการที่ผ่านมา (สำหรับขอต่ออายุ)',
         required: false,
         conditionalRequired: true,
-        requiredFor: { applicationTypes: ['RENEWAL'] }
+        requiredFor: { applicationTypes: ['RENEWAL'] },
     },
     PREVIOUS_CERT: {
         slotId: 'previous_cert',
@@ -217,7 +217,7 @@ const DOCUMENT_SLOTS = {
         description: 'สำเนาใบรับรอง GACP ที่หมดอายุ (สำหรับขอต่ออายุ)',
         required: false,
         conditionalRequired: true,
-        requiredFor: { applicationTypes: ['RENEWAL'] }
+        requiredFor: { applicationTypes: ['RENEWAL'] },
     },
 
     // ===== แบบฟอร์ม GACP =====
@@ -225,27 +225,27 @@ const DOCUMENT_SLOTS = {
         slotId: 'form_09',
         name: 'แบบฟอร์ม 09',
         description: 'แบบคำขอรับรอง GACP (Form 4.3)',
-        required: true
+        required: true,
     },
     FORM_10: {
         slotId: 'form_10',
         name: 'แบบฟอร์ม 10',
         description: 'แบบสรุปข้อมูลฟาร์ม',
-        required: true
+        required: true,
     },
     FORM_11: {
         slotId: 'form_11',
         name: 'แบบฟอร์ม 11 (Self Assessment)',
         description: 'แบบประเมินตนเอง (ตัวเลือก)',
-        required: false
-    }
+        required: false,
+    },
 };
 
 // Get all required slots for a plant type
 const getRequiredSlots = (plantType = 'general') => {
     return Object.values(DOCUMENT_SLOTS).filter(slot => {
-        if (!slot.required) return false;
-        if (slot.requiredFor?.plantTypes && !slot.requiredFor.plantTypes.includes(plantType?.toLowerCase())) return false;
+        if (!slot.required) {return false;}
+        if (slot.requiredFor?.plantTypes && !slot.requiredFor.plantTypes.includes(plantType?.toLowerCase())) {return false;}
         return true;
     });
 };
@@ -269,7 +269,7 @@ const getRequiredDocuments = (options = {}) => {
         objectives = [],
         applicantType = 'INDIVIDUAL',
         landOwnership = 'owned',
-        applicationType = 'NEW'
+        applicationType = 'NEW',
     } = options;
     const required = [];
 
@@ -287,7 +287,7 @@ const getRequiredDocuments = (options = {}) => {
         // Check objective-specific requirements (conditional)
         if (slot.conditionalRequired && slot.requiredFor?.objectives) {
             const matchingObjective = slot.requiredFor.objectives.some(obj =>
-                objectives.includes(obj) || objectives.includes(obj.toUpperCase())
+                objectives.includes(obj) || objectives.includes(obj.toUpperCase()),
             );
             if (matchingObjective) {
                 isRequired = true;
@@ -324,7 +324,7 @@ const getRequiredDocuments = (options = {}) => {
             required.push({
                 ...slot,
                 isRequired: true,
-                key
+                key,
             });
         }
     }
@@ -347,7 +347,7 @@ const getObjectiveWarnings = (objectives = []) => {
         warnings.push({
             slotId: 'license_bt13',
             text: '⚠️ คุณเลือก "แปรรูปผลิตภัณฑ์" - ต้องมีใบอนุญาต บท.13 แนบพร้อมเอกสาร',
-            canProceedWithout: false // ห้ามไปต่อถ้าไม่มี
+            canProceedWithout: false, // ห้ามไปต่อถ้าไม่มี
         });
     }
 
@@ -357,7 +357,7 @@ const getObjectiveWarnings = (objectives = []) => {
         warnings.push({
             slotId: 'license_bt16',
             text: '⚠️ คุณเลือก "ส่งออกต่างประเทศ" - ต้องมีใบอนุญาต บท.16 แนบพร้อมเอกสาร',
-            canProceedWithout: false
+            canProceedWithout: false,
         });
     }
 
@@ -376,12 +376,12 @@ const canProceedWithObjectives = (objectives = [], uploadedSlots = []) => {
         .filter(w => !w.canProceedWithout && !uploadedSlots.includes(w.slotId))
         .map(w => ({
             slotId: w.slotId,
-            message: w.text
+            message: w.text,
         }));
 
     return {
         canProceed: missingDocs.length === 0,
-        missingDocs
+        missingDocs,
     };
 };
 
@@ -392,7 +392,7 @@ module.exports = {
     requiresLicense,
     getRequiredDocuments,
     getObjectiveWarnings,
-    canProceedWithObjectives
+    canProceedWithObjectives,
 };
 
 

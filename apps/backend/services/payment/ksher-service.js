@@ -22,7 +22,7 @@ class KsherService {
     _sign(data) {
         // Mock Signature: Real logic requires sorting keys + signing
         // For production, implement exact logic from docs: Sort -> Key=Value -> Sign
-        if (this.appId === 'mch35689') return 'MOCK_SIGNATURE';
+        if (this.appId === 'mch35689') {return 'MOCK_SIGNATURE';}
 
         try {
             const sortedKeys = Object.keys(data).sort().filter(k => k !== 'sign');
@@ -53,7 +53,7 @@ class KsherService {
                 mch_redirect_url: redirectUrl,
                 mch_notify_url: notifyUrl,
                 nonce_str: crypto.randomBytes(16).toString('hex'),
-                time_stamp: Math.floor(Date.now() / 1000).toString()
+                time_stamp: Math.floor(Date.now() / 1000).toString(),
             };
 
             payload.sign = this._sign(payload);
@@ -69,8 +69,8 @@ class KsherService {
                         reserved_id: 'RES_' + orderId,
                         order_content: `https://gateway.ksher.com/mock_pay/${orderId}`,
                         // Generate a Google Chart QR for testing
-                        code_url: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://gateway.ksher.com/mock_pay/${orderId}`
-                    }
+                        code_url: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://gateway.ksher.com/mock_pay/${orderId}`,
+                    },
                 };
             }
 
@@ -78,7 +78,7 @@ class KsherService {
             const response = await fetch(`${this.apiUrl}/native_pay`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
             });
 
             const data = await response.json();
@@ -99,7 +99,7 @@ class KsherService {
      * Verify Webhook Signature
      */
     verifySignature(data, signature) {
-        if (this.appId === 'mch35689') return true;
+        if (this.appId === 'mch35689') {return true;}
         const calcSign = this._sign(data);
         return calcSign === signature;
     }

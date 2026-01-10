@@ -30,16 +30,16 @@ router.get('/stats', authenticateFarmer, async (req, res) => {
         const applicationsCount = await prisma.application.count({
             where: {
                 farmerId: userId,
-                isDeleted: false
-            }
+                isDeleted: false,
+            },
         });
 
         // 2. Count Farms (Establishments)
         const farmsCount = await prisma.farm.count({
             where: {
                 ownerId: userId,
-                isDeleted: false
-            }
+                isDeleted: false,
+            },
         });
 
         // 3. Count Unread Notifications (Notices)
@@ -49,8 +49,8 @@ router.get('/stats', authenticateFarmer, async (req, res) => {
             noticesCount = await prisma.notification.count({
                 where: {
                     userId: userId,
-                    isRead: false
-                }
+                    isRead: false,
+                },
             });
         } catch (e) {
             // Notification model might be different or not exist yet
@@ -62,8 +62,8 @@ router.get('/stats', authenticateFarmer, async (req, res) => {
             data: {
                 applications: applicationsCount,
                 farms: farmsCount,
-                notices: noticesCount
-            }
+                notices: noticesCount,
+            },
         });
 
     } catch (error) {
@@ -71,7 +71,7 @@ router.get('/stats', authenticateFarmer, async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to fetch dashboard statistics',
-            error: error.message
+            error: error.message,
         });
     }
 });

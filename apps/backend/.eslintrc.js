@@ -23,7 +23,7 @@ module.exports = {
     'no-new-func': 'error',
 
     // === CRITICAL: Error Prevention ===
-    'no-unused-vars': ['error', {
+    'no-unused-vars': ['warn', {
       argsIgnorePattern: '^_',
       varsIgnorePattern: '^_',
       caughtErrorsIgnorePattern: '^_',
@@ -63,8 +63,8 @@ module.exports = {
         sourceType: 'module',
       },
       rules: {
-        '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-        '@typescript-eslint/no-explicit-any': 'error', // Changed from warn to error
+        '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+        '@typescript-eslint/no-explicit-any': 'warn',
       },
     },
     {

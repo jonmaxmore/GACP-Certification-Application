@@ -78,7 +78,7 @@ class CertificateRepository {
     try {
       return await this.model.findOne({
         applicationId,
-        status: 'active'
+        status: 'active',
       }).sort({ issueDate: -1 });
     } catch (error) {
       logger.error('[CertificateRepository] findActiveByApplicationId error:', error);
@@ -99,10 +99,10 @@ class CertificateRepository {
         {
           $set: {
             status,
-            ...additionalData
-          }
+            ...additionalData,
+          },
         },
-        { new: true }
+        { new: true },
       );
     } catch (error) {
       logger.error('[CertificateRepository] updateStatus error:', error);

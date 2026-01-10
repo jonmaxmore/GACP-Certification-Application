@@ -145,7 +145,7 @@ function thaiIdValidationMiddleware(fieldName = 'idCard') {
             return res.status(400).json({
                 success: false,
                 error: 'กรุณากรอกเลขบัตรประชาชน',
-                field: fieldName
+                field: fieldName,
             });
         }
 
@@ -155,7 +155,7 @@ function thaiIdValidationMiddleware(fieldName = 'idCard') {
             return res.status(400).json({
                 success: false,
                 errors: result.errors,
-                field: fieldName
+                field: fieldName,
             });
         }
 
@@ -172,5 +172,5 @@ module.exports = {
     getProvinceCode,
     getProvinceName,
     thaiIdValidationMiddleware,
-    PROVINCE_CODES
+    PROVINCE_CODES,
 };

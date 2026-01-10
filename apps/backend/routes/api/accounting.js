@@ -22,7 +22,7 @@ router.get('/dashboard', authenticateDTAM, async (req, res) => {
             invoicesPaid,
             quotesToday,
             invoicesToday,
-            revenueResult
+            revenueResult,
         ] = await Promise.all([
             prisma.quote.count({ where: { isDeleted: false } }),
             prisma.quote.count({ where: { status: { in: ['pending', 'draft', 'sent'] }, isDeleted: false } }),
@@ -37,8 +37,8 @@ router.get('/dashboard', authenticateDTAM, async (req, res) => {
 
             prisma.invoice.aggregate({
                 _sum: { totalAmount: true },
-                where: { status: 'paid', isDeleted: false }
-            })
+                where: { status: 'paid', isDeleted: false },
+            }),
         ]);
 
         res.json({
@@ -48,19 +48,19 @@ router.get('/dashboard', authenticateDTAM, async (req, res) => {
                     total: quotesTotal,
                     pending: quotesPending,
                     accepted: quotesAccepted,
-                    today: quotesToday
+                    today: quotesToday,
                 },
                 invoices: {
                     total: invoicesTotal,
                     pending: invoicesPending,
                     paid: invoicesPaid,
-                    today: invoicesToday
+                    today: invoicesToday,
                 },
                 revenue: {
                     total: revenueResult._sum.totalAmount || 0,
-                    currency: 'THB'
-                }
-            }
+                    currency: 'THB',
+                },
+            },
         });
 
     } catch (error) {

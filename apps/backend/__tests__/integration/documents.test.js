@@ -113,8 +113,9 @@ describe('Input Sanitization', () => {
     it('should sanitize filenames with path traversal attempts', () => {
         // Test the sanitization logic
         const sanitizeFilename = (filename) => {
-            if (!filename) return 'document';
+            if (!filename) { return 'document'; }
             let sanitized = filename.replace(/\.\./g, '');
+            // eslint-disable-next-line no-control-regex
             sanitized = sanitized.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_');
             sanitized = sanitized.substring(0, 200);
             return sanitized || 'document';
@@ -136,9 +137,9 @@ describe('Magic Bytes Validation', () => {
 
         const validateMagicBytes = (buffer, mimeType) => {
             const expected = MAGIC_BYTES[mimeType];
-            if (!expected) return true;
+            if (!expected) { return true; }
             for (let i = 0; i < expected.length; i++) {
-                if (buffer[i] !== expected[i]) return false;
+                if (buffer[i] !== expected[i]) { return false; }
             }
             return true;
         };

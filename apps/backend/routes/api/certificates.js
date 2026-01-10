@@ -34,19 +34,19 @@ router.get('/', authenticateStaff, async (req, res) => {
         const certificates = await prisma.certificate.findMany({
             where: { isDeleted: false },
             orderBy: { issuedDate: 'desc' },
-            take: 100
+            take: 100,
         });
 
         res.json({
             success: true,
             count: certificates.length,
-            data: certificates
+            data: certificates,
         });
     } catch (error) {
         logger.error('[Certificates] getAll error:', error);
         res.status(500).json({
             success: false,
-            error: 'Failed to fetch certificates'
+            error: 'Failed to fetch certificates',
         });
     }
 });
@@ -56,7 +56,7 @@ router.get('/my', authenticateFarmer, async (req, res) => {
 
         const certificates = await prisma.certificate.findMany({
             where: { userId, isDeleted: false },
-            orderBy: { issuedDate: 'desc' }
+            orderBy: { issuedDate: 'desc' },
         });
 
         // Check expiry
@@ -75,19 +75,19 @@ router.get('/my', authenticateFarmer, async (req, res) => {
                 issuedDate: cert.issuedDate,
                 expiryDate: cert.expiryDate,
                 status: status,
-                qrCode: cert.qrData // Frontend expects qrCode or qrData
+                qrCode: cert.qrData, // Frontend expects qrCode or qrData
             };
         });
 
         res.json({
             success: true,
-            data: formattedCerts
+            data: formattedCerts,
         });
     } catch (error) {
         logger.error('[Certificates] getMy error:', error);
         res.status(500).json({
             success: false,
-            error: 'Failed to fetch certificates'
+            error: 'Failed to fetch certificates',
         });
     }
 });
@@ -105,31 +105,31 @@ router.get('/:id', authenticateFarmer, async (req, res) => {
             where: {
                 id,
                 userId, // Security: Ensure ownership
-                isDeleted: false
+                isDeleted: false,
             },
             include: {
                 application: {
-                    select: { applicationNumber: true }
-                }
-            }
+                    select: { applicationNumber: true },
+                },
+            },
         });
 
         if (!certificate) {
             return res.status(404).json({
                 success: false,
-                error: 'Certificate not found'
+                error: 'Certificate not found',
             });
         }
 
         res.json({
             success: true,
-            data: certificate
+            data: certificate,
         });
     } catch (error) {
         logger.error('[Certificates] getById error:', error);
         res.status(500).json({
             success: false,
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -143,14 +143,14 @@ router.get('/verify/:certificateNumber', async (req, res) => {
         const { certificateNumber } = req.params;
 
         const certificate = await prisma.certificate.findUnique({
-            where: { certificateNumber }
+            where: { certificateNumber },
         });
 
         if (!certificate || certificate.isDeleted) {
             return res.json({
                 success: false,
                 valid: false,
-                error: 'Certificate not found'
+                error: 'Certificate not found',
             });
         }
 
@@ -167,15 +167,15 @@ router.get('/verify/:certificateNumber', async (req, res) => {
                 plantType: certificate.plantType || certificate.cropType,
                 issuedDate: certificate.issuedDate,
                 expiryDate: certificate.expiryDate,
-                status: isExpired ? 'EXPIRED' : certificate.status
-            }
+                status: isExpired ? 'EXPIRED' : certificate.status,
+            },
         });
     } catch (error) {
         logger.error('[Certificates] verify error:', error);
         res.status(500).json({
             success: false,
             valid: false,
-            error: error.message
+            error: error.message,
         });
     }
 });

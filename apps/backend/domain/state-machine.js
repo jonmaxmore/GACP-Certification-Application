@@ -21,7 +21,7 @@ class ApplicationStateMachine {
             rejected: ['draft'], // Allow restart?
             expired: ['draft'], // Allow restart?
             revoked: ['draft'],
-            deleted: []
+            deleted: [],
         };
     }
 
@@ -33,7 +33,7 @@ class ApplicationStateMachine {
      */
     isValidTransition(fromState, toState) {
         // Allow staying in same state (updates)
-        if (fromState === toState) return true;
+        if (fromState === toState) {return true;}
 
         // Allow admin override or force updates (simplified for now)
         // In a real system, we might want stricter rules
@@ -42,7 +42,7 @@ class ApplicationStateMachine {
         const validNextStates = this.transitions[fromState] || [];
 
         // For testing/debugging, we might want to be permissive if state is unknown
-        if (!this.transitions[fromState]) return true;
+        if (!this.transitions[fromState]) {return true;}
 
         return validNextStates.includes(toState);
     }

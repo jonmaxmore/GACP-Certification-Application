@@ -8,7 +8,7 @@ const {
     getRequiredSlots,
     getAllSlotIds,
     requiresLicense,
-    getRequiredDocuments
+    getRequiredDocuments,
 } = require('../constants/document-slots');
 
 describe('Document Slots', () => {
@@ -109,7 +109,7 @@ describe('Document Slots', () => {
         test('should return array of required documents', () => {
             const docs = getRequiredDocuments({
                 plantType: 'cannabis',
-                applicantType: 'INDIVIDUAL'
+                applicantType: 'INDIVIDUAL',
             });
             expect(Array.isArray(docs)).toBe(true);
         });
@@ -117,7 +117,7 @@ describe('Document Slots', () => {
         test('should include BT.11 for cannabis', () => {
             const docs = getRequiredDocuments({
                 plantType: 'cannabis',
-                applicantType: 'INDIVIDUAL'
+                applicantType: 'INDIVIDUAL',
             });
             const hasBt11 = docs.some(d => d.slotId === 'license_bt11');
             expect(hasBt11).toBe(true);
@@ -127,7 +127,7 @@ describe('Document Slots', () => {
             const docs = getRequiredDocuments({
                 plantType: 'cannabis',
                 applicantType: 'INDIVIDUAL',
-                objectives: ['PROCESSING']
+                objectives: ['PROCESSING'],
             });
             const hasBt13 = docs.some(d => d.slotId === 'license_bt13');
             expect(hasBt13).toBe(true);
@@ -136,7 +136,7 @@ describe('Document Slots', () => {
         test('should include company_reg for JURISTIC applicant', () => {
             const docs = getRequiredDocuments({
                 plantType: 'cannabis',
-                applicantType: 'JURISTIC'
+                applicantType: 'JURISTIC',
             });
             const hasCompanyReg = docs.some(d => d.slotId === 'company_reg');
             expect(hasCompanyReg).toBe(true);
@@ -146,7 +146,7 @@ describe('Document Slots', () => {
             const docs = getRequiredDocuments({
                 plantType: 'cannabis',
                 applicantType: 'INDIVIDUAL',
-                landOwnership: 'permitted_use'
+                landOwnership: 'permitted_use',
             });
             const hasLandConsent = docs.some(d => d.slotId === 'land_consent');
             expect(hasLandConsent).toBe(true);

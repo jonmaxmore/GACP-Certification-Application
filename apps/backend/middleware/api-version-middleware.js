@@ -35,8 +35,8 @@ function compareVersions(a, b) {
     const partsB = b.split('.').map(Number);
 
     for (let i = 0; i < 3; i++) {
-        if ((partsA[i] || 0) < (partsB[i] || 0)) return -1;
-        if ((partsA[i] || 0) > (partsB[i] || 0)) return 1;
+        if ((partsA[i] || 0) < (partsB[i] || 0)) {return -1;}
+        if ((partsA[i] || 0) > (partsB[i] || 0)) {return 1;}
     }
     return 0;
 }
@@ -52,7 +52,7 @@ function apiVersionMiddleware(req, res, next) {
     // 2. Check for deprecated endpoint
     const requestPath = req.originalUrl || req.url;
     const deprecated = API_VERSION_CONFIG.deprecatedEndpoints.find(
-        ep => requestPath.startsWith(ep.path)
+        ep => requestPath.startsWith(ep.path),
     );
 
     if (deprecated) {

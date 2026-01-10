@@ -26,24 +26,24 @@ router.get('/', async (req, res) => {
         const { farmId, status, speciesId } = req.query;
 
         const where = {};
-        if (farmId) where.farmId = farmId;
-        if (status) where.status = status;
-        if (speciesId) where.speciesId = speciesId;
+        if (farmId) {where.farmId = farmId;}
+        if (status) {where.status = status;}
+        if (speciesId) {where.speciesId = speciesId;}
 
         const batches = await prisma.harvestBatch.findMany({
             where,
             include: {
                 species: {
-                    select: { id: true, thaiName: true, englishName: true }
-                }
+                    select: { id: true, thaiName: true, englishName: true },
+                },
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
         });
 
         res.json({
             success: true,
             count: batches.length,
-            data: batches
+            data: batches,
         });
     } catch (error) {
         console.error('[HarvestBatch API] Error:', error);
@@ -64,20 +64,20 @@ router.get('/:id', async (req, res) => {
         const batch = await prisma.harvestBatch.findUnique({
             where: { id },
             include: {
-                species: true
-            }
+                species: true,
+            },
         });
 
         if (!batch) {
             return res.status(404).json({
                 success: false,
-                error: 'Harvest batch not found'
+                error: 'Harvest batch not found',
             });
         }
 
         res.json({
             success: true,
-            data: batch
+            data: batch,
         });
     } catch (error) {
         console.error('[HarvestBatch API] Error:', error);
@@ -103,16 +103,16 @@ router.get('/lot/:batchNumber', async (req, res) => {
                         id: true,
                         thaiName: true,
                         englishName: true,
-                        scientificName: true
-                    }
-                }
-            }
+                        scientificName: true,
+                    },
+                },
+            },
         });
 
         if (!batch) {
             return res.status(404).json({
                 success: false,
-                error: 'Lot number not found'
+                error: 'Lot number not found',
             });
         }
 
@@ -125,8 +125,8 @@ router.get('/lot/:batchNumber', async (req, res) => {
                 harvestDate: batch.harvestDate,
                 cultivationType: batch.cultivationType,
                 status: batch.status,
-                plant: batch.species
-            }
+                plant: batch.species,
+            },
         });
     } catch (error) {
         console.error('[HarvestBatch API] Error:', error);
@@ -151,21 +151,21 @@ router.post('/', async (req, res) => {
             plotName,
             plotArea,
             areaUnit = 'rai',
-            notes
+            notes,
         } = req.body;
 
         // Validate required fields
         if (!farmId || !speciesId || !plantingDate) {
             return res.status(400).json({
                 success: false,
-                error: 'farmId, speciesId, and plantingDate are required'
+                error: 'farmId, speciesId, and plantingDate are required',
             });
         }
 
         // Generate lot number
         const year = new Date().getFullYear();
         const count = await prisma.harvestBatch.count({
-            where: { farmId }
+            where: { farmId },
         });
         const batchNumber = `LOT-${farmId.substring(0, 8).toUpperCase()}-${year}-${String(count + 1).padStart(3, '0')}`;
 
@@ -181,17 +181,17 @@ router.post('/', async (req, res) => {
                 plotArea: plotArea ? parseFloat(plotArea) : null,
                 areaUnit,
                 notes,
-                status: 'GROWING'
+                status: 'GROWING',
             },
             include: {
-                species: { select: { thaiName: true } }
-            }
+                species: { select: { thaiName: true } },
+            },
         });
 
         res.status(201).json({
             success: true,
             message: 'Harvest batch created successfully',
-            data: batch
+            data: batch,
         });
     } catch (error) {
         console.error('[HarvestBatch API] Error:', error);
@@ -215,7 +215,7 @@ router.put('/:id', async (req, res) => {
         if (!existing) {
             return res.status(404).json({
                 success: false,
-                error: 'Harvest batch not found'
+                error: 'Harvest batch not found',
             });
         }
 
@@ -232,13 +232,13 @@ router.put('/:id', async (req, res) => {
 
         const batch = await prisma.harvestBatch.update({
             where: { id },
-            data: updateData
+            data: updateData,
         });
 
         res.json({
             success: true,
             message: 'Harvest batch updated successfully',
-            data: batch
+            data: batch,
         });
     } catch (error) {
         console.error('[HarvestBatch API] Error:', error);
@@ -262,14 +262,14 @@ router.post('/:id/harvest', async (req, res) => {
         if (!existing) {
             return res.status(404).json({
                 success: false,
-                error: 'Harvest batch not found'
+                error: 'Harvest batch not found',
             });
         }
 
         if (existing.status === 'HARVESTED') {
             return res.status(400).json({
                 success: false,
-                error: 'This batch has already been harvested'
+                error: 'This batch has already been harvested',
             });
         }
 
@@ -281,14 +281,14 @@ router.post('/:id/harvest', async (req, res) => {
                 yieldUnit,
                 qualityGrade,
                 status: 'HARVESTED',
-                notes: notes || existing.notes
-            }
+                notes: notes || existing.notes,
+            },
         });
 
         res.json({
             success: true,
             message: 'Harvest recorded successfully',
-            data: batch
+            data: batch,
         });
     } catch (error) {
         console.error('[HarvestBatch API] Error:', error);
@@ -309,7 +309,7 @@ router.get('/stats/:farmId', async (req, res) => {
         const [total, growing, harvested] = await Promise.all([
             prisma.harvestBatch.count({ where: { farmId } }),
             prisma.harvestBatch.count({ where: { farmId, status: 'GROWING' } }),
-            prisma.harvestBatch.count({ where: { farmId, status: 'HARVESTED' } })
+            prisma.harvestBatch.count({ where: { farmId, status: 'HARVESTED' } }),
         ]);
 
         res.json({
@@ -319,8 +319,8 @@ router.get('/stats/:farmId', async (req, res) => {
                 totalBatches: total,
                 growing,
                 harvested,
-                pending: total - growing - harvested
-            }
+                pending: total - growing - harvested,
+            },
         });
     } catch (error) {
         console.error('[HarvestBatch API] Error:', error);

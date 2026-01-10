@@ -15,7 +15,7 @@ class AuthController {
 
             const userData = {
                 ...req.body,
-                idCardImage // Add image path to body
+                idCardImage, // Add image path to body
             };
 
             const { accountType = 'INDIVIDUAL' } = req.body;
@@ -49,10 +49,10 @@ class AuthController {
 
             if (!isValid) {
                 // Cleanup file if validation fails early
-                if (req.file && req.file.path) fs.unlink(req.file.path, () => { });
+                if (req.file && req.file.path) {fs.unlink(req.file.path, () => { });}
                 return res.status(400).json({
                     success: false,
-                    error: errorMessage
+                    error: errorMessage,
                 });
             }
 
@@ -66,13 +66,13 @@ class AuthController {
                 'SUCCESS',
                 req.ip || req.connection?.remoteAddress,
                 req.headers['user-agent'],
-                { accountType }
+                { accountType },
             );
 
             res.status(201).json({
                 success: true,
                 message: 'ลงทะเบียนสำเร็จ',
-                data: { user }
+                data: { user },
             });
 
         } catch (error) {
@@ -81,7 +81,7 @@ class AuthController {
             // Cleanup Orphan File
             if (req.file && req.file.path) {
                 fs.unlink(req.file.path, (err) => {
-                    if (err) console.error('[AuthController] Cleanup Failed:', err.message);
+                    if (err) {console.error('[AuthController] Cleanup Failed:', err.message);}
                 });
             }
 
@@ -110,7 +110,7 @@ class AuthController {
 
             res.status(400).json({
                 success: false,
-                error: errorMessage
+                error: errorMessage,
             });
         }
     }
@@ -125,7 +125,7 @@ class AuthController {
             if (!loginId || !password) {
                 return res.status(400).json({
                     success: false,
-                    error: 'Identifier and password are required'
+                    error: 'Identifier and password are required',
                 });
             }
 
@@ -157,10 +157,10 @@ class AuthController {
                     // Keep tokens for mobile apps
                     tokens: {
                         accessToken: result.token,
-                        refreshToken: result.refreshToken
+                        refreshToken: result.refreshToken,
                     },
-                    user: result.user
-                }
+                    user: result.user,
+                },
             });
 
             // 🔒 ISO 27799: Log successful authentication
@@ -171,7 +171,7 @@ class AuthController {
                 'SUCCESS',
                 req.ip || req.connection?.remoteAddress,
                 req.headers['user-agent'],
-                { accountType, identifier: loginId?.substring(0, 4) + '****' }
+                { accountType, identifier: loginId?.substring(0, 4) + '****' },
             );
 
         } catch (error) {
@@ -186,7 +186,7 @@ class AuthController {
                     AuditCategory.AUTH,
                     AuditSeverity.WARNING,
                     'Login failed',
-                    { error: error.message }
+                    { error: error.message },
                 );
             } catch (auditError) {
                 console.error('[AuthController] Audit Log Error:', auditError.message);
@@ -198,7 +198,7 @@ class AuthController {
                 error.message === 'Identifier and password are required') {
                 return res.status(401).json({
                     success: false,
-                    error: error.message
+                    error: error.message,
                 });
             }
 
@@ -218,7 +218,7 @@ class AuthController {
             const user = await AuthService.getProfile(req.user.id);
             res.status(200).json({
                 success: true,
-                data: { user }
+                data: { user },
             });
         } catch (error) {
             res.status(500).json({ success: false, error: 'Server Error' });
@@ -238,7 +238,7 @@ class AuthController {
                 return res.status(400).json({
                     success: false,
                     error: 'Identifier is required',
-                    available: false
+                    available: false,
                 });
             }
 
@@ -251,14 +251,14 @@ class AuthController {
                     return res.status(400).json({
                         success: false,
                         error: 'ต้องมี 13 หลัก',
-                        available: false
+                        available: false,
                     });
                 }
                 if (!/^\d+$/.test(cleanId)) {
                     return res.status(400).json({
                         success: false,
                         error: 'ต้องเป็นตัวเลขเท่านั้น',
-                        available: false
+                        available: false,
                     });
                 }
             }
@@ -282,7 +282,7 @@ class AuthController {
                 return res.status(200).json({
                     success: true,
                     available: false,
-                    error: errorMessage
+                    error: errorMessage,
                 });
             }
 
@@ -290,7 +290,7 @@ class AuthController {
             res.status(200).json({
                 success: true,
                 available: true,
-                message: 'หมายเลขนี้สามารถใช้ลงทะเบียนได้'
+                message: 'หมายเลขนี้สามารถใช้ลงทะเบียนได้',
             });
 
         } catch (error) {
@@ -298,8 +298,28 @@ class AuthController {
             res.status(500).json({
                 success: false,
                 error: 'Server Error',
-                available: false
+                available: false,
             });
+        }
+    }
+
+    async updateProfile(req, res) {
+        try {
+            const userId = req.user.id;
+            const data = req.body;
+
+            // Allow updating valid fields
+            const updateData = {};
+            if (data.firstName) {updateData.firstName = data.firstName;}
+            if (data.lastName) {updateData.lastName = data.lastName;}
+            if (data.phoneNumber) {updateData.phoneNumber = data.phoneNumber;}
+
+            const user = await AuthService.updateProfile(userId, updateData);
+
+            res.json({ success: true, data: user });
+        } catch (error) {
+            console.error('[AuthController] Update Profile Error:', error.message);
+            res.status(500).json({ success: false, error: 'Failed to update profile' });
         }
     }
 }

@@ -23,7 +23,7 @@ class NotificationRepository {
      */
     async findByUserId(userId, { isRead, limit = 50 } = {}) {
         const where = { userId };
-        if (typeof isRead === 'boolean') where.isRead = isRead;
+        if (typeof isRead === 'boolean') {where.isRead = isRead;}
 
         return prisma.notification.findMany({
             where,

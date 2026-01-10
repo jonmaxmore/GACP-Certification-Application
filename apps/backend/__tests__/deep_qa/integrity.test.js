@@ -15,11 +15,11 @@ describe('Deep QA: 1.2 Data Integrity (Controller Logic)', () => {
     beforeAll(() => {
         officerToken = jwt.sign(
             { id: new mongoose.Types.ObjectId(), role: 'OFFICER', email: 'officer@test.com' },
-            SECRET, { expiresIn: '1h' }
+            SECRET, { expiresIn: '1h' },
         );
         farmerToken = jwt.sign(
             { id: new mongoose.Types.ObjectId(), role: 'FARMER', email: 'farmer@test.com' },
-            SECRET, { expiresIn: '1h' }
+            SECRET, { expiresIn: '1h' },
         );
     });
 
@@ -30,7 +30,7 @@ describe('Deep QA: 1.2 Data Integrity (Controller Logic)', () => {
             Application.findById.mockResolvedValue({
                 _id: 'mock-app-id',
                 status: 'DRAFT',
-                save: jest.fn()
+                save: jest.fn(),
             });
 
             const res = await request(app)
@@ -45,7 +45,7 @@ describe('Deep QA: 1.2 Data Integrity (Controller Logic)', () => {
             Application.findById.mockResolvedValue({
                 _id: 'mock-app-id',
                 status: 'DRAFT',
-                save: jest.fn()
+                save: jest.fn(),
             });
 
             const res = await request(app)
@@ -60,7 +60,7 @@ describe('Deep QA: 1.2 Data Integrity (Controller Logic)', () => {
             Application.findById.mockResolvedValue({
                 _id: 'mock-app-id',
                 status: 'DRAFT',
-                save: jest.fn()
+                save: jest.fn(),
             });
 
             const res = await request(app)

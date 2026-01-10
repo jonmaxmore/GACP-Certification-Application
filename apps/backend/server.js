@@ -21,6 +21,8 @@ const swaggerSpec = require('./config/swagger');
 // Import Modules
 const apiRoutes = require('./routes/api');
 const uploadsRouter = require('./routes/api/uploads');
+const pricingRouter = require('./routes/api/pricing');
+const plotsRouter = require('./routes/api/plots');
 
 const app = express();
 const port = process.env.PORT || 3000; // NOTE: Database and Redis connection moved to after app.listen() for graceful degradation
@@ -40,7 +42,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 // Mount Routes
 // Mount Routes
 app.use('/api/uploads', uploadsRouter); // Generic uploads
+app.use('/api/pricing', pricingRouter);
 app.use('/api', apiRoutes); // Unified API routes (no /v2 prefix)
+app.use('/api', plotsRouter); // [NEW] Mount Plot Routes
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -56,13 +60,13 @@ app.get(['/health', '/api/health'], async (req, res) => {
             database: dbHealth,
             redis: {
                 connected: redisService.isAvailable(),
-            }
+            },
         });
     } catch (error) {
         res.status(503).json({
             status: 'ERROR',
             timestamp: new Date(),
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -74,7 +78,7 @@ app.use((err, req, res, next) => {
         success: false,
         message: 'Internal Server Error',
         error: err.message, // ALWAYS SHOW
-        stack: err.stack // ALWAYS SHOW
+        stack: err.stack, // ALWAYS SHOW
     });
 });
 

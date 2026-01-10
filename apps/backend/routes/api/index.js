@@ -62,6 +62,7 @@ router.use('/criteria', require('./criteria'));
 router.use('/standards', require('./standards'));
 router.use('/farms', farmsRouter);
 router.use('/dashboard', dashboardRouter);
+router.use('/admin', require('./admin')); // Admin CMS Routes
 
 // Health check with version info
 router.get('/health', (req, res) => {
@@ -69,7 +70,7 @@ router.get('/health', (req, res) => {
     success: true,
     version: '2.0.0',
     database: 'postgresql',
-    message: 'V2 API is running'
+    message: 'V2 API is running',
   });
 });
 
@@ -79,7 +80,7 @@ router.get('/version', (req, res) => {
     success: true,
     version: '2.0.0',
     minClientVersion: '1.0.0',
-    features: ['notifications', 'tickets', 'kyc', 'config', 'plants', 'harvest-batches', 'validation']
+    features: ['notifications', 'tickets', 'kyc', 'config', 'plants', 'harvest-batches', 'validation'],
   });
 });
 

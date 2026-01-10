@@ -144,7 +144,7 @@ describe('PhotoUploadService', () => {
             // Bangkok to Chiang Mai ~582km (straight line)
             const distance = PhotoUploadService.calculateDistance(
                 13.7563, 100.5018, // Bangkok
-                18.7883, 98.9853   // Chiang Mai
+                18.7883, 98.9853,   // Chiang Mai
             );
 
             expect(distance).toBeGreaterThan(580000);
@@ -154,7 +154,7 @@ describe('PhotoUploadService', () => {
         it('should return 0 for same location', () => {
             const distance = PhotoUploadService.calculateDistance(
                 13.7563, 100.5018,
-                13.7563, 100.5018
+                13.7563, 100.5018,
             );
 
             expect(distance).toBe(0);

@@ -50,7 +50,7 @@ class ZoomService {
                         'Authorization': `Basic ${credentials}`,
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                }
+                },
             );
 
             this.accessToken = response.data.access_token;

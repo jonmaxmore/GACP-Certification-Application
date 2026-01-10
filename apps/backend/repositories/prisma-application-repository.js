@@ -70,7 +70,7 @@ class ApplicationRepository {
         const skip = (page - 1) * limit;
 
         const where = { farmerId, isDeleted: false };
-        if (status) where.status = status;
+        if (status) {where.status = status;}
 
         return prisma.application.findMany({
             where,
@@ -123,8 +123,8 @@ class ApplicationRepository {
         const skip = (page - 1) * limit;
         const where = { isDeleted: false };
 
-        if (status) where.status = status;
-        if (serviceType) where.serviceType = serviceType;
+        if (status) {where.status = status;}
+        if (serviceType) {where.serviceType = serviceType;}
 
         const [applications, total] = await Promise.all([
             prisma.application.findMany({

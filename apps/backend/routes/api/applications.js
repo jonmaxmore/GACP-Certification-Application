@@ -17,7 +17,7 @@ const authenticateFarmer = (req, res, next) => {
     console.error('CRITICAL: authenticateFarmer is not a function');
     return res.status(500).json({
         success: false,
-        error: 'Authentication system error'
+        error: 'Authentication system error',
     });
 };
 
@@ -38,14 +38,14 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
             applicantData, locationData, productionData,
             documents,
             submissionDate, requestedInspectionDate,
-            estimatedProcessingDays, estimatedFee
+            estimatedProcessingDays, estimatedFee,
         } = req.body;
 
         // Validate required fields
         if (!plantId || !serviceType) {
             return res.status(400).json({
                 success: false,
-                error: 'กรุณากรอกข้อมูลพืชและประเภทบริการ'
+                error: 'กรุณากรอกข้อมูลพืชและประเภทบริการ',
             });
         }
 
@@ -53,8 +53,8 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
         const existingDraft = await prisma.application.findFirst({
             where: {
                 farmerId,
-                status: 'DRAFT'
-            }
+                status: 'DRAFT',
+            },
         });
 
         // Generate application number (unique globally)
@@ -83,8 +83,8 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
                 estimatedFee,
                 estimatedProcessingDays,
                 requestedInspectionDate,
-                submissionDate: new Date()
-            }
+                submissionDate: new Date(),
+            },
         };
 
         let application;
@@ -93,12 +93,12 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
             // Update existing draft
             application = await prisma.application.update({
                 where: { id: existingDraft.id },
-                data: applicationData
+                data: applicationData,
             });
         } else {
             // Create new application
             application = await prisma.application.create({
-                data: applicationData
+                data: applicationData,
             });
         }
 
@@ -109,8 +109,8 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
             data: {
                 _id: application.id,
                 applicationNumber: application.applicationNumber,
-                status: application.status
-            }
+                status: application.status,
+            },
         });
 
     } catch (error) {
@@ -123,8 +123,8 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
             debug: process.env.NODE_ENV !== 'production' ? {
                 message: error.message,
                 code: error.code,
-                meta: error.meta
-            } : undefined
+                meta: error.meta,
+            } : undefined,
         });
     }
 });
@@ -140,17 +140,17 @@ router.get('/draft', authenticateFarmer, async (req, res) => {
         const draft = await prisma.application.findFirst({
             where: {
                 farmerId,
-                status: 'DRAFT'
+                status: 'DRAFT',
             },
             orderBy: {
-                createdAt: 'desc'
-            }
+                createdAt: 'desc',
+            },
         });
 
         if (!draft) {
             return res.json({
                 success: true,
-                data: null
+                data: null,
             });
         }
 
@@ -170,15 +170,15 @@ router.get('/draft', authenticateFarmer, async (req, res) => {
                 documents: draft.documents ? JSON.parse(draft.documents) : [],
                 estimatedFee: draft.estimatedFee,
                 status: draft.status,
-                createdAt: draft.createdAt
-            }
+                createdAt: draft.createdAt,
+            },
         });
 
     } catch (error) {
         console.error('[Applications Draft GET] Error:', error);
         res.status(500).json({
             success: false,
-            error: 'ไม่สามารถดึงข้อมูลคำขอได้'
+            error: 'ไม่สามารถดึงข้อมูลคำขอได้',
         });
     }
 });
@@ -194,7 +194,7 @@ router.get('/', authenticateFarmer, async (req, res) => {
         const applications = await prisma.application.findMany({
             where: { farmerId },
             orderBy: { createdAt: 'desc' },
-            take: 50
+            take: 50,
         });
 
         res.json({
@@ -207,15 +207,15 @@ router.get('/', authenticateFarmer, async (req, res) => {
                 status: app.status,
                 estimatedFee: app.estimatedFee,
                 createdAt: app.createdAt,
-                submittedAt: app.submittedAt
-            }))
+                submittedAt: app.submittedAt,
+            })),
         });
 
     } catch (error) {
         console.error('[Applications List] Error:', error);
         res.status(500).json({
             success: false,
-            error: 'ไม่สามารถดึงรายการคำขอได้'
+            error: 'ไม่สามารถดึงรายการคำขอได้',
         });
     }
 });
@@ -232,10 +232,10 @@ router.get('/my', authenticateFarmer, async (req, res) => {
 
         const applications = await prisma.application.findMany({
             where: {
-                farmerId
+                farmerId,
             },
             orderBy: { createdAt: 'desc' },
-            take: 50
+            take: 50,
         });
 
         res.json({
@@ -248,15 +248,15 @@ router.get('/my', authenticateFarmer, async (req, res) => {
                 status: app.status,
                 estimatedFee: app.estimatedFee,
                 createdAt: app.createdAt,
-                submittedAt: app.submittedAt
-            }))
+                submittedAt: app.submittedAt,
+            })),
         });
 
     } catch (error) {
         console.error('[Applications My] Error:', error);
         res.status(500).json({
             success: false,
-            error: 'ไม่สามารถดึงรายการคำขอได้'
+            error: 'ไม่สามารถดึงรายการคำขอได้',
         });
     }
 });
@@ -274,12 +274,12 @@ router.get('/pending-reviews', authenticateDTAM, async (req, res) => {
         const applications = await prisma.application.findMany({
             where: {
                 status: {
-                    in: ['SUBMITTED', 'PENDING_REVIEW', 'DRAFT']
+                    in: ['SUBMITTED', 'PENDING_REVIEW', 'DRAFT'],
                 },
-                isDeleted: false
+                isDeleted: false,
             },
             orderBy: { createdAt: 'desc' },
-            take: 50
+            take: 50,
         });
 
         res.json({ success: true, data: applications });
@@ -307,9 +307,9 @@ router.get('/stats', authenticateDTAM, async (req, res) => {
                 where: {
                     updatedAt: { gte: today, lt: tomorrow },
                     status: { notIn: ['DRAFT', 'SUBMITTED'] },
-                    isDeleted: false
-                }
-            })
+                    isDeleted: false,
+                },
+            }),
         ]);
 
         res.json({
@@ -319,14 +319,14 @@ router.get('/stats', authenticateDTAM, async (req, res) => {
                 pending: pending || 0,
                 approved: approved || 0,
                 revenue: revenue._sum?.totalAmount || 0,
-                todayChecked: todayChecked || 0
-            }
+                todayChecked: todayChecked || 0,
+            },
         });
     } catch (error) {
         console.error('[Applications] getStats error:', error);
         res.json({
             success: true,
-            data: { total: 0, pending: 0, approved: 0, revenue: 0, todayChecked: 0 }
+            data: { total: 0, pending: 0, approved: 0, revenue: 0, todayChecked: 0 },
         });
     }
 });
@@ -337,10 +337,10 @@ router.get('/auditor/assignments', authenticateDTAM, async (req, res) => {
         const applications = await prisma.application.findMany({
             where: {
                 status: { in: ['AUDIT_PENDING', 'AUDIT_SCHEDULED'] },
-                isDeleted: false
+                isDeleted: false,
             },
             orderBy: { createdAt: 'desc' },
-            take: 50
+            take: 50,
         });
 
         res.json({ success: true, data: applications });
@@ -356,13 +356,13 @@ router.get('/:id', authenticateDTAM, async (req, res) => {
         const { id } = req.params;
 
         // Try to find by applicationNumber first (APP-xxx format)
-        let application = await prisma.application.findFirst({
+        const application = await prisma.application.findFirst({
             where: {
                 OR: [
                     { id: id },
-                    { applicationNumber: id }
+                    { applicationNumber: id },
                 ],
-                isDeleted: false
+                isDeleted: false,
             },
             include: {
                 farmer: {
@@ -372,17 +372,17 @@ router.get('/:id', authenticateDTAM, async (req, res) => {
                         lastName: true,
                         email: true,
                         phoneNumber: true,
-                        province: true
-                    }
-                }
-            }
+                        province: true,
+                    },
+                },
+            },
         });
 
         if (!application) {
             return res.status(404).json({
                 success: false,
                 error: 'Not Found',
-                message: `Application ${id} not found`
+                message: `Application ${id} not found`,
             });
         }
 
@@ -405,8 +405,8 @@ router.post('/:id/review', authenticateDTAM, async (req, res) => {
             where: { id },
             data: {
                 status: newStatus,
-                updatedBy: req.user?.id
-            }
+                updatedBy: req.user?.id,
+            },
         });
 
         res.json({ success: true, data: updated, message: `Application ${newStatus}` });
@@ -429,8 +429,8 @@ router.patch('/:id/criteria', authenticateFarmer, async (req, res) => {
             where: { id },
             data: {
                 supplementaryCriteria: supplementaryCriteria || undefined,
-                supplementarySkipped: supplementarySkipped || false
-            }
+                supplementarySkipped: supplementarySkipped || false,
+            },
         });
 
         res.json({
@@ -438,8 +438,8 @@ router.patch('/:id/criteria', authenticateFarmer, async (req, res) => {
             message: 'Supplementary criteria saved',
             data: {
                 id: updated.id,
-                supplementarySkipped: updated.supplementarySkipped
-            }
+                supplementarySkipped: updated.supplementarySkipped,
+            },
         });
     } catch (error) {
         console.error('[Applications] criteria save error:', error);

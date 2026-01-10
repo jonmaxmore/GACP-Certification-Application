@@ -8,14 +8,12 @@
 const { PrismaClient } = require('@prisma/client');
 
 // Singleton pattern for Prisma Client
-let prisma;
-
 if (!global.prisma) {
     global.prisma = new PrismaClient({
         log: ['query', 'info', 'warn', 'error'],
     });
 }
-prisma = global.prisma;
+const prisma = global.prisma;
 
 /**
  * Connect to the database

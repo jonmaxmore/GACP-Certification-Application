@@ -3,7 +3,7 @@
  * คำนวณค่าธรรมเนียมตามประเภทบริการ และจำนวนพื้นที่
  */
 
-const { SERVICE_TYPES, FIXED_FEES } = require('./ServiceTypeEnum');
+const { SERVICE_TYPES, FIXED_FEES } = require('./service-type-enum');
 
 /**
  * Fee Configuration
@@ -21,7 +21,7 @@ const FEE_CONFIG = {
     totalPerArea: 30000,
 
     // Maximum areas allowed
-    maxAreas: 3
+    maxAreas: 3,
 };
 
 /**
@@ -30,7 +30,7 @@ const FEE_CONFIG = {
 const AREA_TYPES = {
     OUTDOOR: { id: 'outdoor', label: 'กลางแจ้ง', labelEn: 'Outdoor' },
     GREENHOUSE: { id: 'greenhouse', label: 'โรงเรือน', labelEn: 'Greenhouse' },
-    INDOOR: { id: 'indoor', label: 'อินดอร์ (ระบบปิด)', labelEn: 'Indoor' }
+    INDOOR: { id: 'indoor', label: 'อินดอร์ (ระบบปิด)', labelEn: 'Indoor' },
 };
 
 /**
@@ -39,7 +39,7 @@ const AREA_TYPES = {
 const OBJECTIVES = {
     RESEARCH: { id: 'research', label: 'วิจัย/ทดลอง', labelEn: 'Research' },
     DOMESTIC: { id: 'domestic', label: 'ขายในประเทศ', labelEn: 'Domestic Sale' },
-    EXPORT: { id: 'export', label: 'ส่งออก', labelEn: 'Export' }
+    EXPORT: { id: 'export', label: 'ส่งออก', labelEn: 'Export' },
 };
 
 /**
@@ -53,7 +53,7 @@ function calculateFee(serviceType, areaTypes = [], options = {}) {
         subtotal: 0,
         vat: 0,
         total: 0,
-        requiresTeamReview: false
+        requiresTeamReview: false,
     };
 
     // Services that require team review don't have fixed pricing
@@ -73,7 +73,7 @@ function calculateFee(serviceType, areaTypes = [], options = {}) {
         description: `ค่าตรวจเอกสาร (${areaLabels || 'ลักษณะพื้นที่'})`,
         quantity: areaCount,
         unitPrice: FEE_CONFIG.docReviewPerArea,
-        total: FEE_CONFIG.docReviewPerArea * areaCount
+        total: FEE_CONFIG.docReviewPerArea * areaCount,
     });
 
     // Inspection per area: 25,000 × areas
@@ -81,7 +81,7 @@ function calculateFee(serviceType, areaTypes = [], options = {}) {
         description: `ค่าตรวจประเมินแปลง (${areaLabels || 'ลักษณะพื้นที่'})`,
         quantity: areaCount,
         unitPrice: FEE_CONFIG.inspectionPerArea,
-        total: FEE_CONFIG.inspectionPerArea * areaCount
+        total: FEE_CONFIG.inspectionPerArea * areaCount,
     });
 
     // Calculate totals
@@ -102,7 +102,7 @@ function numberToThaiText(num) {
     const thaiNumbers = ['', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
     const units = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
 
-    if (num === 0) return 'ศูนย์บาทถ้วน';
+    if (num === 0) {return 'ศูนย์บาทถ้วน';}
 
     // Simple cases for common amounts
     const commonAmounts = {
@@ -111,7 +111,7 @@ function numberToThaiText(num) {
         45000: 'สี่หมื่นห้าพันบาทถ้วน',
         50000: 'ห้าหมื่นบาทถ้วน',
         30000: 'สามหมื่นบาทถ้วน',
-        5000: 'ห้าพันบาทถ้วน'
+        5000: 'ห้าพันบาทถ้วน',
     };
 
     return commonAmounts[num] || `${num.toLocaleString()}บาทถ้วน`;
@@ -126,7 +126,7 @@ function getFeeSummary(serviceType, areaTypes = []) {
     return {
         serviceType,
         areaCount: areaTypes.length,
-        ...fee
+        ...fee,
     };
 }
 
@@ -150,7 +150,7 @@ function validateApplicationData(data) {
 
     return {
         isValid: errors.length === 0,
-        errors
+        errors,
     };
 }
 
@@ -161,6 +161,6 @@ module.exports = {
     calculateFee,
     getFeeSummary,
     numberToThaiText,
-    validateApplicationData
+    validateApplicationData,
 };
 

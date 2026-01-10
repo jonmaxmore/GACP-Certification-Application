@@ -23,7 +23,7 @@ const ApplicationStatus = {
   APPROVED: 'approved',
   CERTIFICATE_ISSUED: 'certificate_issued',
   REJECTED: 'rejected',
-  EXPIRED: 'expired'
+  EXPIRED: 'expired',
 };
 
 class ApplicationRepository {
@@ -75,7 +75,7 @@ class ApplicationRepository {
           $nin: [
             ApplicationStatus.APPROVED,
             ApplicationStatus.REJECTED,
-            ApplicationStatus.CERTIFICATE_ISSUED
+            ApplicationStatus.CERTIFICATE_ISSUED,
           ],
         },
       });
@@ -164,7 +164,7 @@ class ApplicationRepository {
             updatedAt: new Date(),
           },
         },
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       );
     } catch (error) {
       logger.error('[ApplicationRepository] update error:', error);

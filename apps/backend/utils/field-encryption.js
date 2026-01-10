@@ -39,7 +39,7 @@ const getEncryptionKey = () => {
  * @returns {string} Encrypted data in format: iv:authTag:ciphertext (hex)
  */
 function encrypt(plaintext) {
-    if (!plaintext) return null;
+    if (!plaintext) {return null;}
 
     try {
         const key = getEncryptionKey();
@@ -65,7 +65,7 @@ function encrypt(plaintext) {
  * @returns {string|null} Decrypted plaintext or null if failed
  */
 function decrypt(encryptedData) {
-    if (!encryptedData) return null;
+    if (!encryptedData) {return null;}
 
     try {
         const parts = encryptedData.split(':');
@@ -97,7 +97,7 @@ function decrypt(encryptedData) {
  * @returns {string} Masked ID: X-XXXX-XXXXX-XX-X
  */
 function maskThaiId(thaiId) {
-    if (!thaiId || thaiId.length !== 13) return '***';
+    if (!thaiId || thaiId.length !== 13) {return '***';}
 
     // Show first and last digit only: 1-xxxx-xxxxx-xx-3
     return `${thaiId[0]}-xxxx-xxxxx-xx-${thaiId[12]}`;
@@ -109,10 +109,10 @@ function maskThaiId(thaiId) {
  * @returns {string} Masked email: j***@example.com
  */
 function maskEmail(email) {
-    if (!email || !email.includes('@')) return '***';
+    if (!email || !email.includes('@')) {return '***';}
 
     const [local, domain] = email.split('@');
-    if (local.length <= 1) return `*@${domain}`;
+    if (local.length <= 1) {return `*@${domain}`;}
 
     return `${local[0]}${'*'.repeat(Math.min(local.length - 1, 3))}@${domain}`;
 }
@@ -123,10 +123,10 @@ function maskEmail(email) {
  * @returns {string} Masked: 08X-XXX-1234
  */
 function maskPhone(phone) {
-    if (!phone || phone.length < 4) return '***';
+    if (!phone || phone.length < 4) {return '***';}
 
     const clean = phone.replace(/\D/g, '');
-    if (clean.length < 10) return `${'*'.repeat(clean.length - 4)}${clean.slice(-4)}`;
+    if (clean.length < 10) {return `${'*'.repeat(clean.length - 4)}${clean.slice(-4)}`;}
 
     return `${clean.slice(0, 2)}X-XXX-${clean.slice(-4)}`;
 }

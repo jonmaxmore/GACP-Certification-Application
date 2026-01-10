@@ -19,8 +19,8 @@ class AccountingController {
             const { status, farmerId, page = 1, limit = 20 } = req.query;
             const query = {};
 
-            if (status) query.status = status;
-            if (farmerId) query.farmerId = farmerId;
+            if (status) { query.status = status; }
+            if (farmerId) { query.farmerId = farmerId; }
 
             const skip = (parseInt(page) - 1) * parseInt(limit);
 
@@ -58,8 +58,8 @@ class AccountingController {
             const { status, farmerId, page = 1, limit = 20 } = req.query;
             const query = {};
 
-            if (status) query.status = status;
-            if (farmerId) query.farmerId = farmerId;
+            if (status) { query.status = status; }
+            if (farmerId) { query.farmerId = farmerId; }
 
             const skip = (parseInt(page) - 1) * parseInt(limit);
 
@@ -105,9 +105,9 @@ class AccountingController {
                 });
             }
 
-            let document;
-            let Model = type === 'quote' ? Quote : Invoice;
-            let numberField = type === 'quote' ? 'quoteNumber' : 'invoiceNumber';
+
+            const Model = type === 'quote' ? Quote : Invoice;
+            const numberField = type === 'quote' ? 'quoteNumber' : 'invoiceNumber';
 
             // Check if new number already exists
             const existing = await Model.findOne({ [numberField]: newNumber });
@@ -119,7 +119,7 @@ class AccountingController {
             }
 
             // Update document number
-            document = await Model.findByIdAndUpdate(
+            const document = await Model.findByIdAndUpdate(
                 id,
                 {
                     [numberField]: newNumber,
@@ -127,14 +127,14 @@ class AccountingController {
                     $push: {
                         updateHistory: {
                             field: numberField,
-                            oldValue: document?.[numberField],
+                            oldValue: null,
                             newValue: newNumber,
                             updatedBy: req.user?.id,
                             updatedAt: new Date(),
                         },
                     },
                 },
-                { new: true }
+                { new: true },
             );
 
             if (!document) {
@@ -223,13 +223,13 @@ class AccountingController {
             }
 
             const updateData = { status };
-            if (status === 'sent') updateData.sentAt = new Date();
-            if (status === 'accepted') updateData.acceptedAt = new Date();
+            if (status === 'sent') { updateData.sentAt = new Date(); }
+            if (status === 'accepted') { updateData.acceptedAt = new Date(); }
             if (status === 'rejected') {
                 updateData.rejectedAt = new Date();
                 updateData.farmerNotes = notes;
             }
-            if (notes) updateData.notes = notes;
+            if (notes) { updateData.notes = notes; }
 
             const quote = await Quote.findByIdAndUpdate(id, updateData, { new: true })
                 .populate('farmerId', 'firstName lastName email');
@@ -322,7 +322,7 @@ class AccountingController {
             const updateData = { status };
             if (status === 'paid') {
                 updateData.paidAt = new Date();
-                if (paymentTransactionId) updateData.paymentTransactionId = paymentTransactionId;
+                if (paymentTransactionId) { updateData.paymentTransactionId = paymentTransactionId; }
             }
 
             const invoice = await Invoice.findByIdAndUpdate(id, updateData, { new: true })

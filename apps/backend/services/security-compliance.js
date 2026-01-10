@@ -251,32 +251,7 @@ class RBACService {
         inheritFrom: [],
       },
 
-      dtam_admin: {
-        name: 'DTAM Administrator',
-        description: 'Administrative access (Alias)',
-        permissions: [
-          'user.create',
-          'user.read',
-          'user.update',
-          'user.list',
-          'application.read',
-          'application.review',
-          'application.approve',
-          'application.reject',
-          'certificate.issue',
-          'certificate.read',
-          'certificate.revoke',
-          'certificate.renew',
-          'inspection.schedule',
-          'inspection.review',
-          'inspection.approve',
-          'payment.view',
-          'audit.read',
-          'report.generate',
-          'dashboard.view',
-        ],
-        inheritFrom: [],
-      },
+
 
       reviewer: {
         name: 'Application Reviewer',

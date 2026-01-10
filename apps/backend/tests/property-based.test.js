@@ -10,7 +10,7 @@ const fc = require('fast-check');
 
 // Thai ID Checksum Algorithm
 function calculateThaiIdChecksum(digits) {
-    if (digits.length !== 12) return null;
+    if (digits.length !== 12) {return null;}
 
     let sum = 0;
     for (let i = 0; i < 12; i++) {
@@ -24,8 +24,8 @@ function calculateThaiIdChecksum(digits) {
 
 function validateThaiId(id) {
     const clean = id.replace(/-/g, '');
-    if (clean.length !== 13) return false;
-    if (!/^\d+$/.test(clean)) return false;
+    if (clean.length !== 13) {return false;}
+    if (!/^\d+$/.test(clean)) {return false;}
 
     const expectedCheck = calculateThaiIdChecksum(clean.substring(0, 12));
     return parseInt(clean[12]) === expectedCheck;
@@ -33,10 +33,10 @@ function validateThaiId(id) {
 
 function formatThaiId(id) {
     const clean = id.replace(/\D/g, '').substring(0, 13);
-    if (clean.length <= 1) return clean;
-    if (clean.length <= 5) return `${clean[0]}-${clean.substring(1)}`;
-    if (clean.length <= 10) return `${clean[0]}-${clean.substring(1, 5)}-${clean.substring(5)}`;
-    if (clean.length <= 12) return `${clean[0]}-${clean.substring(1, 5)}-${clean.substring(5, 10)}-${clean.substring(10)}`;
+    if (clean.length <= 1) {return clean;}
+    if (clean.length <= 5) {return `${clean[0]}-${clean.substring(1)}`;}
+    if (clean.length <= 10) {return `${clean[0]}-${clean.substring(1, 5)}-${clean.substring(5)}`;}
+    if (clean.length <= 12) {return `${clean[0]}-${clean.substring(1, 5)}-${clean.substring(5, 10)}-${clean.substring(10)}`;}
     return `${clean[0]}-${clean.substring(1, 5)}-${clean.substring(5, 10)}-${clean.substring(10, 12)}-${clean[12]}`;
 }
 
@@ -62,9 +62,9 @@ describe('Thai ID Validation - Property-Based Tests', () => {
 
                     // Invariant: ID with correct checksum is always valid
                     return validateThaiId(fullId) === true;
-                }
+                },
             ),
-            { numRuns: 1000 }
+            { numRuns: 1000 },
         );
     });
 
@@ -93,9 +93,9 @@ describe('Thai ID Validation - Property-Based Tests', () => {
                         return validateThaiId(modifiedId) === false;
                     }
                     return true;
-                }
+                },
             ),
-            { numRuns: 500 }
+            { numRuns: 500 },
         );
     });
 
@@ -113,9 +113,9 @@ describe('Thai ID Validation - Property-Based Tests', () => {
 
                     // Invariant: format(format(x)) === format(x)
                     return once === twice;
-                }
+                },
             ),
-            { numRuns: 1000 }
+            { numRuns: 1000 },
         );
     });
 
@@ -133,9 +133,9 @@ describe('Thai ID Validation - Property-Based Tests', () => {
 
                     // Invariant: output digits match input (up to 13)
                     return outputDigits === input.substring(0, 13);
-                }
+                },
             ),
-            { numRuns: 1000 }
+            { numRuns: 1000 },
         );
     });
 
@@ -153,9 +153,9 @@ describe('Thai ID Validation - Property-Based Tests', () => {
                         return validateThaiId(input) === false;
                     }
                     return true;
-                }
+                },
             ),
-            { numRuns: 500 }
+            { numRuns: 500 },
         );
     });
 });
@@ -180,9 +180,9 @@ describe('API Response - Property-Based Tests', () => {
                 (response) => {
                     // Invariant: success field is always boolean
                     return typeof response.success === 'boolean';
-                }
+                },
             ),
-            { numRuns: 100 }
+            { numRuns: 100 },
         );
     });
 
@@ -207,9 +207,9 @@ describe('API Response - Property-Based Tests', () => {
                     } else {
                         return response.error !== undefined;
                     }
-                }
+                },
             ),
-            { numRuns: 100 }
+            { numRuns: 100 },
         );
     });
 });

@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
             where: { isActive: true },
             orderBy: [
                 { category: 'asc' },
-                { sortOrder: 'asc' }
+                { sortOrder: 'asc' },
             ],
             select: {
                 id: true,
@@ -38,8 +38,8 @@ router.get('/', async (req, res) => {
                 icon: true,
                 isRequired: true,
                 inputType: true,
-                sortOrder: true
-            }
+                sortOrder: true,
+            },
         });
 
         // Group by category
@@ -50,7 +50,7 @@ router.get('/', async (req, res) => {
                     category: cat,
                     categoryTH: item.categoryTH || cat,
                     icon: item.icon,
-                    items: []
+                    items: [],
                 };
             }
             acc[cat].items.push({
@@ -59,7 +59,7 @@ router.get('/', async (req, res) => {
                 label: item.label,
                 description: item.description,
                 isRequired: item.isRequired,
-                inputType: item.inputType
+                inputType: item.inputType,
             });
             return acc;
         }, {});
@@ -67,14 +67,14 @@ router.get('/', async (req, res) => {
         res.json({
             success: true,
             count: criteria.length,
-            data: Object.values(grouped)
+            data: Object.values(grouped),
         });
     } catch (error) {
         console.error('Error fetching criteria:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch criteria',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -88,21 +88,21 @@ router.get('/all', authenticateDTAM, async (req, res) => {
         const criteria = await prisma.supplementaryCriterion.findMany({
             orderBy: [
                 { category: 'asc' },
-                { sortOrder: 'asc' }
-            ]
+                { sortOrder: 'asc' },
+            ],
         });
 
         res.json({
             success: true,
             count: criteria.length,
-            data: criteria
+            data: criteria,
         });
     } catch (error) {
         console.error('Error fetching all criteria:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch criteria',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -122,26 +122,26 @@ router.post('/', authenticateDTAM, async (req, res) => {
             icon,
             sortOrder,
             isRequired,
-            inputType
+            inputType,
         } = req.body;
 
         // Validation
         if (!code || !category || !label) {
             return res.status(400).json({
                 success: false,
-                message: 'code, category, and label are required'
+                message: 'code, category, and label are required',
             });
         }
 
         // Check unique code
         const existing = await prisma.supplementaryCriterion.findUnique({
-            where: { code }
+            where: { code },
         });
 
         if (existing) {
             return res.status(409).json({
                 success: false,
-                message: `Criterion with code '${code}' already exists`
+                message: `Criterion with code '${code}' already exists`,
             });
         }
 
@@ -156,21 +156,21 @@ router.post('/', authenticateDTAM, async (req, res) => {
                 sortOrder: sortOrder || 0,
                 isRequired: isRequired || false,
                 inputType: inputType || 'checkbox',
-                createdBy: req.user?.id
-            }
+                createdBy: req.user?.id,
+            },
         });
 
         res.status(201).json({
             success: true,
             message: 'Criterion created successfully',
-            data: criterion
+            data: criterion,
         });
     } catch (error) {
         console.error('Error creating criterion:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to create criterion',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -190,26 +190,26 @@ router.patch('/:id', authenticateDTAM, async (req, res) => {
 
         const criterion = await prisma.supplementaryCriterion.update({
             where: { id },
-            data: updateData
+            data: updateData,
         });
 
         res.json({
             success: true,
             message: 'Criterion updated successfully',
-            data: criterion
+            data: criterion,
         });
     } catch (error) {
         console.error('Error updating criterion:', error);
         if (error.code === 'P2025') {
             return res.status(404).json({
                 success: false,
-                message: 'Criterion not found'
+                message: 'Criterion not found',
             });
         }
         res.status(500).json({
             success: false,
             message: 'Failed to update criterion',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -223,25 +223,25 @@ router.delete('/:id', authenticateDTAM, async (req, res) => {
         const { id } = req.params;
 
         await prisma.supplementaryCriterion.delete({
-            where: { id }
+            where: { id },
         });
 
         res.json({
             success: true,
-            message: 'Criterion deleted successfully'
+            message: 'Criterion deleted successfully',
         });
     } catch (error) {
         console.error('Error deleting criterion:', error);
         if (error.code === 'P2025') {
             return res.status(404).json({
                 success: false,
-                message: 'Criterion not found'
+                message: 'Criterion not found',
             });
         }
         res.status(500).json({
             success: false,
             message: 'Failed to delete criterion',
-            error: error.message
+            error: error.message,
         });
     }
 });

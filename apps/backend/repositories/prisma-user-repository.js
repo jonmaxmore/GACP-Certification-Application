@@ -84,8 +84,8 @@ class UserRepository {
                 email: true,
                 firstName: true,
                 lastName: true,
-                phoneNumber: true
-            }
+                phoneNumber: true,
+            },
         });
     }
 
@@ -149,7 +149,7 @@ class UserRepository {
             select: { password: true },
         });
 
-        if (!user) return false;
+        if (!user) {return false;}
         return bcrypt.compare(candidatePassword, user.password);
     }
 
@@ -201,8 +201,8 @@ class UserRepository {
             isDeleted: false,
         };
 
-        if (role) where.role = role;
-        if (status) where.status = status;
+        if (role) {where.role = role;}
+        if (status) {where.status = status;}
         if (search) {
             where.OR = [
                 { firstName: { contains: search, mode: 'insensitive' } },

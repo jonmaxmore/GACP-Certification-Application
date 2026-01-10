@@ -8,7 +8,7 @@ const {
     formatThaiId,
     maskThaiId,
     getProvinceCode,
-    getProvinceName
+    getProvinceName,
 } = require('../utils/thai-id-validator');
 
 describe('Thai ID Validator', () => {

@@ -16,7 +16,7 @@ const kycController = {
                 where: {
                     role: 'FARMER',
                     status: 'PENDING_VERIFICATION',
-                    isDeleted: false
+                    isDeleted: false,
                 },
                 select: {
                     id: true,
@@ -28,8 +28,8 @@ const kycController = {
                     companyName: true,
                     communityName: true,
                     status: true,
-                    createdAt: true
-                }
+                    createdAt: true,
+                },
             });
             res.json({ success: true, data: pendingUsers });
         } catch (error) {
@@ -49,7 +49,7 @@ const kycController = {
             const updateData = {
                 status: status === 'approved' ? 'ACTIVE' : 'SUSPENDED',
                 updatedBy: req.user.userId,
-                updatedAt: new Date()
+                updatedAt: new Date(),
             };
 
             const user = await prisma.user.update({
@@ -60,8 +60,8 @@ const kycController = {
                     email: true,
                     firstName: true,
                     lastName: true,
-                    status: true
-                }
+                    status: true,
+                },
             });
 
             res.json({ success: true, data: user });

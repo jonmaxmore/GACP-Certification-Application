@@ -17,18 +17,18 @@ router.get('/', authenticateDTAM, async (req, res) => {
         const { status, startDate, endDate, limit = 50 } = req.query;
 
         const where = { isDeleted: false };
-        if (status) where.status = status;
+        if (status) {where.status = status;}
         if (startDate && endDate) {
             where.createdAt = {
                 gte: new Date(startDate),
-                lte: new Date(endDate)
+                lte: new Date(endDate),
             };
         }
 
         const invoices = await prisma.invoice.findMany({
             where,
             orderBy: { createdAt: 'desc' },
-            take: parseInt(limit)
+            take: parseInt(limit),
         });
 
         res.json({ success: true, data: { invoices } });
@@ -45,11 +45,11 @@ router.get('/my', authenticateFarmer, async (req, res) => {
         const { status } = req.query;
 
         const where = { farmerId, isDeleted: false };
-        if (status) where.status = status;
+        if (status) {where.status = status;}
 
         const invoices = await prisma.invoice.findMany({
             where,
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
         });
 
         res.json({ success: true, data: invoices });
@@ -68,7 +68,7 @@ router.get('/summary', authenticateDTAM, async (req, res) => {
         if (startDate && endDate) {
             where.createdAt = {
                 gte: new Date(startDate),
-                lte: new Date(endDate)
+                lte: new Date(endDate),
             };
         }
 
@@ -76,7 +76,7 @@ router.get('/summary', authenticateDTAM, async (req, res) => {
             prisma.invoice.aggregate({ _sum: { totalAmount: true }, where: { ...where, status: 'paid' } }),
             prisma.invoice.aggregate({ _sum: { totalAmount: true }, where: { ...where, status: 'pending' } }),
             prisma.invoice.aggregate({ _sum: { totalAmount: true }, where: { ...where, status: 'overdue' } }),
-            prisma.invoice.groupBy({ by: ['status'], _count: true, where })
+            prisma.invoice.groupBy({ by: ['status'], _count: true, where }),
         ]);
 
         const counts = invoiceCounts.reduce((acc, c) => {
@@ -93,9 +93,9 @@ router.get('/summary', authenticateDTAM, async (req, res) => {
                 monthlyRevenue: totalPaid._sum?.totalAmount || 0,
                 invoiceCount: {
                     total: Object.values(counts).reduce((a, b) => a + b, 0),
-                    ...counts
-                }
-            }
+                    ...counts,
+                },
+            },
         });
     } catch (error) {
         console.error('[Invoices] getSummary error:', error);
@@ -103,8 +103,8 @@ router.get('/summary', authenticateDTAM, async (req, res) => {
             success: true,
             data: {
                 totalRevenue: 0, pendingAmount: 0, overdueAmount: 0, monthlyRevenue: 0,
-                invoiceCount: { total: 0, pending: 0, paid: 0, overdue: 0 }
-            }
+                invoiceCount: { total: 0, pending: 0, paid: 0, overdue: 0 },
+            },
         });
     }
 });
@@ -114,7 +114,7 @@ router.get('/:invoiceId', authenticateDTAM, async (req, res) => {
     try {
         const { invoiceId } = req.params;
         const invoice = await prisma.invoice.findUnique({
-            where: { id: invoiceId }
+            where: { id: invoiceId },
         });
 
         if (!invoice) {
@@ -139,8 +139,8 @@ router.post('/:invoiceId/pay', authenticateDTAM, async (req, res) => {
             data: {
                 status: 'paid',
                 paidAt: new Date(),
-                paymentTransactionId: transactionId || null
-            }
+                paymentTransactionId: transactionId || null,
+            },
         });
 
         res.json({ success: true, message: 'Invoice marked as paid', data: invoice });

@@ -36,8 +36,8 @@ async function connect() {
         port: config.port,
         reconnectStrategy: (retries) => {
           return Math.min(retries * 50, 2000);
-        }
-      }
+        },
+      },
     };
 
     redisClient = createClient(options);

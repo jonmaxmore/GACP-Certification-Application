@@ -26,7 +26,7 @@ class PaymentController {
             if (!userId) {
                 return res.status(401).json({
                     success: false,
-                    error: 'User not authenticated'
+                    error: 'User not authenticated',
                 });
             }
 
@@ -49,18 +49,18 @@ class PaymentController {
                 amount: doc.amount,
                 status: doc.status,
                 createdAt: doc.issueDate || doc.createdAt,
-                paidAt: doc.paidAt || null
+                paidAt: doc.paidAt || null,
             }));
 
             res.json({
                 success: true,
-                data: formattedDocs
+                data: formattedDocs,
             });
         } catch (error) {
             logger.error('Error fetching payment documents:', error);
             res.status(500).json({
                 success: false,
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -81,19 +81,19 @@ class PaymentController {
             if (!document) {
                 return res.status(404).json({
                     success: false,
-                    error: 'Document not found'
+                    error: 'Document not found',
                 });
             }
 
             res.json({
                 success: true,
-                data: document
+                data: document,
             });
         } catch (error) {
             logger.error('Error fetching payment document:', error);
             res.status(500).json({
                 success: false,
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -108,8 +108,8 @@ class PaymentController {
                 $or: [
                     { userId: userId },
                     { 'user': userId },
-                    { 'applicant.userId': userId }
-                ]
+                    { 'applicant.userId': userId },
+                ],
             }).lean();
 
             if (applications.length === 0) {
@@ -159,7 +159,7 @@ class PaymentController {
                             quantity: areaCount,
                             unit: 'ต่อคำขอ',
                             unitPrice: FEE_DOC_REVIEW_PER_AREA,
-                            amount: docReviewTotal
+                            amount: docReviewTotal,
                         },
                         {
                             order: 2,
@@ -167,12 +167,12 @@ class PaymentController {
                             quantity: areaCount,
                             unit: 'ต่อคำขอ',
                             unitPrice: FEE_INSPECTION_PER_AREA,
-                            amount: inspectionTotal
-                        }
+                            amount: inspectionTotal,
+                        },
                     ],
                     status: 'APPROVED',
                     recipientName: app.applicantName || app.companyName || 'ผู้ยื่นคำขอ',
-                    issueDate: app.createdAt
+                    issueDate: app.createdAt,
                 });
                 documents.push(quotation);
 
@@ -193,7 +193,7 @@ class PaymentController {
                                 quantity: areaCount,
                                 unit: 'ต่อคำขอ',
                                 unitPrice: FEE_DOC_REVIEW_PER_AREA,
-                                amount: docReviewTotal
+                                amount: docReviewTotal,
                             },
                             {
                                 order: 2,
@@ -201,13 +201,13 @@ class PaymentController {
                                 quantity: areaCount,
                                 unit: 'ต่อคำขอ',
                                 unitPrice: FEE_INSPECTION_PER_AREA,
-                                amount: inspectionTotal
-                            }
+                                amount: inspectionTotal,
+                            },
                         ],
                         status: app.payment?.phase1?.status === 'PAID' ? 'DELIVERED' : 'PENDING',
                         recipientName: app.applicantName || app.companyName || 'ผู้ยื่นคำขอ',
                         issueDate: app.createdAt,
-                        dueDate: new Date(new Date(app.createdAt).getTime() + 3 * 24 * 60 * 60 * 1000) // 3 days
+                        dueDate: new Date(new Date(app.createdAt).getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days
                     });
                     documents.push(invoice);
 
@@ -226,7 +226,7 @@ class PaymentController {
                             status: 'ISSUED',
                             recipientName: app.applicantName || app.companyName || 'ผู้ยื่นคำขอ',
                             issueDate: app.payment?.phase1?.paidAt || new Date(),
-                            paidAt: app.payment?.phase1?.paidAt || new Date()
+                            paidAt: app.payment?.phase1?.paidAt || new Date(),
                         });
                         documents.push(receipt);
                     }
@@ -254,7 +254,7 @@ class PaymentController {
             if (!applicationId || !phase) {
                 return res.status(400).json({
                     success: false,
-                    error: 'Application ID and phase are required'
+                    error: 'Application ID and phase are required',
                 });
             }
 
@@ -265,13 +265,13 @@ class PaymentController {
                 applicationId,
                 type: 'INVOICE',
                 phase: parseInt(phase),
-                status: 'PENDING'
+                status: 'PENDING',
             });
 
             if (!invoice) {
                 return res.status(404).json({
                     success: false,
-                    error: 'Invoice not found or already paid'
+                    error: 'Invoice not found or already paid',
                 });
             }
 
@@ -295,7 +295,7 @@ class PaymentController {
                 recipientName: invoice.recipientName,
                 issueDate: new Date(),
                 paidAt: new Date(),
-                note: slipImage ? `Slip: ${slipImage.filename}` : null
+                note: slipImage ? `Slip: ${slipImage.filename}` : null,
             });
 
             res.json({
@@ -303,14 +303,14 @@ class PaymentController {
                 data: {
                     invoice,
                     receipt,
-                    message: 'Payment confirmed successfully'
-                }
+                    message: 'Payment confirmed successfully',
+                },
             });
         } catch (error) {
             logger.error('Payment confirmation error:', error);
             res.status(400).json({
                 success: false,
-                error: error.message
+                error: error.message,
             });
         }
     }

@@ -186,7 +186,7 @@ describe('⚡ API Stress Tests', () => {
     describe('Rate Limiting', () => {
         it('should handle rapid requests without crash', async () => {
             const promises = Array(10).fill(null).map(() =>
-                makeRequest('/api/v2/health').catch(() => ({ status: 500 }))
+                makeRequest('/api/v2/health').catch(() => ({ status: 500 })),
             );
             const results = await Promise.all(promises);
             results.forEach(res => {

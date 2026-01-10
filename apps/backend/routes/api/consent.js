@@ -23,7 +23,7 @@ router.get('/', authenticateFarmer, async (req, res) => {
                 consents,
                 categories: Object.values(ConsentCategory),
                 required: RequiredConsents,
-            }
+            },
         });
     } catch (error) {
         console.error('[Consent] Get error:', error);
@@ -42,7 +42,7 @@ router.post('/', authenticateFarmer, async (req, res) => {
         if (!category || !Object.values(ConsentCategory).includes(category)) {
             return res.status(400).json({
                 success: false,
-                error: 'Invalid consent category'
+                error: 'Invalid consent category',
             });
         }
 
@@ -51,12 +51,12 @@ router.post('/', authenticateFarmer, async (req, res) => {
             category,
             granted,
             req.ip,
-            req.headers['user-agent']
+            req.headers['user-agent'],
         );
 
         res.json({
             success: true,
-            data: consent
+            data: consent,
         });
     } catch (error) {
         console.error('[Consent] Record error:', error);
@@ -75,7 +75,7 @@ router.post('/bulk', async (req, res) => {
         if (!userId || !Array.isArray(consents)) {
             return res.status(400).json({
                 success: false,
-                error: 'userId and consents array required'
+                error: 'userId and consents array required',
             });
         }
 
@@ -83,12 +83,12 @@ router.post('/bulk', async (req, res) => {
             userId,
             consents,
             req.ip,
-            req.headers['user-agent']
+            req.headers['user-agent'],
         );
 
         res.json({
             success: true,
-            data: results
+            data: results,
         });
     } catch (error) {
         console.error('[Consent] Bulk error:', error);
@@ -108,13 +108,13 @@ router.delete('/:category', authenticateFarmer, async (req, res) => {
             req.user.id,
             category,
             req.ip,
-            req.headers['user-agent']
+            req.headers['user-agent'],
         );
 
         res.json({
             success: true,
             message: 'Consent withdrawn successfully',
-            data: consent
+            data: consent,
         });
     } catch (error) {
         console.error('[Consent] Withdraw error:', error);
@@ -135,13 +135,13 @@ router.get('/document/:category', (req, res) => {
     if (!document) {
         return res.status(404).json({
             success: false,
-            error: 'Document not found'
+            error: 'Document not found',
         });
     }
 
     res.json({
         success: true,
-        data: document
+        data: document,
     });
 });
 

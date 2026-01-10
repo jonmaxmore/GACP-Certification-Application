@@ -53,7 +53,7 @@ async function connectRedis() {
 const corsOptions = {
     origin: (origin, callback) => {
         // Allow requests with no origin (mobile apps, curl, etc)
-        if (!origin) return callback(null, true);
+        if (!origin) {return callback(null, true);}
 
         // Development mode - allow all origins
         if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
@@ -172,8 +172,8 @@ app.get('/api/v2/config/document-slots', (req, res) => {
                 { id: 'id-card', name: 'บัตรประชาชน', required: true },
                 { id: 'house-reg', name: 'ทะเบียนบ้าน', required: true },
                 { id: 'land-doc', name: 'เอกสารที่ดิน', required: true },
-            ]
-        }
+            ],
+        },
     });
 });
 
@@ -184,7 +184,7 @@ app.get('/api/v2/config/fee-structure', (req, res) => {
             applicationFee: 500,
             inspectionFee: 1500,
             certificateFee: 1000,
-        }
+        },
     });
 });
 
@@ -201,7 +201,7 @@ app.get('/api/v2/plants', async (req, res) => {
                 { id: 1, name: 'กัญชา', thaiName: 'Cannabis', permittedUse: 'medical' },
                 { id: 2, name: 'กระท่อม', thaiName: 'Kratom', permittedUse: 'medical' },
                 { id: 3, name: 'ขมิ้นชัน', thaiName: 'Turmeric', permittedUse: 'general' },
-            ]
+            ],
         });
     }
 });
@@ -215,8 +215,8 @@ app.get('/api/v2/validation/checklist', (req, res) => {
                 { id: 1, name: 'เอกสารครบถ้วน', required: true },
                 { id: 2, name: 'รูปถ่ายสถานที่', required: true },
                 { id: 3, name: 'แผนที่ตำแหน่ง', required: true },
-            ]
-        }
+            ],
+        },
     });
 });
 

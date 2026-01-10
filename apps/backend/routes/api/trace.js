@@ -35,7 +35,7 @@ function formatCultivationType(type) {
         'PURCHASED': 'รับซื้อจากแหล่งอื่น',
         'OUTDOOR': 'กลางแจ้ง',
         'INDOOR': 'โรงเรือน',
-        'GREENHOUSE': 'เรือนกระจก'
+        'GREENHOUSE': 'เรือนกระจก',
     };
     return types[type] || type;
 }
@@ -44,7 +44,7 @@ function formatCultivationType(type) {
  * Helper: Format date for Thai display
  */
 function formatThaiDate(date) {
-    if (!date) return null;
+    if (!date) {return null;}
     const d = new Date(date);
     const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
         'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
@@ -77,9 +77,9 @@ router.get('/:qrCode', async (req, res) => {
                 where: {
                     OR: [
                         { id: qrCode },
-                        { uuid: qrCode }
+                        { uuid: qrCode },
                     ],
-                    isDeleted: false
+                    isDeleted: false,
                 },
                 include: {
                     farm: {
@@ -91,16 +91,16 @@ router.get('/:qrCode', async (req, res) => {
                             district: true,
                             subDistrict: true,
                             address: true,
-                            status: true
-                        }
+                            status: true,
+                        },
                     },
                     plantSpecies: {
                         select: {
                             code: true,
                             nameTH: true,
                             nameEN: true,
-                            scientificName: true
-                        }
+                            scientificName: true,
+                        },
                     },
                     certificate: {
                         select: {
@@ -109,8 +109,8 @@ router.get('/:qrCode', async (req, res) => {
                             expiryDate: true,
                             issuedDate: true,
                             status: true,
-                            standardName: true
-                        }
+                            standardName: true,
+                        },
                     },
                     batches: {
                         where: { isDeleted: false },
@@ -122,10 +122,10 @@ router.get('/:qrCode', async (req, res) => {
                             actualYield: true,
                             yieldUnit: true,
                             qualityGrade: true,
-                            status: true
-                        }
-                    }
-                }
+                            status: true,
+                        },
+                    },
+                },
             });
         } catch (e) {
             cycle = null;
@@ -145,13 +145,13 @@ router.get('/:qrCode', async (req, res) => {
                         type: cycle.farm.farmType,
                         location: `${cycle.farm.district}, ${cycle.farm.province}`,
                         address: cycle.farm.address,
-                        status: cycle.farm.status
+                        status: cycle.farm.status,
                     },
                     // ข้อมูลแปลง/โรงปลูก
                     plot: {
                         name: cycle.plotName || 'แปลงหลัก',
                         area: cycle.plotArea,
-                        unit: cycle.areaUnit === 'rai' ? 'ไร่' : cycle.areaUnit
+                        unit: cycle.areaUnit === 'rai' ? 'ไร่' : cycle.areaUnit,
                     },
                     // ข้อมูลพืช
                     plant: {
@@ -159,7 +159,7 @@ router.get('/:qrCode', async (req, res) => {
                         nameTH: cycle.plantSpecies.nameTH,
                         nameEN: cycle.plantSpecies.nameEN,
                         scientificName: cycle.plantSpecies.scientificName,
-                        variety: cycle.varietyName || 'ไม่ระบุพันธุ์'
+                        variety: cycle.varietyName || 'ไม่ระบุพันธุ์',
                     },
                     // วิธีการปลูก
                     cultivation: {
@@ -169,7 +169,7 @@ router.get('/:qrCode', async (req, res) => {
                         soilType: cycle.soilType || 'ไม่ระบุ',
                         irrigationType: cycle.irrigationType || 'ไม่ระบุ',
                         cycleName: cycle.cycleName,
-                        cycleNumber: cycle.cycleNumber
+                        cycleNumber: cycle.cycleNumber,
                     },
                     // วันที่
                     dates: {
@@ -178,13 +178,13 @@ router.get('/:qrCode', async (req, res) => {
                         expectedHarvest: cycle.expectedHarvestDate,
                         expectedHarvestTH: formatThaiDate(cycle.expectedHarvestDate),
                         actualHarvest: cycle.actualHarvestDate,
-                        actualHarvestTH: formatThaiDate(cycle.actualHarvestDate)
+                        actualHarvestTH: formatThaiDate(cycle.actualHarvestDate),
                     },
                     // ผลผลิต
                     yield: {
                         estimated: cycle.estimatedYield,
                         actual: cycle.actualYield,
-                        unit: 'กก.'
+                        unit: 'กก.',
                     },
                     // สถานะ
                     status: cycle.status,
@@ -197,7 +197,7 @@ router.get('/:qrCode', async (req, res) => {
                         expiryDate: cert.expiryDate,
                         expiryDateTH: formatThaiDate(cert.expiryDate),
                         status: cert.status,
-                        isValid: isValidCert
+                        isValid: isValidCert,
                     } : null,
                     // Harvest batches
                     harvests: cycle.batches.map(b => ({
@@ -207,16 +207,16 @@ router.get('/:qrCode', async (req, res) => {
                         yield: b.actualYield,
                         yieldUnit: b.yieldUnit === 'kg' ? 'กก.' : b.yieldUnit,
                         grade: b.qualityGrade,
-                        status: b.status
+                        status: b.status,
                     })),
                     // Verification
                     verification: {
                         valid: true,
                         certified: isValidCert,
                         scannedAt: new Date().toISOString(),
-                        verifiedBy: 'กรมการแพทย์แผนไทยและการแพทย์ทางเลือก'
-                    }
-                }
+                        verifiedBy: 'กรมการแพทย์แผนไทยและการแพทย์ทางเลือก',
+                    },
+                },
             });
         }
 
@@ -228,9 +228,9 @@ router.get('/:qrCode', async (req, res) => {
                     OR: [
                         { qrCode },
                         { batchNumber: qrCode },
-                        { id: qrCode }
+                        { id: qrCode },
                     ],
-                    isDeleted: false
+                    isDeleted: false,
                 },
                 include: {
                     farm: {
@@ -241,16 +241,16 @@ router.get('/:qrCode', async (req, res) => {
                             province: true,
                             district: true,
                             address: true,
-                            status: true
-                        }
+                            status: true,
+                        },
                     },
                     species: {
                         select: {
                             code: true,
                             nameTH: true,
                             nameEN: true,
-                            scientificName: true
-                        }
+                            scientificName: true,
+                        },
                     },
                     cycle: {
                         include: {
@@ -260,20 +260,20 @@ router.get('/:qrCode', async (req, res) => {
                                     expiryDate: true,
                                     issuedDate: true,
                                     status: true,
-                                    standardName: true
-                                }
-                            }
-                        }
+                                    standardName: true,
+                                },
+                            },
+                        },
                     },
                     lots: {
                         select: {
                             lotNumber: true,
                             packageType: true,
                             quantity: true,
-                            status: true
-                        }
-                    }
-                }
+                            status: true,
+                        },
+                    },
+                },
             });
         } catch (e) {
             batch = null;
@@ -292,25 +292,25 @@ router.get('/:qrCode', async (req, res) => {
                         name: batch.farm.farmName,
                         type: batch.farm.farmType,
                         location: `${batch.farm.district}, ${batch.farm.province}`,
-                        address: batch.farm.address
+                        address: batch.farm.address,
                     },
                     // ข้อมูลแปลง
                     plot: {
                         name: batch.plotName || 'แปลงหลัก',
                         area: batch.plotArea,
-                        unit: batch.areaUnit === 'rai' ? 'ไร่' : batch.areaUnit
+                        unit: batch.areaUnit === 'rai' ? 'ไร่' : batch.areaUnit,
                     },
                     // ข้อมูลพืช
                     plant: {
                         code: batch.species.code,
                         nameTH: batch.species.nameTH,
                         nameEN: batch.species.nameEN,
-                        scientificName: batch.species.scientificName
+                        scientificName: batch.species.scientificName,
                     },
                     // วิธีการปลูก
                     cultivation: {
                         method: formatCultivationType(batch.cultivationType),
-                        seedSource: batch.seedSource || 'ไม่ระบุ'
+                        seedSource: batch.seedSource || 'ไม่ระบุ',
                     },
                     // ข้อมูล Batch
                     batch: {
@@ -322,7 +322,7 @@ router.get('/:qrCode', async (req, res) => {
                         yield: batch.actualYield || batch.estimatedYield,
                         yieldUnit: batch.yieldUnit === 'kg' ? 'กก.' : batch.yieldUnit,
                         qualityGrade: batch.qualityGrade,
-                        status: batch.status
+                        status: batch.status,
                     },
                     // ใบรับรอง
                     certificate: cert ? {
@@ -330,7 +330,7 @@ router.get('/:qrCode', async (req, res) => {
                         standard: cert.standardName || 'GACP',
                         expiryDate: cert.expiryDate,
                         expiryDateTH: formatThaiDate(cert.expiryDate),
-                        isValid: isValidCert
+                        isValid: isValidCert,
                     } : null,
                     // Lots
                     lots: batch.lots,
@@ -338,9 +338,9 @@ router.get('/:qrCode', async (req, res) => {
                     verification: {
                         valid: true,
                         certified: isValidCert,
-                        scannedAt: new Date().toISOString()
-                    }
-                }
+                        scannedAt: new Date().toISOString(),
+                    },
+                },
             });
         }
 
@@ -351,8 +351,8 @@ router.get('/:qrCode', async (req, res) => {
                 where: {
                     OR: [
                         { qrCode },
-                        { lotNumber: qrCode }
-                    ]
+                        { lotNumber: qrCode },
+                    ],
                 },
                 include: {
                     batch: {
@@ -361,12 +361,12 @@ router.get('/:qrCode', async (req, res) => {
                             species: true,
                             cycle: {
                                 include: {
-                                    certificate: true
-                                }
-                            }
-                        }
-                    }
-                }
+                                    certificate: true,
+                                },
+                            },
+                        },
+                    },
+                },
             });
         } catch (e) {
             lot = null;
@@ -390,31 +390,31 @@ router.get('/:qrCode', async (req, res) => {
                             status: lot.testStatus,
                             thcContent: lot.thcContent,
                             cbdContent: lot.cbdContent,
-                            moistureContent: lot.moistureContent
-                        }
+                            moistureContent: lot.moistureContent,
+                        },
                     },
                     batch: lot.batch ? {
                         batchNumber: lot.batch.batchNumber,
                         harvestDate: lot.batch.harvestDate,
                         harvestDateTH: formatThaiDate(lot.batch.harvestDate),
-                        plantingDate: lot.batch.plantingDate
+                        plantingDate: lot.batch.plantingDate,
                     } : null,
                     farm: lot.batch?.farm ? {
                         name: lot.batch.farm.farmName,
-                        location: `${lot.batch.farm.district}, ${lot.batch.farm.province}`
+                        location: `${lot.batch.farm.district}, ${lot.batch.farm.province}`,
                     } : null,
                     plant: lot.batch?.species,
                     certificate: cert ? {
                         number: cert.certificateNumber,
                         expiryDate: cert.expiryDate,
                         expiryDateTH: formatThaiDate(cert.expiryDate),
-                        isValid: cert.status === 'ACTIVE' && new Date(cert.expiryDate) > new Date()
+                        isValid: cert.status === 'ACTIVE' && new Date(cert.expiryDate) > new Date(),
                     } : null,
                     verification: {
                         valid: true,
-                        scannedAt: new Date().toISOString()
-                    }
-                }
+                        scannedAt: new Date().toISOString(),
+                    },
+                },
             });
         }
 
@@ -425,8 +425,8 @@ router.get('/:qrCode', async (req, res) => {
             messageEN: 'QR code not found. This product may not be registered in our system.',
             verification: {
                 valid: false,
-                scannedAt: new Date().toISOString()
-            }
+                scannedAt: new Date().toISOString(),
+            },
         });
 
     } catch (error) {
@@ -434,7 +434,7 @@ router.get('/:qrCode', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'เกิดข้อผิดพลาดในการตรวจสอบ',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -457,8 +457,8 @@ router.get('/:qrCode/qr', async (req, res) => {
             margin: 2,
             color: {
                 dark: '#10b981',  // Emerald color
-                light: '#ffffff'
-            }
+                light: '#ffffff',
+            },
         };
 
         if (format === 'svg') {
@@ -471,7 +471,7 @@ router.get('/:qrCode/qr', async (req, res) => {
                 success: true,
                 qrCode,
                 traceUrl,
-                dataUrl
+                dataUrl,
             });
         } else {
             const buffer = await QRCode.toBuffer(traceUrl, qrOptions);
@@ -485,7 +485,7 @@ router.get('/:qrCode/qr', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to generate QR code',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -502,7 +502,7 @@ router.post('/generate', authenticateFarmer, async (req, res) => {
         if (!type || !id) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing required fields: type, id'
+                message: 'Missing required fields: type, id',
             });
         }
 
@@ -513,13 +513,13 @@ router.post('/generate', authenticateFarmer, async (req, res) => {
             // Verify ownership
             const cycle = await prisma.plantingCycle.findFirst({
                 where: { id },
-                include: { farm: true }
+                include: { farm: true },
             });
 
             if (!cycle || cycle.farm.ownerId !== req.user.id) {
                 return res.status(404).json({
                     success: false,
-                    message: 'PlantingCycle not found or access denied'
+                    message: 'PlantingCycle not found or access denied',
                 });
             }
 
@@ -532,21 +532,21 @@ router.post('/generate', authenticateFarmer, async (req, res) => {
                 data: {
                     qrCode: cycle.uuid,
                     trackingUrl: `${TRACE_BASE_URL}/trace/${cycle.uuid}`,
-                    type: 'CYCLE'
-                }
+                    type: 'CYCLE',
+                },
             });
 
         } else if (type === 'BATCH') {
             // Verify ownership
             const batch = await prisma.harvestBatch.findFirst({
                 where: { id },
-                include: { farm: true }
+                include: { farm: true },
             });
 
             if (!batch || batch.farm.ownerId !== req.user.id) {
                 return res.status(404).json({
                     success: false,
-                    message: 'HarvestBatch not found or access denied'
+                    message: 'HarvestBatch not found or access denied',
                 });
             }
 
@@ -555,8 +555,8 @@ router.post('/generate', authenticateFarmer, async (req, res) => {
                 where: { id },
                 data: {
                     qrCode: qrCodeString,
-                    trackingUrl
-                }
+                    trackingUrl,
+                },
             });
 
             return res.json({
@@ -566,14 +566,14 @@ router.post('/generate', authenticateFarmer, async (req, res) => {
                     qrCode: qrCodeString,
                     trackingUrl,
                     batchNumber: updated.batchNumber,
-                    type: 'BATCH'
-                }
+                    type: 'BATCH',
+                },
             });
 
         } else {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid type. Must be CYCLE or BATCH'
+                message: 'Invalid type. Must be CYCLE or BATCH',
             });
         }
 
@@ -582,7 +582,7 @@ router.post('/generate', authenticateFarmer, async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to generate QR code',
-            error: error.message
+            error: error.message,
         });
     }
 });

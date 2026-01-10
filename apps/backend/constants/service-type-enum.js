@@ -7,14 +7,14 @@ const SERVICE_TYPES = {
     NEW_APPLICATION: 'new_application',      // ยื่นขอใบรับรองใหม่
     RENEWAL: 'renewal',                      // ต่ออายุใบรับรอง
     REPLACEMENT: 'replacement',              // ขอใบรับรองแทน
-    AMENDMENT: 'amendment'                   // แก้ไขข้อมูล
+    AMENDMENT: 'amendment',                   // แก้ไขข้อมูล
 };
 
 const SERVICE_TYPE_LABELS = {
     new_application: 'ยื่นขอใบรับรองใหม่',
     renewal: 'ต่ออายุใบรับรอง',
     replacement: 'ขอใบรับรองแทน (สูญหาย/ถูกทำลาย)',
-    amendment: 'แก้ไขข้อมูลในใบรับรอง'
+    amendment: 'แก้ไขข้อมูลในใบรับรอง',
 };
 
 /**
@@ -25,14 +25,14 @@ const FIXED_FEES = {
     new_application: {
         docReview: 5000,      // ค่าตรวจเอกสาร SOP
         fieldInspection: 30000, // ค่าตรวจแปลง
-        total: 35000
+        total: 35000,
     },
     renewal: {
         fieldInspection: 30000,
-        total: 30000
+        total: 30000,
     },
     replacement: null,  // Team decides
-    amendment: null     // Team decides
+    amendment: null,     // Team decides
 };
 
 /**
@@ -46,7 +46,7 @@ const FORM_REQUIREMENTS = {
         part3: true,  // ข้อมูลการผลิต
         part4: true,  // เอกสารแนบ
         requiresSOP: true,
-        requiresFieldMap: true
+        requiresFieldMap: true,
     },
     renewal: {
         part1: false, // ไม่ต้องกรอก
@@ -55,7 +55,7 @@ const FORM_REQUIREMENTS = {
         part4: true,  // กรอก
         requiresSOP: false,
         requiresOperationReport: true,  // รายงานผลดำเนินงาน
-        requiresOldCertificate: true    // ใบรับรองเดิม
+        requiresOldCertificate: true,    // ใบรับรองเดิม
     },
     replacement: {
         part1: false,
@@ -63,15 +63,15 @@ const FORM_REQUIREMENTS = {
         part3: false,
         part4: true,
         requiresPoliceReport: true,     // ใบแจ้งความ (กรณีสูญหาย)
-        requiresDamagedCertificate: true // ใบรับรองที่เสียหาย (กรณีถูกทำลาย)
+        requiresDamagedCertificate: true, // ใบรับรองที่เสียหาย (กรณีถูกทำลาย)
     },
     amendment: {
         part1: 'prefill',  // ดึงข้อมูลเดิม แก้ไขได้
         part2: 'prefill',  // ดึงข้อมูลเดิม แก้ไขได้
         part3: 'prefill',  // ดึงข้อมูลเดิม แก้ไขได้
         part4: true,
-        requiresChangeDescription: true // อธิบายการเปลี่ยนแปลง
-    }
+        requiresChangeDescription: true, // อธิบายการเปลี่ยนแปลง
+    },
 };
 
 /**
@@ -88,7 +88,7 @@ const APPLICATION_STATUS = {
     PENDING_CORRECTION: 'pending_correction',     // รอแก้ไข
     APPROVED: 'approved',                         // อนุมัติ
     REJECTED: 'rejected',                         // ไม่อนุมัติ
-    CANCELLED: 'cancelled'                        // ยกเลิก
+    CANCELLED: 'cancelled',                        // ยกเลิก
 };
 
 /**
@@ -118,6 +118,6 @@ module.exports = {
     APPLICATION_STATUS,
     CERTIFICATE_VALIDITY_YEARS,
     requiresTeamReview,
-    getFeeForServiceType
+    getFeeForServiceType,
 };
 

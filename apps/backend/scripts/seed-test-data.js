@@ -11,7 +11,7 @@ async function seedTestData() {
     try {
         // First, get or create a test farmer user
         let testFarmer = await prisma.user.findFirst({
-            where: { email: 'testfarmer@gacp.test' }
+            where: { email: 'testfarmer@gacp.test' },
         });
 
         if (!testFarmer) {
@@ -24,8 +24,8 @@ async function seedTestData() {
                     accountType: 'INDIVIDUAL',
                     role: 'FARMER',
                     status: 'ACTIVE',
-                    phoneNumber: '0812345678'
-                }
+                    phoneNumber: '0812345678',
+                },
             });
             console.log('✅ Created test farmer user\n');
         }
@@ -42,7 +42,7 @@ async function seedTestData() {
 
         for (const staff of inspectorRoles) {
             const existing = await prisma.dTAMStaff.findFirst({
-                where: { email: staff.email }
+                where: { email: staff.email },
             });
 
             if (!existing) {
@@ -58,8 +58,8 @@ async function seedTestData() {
                         lastName: staff.lastName,
                         role: staff.role,
                         isActive: true,
-                        isDeleted: false
-                    }
+                        isDeleted: false,
+                    },
                 });
                 console.log(`✅ Created ${staff.role}: ${staff.firstName} ${staff.lastName} (username: ${staff.username})`);
             }
@@ -95,10 +95,10 @@ async function seedTestData() {
                         farmerId: testFarmer.id,
                         formData: {
                             plantId: plantType,
-                            farmArea: Math.floor(Math.random() * 50) + 5
+                            farmArea: Math.floor(Math.random() * 50) + 5,
                         },
-                        isDeleted: false
-                    }
+                        isDeleted: false,
+                    },
                 });
                 createdApps.push(app);
                 totalCreated++;
@@ -131,8 +131,8 @@ async function seedTestData() {
                     status: invoiceStatus,
                     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
                     paidAt: invoiceStatus === 'paid' ? new Date() : null,
-                    isDeleted: false
-                }
+                    isDeleted: false,
+                },
             });
             invoicesCreated++;
             await new Promise(r => setTimeout(r, 10));
@@ -144,7 +144,7 @@ async function seedTestData() {
         const appCounts = await prisma.application.groupBy({
             by: ['status'],
             _count: true,
-            where: { isDeleted: false }
+            where: { isDeleted: false },
         });
 
         console.log('📊 Application Summary:');
@@ -153,7 +153,7 @@ async function seedTestData() {
         const invoiceCounts = await prisma.invoice.groupBy({
             by: ['status'],
             _count: true,
-            where: { isDeleted: false }
+            where: { isDeleted: false },
         });
 
         console.log('\n💰 Invoice Summary:');

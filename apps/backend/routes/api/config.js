@@ -15,7 +15,7 @@ const {
     DOCUMENT_SLOTS,
     getRequiredDocuments,
     getObjectiveWarnings,
-    canProceedWithObjectives
+    canProceedWithObjectives,
 } = require('../../constants/document-slots');
 
 // LEGACY: cannabisTemplates was in root config/, now deleted
@@ -36,13 +36,13 @@ router.get('/document-slots', (req, res) => {
     try {
         const slots = Object.entries(DOCUMENT_SLOTS).map(([key, slot]) => ({
             key,
-            ...slot
+            ...slot,
         }));
 
         res.json({
             success: true,
             count: slots.length,
-            data: slots
+            data: slots,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -68,14 +68,14 @@ router.get('/document-slots/required', (req, res) => {
         const requiredDocs = getRequiredDocuments({
             plantType: plantType || 'general',
             objectives: objectivesArray,
-            applicantType: applicantType || 'INDIVIDUAL'
+            applicantType: applicantType || 'INDIVIDUAL',
         });
 
         res.json({
             success: true,
             count: requiredDocs.length,
             query: { plantType, objectives: objectivesArray, applicantType },
-            data: requiredDocs
+            data: requiredDocs,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -102,7 +102,7 @@ router.get('/document-slots/warnings', (req, res) => {
             success: true,
             count: warnings.length,
             objectives: objectivesArray,
-            data: warnings
+            data: warnings,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -124,7 +124,7 @@ router.post('/document-slots/validate', (req, res) => {
 
         res.json({
             success: true,
-            ...result
+            ...result,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -152,13 +152,13 @@ router.get('/templates', (req, res) => {
             titleTH: t.template?.titleTH,
             type: t.template?.cannabisMetadata?.surveyType,
             questionCount: t.questions?.length || 0,
-            status: t.template?.status
+            status: t.template?.status,
         }));
 
         res.json({
             success: true,
             count: templateList.length,
-            data: templateList
+            data: templateList,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -178,14 +178,14 @@ router.get('/templates/:type', (req, res) => {
         const templates = cannabisTemplatesData;
 
         const template = templates.find(t =>
-            t.template?.cannabisMetadata?.surveyType === type
+            t.template?.cannabisMetadata?.surveyType === type,
         );
 
         if (!template) {
             return res.status(404).json({
                 success: false,
                 error: `Template type '${type}' not found`,
-                availableTypes: templates.map(t => t.template?.cannabisMetadata?.surveyType)
+                availableTypes: templates.map(t => t.template?.cannabisMetadata?.surveyType),
             });
         }
 
@@ -193,8 +193,8 @@ router.get('/templates/:type', (req, res) => {
             success: true,
             data: {
                 template: template.template,
-                questions: template.questions
-            }
+                questions: template.questions,
+            },
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -213,13 +213,13 @@ router.get('/templates/:type/questions', (req, res) => {
         const templates = cannabisTemplatesData;
 
         const template = templates.find(t =>
-            t.template?.cannabisMetadata?.surveyType === type
+            t.template?.cannabisMetadata?.surveyType === type,
         );
 
         if (!template) {
             return res.status(404).json({
                 success: false,
-                error: `Template type '${type}' not found`
+                error: `Template type '${type}' not found`,
             });
         }
 
@@ -227,7 +227,7 @@ router.get('/templates/:type/questions', (req, res) => {
             success: true,
             type,
             count: template.questions?.length || 0,
-            data: template.questions
+            data: template.questions,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -249,13 +249,13 @@ router.get('/standards', (req, res) => {
         const standards = [
             { code: 'thai', name: 'Thai GACP', file: 'gacp-thailand.json' },
             { code: 'who', name: 'WHO GAP', file: 'who-gap.json' },
-            { code: 'eu', name: 'EU Organic', file: 'eu-organic.json' }
+            { code: 'eu', name: 'EU Organic', file: 'eu-organic.json' },
         ];
 
         res.json({
             success: true,
             count: standards.length,
-            data: standards
+            data: standards,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -278,14 +278,14 @@ router.get('/standards/:code', (req, res) => {
         const fileMap = {
             thai: 'gacp-thailand.json',
             who: 'who-gap.json',
-            eu: 'eu-organic.json'
+            eu: 'eu-organic.json',
         };
 
         if (!fileMap[code]) {
             return res.status(404).json({
                 success: false,
                 error: `Standard '${code}' not found`,
-                availableCodes: Object.keys(fileMap)
+                availableCodes: Object.keys(fileMap),
             });
         }
 
@@ -294,7 +294,7 @@ router.get('/standards/:code', (req, res) => {
         if (!fs.existsSync(filePath)) {
             return res.status(404).json({
                 success: false,
-                error: `Standard file not found: ${fileMap[code]}`
+                error: `Standard file not found: ${fileMap[code]}`,
             });
         }
 
@@ -303,7 +303,7 @@ router.get('/standards/:code', (req, res) => {
         res.json({
             success: true,
             code,
-            data
+            data,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -325,13 +325,13 @@ router.get('/service-types', (req, res) => {
             { code: 'NEW', label: 'ขอใหม่', labelEN: 'New Application', description: 'ยื่นขอใบรับรอง GACP ใหม่' },
             { code: 'RENEWAL', label: 'ต่ออายุ', labelEN: 'Renewal', description: 'ต่ออายุใบรับรอง GACP ที่หมดอายุ' },
             { code: 'AMENDMENT', label: 'แก้ไข', labelEN: 'Amendment', description: 'แก้ไขข้อมูลใบรับรอง GACP' },
-            { code: 'EXPANSION', label: 'ขยายขอบเขต', labelEN: 'Scope Expansion', description: 'ขยายขอบเขตใบรับรอง GACP' }
+            { code: 'EXPANSION', label: 'ขยายขอบเขต', labelEN: 'Scope Expansion', description: 'ขยายขอบเขตใบรับรอง GACP' },
         ];
 
         res.json({
             success: true,
             count: serviceTypes.length,
-            data: serviceTypes
+            data: serviceTypes,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -351,13 +351,13 @@ router.get('/purposes', (req, res) => {
             { code: 'EDUCATION', label: 'การศึกษา', labelEN: 'Education' },
             { code: 'EXPORT', label: 'ส่งออก', labelEN: 'Export' },
             { code: 'PROCESSING', label: 'แปรรูป', labelEN: 'Processing' },
-            { code: 'MEDICAL', label: 'ทางการแพทย์', labelEN: 'Medical Use' }
+            { code: 'MEDICAL', label: 'ทางการแพทย์', labelEN: 'Medical Use' },
         ];
 
         res.json({
             success: true,
             count: purposes.length,
-            data: purposes
+            data: purposes,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -377,13 +377,13 @@ router.get('/cultivation-methods', (req, res) => {
             { code: 'GAP', label: 'GAP', labelEN: 'Good Agricultural Practice' },
             { code: 'HYDROPONIC', label: 'ไฮโดรโปนิกส์', labelEN: 'Hydroponic' },
             { code: 'SOILLESS', label: 'ไร้ดิน', labelEN: 'Soilless' },
-            { code: 'AEROPONIC', label: 'แอโรโปนิกส์', labelEN: 'Aeroponic' }
+            { code: 'AEROPONIC', label: 'แอโรโปนิกส์', labelEN: 'Aeroponic' },
         ];
 
         res.json({
             success: true,
             count: methods.length,
-            data: methods
+            data: methods,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -402,13 +402,13 @@ router.get('/farm-types', (req, res) => {
             { code: 'PROCESSING', label: 'โรงแปรรูป', labelEN: 'Processing Facility' },
             { code: 'STORAGE', label: 'คลังสินค้า', labelEN: 'Storage Facility' },
             { code: 'NURSERY', label: 'เรือนเพาะชำ', labelEN: 'Nursery' },
-            { code: 'MIXED', label: 'ผสมผสาน', labelEN: 'Mixed Use' }
+            { code: 'MIXED', label: 'ผสมผสาน', labelEN: 'Mixed Use' },
         ];
 
         res.json({
             success: true,
             count: farmTypes.length,
-            data: farmTypes
+            data: farmTypes,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -426,13 +426,13 @@ router.get('/area-types', (req, res) => {
             { code: 'INDOOR', label: 'ในอาคาร', labelEN: 'Indoor', description: 'ปลูกในอาคารควบคุมสภาพแวดล้อม' },
             { code: 'OUTDOOR', label: 'กลางแจ้ง', labelEN: 'Outdoor', description: 'ปลูกพื้นที่โล่งแจ้ง' },
             { code: 'GREENHOUSE', label: 'โรงเรือน', labelEN: 'Greenhouse', description: 'ปลูกในโรงเรือนพลาสติก/กระจก' },
-            { code: 'CONTROLLED', label: 'สภาพแวดล้อมควบคุม', labelEN: 'Controlled Environment', description: 'ห้องปลูกควบคุมอุณหภูมิ/แสง' }
+            { code: 'CONTROLLED', label: 'สภาพแวดล้อมควบคุม', labelEN: 'Controlled Environment', description: 'ห้องปลูกควบคุมอุณหภูมิ/แสง' },
         ];
 
         res.json({
             success: true,
             count: areaTypes.length,
-            data: areaTypes
+            data: areaTypes,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -449,13 +449,13 @@ router.get('/applicant-types', (req, res) => {
         const applicantTypes = [
             { code: 'INDIVIDUAL', label: 'บุคคลธรรมดา', labelEN: 'Individual' },
             { code: 'JURISTIC', label: 'นิติบุคคล', labelEN: 'Juristic Person' },
-            { code: 'COMMUNITY_ENTERPRISE', label: 'วิสาหกิจชุมชน', labelEN: 'Community Enterprise' }
+            { code: 'COMMUNITY_ENTERPRISE', label: 'วิสาหกิจชุมชน', labelEN: 'Community Enterprise' },
         ];
 
         res.json({
             success: true,
             count: applicantTypes.length,
-            data: applicantTypes
+            data: applicantTypes,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -478,28 +478,28 @@ router.get('/pricing', (req, res) => {
             phase1: {
                 amount: 5000,
                 description: 'ค่าตรวจเอกสาร SOP (ต่อประเภทพื้นที่)',
-                descriptionEN: 'Document review fee per area type'
+                descriptionEN: 'Document review fee per area type',
             },
             phase2: {
                 amount: 30000,
                 description: 'ค่าตรวจประเมินแปลงปลูก',
-                descriptionEN: 'Site inspection fee'
+                descriptionEN: 'Site inspection fee',
             },
             licenses: {
                 bt11_cultivation: 50000,
                 bt13_processing: 50000,
                 bt16_export: 90000,
-                bt_trading: 4000
+                bt_trading: 4000,
             },
             notes: [
                 'ผู้ยื่นรับผิดชอบค่าเดินทางและที่พัก Auditor 3 ท่าน',
-                'ค่าธรรมเนียมอาจเปลี่ยนแปลงตามประกาศ'
-            ]
+                'ค่าธรรมเนียมอาจเปลี่ยนแปลงตามประกาศ',
+            ],
         };
 
         res.json({
             success: true,
-            data: pricing
+            data: pricing,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -549,18 +549,18 @@ router.get('/pricing/calculate', (req, res) => {
                 phase1: {
                     perType: phase1PerType,
                     count: areaTypesArray.length,
-                    subtotal: phase1Total
+                    subtotal: phase1Total,
                 },
                 phase2: {
-                    amount: phase2
+                    amount: phase2,
                 },
                 licenses: {
                     items: licenseBreakdown,
-                    subtotal: licenseFees
+                    subtotal: licenseFees,
                 },
                 total: total + licenseFees,
-                currency: 'THB'
-            }
+                currency: 'THB',
+            },
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });

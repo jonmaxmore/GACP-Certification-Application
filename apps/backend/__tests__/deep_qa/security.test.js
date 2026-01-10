@@ -19,7 +19,7 @@ describe('Deep QA: 1.1 Auth & Security', () => {
             const token = jwt.sign(
                 { id: '507f1f77bcf86cd799439011', role: 'farmer' },
                 SECRET || 'secret', // Use valid secret if available
-                { expiresIn: '-1s' }
+                { expiresIn: '-1s' },
             );
 
             const res = await request(app)
@@ -37,7 +37,7 @@ describe('Deep QA: 1.1 Auth & Security', () => {
             const token = jwt.sign(
                 { id: '507f1f77bcf86cd799439011', role: 'farmer' },
                 SECRET || 'secret',
-                { expiresIn: '1h' }
+                { expiresIn: '1h' },
             );
 
             // /api/v2/officer/auditors requires 'officer' role

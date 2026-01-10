@@ -175,7 +175,7 @@ const auditMiddleware = (category, action, options = {}) => {
  * Sanitize request body to remove sensitive data
  */
 const sanitizeBody = (body) => {
-    if (!body) return undefined;
+    if (!body) {return undefined;}
 
     const sensitiveFields = ['password', 'token', 'secret', 'apiKey', 'creditCard'];
     const sanitized = { ...body };
@@ -311,8 +311,8 @@ router.get('/stats', (req, res) => {
 
         // Count recent
         const logTime = new Date(log.timestamp).getTime();
-        if (logTime >= oneDayAgo) stats.last24Hours++;
-        if (logTime >= oneHourAgo) stats.lastHour++;
+        if (logTime >= oneDayAgo) {stats.last24Hours++;}
+        if (logTime >= oneHourAgo) {stats.lastHour++;}
     }
 
     res.json({

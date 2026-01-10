@@ -111,9 +111,9 @@ class MFAService {
         let bits = '';
 
         for (const char of base32String.toUpperCase()) {
-            if (char === '=') break;
+            if (char === '=') {break;}
             const index = alphabet.indexOf(char);
-            if (index === -1) continue;
+            if (index === -1) {continue;}
             bits += index.toString(2).padStart(5, '0');
         }
 
@@ -129,7 +129,7 @@ class MFAService {
      * Secure string comparison (timing-safe)
      */
     secureCompare(a, b) {
-        if (a.length !== b.length) return false;
+        if (a.length !== b.length) {return false;}
         return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
     }
 

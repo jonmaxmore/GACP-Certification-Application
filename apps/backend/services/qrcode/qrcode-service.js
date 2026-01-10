@@ -43,11 +43,11 @@ class QRCodeService {
             type: 'image/png',
             color: {
                 dark: options.darkColor || '#000000',
-                light: options.lightColor || '#FFFFFF'
+                light: options.lightColor || '#FFFFFF',
             },
             width: options.width || 300,
             margin: options.margin || 2,
-            errorCorrectionLevel: 'M'
+            errorCorrectionLevel: 'M',
         };
 
         try {
@@ -71,11 +71,11 @@ class QRCodeService {
             type: 'png',
             color: {
                 dark: options.darkColor || '#000000',
-                light: options.lightColor || '#FFFFFF'
+                light: options.lightColor || '#FFFFFF',
             },
             width: options.width || 300,
             margin: options.margin || 2,
-            errorCorrectionLevel: 'M'
+            errorCorrectionLevel: 'M',
         };
 
         try {
@@ -104,7 +104,7 @@ class QRCodeService {
             dataUrl,
             type,
             recordId: id,
-            generatedAt: new Date().toISOString()
+            generatedAt: new Date().toISOString(),
         };
     }
 }

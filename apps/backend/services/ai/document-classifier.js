@@ -15,53 +15,53 @@ const DOCUMENT_TYPES = {
         nameTH: 'บัตรประจำตัวประชาชน',
         nameEN: 'National ID Card',
         requiredPatterns: [
-            /\d{1}-\d{4}-\d{5}-\d{2}-\d{1}/  // Thai ID format
+            /\d{1}-\d{4}-\d{5}-\d{2}-\d{1}/,  // Thai ID format
         ],
         keywords: ['บัตรประจำตัว', 'identification', 'หมายเลขบัตร', 'ชื่อ-นามสกุล'],
-        minConfidence: 0.7
+        minConfidence: 0.7,
     },
     HOUSE_REGISTRATION: {
         nameTH: 'สำเนาทะเบียนบ้าน',
         nameEN: 'House Registration',
         requiredPatterns: [],
         keywords: ['ทะเบียนบ้าน', 'house registration', 'เลขรหัสประจำบ้าน', 'ที่อยู่'],
-        minConfidence: 0.6
+        minConfidence: 0.6,
     },
     LAND_TITLE: {
         nameTH: 'โฉนดที่ดิน/นส.3',
         nameEN: 'Land Title Deed',
         requiredPatterns: [],
         keywords: ['โฉนด', 'นส.3', 'เอกสารสิทธิ์', 'ที่ดิน', 'ไร่', 'งาน', 'ตารางวา'],
-        minConfidence: 0.6
+        minConfidence: 0.6,
     },
     FARM_LICENSE: {
         nameTH: 'ใบอนุญาตประกอบกิจการ',
         nameEN: 'Farm/Business License',
         requiredPatterns: [],
         keywords: ['ใบอนุญาต', 'permit', 'license', 'กรมการแพทย์', 'อย.'],
-        minConfidence: 0.6
+        minConfidence: 0.6,
     },
     MEDICAL_CERTIFICATE: {
         nameTH: 'ใบรับรองแพทย์',
         nameEN: 'Medical Certificate',
         requiredPatterns: [],
         keywords: ['ใบรับรองแพทย์', 'medical', 'โรงพยาบาล', 'แพทย์', 'สุขภาพ'],
-        minConfidence: 0.6
+        minConfidence: 0.6,
     },
     BANK_STATEMENT: {
         nameTH: 'สมุดบัญชีธนาคาร',
         nameEN: 'Bank Statement',
         requiredPatterns: [],
         keywords: ['ธนาคาร', 'bank', 'บัญชี', 'ยอดเงิน', 'statement'],
-        minConfidence: 0.6
+        minConfidence: 0.6,
     },
     PHOTO: {
         nameTH: 'รูปถ่าย',
         nameEN: 'Photograph',
         requiredPatterns: [],
         keywords: [],  // Photos don't have text, rely on image analysis
-        minConfidence: 0.5
-    }
+        minConfidence: 0.5,
+    },
 };
 
 class DocumentClassifier {
@@ -77,7 +77,7 @@ class DocumentClassifier {
             return {
                 valid: false,
                 error: `Unknown document type: ${expectedType}`,
-                confidence: 0
+                confidence: 0,
             };
         }
 
@@ -144,7 +144,7 @@ class DocumentClassifier {
             maxScore,
             issues,
             keywordsFound,
-            totalKeywords: docDef.keywords.length
+            totalKeywords: docDef.keywords.length,
         };
     }
 
@@ -158,32 +158,35 @@ class DocumentClassifier {
         const data = {};
 
         switch (documentType) {
-            case 'ID_CARD':
+            case 'ID_CARD': {
                 // Extract Thai ID number
                 const idMatch = extractedText.match(/\d{1}-\d{4}-\d{5}-\d{2}-\d{1}/);
                 if (idMatch) {
                     data.idNumber = idMatch[0];
                 }
                 break;
+            }
 
-            case 'LAND_TITLE':
+            case 'LAND_TITLE': {
                 // Extract area measurements
                 const areaMatch = extractedText.match(/(\d+)\s*ไร่\s*(\d+)?\s*งาน?\s*(\d+(?:\.\d+)?)?\s*ตารางวา?/);
                 if (areaMatch) {
                     data.area = {
                         rai: parseInt(areaMatch[1]) || 0,
                         ngan: parseInt(areaMatch[2]) || 0,
-                        sqWa: parseFloat(areaMatch[3]) || 0
+                        sqWa: parseFloat(areaMatch[3]) || 0,
                     };
                 }
                 break;
+            }
 
-            default:
+            default: {
                 // Generic extraction - dates, numbers
-                const dates = extractedText.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/g);
+                const dates = extractedText.match(/\d{1,2}[/-]\d{1,2}[/-]\d{2,4}/g);
                 if (dates) {
                     data.dates = dates;
                 }
+            }
         }
 
         return data;
@@ -196,7 +199,7 @@ class DocumentClassifier {
         return Object.entries(DOCUMENT_TYPES).map(([key, value]) => ({
             type: key,
             nameTH: value.nameTH,
-            nameEN: value.nameEN
+            nameEN: value.nameEN,
         }));
     }
 }

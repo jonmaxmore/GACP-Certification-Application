@@ -13,23 +13,23 @@ router.get('/', async (req, res) => {
             where: { isActive: true },
             include: {
                 requirements: {
-                    orderBy: { sortOrder: 'asc' }
-                }
+                    orderBy: { sortOrder: 'asc' },
+                },
             },
-            orderBy: { sortOrder: 'asc' }
+            orderBy: { sortOrder: 'asc' },
         });
 
         res.json({
             success: true,
             count: standards.length,
-            data: standards
+            data: standards,
         });
     } catch (error) {
         console.error('Error fetching standards:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch standards',
-            error: error.message
+            error: error.message,
         });
     }
 });

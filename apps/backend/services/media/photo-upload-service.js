@@ -139,8 +139,8 @@ class PhotoUploadService {
         }
 
         // Thailand bounds: Lat 5.6-20.5, Lng 97.3-105.6
-        if (latitude < 5 || latitude > 21) return false;
-        if (longitude < 97 || longitude > 106) return false;
+        if (latitude < 5 || latitude > 21) {return false;}
+        if (longitude < 97 || longitude > 106) {return false;}
 
         return true;
     }

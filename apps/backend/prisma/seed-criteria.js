@@ -16,7 +16,7 @@ const criteriaData = [
         description: 'รายงานการตรวจสารปนเปื้อน เช่น โลหะหนัก ยาฆ่าแมลง',
         icon: '🧪',
         sortOrder: 1,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
     {
         code: 'IDENTITY_TEST',
@@ -26,7 +26,7 @@ const criteriaData = [
         description: 'รายงานยืนยันชนิดพืช/สายพันธุ์',
         icon: '🧪',
         sortOrder: 2,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
     {
         code: 'MOISTURE_TEST',
@@ -36,7 +36,7 @@ const criteriaData = [
         description: 'รายงานวัดความชื้นผลิตภัณฑ์',
         icon: '🧪',
         sortOrder: 3,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
 
     // หมวดขั้นตอนการผลิต
@@ -48,7 +48,7 @@ const criteriaData = [
         description: 'เอกสารกระบวนการอบแห้ง บรรจุ เก็บรักษา',
         icon: '⚙️',
         sortOrder: 1,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
     {
         code: 'MANUFACTURING_RECORD',
@@ -58,7 +58,7 @@ const criteriaData = [
         description: 'เอกสาร Master Manufacturing Record',
         icon: '⚙️',
         sortOrder: 2,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
 
     // หมวดแหล่งที่มาเมล็ดพันธุ์
@@ -70,7 +70,7 @@ const criteriaData = [
         description: 'ใบรับรองแหล่งที่มา/ใบเสร็จซื้อเมล็ด',
         icon: '🌱',
         sortOrder: 1,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
     {
         code: 'PROPAGATION_RECORD',
@@ -80,7 +80,7 @@ const criteriaData = [
         description: 'เอกสารวิธีการขยายพันธุ์',
         icon: '🌱',
         sortOrder: 2,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
 
     // หมวดสุขอนามัยและความปลอดภัย  
@@ -92,7 +92,7 @@ const criteriaData = [
         description: 'ใบรับรองสุขภาพ/การอบรมสุขอนามัย',
         icon: '🛡️',
         sortOrder: 1,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
     {
         code: 'RECALL_PROCEDURE',
@@ -102,7 +102,7 @@ const criteriaData = [
         description: 'เอกสารขั้นตอนเรียกคืนสินค้า',
         icon: '🛡️',
         sortOrder: 2,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
     {
         code: 'COMPLAINT_RECORD',
@@ -112,7 +112,7 @@ const criteriaData = [
         description: 'เอกสารขั้นตอนรับเรื่องร้องเรียน',
         icon: '🛡️',
         sortOrder: 3,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
 
     // ----------------------------------------------------
@@ -128,7 +128,7 @@ const criteriaData = [
         description: 'มีเอกสารประเมินความเสี่ยงและมาตรการควบคุมในทุกขั้นตอนการผลิต',
         icon: '🌍',
         sortOrder: 1,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
     {
         code: 'WHO_RECORD_KEEPING',
@@ -138,7 +138,7 @@ const criteriaData = [
         description: 'มีระบบจัดเก็บและสืบค้นเอกสารย้อนหลังได้อย่างน้อย 5 ปี',
         icon: '🌍',
         sortOrder: 2,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
 
     // US FDA Category
@@ -150,7 +150,7 @@ const criteriaData = [
         description: 'มีขั้นตอนปฏิบัติมาตรฐานด้านความสะอาดและสุขอนามัย (SSOP)',
         icon: '🇺🇸',
         sortOrder: 1,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
     {
         code: 'FDA_HYGIENE_TRAINING',
@@ -160,7 +160,7 @@ const criteriaData = [
         description: 'บันทึกประวัติการฝึกอบรมพนักงานด้านสุขอนามัยประจำปี',
         icon: '🇺🇸',
         sortOrder: 2,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
 
     // ASEAN GHP/GMP
@@ -172,7 +172,7 @@ const criteriaData = [
         description: 'มีคู่มือคุณภาพที่ระบุนโยบายและวัตถุประสงค์คุณภาพชัดเจน',
         icon: '🌏',
         sortOrder: 1,
-        inputType: 'checkbox'
+        inputType: 'checkbox',
     },
     {
         code: 'ASEAN_POST_HARVEST_LOG',
@@ -182,8 +182,8 @@ const criteriaData = [
         description: 'บันทึกการตรวจสอบคุณภาพวัตถุดิบหลังการเก็บเกี่ยวและการแปรรูปเบื้องต้น',
         icon: '🌏',
         sortOrder: 2,
-        inputType: 'checkbox'
-    }
+        inputType: 'checkbox',
+    },
 ];
 
 async function seedCriteria() {
@@ -194,7 +194,7 @@ async function seedCriteria() {
             await prisma.supplementaryCriterion.upsert({
                 where: { code: criterion.code },
                 update: criterion,
-                create: criterion
+                create: criterion,
             });
             console.log(`  ✓ ${criterion.code}: ${criterion.label}`);
         } catch (error) {

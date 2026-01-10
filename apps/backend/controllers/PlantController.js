@@ -25,7 +25,7 @@ class PlantController {
 
             const plants = await prisma.plantSpecies.findMany({
                 where,
-                orderBy: { sortOrder: 'asc' }
+                orderBy: { sortOrder: 'asc' },
             });
 
             // Map to legacy format for frontend compatibility if needed, 
@@ -33,7 +33,7 @@ class PlantController {
             // The frontend likely expects 'plantId' property instead of 'code'.
             const mappedPlants = plants.map(p => ({
                 ...p,
-                plantId: p.code // Alias code to plantId
+                plantId: p.code, // Alias code to plantId
             }));
 
             res.json({
@@ -60,7 +60,7 @@ class PlantController {
             const { plantId } = req.params;
 
             const plant = await prisma.plantSpecies.findUnique({
-                where: { code: plantId }
+                where: { code: plantId },
             });
 
             if (!plant) {
@@ -74,7 +74,7 @@ class PlantController {
                 success: true,
                 data: {
                     ...plant,
-                    plantId: plant.code
+                    plantId: plant.code,
                 },
             });
         } catch (error) {
@@ -98,7 +98,7 @@ class PlantController {
 
             // Verify plant exists
             const plant = await prisma.plantSpecies.findUnique({
-                where: { code: plantId }
+                where: { code: plantId },
             });
 
             if (!plant) {
@@ -151,7 +151,7 @@ class PlantController {
             const { plantId } = req.params;
 
             const plant = await prisma.plantSpecies.findUnique({
-                where: { code: plantId }
+                where: { code: plantId },
             });
 
             if (!plant) {
@@ -191,7 +191,7 @@ class PlantController {
         try {
             const plants = await prisma.plantSpecies.findMany({
                 where: { isActive: true },
-                orderBy: { sortOrder: 'asc' }
+                orderBy: { sortOrder: 'asc' },
             });
 
             const summary = plants.map(p => ({

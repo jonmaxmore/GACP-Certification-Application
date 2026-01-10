@@ -11,7 +11,7 @@ router.post('/', upload.single('file'), (req, res) => {
         if (!req.file) {
             return res.status(400).json({
                 success: false,
-                error: 'No file uploaded'
+                error: 'No file uploaded',
             });
         }
 
@@ -26,14 +26,14 @@ router.post('/', upload.single('file'), (req, res) => {
                 path: req.file.path,
                 url: fileUrl,
                 mimetype: req.file.mimetype,
-                size: req.file.size
-            }
+                size: req.file.size,
+            },
         });
     } catch (error) {
         console.error('Upload error:', error);
         res.status(500).json({
             success: false,
-            error: 'File upload failed'
+            error: 'File upload failed',
         });
     }
 });

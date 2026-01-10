@@ -68,7 +68,7 @@ class CARReportService {
         } = data;
 
         const formatDate = (dateStr) => {
-            if (!dateStr) return '-';
+            if (!dateStr) {return '-';}
             return new Date(dateStr).toLocaleDateString('th-TH', {
                 year: 'numeric',
                 month: 'long',

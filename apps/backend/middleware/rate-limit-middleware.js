@@ -26,7 +26,7 @@ const RATE_LIMITS = {
     'applications/submit': { windowMs: 5 * 60 * 1000, maxRequests: 10 }, // 10 per 5 min
 
     // Default
-    'default': { windowMs: 60 * 1000, maxRequests: 100 } // 100 per min
+    'default': { windowMs: 60 * 1000, maxRequests: 100 }, // 100 per min
 };
 
 /**
@@ -110,7 +110,7 @@ function rateLimiter(req, res, next) {
         entry = {
             count: 1,
             windowStart: now,
-            windowEnd: now + config.windowMs
+            windowEnd: now + config.windowMs,
         };
         requestStore.set(key, entry);
     } else {
@@ -129,14 +129,14 @@ function rateLimiter(req, res, next) {
             clientId,
             path: req.path,
             count: entry.count,
-            limit: config.maxRequests
+            limit: config.maxRequests,
         });
 
         return res.status(429).json({
             success: false,
             error: 'RATE_LIMIT_EXCEEDED',
             message: 'กรุณารอสักครู่ก่อนลองใหม่อีกครั้ง',
-            retryAfter: Math.ceil((entry.windowEnd - now) / 1000)
+            retryAfter: Math.ceil((entry.windowEnd - now) / 1000),
         });
     }
 
@@ -172,7 +172,7 @@ function strictRateLimiter(windowMs, maxRequests) {
                 success: false,
                 error: 'TOO_MANY_REQUESTS',
                 message: 'คำขอมากเกินไป กรุณารอสักครู่',
-                retryAfter: Math.ceil((entry.windowEnd - now) / 1000)
+                retryAfter: Math.ceil((entry.windowEnd - now) / 1000),
             });
         }
 
@@ -185,7 +185,7 @@ module.exports = {
     strictRateLimiter,
     RATE_LIMITS,
     startCleanup,
-    stopCleanup
+    stopCleanup,
 };
 
 

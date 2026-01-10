@@ -129,7 +129,7 @@ API Documentation สำหรับระบบรับรองมาตร�
     apis: [
         path.join(__dirname, '../routes/**/*.js'),
         path.join(__dirname, '../controllers/**/*.js'),
-        path.join(__dirname, '../server.js')
+        path.join(__dirname, '../server.js'),
     ],
 };
 

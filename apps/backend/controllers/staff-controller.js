@@ -89,10 +89,10 @@ class StaffController {
 
             const query = { role: { $in: STAFF_ROLES } };
 
-            if (role && STAFF_ROLES.includes(role)) query.role = role;
-            if (departmentId) query.departmentId = departmentId;
-            if (teamId) query.teamId = teamId;
-            if (region) query.region = region;
+            if (role && STAFF_ROLES.includes(role)) {query.role = role;}
+            if (departmentId) {query.departmentId = departmentId;}
+            if (teamId) {query.teamId = teamId;}
+            if (region) {query.region = region;}
 
             const skip = (parseInt(page) - 1) * parseInt(limit);
 
@@ -174,14 +174,14 @@ class StaffController {
             }
 
             // Update fields
-            if (firstName) staff.firstName = firstName;
-            if (lastName) staff.lastName = lastName;
-            if (role && STAFF_ROLES.includes(role)) staff.role = role;
-            if (departmentId !== undefined) staff.departmentId = departmentId;
-            if (teamId !== undefined) staff.teamId = teamId;
-            if (region !== undefined) staff.region = region;
-            if (supervisorId !== undefined) staff.supervisorId = supervisorId;
-            if (status) staff.status = status;
+            if (firstName) {staff.firstName = firstName;}
+            if (lastName) {staff.lastName = lastName;}
+            if (role && STAFF_ROLES.includes(role)) {staff.role = role;}
+            if (departmentId !== undefined) {staff.departmentId = departmentId;}
+            if (teamId !== undefined) {staff.teamId = teamId;}
+            if (region !== undefined) {staff.region = region;}
+            if (supervisorId !== undefined) {staff.supervisorId = supervisorId;}
+            if (status) {staff.status = status;}
 
             await staff.save();
 

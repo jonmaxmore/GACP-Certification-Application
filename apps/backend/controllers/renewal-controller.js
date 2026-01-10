@@ -30,7 +30,7 @@ class RenewalController {
                 return response.error(
                     res,
                     'Application not found or not approved',
-                    404
+                    404,
                 );
             }
 
@@ -40,7 +40,7 @@ class RenewalController {
             // Get document requirements for this plant type
             const docRequirements = await DocumentRequirement.getRequirementsForPlant(
                 prevApp.plantId,
-                'RENEW'
+                'RENEW',
             );
 
             // Determine which documents need to be re-uploaded
@@ -106,7 +106,7 @@ class RenewalController {
         for (const req of docRequirements) {
             // Find existing document for this requirement
             const existingDoc = prevApp.documents?.find(
-                (d) => d.requirementId?.toString() === req._id?.toString()
+                (d) => d.requirementId?.toString() === req._id?.toString(),
             );
 
             if (!existingDoc) {
@@ -154,7 +154,7 @@ class RenewalController {
                 return response.error(
                     res,
                     'Previous application not found',
-                    404
+                    404,
                 );
             }
 
@@ -179,7 +179,7 @@ class RenewalController {
                 formData,
                 userId,
                 prevApp.plantId,
-                'RENEW'
+                'RENEW',
             );
 
             logger.info(`Renewal application created: ${newApp._id}`);

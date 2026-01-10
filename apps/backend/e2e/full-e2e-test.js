@@ -36,7 +36,7 @@ const results = {
     passed: [],
     failed: [],
     skipped: [],
-    hardcoded: []
+    hardcoded: [],
 };
 
 // ============================================
@@ -47,7 +47,7 @@ function generateFarmerToken(user) {
     return jwt.sign(
         { id: user.id, role: 'FARMER', uuid: user.uuid, accountType: user.accountType },
         JWT_SECRET,
-        { expiresIn: '1h' }
+        { expiresIn: '1h' },
     );
 }
 
@@ -55,7 +55,7 @@ function generateStaffToken(staff) {
     return jwt.sign(
         { id: staff.id, role: staff.role, email: staff.email },
         DTAM_JWT_SECRET,
-        { expiresIn: '1h' }
+        { expiresIn: '1h' },
     );
 }
 
@@ -88,14 +88,14 @@ async function testInfrastructure() {
 
     await test('Health endpoint returns success', async () => {
         const res = await axios.get(`${API_URL}/health`);
-        if (!res.data.success) throw new Error('Health check failed');
-        if (res.data.database !== 'postgresql') throw new Error('Database type mismatch');
+        if (!res.data.success) {throw new Error('Health check failed');}
+        if (res.data.database !== 'postgresql') {throw new Error('Database type mismatch');}
     });
 
     await test('API version endpoint', async () => {
         const res = await axios.get(`${API_URL}/version`);
-        if (!res.data.success) throw new Error('Version check failed');
-        if (!res.data.version) throw new Error('No version info');
+        if (!res.data.success) {throw new Error('Version check failed');}
+        if (!res.data.version) {throw new Error('No version info');}
     });
 }
 
@@ -120,24 +120,24 @@ async function testMemberSystem() {
                 status: 'ACTIVE',
                 firstName: 'E2E',
                 lastName: 'Tester',
-                phoneNumber: '0899999999'
-            }
+                phoneNumber: '0899999999',
+            },
         });
-        if (!testUser.id) throw new Error('User creation failed');
+        if (!testUser.id) {throw new Error('User creation failed');}
     });
 
     await test('Generate and validate farmer token', async () => {
         const token = generateFarmerToken(testUser);
         const decoded = jwt.verify(token, JWT_SECRET);
-        if (decoded.id !== testUser.id) throw new Error('Token ID mismatch');
+        if (decoded.id !== testUser.id) {throw new Error('Token ID mismatch');}
     });
 
     await test('Get current user (/auth-farmer/me)', async () => {
         const token = generateFarmerToken(testUser);
         const res = await axios.get(`${API_URL}/auth-farmer/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': `Bearer ${token}` },
         });
-        if (!res.data.success) throw new Error('Get me failed');
+        if (!res.data.success) {throw new Error('Get me failed');}
     });
 
     // Store for later tests
@@ -154,7 +154,7 @@ async function testApplicationFlow() {
 
     await test('Get plants list (/plants)', async () => {
         const res = await axios.get(`${API_URL}/plants`);
-        if (!res.data.success) throw new Error('Get plants failed');
+        if (!res.data.success) {throw new Error('Get plants failed');}
         // Check if data is hardcoded or from DB
         if (res.data.data && res.data.data.length > 0) {
             const plant = res.data.data[0];
@@ -171,20 +171,20 @@ async function testApplicationFlow() {
             plantId: 'cannabis',
             serviceType: 'NEW',
             areaType: 'OUTDOOR',
-            documents: []
+            documents: [],
         }, {
-            headers: { 'Authorization': `Bearer ${global.farmerToken}` }
+            headers: { 'Authorization': `Bearer ${global.farmerToken}` },
         });
-        if (!res.data.success) throw new Error('Create draft failed');
+        if (!res.data.success) {throw new Error('Create draft failed');}
         applicationId = res.data.data._id;
     });
 
     await test('Get my applications', async () => {
         const res = await axios.get(`${API_URL}/applications/my`, {
-            headers: { 'Authorization': `Bearer ${global.farmerToken}` }
+            headers: { 'Authorization': `Bearer ${global.farmerToken}` },
         });
-        if (!res.data.success) throw new Error('Get my applications failed');
-        if (res.data.data.length === 0) throw new Error('No applications found');
+        if (!res.data.success) {throw new Error('Get my applications failed');}
+        if (res.data.data.length === 0) {throw new Error('No applications found');}
     });
 
     global.testApplicationId = applicationId;
@@ -213,19 +213,19 @@ async function testQuotationSystem() {
                 role: 'ACCOUNTANT',
                 accountType: 'STAFF',
                 status: 'ACTIVE',
-                phoneNumber: '0888888888'
-            }
+                phoneNumber: '0888888888',
+            },
         });
-        if (!testStaff.id) throw new Error('Staff creation failed');
+        if (!testStaff.id) {throw new Error('Staff creation failed');}
         global.testStaff = testStaff;
         global.staffToken = generateStaffToken(testStaff);
     });
 
     await test('Staff: Get pending reviews', async () => {
         const res = await axios.get(`${API_URL}/applications/pending-reviews`, {
-            headers: { 'Authorization': `Bearer ${global.staffToken}` }
+            headers: { 'Authorization': `Bearer ${global.staffToken}` },
         });
-        if (!res.data.success) throw new Error('Get pending reviews failed');
+        if (!res.data.success) {throw new Error('Get pending reviews failed');}
     });
 
     let quoteId;
@@ -239,13 +239,13 @@ async function testQuotationSystem() {
         const res = await axios.post(`${API_URL}/quotes`, {
             applicationId: global.testApplicationId,
             items: [
-                { description: 'ค่าตรวจสอบ', quantity: 1, unitPrice: 5000, amount: 5000 }
+                { description: 'ค่าตรวจสอบ', quantity: 1, unitPrice: 5000, amount: 5000 },
             ],
-            validDays: 30
+            validDays: 30,
         }, {
-            headers: { 'Authorization': `Bearer ${global.staffToken}` }
+            headers: { 'Authorization': `Bearer ${global.staffToken}` },
         });
-        if (!res.data.success) throw new Error(`Create quote failed: ${JSON.stringify(res.data)}`);
+        if (!res.data.success) {throw new Error(`Create quote failed: ${JSON.stringify(res.data)}`);}
         quoteId = res.data.data.id;
         global.testQuoteId = quoteId;
     });
@@ -256,16 +256,16 @@ async function testQuotationSystem() {
             return;
         }
         const res = await axios.post(`${API_URL}/quotes/${quoteId}/send`, {}, {
-            headers: { 'Authorization': `Bearer ${global.staffToken}` }
+            headers: { 'Authorization': `Bearer ${global.staffToken}` },
         });
-        if (!res.data.success) throw new Error('Send quote failed');
+        if (!res.data.success) {throw new Error('Send quote failed');}
     });
 
     await test('Farmer: Get my quotes', async () => {
         const res = await axios.get(`${API_URL}/quotes/my`, {
-            headers: { 'Authorization': `Bearer ${global.farmerToken}` }
+            headers: { 'Authorization': `Bearer ${global.farmerToken}` },
         });
-        if (!res.data.success) throw new Error('Get my quotes failed');
+        if (!res.data.success) {throw new Error('Get my quotes failed');}
     });
 }
 
@@ -278,16 +278,16 @@ async function testPaymentSystem() {
 
     await test('Farmer: Get my payments', async () => {
         const res = await axios.get(`${API_URL}/payments/my`, {
-            headers: { 'Authorization': `Bearer ${global.farmerToken}` }
+            headers: { 'Authorization': `Bearer ${global.farmerToken}` },
         });
-        if (!res.data.success) throw new Error('Get my payments failed');
+        if (!res.data.success) {throw new Error('Get my payments failed');}
     });
 
     await test('Farmer: Get my invoices', async () => {
         const res = await axios.get(`${API_URL}/invoices/my`, {
-            headers: { 'Authorization': `Bearer ${global.farmerToken}` }
+            headers: { 'Authorization': `Bearer ${global.farmerToken}` },
         });
-        if (!res.data.success) throw new Error('Get my invoices failed');
+        if (!res.data.success) {throw new Error('Get my invoices failed');}
     });
 }
 
@@ -316,12 +316,12 @@ async function testTrackAndTrace() {
     // Check if we have any existing batches/lots with QR codes
     await test('Check for existing trace data', async () => {
         const batch = await prisma.harvestBatch.findFirst({
-            where: { qrCode: { not: null } }
+            where: { qrCode: { not: null } },
         });
 
         if (batch) {
             const res = await axios.get(`${API_URL}/trace/${batch.qrCode}`);
-            if (!res.data.success) throw new Error('Trace batch failed');
+            if (!res.data.success) {throw new Error('Trace batch failed');}
             console.log(`   Found traceable batch: ${batch.batchNumber}`);
         } else {
             console.log('   No batches with QR codes found (expected for fresh DB)');
@@ -338,9 +338,9 @@ async function testCertificateManagement() {
 
     await test('Get certificates list (staff)', async () => {
         const res = await axios.get(`${API_URL}/certificates`, {
-            headers: { 'Authorization': `Bearer ${global.staffToken}` }
+            headers: { 'Authorization': `Bearer ${global.staffToken}` },
         });
-        if (!res.data.success) throw new Error('Get certificates failed');
+        if (!res.data.success) {throw new Error('Get certificates failed');}
     });
 }
 
@@ -353,45 +353,45 @@ async function testAdditionalAPIs() {
 
     await test('Get config/service-types', async () => {
         const res = await axios.get(`${API_URL}/config/service-types`);
-        if (!res.data.success) throw new Error('Get service types failed');
-        if (res.data.count < 3) throw new Error('Expected at least 3 service types');
+        if (!res.data.success) {throw new Error('Get service types failed');}
+        if (res.data.count < 3) {throw new Error('Expected at least 3 service types');}
     });
 
     await test('Get config/purposes', async () => {
         const res = await axios.get(`${API_URL}/config/purposes`);
-        if (!res.data.success) throw new Error('Get purposes failed');
-        if (res.data.count < 4) throw new Error('Expected at least 4 purposes');
+        if (!res.data.success) {throw new Error('Get purposes failed');}
+        if (res.data.count < 4) {throw new Error('Expected at least 4 purposes');}
     });
 
     await test('Get config/cultivation-methods', async () => {
         const res = await axios.get(`${API_URL}/config/cultivation-methods`);
-        if (!res.data.success) throw new Error('Get cultivation methods failed');
+        if (!res.data.success) {throw new Error('Get cultivation methods failed');}
     });
 
     await test('Get config/farm-types', async () => {
         const res = await axios.get(`${API_URL}/config/farm-types`);
-        if (!res.data.success) throw new Error('Get farm types failed');
+        if (!res.data.success) {throw new Error('Get farm types failed');}
     });
 
     await test('Get config/area-types', async () => {
         const res = await axios.get(`${API_URL}/config/area-types`);
-        if (!res.data.success) throw new Error('Get area types failed');
+        if (!res.data.success) {throw new Error('Get area types failed');}
     });
 
     await test('Get config/applicant-types', async () => {
         const res = await axios.get(`${API_URL}/config/applicant-types`);
-        if (!res.data.success) throw new Error('Get applicant types failed');
+        if (!res.data.success) {throw new Error('Get applicant types failed');}
     });
 
     await test('Get config/pricing', async () => {
         const res = await axios.get(`${API_URL}/config/pricing`);
-        if (!res.data.success) throw new Error('Get pricing failed');
+        if (!res.data.success) {throw new Error('Get pricing failed');}
     });
 
     await test('Get config/document-slots', async () => {
         try {
             const res = await axios.get(`${API_URL}/config/document-slots`);
-            if (!res.data.success) throw new Error('Get document slots failed');
+            if (!res.data.success) {throw new Error('Get document slots failed');}
         } catch (e) {
             if (e.response && e.response.status === 404) {
                 skip('Document slots', 'Endpoint not yet implemented');
@@ -404,9 +404,9 @@ async function testAdditionalAPIs() {
     await test('Get notifications (farmer)', async () => {
         try {
             const res = await axios.get(`${API_URL}/notifications`, {
-                headers: { 'Authorization': `Bearer ${global.farmerToken}` }
+                headers: { 'Authorization': `Bearer ${global.farmerToken}` },
             });
-            if (!res.data.success) throw new Error('Get notifications failed');
+            if (!res.data.success) {throw new Error('Get notifications failed');}
         } catch (e) {
             if (e.response && e.response.status === 500) {
                 console.log('   ⚠️ Notifications endpoint has issues (500)');
@@ -426,10 +426,10 @@ async function cleanup() {
         // Delete test user and related data
         if (global.testFarmer) {
             await prisma.application.deleteMany({
-                where: { farmerId: global.testFarmer.id }
+                where: { farmerId: global.testFarmer.id },
             });
             await prisma.user.delete({
-                where: { id: global.testFarmer.id }
+                where: { id: global.testFarmer.id },
             });
             console.log('   Cleaned up test farmer');
         }

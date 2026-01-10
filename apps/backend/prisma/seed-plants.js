@@ -261,7 +261,7 @@ async function main() {
                     sortOrder: plant.sortOrder,
                     isActive: plant.isActive,
                     gacpCategory: plant.group === 'HIGH_CONTROL' ? 'HIGH_CONTROL' : 'MEDICINAL',
-                }
+                },
             });
             console.log(`  ✅ Synced plant: ${plant.code}`);
         }
@@ -271,13 +271,13 @@ async function main() {
         // 2. Clear existing documents for these plants
         for (const plant of plantsData) {
             await prisma.documentRequirement.deleteMany({
-                where: { plantCode: plant.code }
+                where: { plantCode: plant.code },
             });
         }
 
         // 3. Insert Documents
         await prisma.documentRequirement.createMany({
-            data: documentsData
+            data: documentsData,
         });
 
         console.log(`  ✅ Seeded ${documentsData.length} document requirements.`);

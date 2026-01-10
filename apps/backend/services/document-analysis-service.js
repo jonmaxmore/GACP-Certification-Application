@@ -19,11 +19,11 @@ class DocumentAnalysisService {
         const docs = await prisma.documentRequirement.findMany({
             where: {
                 plantCode: plantId,
-                requestType: requestType
+                requestType: requestType,
             },
             orderBy: {
-                sortOrder: 'asc'
-            }
+                sortOrder: 'asc',
+            },
         });
 
         return docs.map(doc => ({
@@ -51,7 +51,7 @@ class DocumentAnalysisService {
     async analyzeRequiredDocuments(plantId, requestType, applicationData = {}) {
         // 1. Get plant configuration
         const plant = await prisma.plantSpecies.findUnique({
-            where: { code: plantId }
+            where: { code: plantId },
         });
 
         if (!plant) {
@@ -67,7 +67,7 @@ class DocumentAnalysisService {
         const conditionalDocs = this._generateConditionalDocs(
             isGroupA,
             requestType,
-            applicationData
+            applicationData,
         );
 
         // 4. Merge and deduplicate
@@ -182,7 +182,7 @@ class DocumentAnalysisService {
         const hasTuber = plantParts.some(p =>
             p.toLowerCase().includes('tuber') ||
             p.includes('หัว') ||
-            p.includes('เหง้า')
+            p.includes('เหง้า'),
         );
         if (hasTuber) {
             docs.push({
@@ -320,7 +320,7 @@ class DocumentAnalysisService {
                     valid: false,
                     error: 'OCR extraction failed',
                     details: extraction.error,
-                    confidence: 0
+                    confidence: 0,
                 };
             }
 
@@ -341,14 +341,14 @@ class DocumentAnalysisService {
                 ocrConfidence: extraction.confidence,
                 ocrDuration: extraction.duration,
                 keywordsFound: classification.keywordsFound,
-                totalKeywords: classification.totalKeywords
+                totalKeywords: classification.totalKeywords,
             };
         } catch (error) {
             return {
                 valid: false,
                 error: 'Verification failed',
                 details: error.message,
-                confidence: 0
+                confidence: 0,
             };
         }
     }

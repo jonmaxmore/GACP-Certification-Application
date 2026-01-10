@@ -132,19 +132,19 @@ module.exports = {
           description: 'ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น',
           quantity: areaCount,
           unitPrice: PAYMENT_FEES.DOCUMENT_REVIEW_FEE,
-          amount: docReview
+          amount: docReview,
         },
         {
           order: 2,
           description: 'ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน',
           quantity: areaCount,
           unitPrice: PAYMENT_FEES.FIELD_AUDIT_FEE,
-          amount: inspection
-        }
+          amount: inspection,
+        },
       ],
       subtotal: docReview + inspection,
       total: docReview + inspection,
-      areaCount
+      areaCount,
     };
   },
 

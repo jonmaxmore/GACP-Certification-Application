@@ -33,26 +33,26 @@ router.post('/', async (req, res) => {
             labTestReportUrl,
             destinationType,
             destination,
-            notes
+            notes,
         } = req.body;
 
         // Validation
         if (!batchId || !packageType || !quantity || !unitWeight) {
             return res.status(400).json({
                 success: false,
-                message: 'batchId, packageType, quantity, and unitWeight are required'
+                message: 'batchId, packageType, quantity, and unitWeight are required',
             });
         }
 
         // Check batch exists
         const batch = await prisma.harvestBatch.findUnique({
-            where: { id: batchId }
+            where: { id: batchId },
         });
 
         if (!batch) {
             return res.status(404).json({
                 success: false,
-                message: 'Harvest batch not found'
+                message: 'Harvest batch not found',
             });
         }
 
@@ -88,8 +88,8 @@ router.post('/', async (req, res) => {
                 destination,
                 qrCode: qrData.qrCode,
                 trackingUrl: qrData.trackingUrl,
-                status: 'PACKAGED'
-            }
+                status: 'PACKAGED',
+            },
         });
 
         res.status(201).json({
@@ -97,15 +97,15 @@ router.post('/', async (req, res) => {
             message: 'Lot created successfully',
             data: {
                 lot,
-                qrCode: qrData
-            }
+                qrCode: qrData,
+            },
         });
     } catch (error) {
         console.error('Error creating lot:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to create lot',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -129,41 +129,41 @@ router.get('/:id', async (req, res) => {
                                 farmName: true,
                                 farmNameTH: true,
                                 province: true,
-                                district: true
-                            }
+                                district: true,
+                            },
                         },
                         species: {
-                            select: { code: true, nameTH: true, nameEN: true }
+                            select: { code: true, nameTH: true, nameEN: true },
                         },
                         cycle: {
                             select: {
                                 cycleName: true,
                                 startDate: true,
-                                certificateId: true
-                            }
-                        }
-                    }
-                }
-            }
+                                certificateId: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
 
         if (!lot) {
             return res.status(404).json({
                 success: false,
-                message: 'Lot not found'
+                message: 'Lot not found',
             });
         }
 
         res.json({
             success: true,
-            data: lot
+            data: lot,
         });
     } catch (error) {
         console.error('Error fetching lot:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch lot',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -178,19 +178,19 @@ router.get('/:id/qr', async (req, res) => {
 
         const lot = await prisma.lot.findUnique({
             where: { id },
-            select: { qrCode: true }
+            select: { qrCode: true },
         });
 
         if (!lot || !lot.qrCode) {
             return res.status(404).json({
                 success: false,
-                message: 'QR code not found'
+                message: 'QR code not found',
             });
         }
 
         // Generate QR code image
         const qrBuffer = await qrcodeService.generateBuffer(lot.qrCode, {
-            width: 300
+            width: 300,
         });
 
         res.set('Content-Type', 'image/png');
@@ -200,7 +200,7 @@ router.get('/:id/qr', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to generate QR code',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -222,27 +222,27 @@ router.get('/:id/qr/print', async (req, res) => {
                             select: {
                                 farmName: true,
                                 farmNameTH: true,
-                                province: true
-                            }
+                                province: true,
+                            },
                         },
                         species: {
-                            select: { nameTH: true, nameEN: true }
-                        }
-                    }
-                }
-            }
+                            select: { nameTH: true, nameEN: true },
+                        },
+                    },
+                },
+            },
         });
 
         if (!lot) {
             return res.status(404).json({
                 success: false,
-                message: 'Lot not found'
+                message: 'Lot not found',
             });
         }
 
         // Generate QR code as data URL for embedding
         const qrDataUrl = await qrcodeService.generateDataUrl(lot.qrCode, {
-            width: 200
+            width: 200,
         });
 
         // Return label data for frontend to render
@@ -260,16 +260,16 @@ router.get('/:id/qr/print', async (req, res) => {
                     harvestDate: lot.batch.harvestDate,
                     packagedAt: lot.packagedAt,
                     expiryDate: lot.expiryDate,
-                    trackingUrl: lot.trackingUrl
-                }
-            }
+                    trackingUrl: lot.trackingUrl,
+                },
+            },
         });
     } catch (error) {
         console.error('Error generating print label:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to generate print label',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -284,20 +284,20 @@ router.get('/batch/:batchId', async (req, res) => {
 
         const lots = await prisma.lot.findMany({
             where: { batchId, isDeleted: false },
-            orderBy: { createdAt: 'asc' }
+            orderBy: { createdAt: 'asc' },
         });
 
         res.json({
             success: true,
             count: lots.length,
-            data: lots
+            data: lots,
         });
     } catch (error) {
         console.error('Error fetching lots:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch lots',
-            error: error.message
+            error: error.message,
         });
     }
 });

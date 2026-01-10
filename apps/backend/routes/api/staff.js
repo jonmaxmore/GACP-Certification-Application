@@ -15,8 +15,8 @@ router.get('/', authenticateDTAM, async (req, res) => {
         const { role, isActive } = req.query;
 
         const where = { isDeleted: false };
-        if (role) where.role = role.toLowerCase();
-        if (isActive !== undefined) where.isActive = isActive === 'true';
+        if (role) {where.role = role.toLowerCase();}
+        if (isActive !== undefined) {where.isActive = isActive === 'true';}
 
         const staff = await prisma.dTAMStaff.findMany({
             where,
@@ -32,9 +32,9 @@ router.get('/', authenticateDTAM, async (req, res) => {
                 role: true,
                 isActive: true,
                 lastLoginAt: true,
-                createdAt: true
+                createdAt: true,
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
         });
 
         res.json({ success: true, data: staff });
@@ -51,16 +51,16 @@ router.get('/inspectors', authenticateDTAM, async (req, res) => {
             where: {
                 role: { in: ['inspector', 'auditor', 'reviewer'] },
                 isActive: true,
-                isDeleted: false
+                isDeleted: false,
             },
             select: {
                 id: true,
                 firstName: true,
                 lastName: true,
                 role: true,
-                department: true
+                department: true,
             },
-            orderBy: { firstName: 'asc' }
+            orderBy: { firstName: 'asc' },
         });
 
         res.json({ success: true, data: inspectors });
@@ -80,8 +80,8 @@ router.get('/roles', authenticateDTAM, async (req, res) => {
             { value: 'auditor', label: 'ผู้ตรวจประเมิน' },
             { value: 'inspector', label: 'ผู้ตรวจสอบพื้นที่' },
             { value: 'scheduler', label: 'เจ้าหน้าที่จัดคิว' },
-            { value: 'accountant', label: 'เจ้าหน้าที่บัญชี' }
-        ]
+            { value: 'accountant', label: 'เจ้าหน้าที่บัญชี' },
+        ],
     });
 });
 
@@ -94,7 +94,7 @@ router.post('/', authenticateDTAM, async (req, res) => {
         if (!username || !email || !password || !firstName || !lastName) {
             return res.status(400).json({
                 success: false,
-                error: 'Missing required fields: username, email, password, firstName, lastName'
+                error: 'Missing required fields: username, email, password, firstName, lastName',
             });
         }
 
@@ -103,15 +103,15 @@ router.post('/', authenticateDTAM, async (req, res) => {
             where: {
                 OR: [
                     { username: username },
-                    { email: email }
-                ]
-            }
+                    { email: email },
+                ],
+            },
         });
 
         if (existing) {
             return res.status(409).json({
                 success: false,
-                error: 'Username or email already exists'
+                error: 'Username or email already exists',
             });
         }
 
@@ -128,8 +128,8 @@ router.post('/', authenticateDTAM, async (req, res) => {
                 lastName,
                 role: role?.toLowerCase() || 'reviewer',
                 employeeId: employeeId || null,
-                createdBy: req.user?.id
-            }
+                createdBy: req.user?.id,
+            },
         });
 
         res.status(201).json({
@@ -141,8 +141,8 @@ router.post('/', authenticateDTAM, async (req, res) => {
                 email: newStaff.email,
                 firstName: newStaff.firstName,
                 lastName: newStaff.lastName,
-                role: newStaff.role
-            }
+                role: newStaff.role,
+            },
         });
     } catch (error) {
         console.error('[Staff] createStaff error:', error);
@@ -164,8 +164,8 @@ router.get('/:id', authenticateDTAM, async (req, res) => {
                 role: true,
                 department: true,
                 isActive: true,
-                createdAt: true
-            }
+                createdAt: true,
+            },
         });
 
         if (!staff) {
@@ -186,16 +186,16 @@ router.patch('/:id', authenticateDTAM, async (req, res) => {
         const { firstName, lastName, role, isActive, employeeId } = req.body;
 
         const updateData = {};
-        if (firstName) updateData.firstName = firstName;
-        if (lastName) updateData.lastName = lastName;
-        if (role) updateData.role = role.toLowerCase();
-        if (isActive !== undefined) updateData.isActive = isActive;
-        if (employeeId) updateData.employeeId = employeeId;
+        if (firstName) {updateData.firstName = firstName;}
+        if (lastName) {updateData.lastName = lastName;}
+        if (role) {updateData.role = role.toLowerCase();}
+        if (isActive !== undefined) {updateData.isActive = isActive;}
+        if (employeeId) {updateData.employeeId = employeeId;}
         updateData.updatedBy = req.user?.id;
 
         const updated = await prisma.dTAMStaff.update({
             where: { id },
-            data: updateData
+            data: updateData,
         });
 
         res.json({ success: true, data: updated });

@@ -124,7 +124,7 @@ const trackEvent = (eventType) => {
 
 // Update gauge values
 const setGauge = (name, value) => {
-    if (metrics.gauges.hasOwnProperty(name)) {
+    if (Object.prototype.hasOwnProperty.call(metrics.gauges, name)) {
         metrics.gauges[name] = value;
     }
 };

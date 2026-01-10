@@ -24,7 +24,7 @@ const STANDARDS = [
             { category: 'CONTAMINANT', name: 'Pesticide Residues', nameTH: 'สารตกค้างกำจัดศัตรูพืช', description: 'No detection of prohibited pesticides. Limits for others must comply with WHO/FAO Codex Alimentarius.', isRequired: true },
             { category: 'PROCESS', name: 'Drying Protocols', nameTH: 'กระบวนการตากแห้ง', description: 'Must prevent mycotoxin formation (Aflatoxins < 20 ppb). Controlled humidity and temperature records required.', isRequired: true },
             { category: 'DOCUMENTATION', name: 'Batch Traceability', nameTH: 'การตรวจสอบย้อนกลับรุ่นผลิต', description: 'Full traceability from seed source to final harvest batch with unique batch numbering.', isRequired: true },
-        ]
+        ],
     },
     {
         code: 'FDA',
@@ -41,7 +41,7 @@ const STANDARDS = [
             { category: 'FACILITY', name: 'Sanitary Facilities', nameTH: 'สถานที่มีสุขอนามัย', description: 'Toilet and hand-washing facilities must be readily accessible and separate from production areas.', isRequired: true },
             { category: 'PROCESS', name: 'Water Quality', nameTH: 'คุณภาพน้ำ', description: 'Water used for irrigation and washing must be EPA-compliant for microbial quality (E. coli limits).', isRequired: true },
             { category: 'DOCUMENTATION', name: 'Foreign Supplier Verification Program (FSVP)', nameTH: 'โปรแกรมตรวจสอบผู้จัดหาต่างประเทศ', description: 'Records demonstrating compliance with FSVP requirements for exporters to US.', isRequired: true },
-        ]
+        ],
     },
     {
         code: 'ASEAN',
@@ -58,7 +58,7 @@ const STANDARDS = [
             { category: 'FACILITY', name: 'Pest Control System', nameTH: 'ระบบควบคุมสัตว์พาหะ', description: 'Documented pest control program with bait map and regular monitoring records.', isRequired: true },
             { category: 'PROCESS', name: 'Waste Management', nameTH: 'การจัดการของเสีย', description: 'Proper segregation and disposal of organic and inorganic waste away from production areas.', isRequired: true },
             { category: 'DOCUMENTATION', name: 'Cleaning Records', nameTH: 'บันทึกการทำความสะอาด', description: 'Daily logs of cleaning and sanitization of equipment and facilities.', isRequired: true },
-        ]
+        ],
     },
     {
         code: 'THAI_GACP',
@@ -73,8 +73,8 @@ const STANDARDS = [
         requirements: [
             { category: 'LEGAL', name: 'Farm Registration', nameTH: 'ทะเบียนเกษตรกร', description: 'Must register with Department of Agriculture extension office.', isRequired: true },
             { category: 'PROCESS', name: 'GAP Guidelines', nameTH: 'แนวทาง GAP', description: 'Follow basic GAP guidelines for site selection and water sources.', isRequired: true },
-        ]
-    }
+        ],
+    },
 ];
 
 async function seedStandards() {
@@ -87,7 +87,7 @@ async function seedStandards() {
         const created = await prisma.certificationStandard.upsert({
             where: { code: standard.code },
             update: standard,
-            create: standard
+            create: standard,
         });
 
         console.log(`  ✅ ${created.code}: ${created.name}`);
@@ -103,8 +103,8 @@ async function seedStandards() {
                     nameTH: req.nameTH,
                     description: req.description,
                     isRequired: req.isRequired,
-                    sortOrder: i + 1
-                }
+                    sortOrder: i + 1,
+                },
             }).catch(() => {
                 // Ignore duplicate errors on re-run
             });

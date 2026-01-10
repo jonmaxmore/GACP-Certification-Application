@@ -18,7 +18,7 @@ router.post('/submit', async (req, res) => {
         if (!userId) {
             return res.status(401).json({
                 success: false,
-                error: 'กรุณาเข้าสู่ระบบ'
+                error: 'กรุณาเข้าสู่ระบบ',
             });
         }
 
@@ -28,14 +28,14 @@ router.post('/submit', async (req, res) => {
         if (!sharedData?.plantType) {
             return res.status(400).json({
                 success: false,
-                error: 'กรุณาเลือกประเภทพืช'
+                error: 'กรุณาเลือกประเภทพืช',
             });
         }
 
         if (!areaTypes || areaTypes.length === 0) {
             return res.status(400).json({
                 success: false,
-                error: 'กรุณาเลือกลักษณะพื้นที่อย่างน้อย 1 ประเภท'
+                error: 'กรุณาเลือกลักษณะพื้นที่อย่างน้อย 1 ประเภท',
             });
         }
 
@@ -44,7 +44,7 @@ router.post('/submit', async (req, res) => {
         if (!canSubmit.canSubmit) {
             return res.status(403).json({
                 success: false,
-                error: canSubmit.reason
+                error: canSubmit.reason,
             });
         }
 
@@ -56,7 +56,7 @@ router.post('/submit', async (req, res) => {
             sharedData,
             siteData,
             areaTypes,
-            documents
+            documents,
         });
 
         res.status(201).json(result);
@@ -65,7 +65,7 @@ router.post('/submit', async (req, res) => {
         console.error('Batch submit error:', error);
         res.status(500).json({
             success: false,
-            error: error.message || 'ไม่สามารถส่งคำขอได้'
+            error: error.message || 'ไม่สามารถส่งคำขอได้',
         });
     }
 });
@@ -83,18 +83,18 @@ router.get('/:batchId', async (req, res) => {
         if (!result) {
             return res.status(404).json({
                 success: false,
-                error: 'ไม่พบ batch นี้'
+                error: 'ไม่พบ batch นี้',
             });
         }
 
         res.json({
             success: true,
-            data: result
+            data: result,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: 'เกิดข้อผิดพลาด'
+            error: 'เกิดข้อผิดพลาด',
         });
     }
 });
@@ -111,14 +111,14 @@ router.post('/:batchId/payment', async (req, res) => {
         const result = await BatchService.updateBatchPaymentStatus(batchId, {
             transactionId,
             status: status || 'paid',
-            paidAt: paidAt || new Date()
+            paidAt: paidAt || new Date(),
         });
 
         res.json(result);
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: 'ไม่สามารถอัปเดตสถานะการชำระเงินได้'
+            error: 'ไม่สามารถอัปเดตสถานะการชำระเงินได้',
         });
     }
 });
@@ -138,7 +138,7 @@ router.get('/preview-fee', async (req, res) => {
             areaType,
             docReview: 5000,
             inspection: 25000,
-            total: 30000
+            total: 30000,
         }));
 
         res.json({
@@ -149,13 +149,13 @@ router.get('/preview-fee', async (req, res) => {
                 feePerArea,
                 totalFee,
                 totalFeeText: `${totalFee.toLocaleString()} บาท`,
-                breakdown
-            }
+                breakdown,
+            },
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: 'เกิดข้อผิดพลาด'
+            error: 'เกิดข้อผิดพลาด',
         });
     }
 });

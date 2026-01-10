@@ -29,7 +29,7 @@ const defaultLogger = winston.createLogger({
 defaultLogger.stream = {
   write: (message) => {
     defaultLogger.info(message.trim());
-  }
+  },
 };
 
 module.exports = defaultLogger;

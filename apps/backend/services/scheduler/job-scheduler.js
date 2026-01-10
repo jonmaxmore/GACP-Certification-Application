@@ -124,7 +124,7 @@ class JobScheduler {
         throw new Error(`Manual execution not implemented for: ${jobName}`);
     }
 
-    logger.info(`Job completed: ${jobName}`);
+
   }
 }
 

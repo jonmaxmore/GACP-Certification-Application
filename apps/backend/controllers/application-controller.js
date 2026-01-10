@@ -25,7 +25,7 @@ class ApplicationController {
                 objective,
                 applicantType,
                 applicantInfo,
-                siteInfo
+                siteInfo,
             } = req.body;
 
             if (!req.user || !req.user.id) {
@@ -67,9 +67,9 @@ class ApplicationController {
                     applicantType: applicantType ? applicantType.toUpperCase() : 'INDIVIDUAL',
                     applicantInfo,
                     siteInfo,
-                    formData: formData || {}
+                    formData: formData || {},
                 },
-                forms: { form09: true, form10: true, form11: false }
+                forms: { form09: true, form10: true, form11: false },
             });
             console.log('[ApplicationController] Draft created:', application._id);
 
@@ -98,7 +98,7 @@ class ApplicationController {
                     success: true,
                     data: cached.data,
                     total: cached.total,
-                    cached: true
+                    cached: true,
                 });
             }
 
@@ -118,7 +118,7 @@ class ApplicationController {
                 success: true,
                 data: applications,
                 total: applications.length,
-                cached: false
+                cached: false,
             });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
@@ -151,13 +151,13 @@ class ApplicationController {
             const validStatuses = [
                 'DRAFT', 'REVIEW_PENDING', 'PAYMENT_1_PENDING', 'SUBMITTED',
                 'REVISION_REQ', 'PAYMENT_1_RETRY', 'PAYMENT_2_PENDING',
-                'AUDIT_PENDING', 'AUDIT_SCHEDULED', 'CERTIFIED', 'REJECTED'
+                'AUDIT_PENDING', 'AUDIT_SCHEDULED', 'CERTIFIED', 'REJECTED',
             ];
 
             if (!status || !validStatuses.includes(status.toUpperCase())) {
                 return res.status(400).json({
                     success: false,
-                    error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+                    error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
                 });
             }
 
@@ -204,7 +204,7 @@ class ApplicationController {
             applicationId: app._id,
             transactionId: txId,
             amount: amount,
-            status: 'PENDING'
+            status: 'PENDING',
         });
 
         // 2. Call Ksher API
@@ -223,8 +223,8 @@ class ApplicationController {
         await tx.save();
 
         // 4. Update Application Link
-        if (phase === 1) app.payment.phase1.transactionId = tx._id;
-        else app.payment.phase2.transactionId = tx._id;
+        if (phase === 1) { app.payment.phase1.transactionId = tx._id; }
+        else { app.payment.phase2.transactionId = tx._id; }
         await app.save();
 
         return res.json({
@@ -233,8 +233,8 @@ class ApplicationController {
             data: {
                 transactionId: txId,
                 paymentUrl: ksherRes.data.order_content, // Redirect Link
-                qrCode: ksherRes.data.code_url // QR Image URL
-            }
+                qrCode: ksherRes.data.code_url, // QR Image URL
+            },
         });
     }
 
@@ -318,7 +318,7 @@ class ApplicationController {
                         recipientId: 'OFFICER', role: 'OFFICER',
                         title: 'มีคำขอใหม่ (New Application)',
                         message: `คำขอ ${app.applicationNumber} ชำระเงิน Phase 1 แล้ว (${data.channel})`,
-                        applicationId: app._id
+                        applicationId: app._id,
                     });
                 } else if (txId.startsWith('PAY2')) {
                     app.payment.phase2.status = 'PAID';
@@ -329,7 +329,7 @@ class ApplicationController {
                         recipientId: 'ADMIN', role: 'ADMIN',
                         title: 'ชำระเงิน Phase 2 สำเร็จ',
                         message: `คำขอ ${app.applicationNumber} พร้อมสำหรับการนัดหมาย Auditor`,
-                        applicationId: app._id
+                        applicationId: app._id,
                     });
                 }
 
@@ -354,7 +354,7 @@ class ApplicationController {
         try {
             const { id } = req.params; // Transaction ID or App ID? Let's use TxID for precision
             const tx = await PaymentTransaction.findOne({ transactionId: id });
-            if (!tx) return res.status(404).json({ success: false });
+            if (!tx) { return res.status(404).json({ success: false }); }
 
             res.json({ success: true, status: tx.status });
         } catch (e) {
@@ -379,7 +379,7 @@ class ApplicationController {
             // Find apps where audit.auditorId matches current user
             const applications = await Application.find({
                 'audit.auditorId': req.user.id,
-                status: { $in: ['AUDIT_SCHEDULED', 'AUDIT_PENDING'] } // Broaden match if needed
+                status: { $in: ['AUDIT_SCHEDULED', 'AUDIT_PENDING'] }, // Broaden match if needed
             });
             res.json({ success: true, data: applications });
         } catch (error) {
@@ -391,7 +391,7 @@ class ApplicationController {
     async getApplicationById(req, res) {
         try {
             const app = await Application.findById(req.params.id);
-            if (!app) return res.status(404).json({ success: false, error: 'Not Found' });
+            if (!app) { return res.status(404).json({ success: false, error: 'Not Found' }); }
             res.json({ success: true, data: app });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
@@ -426,7 +426,7 @@ class ApplicationController {
                 recipientId: app.farmerId, role: 'FARMER',
                 title: action === 'APPROVE' ? 'เอกสารผ่านการอนุมัติ (Approved)' : 'เอกสารต้องแก้ไข (Revision Request)',
                 message: action === 'APPROVE' ? 'กรุณาดำเนินการชำระเงิน Phase 2' : `เหตุผล: ${comment || 'เอกสารไม่ถูกต้อง'}`,
-                applicationId: app._id
+                applicationId: app._id,
             });
             res.json({ success: true, data: app });
         } catch (error) {
@@ -456,7 +456,7 @@ class ApplicationController {
                 recipientId: auditorId, role: 'AUDITOR',
                 title: 'คุณมีงานตรวจสอบใหม่ (New Assignment)',
                 message: `กรุณาตรวจสอบฟาร์มวันที่ ${date}`,
-                applicationId: app._id
+                applicationId: app._id,
             });
 
             res.json({ success: true, message: 'Auditor Assigned.', data: app });
@@ -479,6 +479,26 @@ class ApplicationController {
 
             if (result === 'PASS') {
                 app.status = 'CERTIFIED';
+
+                // [QC-REQ] Auto-Activate Farm when Certified
+                const Farm = require('../models-mongoose-legacy/farm-model'); // Or Prisma if migrated
+                // Note: We are using Prisma mostly but this legacy controller uses Mongoose Application model
+                // But wait, the Application is linked to Farmer via ID. 
+                // Let's assume we use the FarmService or direct DB update.
+                // Since this controller is hybrid (Mongoose App, maybe Prisma Farm?), let's check.
+                // `createDraft` uses `Application.create`.
+                // Let's use the `prisma` client if available to update the Postgres Farm.
+                const { prisma } = require('../services/prisma-database');
+                if (prisma && app.data && app.data.farmId) {
+                    await prisma.farm.update({
+                        where: { id: app.data.farmId },
+                        data: { status: 'ACTIVE' },
+                    });
+                    console.log(`[Audit] Auto-Activated Farm: ${app.data.farmId}`);
+                }
+
+            } else if (result === 'FIX_REQUIRED') {
+                app.status = 'AUDIT_FIX_REQ'; // Loop back to Farmer
             } else {
                 app.status = 'REJECTED';
             }
@@ -490,12 +510,25 @@ class ApplicationController {
             await app.save();
 
             // Notify Farmer
+            let title = 'ผลการตรวจสอบ (Audit Result)';
+            let msg = '';
+            if (result === 'PASS') {
+                title = 'ยินดีด้วย! ผ่านการรับรอง (Certified)';
+                msg = 'ใบรับรองของคุณถูกออกแล้ว และฟาร์มของคุณพร้อมใช้งาน';
+            } else if (result === 'FIX_REQUIRED') {
+                title = 'ต้องแก้ไขข้อบกพร่อง (Action Required)';
+                msg = `กรุณาแก้ไขตามรายการ: ${notes}`;
+            } else {
+                title = 'ไม่ผ่านการรับรอง (Audit Failed)';
+                msg = `เหตุผล: ${notes}`;
+            }
+
             Notification.create({
                 recipientId: app.farmerId,
                 role: 'FARMER',
-                title: result === 'PASS' ? 'ยินดีด้วย! ผ่านการรับรอง (Certified)' : 'ไม่ผ่านการรับรอง (Audit Failed)',
-                message: result === 'PASS' ? 'ใบรับรองของคุณถูกออกแล้ว' : `หมายเหตุ/ปรับปรุง: ${notes}`,
-                applicationId: app._id
+                title: title,
+                message: msg,
+                applicationId: app._id,
             });
 
             res.json({ success: true, message: `Application ${app.status}`, data: app });
@@ -532,42 +565,14 @@ class ApplicationController {
                     total,
                     pending,
                     approved,
-                    revenue
-                }
+                    revenue,
+                },
             });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }
     }
-    /**
-     * Admin Force Update Status
-     * PATCH /:id/status
-     */
-    async updateStatus(req, res) {
-        try {
-            const { id } = req.params;
-            const { status, notes } = req.body;
 
-            // TODO: checkPermission('ADMIN') - dependent on middleware setup
-            // For now, allow authenticated users (Logic should strictly be Admin only)
-
-            const app = await Application.findById(id);
-            if (!app) return res.status(404).json({ success: false, error: 'Application Not Found' });
-
-            // Validate Status Enum
-            if (!Application.schema.path('status').enumValues.includes(status)) {
-                return res.status(400).json({ success: false, error: `Invalid Status. Allowed: ${Application.schema.path('status').enumValues.join(', ')}` });
-            }
-
-            app.status = status;
-            // app.notes = notes; // If notes field exists
-            await app.save();
-
-            res.json({ success: true, message: 'Status Updated', data: app });
-        } catch (error) {
-            res.status(500).json({ success: false, error: error.message });
-        }
-    }
 
     // Document Upload Handler
     // POST /applications/:id/documents/:docType
@@ -579,7 +584,7 @@ class ApplicationController {
             if (!app) {
                 return res.status(404).json({
                     success: false,
-                    error: 'Application not found'
+                    error: 'Application not found',
                 });
             }
 
@@ -587,7 +592,7 @@ class ApplicationController {
             if (app.farmerId.toString() !== req.user.id.toString()) {
                 return res.status(403).json({
                     success: false,
-                    error: 'Unauthorized'
+                    error: 'Unauthorized',
                 });
             }
 
@@ -595,7 +600,7 @@ class ApplicationController {
             if (!req.file) {
                 return res.status(400).json({
                     success: false,
-                    error: 'No file uploaded'
+                    error: 'No file uploaded',
                 });
             }
 
@@ -611,7 +616,7 @@ class ApplicationController {
                 path: req.file.path || `/uploads/${req.file.filename}`,
                 mimetype: req.file.mimetype,
                 size: req.file.size,
-                uploadedAt: new Date()
+                uploadedAt: new Date(),
             };
 
             // Replace if same type exists
@@ -627,7 +632,7 @@ class ApplicationController {
             res.json({
                 success: true,
                 message: 'Document uploaded successfully',
-                data: docEntry
+                data: docEntry,
             });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });

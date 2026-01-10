@@ -31,8 +31,8 @@ router.post('/setup', authenticateDTAM, async (req, res) => {
             where: { id: userId },
             data: {
                 mfaSecret: secret,
-                mfaEnabled: false // Not enabled until verified
-            }
+                mfaEnabled: false, // Not enabled until verified
+            },
         });
 
         // Log MFA setup initiation
@@ -44,7 +44,7 @@ router.post('/setup', authenticateDTAM, async (req, res) => {
             resourceType: 'USER',
             resourceId: userId,
             ipAddress: req.ip,
-            userAgent: req.headers['user-agent']
+            userAgent: req.headers['user-agent'],
         });
 
         res.json({
@@ -52,8 +52,8 @@ router.post('/setup', authenticateDTAM, async (req, res) => {
             data: {
                 secret,
                 qrCodeUri,
-                message: 'Scan QR code with authenticator app, then verify with a code'
-            }
+                message: 'Scan QR code with authenticator app, then verify with a code',
+            },
         });
     } catch (error) {
         console.error('[MFA] Setup error:', error);
@@ -73,20 +73,20 @@ router.post('/verify-setup', authenticateDTAM, async (req, res) => {
         if (!code || code.length !== 6) {
             return res.status(400).json({
                 success: false,
-                error: 'Invalid code format'
+                error: 'Invalid code format',
             });
         }
 
         // Get stored secret
         const user = await prisma.dTAMStaff.findUnique({
             where: { id: userId },
-            select: { mfaSecret: true }
+            select: { mfaSecret: true },
         });
 
         if (!user?.mfaSecret) {
             return res.status(400).json({
                 success: false,
-                error: 'MFA not initialized. Please start setup first.'
+                error: 'MFA not initialized. Please start setup first.',
             });
         }
 
@@ -103,12 +103,12 @@ router.post('/verify-setup', authenticateDTAM, async (req, res) => {
                 resourceId: userId,
                 ipAddress: req.ip,
                 userAgent: req.headers['user-agent'],
-                metadata: { reason: 'Invalid verification code' }
+                metadata: { reason: 'Invalid verification code' },
             });
 
             return res.status(400).json({
                 success: false,
-                error: 'Invalid code. Please try again.'
+                error: 'Invalid code. Please try again.',
             });
         }
 
@@ -121,8 +121,8 @@ router.post('/verify-setup', authenticateDTAM, async (req, res) => {
             where: { id: userId },
             data: {
                 mfaEnabled: true,
-                mfaBackupCodes: JSON.stringify(hashedCodes)
-            }
+                mfaBackupCodes: JSON.stringify(hashedCodes),
+            },
         });
 
         // Log success
@@ -134,7 +134,7 @@ router.post('/verify-setup', authenticateDTAM, async (req, res) => {
             resourceType: 'USER',
             resourceId: userId,
             ipAddress: req.ip,
-            userAgent: req.headers['user-agent']
+            userAgent: req.headers['user-agent'],
         });
 
         res.json({
@@ -142,8 +142,8 @@ router.post('/verify-setup', authenticateDTAM, async (req, res) => {
             data: {
                 message: 'MFA enabled successfully',
                 backupCodes, // Show once only!
-                warning: 'Save these backup codes securely. They will not be shown again.'
-            }
+                warning: 'Save these backup codes securely. They will not be shown again.',
+            },
         });
     } catch (error) {
         console.error('[MFA] Verify setup error:', error);
@@ -162,7 +162,7 @@ router.post('/verify', async (req, res) => {
         if (!userId || !code) {
             return res.status(400).json({
                 success: false,
-                error: 'User ID and code required'
+                error: 'User ID and code required',
             });
         }
 
@@ -172,14 +172,14 @@ router.post('/verify', async (req, res) => {
                 mfaSecret: true,
                 mfaEnabled: true,
                 mfaBackupCodes: true,
-                role: true
-            }
+                role: true,
+            },
         });
 
         if (!user?.mfaEnabled) {
             return res.status(400).json({
                 success: false,
-                error: 'MFA not enabled for this user'
+                error: 'MFA not enabled for this user',
             });
         }
 
@@ -197,7 +197,7 @@ router.post('/verify', async (req, res) => {
                 backupCodes.splice(codeIndex, 1);
                 await prisma.dTAMStaff.update({
                     where: { id: userId },
-                    data: { mfaBackupCodes: JSON.stringify(backupCodes) }
+                    data: { mfaBackupCodes: JSON.stringify(backupCodes) },
                 });
             }
         } else {
@@ -215,19 +215,19 @@ router.post('/verify', async (req, res) => {
             resourceId: userId,
             ipAddress: req.ip,
             userAgent: req.headers['user-agent'],
-            result: isValid ? 'SUCCESS' : 'FAILURE'
+            result: isValid ? 'SUCCESS' : 'FAILURE',
         });
 
         if (!isValid) {
             return res.status(401).json({
                 success: false,
-                error: 'Invalid code'
+                error: 'Invalid code',
             });
         }
 
         res.json({
             success: true,
-            message: 'MFA verification successful'
+            message: 'MFA verification successful',
         });
     } catch (error) {
         console.error('[MFA] Verify error:', error);
@@ -246,13 +246,13 @@ router.delete('/disable', authenticateDTAM, async (req, res) => {
 
         const user = await prisma.dTAMStaff.findUnique({
             where: { id: userId },
-            select: { mfaSecret: true, mfaEnabled: true }
+            select: { mfaSecret: true, mfaEnabled: true },
         });
 
         if (!user?.mfaEnabled) {
             return res.status(400).json({
                 success: false,
-                error: 'MFA is not enabled'
+                error: 'MFA is not enabled',
             });
         }
 
@@ -262,7 +262,7 @@ router.delete('/disable', authenticateDTAM, async (req, res) => {
         if (!isValid) {
             return res.status(401).json({
                 success: false,
-                error: 'Invalid code'
+                error: 'Invalid code',
             });
         }
 
@@ -272,8 +272,8 @@ router.delete('/disable', authenticateDTAM, async (req, res) => {
             data: {
                 mfaEnabled: false,
                 mfaSecret: null,
-                mfaBackupCodes: null
-            }
+                mfaBackupCodes: null,
+            },
         });
 
         // Log
@@ -285,12 +285,12 @@ router.delete('/disable', authenticateDTAM, async (req, res) => {
             resourceType: 'USER',
             resourceId: userId,
             ipAddress: req.ip,
-            userAgent: req.headers['user-agent']
+            userAgent: req.headers['user-agent'],
         });
 
         res.json({
             success: true,
-            message: 'MFA disabled successfully'
+            message: 'MFA disabled successfully',
         });
     } catch (error) {
         console.error('[MFA] Disable error:', error);

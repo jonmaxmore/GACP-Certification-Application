@@ -56,7 +56,7 @@ class ConsentManager {
 
         // Check if consent already exists
         const existing = await this.prisma.userConsent.findFirst({
-            where: { userId, category }
+            where: { userId, category },
         });
 
         let consent;
@@ -73,7 +73,7 @@ class ConsentManager {
                     userAgent,
                     metadata: JSON.stringify(metadata),
                     updatedAt: new Date(),
-                }
+                },
             });
         } else {
             // Create new consent record
@@ -88,7 +88,7 @@ class ConsentManager {
                     ipAddress,
                     userAgent: userAgent?.substring(0, 500),
                     metadata: JSON.stringify(metadata),
-                }
+                },
             });
         }
 
@@ -102,7 +102,7 @@ class ConsentManager {
             resourceId: consent.id,
             ipAddress,
             userAgent,
-            metadata: { consentCategory: category, version }
+            metadata: { consentCategory: category, version },
         });
 
         return consent;
@@ -116,7 +116,7 @@ class ConsentManager {
 
         for (const { category, granted } of consents) {
             const result = await this.recordConsent(
-                userId, category, granted, ipAddress, userAgent
+                userId, category, granted, ipAddress, userAgent,
             );
             results.push(result);
         }
@@ -132,8 +132,8 @@ class ConsentManager {
             where: {
                 userId,
                 category: { in: RequiredConsents },
-                granted: true
-            }
+                granted: true,
+            },
         });
 
         const grantedCategories = new Set(consents.map(c => c.category));
@@ -146,7 +146,7 @@ class ConsentManager {
     async getUserConsents(userId) {
         const consents = await this.prisma.userConsent.findMany({
             where: { userId },
-            orderBy: { category: 'asc' }
+            orderBy: { category: 'asc' },
         });
 
         // Build consent status object
@@ -175,7 +175,7 @@ class ConsentManager {
         }
 
         return this.recordConsent(userId, category, false, ipAddress, userAgent, {
-            withdrawalReason: 'USER_REQUEST'
+            withdrawalReason: 'USER_REQUEST',
         });
     }
 
@@ -194,7 +194,7 @@ class ConsentManager {
                     title: 'Terms of Service',
                     summary: 'Terms for using GACP Certification System',
                     url: '/legal/terms-of-service',
-                }
+                },
             },
             PRIVACY_POLICY: {
                 th: {
@@ -206,7 +206,7 @@ class ConsentManager {
                     title: 'Privacy Policy',
                     summary: 'Collection, use, and disclosure of personal data under PDPA',
                     url: '/legal/privacy-policy',
-                }
+                },
             },
             MARKETING_EMAIL: {
                 th: {
@@ -216,7 +216,7 @@ class ConsentManager {
                 en: {
                     title: 'Email Marketing',
                     summary: 'Receive news, promotions, and notifications via email',
-                }
+                },
             },
             MARKETING_SMS: {
                 th: {
@@ -226,7 +226,7 @@ class ConsentManager {
                 en: {
                     title: 'SMS Marketing',
                     summary: 'Receive notifications and news via SMS',
-                }
+                },
             },
             DATA_ANALYTICS: {
                 th: {
@@ -236,7 +236,7 @@ class ConsentManager {
                 en: {
                     title: 'Data Analytics',
                     summary: 'Allow data usage for service improvement',
-                }
+                },
             },
         };
 

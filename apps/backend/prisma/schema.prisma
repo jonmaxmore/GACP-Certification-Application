@@ -439,6 +439,9 @@ model Farm {
   cultivationArea Float
   areaUnit        String @default("rai")
 
+  // Relation to Plots
+  plots           Plot[]
+
   // Cultivation
   cultivationMethod String
   irrigationType    String?
@@ -695,8 +698,8 @@ model PlantingCycle {
   varietyName    String?      // พันธุ์ (ถ้ามี)
 
   // ข้อมูลแปลง
-  plotName  String?  // ชื่อแปลง
-  plotArea  Float?   // พื้นที่ปลูก
+  plotName  String?  // @deprecated Use relation to Plot table instead
+  plotArea  Float?   // @deprecated Use relation to Plot table instead
   areaUnit  String   @default("rai")
 
   // วันที่
@@ -734,6 +737,31 @@ model PlantingCycle {
   @@index([status])
   @@index([isDeleted])
   @@map("planting_cycles")
+}
+
+model Plot {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relation to Farm
+  farmId      String
+  farm        Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  // Plot Details
+  name        String
+  area        Float
+  areaUnit    String   @default("rai")
+  
+  // Cultivation System (Solar System)
+  solarSystem String   @default("OUTDOOR") // OUTDOOR, INDOOR, GREENHOUSE
+
+  // Coordinates (Optional for specific plot location)
+  latitude    Float?
+  longitude   Float?
+
+  @@index([farmId])
+  @@map("plots")
 }
 
 // =============================================================================

@@ -77,7 +77,7 @@ class RedisService {
      * @returns {any} - Parsed value or null
      */
     async get(key) {
-        if (!this.isConnected) return null;
+        if (!this.isConnected) {return null;}
 
         try {
             const value = await this.client.get(key);
@@ -100,7 +100,7 @@ class RedisService {
      * @param {number} ttlSeconds - Time to live in seconds (default: 300 = 5 min)
      */
     async set(key, value, ttlSeconds = 300) {
-        if (!this.isConnected) return false;
+        if (!this.isConnected) {return false;}
 
         try {
             const serialized = JSON.stringify(value);
@@ -118,7 +118,7 @@ class RedisService {
      * @param {string} key - Cache key to delete
      */
     async del(key) {
-        if (!this.isConnected) return false;
+        if (!this.isConnected) {return false;}
 
         try {
             await this.client.del(key);
@@ -135,7 +135,7 @@ class RedisService {
      * @param {string} pattern - Redis pattern (e.g., "user:*")
      */
     async invalidatePattern(pattern) {
-        if (!this.isConnected) return false;
+        if (!this.isConnected) {return false;}
 
         try {
             const keys = await this.client.keys(pattern);
@@ -193,7 +193,7 @@ class RedisService {
             return {
                 connected: true,
                 info: info.substring(0, 500),
-                keyspace
+                keyspace,
             };
         } catch {
             return { connected: false };

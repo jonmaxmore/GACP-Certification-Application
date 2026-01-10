@@ -20,7 +20,7 @@ class TesseractService {
      * Initialize the Tesseract scheduler with Thai + English languages
      */
     async initialize() {
-        if (this.isInitialized) return;
+        if (this.isInitialized) {return;}
 
         try {
             this.scheduler = Tesseract.createScheduler();
@@ -60,9 +60,9 @@ class TesseractService {
                 words: result.data.words?.map(w => ({
                     text: w.text,
                     confidence: w.confidence,
-                    bbox: w.bbox
+                    bbox: w.bbox,
                 })),
-                duration
+                duration,
             };
         } catch (error) {
             logger.error('OCR extraction failed:', error.message);
@@ -70,7 +70,7 @@ class TesseractService {
                 success: false,
                 error: error.message,
                 text: '',
-                confidence: 0
+                confidence: 0,
             };
         }
     }
@@ -95,7 +95,7 @@ class TesseractService {
             /\d{1}-\d{4}-\d{5}-\d{2}-\d{1}/,  // Thai ID format
             /บัตรประจำตัวประชาชน/,
             /identification card/i,
-            /หมายเลขบัตร/
+            /หมายเลขบัตร/,
         ];
         if (idCardPatterns.some(p => p.test(extraction.text))) {
             detectedTypes.push({ type: 'ID_CARD', confidence: 0.9 });
@@ -106,7 +106,7 @@ class TesseractService {
             /ทะเบียนบ้าน/,
             /สำเนาทะเบียนบ้าน/,
             /house registration/i,
-            /เลขรหัสประจำบ้าน/
+            /เลขรหัสประจำบ้าน/,
         ];
         if (housePatterns.some(p => p.test(extraction.text))) {
             detectedTypes.push({ type: 'HOUSE_REGISTRATION', confidence: 0.85 });
@@ -118,7 +118,7 @@ class TesseractService {
             /license/i,
             /permit/i,
             /ใบรับรอง/,
-            /certificate/i
+            /certificate/i,
         ];
         if (licensePatterns.some(p => p.test(extraction.text))) {
             detectedTypes.push({ type: 'LICENSE', confidence: 0.8 });
@@ -130,7 +130,7 @@ class TesseractService {
             /medical certificate/i,
             /health certificate/i,
             /โรงพยาบาล/,
-            /hospital/i
+            /hospital/i,
         ];
         if (medicalPatterns.some(p => p.test(extraction.text))) {
             detectedTypes.push({ type: 'MEDICAL_CERTIFICATE', confidence: 0.85 });
@@ -141,7 +141,7 @@ class TesseractService {
             /โฉนด/,
             /นส\.?\s?3/,
             /land title/i,
-            /เอกสารสิทธิ์/
+            /เอกสารสิทธิ์/,
         ];
         if (landPatterns.some(p => p.test(extraction.text))) {
             detectedTypes.push({ type: 'LAND_TITLE', confidence: 0.85 });
@@ -150,7 +150,7 @@ class TesseractService {
         return {
             ...extraction,
             detectedTypes: detectedTypes.sort((a, b) => b.confidence - a.confidence),
-            primaryType: detectedTypes[0]?.type || 'UNKNOWN'
+            primaryType: detectedTypes[0]?.type || 'UNKNOWN',
         };
     }
 

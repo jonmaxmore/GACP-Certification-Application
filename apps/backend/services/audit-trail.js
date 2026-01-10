@@ -150,18 +150,18 @@ async function getAuditLogs({
 }) {
     const where = {};
 
-    if (entityType) where.entityType = entityType;
-    if (entityId) where.entityId = entityId;
-    if (userId) where.userId = userId;
-    if (action) where.action = action;
-    if (applicationId) where.applicationId = applicationId;
-    if (farmId) where.farmId = farmId;
-    if (severity) where.severity = severity;
+    if (entityType) {where.entityType = entityType;}
+    if (entityId) {where.entityId = entityId;}
+    if (userId) {where.userId = userId;}
+    if (action) {where.action = action;}
+    if (applicationId) {where.applicationId = applicationId;}
+    if (farmId) {where.farmId = farmId;}
+    if (severity) {where.severity = severity;}
 
     if (startDate || endDate) {
         where.createdAt = {};
-        if (startDate) where.createdAt.gte = new Date(startDate);
-        if (endDate) where.createdAt.lte = new Date(endDate);
+        if (startDate) {where.createdAt.gte = new Date(startDate);}
+        if (endDate) {where.createdAt.lte = new Date(endDate);}
     }
 
     const [logs, total] = await Promise.all([

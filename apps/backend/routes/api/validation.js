@@ -32,7 +32,7 @@ router.post('/pre-submission', async (req, res) => {
             objectives = [],
             landOwnership = 'owned',
             applicationType = 'NEW',
-            uploadedDocuments = []
+            uploadedDocuments = [],
         } = req.body;
 
         const validationResults = {
@@ -42,7 +42,7 @@ router.post('/pre-submission', async (req, res) => {
             missingRequired: [],
             missingConditional: [],
             warnings: [],
-            recommendations: []
+            recommendations: [],
         };
 
         // ─────────────────────────────────────────────────────────
@@ -53,12 +53,12 @@ router.post('/pre-submission', async (req, res) => {
             applicantType,
             objectives,
             landOwnership,
-            applicationType
+            applicationType,
         });
 
         const uploadedSlotIds = uploadedDocuments.map(d => d.slotId || d);
         const missingDocs = requiredDocs.filter(doc =>
-            !uploadedSlotIds.includes(doc.slotId)
+            !uploadedSlotIds.includes(doc.slotId),
         );
 
         const docSection = {
@@ -70,8 +70,8 @@ router.post('/pre-submission', async (req, res) => {
             missing: missingDocs.map(d => ({
                 slotId: d.slotId,
                 name: d.name,
-                isConditional: d.conditionalRequired || false
-            }))
+                isConditional: d.conditionalRequired || false,
+            })),
         };
         validationResults.sections.push(docSection);
 
@@ -81,12 +81,12 @@ router.post('/pre-submission', async (req, res) => {
                 validationResults.missingConditional.push({
                     slotId: doc.slotId,
                     name: doc.name,
-                    reason: doc.warningText || 'บังคับตามเงื่อนไขที่เลือก'
+                    reason: doc.warningText || 'บังคับตามเงื่อนไขที่เลือก',
                 });
             } else {
                 validationResults.missingRequired.push({
                     slotId: doc.slotId,
-                    name: doc.name
+                    name: doc.name,
                 });
             }
         });
@@ -99,33 +99,33 @@ router.post('/pre-submission', async (req, res) => {
             nameEN: 'Applicant Info',
             total: 3,
             completed: 0,
-            checks: []
+            checks: [],
         };
 
         // Check Thai ID
         const hasIdCard = uploadedSlotIds.includes('id_card');
         applicantSection.checks.push({
             item: 'สำเนาบัตรประชาชน',
-            status: hasIdCard ? 'passed' : 'missing'
+            status: hasIdCard ? 'passed' : 'missing',
         });
-        if (hasIdCard) applicantSection.completed++;
+        if (hasIdCard) {applicantSection.completed++;}
 
         // Check House Registration
         const hasHouseReg = uploadedSlotIds.includes('house_reg');
         applicantSection.checks.push({
             item: 'สำเนาทะเบียนบ้าน',
-            status: hasHouseReg ? 'passed' : 'missing'
+            status: hasHouseReg ? 'passed' : 'missing',
         });
-        if (hasHouseReg) applicantSection.completed++;
+        if (hasHouseReg) {applicantSection.completed++;}
 
         // Check Criminal Background (DTAM Required)
         const hasCriminalBg = uploadedSlotIds.includes('criminal_bg');
         applicantSection.checks.push({
             item: 'ผลตรวจประวัติอาชญากรรม',
             status: hasCriminalBg ? 'passed' : 'missing',
-            warning: !hasCriminalBg ? 'กรมการแพทย์แผนไทยกำหนดให้ต้องมี' : null
+            warning: !hasCriminalBg ? 'กรมการแพทย์แผนไทยกำหนดให้ต้องมี' : null,
         });
-        if (hasCriminalBg) applicantSection.completed++;
+        if (hasCriminalBg) {applicantSection.completed++;}
 
         applicantSection.percentage = Math.round((applicantSection.completed / applicantSection.total) * 100);
         validationResults.sections.push(applicantSection);
@@ -138,7 +138,7 @@ router.post('/pre-submission', async (req, res) => {
             nameEN: 'Land Documents',
             total: 1,
             completed: 0,
-            checks: []
+            checks: [],
         };
 
         const hasLandDeed = uploadedSlotIds.includes('land_deed');
@@ -148,33 +148,33 @@ router.post('/pre-submission', async (req, res) => {
         if (landOwnership === 'owned') {
             landSection.checks.push({
                 item: 'โฉนดที่ดิน / น.ส.3 / น.ส.4',
-                status: hasLandDeed ? 'passed' : 'missing'
+                status: hasLandDeed ? 'passed' : 'missing',
             });
-            if (hasLandDeed) landSection.completed++;
+            if (hasLandDeed) {landSection.completed++;}
         } else if (landOwnership === 'leased') {
             landSection.total = 2;
             landSection.checks.push({
                 item: 'โฉนดที่ดิน',
-                status: hasLandDeed ? 'passed' : 'missing'
+                status: hasLandDeed ? 'passed' : 'missing',
             });
             landSection.checks.push({
                 item: 'สัญญาเช่าที่ดิน',
-                status: hasLandLease ? 'passed' : 'missing'
+                status: hasLandLease ? 'passed' : 'missing',
             });
-            if (hasLandDeed) landSection.completed++;
-            if (hasLandLease) landSection.completed++;
+            if (hasLandDeed) {landSection.completed++;}
+            if (hasLandLease) {landSection.completed++;}
         } else if (landOwnership === 'permitted_use') {
             landSection.total = 2;
             landSection.checks.push({
                 item: 'โฉนดที่ดิน',
-                status: hasLandDeed ? 'passed' : 'missing'
+                status: hasLandDeed ? 'passed' : 'missing',
             });
             landSection.checks.push({
                 item: 'หนังสือยินยอมให้ใช้ที่ดิน',
-                status: hasLandConsent ? 'passed' : 'missing'
+                status: hasLandConsent ? 'passed' : 'missing',
             });
-            if (hasLandDeed) landSection.completed++;
-            if (hasLandConsent) landSection.completed++;
+            if (hasLandDeed) {landSection.completed++;}
+            if (hasLandConsent) {landSection.completed++;}
         }
 
         landSection.percentage = Math.round((landSection.completed / landSection.total) * 100) || 0;
@@ -189,7 +189,7 @@ router.post('/pre-submission', async (req, res) => {
                 nameEN: 'Licenses',
                 total: 1,
                 completed: 0,
-                checks: []
+                checks: [],
             };
 
             // BT.11 is always required for controlled plants
@@ -197,9 +197,9 @@ router.post('/pre-submission', async (req, res) => {
             licenseSection.checks.push({
                 item: 'ใบอนุญาต บท.11 (ปลูก)',
                 status: hasBt11 ? 'passed' : 'missing',
-                critical: true
+                critical: true,
             });
-            if (hasBt11) licenseSection.completed++;
+            if (hasBt11) {licenseSection.completed++;}
 
             // BT.13 if processing
             if (objectives.includes('PROCESSING')) {
@@ -207,9 +207,9 @@ router.post('/pre-submission', async (req, res) => {
                 const hasBt13 = uploadedSlotIds.includes('license_bt13');
                 licenseSection.checks.push({
                     item: 'ใบอนุญาต บท.13 (แปรรูป)',
-                    status: hasBt13 ? 'passed' : 'missing'
+                    status: hasBt13 ? 'passed' : 'missing',
                 });
-                if (hasBt13) licenseSection.completed++;
+                if (hasBt13) {licenseSection.completed++;}
             }
 
             // BT.16 if export
@@ -218,9 +218,9 @@ router.post('/pre-submission', async (req, res) => {
                 const hasBt16 = uploadedSlotIds.includes('license_bt16');
                 licenseSection.checks.push({
                     item: 'ใบอนุญาต บท.16 (ส่งออก)',
-                    status: hasBt16 ? 'passed' : 'missing'
+                    status: hasBt16 ? 'passed' : 'missing',
                 });
-                if (hasBt16) licenseSection.completed++;
+                if (hasBt16) {licenseSection.completed++;}
             }
 
             licenseSection.percentage = Math.round((licenseSection.completed / licenseSection.total) * 100);
@@ -235,7 +235,7 @@ router.post('/pre-submission', async (req, res) => {
             nameEN: 'Photos',
             total: 2,
             completed: 0,
-            checks: []
+            checks: [],
         };
 
         const hasExterior = uploadedSlotIds.includes('photos_exterior');
@@ -243,15 +243,15 @@ router.post('/pre-submission', async (req, res) => {
 
         photoSection.checks.push({
             item: 'ภาพถ่ายภายนอก/แปลงปลูก',
-            status: hasExterior ? 'passed' : 'missing'
+            status: hasExterior ? 'passed' : 'missing',
         });
         photoSection.checks.push({
             item: 'ภาพถ่ายป้าย',
-            status: hasSignage ? 'passed' : 'missing'
+            status: hasSignage ? 'passed' : 'missing',
         });
 
-        if (hasExterior) photoSection.completed++;
-        if (hasSignage) photoSection.completed++;
+        if (hasExterior) {photoSection.completed++;}
+        if (hasSignage) {photoSection.completed++;}
 
         photoSection.percentage = Math.round((photoSection.completed / photoSection.total) * 100);
         validationResults.sections.push(photoSection);
@@ -270,7 +270,7 @@ router.post('/pre-submission', async (req, res) => {
             validationResults.warnings.push({
                 type: 'document',
                 message: 'ยังไม่ได้อัปโหลดผลตรวจประวัติอาชญากรรม (ต้องได้จาก สตช. อายุไม่เกิน 3 เดือน)',
-                priority: 'high'
+                priority: 'high',
             });
         }
 
@@ -281,7 +281,7 @@ router.post('/pre-submission', async (req, res) => {
 
         res.json({
             success: true,
-            data: validationResults
+            data: validationResults,
         });
     } catch (error) {
         console.error('[Validation API] Error:', error);
@@ -308,24 +308,24 @@ router.get('/checklist', async (req, res) => {
                     items: [
                         { slotId: 'id_card', name: 'สำเนาบัตรประชาชน', required: true },
                         { slotId: 'house_reg', name: 'สำเนาทะเบียนบ้าน', required: true },
-                        { slotId: 'criminal_bg', name: 'ผลตรวจประวัติอาชญากรรม', required: true }
-                    ]
+                        { slotId: 'criminal_bg', name: 'ผลตรวจประวัติอาชญากรรม', required: true },
+                    ],
                 },
                 {
                     name: 'เอกสารที่ดิน',
                     items: [
                         { slotId: 'land_deed', name: 'โฉนดที่ดิน / น.ส.3 / น.ส.4', required: true },
                         { slotId: 'land_lease', name: 'สัญญาเช่า (กรณีเช่า)', required: false },
-                        { slotId: 'land_consent', name: 'หนังสือยินยอม (กรณีขอใช้)', required: false }
-                    ]
+                        { slotId: 'land_consent', name: 'หนังสือยินยอม (กรณีขอใช้)', required: false },
+                    ],
                 },
                 {
                     name: 'ใบอนุญาต',
                     items: [
                         { slotId: 'license_bt11', name: 'บท.11 (ปลูก)', required: ['cannabis', 'kratom'].includes(plantType) },
                         { slotId: 'license_bt13', name: 'บท.13 (แปรรูป)', required: false },
-                        { slotId: 'license_bt16', name: 'บท.16 (ส่งออก)', required: false }
-                    ]
+                        { slotId: 'license_bt16', name: 'บท.16 (ส่งออก)', required: false },
+                    ],
                 },
                 {
                     name: 'SOP',
@@ -333,8 +333,8 @@ router.get('/checklist', async (req, res) => {
                         { slotId: 'sop_cultivation', name: 'SOP การปลูก', required: true },
                         { slotId: 'sop_harvest', name: 'SOP การเก็บเกี่ยว', required: true },
                         { slotId: 'sop_storage', name: 'SOP การเก็บรักษา', required: true },
-                        { slotId: 'sop_pest', name: 'SOP การจัดการศัตรูพืช', required: true }
-                    ]
+                        { slotId: 'sop_pest', name: 'SOP การจัดการศัตรูพืช', required: true },
+                    ],
                 },
                 {
                     name: 'รูปถ่าย',
@@ -342,18 +342,18 @@ router.get('/checklist', async (req, res) => {
                         { slotId: 'photos_exterior', name: 'ภาพถ่ายภายนอก', required: true },
                         { slotId: 'photos_signage', name: 'ภาพถ่ายป้าย', required: true },
                         { slotId: 'photos_interior', name: 'ภาพถ่ายภายใน', required: false },
-                        { slotId: 'photos_storage', name: 'ภาพถ่ายคลังเก็บ', required: false }
-                    ]
+                        { slotId: 'photos_storage', name: 'ภาพถ่ายคลังเก็บ', required: false },
+                    ],
                 },
                 {
                     name: 'แบบฟอร์ม',
                     items: [
                         { slotId: 'form_09', name: 'แบบคำขอ (Form 09)', required: true },
                         { slotId: 'form_10', name: 'แบบสรุปข้อมูลฟาร์ม (Form 10)', required: true },
-                        { slotId: 'site_map', name: 'แผนผังแปลงปลูก', required: true }
-                    ]
-                }
-            ]
+                        { slotId: 'site_map', name: 'แผนผังแปลงปลูก', required: true },
+                    ],
+                },
+            ],
         };
 
         // Add juristic documents if applicable
@@ -361,22 +361,22 @@ router.get('/checklist', async (req, res) => {
             checklist.sections.splice(1, 0, {
                 name: 'เอกสารนิติบุคคล',
                 items: [
-                    { slotId: 'company_reg', name: 'หนังสือรับรองบริษัท', required: true }
-                ]
+                    { slotId: 'company_reg', name: 'หนังสือรับรองบริษัท', required: true },
+                ],
             });
         } else if (applicantType === 'COMMUNITY_ENTERPRISE') {
             checklist.sections.splice(1, 0, {
                 name: 'เอกสารวิสาหกิจชุมชน',
                 items: [
                     { slotId: 'community_cert', name: 'หนังสือจดทะเบียนวิสาหกิจชุมชน', required: true },
-                    { slotId: 'gov_support', name: 'หนังสือสนับสนุนจากหน่วยงาน', required: true }
-                ]
+                    { slotId: 'gov_support', name: 'หนังสือสนับสนุนจากหน่วยงาน', required: true },
+                ],
             });
         }
 
         res.json({
             success: true,
-            data: checklist
+            data: checklist,
         });
     } catch (error) {
         console.error('[Validation API] Error:', error);

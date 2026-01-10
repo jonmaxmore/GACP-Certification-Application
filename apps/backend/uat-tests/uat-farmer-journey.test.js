@@ -48,7 +48,7 @@ const makeRequest = (path, method = 'GET', data = null, headers = {}) => {
             reject(new Error('Timeout'));
         });
 
-        if (data) req.write(JSON.stringify(data));
+        if (data) {req.write(JSON.stringify(data));}
         req.end();
     });
 };
@@ -225,7 +225,7 @@ describe('🎯 Quality Gates', () => {
     describe('Stress Test: Concurrent Requests', () => {
         it('should handle 10 concurrent health checks', async () => {
             const promises = Array(10).fill(null).map(() =>
-                makeRequest('/api/v2/health').catch(() => ({ status: 500 }))
+                makeRequest('/api/v2/health').catch(() => ({ status: 500 })),
             );
             const results = await Promise.all(promises);
             const successCount = results.filter(r => r.status === 200).length;

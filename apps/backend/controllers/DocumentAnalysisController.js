@@ -23,8 +23,8 @@ class DocumentAnalysisController {
                     code: true,
                     nameTH: true,
                     nameEN: true,
-                    group: true
-                }
+                    group: true,
+                },
             });
 
             res.json({
@@ -34,15 +34,15 @@ class DocumentAnalysisController {
                     code: p.code,
                     nameTH: p.nameTH,
                     nameEN: p.nameEN,
-                    group: p.group
-                }))
+                    group: p.group,
+                })),
             });
         } catch (error) {
             console.error('Error fetching plants:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch plants',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -60,14 +60,14 @@ class DocumentAnalysisController {
 
             res.json({
                 success: true,
-                data: requirements
+                data: requirements,
             });
         } catch (error) {
             console.error('Error fetching requirements:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch requirements',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -83,26 +83,26 @@ class DocumentAnalysisController {
             if (!plantId || !requestType) {
                 return res.status(400).json({
                     success: false,
-                    message: 'plantId and requestType are required'
+                    message: 'plantId and requestType are required',
                 });
             }
 
             const analysis = await documentAnalysisService.analyzeRequiredDocuments(
                 plantId,
                 requestType.toUpperCase(),
-                applicationData || {}
+                applicationData || {},
             );
 
             res.json({
                 success: true,
-                data: analysis
+                data: analysis,
             });
         } catch (error) {
             console.error('Error analyzing documents:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to analyze documents',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -118,7 +118,7 @@ class DocumentAnalysisController {
             if (!Array.isArray(uploadedDocs) || !Array.isArray(requirements)) {
                 return res.status(400).json({
                     success: false,
-                    message: 'uploadedDocs and requirements must be arrays'
+                    message: 'uploadedDocs and requirements must be arrays',
                 });
             }
 
@@ -126,14 +126,14 @@ class DocumentAnalysisController {
 
             res.json({
                 success: true,
-                data: validation
+                data: validation,
             });
         } catch (error) {
             console.error('Error validating documents:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to validate documents',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -151,21 +151,21 @@ class DocumentAnalysisController {
             if (!file) {
                 return res.status(400).json({
                     success: false,
-                    message: 'No file uploaded. Use multipart/form-data with "file" field.'
+                    message: 'No file uploaded. Use multipart/form-data with "file" field.',
                 });
             }
 
             if (!expectedType) {
                 return res.status(400).json({
                     success: false,
-                    message: 'expectedType is required (e.g., ID_CARD, LAND_TITLE, HOUSE_REGISTRATION)'
+                    message: 'expectedType is required (e.g., ID_CARD, LAND_TITLE, HOUSE_REGISTRATION)',
                 });
             }
 
             // Use file buffer for verification
             const verification = await documentAnalysisService.verifyUploadedDocument(
                 file.buffer,
-                expectedType.toUpperCase()
+                expectedType.toUpperCase(),
             );
 
             res.json({
@@ -174,15 +174,15 @@ class DocumentAnalysisController {
                     filename: file.originalname,
                     mimetype: file.mimetype,
                     size: file.size,
-                    verification
-                }
+                    verification,
+                },
             });
         } catch (error) {
             console.error('Error verifying document:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to verify document',
-                error: error.message
+                error: error.message,
             });
         }
     }

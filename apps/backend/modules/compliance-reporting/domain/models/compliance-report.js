@@ -9,34 +9,34 @@ const complianceReportSchema = new mongoose.Schema({
     licenseId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Application', // Linking to the approved application/license
-        required: true
+        required: true,
     },
     farmerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
     },
     reportType: {
         type: String,
         enum: ['form_27', 'form_28', 'form_29', 'form_30', 'form_31', 'form_32'],
-        required: true
+        required: true,
     },
     period: {
         month: { type: Number, required: true },
-        year: { type: Number, required: true }
+        year: { type: Number, required: true },
     },
     data: {
         type: mongoose.Schema.Types.Mixed, // Flexible schema for different forms
-        required: true
+        required: true,
     },
     status: {
         type: String,
         enum: ['draft', 'submitted', 'acknowledged', 'rejected'],
-        default: 'draft'
+        default: 'draft',
     },
     submittedAt: Date,
     acknowledgedAt: Date,
-    officerComments: String
+    officerComments: String,
 }, { timestamps: true });
 
 // Indexes for quick lookup

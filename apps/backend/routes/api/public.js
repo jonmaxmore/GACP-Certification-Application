@@ -26,7 +26,7 @@ router.get('/verify/:certificateNumber', async (req, res) => {
         }
 
         const certificate = await prisma.certificate.findUnique({
-            where: { certificateNumber }
+            where: { certificateNumber },
         });
 
         if (!certificate) {
@@ -36,8 +36,8 @@ router.get('/verify/:certificateNumber', async (req, res) => {
                 valid: false,
                 data: {
                     status: 'invalid',
-                    reason: 'Certificate not found'
-                }
+                    reason: 'Certificate not found',
+                },
             });
         }
 
@@ -57,8 +57,8 @@ router.get('/verify/:certificateNumber', async (req, res) => {
                 valid: false,
                 data: {
                     status: 'invalid',
-                    reason: 'Invalid verification code'
-                }
+                    reason: 'Invalid verification code',
+                },
             });
         }
 
@@ -103,7 +103,7 @@ router.get('/verify/:certificateNumber/page', async (req, res) => {
         const { certificateNumber } = req.params;
 
         const certificate = await prisma.certificate.findUnique({
-            where: { certificateNumber }
+            where: { certificateNumber },
         });
 
         // Prepare data for HTML generator
@@ -114,7 +114,7 @@ router.get('/verify/:certificateNumber/page', async (req, res) => {
             certificateNumber,
             isValid,
             certificate,
-            verificationTimestamp: new Date()
+            verificationTimestamp: new Date(),
         });
 
         res.setHeader('Content-Type', 'text/html; charset=utf-8');

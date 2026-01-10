@@ -9,7 +9,7 @@ const router = express.Router();
 const { authenticate, checkPermission } = require('../../middleware/auth-middleware');
 
 // Temporary in-memory storage (will be replaced with Prisma model later)
-let tickets = [];
+const tickets = [];
 let ticketIdCounter = 1;
 
 const ticketController = {
@@ -60,7 +60,7 @@ const ticketController = {
                 creator: req.user.userId,
                 status: 'open',
                 messages: [],
-                createdAt: new Date()
+                createdAt: new Date(),
             };
             tickets.push(newTicket);
             res.status(201).json({ success: true, data: newTicket });
@@ -79,7 +79,7 @@ const ticketController = {
             tickets[ticketIndex].messages.push({
                 sender: req.user.userId,
                 content,
-                createdAt: new Date()
+                createdAt: new Date(),
             });
             res.status(201).json({ success: true, data: tickets[ticketIndex] });
         } catch (error) {
@@ -111,7 +111,7 @@ const ticketController = {
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
         }
-    }
+    },
 };
 
 // All routes require authentication

@@ -17,7 +17,7 @@ const notificationController = {
             const notifications = await prisma.notification.findMany({
                 where: { userId },
                 orderBy: { createdAt: 'desc' },
-                take: 50
+                take: 50,
             });
 
             res.json({ success: true, data: notifications });
@@ -33,8 +33,8 @@ const notificationController = {
             const count = await prisma.notification.count({
                 where: {
                     userId,
-                    isRead: false
-                }
+                    isRead: false,
+                },
             });
             res.json({ success: true, count });
         } catch (error) {
@@ -49,12 +49,12 @@ const notificationController = {
             const notification = await prisma.notification.updateMany({
                 where: {
                     id: req.params.id,
-                    userId
+                    userId,
                 },
                 data: {
                     isRead: true,
-                    readAt: new Date()
-                }
+                    readAt: new Date(),
+                },
             });
 
             if (notification.count === 0) {
@@ -74,12 +74,12 @@ const notificationController = {
             await prisma.notification.updateMany({
                 where: {
                     userId,
-                    isRead: false
+                    isRead: false,
                 },
                 data: {
                     isRead: true,
-                    readAt: new Date()
-                }
+                    readAt: new Date(),
+                },
             });
             res.json({ success: true });
         } catch (error) {
@@ -98,8 +98,8 @@ const notificationController = {
                     title,
                     message,
                     type: type || 'INFO',
-                    metadata: data || {}
-                }
+                    metadata: data || {},
+                },
             });
 
             res.status(201).json({ success: true, data: notification });

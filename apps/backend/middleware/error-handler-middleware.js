@@ -130,7 +130,7 @@ const errorHandler = (err, req, res, _next) => {
       err.errorCode || ERROR_CODES.INTERNAL_SERVER_ERROR,
       err.message,
       err.details || null,
-      err.statusCode || 500
+      err.statusCode || 500,
     );
     return res.status(err.statusCode || 500).json(errorResponse);
   }

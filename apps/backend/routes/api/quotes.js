@@ -18,8 +18,8 @@ router.get('/', authenticateDTAM, async (req, res) => {
         const { status, farmerId, page = 1, limit = 20 } = req.query;
         const where = { isDeleted: false };
 
-        if (status) where.status = status;
-        if (farmerId) where.farmerId = farmerId;
+        if (status) {where.status = status;}
+        if (farmerId) {where.farmerId = farmerId;}
 
         const p = parseInt(page) || 1;
         const l = parseInt(limit) || 20;
@@ -29,13 +29,13 @@ router.get('/', authenticateDTAM, async (req, res) => {
             prisma.quote.findMany({
                 where,
                 include: {
-                    application: { select: { applicationNumber: true } }
+                    application: { select: { applicationNumber: true } },
                 },
                 orderBy: { createdAt: 'desc' },
                 skip,
-                take: l
+                take: l,
             }),
-            prisma.quote.count({ where })
+            prisma.quote.count({ where }),
         ]);
 
         // Include Farmer info via application
@@ -50,20 +50,20 @@ router.get('/', authenticateDTAM, async (req, res) => {
                                 firstName: true,
                                 lastName: true,
                                 email: true,
-                                companyName: true
-                            }
-                        }
-                    }
-                }
+                                companyName: true,
+                            },
+                        },
+                    },
+                },
             },
             orderBy: { createdAt: 'desc' },
             skip,
-            take: l
+            take: l,
         });
 
         const formattedQuotes = quotesWithFarmer.map(q => ({
             ...q,
-            farmerId: q.application?.farmer || null
+            farmerId: q.application?.farmer || null,
         }));
 
         res.json({
@@ -73,8 +73,8 @@ router.get('/', authenticateDTAM, async (req, res) => {
                 page: p,
                 limit: l,
                 total,
-                pages: Math.ceil(total / l)
-            }
+                pages: Math.ceil(total / l),
+            },
         });
 
     } catch (error) {
@@ -98,18 +98,18 @@ router.get('/my', authenticateFarmer, async (req, res) => {
 
         const where = {
             application: { farmerId: farmerId },
-            isDeleted: false
+            isDeleted: false,
         };
-        if (status) where.status = status;
+        if (status) {where.status = status;}
 
         const quotes = await prisma.quote.findMany({
             where,
             include: {
                 application: {
-                    select: { applicationNumber: true, serviceType: true }
-                }
+                    select: { applicationNumber: true, serviceType: true },
+                },
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
         });
 
         res.json({ success: true, data: quotes });
@@ -127,7 +127,7 @@ router.post('/', authenticateDTAM, async (req, res) => {
 
         const application = await prisma.application.findUnique({
             where: { id: applicationId },
-            include: { farmer: true }
+            include: { farmer: true },
         });
 
         if (!application) {
@@ -158,14 +158,14 @@ router.post('/', authenticateDTAM, async (req, res) => {
                 totalAmount,
                 validUntil,
                 notes,
-                status: 'draft' // Initial status draft as per legacy logic
-            }
+                status: 'draft', // Initial status draft as per legacy logic
+            },
         });
 
         res.status(201).json({
             success: true,
             message: 'สร้างใบเสนอราคาสำเร็จ',
-            data: quote
+            data: quote,
         });
 
     } catch (error) {
@@ -186,20 +186,20 @@ router.put('/:id/status', authenticateDTAM, async (req, res) => {
         }
 
         const updateData = { status };
-        if (status === 'accepted') updateData.acceptedAt = new Date();
-        if (status === 'rejected') updateData.rejectedAt = new Date();
-        if (notes) updateData.notes = notes;
+        if (status === 'accepted') {updateData.acceptedAt = new Date();}
+        if (status === 'rejected') {updateData.rejectedAt = new Date();}
+        if (notes) {updateData.notes = notes;}
 
         const quote = await prisma.quote.update({
             where: { id },
             data: updateData,
-            include: { application: { include: { farmer: true } } }
+            include: { application: { include: { farmer: true } } },
         });
 
         res.json({
             success: true,
             message: 'อัพเดทสถานะสำเร็จ',
-            data: quote
+            data: quote,
         });
 
     } catch (error) {
@@ -215,16 +215,16 @@ router.post('/:id/send', authenticateDTAM, async (req, res) => {
 
         const quote = await prisma.quote.findUnique({
             where: { id },
-            include: { application: true }
+            include: { application: true },
         });
 
-        if (!quote) return res.status(404).json({ success: false, message: 'Quote not found' });
-        if (quote.status !== 'draft') return res.status(400).json({ success: false, message: 'Quote already sent or processed' });
+        if (!quote) {return res.status(404).json({ success: false, message: 'Quote not found' });}
+        if (quote.status !== 'draft') {return res.status(400).json({ success: false, message: 'Quote already sent or processed' });}
 
         // Update Quote status
         const updatedQuote = await prisma.quote.update({
             where: { id },
-            data: { status: 'sent' }
+            data: { status: 'sent' },
         });
 
         // Update Application Status (QUOTE_SENT is mapped to existing status? e.g. 'AWAITING_PAYMENT' or similar? 
@@ -235,8 +235,8 @@ router.post('/:id/send', authenticateDTAM, async (req, res) => {
         await prisma.application.update({
             where: { id: quote.applicationId },
             data: {
-                status: 'QUOTE_SENT' // Verify if this status exists in enum ApplicationStatus
-            }
+                status: 'QUOTE_SENT', // Verify if this status exists in enum ApplicationStatus
+            },
         });
 
         // Send Notification
@@ -244,7 +244,7 @@ router.post('/:id/send', authenticateDTAM, async (req, res) => {
             quoteId: quote.id,
             quoteNumber: quote.quoteNumber,
             amount: quote.totalAmount,
-            validUntil: quote.validUntil
+            validUntil: quote.validUntil,
         });
 
         res.json({ success: true, message: 'Quote sent', data: updatedQuote });
@@ -265,12 +265,12 @@ router.post('/:id/accept', authenticateFarmer, async (req, res) => {
 
         const quote = await prisma.quote.findUnique({
             where: { id },
-            include: { application: true }
+            include: { application: true },
         });
 
-        if (!quote) return res.status(404).json({ success: false, message: 'Quote not found' });
+        if (!quote) {return res.status(404).json({ success: false, message: 'Quote not found' });}
         // Check ownership via application
-        if (quote.application.farmerId !== farmerId) return res.status(403).json({ success: false, message: 'Not authorized' });
+        if (quote.application.farmerId !== farmerId) {return res.status(403).json({ success: false, message: 'Not authorized' });}
 
         if (quote.status !== 'sent') {
             return res.status(400).json({ success: false, message: 'Quote cannot be accepted' });
@@ -298,22 +298,22 @@ router.post('/:id/accept', authenticateFarmer, async (req, res) => {
                 vat: quote.vat,
                 totalAmount: quote.totalAmount,
                 status: 'pending',
-                dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-            }
+                dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            },
         });
 
         // Update Quote
         await prisma.quote.update({
             where: { id },
-            data: { status: 'invoiced', acceptedAt: new Date(), invoiceId: invoice.id }
+            data: { status: 'invoiced', acceptedAt: new Date(), invoiceId: invoice.id },
         });
 
         // Update Application
         await prisma.application.update({
             where: { id: quote.applicationId },
             data: {
-                status: 'AWAITING_PAYMENT'
-            }
+                status: 'AWAITING_PAYMENT',
+            },
         });
 
         // Notify
@@ -321,7 +321,7 @@ router.post('/:id/accept', authenticateFarmer, async (req, res) => {
             invoiceId: invoice.id,
             invoiceNumber: invoice.invoiceNumber,
             amount: invoice.totalAmount,
-            applicationId: quote.applicationId
+            applicationId: quote.applicationId,
         });
 
         res.json({ success: true, message: 'Quote accepted', data: { quote, invoice } });
@@ -341,25 +341,25 @@ router.post('/:id/reject', authenticateFarmer, async (req, res) => {
 
         const quote = await prisma.quote.findUnique({
             where: { id },
-            include: { application: true }
+            include: { application: true },
         });
 
-        if (!quote) return res.status(404).json({ success: false, message: 'Quote not found' });
-        if (quote.application.farmerId !== farmerId) return res.status(403).json({ success: false, message: 'Not authorized' });
+        if (!quote) {return res.status(404).json({ success: false, message: 'Quote not found' });}
+        if (quote.application.farmerId !== farmerId) {return res.status(403).json({ success: false, message: 'Not authorized' });}
 
         await prisma.quote.update({
             where: { id },
             data: {
                 status: 'rejected',
                 rejectedAt: new Date(),
-                farmerNotes: reason
-            }
+                farmerNotes: reason,
+            },
         });
 
         // App back to pending review?
         await prisma.application.update({
             where: { id: quote.applicationId },
-            data: { status: 'PENDING_TEAM_REVIEW' } // Verify Status
+            data: { status: 'PENDING_TEAM_REVIEW' }, // Verify Status
         });
 
         res.json({ success: true, message: 'Quote rejected' });
@@ -380,10 +380,10 @@ router.post('/:id/invoice', authenticateDTAM, async (req, res) => {
 
         const quote = await prisma.quote.findUnique({
             where: { id },
-            include: { application: true }
+            include: { application: true },
         });
 
-        if (!quote) return res.status(404).json({ success: false, message: 'Quote not found' });
+        if (!quote) {return res.status(404).json({ success: false, message: 'Quote not found' });}
 
         // Allow if accepted.
         if (quote.status !== 'accepted') {
@@ -408,20 +408,20 @@ router.post('/:id/invoice', authenticateDTAM, async (req, res) => {
                 vat: quote.vat,
                 totalAmount: quote.totalAmount,
                 status: 'pending',
-                dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-            }
+                dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            },
         });
 
         // Update Quote
         await prisma.quote.update({
             where: { id: quote.id },
-            data: { status: 'invoiced' }
+            data: { status: 'invoiced' },
         });
 
         res.status(201).json({
             success: true,
             message: 'สร้างใบวางบิลจากใบเสนอราคาสำเร็จ',
-            data: invoice
+            data: invoice,
         });
 
     } catch (error) {
@@ -439,21 +439,21 @@ router.put('/:id/number', authenticateDTAM, async (req, res) => {
 
         if (type === 'quote') {
             const existing = await prisma.quote.findUnique({ where: { quoteNumber: newNumber } });
-            if (existing && existing.id !== id) return res.status(409).json({ success: false, message: 'Number already exists' });
+            if (existing && existing.id !== id) {return res.status(409).json({ success: false, message: 'Number already exists' });}
 
             const updated = await prisma.quote.update({
                 where: { id },
-                data: { quoteNumber: newNumber }
+                data: { quoteNumber: newNumber },
             });
             return res.json({ success: true, message: 'Updated', data: updated });
 
         } else if (type === 'invoice') {
             const existing = await prisma.invoice.findUnique({ where: { invoiceNumber: newNumber } });
-            if (existing && existing.id !== id) return res.status(409).json({ success: false, message: 'Number already exists' });
+            if (existing && existing.id !== id) {return res.status(409).json({ success: false, message: 'Number already exists' });}
 
             const updated = await prisma.invoice.update({
                 where: { id },
-                data: { invoiceNumber: newNumber }
+                data: { invoiceNumber: newNumber },
             });
             return res.json({ success: true, message: 'Updated', data: updated });
         }

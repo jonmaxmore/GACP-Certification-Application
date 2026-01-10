@@ -20,7 +20,7 @@ const createQuote = async (req, res) => {
         if (!application) {
             return res.status(404).json({
                 success: false,
-                message: 'Application not found'
+                message: 'Application not found',
             });
         }
 
@@ -33,7 +33,7 @@ const createQuote = async (req, res) => {
             description: item.description,
             quantity: item.quantity || 1,
             unitPrice: item.unitPrice,
-            total: (item.quantity || 1) * item.unitPrice
+            total: (item.quantity || 1) * item.unitPrice,
         }));
 
         const subtotal = processedItems.reduce((sum, item) => sum + item.total, 0);
@@ -48,7 +48,7 @@ const createQuote = async (req, res) => {
             totalAmount: subtotal,
             validUntil,
             notes,
-            status: 'draft'
+            status: 'draft',
         });
 
         await quote.save();
@@ -56,14 +56,14 @@ const createQuote = async (req, res) => {
         res.status(201).json({
             success: true,
             message: 'Quote created successfully',
-            data: quote
+            data: quote,
         });
     } catch (error) {
         console.error('Create quote error:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to create quote',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -80,13 +80,13 @@ const getQuotesByApplication = async (req, res) => {
 
         res.json({
             success: true,
-            data: quotes
+            data: quotes,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Failed to fetch quotes',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -110,13 +110,13 @@ const getQuotesForFarmer = async (req, res) => {
 
         res.json({
             success: true,
-            data: quotes
+            data: quotes,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Failed to fetch quotes',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -132,14 +132,14 @@ const sendQuote = async (req, res) => {
         if (!quote) {
             return res.status(404).json({
                 success: false,
-                message: 'Quote not found'
+                message: 'Quote not found',
             });
         }
 
         if (quote.status !== 'draft') {
             return res.status(400).json({
                 success: false,
-                message: 'Quote already sent or processed'
+                message: 'Quote already sent or processed',
             });
         }
 
@@ -152,7 +152,7 @@ const sendQuote = async (req, res) => {
             status: APPLICATION_STATUS.QUOTE_SENT,
             'teamQuote.quoteId': quote._id,
             'teamQuote.receivedAt': new Date(),
-            'teamQuote.amount': quote.totalAmount
+            'teamQuote.amount': quote.totalAmount,
         });
 
         // Send notification to farmer
@@ -161,19 +161,19 @@ const sendQuote = async (req, res) => {
             quoteId: quote._id,
             quoteNumber: quote.quoteNumber,
             amount: quote.totalAmount,
-            validUntil: quote.validUntil
+            validUntil: quote.validUntil,
         });
 
         res.json({
             success: true,
             message: 'Quote sent to farmer',
-            data: quote
+            data: quote,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Failed to send quote',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -190,7 +190,7 @@ const acceptQuote = async (req, res) => {
         if (!quote) {
             return res.status(404).json({
                 success: false,
-                message: 'Quote not found'
+                message: 'Quote not found',
             });
         }
 
@@ -198,14 +198,14 @@ const acceptQuote = async (req, res) => {
         if (quote.farmerId.toString() !== farmerId) {
             return res.status(403).json({
                 success: false,
-                message: 'Not authorized'
+                message: 'Not authorized',
             });
         }
 
         if (quote.status !== 'sent') {
             return res.status(400).json({
                 success: false,
-                message: 'Quote cannot be accepted in current status'
+                message: 'Quote cannot be accepted in current status',
             });
         }
 
@@ -215,7 +215,7 @@ const acceptQuote = async (req, res) => {
             await quote.save();
             return res.status(400).json({
                 success: false,
-                message: 'Quote has expired'
+                message: 'Quote has expired',
             });
         }
 
@@ -233,7 +233,7 @@ const acceptQuote = async (req, res) => {
             subtotal: quote.subtotal,
             vat: quote.vat || 0,
             totalAmount: quote.totalAmount,
-            totalAmountText: quote.totalAmountText
+            totalAmountText: quote.totalAmountText,
         });
 
         await invoice.save();
@@ -245,7 +245,7 @@ const acceptQuote = async (req, res) => {
         // Update application
         await Application.findByIdAndUpdate(quote.applicationId, {
             status: APPLICATION_STATUS.AWAITING_PAYMENT,
-            'teamQuote.acceptedAt': new Date()
+            'teamQuote.acceptedAt': new Date(),
         });
 
         // Send notification about new invoice
@@ -254,7 +254,7 @@ const acceptQuote = async (req, res) => {
             invoiceId: invoice._id,
             invoiceNumber: invoice.invoiceNumber,
             amount: invoice.totalAmount,
-            applicationId: quote.applicationId
+            applicationId: quote.applicationId,
         });
 
         res.json({
@@ -262,14 +262,14 @@ const acceptQuote = async (req, res) => {
             message: 'Quote accepted, invoice generated',
             data: {
                 quote,
-                invoice
-            }
+                invoice,
+            },
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Failed to accept quote',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -287,14 +287,14 @@ const rejectQuote = async (req, res) => {
         if (!quote) {
             return res.status(404).json({
                 success: false,
-                message: 'Quote not found'
+                message: 'Quote not found',
             });
         }
 
         if (quote.farmerId.toString() !== farmerId) {
             return res.status(403).json({
                 success: false,
-                message: 'Not authorized'
+                message: 'Not authorized',
             });
         }
 
@@ -305,19 +305,19 @@ const rejectQuote = async (req, res) => {
 
         // Update application to pending team review again
         await Application.findByIdAndUpdate(quote.applicationId, {
-            status: APPLICATION_STATUS.PENDING_TEAM_REVIEW
+            status: APPLICATION_STATUS.PENDING_TEAM_REVIEW,
         });
 
         res.json({
             success: true,
             message: 'Quote rejected',
-            data: quote
+            data: quote,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Failed to reject quote',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -328,6 +328,6 @@ module.exports = {
     getQuotesForFarmer,
     sendQuote,
     acceptQuote,
-    rejectQuote
+    rejectQuote,
 };
 

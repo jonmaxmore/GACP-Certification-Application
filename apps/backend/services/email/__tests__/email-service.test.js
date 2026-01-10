@@ -122,7 +122,7 @@ describe('EmailService', () => {
           to: 'user@example.com',
           subject: 'Test Subject',
           from: 'Test Platform <noreply@test.com>',
-        })
+        }),
       );
 
       expect(result).toEqual({
@@ -140,7 +140,7 @@ describe('EmailService', () => {
           subject: 'Test',
           template: 'welcome',
           data: {},
-        })
+        }),
       ).rejects.toThrow('SMTP Error');
     });
   });
@@ -159,7 +159,7 @@ describe('EmailService', () => {
         expect.objectContaining({
           to: 'user@example.com',
           subject: 'รีเซ็ตรหัสผ่าน - GACP Platform',
-        })
+        }),
       );
 
       const callArgs = mockTransporter.sendMail.mock.calls[0][0];
@@ -194,7 +194,7 @@ describe('EmailService', () => {
         expect.objectContaining({
           to: 'newuser@example.com',
           subject: 'ยืนยันอีเมล - GACP Platform',
-        })
+        }),
       );
 
       const callArgs = mockTransporter.sendMail.mock.calls[0][0];
@@ -217,7 +217,7 @@ describe('EmailService', () => {
         expect.objectContaining({
           to: 'welcome@example.com',
           subject: 'ยินดีต้อนรับสู่ GACP Platform',
-        })
+        }),
       );
 
       const callArgs = mockTransporter.sendMail.mock.calls[0][0];
@@ -243,7 +243,7 @@ describe('EmailService', () => {
       expect(mockTransporter.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'farmer@example.com',
-        })
+        }),
       );
 
       const callArgs = mockTransporter.sendMail.mock.calls[0][0];
@@ -272,7 +272,7 @@ describe('EmailService', () => {
         expect.objectContaining({
           to: 'farmer@example.com',
           subject: 'การตรวจสอบฟาร์มได้รับการนัดหมายแล้ว',
-        })
+        }),
       );
 
       const callArgs = mockTransporter.sendMail.mock.calls[0][0];

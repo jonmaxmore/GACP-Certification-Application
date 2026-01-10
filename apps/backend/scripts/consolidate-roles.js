@@ -15,15 +15,15 @@ async function consolidateRoles() {
     // 1. Update existing users with old roles to 'assessor'
     const result = await prisma.dTAMStaff.updateMany({
         where: {
-            role: { in: ['inspector', 'auditor', 'reviewer'] }
+            role: { in: ['inspector', 'auditor', 'reviewer'] },
         },
-        data: { role: 'assessor' }
+        data: { role: 'assessor' },
     });
     console.log(`Updated ${result.count} users from inspector/auditor/reviewer to assessor`);
 
     // 2. Create a main assessor user if not exists
     const existingAssessor = await prisma.dTAMStaff.findFirst({
-        where: { username: 'assessor' }
+        where: { username: 'assessor' },
     });
 
     if (!existingAssessor) {
@@ -39,8 +39,8 @@ async function consolidateRoles() {
                 userType: 'DTAM_STAFF',
                 department: 'กรมการแพทย์แผนไทย',
                 isActive: true,
-                isDeleted: false
-            }
+                isDeleted: false,
+            },
         });
         console.log('Created new assessor user: assessor / Gacp@2024');
     } else {
@@ -50,14 +50,14 @@ async function consolidateRoles() {
     // 3. List all current roles
     const users = await prisma.dTAMStaff.findMany({
         select: { username: true, role: true, isActive: true },
-        orderBy: { role: 'asc' }
+        orderBy: { role: 'asc' },
     });
 
     console.log('\n=== Current Staff Roles ===');
     users.forEach(u => console.log(
         u.username.padEnd(15),
         u.role.padEnd(15),
-        u.isActive ? '✅' : '❌'
+        u.isActive ? '✅' : '❌',
     ));
 
     const uniqueRoles = [...new Set(users.map(u => u.role))];

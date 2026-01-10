@@ -8,6 +8,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../../services/prisma-database').prisma;
 const { authLimiter } = require('../../middleware/rate-limiter');
+const jwtConfig = require('../../config/jwt-security');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'gacp-jwt-secret-key-2024';
 const JWT_EXPIRES_IN = '8h';
@@ -23,7 +24,8 @@ const MOCK_STAFF = [
 ];
 
 // POST /auth-dtam/login - 🛡️ Rate limited: 5 attempts per 15 minutes
-router.post('/login', authLimiter, async (req, res) => {
+const limiter = DEV_MODE ? (req, res, next) => next() : authLimiter;
+router.post('/login', limiter, async (req, res) => {
     try {
         const { username, password, identifier } = req.body;
         const loginId = username || identifier;
@@ -31,29 +33,25 @@ router.post('/login', authLimiter, async (req, res) => {
         if (!loginId || !password) {
             return res.status(400).json({
                 success: false,
-                error: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'
+                error: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน',
             });
         }
 
-        // DEV MODE: Try mock authentication first
+        // Mock staff login
         if (DEV_MODE) {
             const mockStaff = MOCK_STAFF.find(s =>
-                (s.username === loginId || s.email === loginId) && s.password === password
+                (s.username === loginId || s.email === loginId) && s.password === password,
             );
 
             if (mockStaff) {
-                const token = jwt.sign(
-                    {
-                        id: mockStaff.id,
-                        uuid: mockStaff.uuid,
-                        username: mockStaff.username,
-                        email: mockStaff.email,
-                        role: mockStaff.role,
-                        userType: 'DTAM_STAFF'
-                    },
-                    JWT_SECRET,
-                    { expiresIn: JWT_EXPIRES_IN }
-                );
+                const token = jwtConfig.generateToken({
+                    id: mockStaff.id,
+                    uuid: mockStaff.uuid,
+                    username: mockStaff.username,
+                    email: mockStaff.email,
+                    role: mockStaff.role,
+                    userType: 'DTAM_STAFF',
+                }, 'dtam');
 
                 console.log(`[Auth DEV] Mock staff login: ${mockStaff.username} (${mockStaff.role})`);
 
@@ -69,10 +67,10 @@ router.post('/login', authLimiter, async (req, res) => {
                             lastName: mockStaff.lastName,
                             role: mockStaff.role,
                             department: mockStaff.department,
-                            dashboardUrl: '/staff/dashboard'
+                            dashboardUrl: '/staff/dashboard',
                         },
-                        token
-                    }
+                        token,
+                    },
                 });
             }
         }
@@ -83,16 +81,16 @@ router.post('/login', authLimiter, async (req, res) => {
                 OR: [
                     { username: loginId },
                     { email: loginId },
-                    { employeeId: loginId }
+                    { employeeId: loginId },
                 ],
-                isDeleted: false
-            }
+                isDeleted: false,
+            },
         });
 
         if (!staff) {
             return res.status(401).json({
                 success: false,
-                error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
+                error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
             });
         }
 
@@ -100,7 +98,7 @@ router.post('/login', authLimiter, async (req, res) => {
         if (!staff.isActive) {
             return res.status(403).json({
                 success: false,
-                error: 'บัญชีของคุณถูกระงับการใช้งาน'
+                error: 'บัญชีของคุณถูกระงับการใช้งาน',
             });
         }
 
@@ -109,28 +107,24 @@ router.post('/login', authLimiter, async (req, res) => {
         if (!isValidPassword) {
             return res.status(401).json({
                 success: false,
-                error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
+                error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
             });
         }
 
         // Generate JWT token
-        const token = jwt.sign(
-            {
-                id: staff.id,
-                uuid: staff.uuid,
-                username: staff.username,
-                email: staff.email,
-                role: staff.role,
-                userType: 'DTAM_STAFF'
-            },
-            JWT_SECRET,
-            { expiresIn: JWT_EXPIRES_IN }
-        );
+        const token = jwtConfig.generateToken({
+            id: staff.id,
+            uuid: staff.uuid,
+            username: staff.username,
+            email: staff.email,
+            role: staff.role,
+            userType: 'DTAM_STAFF',
+        }, 'dtam');
 
         // Update last login
         await prisma.dTAMStaff.update({
             where: { id: staff.id },
-            data: { lastLoginAt: new Date() }
+            data: { lastLoginAt: new Date() },
         });
 
         console.log(`[Auth] Staff login: ${staff.username} (${staff.role})`);
@@ -147,10 +141,10 @@ router.post('/login', authLimiter, async (req, res) => {
                     lastName: staff.lastName,
                     role: staff.role,
                     department: staff.department,
-                    dashboardUrl: '/staff/dashboard'
+                    dashboardUrl: '/staff/dashboard',
                 },
-                token
-            }
+                token,
+            },
         });
     } catch (error) {
         console.error('[Auth] DTAM login error:', error);
@@ -159,13 +153,13 @@ router.post('/login', authLimiter, async (req, res) => {
             error.message === 'บัญชีของคุณถูกระงับการใช้งาน') {
             return res.status(401).json({
                 success: false,
-                error: error.message
+                error: error.message,
             });
         }
 
         res.status(500).json({
             success: false,
-            error: 'เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่'
+            error: 'เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่',
         });
     }
 });
@@ -174,7 +168,7 @@ router.post('/login', authLimiter, async (req, res) => {
 router.post('/logout', (req, res) => {
     res.json({
         success: true,
-        message: 'ออกจากระบบสำเร็จ'
+        message: 'ออกจากระบบสำเร็จ',
     });
 });
 
@@ -200,8 +194,8 @@ router.get('/me', async (req, res) => {
                 lastName: true,
                 role: true,
                 department: true,
-                isActive: true
-            }
+                isActive: true,
+            },
         });
 
         if (!staff || !staff.isActive) {

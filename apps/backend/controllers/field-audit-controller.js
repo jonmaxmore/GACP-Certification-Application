@@ -160,7 +160,7 @@ class FieldAuditController {
             const audit = await FieldAuditService.startAudit(
                 req.params.id,
                 auditorId,
-                { lat, lng, accuracy }
+                { lat, lng, accuracy },
             );
 
             return res.json({
@@ -196,7 +196,7 @@ class FieldAuditController {
                 id,
                 auditorId,
                 itemCode,
-                responseData
+                responseData,
             );
 
             return res.json({
@@ -231,7 +231,7 @@ class FieldAuditController {
             const audit = await FieldAuditService.submitAllResponses(
                 req.params.id,
                 auditorId,
-                responses
+                responses,
             );
 
             return res.json({
@@ -264,7 +264,7 @@ class FieldAuditController {
             const result = await FieldAuditService.completeAudit(
                 req.params.id,
                 auditorId,
-                completionData
+                completionData,
             );
 
             return res.json({
@@ -304,7 +304,7 @@ class FieldAuditController {
 
             const audit = await FieldAuditService.syncOfflineAudit(
                 req.params.id,
-                offlineData
+                offlineData,
             );
 
             return res.json({
@@ -360,8 +360,8 @@ class FieldAuditController {
             const { type, plantType } = req.query;
 
             const query = { isActive: true };
-            if (type) query.templateType = type;
-            if (plantType) query.plantType = plantType;
+            if (type) {query.templateType = type;}
+            if (plantType) {query.plantType = plantType;}
 
             const templates = await AuditChecklistTemplate.find(query)
                 .select('templateCode name nameTh templateType plantType totalItems version')
@@ -524,7 +524,7 @@ class FieldAuditController {
                         lng,
                         accuracy,
                         capturedBy: req.user?.userId,
-                    }
+                    },
                 );
 
                 return res.json({
@@ -626,7 +626,7 @@ class FieldAuditController {
                     signerId: req.user?.userId,
                     signerName,
                     signerRole,
-                }
+                },
             );
 
             return res.json({

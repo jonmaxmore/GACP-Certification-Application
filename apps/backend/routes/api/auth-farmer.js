@@ -16,5 +16,6 @@ router.post('/check-identifier', (req, res) => AuthController.checkIdentifier(re
 
 // Protected Routes
 router.get('/me', authenticateFarmer, (req, res) => AuthController.getMe(req, res));
+router.patch('/me', authenticateFarmer, (req, res) => AuthController.updateProfile(req, res));
 
 module.exports = router;

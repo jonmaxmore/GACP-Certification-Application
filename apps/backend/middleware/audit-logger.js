@@ -64,11 +64,11 @@ class AuditLogger {
     async getLastHash() {
         const lastLog = await this.prisma.auditLog.findFirst({
             orderBy: { sequenceNumber: 'desc' },
-            select: { currentHash: true, sequenceNumber: true }
+            select: { currentHash: true, sequenceNumber: true },
         });
         return {
             hash: lastLog?.currentHash || 'GENESIS',
-            sequence: lastLog?.sequenceNumber || 0
+            sequence: lastLog?.sequenceNumber || 0,
         };
     }
 
@@ -110,7 +110,7 @@ class AuditLogger {
                 actorId,
                 resourceType,
                 resourceId,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
             }, previousHash);
 
             // Create immutable audit record
@@ -135,8 +135,8 @@ class AuditLogger {
                     errorMessage,
                     previousHash,
                     currentHash,
-                    hashAlgorithm: 'SHA-256'
-                }
+                    hashAlgorithm: 'SHA-256',
+                },
             });
 
             // Alert for critical events
@@ -150,7 +150,7 @@ class AuditLogger {
             console.error('[AUDIT_FALLBACK]', {
                 category, action, severity,
                 error: error.message,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
             });
             return null;
         }
@@ -172,7 +172,7 @@ class AuditLogger {
             userAgent,
             metadata,
             result: outcome,
-            severity: outcome === 'FAILURE' ? AuditSeverity.WARNING : AuditSeverity.INFO
+            severity: outcome === 'FAILURE' ? AuditSeverity.WARNING : AuditSeverity.INFO,
         });
     }
 
@@ -190,7 +190,7 @@ class AuditLogger {
             ipAddress,
             userAgent,
             metadata,
-            severity: AuditSeverity.WARNING
+            severity: AuditSeverity.WARNING,
         });
     }
 
@@ -202,10 +202,10 @@ class AuditLogger {
             where: {
                 sequenceNumber: {
                     gte: startSequence,
-                    ...(endSequence && { lte: endSequence })
-                }
+                    ...(endSequence && { lte: endSequence }),
+                },
             },
-            orderBy: { sequenceNumber: 'asc' }
+            orderBy: { sequenceNumber: 'asc' },
         });
 
         let previousHash = 'GENESIS';
@@ -217,7 +217,7 @@ class AuditLogger {
                     logId: log.logId,
                     sequenceNumber: log.sequenceNumber,
                     expected: previousHash,
-                    found: log.previousHash
+                    found: log.previousHash,
                 });
             }
             previousHash = log.currentHash;
@@ -226,7 +226,7 @@ class AuditLogger {
         return {
             verified: corrupted.length === 0,
             totalLogs: logs.length,
-            corruptedLogs: corrupted
+            corruptedLogs: corrupted,
         };
     }
 

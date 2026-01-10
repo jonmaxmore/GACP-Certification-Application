@@ -28,7 +28,7 @@ const NotifyType = {
     REVISION_REQUIRED: 'REVISION_REQUIRED',
 
     // Team workflow
-    TEAM_REVIEW_COMPLETE: 'TEAM_REVIEW_COMPLETE'
+    TEAM_REVIEW_COMPLETE: 'TEAM_REVIEW_COMPLETE',
 };
 
 // Notification templates
@@ -86,10 +86,10 @@ async function sendNotification(recipientId, type, data = {}, overrides = {}) {
                 message: overrides.message || templateResult.message || 'คุณมีการแจ้งเตือนใหม่',
                 metadata: { // Map 'data' to 'metadata' JSON field
                     ...data,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
                 },
-                isRead: false
-            }
+                isRead: false,
+            },
         });
 
         console.log(`[NotificationService] Sent ${type} notification to user ${recipientId}`);
@@ -117,5 +117,5 @@ module.exports = {
     sendNotification,
     sendBatchNotifications,
     NotifyType,
-    NotifyTemplates
+    NotifyTemplates,
 };

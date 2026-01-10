@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
         if (!farmId) {
             return res.status(400).json({
                 success: false,
-                message: 'farmId is required'
+                message: 'farmId is required',
             });
         }
 
@@ -40,26 +40,26 @@ router.get('/', async (req, res) => {
             orderBy: { createdAt: 'desc' },
             include: {
                 plantSpecies: {
-                    select: { code: true, nameTH: true, nameEN: true }
+                    select: { code: true, nameTH: true, nameEN: true },
                 },
                 certificate: {
-                    select: { certificateNumber: true, expiryDate: true }
+                    select: { certificateNumber: true, expiryDate: true },
                 },
-                _count: { select: { batches: true } }
-            }
+                _count: { select: { batches: true } },
+            },
         });
 
         res.json({
             success: true,
             count: cycles.length,
-            data: cycles
+            data: cycles,
         });
     } catch (error) {
         console.error('Error fetching planting cycles:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch planting cycles',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -87,20 +87,20 @@ router.post('/', async (req, res) => {
             irrigationType,
             estimatedYield,
             varietyName,
-            notes
+            notes,
         } = req.body;
 
         // Validation
         if (!farmId || !plantSpeciesId || !cycleName || !startDate) {
             return res.status(400).json({
                 success: false,
-                message: 'farmId, plantSpeciesId, cycleName, and startDate are required'
+                message: 'farmId, plantSpeciesId, cycleName, and startDate are required',
             });
         }
 
         // Get next cycle number for this farm
         const cycleCount = await prisma.plantingCycle.count({
-            where: { farmId }
+            where: { farmId },
         });
 
         const cycle = await prisma.plantingCycle.create({
@@ -123,21 +123,21 @@ router.post('/', async (req, res) => {
                 estimatedYield: estimatedYield ? parseFloat(estimatedYield) : null,
                 varietyName,
                 notes,
-                status: 'PLANTED'
-            }
+                status: 'PLANTED',
+            },
         });
 
         res.status(201).json({
             success: true,
             message: 'Planting cycle created successfully',
-            data: cycle
+            data: cycle,
         });
     } catch (error) {
         console.error('Error creating planting cycle:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to create planting cycle',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -159,46 +159,46 @@ router.get('/:id', async (req, res) => {
                         farmName: true,
                         farmNameTH: true,
                         province: true,
-                        district: true
-                    }
+                        district: true,
+                    },
                 },
                 plantSpecies: {
-                    select: { code: true, nameTH: true, nameEN: true }
+                    select: { code: true, nameTH: true, nameEN: true },
                 },
                 certificate: {
                     select: {
                         certificateNumber: true,
                         expiryDate: true,
-                        status: true
-                    }
+                        status: true,
+                    },
                 },
                 batches: {
                     where: { isDeleted: false },
                     orderBy: { createdAt: 'desc' },
                     include: {
-                        _count: { select: { lots: true } }
-                    }
-                }
-            }
+                        _count: { select: { lots: true } },
+                    },
+                },
+            },
         });
 
         if (!cycle) {
             return res.status(404).json({
                 success: false,
-                message: 'Planting cycle not found'
+                message: 'Planting cycle not found',
             });
         }
 
         res.json({
             success: true,
-            data: cycle
+            data: cycle,
         });
     } catch (error) {
         console.error('Error fetching planting cycle:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch planting cycle',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -233,20 +233,20 @@ router.patch('/:id', async (req, res) => {
 
         const cycle = await prisma.plantingCycle.update({
             where: { id },
-            data: updateData
+            data: updateData,
         });
 
         res.json({
             success: true,
             message: 'Planting cycle updated successfully',
-            data: cycle
+            data: cycle,
         });
     } catch (error) {
         console.error('Error updating planting cycle:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to update planting cycle',
-            error: error.message
+            error: error.message,
         });
     }
 });
@@ -262,19 +262,19 @@ router.post('/:id/harvest', async (req, res) => {
             harvestDate,
             actualYield,
             qualityGrade,
-            notes
+            notes,
         } = req.body;
 
         // Get the planting cycle
         const cycle = await prisma.plantingCycle.findUnique({
             where: { id },
-            include: { farm: true }
+            include: { farm: true },
         });
 
         if (!cycle) {
             return res.status(404).json({
                 success: false,
-                message: 'Planting cycle not found'
+                message: 'Planting cycle not found',
             });
         }
 
@@ -306,8 +306,8 @@ router.post('/:id/harvest', async (req, res) => {
                 notes,
                 status: 'HARVESTED',
                 qrCode: qrData.qrCode,
-                trackingUrl: qrData.trackingUrl
-            }
+                trackingUrl: qrData.trackingUrl,
+            },
         });
 
         // Update cycle status
@@ -316,8 +316,8 @@ router.post('/:id/harvest', async (req, res) => {
             data: {
                 status: 'HARVESTED',
                 actualHarvestDate: harvestDate ? new Date(harvestDate) : new Date(),
-                actualYield: actualYield ? parseFloat(actualYield) : null
-            }
+                actualYield: actualYield ? parseFloat(actualYield) : null,
+            },
         });
 
         res.status(201).json({
@@ -325,15 +325,15 @@ router.post('/:id/harvest', async (req, res) => {
             message: 'Harvest batch created successfully',
             data: {
                 batch,
-                qrCode: qrData
-            }
+                qrCode: qrData,
+            },
         });
     } catch (error) {
         console.error('Error creating harvest batch:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to create harvest batch',
-            error: error.message
+            error: error.message,
         });
     }
 });

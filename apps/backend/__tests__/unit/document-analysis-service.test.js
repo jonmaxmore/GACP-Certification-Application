@@ -68,7 +68,7 @@ describe('DocumentAnalysisService', () => {
             const result = await DocumentAnalysisService.analyzeRequiredDocuments(
                 'CAN',
                 'NEW',
-                { licenseInfo: { plantingStatus: 'Permission' } }
+                { licenseInfo: { plantingStatus: 'Permission' } },
             );
 
             // Assert
@@ -77,7 +77,7 @@ describe('DocumentAnalysisService', () => {
             expect(result.documents).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({ slotId: 'license_copy' }),
-                ])
+                ]),
             );
         });
 
@@ -86,14 +86,14 @@ describe('DocumentAnalysisService', () => {
             const result = await DocumentAnalysisService.analyzeRequiredDocuments(
                 'CAN',
                 'NEW',
-                { licenseInfo: { plantingStatus: 'Notify' } }
+                { licenseInfo: { plantingStatus: 'Notify' } },
             );
 
             // Assert
             expect(result.documents).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({ slotId: 'notify_receipt' }),
-                ])
+                ]),
             );
         });
 
@@ -104,15 +104,15 @@ describe('DocumentAnalysisService', () => {
                 'NEW',
                 {
                     licenseInfo: { plantingStatus: 'Permission' },
-                    securityMeasures: { hasCCTV: true }
-                }
+                    securityMeasures: { hasCCTV: true },
+                },
             );
 
             // Assert
             expect(result.documents).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({ slotId: 'cctv_plan' }),
-                ])
+                ]),
             );
         });
 
@@ -121,19 +121,19 @@ describe('DocumentAnalysisService', () => {
             const result = await DocumentAnalysisService.analyzeRequiredDocuments(
                 'CAN',
                 'AMEND',
-                { replacementReason: 'Lost' }
+                { replacementReason: 'Lost' },
             );
 
             // Assert
             expect(result.documents).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({ slotId: 'police_report' }),
-                ])
+                ]),
             );
             expect(result.documents).not.toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({ slotId: 'damaged_cert_photo' }),
-                ])
+                ]),
             );
         });
 
@@ -142,14 +142,14 @@ describe('DocumentAnalysisService', () => {
             const result = await DocumentAnalysisService.analyzeRequiredDocuments(
                 'CAN',
                 'AMEND',
-                { replacementReason: 'Damaged' }
+                { replacementReason: 'Damaged' },
             );
 
             // Assert
             expect(result.documents).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({ slotId: 'damaged_cert_photo' }),
-                ])
+                ]),
             );
         });
 
@@ -165,14 +165,14 @@ describe('DocumentAnalysisService', () => {
             const result = await DocumentAnalysisService.analyzeRequiredDocuments(
                 'TUR',
                 'NEW',
-                { production: { plantParts: ['Rhizome (เหง้า)'] } }
+                { production: { plantParts: ['Rhizome (เหง้า)'] } },
             );
 
             // Assert
             expect(result.documents).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({ slotId: 'arsenic_test' }),
-                ])
+                ]),
             );
         });
 
@@ -183,15 +183,15 @@ describe('DocumentAnalysisService', () => {
                 'NEW',
                 {
                     licenseInfo: { plantingStatus: 'Permission' },
-                    production: { sourceType: 'Import' }
-                }
+                    production: { sourceType: 'Import' },
+                },
             );
 
             // Assert
             expect(result.documents).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({ slotId: 'import_license' }),
-                ])
+                ]),
             );
         });
 
@@ -200,7 +200,7 @@ describe('DocumentAnalysisService', () => {
 
             // Act & Assert
             await expect(
-                DocumentAnalysisService.analyzeRequiredDocuments('INVALID', 'NEW', {})
+                DocumentAnalysisService.analyzeRequiredDocuments('INVALID', 'NEW', {}),
             ).rejects.toThrow('Plant not found: INVALID');
         });
     });

@@ -133,20 +133,20 @@ class SignatureService {
      * Validate signature data
      */
     validateSignatureData(base64Data) {
-        if (!base64Data) return false;
+        if (!base64Data) {return false;}
 
         // Check if valid base64
         const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
         const clean = base64Data.replace(/^data:image\/\w+;base64,/, '');
 
-        if (!base64Regex.test(clean)) return false;
+        if (!base64Regex.test(clean)) {return false;}
 
         // Check minimum size (at least 100 bytes for a signature)
         const buffer = Buffer.from(clean, 'base64');
-        if (buffer.length < 100) return false;
+        if (buffer.length < 100) {return false;}
 
         // Check maximum size (5MB)
-        if (buffer.length > 5 * 1024 * 1024) return false;
+        if (buffer.length > 5 * 1024 * 1024) {return false;}
 
         return true;
     }

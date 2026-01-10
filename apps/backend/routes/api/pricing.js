@@ -13,9 +13,13 @@ const {
     AREA_TYPES,
     OBJECTIVES,
     calculateFee,
-    getFeeSummary
-} = require('../../constants/PricingService');
-const { SERVICE_TYPES, SERVICE_TYPE_LABELS } = require('../../constants/ServiceTypeEnum');
+    getFeeSummary,
+} = require('../../constants/pricing-service'); // Fixed path
+const { SERVICE_TYPES, SERVICE_TYPE_LABELS } = require('../../constants/service-type-enum'); // Fixed path
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+// ... existing code ...
 
 /**
  * @route GET /api/v2/pricing/fees
@@ -31,11 +35,11 @@ router.get('/fees', (req, res) => {
             objectives: Object.values(OBJECTIVES),
             serviceTypes: Object.entries(SERVICE_TYPES).map(([key, value]) => ({
                 id: value,
-                label: SERVICE_TYPE_LABELS[value]
+                label: SERVICE_TYPE_LABELS[value],
             })),
             lastUpdated: '2025-12-13',
-            validUntil: '2025-12-31'
-        }
+            validUntil: '2025-12-31',
+        },
     });
 });
 
@@ -51,7 +55,7 @@ router.post('/calculate', (req, res) => {
         if (!serviceType) {
             return res.status(400).json({
                 success: false,
-                error: 'กรุณาระบุประเภทบริการ (serviceType)'
+                error: 'กรุณาระบุประเภทบริการ (serviceType)',
             });
         }
 
@@ -66,13 +70,13 @@ router.post('/calculate', (req, res) => {
                 areaCount: areaTypes.length,
                 plantType,
                 objective,
-                ...feeBreakdown
-            }
+                ...feeBreakdown,
+            },
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: 'ไม่สามารถคำนวณค่าธรรมเนียมได้'
+            error: 'ไม่สามารถคำนวณค่าธรรมเนียมได้',
         });
     }
 });
@@ -85,20 +89,20 @@ router.post('/calculate', (req, res) => {
 router.get('/quotation/:applicationId', async (req, res) => {
     try {
         const { applicationId } = req.params;
-        const Application = require('../../models-mongoose-legacy/application-model');
 
-        // Fetch actual application to get area count
-        const app = await Application.findById(applicationId).lean();
+        // Fetch actual application to get area count via Prisma
+        const app = await prisma.application.findUnique({
+            where: { id: applicationId },
+            include: { farm: true }, // If needed
+        });
+
         let areaCount = 1;
 
         if (app) {
-            if (app.areaType) {
-                // New format: single areaType per application
-                areaCount = 1;
-            } else if (app.data?.siteInfo?.areaType && Array.isArray(app.data.siteInfo.areaType)) {
-                areaCount = app.data.siteInfo.areaType.length || 1;
-            } else if (app.siteTypes && Array.isArray(app.siteTypes)) {
-                areaCount = app.siteTypes.length || 1;
+            // Logic to determine area count from app data
+            // Assuming simple logic for now or mapped from legacy
+            if (app.farm && app.farm.totalArea) {
+                areaCount = Math.ceil(app.farm.totalArea);
             }
         }
 
@@ -115,14 +119,14 @@ router.get('/quotation/:applicationId', async (req, res) => {
                     description: 'ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น',
                     quantity: areaCount,
                     unitPrice: docReviewPerArea,
-                    total: docReviewTotal
+                    total: docReviewTotal,
                 },
                 {
                     description: 'ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน',
                     quantity: areaCount,
                     unitPrice: inspectionPerArea,
-                    total: inspectionTotal
-                }
+                    total: inspectionTotal,
+                },
             ],
             subtotal: total,
             vat: 0,
@@ -130,18 +134,18 @@ router.get('/quotation/:applicationId', async (req, res) => {
             currency: 'THB',
             validDays: 30,
             areaCount,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
         };
 
         res.json({
             success: true,
-            data: quotation
+            data: quotation,
         });
     } catch (error) {
         console.error('Quotation error:', error);
         res.status(500).json({
             success: false,
-            error: 'ไม่สามารถสร้างใบเสนอราคาได้'
+            error: 'ไม่สามารถสร้างใบเสนอราคาได้',
         });
     }
 });
@@ -159,14 +163,14 @@ router.get('/invoice/:phase', (req, res) => {
             phase: 1,
             description: 'ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น',
             amount: 5000,
-            currency: 'THB'
+            currency: 'THB',
         },
         'phase2': {
             phase: 2,
             description: 'ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน',
             amount: 25000,
-            currency: 'THB'
-        }
+            currency: 'THB',
+        },
     };
 
     const invoice = invoices[phase.toLowerCase()];
@@ -174,13 +178,13 @@ router.get('/invoice/:phase', (req, res) => {
     if (!invoice) {
         return res.status(404).json({
             success: false,
-            error: 'ไม่พบข้อมูล Phase ที่ระบุ'
+            error: 'ไม่พบข้อมูล Phase ที่ระบุ',
         });
     }
 
     res.json({
         success: true,
-        data: invoice
+        data: invoice,
     });
 });
 

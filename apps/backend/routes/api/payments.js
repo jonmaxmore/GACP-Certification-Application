@@ -29,25 +29,25 @@ router.get('/my', authenticateFarmer, async (req, res) => {
         const invoices = await prisma.invoice.findMany({
             where: {
                 farmerId: userId,
-                isDeleted: false
+                isDeleted: false,
             },
             orderBy: { createdAt: 'desc' },
             include: {
                 application: {
-                    select: { applicationNumber: true }
-                }
-            }
+                    select: { applicationNumber: true },
+                },
+            },
         });
 
         res.json({
             success: true,
-            data: invoices
+            data: invoices,
         });
     } catch (error) {
         logger.error('[Payments] getMy error:', error);
         res.status(500).json({
             success: false,
-            error: 'Failed to fetch payments'
+            error: 'Failed to fetch payments',
         });
     }
 });
@@ -67,7 +67,7 @@ router.post('/confirm', authenticateFarmer, upload.single('slipImage'), async (r
 
         // Verify ownership
         const invoice = await prisma.invoice.findFirst({
-            where: { id: invoiceId, farmerId: req.user.id }
+            where: { id: invoiceId, farmerId: req.user.id },
         });
 
         if (!invoice) {
@@ -77,7 +77,7 @@ router.post('/confirm', authenticateFarmer, upload.single('slipImage'), async (r
         const updateData = {
             status: 'payment_verification_pending',
             paymentTransactionId: transactionId || null,
-            updatedBy: req.user.id
+            updatedBy: req.user.id,
         };
 
         // If file uploaded, store path in metadata or notes (Since Invoice model doesn't have slipUrl default)
@@ -93,7 +93,7 @@ router.post('/confirm', authenticateFarmer, upload.single('slipImage'), async (r
 
         const updatedInvoice = await prisma.invoice.update({
             where: { id: invoiceId },
-            data: updateData
+            data: updateData,
         });
 
         logger.info(`[Payments] Invoice ${invoiceId} payment confirmed by user ${req.user.id}`);
@@ -101,14 +101,14 @@ router.post('/confirm', authenticateFarmer, upload.single('slipImage'), async (r
         res.json({
             success: true,
             message: 'Payment confirmation submitted',
-            data: updatedInvoice
+            data: updatedInvoice,
         });
 
     } catch (error) {
         logger.error('[Payments] confirm error:', error);
         res.status(500).json({
             success: false,
-            error: error.message
+            error: error.message,
         });
     }
 });

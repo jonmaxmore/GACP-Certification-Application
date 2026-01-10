@@ -415,6 +415,43 @@ class ReplacementReason {
   }
 }
 
+// [NEW] Plot Definition Model
+class PlotDefinition {
+  final String id;
+  final String name;
+  final String areaSize;
+  final String areaUnit;
+  final String solarSystem; // OUTDOOR, INDOOR, GREENHOUSE
+
+  const PlotDefinition({
+    required this.id,
+    required this.name,
+    this.areaSize = '',
+    this.areaUnit = 'Rai',
+    this.solarSystem = 'OUTDOOR',
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'areaSize': areaSize,
+      'areaUnit': areaUnit,
+      'solarSystem': solarSystem,
+    };
+  }
+
+  factory PlotDefinition.fromMap(Map<String, dynamic> map) {
+    return PlotDefinition(
+      id: map['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      name: map['name'] ?? '',
+      areaSize: map['areaSize'] ?? '',
+      areaUnit: map['areaUnit'] ?? 'Rai',
+      solarSystem: map['solarSystem'] ?? 'OUTDOOR',
+    );
+  }
+}
+
 class SiteLocation {
   final String name;
   final String address;
@@ -429,6 +466,9 @@ class SiteLocation {
   // Values: 'Own' | 'Rent' | 'Consent' | '' (not selected)
   final String landOwnership;
 
+  // [NEW] Plots
+  final List<PlotDefinition> plots;
+
   const SiteLocation({
     this.name = '',
     this.address = '',
@@ -439,6 +479,7 @@ class SiteLocation {
     this.east = '',
     this.west = '',
     this.landOwnership = '',
+    this.plots = const [],
   });
 
   SiteLocation copyWith({
@@ -451,6 +492,7 @@ class SiteLocation {
     String? east,
     String? west,
     String? landOwnership,
+    List<PlotDefinition>? plots,
   }) {
     return SiteLocation(
       name: name ?? this.name,
@@ -462,6 +504,7 @@ class SiteLocation {
       east: east ?? this.east,
       west: west ?? this.west,
       landOwnership: landOwnership ?? this.landOwnership,
+      plots: plots ?? this.plots,
     );
   }
 
@@ -476,6 +519,7 @@ class SiteLocation {
       'east': east,
       'west': west,
       'landOwnership': landOwnership,
+      'plots': plots.map((e) => e.toMap()).toList(),
     };
   }
 
@@ -490,6 +534,10 @@ class SiteLocation {
       east: map['east'] ?? '',
       west: map['west'] ?? '',
       landOwnership: map['landOwnership'] ?? '',
+      plots: (map['plots'] as List<dynamic>?)
+              ?.map((e) => PlotDefinition.fromMap(e))
+              .toList() ??
+          [],
     );
   }
 }

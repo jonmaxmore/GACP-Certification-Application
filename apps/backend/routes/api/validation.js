@@ -18,6 +18,66 @@ const { DOCUMENT_SLOTS, getRequiredDocuments } = require('../../constants/docume
 // ============================================================================
 
 /**
+ * @route   POST /api/v2/validation/land-check
+ * @desc    Smart Land Check (Coordinates & restricted zones)
+ * @access  Farmer
+ */
+router.post('/land-check', async (req, res) => {
+    try {
+        const { lat, lng } = req.body;
+
+        if (!lat || !lng) {
+            return res.status(400).json({ success: false, error: 'Coordinate is required' });
+        }
+
+        const latitude = parseFloat(lat);
+        const longitude = parseFloat(lng);
+
+        // 1. Format Check
+        if (isNaN(latitude) || isNaN(longitude)) {
+            return res.json({ success: true, data: { valid: false, reason: 'Invalid format' } });
+        }
+
+        // 2. Restricted Zone Check (Mock - e.g., near Royal Palace or National Park)
+        // Simple mock: if lat > 18.0 and lat < 18.5 => Restricted
+        const isRestricted = (latitude > 18.0 && latitude < 18.1); // Mock restricted zone in North Thailand
+
+        if (isRestricted) {
+            return res.json({
+                success: true,
+                data: {
+                    valid: false,
+                    reason: 'Located in restricted zone (National Park/Military Base)',
+                    type: 'RESTRICTED_ZONE'
+                }
+            });
+        }
+
+        // 3. Overlap Check (Mock - check against DB)
+        // In real impl, query PostGIS. Here, mock collision if lat ends in .000
+        const isOverlap = Math.floor(latitude * 1000) % 10 === 0;
+
+        if (isOverlap) {
+            return res.json({
+                success: true,
+                data: {
+                    valid: false,
+                    reason: 'Land overlaps with existing registered farm',
+                    type: 'OVERLAP'
+                }
+            });
+        }
+
+        // Valid
+        res.json({ success: true, data: { valid: true } });
+
+    } catch (error) {
+        console.error('[Land Check] Error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
  * @route   POST /api/v2/validation/pre-submission
  * @desc    Validate application before submission
  * @access  Farmer
@@ -108,7 +168,7 @@ router.post('/pre-submission', async (req, res) => {
             item: 'สำเนาบัตรประชาชน',
             status: hasIdCard ? 'passed' : 'missing',
         });
-        if (hasIdCard) {applicantSection.completed++;}
+        if (hasIdCard) { applicantSection.completed++; }
 
         // Check House Registration
         const hasHouseReg = uploadedSlotIds.includes('house_reg');
@@ -116,7 +176,7 @@ router.post('/pre-submission', async (req, res) => {
             item: 'สำเนาทะเบียนบ้าน',
             status: hasHouseReg ? 'passed' : 'missing',
         });
-        if (hasHouseReg) {applicantSection.completed++;}
+        if (hasHouseReg) { applicantSection.completed++; }
 
         // Check Criminal Background (DTAM Required)
         const hasCriminalBg = uploadedSlotIds.includes('criminal_bg');
@@ -125,7 +185,7 @@ router.post('/pre-submission', async (req, res) => {
             status: hasCriminalBg ? 'passed' : 'missing',
             warning: !hasCriminalBg ? 'กรมการแพทย์แผนไทยกำหนดให้ต้องมี' : null,
         });
-        if (hasCriminalBg) {applicantSection.completed++;}
+        if (hasCriminalBg) { applicantSection.completed++; }
 
         applicantSection.percentage = Math.round((applicantSection.completed / applicantSection.total) * 100);
         validationResults.sections.push(applicantSection);
@@ -150,7 +210,7 @@ router.post('/pre-submission', async (req, res) => {
                 item: 'โฉนดที่ดิน / น.ส.3 / น.ส.4',
                 status: hasLandDeed ? 'passed' : 'missing',
             });
-            if (hasLandDeed) {landSection.completed++;}
+            if (hasLandDeed) { landSection.completed++; }
         } else if (landOwnership === 'leased') {
             landSection.total = 2;
             landSection.checks.push({
@@ -161,8 +221,8 @@ router.post('/pre-submission', async (req, res) => {
                 item: 'สัญญาเช่าที่ดิน',
                 status: hasLandLease ? 'passed' : 'missing',
             });
-            if (hasLandDeed) {landSection.completed++;}
-            if (hasLandLease) {landSection.completed++;}
+            if (hasLandDeed) { landSection.completed++; }
+            if (hasLandLease) { landSection.completed++; }
         } else if (landOwnership === 'permitted_use') {
             landSection.total = 2;
             landSection.checks.push({
@@ -173,8 +233,8 @@ router.post('/pre-submission', async (req, res) => {
                 item: 'หนังสือยินยอมให้ใช้ที่ดิน',
                 status: hasLandConsent ? 'passed' : 'missing',
             });
-            if (hasLandDeed) {landSection.completed++;}
-            if (hasLandConsent) {landSection.completed++;}
+            if (hasLandDeed) { landSection.completed++; }
+            if (hasLandConsent) { landSection.completed++; }
         }
 
         landSection.percentage = Math.round((landSection.completed / landSection.total) * 100) || 0;
@@ -199,7 +259,7 @@ router.post('/pre-submission', async (req, res) => {
                 status: hasBt11 ? 'passed' : 'missing',
                 critical: true,
             });
-            if (hasBt11) {licenseSection.completed++;}
+            if (hasBt11) { licenseSection.completed++; }
 
             // BT.13 if processing
             if (objectives.includes('PROCESSING')) {
@@ -209,7 +269,7 @@ router.post('/pre-submission', async (req, res) => {
                     item: 'ใบอนุญาต บท.13 (แปรรูป)',
                     status: hasBt13 ? 'passed' : 'missing',
                 });
-                if (hasBt13) {licenseSection.completed++;}
+                if (hasBt13) { licenseSection.completed++; }
             }
 
             // BT.16 if export
@@ -220,7 +280,7 @@ router.post('/pre-submission', async (req, res) => {
                     item: 'ใบอนุญาต บท.16 (ส่งออก)',
                     status: hasBt16 ? 'passed' : 'missing',
                 });
-                if (hasBt16) {licenseSection.completed++;}
+                if (hasBt16) { licenseSection.completed++; }
             }
 
             licenseSection.percentage = Math.round((licenseSection.completed / licenseSection.total) * 100);
@@ -250,8 +310,8 @@ router.post('/pre-submission', async (req, res) => {
             status: hasSignage ? 'passed' : 'missing',
         });
 
-        if (hasExterior) {photoSection.completed++;}
-        if (hasSignage) {photoSection.completed++;}
+        if (hasExterior) { photoSection.completed++; }
+        if (hasSignage) { photoSection.completed++; }
 
         photoSection.percentage = Math.round((photoSection.completed / photoSection.total) * 100);
         validationResults.sections.push(photoSection);

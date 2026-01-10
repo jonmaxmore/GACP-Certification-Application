@@ -62,6 +62,7 @@ router.use('/criteria', require('./criteria'));
 router.use('/standards', require('./standards'));
 router.use('/farms', farmsRouter);
 router.use('/dashboard', dashboardRouter);
+router.use('/master-data', require('./master-data'));
 router.use('/admin', require('./admin')); // Admin CMS Routes
 
 // Health check with version info

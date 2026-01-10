@@ -238,9 +238,54 @@ class _ProjectForm extends StatelessWidget {
               (v) => notifier.updateLocation(name: v)),
           WizardTextInput('ที่อยู่สถานที่ (Address)', state.location.address,
               (v) => notifier.updateLocation(address: v)),
+          WizardTextInput('ที่อยู่สถานที่ (Address)', state.location.address,
+              (v) => notifier.updateLocation(address: v)),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('2. แปลงย่อย (Plots)',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              TextButton.icon(
+                onPressed: () => _showAddPlotDialog(context, notifier),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('เพิ่มแปลง'),
+              ),
+            ],
+          ),
+          if (state.location.plots.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(16),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text('ยังไม่มีรายการแปลงย่อย',
+                  style: TextStyle(color: Colors.grey)),
+            )
+          else
+            ...state.location.plots.map((plot) => Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    title: Text(plot.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(
+                        '${plot.areaSize} ${plot.areaUnit} • ${plot.solarSystem}'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        final updated =
+                            List<PlotDefinition>.from(state.location.plots)
+                              ..removeWhere((p) => p.id == plot.id);
+                        notifier.updateLocation(plots: updated);
+                      },
+                    ),
+                  ),
+                )),
           if (isGroupA) ...[
             const SizedBox(height: 24),
-            const Text('2. ใบอนุญาต (License Info) - Group A Only',
+            const Text('3. ใบอนุญาต (License Info) - Group A Only',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.indigo,
@@ -300,6 +345,71 @@ class _ProjectForm extends StatelessWidget {
       groupValue: state.licenseInfo?.plantingStatus ?? 'Notify',
       onChanged: (v) => notifier.updateLicense(plantingStatus: v),
       contentPadding: EdgeInsets.zero,
+    );
+  }
+
+  void _showAddPlotDialog(
+      BuildContext context, ApplicationFormNotifier notifier) {
+    final nameController = TextEditingController();
+    final sizeController = TextEditingController();
+    String solarSystem = 'OUTDOOR';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('เพิ่มแปลงย่อย (Add Plot)'),
+        content: StatefulBuilder(
+          builder: (context, setState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'ชื่อแปลง'),
+              ),
+              TextField(
+                controller: sizeController,
+                decoration: const InputDecoration(labelText: 'ขนาด (ไร่)'),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: solarSystem,
+                items: const [
+                  DropdownMenuItem(value: 'OUTDOOR', child: Text('กลางแจ้ง')),
+                  DropdownMenuItem(value: 'INDOOR', child: Text('Indoor')),
+                  DropdownMenuItem(
+                      value: 'GREENHOUSE', child: Text('โรงเรือน')),
+                ],
+                onChanged: (v) => setState(() => solarSystem = v!),
+                decoration: const InputDecoration(labelText: 'ระบบปลูก'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('ยกเลิก'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (nameController.text.isNotEmpty) {
+                final newPlot = PlotDefinition(
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  name: nameController.text,
+                  areaSize: sizeController.text,
+                  solarSystem: solarSystem,
+                );
+                final updated = List<PlotDefinition>.from(state.location.plots)
+                  ..add(newPlot);
+                notifier.updateLocation(plots: updated);
+                Navigator.pop(ctx);
+              }
+            },
+            child: const Text('บันทึก'),
+          ),
+        ],
+      ),
     );
   }
 }

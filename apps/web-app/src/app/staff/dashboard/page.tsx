@@ -8,6 +8,7 @@ import {
     IconDocument, IconSearch, IconChart, IconCreditCard, IconCalendar,
     IconCheckCircle, IconClock, IconUser
 } from "@/components/ui/icons";
+import { ApplicationService, DashboardStats, Application } from "@/lib/services/application-service";
 
 interface StaffUser {
     id: string;
@@ -44,11 +45,10 @@ export default function StaffDashboardPage() {
     const [activeTab, setActiveTab] = useState<"documents" | "audits">("documents");
     const [pendingDocuments, setPendingDocuments] = useState<PendingItem[]>([]);
     const [pendingAudits, setPendingAudits] = useState<PendingItem[]>([]);
-    const [dashboardStats, setDashboardStats] = useState({ total: 0, pending: 0, approved: 0, todayChecked: 0 });
-    const [isDark, setIsDark] = useState(false);
+    const [dashboardStats, setDashboardStats] = useState<DashboardStats>({ total: 0, pending: 0, approved: 0, todayChecked: 0 });
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        setIsDark(localStorage.getItem("theme") === "dark");
         const token = localStorage.getItem("staff_token");
         const userData = localStorage.getItem("staff_user");
         if (!token || !userData) { router.push("/staff/login"); return; }
@@ -56,131 +56,149 @@ export default function StaffDashboardPage() {
             const parsed = JSON.parse(userData);
             setUser(parsed);
             if (parsed.role === "SCHEDULER") setActiveTab("audits");
-            fetchPendingData(token);
+            fetchPendingData();
         } catch { router.push("/staff/login"); }
     }, [router]);
 
-    const fetchPendingData = async (token: string) => {
+    const fetchPendingData = async () => {
         try {
             const [pendingRes, auditsRes, statsRes] = await Promise.all([
-                fetch('/api/applications/pending-reviews', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch('/api/applications/auditor/assignments', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch('/api/applications/stats', { headers: { 'Authorization': `Bearer ${token}` } })
+                ApplicationService.getPendingReviews(),
+                ApplicationService.getPendingAudits(),
+                ApplicationService.getStats()
             ]);
 
-            if (pendingRes.ok) {
-                const result = await pendingRes.json();
-                if (result.success) setPendingDocuments(result.data?.map((app: any) => ({
-                    id: app._id || app.applicationNumber, applicantName: app.data?.applicantInfo?.name || 'ไม่ระบุ',
-                    plantType: app.data?.formData?.plantId || 'ไม่ระบุ', status: app.status,
-                    submittedAt: app.createdAt, submissionCount: (app.rejectCount || 0) + 1, waitTime: getWaitTime(app.createdAt)
-                })) || []);
+            if (pendingRes.success) {
+                setPendingDocuments(mapApplicationsToPendingItems(pendingRes.data as Application[]));
             }
-            if (auditsRes.ok) {
-                const result = await auditsRes.json();
-                if (result.success) setPendingAudits(result.data?.map((app: any) => ({
-                    id: app._id || app.applicationNumber, applicantName: app.data?.applicantInfo?.name || 'ไม่ระบุ',
-                    plantType: app.data?.formData?.plantId || 'ไม่ระบุ', status: app.status,
-                    submittedAt: app.audit?.scheduledDate || app.createdAt, waitTime: getWaitTime(app.createdAt)
-                })) || []);
+            if (auditsRes.success) {
+                setPendingAudits(mapApplicationsToPendingItems(auditsRes.data as Application[]));
             }
-            if (statsRes.ok) {
-                const result = await statsRes.json();
-                if (result.success) setDashboardStats({ total: result.data?.total || 0, pending: result.data?.pending || 0, approved: result.data?.approved || 0, todayChecked: result.data?.todayChecked || 0 });
+            if (statsRes.success && statsRes.data) {
+                setDashboardStats(statsRes.data);
             }
-        } catch (e) { console.error('Error:', e); }
+        } catch (e) {
+            console.error('Error fetching dashboard data:', e);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const mapApplicationsToPendingItems = (apps: Application[] | undefined): PendingItem[] => {
+        if (!apps || !Array.isArray(apps)) return [];
+        return apps.map(app => ({
+            id: app._id || app.applicationNumber || 'Unknown',
+            applicantName: app.data?.applicantInfo?.name || 'ไม่ระบุ',
+            plantType: app.data?.formData?.plantId || 'ไม่ระบุ',
+            status: app.status,
+            submittedAt: app.audit?.scheduledDate || app.createdAt,
+            submissionCount: (app.rejectCount || 0) + 1,
+            waitTime: getWaitTime(app.createdAt)
+        }));
     };
 
     const getWaitTime = (date: string) => {
         const diff = Date.now() - new Date(date).getTime();
         const hours = Math.floor(diff / 3600000);
-        return hours < 24 ? `${hours} ชั่วโมง` : `${Math.floor(hours / 24)} วัน`;
+        return hours < 24 ? `${hours} ชม.` : `${Math.floor(hours / 24)} วัน`;
     };
 
-    if (!user) return null;
+    if (!user || isLoading) return <div className="p-8 flex justify-center"><div className="w-8 h-8 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div></div>;
 
     const roleInfo = ROLE_LABELS[user.role] || { label: user.role };
 
     return (
-        <StaffLayout title={`สวัสดี, ${user.firstName || 'เจ้าหน้าที่'}`} subtitle={roleInfo.label}>
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <StaffLayout title="Dashboard" subtitle={`ภาพรวมการทำงาน (${roleInfo.label})`}>
+            {/* 1. Key Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 {[
-                    { label: "รอดำเนินการ", value: pendingDocuments.length + pendingAudits.length, Icon: IconClock, bgColor: "bg-slate-600" },
-                    { label: "รอตรวจเอกสาร", value: pendingDocuments.length, Icon: IconDocument, bgColor: "bg-amber-500" },
-                    { label: "รอตรวจแปลง", value: pendingAudits.length, Icon: IconSearch, bgColor: "bg-violet-500" },
-                    { label: "อนุมัติแล้ว", value: dashboardStats.approved, Icon: IconCheckCircle, bgColor: "bg-emerald-500" },
+                    { label: "งานทั้งหมดในระบบ", value: dashboardStats.total, icon: IconCalendar, color: "text-slate-400" },
+                    { label: "รอตรวจเอกสาร", value: pendingDocuments.length, icon: IconDocument, color: "text-amber-500" },
+                    { label: "รอเข้าตรวจแปลง", value: pendingAudits.length, icon: IconSearch, color: "text-purple-500" },
+                    { label: "อนุมัติวันนี้", value: dashboardStats.todayChecked, icon: IconCheckCircle, color: "text-emerald-500" },
                 ].map((stat, i) => (
-                    <div key={i} className={`p-4 rounded-xl border transition-all hover:shadow-md ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
-                        <div className="flex items-center justify-between mb-3">
-                            <span className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</span>
-                            <div className={`w-8 h-8 rounded-lg ${stat.bgColor} flex items-center justify-center`}>
-                                <stat.Icon size={16} className="text-white" />
+                    <div key={i} className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{stat.label}</p>
+                                <h3 className="text-3xl font-bold mt-2 text-slate-800 dark:text-slate-100">{stat.value}</h3>
                             </div>
+                            <stat.icon size={24} className={stat.color} />
                         </div>
-                        <p className="text-2xl font-semibold">{stat.value}</p>
                     </div>
                 ))}
             </div>
 
-            {/* Tab Buttons */}
-            {user.role === "REVIEWER_AUDITOR" && (
-                <div className="flex gap-2 mb-6">
-                    {[
-                        { key: "documents", label: `รอตรวจเอกสาร (${pendingDocuments.length})` },
-                        { key: "audits", label: `รอตรวจประเมิน (${pendingAudits.length})` }
-                    ].map(tab => (
-                        <button
-                            key={tab.key}
-                            onClick={() => setActiveTab(tab.key as any)}
-                            className={`px-6 py-3 rounded-full font-semibold transition-all ${activeTab === tab.key
-                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30'
-                                : `${isDark ? 'bg-slate-800 text-slate-300' : 'bg-white text-slate-600 border border-slate-200'} hover:border-emerald-300`
-                                }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-            )}
+            {/* 2. Work Queue (Tabs & Table) */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden mb-8">
+                {/* Tabs */}
+                {user.role === "REVIEWER_AUDITOR" && (
+                    <div className="flex border-b border-slate-200 dark:border-slate-700">
+                        {[
+                            { key: "documents", label: `รอตรวจเอกสาร (${pendingDocuments.length})`, icon: IconDocument },
+                            { key: "audits", label: `รอตรวจประเมิน (${pendingAudits.length})`, icon: IconSearch }
+                        ].map(tab => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setActiveTab(tab.key as any)}
+                                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors border-b-2 -mb-px ${activeTab === tab.key
+                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/10'
+                                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                    }`}
+                            >
+                                <tab.icon size={18} />
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
-            {/* Data Table */}
-            <div className={`rounded-2xl shadow-lg overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
-                <div className={`px-6 py-4 border-b flex justify-between items-center ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
-                    <h3 className="text-lg font-semibold">
-                        {activeTab === "documents" ? "รอตรวจเอกสาร" : "รอตรวจประเมิน"}
+                {/* Table Header */}
+                <div className="px-6 py-4 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                    <h3 className="font-semibold text-slate-700 dark:text-slate-200">
+                        {activeTab === "documents" ? "รายการเอกสารรอตรวจสอบ" : "รายการนัดหมายตรวจแปลง"}
                     </h3>
-                    <span className="text-sm text-slate-500">เรียงตามรอนานที่สุด</span>
+                    <div className="flex gap-2">
+                        <span className="text-xs px-2 py-1 rounded bg-amber-100 text-amber-700 border border-amber-200">Priority: สูง</span>
+                    </div>
                 </div>
+
+                {/* Table Body */}
                 <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className={isDark ? 'bg-slate-700' : 'bg-slate-100'}>
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 text-xs uppercase text-slate-500 font-semibold">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Job ID</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">ผู้ยื่น</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">พืช</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">สถานะ</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">รอมานาน</th>
-                                <th className="px-6 py-3"></th>
+                                <th className="px-6 py-3">JobID</th>
+                                <th className="px-6 py-3">ผู้ยื่นคำขอ</th>
+                                <th className="px-6 py-3">ชนิดพืช</th>
+                                <th className="px-6 py-3">สถานะ</th>
+                                <th className="px-6 py-3">เวลารอคอย</th>
+                                <th className="px-6 py-3 text-right">จัดการ</th>
                             </tr>
                         </thead>
-                        <tbody className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-slate-200'}`}>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                             {(activeTab === "documents" ? pendingDocuments : pendingAudits).map(item => (
-                                <tr key={item.id} className={`${isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'} transition-colors`}>
-                                    <td className="px-6 py-4 text-sm font-mono text-slate-500">{item.id?.slice(-8)}</td>
-                                    <td className="px-6 py-4 text-sm font-medium">{item.applicantName}</td>
-                                    <td className="px-6 py-4 text-sm text-slate-500">{item.plantType}</td>
+                                <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                    <td className="px-6 py-4 font-mono text-slate-500">#{item.id?.slice(-6)}</td>
+                                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">{item.applicantName}</td>
+                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{item.plantType}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${item.submissionCount === 1 ? 'bg-emerald-100 text-emerald-700'
-                                            : item.submissionCount === 2 ? 'bg-amber-100 text-amber-700'
-                                                : 'bg-red-100 text-red-700'
+                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${item.submissionCount === 1
+                                            ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800'
+                                            : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800'
                                             }`}>
-                                            {item.submissionCount === 1 ? 'ครั้งแรก' : `แก้ไขรอบ ${(item.submissionCount || 1) - 1}`}
+                                            <span className={`w-1.5 h-1.5 rounded-full ${item.submissionCount === 1 ? 'bg-blue-500' : 'bg-amber-500'}`}></span>
+                                            {item.submissionCount === 1 ? 'ยื่นใหม่' : `แก้ไขครั้งที่ ${(item.submissionCount || 1) - 1}`}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-amber-600 font-medium">{item.waitTime}</td>
                                     <td className="px-6 py-4">
-                                        <Link href={`/staff/applications/${item.id}`} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
+                                        <span className="text-slate-600 dark:text-slate-400 font-medium">{item.waitTime}</span>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <Link
+                                            href={`/staff/applications/${item.id}`}
+                                            className="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold transition-colors shadow-sm"
+                                        >
                                             ตรวจสอบ
                                         </Link>
                                     </td>
@@ -188,9 +206,11 @@ export default function StaffDashboardPage() {
                             ))}
                             {(activeTab === "documents" ? pendingDocuments : pendingAudits).length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                                        <IconCheckCircle size={32} className="mx-auto text-emerald-500 mb-3" />
-                                        ไม่มีรายการรอดำเนินการ
+                                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                                        <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <IconCheckCircle className="text-slate-400" size={24} />
+                                        </div>
+                                        <p>ไม่มีรายการที่ต้องดำเนินการในขณะนี้</p>
                                     </td>
                                 </tr>
                             )}
@@ -199,46 +219,50 @@ export default function StaffDashboardPage() {
                 </div>
             </div>
 
-            {/* Quick Actions for Admin/Accountant */}
-            {(user.role === "ADMIN" || user.role === "admin" || user.role === "SUPER_ADMIN") && (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-                    {[
-                        { href: "/staff/management", Icon: IconUser, title: "จัดการบัญชี", desc: "สร้าง/แก้ไขเจ้าหน้าที่", color: "bg-slate-600" },
-                        { href: "/staff/analytics", Icon: IconChart, title: "สถิติ", desc: "ดูรายงานและสถิติ", color: "bg-blue-500" },
-                        { href: "/staff/accounting", Icon: IconCreditCard, title: "ระบบบัญชี", desc: "จัดการใบแจ้งหนี้", color: "bg-amber-500" },
-                        { href: "/staff/calendar", Icon: IconCalendar, title: "ปฏิทิน", desc: "ตารางนัดหมาย", color: "bg-emerald-500" },
-                    ].map((action, i) => (
-                        <Link key={i} href={action.href} className={`p-5 rounded-xl transition-all hover:shadow-md ${isDark ? 'bg-slate-800/50 border border-slate-700/50' : 'bg-white border border-slate-200'}`}>
-                            <div className={`w-10 h-10 rounded-lg ${action.color} flex items-center justify-center mb-3`}><action.Icon size={20} className="text-white" /></div>
-                            <h3 className="font-semibold">{action.title}</h3>
-                            <p className="text-sm text-slate-500">{action.desc}</p>
-                        </Link>
-                    ))}
-                </div>
-            )}
-
-            {user.role === "ACCOUNTANT" || user.role === "accountant" ? (
-                <div className="mt-8">
-                    <h3 className="text-lg font-semibold mb-4">ระบบบัญชีและการเงิน</h3>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                        <Link href="/staff/accounting" className="p-6 rounded-xl bg-emerald-600 text-white shadow-md hover:bg-emerald-700 transition-colors">
-                            <IconDocument size={28} className="mb-3" />
-                            <h3 className="font-semibold text-lg">ใบแจ้งหนี้</h3>
-                            <p className="text-emerald-100 text-sm">จัดการใบแจ้งหนี้ทั้งหมด</p>
-                        </Link>
-                        <Link href="/staff/accounting?tab=pending" className={`p-6 rounded-xl border transition-all hover:shadow-md ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-amber-200'}`}>
-                            <IconClock size={28} className="mb-3 text-amber-500" />
-                            <h3 className="font-semibold text-amber-700">รอชำระ</h3>
-                            <p className="text-sm text-slate-500">ตรวจสอบรายการค้างชำระ</p>
-                        </Link>
-                        <Link href="/staff/analytics" className={`p-6 rounded-xl border transition-all hover:shadow-md ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
-                            <IconChart size={28} className="mb-3 text-blue-500" />
-                            <h3 className="font-semibold">รายงาน</h3>
-                            <p className="text-sm text-slate-500">สรุปรายได้และสถิติ</p>
-                        </Link>
+            {/* 3. Quick Actions Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Internal Tools */}
+                <div className="md:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <h3 className="font-semibold mb-4 text-slate-800 dark:text-slate-200">เครื่องมือเจ้าหน้าที่</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {[
+                            { title: "จัดการผู้ใช้", icon: IconUser, href: "/staff/management", color: "bg-blue-100 text-blue-600" },
+                            { title: "รายงานสถิติ", icon: IconChart, href: "/staff/analytics", color: "bg-emerald-100 text-emerald-600" },
+                            { title: "ระบบบัญชี", icon: IconCreditCard, href: "/staff/accounting", color: "bg-amber-100 text-amber-600" },
+                            { title: "ตารางงาน", icon: IconCalendar, href: "/staff/calendar", color: "bg-purple-100 text-purple-600" },
+                        ].map((tool, i) => (
+                            <Link key={i} href={tool.href} className="flex flex-col items-center justify-center p-4 rounded-lg bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700 text-center gap-3">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tool.color} dark:bg-opacity-20`}>
+                                    <tool.icon size={20} />
+                                </div>
+                                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{tool.title}</span>
+                            </Link>
+                        ))}
                     </div>
                 </div>
-            ) : null}
+
+                {/* System Status */}
+                <div className="bg-slate-900 text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
+                    <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-indigo-500 rounded-full blur-3xl opacity-20"></div>
+                    <div className="relative z-10">
+                        <h3 className="font-semibold mb-1">สถานะระบบ</h3>
+                        <p className="text-xs text-slate-400 mb-4">Version 2.0.1 (Stable)</p>
+                        <div className="space-y-3">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-300">Database</span>
+                                <span className="text-emerald-400 flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400"></span> Connected</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-300">API Gateway</span>
+                                <span className="text-emerald-400 flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400"></span> Online</span>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-slate-700">
+                                <p className="text-xs text-slate-400">Last backup: 2 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </StaffLayout>
     );
 }

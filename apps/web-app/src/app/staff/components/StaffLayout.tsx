@@ -65,27 +65,24 @@ export default function StaffLayout({ children, title, subtitle }: StaffLayoutPr
     const pathname = usePathname();
     const router = useRouter();
     const [user, setUser] = useState<StaffUser | null>(null);
-    const [isDark, setIsDark] = useState(false);
+    const [isDark, setIsDark] = useState(true); // Default to Dark for Admin
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
-        setIsDark(localStorage.getItem("theme") === "dark");
+        // Force slate/dark theme preference for staff if not set
+        const saved = localStorage.getItem("staff_theme");
+        setIsDark(saved === "light" ? false : true);
+
         const userData = localStorage.getItem("staff_user");
-        if (!userData) {
-            router.push("/staff/login");
-            return;
-        }
-        try {
-            setUser(JSON.parse(userData));
-        } catch {
-            router.push("/staff/login");
-        }
+        if (!userData) { router.push("/staff/login"); return; }
+        try { setUser(JSON.parse(userData)); } catch { router.push("/staff/login"); }
     }, [router]);
 
     const toggleTheme = () => {
-        setIsDark(!isDark);
-        localStorage.setItem("theme", !isDark ? "dark" : "light");
+        const next = !isDark;
+        setIsDark(next);
+        localStorage.setItem("staff_theme", next ? "dark" : "light");
     };
 
     const handleLogout = () => {
@@ -103,88 +100,76 @@ export default function StaffLayout({ children, title, subtitle }: StaffLayoutPr
 
     const roleInfo = user ? ROLE_LABELS[user.role] || { label: user.role } : { label: "" };
 
-    if (!mounted) {
-        return (
-            <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-slate-900' : 'bg-stone-50'}`}>
-                <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
-            </div>
-        );
-    }
+    if (!mounted) return <div className="min-h-screen bg-slate-900 flex items-center justify-center"><div className="w-8 h-8 border-4 border-slate-600 border-t-slate-400 rounded-full animate-spin" /></div>;
+
+    const bgClass = isDark ? "bg-slate-900 text-slate-200" : "bg-slate-50 text-slate-800";
+    const sidebarClass = isDark ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200";
 
     return (
-        <div className={`min-h-screen font-sans transition-colors ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-stone-50 text-slate-900'}`}>
+        <div className={`min-h-screen font-sans flex ${bgClass}`}>
             {/* Sidebar - Desktop */}
-            <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 w-20 flex-col items-center py-6 border-r ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-                <Link href="/staff/dashboard" className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-lg font-semibold text-white mb-8">
-                    G
-                </Link>
-                <nav className="flex-1 flex flex-col gap-1 w-full px-3">
-                    {filteredNavItems.map(item => {
-                        const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all relative ${isActive
-                                    ? (isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600')
-                                    : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100')
-                                    }`}
-                            >
-                                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-emerald-500 rounded-r" />}
-                                <item.Icon size={22} />
-                                <span className="text-[10px] font-medium">{item.label}</span>
-                            </Link>
-                        );
-                    })}
-                </nav>
-                <div className="flex flex-col gap-2">
-                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}>
-                        {isDark ? <IconSun size={20} /> : <IconMoon size={20} />}
-                    </button>
-                    <Link href="/staff/profile" className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}>
-                        <IconUser size={20} />
-                    </Link>
-                    <button onClick={handleLogout} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'text-slate-400 hover:text-red-400 hover:bg-red-500/10' : 'text-slate-500 hover:text-red-500 hover:bg-red-50'}`}>
-                        <IconLogout size={20} />
-                    </button>
+            <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 w-64 flex-col border-r transition-colors ${sidebarClass}`}>
+                <div className="p-6">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-900/50">D</div>
+                        <div>
+                            <h1 className="font-bold text-lg leading-tight">DTAM Staff</h1>
+                            <p className="text-xs text-slate-500">Backoffice Portal</p>
+                        </div>
+                    </div>
+
+                    <nav className="flex flex-col gap-1">
+                        <p className="px-3 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Menu</p>
+                        {filteredNavItems.map(item => {
+                            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${isActive
+                                        ? 'bg-indigo-600/10 text-indigo-400'
+                                        : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
+                                        }`}
+                                >
+                                    <item.Icon size={20} className={isActive ? "text-indigo-500" : ""} />
+                                    <span className={`text-sm font-medium ${isActive ? "text-indigo-400" : ""}`}>{item.label}</span>
+                                </Link>
+                            );
+                        })}
+                    </nav>
+                </div>
+
+                <div className="mt-auto p-4 border-t border-slate-800">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+                                <IconUser size={18} />
+                            </div>
+                            <div className="text-sm">
+                                <p className="font-medium text-slate-300">{user?.firstName}</p>
+                                <p className="text-xs text-slate-500">{roleInfo.label}</p>
+                            </div>
+                        </div>
+                        <button onClick={handleLogout} className="text-slate-500 hover:text-red-400 transition-colors"><IconLogout size={18} /></button>
+                    </div>
                 </div>
             </aside>
 
-            {/* Mobile Bottom Nav */}
-            <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-20 flex justify-around items-center border-t ${isDark ? 'bg-slate-900/95 border-slate-800 backdrop-blur-lg' : 'bg-white/95 border-slate-200 backdrop-blur-lg'}`}>
-                {filteredNavItems.slice(0, 5).map(item => {
-                    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                    return (
-                        <Link key={item.href} href={item.href} className={`flex flex-col items-center gap-1 py-2 px-4 min-w-[64px] ${isActive ? 'text-emerald-500' : (isDark ? 'text-slate-500' : 'text-slate-400')}`}>
-                            <item.Icon size={24} />
-                            <span className="text-[10px] font-medium">{item.label}</span>
-                        </Link>
-                    );
-                })}
-            </nav>
-
             {/* Main Content */}
-            <main className="lg:ml-20 p-6 lg:p-8 pb-28 lg:pb-8 max-w-7xl">
-                {/* Header */}
-                {(title || user) && (
-                    <header className="flex justify-between items-start flex-wrap gap-4 mb-8">
-                        <div>
-                            {title && <h1 className="text-2xl lg:text-3xl font-semibold">{title}</h1>}
-                            {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
-                        </div>
-                        {user && (
-                            <div className={`hidden lg:flex items-center gap-3 px-4 py-2 rounded-xl ${isDark ? 'bg-slate-800' : 'bg-white border border-slate-200'}`}>
-                                <div className="text-right">
-                                    <p className="text-sm font-semibold">{user.firstName || 'เจ้าหน้าที่'} {user.lastName || ''}</p>
-                                    <p className="text-xs text-slate-500">{roleInfo.label}</p>
-                                </div>
-                            </div>
-                        )}
-                    </header>
-                )}
+            <main className="flex-1 lg:ml-64 relative">
+                {/* Topbar */}
+                <header className={`h-16 border-b flex items-center justify-between px-6 sticky top-0 z-20 backdrop-blur-md ${isDark ? 'bg-slate-900/80 border-slate-800' : 'bg-white/80 border-slate-200'}`}>
+                    <h2 className="font-semibold text-lg">{title || 'Dashboard'}</h2>
+                    <div className="flex items-center gap-4">
+                        <button onClick={toggleTheme} className="text-slate-500 hover:text-slate-300">
+                            {isDark ? <IconSun size={20} /> : <IconMoon size={20} />}
+                        </button>
+                    </div>
+                </header>
 
-                {/* Content */}
-                {children}
+                <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+                    {children}
+                </div>
             </main>
         </div>
     );

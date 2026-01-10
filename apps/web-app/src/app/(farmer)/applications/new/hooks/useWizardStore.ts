@@ -73,6 +73,15 @@ export interface ApplicantData {
     licenseType?: 'BHT11' | 'BHT13' | 'BHT16';
 }
 
+// [NEW] Plot Definition
+export interface Plot {
+    id: string; // uuid or temp-id
+    name: string; // e.g., "Greenhouse A"
+    areaSize: string; // e.g., "2"
+    areaUnit: string; // e.g., "Rai"
+    solarSystem: 'OUTDOOR' | 'INDOOR' | 'GREENHOUSE';
+}
+
 // Expanded SiteData with all fields from original Step6SiteSecurity
 export interface SiteData {
     siteName: string;
@@ -101,6 +110,9 @@ export interface SiteData {
     hasBiometric?: boolean;
     hasAnimalFence?: boolean;
     hasZoneSign?: boolean;
+
+    // [NEW] Plot Management
+    plots?: Plot[];
 }
 
 // Expanded ProductionData with all fields from original Step5Production

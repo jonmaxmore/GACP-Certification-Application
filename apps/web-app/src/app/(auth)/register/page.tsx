@@ -198,8 +198,24 @@ export default function RegisterPage() {
         else if (accountType === "JURISTIC") { data.companyName = sanitize(companyName); data.representativeName = sanitize(representativeName); data.taxId = cleanIdentifier; }
         else { data.communityName = sanitize(communityName); data.representativeName = sanitize(representativeName); data.communityRegistrationNo = identifier.replace(/[<>'"&]/g, ""); }
 
-        const result = await apiClient.post<{ success: boolean }>("/auth-farmer/register", data);
-        if (!result.success) { setError(result.error || "เกิดข้อผิดพลาดในการลงทะเบียน"); setIsLoading(false); return; }
+        try {
+            const response = await fetch('/api/auth-farmer/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                setError(result.error || "เกิดข้อผิดพลาดในการลงทะเบียน");
+                setIsLoading(false);
+                return;
+            }
+        } catch (err) {
+            setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+            setIsLoading(false);
+            return;
+        }
 
         setIsLoading(false);
         localStorage.removeItem("register_draft");

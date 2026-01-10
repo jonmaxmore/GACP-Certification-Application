@@ -173,91 +173,82 @@ export default function AdminUsersPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            {/* Header */}
-            <header className="bg-slate-800 text-white shadow-lg">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                        <Link href="/staff/dashboard" className="text-slate-400 hover:text-white">
-                            ← กลับ
-                        </Link>
-                        <div className="h-6 w-px bg-slate-600" />
-                        <div className="flex items-center gap-3">
-                            <div>
-                                <h1 className="font-bold">จัดการบัญชีเจ้าหน้าที่</h1>
-                                <p className="text-xs text-slate-400">Admin Panel</p>
-                            </div>
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => setShowCreateModal(true)}
-                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm flex items-center gap-2"
-                    >
-                        +
-                        สร้างบัญชีใหม่
-                    </button>
+        <div className="font-sans">
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-800">จัดการบัญชีเจ้าหน้าที่ (Staff Management)</h1>
+                    <p className="text-sm text-slate-500">จัดการผู้ใช้งานและสิทธิ์การเข้าถึง</p>
                 </div>
-            </header>
+                <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm flex items-center gap-2"
+                >
+                    + สร้างบัญชีใหม่
+                </button>
+            </div>
 
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-6 py-8">
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-white rounded-xl p-4 shadow">
-                        <p className="text-2xl font-bold">{users.length}</p>
-                        <p className="text-sm text-slate-500">เจ้าหน้าที่ทั้งหมด</p>
-                    </div>
-                    <div className="bg-white rounded-xl p-4 shadow">
-                        <p className="text-2xl font-bold text-blue-600">{users.filter(u => u.role === "REVIEWER_AUDITOR").length}</p>
-                        <p className="text-sm text-slate-500">ผู้ตรวจเอกสาร/ประเมิน</p>
-                    </div>
-                    <div className="bg-white rounded-xl p-4 shadow">
-                        <p className="text-2xl font-bold text-purple-600">{users.filter(u => u.role === "SCHEDULER").length}</p>
-                        <p className="text-sm text-slate-500">เจ้าหน้าที่จัดคิว</p>
-                    </div>
-                    <div className="bg-white rounded-xl p-4 shadow">
-                        <p className="text-2xl font-bold text-amber-600">{users.filter(u => u.role === "ADMIN").length}</p>
-                        <p className="text-sm text-slate-500">ผู้ดูแลระบบ</p>
-                    </div>
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                    <p className="text-2xl font-bold text-slate-800">{users.length}</p>
+                    <p className="text-sm text-slate-500">เจ้าหน้าที่ทั้งหมด</p>
                 </div>
+                <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                    <p className="text-2xl font-bold text-blue-600">{users.filter(u => u.role === "REVIEWER_AUDITOR").length}</p>
+                    <p className="text-sm text-slate-500">ผู้ตรวจเอกสาร/ประเมิน</p>
+                </div>
+                <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                    <p className="text-2xl font-bold text-purple-600">{users.filter(u => u.role === "SCHEDULER").length}</p>
+                    <p className="text-sm text-slate-500">เจ้าหน้าที่จัดคิว</p>
+                </div>
+                <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                    <p className="text-2xl font-bold text-amber-600">{users.filter(u => u.role === "ADMIN").length}</p>
+                    <p className="text-sm text-slate-500">ผู้ดูแลระบบ</p>
+                </div>
+            </div>
 
-                {/* Users Table */}
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                    <table className="w-full">
-                        <thead className="bg-slate-50">
-                            <tr>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">ชื่อ</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">อีเมล</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">ตำแหน่ง</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">สถานะ</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">สร้างเมื่อ</th>
-                                <th className="px-6 py-4"></th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {users.map((user) => (
-                                <tr key={user.id} className="hover:bg-slate-50">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.5"><circle cx="12" cy="7" r="4" /><path d="M5.5 21a7.5 7.5 0 0 1 13 0" /></svg></div>
-                                            <p className="font-medium text-slate-800">{user.firstName} {user.lastName}</p>
+            {/* Users Table */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <table className="w-full">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">ชื่อ</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">อีเมล</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">ตำแหน่ง</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">สถานะ</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">สร้างเมื่อ</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {users.map((user) => (
+                            <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="7" r="4" /><path d="M5.5 21a7.5 7.5 0 0 1 13 0" /></svg>
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-slate-600">{user.email}</td>
-                                    <td className="px-6 py-4">{getRoleBadge(user.role)}</td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Active</span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-slate-500">{user.createdAt}</td>
-                                    <td className="px-6 py-4">
-                                        <button className="text-slate-400 hover:text-slate-600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg></button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </main>
+                                        <p className="font-medium text-slate-700">{user.firstName} {user.lastName}</p>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-slate-600">{user.email}</td>
+                                <td className="px-6 py-4">{getRoleBadge(user.role)}</td>
+                                <td className="px-6 py-4">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-600'}`}>
+                                        {user.status}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-slate-500">{user.createdAt}</td>
+                                <td className="px-6 py-4">
+                                    <button className="text-slate-400 hover:text-emerald-600 transition-colors">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
 
             {/* Create User Modal */}
             {showCreateModal && (

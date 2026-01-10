@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { BottomNav } from '@/components/ui';
+import { Sidebar } from '@/components/ui/sidebar';
 
 interface FarmerLayoutProps {
     children: React.ReactNode;
@@ -21,11 +22,22 @@ export function FarmerLayout({ children }: FarmerLayoutProps) {
         return () => window.removeEventListener('storage', handleStorage);
     }, []);
 
+    const toggleTheme = () => {
+        const newTheme = !isDark;
+        setIsDark(newTheme);
+        localStorage.setItem("theme", newTheme ? "dark" : "light");
+    };
+
     return (
-        <>
-            {children}
+        <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-stone-50 text-slate-800'}`}>
+            <Sidebar isDark={isDark} toggleTheme={toggleTheme} />
+
+            <main className="lg:ml-[72px] pb-[72px] lg:pb-0">
+                {children}
+            </main>
+
             <BottomNav isDark={isDark} />
-        </>
+        </div>
     );
 }
 

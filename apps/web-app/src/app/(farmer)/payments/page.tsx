@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { apiClient as api } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { apiClient as api } from "@/lib/api/api-client";
+import { AuthService } from "@/lib/services/auth-service";
 import {
-    IconHome, IconDocument, IconCompass, IconCreditCard, IconUser,
-    IconSun, IconMoon, IconLogout, IconCheckCircle, IconClock, IconReceipt, IconLeaf
+    IconDocument, IconCheckCircle, IconClock, IconReceipt,
 } from "@/components/ui/icons";
 
 interface PaymentRecord {
@@ -20,17 +21,8 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
     DELIVERED: { label: "วางบิลแล้ว", color: "emerald" }, ISSUED: { label: "ออกแล้ว", color: "emerald" }, CANCELLED: { label: "ยกเลิก", color: "red" },
 };
 
-const NAV_ITEMS = [
-    { href: "/dashboard", Icon: IconHome, label: "หน้าหลัก" },
-    { href: "/applications", Icon: IconDocument, label: "คำขอ" },
-    { href: "/establishments", Icon: IconLeaf, label: "แปลงปลูก" },
-    { href: "/tracking", Icon: IconCompass, label: "ติดตาม" },
-    { href: "/payments", Icon: IconCreditCard, label: "การเงิน", active: true },
-    { href: "/profile", Icon: IconUser, label: "โปรไฟล์" },
-];
-
 export default function PaymentsPage() {
-    const [user, setUser] = useState<{ firstName?: string; lastName?: string } | null>(null);
+    const router = useRouter();
     const [payments, setPayments] = useState<PaymentRecord[]>([]);
     const [filter, setFilter] = useState<"ALL" | "PENDING" | "PAID">("ALL");
     const [mounted, setMounted] = useState(false);
@@ -42,10 +34,15 @@ export default function PaymentsPage() {
     useEffect(() => {
         setMounted(true);
         setIsDark(localStorage.getItem("theme") === "dark");
-        const userData = localStorage.getItem("user");
-        if (!userData) { window.location.href = "/login"; return; }
-        try { setUser(JSON.parse(userData)); loadPayments(); } catch { window.location.href = "/login"; }
-    }, []);
+
+        const user = AuthService.getUser();
+        if (!user) {
+            router.push("/login");
+            return;
+        }
+
+        loadPayments();
+    }, [router]);
 
     const loadPayments = async () => {
         setLoading(true);
@@ -60,8 +57,6 @@ export default function PaymentsPage() {
         finally { setLoading(false); }
     };
 
-    const toggleTheme = () => { setIsDark(!isDark); localStorage.setItem("theme", !isDark ? "dark" : "light"); };
-    const handleLogout = () => { localStorage.removeItem("user"); window.location.href = "/api/auth/logout"; };
     const formatAmount = (n: number) => new Intl.NumberFormat('th-TH').format(n);
 
     if (!mounted) return null;
@@ -100,141 +95,101 @@ export default function PaymentsPage() {
     ];
 
     return (
-        <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-slate-900 text-white' : 'bg-stone-50 text-slate-900'}`}>
-            {/* Sidebar - iOS Style */}
-            <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 w-20 flex-col items-center py-6 border-r ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-                <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-lg font-semibold text-white mb-8">G</div>
-                <nav className="flex-1 flex flex-col gap-1 w-full px-3">
-                    {NAV_ITEMS.map(item => (
-                        <Link key={item.href} href={item.href}
-                            className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all relative ${item.active
-                                ? (isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600')
-                                : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100')
-                                }`}>
-                            {item.active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-emerald-500 rounded-r" />}
-                            <item.Icon size={22} />
-                            <span className="text-[10px] font-medium">{item.label}</span>
-                        </Link>
-                    ))}
-                </nav>
-                <div className="flex flex-col gap-2">
-                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}>
-                        {isDark ? <IconSun size={20} /> : <IconMoon size={20} />}
-                    </button>
-                    <button onClick={handleLogout} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'text-slate-400 hover:text-red-400 hover:bg-red-500/10' : 'text-slate-500 hover:text-red-500 hover:bg-red-50'}`}>
-                        <IconLogout size={20} />
-                    </button>
-                </div>
-            </aside>
+        <div className="p-6 lg:p-8 max-w-5xl mx-auto pb-24 lg:pb-8">
+            {/* Header */}
+            <header className="mb-8">
+                <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight">ประวัติการชำระเงิน</h1>
+                <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ใบเสนอราคา, ใบแจ้งหนี้, และใบเสร็จรับเงิน</p>
+            </header>
 
-            {/* Mobile Nav - iOS Tab Bar */}
-            <nav className={`lg:hidden fixed bottom-0 inset-x-0 h-20 flex justify-around items-center border-t ${isDark ? 'bg-slate-900/95 border-slate-800 backdrop-blur-lg' : 'bg-white/95 border-slate-200 backdrop-blur-lg'}`}>
-                {NAV_ITEMS.map(item => (
-                    <Link key={item.href} href={item.href} className={`flex flex-col items-center gap-1 py-2 px-4 min-w-[64px] ${item.active ? 'text-emerald-500' : (isDark ? 'text-slate-500' : 'text-slate-400')
-                        }`}>
-                        <item.Icon size={24} />
-                        <span className="text-[10px] font-medium">{item.label}</span>
-                    </Link>
-                ))}
-            </nav>
-
-            {/* Main Content */}
-            <main className="lg:ml-20 p-6 lg:p-8 pb-28 lg:pb-8 max-w-5xl mx-auto">
-                {/* Header */}
-                <header className="mb-8">
-                    <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight">ประวัติการชำระเงิน</h1>
-                    <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ใบเสนอราคา, ใบแจ้งหนี้, และใบเสร็จรับเงิน</p>
-                </header>
-
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
-                    {stats.map((stat, i) => (
-                        <div key={i} className={`p-4 rounded-xl border transition-all hover:shadow-md ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
-                            <div className="flex items-center justify-between mb-3">
-                                <span className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</span>
-                                <div className={`w-8 h-8 rounded-lg ${stat.color} flex items-center justify-center`}>
-                                    <stat.Icon size={16} className="text-white" />
-                                </div>
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
+                {stats.map((stat, i) => (
+                    <div key={i} className={`p-4 rounded-xl border transition-all hover:shadow-md ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
+                        <div className="flex items-center justify-between mb-3">
+                            <span className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{stat.label}</span>
+                            <div className={`w-8 h-8 rounded-lg ${stat.color} flex items-center justify-center`}>
+                                <stat.Icon size={16} className="text-white" />
                             </div>
-                            <div className="text-2xl font-semibold">{stat.value}</div>
                         </div>
-                    ))}
-                </div>
+                        <div className="text-2xl font-semibold">{stat.value}</div>
+                    </div>
+                ))}
+            </div>
 
-                {/* Filter Tabs */}
-                <div className="flex gap-2 mb-6">
-                    {[{ key: "ALL", label: "ทั้งหมด" }, { key: "PENDING", label: "รอชำระ" }, { key: "PAID", label: "ชำระแล้ว" }].map(tab => (
-                        <button key={tab.key} onClick={() => setFilter(tab.key as "ALL" | "PENDING" | "PAID")}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${filter === tab.key
-                                ? 'bg-emerald-600 text-white'
-                                : (isDark ? 'bg-slate-800 border border-slate-700 text-slate-400 hover:border-emerald-500/30' : 'bg-white border border-slate-200 text-slate-600 hover:border-emerald-300')}`}>
-                            {tab.label}
-                            <span className={`px-2 py-0.5 rounded-md text-xs ${filter === tab.key ? 'bg-white/20' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'}`}>{counts[tab.key as keyof typeof counts]}</span>
-                        </button>
-                    ))}
-                </div>
+            {/* Filter Tabs */}
+            <div className="flex gap-2 mb-6">
+                {[{ key: "ALL", label: "ทั้งหมด" }, { key: "PENDING", label: "รอชำระ" }, { key: "PAID", label: "ชำระแล้ว" }].map(tab => (
+                    <button key={tab.key} onClick={() => setFilter(tab.key as "ALL" | "PENDING" | "PAID")}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${filter === tab.key
+                            ? 'bg-emerald-600 text-white'
+                            : (isDark ? 'bg-slate-800 border border-slate-700 text-slate-400 hover:border-emerald-500/30' : 'bg-white border border-slate-200 text-slate-600 hover:border-emerald-300')}`}>
+                        {tab.label}
+                        <span className={`px-2 py-0.5 rounded-md text-xs ${filter === tab.key ? 'bg-white/20' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'}`}>{counts[tab.key as keyof typeof counts]}</span>
+                    </button>
+                ))}
+            </div>
 
-                {/* Payment List */}
-                <div className={`rounded-xl overflow-hidden border ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className={`border-b ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
-                                <th className="p-4 text-left text-xs text-slate-500 font-medium">เอกสาร</th>
-                                <th className="p-4 text-left text-xs text-slate-500 font-medium hidden md:table-cell">หมายเลขเคส</th>
-                                <th className="p-4 text-left text-xs text-slate-500 font-medium hidden sm:table-cell">ประเภท</th>
-                                <th className="p-4 text-right text-xs text-slate-500 font-medium">จำนวนเงิน</th>
-                                <th className="p-4 text-center text-xs text-slate-500 font-medium">สถานะ</th>
-                                <th className="p-4 text-center text-xs text-slate-500 font-medium">ดำเนินการ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredPayments.length > 0 ? filteredPayments.map(p => {
-                                const typeCfg = TYPE_CONFIG[p.type];
-                                const statusCfg = STATUS_LABELS[p.status] || { label: p.status, color: 'slate' };
-                                return (
-                                    <tr key={p.id} className={`border-b last:border-b-0 ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getColorCls(typeCfg.color, true)}`}>
-                                                    <IconDocument size={18} className={getColorCls(typeCfg.color)} />
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium">{p.documentNumber}</p>
-                                                    <p className="text-xs text-slate-500">{p.createdAt}</p>
-                                                </div>
+            {/* Payment List */}
+            <div className={`rounded-xl overflow-hidden border ${isDark ? 'bg-slate-800/50 border-slate-700/50' : 'bg-white border-slate-200'}`}>
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className={`border-b ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
+                            <th className="p-4 text-left text-xs text-slate-500 font-medium">เอกสาร</th>
+                            <th className="p-4 text-left text-xs text-slate-500 font-medium hidden md:table-cell">หมายเลขเคส</th>
+                            <th className="p-4 text-left text-xs text-slate-500 font-medium hidden sm:table-cell">ประเภท</th>
+                            <th className="p-4 text-right text-xs text-slate-500 font-medium">จำนวนเงิน</th>
+                            <th className="p-4 text-center text-xs text-slate-500 font-medium">สถานะ</th>
+                            <th className="p-4 text-center text-xs text-slate-500 font-medium">ดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredPayments.length > 0 ? filteredPayments.map(p => {
+                            const typeCfg = TYPE_CONFIG[p.type];
+                            const statusCfg = STATUS_LABELS[p.status] || { label: p.status, color: 'slate' };
+                            return (
+                                <tr key={p.id} className={`border-b last:border-b-0 ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getColorCls(typeCfg.color, true)}`}>
+                                                <IconDocument size={18} className={getColorCls(typeCfg.color)} />
                                             </div>
-                                        </td>
-                                        <td className="p-4 hidden md:table-cell">
-                                            {p.applicationId ? (
-                                                <Link href={`/tracking?appId=${p.applicationId}`} className={`px-3 py-1 rounded-lg text-xs font-medium ${isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
-                                                    {p.applicationId.substring(0, 8)}...
-                                                </Link>
-                                            ) : <span className="text-slate-500">-</span>}
-                                        </td>
-                                        <td className="p-4 hidden sm:table-cell"><span className={`px-3 py-1 rounded-lg text-xs font-medium ${getColorCls(typeCfg.color, true)} ${getColorCls(typeCfg.color)}`}>{typeCfg.label}</span></td>
-                                        <td className="p-4 text-right font-semibold">{formatAmount(p.amount)} ฿</td>
-                                        <td className="p-4 text-center"><span className={`px-3 py-1 rounded-lg text-xs font-medium ${getColorCls(statusCfg.color, true)} ${getColorCls(statusCfg.color)}`}>{statusCfg.label}</span></td>
-                                        <td className="p-4">
-                                            <div className="flex gap-2 justify-center">
-                                                <button onClick={() => setViewDoc(p)} className={`px-3 py-2 rounded-lg text-xs font-medium ${isDark ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>ดู</button>
-                                                {p.type === "INVOICE" && p.status === "PENDING" && (
-                                                    <button onClick={() => setPayQR(p)} className="px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700">ชำระ</button>
-                                                )}
-                                                <button className={`px-3 py-2 rounded-lg text-xs font-medium ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>PDF</button>
+                                            <div>
+                                                <p className="font-medium">{p.documentNumber}</p>
+                                                <p className="text-xs text-slate-500">{p.createdAt}</p>
                                             </div>
-                                        </td>
-                                    </tr>
-                                );
-                            }) : (
-                                <tr><td colSpan={6} className="p-12 text-center">
-                                    <IconDocument size={32} className="mx-auto text-slate-400 mb-3" />
-                                    <p className="text-slate-500">ไม่พบรายการ</p>
-                                </td></tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </main>
+                                        </div>
+                                    </td>
+                                    <td className="p-4 hidden md:table-cell">
+                                        {p.applicationId ? (
+                                            <Link href={`/tracking?appId=${p.applicationId}`} className={`px-3 py-1 rounded-lg text-xs font-medium ${isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
+                                                {p.applicationId.substring(0, 8)}...
+                                            </Link>
+                                        ) : <span className="text-slate-500">-</span>}
+                                    </td>
+                                    <td className="p-4 hidden sm:table-cell"><span className={`px-3 py-1 rounded-lg text-xs font-medium ${getColorCls(typeCfg.color, true)} ${getColorCls(typeCfg.color)}`}>{typeCfg.label}</span></td>
+                                    <td className="p-4 text-right font-semibold">{formatAmount(p.amount)} ฿</td>
+                                    <td className="p-4 text-center"><span className={`px-3 py-1 rounded-lg text-xs font-medium ${getColorCls(statusCfg.color, true)} ${getColorCls(statusCfg.color)}`}>{statusCfg.label}</span></td>
+                                    <td className="p-4">
+                                        <div className="flex gap-2 justify-center">
+                                            <button onClick={() => setViewDoc(p)} className={`px-3 py-2 rounded-lg text-xs font-medium ${isDark ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>ดู</button>
+                                            {p.type === "INVOICE" && p.status === "PENDING" && (
+                                                <button onClick={() => setPayQR(p)} className="px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700">ชำระ</button>
+                                            )}
+                                            <button className={`px-3 py-2 rounded-lg text-xs font-medium ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>PDF</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        }) : (
+                            <tr><td colSpan={6} className="p-12 text-center">
+                                <IconDocument size={32} className="mx-auto text-slate-400 mb-3" />
+                                <p className="text-slate-500">ไม่พบรายการ</p>
+                            </td></tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
 
             {/* Document Preview Modal */}
             {viewDoc && (

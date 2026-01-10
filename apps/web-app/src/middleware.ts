@@ -24,6 +24,7 @@ const protectedStaffRoutes = [
     '/staff/accounting',
     '/staff/calendar',
     '/staff/analytics',
+    '/admin',
 ];
 
 // Routes that are only for unauthenticated users

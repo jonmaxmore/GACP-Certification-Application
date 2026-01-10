@@ -81,9 +81,6 @@ export default function LoginPage() {
 
             if (!result.success) {
                 let errorMsg = result.error || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
-                if (response.status === 401) errorMsg = "เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง";
-                else if (response.status === 429) errorMsg = "มีการเข้าสู่ระบบผิดพลาดหลายครั้ง กรุณารอ 5 นาที";
-                else if (response.status >= 500) errorMsg = "เซิร์ฟเวอร์มีปัญหาชั่วคราว กรุณาลองใหม่";
                 setError(errorMsg);
                 setIsLoading(false);
                 setLoginState('error');
@@ -100,7 +97,7 @@ export default function LoginPage() {
                 return;
             }
 
-            // Save session using centralized AuthService (fixes token not being saved)
+            // Save session using centralized AuthService
             AuthService.saveSession({
                 token,
                 tokens: responseData?.tokens,

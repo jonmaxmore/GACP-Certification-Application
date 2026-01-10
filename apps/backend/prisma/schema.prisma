@@ -1031,3 +1031,17 @@ model SupplementaryCriterion {
   @@map("supplementary_criteria")
 }
 
+// =============================================================================
+// SYSTEM CONFIGURATION
+// =============================================================================
+model SystemConfig {
+  key         String   @id
+  value       String
+  type        String   @default("STRING") // NUMBER, BOOLEAN, STRING
+  description String?
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?
+
+  @@map("system_configs")
+}
+

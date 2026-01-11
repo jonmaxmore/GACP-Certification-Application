@@ -160,8 +160,11 @@ function authenticateFarmer(req, res, next) {
  */
 function authenticateDTAM(req, res, next) {
   try {
+    // Priority: 1. Authorization header (API clients), 2. Cookie (Web Dashboard)
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const headerToken = authHeader && authHeader.split(' ')[1];
+    const cookieToken = req.cookies?.staff_token;
+    const token = headerToken || cookieToken;
 
     if (!token) {
       return res.status(401).json({
@@ -188,6 +191,8 @@ function authenticateDTAM(req, res, next) {
       'SCHEDULER',
       'ACCOUNTANT',
       'SUPER_ADMIN',
+      'ASSESSOR', // New role
+      'REVIEWER_AUDITOR', // Legacy role
       // lowercase versions for compatibility
       'admin',
       'reviewer',
@@ -196,6 +201,8 @@ function authenticateDTAM(req, res, next) {
       'auditor',
       'scheduler',
       'accountant',
+      'assessor',
+      'reviewer_auditor',
     ];
     const userRole = decoded.role?.toUpperCase() || '';
     const isValidRole = validDTAMRoles.some(r => r.toUpperCase() === userRole);
@@ -278,11 +285,49 @@ function optionalAuth(req, res, next) {
 
 const { RBACService } = require('../services/security-compliance');
 const rbacService = new RBACService();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+// Middleware to require Identity Verification (Active Status)
+async function requireVerification(req, res, next) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Not authorized' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { verificationStatus: true, status: true, role: true },
+    });
+
+    // Skip for Admin/Staff
+    if (['ADMIN', 'SUPER_ADMIN', 'REVIEWER_AUDITOR', 'SCHEDULER', 'ACCOUNTANT'].includes(user.role)) {
+      return next();
+    }
+
+    // Check if verified
+    if (user.verificationStatus === 'APPROVED' || user.status === 'ACTIVE') {
+      return next();
+    }
+
+    return res.status(403).json({
+      success: false,
+      error: 'Identity verification required',
+      code: 'VERIFICATION_REQUIRED',
+      status: user.verificationStatus || 'NEW',
+    });
+
+  } catch (error) {
+    console.error('Verification Check Error:', error);
+    res.status(500).json({ success: false, error: 'Server Error' });
+  }
+}
 
 module.exports = {
   authenticateFarmer,
   authenticateDTAM,
   optionalAuth,
+  requireVerification,
   authenticate: authenticateFarmer, // Alias for generic authentication
 
   // Legacy Role-Based Check (Keep for backward compatibility)

@@ -1,17 +1,86 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWizardStore } from '../hooks/useWizardStore';
+import { ApplicationService } from '@/lib/services/application-service';
+import { apiClient } from '@/lib/api/api-client';
+import { useRouter } from 'next/navigation';
 
 export const StepInvoice = () => {
     const { setCurrentStep } = useWizardStore();
+    const router = useRouter();
     const [showQrModal, setShowQrModal] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [appData, setAppData] = useState<any>(null);
+    const [phase, setPhase] = useState<1 | 2>(1);
 
     const invoiceNumber = `INV-${new Date().getFullYear()}${(Math.random() * 10000).toFixed(0)}`;
     const currentDate = new Date();
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 7);
+
+    const [invoiceItems, setInvoiceItems] = useState<{ label: string; amount: number }[]>([]);
+
+    useEffect(() => {
+        // Fetch Application Data to determine Phase and Calculate Fee
+        const fetchApp = async () => {
+            const res = await ApplicationService.getMyApplications();
+            if (res.success && res.data) {
+                const apps = (Array.isArray(res.data) ? res.data : (res.data as any).data || []);
+                const activeApp = apps[0]; // Assuming single active app
+                if (activeApp) {
+                    setAppData(activeApp);
+
+                    // Determine Phase
+                    let currentPhase: 1 | 2 = 1;
+                    if (activeApp.status === 'PAYMENT_2_PENDING') {
+                        currentPhase = 2;
+                    }
+                    setPhase(currentPhase);
+
+                    // Extract Fees from Saved Data
+                    // Note: formData might be nested or direct depending on API
+                    // Assuming API returns it in `formData` or root if mapped
+                    // Our ApplicationService might mask `formData`. Let's assume it's available or map it.
+                    // Actually, `Application` interface might not have `formData`.
+                    // But in strict mode, we should assume the API returns it or we stored it in specific fields.
+                    // The backend returns mapped fields. But `formData` is not fully mapped in `getMyApplications`.
+                    // Wait! `getMyApplications` maps specific fields.
+                    // I need to update `getMyApplications` or the endpoint `GET /my` to include `fees`.
+                    // Checking `applications.js` GET /my ... mapped `audit` but NOT `fees`.
+                    // CRITICAL: Update Backend `GET /my` to include `fees`.
+                    // For now, I will assume fallback logic here if fees missing.
+
+                    // Fallback Logic (if backend not updated yet)
+                    // I will add the backend `fees` mapping in next step.
+                    // Here I implement the rendering logic assuming data will arrive.
+                    const feeData = (activeApp as any).fees || {};
+                    const phaseData = currentPhase === 1 ? feeData.phase1 : feeData.phase2;
+
+                    if (phaseData && phaseData.items) {
+                        setInvoiceItems(phaseData.items.map((i: any) => ({
+                            label: i.description,
+                            amount: i.amount
+                        })));
+                    } else {
+                        // Default Fallback (if legacy data)
+                        if (currentPhase === 1) {
+                            setInvoiceItems([
+                                { label: "ค่าธรรมเนียมคำขอรับรองมาตรฐาน GACP (Standard Fee)", amount: 100 },
+                                { label: "ค่าตรวจเอกสาร (Document Check)", amount: 200 }
+                            ]);
+                        } else {
+                            setInvoiceItems([
+                                { label: "ค่าธรรมเนียมการตรวจประเมิน (Audit Fee)", amount: 2000 },
+                                { label: "ค่าพาหนะ (Standard Travel)", amount: 500 }
+                            ]);
+                        }
+                    }
+                }
+            }
+        };
+        fetchApp();
+    }, []);
 
     const handlePayClick = () => {
         setIsProcessing(true);
@@ -21,18 +90,46 @@ export const StepInvoice = () => {
         }, 1000);
     };
 
-    const handlePaymentSuccess = () => {
+    const handlePaymentSuccess = async () => {
         setIsProcessing(true);
-        setTimeout(() => {
-            setCurrentStep(8); // Go to Success (Step 8 in new 0-indexed flow)
-        }, 1500);
+        try {
+            if (appData && appData._id) {
+                const total = invoiceItems.reduce((acc, item) => acc + item.amount, 0);
+
+                // Call API to confirm payment
+                // Using a generic payment endpoint or status update
+                await apiClient.post(`/applications/${appData._id}/payment`, {
+                    phase: phase,
+                    amount: total,
+                    method: 'QR_CASH'
+                });
+            }
+
+            setTimeout(() => {
+                // If Phase 2, go to Dashboard (Wait for Audit Schedule)
+                // If Phase 1, go to Success Step (Wizard Completion)
+                if (phase === 2) {
+                    router.push('/dashboard');
+                } else {
+                    setCurrentStep(8);
+                }
+            }, 1000);
+        } catch (error) {
+            console.error("Payment Error", error);
+            alert("Payment failed");
+            setIsProcessing(false);
+        }
     };
+
+    const totalAmount = invoiceItems.reduce((acc, item) => acc + item.amount, 0);
 
     return (
         <div className="flex flex-col items-center p-6 bg-slate-50 min-h-screen font-thai">
 
             <div className="w-full max-w-[210mm] mb-4 text-center">
-                <h2 className="text-xl font-bold text-slate-700 mb-2">ขั้นตอนที่ 3: ใบแจ้งหนี้ & ชำระเงิน (Invoice & Payment)</h2>
+                <h2 className="text-xl font-bold text-slate-700 mb-2">
+                    {phase === 1 ? "ขั้นตอนที่ 3: ชำระค่าธรรมเนียมคำขอ" : "ชำระค่าธรรมเนียมการตรวจประเมิน"}
+                </h2>
                 <p className="text-sm text-slate-500">โปรดชำระเงินตามใบแจ้งหนี้ด้านล่าง</p>
             </div>
 
@@ -68,25 +165,20 @@ export const StepInvoice = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200 border border-slate-200">
-                            <tr>
-                                <td className="py-4 px-4 text-center align-top border-r border-slate-200">1</td>
-                                <td className="py-4 px-4 align-top border-r border-slate-200">
-                                    <p className="font-bold">ค่าธรรมเนียมคำขอรับรองมาตรฐาน GACP</p>
-                                </td>
-                                <td className="py-4 px-4 text-right align-top">100.00</td>
-                            </tr>
-                            <tr>
-                                <td className="py-4 px-4 text-center align-top border-r border-slate-200">2</td>
-                                <td className="py-4 px-4 align-top border-r border-slate-200">
-                                    <p className="font-bold">ค่าธรรมเนียมแปลงปลูก (Plot Fee)</p>
-                                </td>
-                                <td className="py-4 px-4 text-right align-top">50.00</td>
-                            </tr>
+                            {invoiceItems.map((item, idx) => (
+                                <tr key={idx}>
+                                    <td className="py-4 px-4 text-center align-top border-r border-slate-200">{idx + 1}</td>
+                                    <td className="py-4 px-4 align-top border-r border-slate-200">
+                                        <p className="font-bold">{item.label}</p>
+                                    </td>
+                                    <td className="py-4 px-4 text-right align-top">{item.amount.toFixed(2)}</td>
+                                </tr>
+                            ))}
                         </tbody>
                         <tfoot className="border-t-2 border-slate-300">
                             <tr className="bg-blue-50">
                                 <td colSpan={2} className="py-4 px-4 text-right font-bold text-blue-900 text-lg">ยอดชำระสุทธิ (Net Amount)</td>
-                                <td className="py-4 px-4 text-right font-bold text-blue-900 text-lg border border-slate-200">150.00</td>
+                                <td className="py-4 px-4 text-right font-bold text-blue-900 text-lg border border-slate-200">{totalAmount.toFixed(2)}</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -109,10 +201,10 @@ export const StepInvoice = () => {
             {/* Actions */}
             <div className="w-full max-w-[210mm] flex gap-4 justify-center">
                 <button
-                    onClick={() => setCurrentStep(6)} // Back to Quote
+                    onClick={() => phase === 2 ? router.push('/dashboard') : setCurrentStep(6)}
                     className="px-8 py-3 rounded-xl font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50"
                 >
-                    ย้อนกลับ
+                    {phase === 2 ? "ยกเลิก" : "ย้อนกลับ"}
                 </button>
                 <button
                     onClick={handlePayClick}
@@ -132,7 +224,7 @@ export const StepInvoice = () => {
                             <p className="text-white/80 text-sm relative z-10">Secure Payment Gateway</p>
                         </div>
                         <div className="p-8 text-center">
-                            <p className="text-slate-500 mb-4 font-medium">สแกน QR Code เพื่อชำระเงิน</p>
+                            <p className="text-slate-500 mb-4 font-medium">สแกน QR Code เพื่อชำระเงิน ({totalAmount.toFixed(2)} THB)</p>
                             <div className="w-64 h-64 bg-slate-100 mx-auto rounded-2xl border-2 border-slate-200 p-2 mb-6 shadow-inner">
                                 <div className="w-full h-full bg-white rounded-xl flex items-center justify-center border border-dashed border-slate-300">
                                     <div className="text-center">

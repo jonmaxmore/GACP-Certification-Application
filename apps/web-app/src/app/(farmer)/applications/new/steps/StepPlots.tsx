@@ -16,8 +16,16 @@ export const StepPlots = () => {
         name: '',
         areaSize: '',
         areaUnit: 'Rai',
-        solarSystem: 'OUTDOOR'
+        areaUnit: 'Rai',
+        solarSystem: state.locationType || 'OUTDOOR' // Initialize with global selection
     });
+
+    // Reset current plot system when global location type changes (if valid)
+    useEffect(() => {
+        if (state.locationType) {
+            setCurrentPlot(prev => ({ ...prev, solarSystem: state.locationType! }));
+        }
+    }, [state.locationType]);
 
     useEffect(() => {
         // Update store when plots change
@@ -39,7 +47,14 @@ export const StepPlots = () => {
 
         setPlots([...plots, newPlot]);
         setIsModalOpen(false);
-        setCurrentPlot({ name: '', areaSize: '', areaUnit: 'Rai', solarSystem: 'OUTDOOR' });
+        setPlots([...plots, newPlot]);
+        setIsModalOpen(false);
+        setCurrentPlot({
+            name: '',
+            areaSize: '',
+            areaUnit: 'Rai',
+            solarSystem: state.locationType || 'OUTDOOR' // Reset to global
+        });
     };
 
     const handleRemovePlot = (id: string) => {
@@ -128,28 +143,44 @@ export const StepPlots = () => {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">ระบบการปลูก (Cultivation System)</label>
                                 <div className="grid grid-cols-1 gap-2">
-                                    {cultivationSystems.map(sys => (
-                                        <label
-                                            key={sys.id}
-                                            className={`
-                                                flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all
-                                                ${currentPlot.solarSystem === sys.id
-                                                    ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
-                                                    : 'border-gray-200 hover:bg-gray-50'
-                                                }
-                                            `}
-                                        >
-                                            <input
-                                                type="radio"
-                                                name="system"
-                                                className="hidden"
-                                                checked={currentPlot.solarSystem === sys.id}
-                                                onChange={() => setCurrentPlot({ ...currentPlot, solarSystem: sys.id as any })}
-                                            />
-                                            <span className="text-xl">{sys.icon}</span>
-                                            <span className="font-medium">{sys.label}</span>
-                                        </label>
-                                    ))}
+                                    {cultivationSystems.map(sys => {
+                                        const isLocked = !!state.locationType;
+                                        const isSelected = currentPlot.solarSystem === sys.id;
+
+                                        // If locked, hide others or show disabled style?
+                                        // Better UX: Show only the selected one if locked, or show all but disable interaction?
+                                        // User request: "Why is this not locked?" => So it should be non-editable.
+
+                                        if (isLocked && !isSelected) return null; // Hide non-selected options if locked
+
+                                        return (
+                                            <label
+                                                key={sys.id}
+                                                className={`
+                                                    flex items-center gap-3 p-3 rounded-lg border transition-all
+                                                    ${isSelected
+                                                        ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
+                                                        : 'border-gray-200 opacity-50 cursor-not-allowed'
+                                                    }
+                                                    ${!isLocked ? 'cursor-pointer hover:bg-gray-50' : 'cursor-default'}
+                                                `}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="system"
+                                                    className="hidden"
+                                                    disabled={isLocked}
+                                                    checked={isSelected}
+                                                    onChange={() => !isLocked && setCurrentPlot({ ...currentPlot, solarSystem: sys.id as any })}
+                                                />
+                                                <span className="text-xl">{sys.icon}</span>
+                                                <div className="flex-1">
+                                                    <span className="font-medium">{sys.label}</span>
+                                                    {isLocked && <span className="ml-2 text-xs text-emerald-600 font-bold">(Locked by Step 1)</span>}
+                                                </div>
+                                            </label>
+                                        );
+                                    })}
                                 </div>
                             </div>
 

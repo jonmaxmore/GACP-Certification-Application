@@ -42,21 +42,30 @@ const IconReturn = ({ size = 24, className }: { size?: number; className?: strin
     </svg>
 );
 
+const IconVideo = ({ size = 24, className }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polygon points="23 7 16 12 23 17 23 7" />
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+    </svg>
+);
+
 interface Application {
     id: string;
     applicantName: string;
     applicantType: string;
     plantType: string;
+    areaType?: string; // [NEW]
     status: string;
     phase: number;
     submissionCount: number;
     submittedAt: string;
     lastUpdatedAt: string;
     slaTimer: string;
-    documents: { name: string; status: string; url: string }[];
+    documents: { name: string; status: string; url: string; metadata?: any }[];
     reviewHistory: { date: string; action: string; comment: string; by: string }[];
     auditRecord?: { checklist: { item: string; passed: boolean }[]; photos: string[]; result: string };
     payments: { phase: number; amount: number; paidAt: string }[];
+    youtubeUrl?: string; // Feature: Visual Evidence
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -100,20 +109,24 @@ export default function JobSheetPage() {
                     const result = await res.json();
                     if (result.success && result.data) {
                         const data = result.data;
+                        const formData = data.formData || {}; // Correctly access formData
+
                         setApp({
                             id: data._id || data.id || params.id as string,
-                            applicantName: data.data?.applicantInfo?.name || 'ไม่ระบุชื่อ',
-                            applicantType: data.data?.applicantType || 'บุคคลธรรมดา',
-                            plantType: data.data?.formData?.plantId || 'ไม่ระบุ',
+                            applicantName: formData.applicantData?.name || formData.applicantData?.firstName ? `${formData.applicantData?.firstName} ${formData.applicantData?.lastName}` : 'ไม่ระบุชื่อ',
+                            applicantType: formData.applicantData?.applicantType || 'บุคคลธรรมดา',
+                            plantType: formData.plantName || formData.plantId || 'ไม่ระบุ',
+                            areaType: data.areaType || formData.areaType || 'OUTDOOR', // Map areaType
                             status: data.status,
                             phase: data.status?.includes('AUDIT') ? 2 : 1,
                             submissionCount: (data.rejectCount || 0) + 1,
                             submittedAt: data.createdAt?.split('T')[0] || '-',
                             lastUpdatedAt: data.updatedAt || data.createdAt || '-',
                             slaTimer: getSLATimer(data.createdAt),
-                            documents: data.documents || [],
+                            documents: formData.documents || [], // Get from formData
                             reviewHistory: [],
-                            payments: []
+                            payments: [],
+                            youtubeUrl: formData.youtubeUrl // Extract YouTube URL
                         });
                     }
                 }
@@ -194,7 +207,20 @@ export default function JobSheetPage() {
                                     <p className="font-mono text-lg">{app.id}</p>
                                     <span className={`px-2 py-1 rounded-full text-xs ${statusInfo.color}`}>{statusInfo.label}</span>
                                 </div>
-                                <p className="text-slate-400 text-sm">{app.applicantName} • {app.applicantType}</p>
+                                <div className="flex items-center gap-2 text-slate-400 text-sm mt-1">
+                                    <span>{app.applicantName}</span>
+                                    <span>•</span>
+                                    <span>{app.plantType}</span>
+                                    {app.areaType && (
+                                        <>
+                                            <span>•</span>
+                                            <span className="text-emerald-400 font-medium">
+                                                {app.areaType === 'GREENHOUSE' ? 'โรงเรือน (Greenhouse)' :
+                                                    app.areaType === 'INDOOR' ? 'ระบบปิด (Indoor)' : 'กลางแจ้ง (Outdoor)'}
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <div className="text-right">
@@ -270,122 +296,167 @@ export default function JobSheetPage() {
                         <div className="px-6 py-4 border-b">
                             <h3 className="font-semibold">เอกสารแนบ ({app.documents.length} รายการ)</h3>
                         </div>
+
+                        {/* Visual Evidence Section */}
+                        {app.youtubeUrl && (
+                            <div className="p-4 bg-blue-50/50 border-b border-blue-100 flex items-start gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                                    <IconVideo size={20} />
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-semibold text-blue-900 mb-1">สื่อบันทึกภาพ/วิดีโอ (Evidence)</h4>
+                                    <p className="text-sm text-blue-700 mb-2">เกษตรกรได้แนบลิงก์วิดีโอแนะนำฟาร์ม/แปลงปลูก</p>
+                                    <a
+                                        href={app.youtubeUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm transition-colors"
+                                    >
+                                        <IconVideo size={16} />
+                                        เปิดดูวิดีโอ (YouTube)
+                                    </a>
+                                </div>
+                            </div>
+                        )}
                         <div className="divide-y">
                             {app.documents.map((doc, i) => (
-                                <div key={i} className="flex items-center gap-4 p-4 hover:bg-slate-50">
-                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${doc.status === "verified" ? "bg-green-100" :
-                                        doc.status === "issue" ? "bg-red-100" :
-                                            "bg-amber-100"
-                                        }`}>
-                                        {doc.status === "verified" ? <IconCheckCircle size={16} className="text-green-600" /> : doc.status === "issue" ? <IconX size={16} className="text-red-600" /> : <IconClock size={16} className="text-amber-600" />}
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="font-medium">{doc.name}</p>
-                                        <p className={`text-sm ${doc.status === "verified" ? "text-green-600" :
-                                            doc.status === "issue" ? "text-red-600" :
-                                                "text-amber-600"
+                                <div key={i} className="p-4 hover:bg-slate-50 border-b last:border-b-0">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${doc.status === "verified" ? "bg-green-100" :
+                                            doc.status === "issue" ? "bg-red-100" :
+                                                "bg-amber-100"
                                             }`}>
-                                            {doc.status === "verified" ? "ถูกต้อง" : doc.status === "issue" ? "ต้องแก้ไข" : "รอตรวจสอบ"}
-                                        </p>
+                                            {doc.status === "verified" ? <IconCheckCircle size={16} className="text-green-600" /> : doc.status === "issue" ? <IconX size={16} className="text-red-600" /> : <IconClock size={16} className="text-amber-600" />}
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="font-medium">{doc.name}</p>
+                                            <p className={`text-sm ${doc.status === "verified" ? "text-green-600" :
+                                                doc.status === "issue" ? "text-red-600" :
+                                                    "text-amber-600"
+                                                }`}>
+                                                {doc.status === "verified" ? "ถูกต้อง" : doc.status === "issue" ? "ต้องแก้ไข" : "รอตรวจสอบ"}
+                                            </p>
+                                        </div>
+                                        <button className="flex items-center gap-1.5 px-4 py-2 bg-slate-100 rounded-lg hover:bg-slate-200 text-sm">
+                                            <IconEye size={14} /> Preview
+                                        </button>
                                     </div>
-                                    <button className="flex items-center gap-1.5 px-4 py-2 bg-slate-100 rounded-lg hover:bg-slate-200 text-sm">
-                                        <IconEye size={14} /> Preview
-                                    </button>
+
+                                    {/* [NEW] Metadata Display (Land Info) */}
+                                    {doc.metadata?.area && (
+                                        <div className="ml-14 mt-2 bg-slate-100 rounded-lg p-3 text-xs w-fit border border-slate-200">
+                                            <span className="font-bold text-slate-700 block mb-1">
+                                                ข้อมูลที่ดิน ({doc.metadata.manualEntry ? 'Manual Edited' : 'AI Extracted'})
+                                            </span>
+                                            <div className="flex gap-4 text-slate-600">
+                                                <span>ไร่: <b className="text-slate-900">{doc.metadata.area.rai}</b></span>
+                                                <span>งาน: <b className="text-slate-900">{doc.metadata.area.ngan}</b></span>
+                                                <span>ตร.ว.: <b className="text-slate-900">{doc.metadata.area.sqWa}</b></span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
                     </div>
                 )}
 
-                {activeTab === "history" && (
-                    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                        <div className="px-6 py-4 border-b">
-                            <h3 className="font-semibold">ประวัติการดำเนินการ</h3>
-                        </div>
-                        <div className="p-6">
-                            <div className="relative pl-8">
-                                {app.reviewHistory.map((item, i) => (
-                                    <div key={i} className="relative pb-8 last:pb-0">
-                                        {i < app.reviewHistory.length - 1 && (
-                                            <div className="absolute left-[-20px] top-6 w-0.5 h-full bg-slate-200" />
-                                        )}
-                                        <div className="absolute left-[-24px] w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
-                                        <div className="bg-slate-50 rounded-xl p-4">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <p className="font-semibold">{item.action}</p>
-                                                <p className="text-sm text-slate-500">{item.date}</p>
+
+                {
+                    activeTab === "history" && (
+                        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                            <div className="px-6 py-4 border-b">
+                                <h3 className="font-semibold">ประวัติการดำเนินการ</h3>
+                            </div>
+                            <div className="p-6">
+                                <div className="relative pl-8">
+                                    {app.reviewHistory.map((item, i) => (
+                                        <div key={i} className="relative pb-8 last:pb-0">
+                                            {i < app.reviewHistory.length - 1 && (
+                                                <div className="absolute left-[-20px] top-6 w-0.5 h-full bg-slate-200" />
+                                            )}
+                                            <div className="absolute left-[-24px] w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                                            <div className="bg-slate-50 rounded-xl p-4">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <p className="font-semibold">{item.action}</p>
+                                                    <p className="text-sm text-slate-500">{item.date}</p>
+                                                </div>
+                                                <p className="text-slate-600">{item.comment}</p>
+                                                <p className="text-sm text-slate-400 mt-1">โดย: {item.by}</p>
                                             </div>
-                                            <p className="text-slate-600">{item.comment}</p>
-                                            <p className="text-sm text-slate-400 mt-1">โดย: {item.by}</p>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
 
                 {/* Action Bar - Fixed at bottom during Phase 1 */}
-                {app.phase === 1 && (
-                    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4">
-                        <div className="max-w-7xl mx-auto flex justify-end gap-4">
-                            <button
-                                onClick={() => handleAction("reject")}
-                                className="px-8 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 flex items-center gap-2"
-                            >
-                                <IconReturn size={16} /> ส่งคืนแก้ไข
-                            </button>
-                            <button
-                                onClick={() => handleAction("approve")}
-                                className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 flex items-center gap-2"
-                            >
-                                <IconCheckCircle size={16} /> อนุมัติเอกสาร
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </main>
-
-            {/* Action Modal */}
-            {showActionModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-                        <div className="px-6 py-4 border-b">
-                            <h3 className="text-lg font-semibold">
-                                {actionType === "approve" ? <><IconCheckCircle size={16} /> ยืนยันอนุมัติเอกสาร</> : <><IconReturn size={16} /> ส่งคืนแก้ไข</>}
-                            </h3>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            {actionType === "reject" && (
-                                <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm">
-                                    <IconWarning size={16} /> ผู้สมัครแก้ไขฟรี {3 - app.submissionCount} ครั้ง หลังจากนั้นต้องชำระค่าธรรมเนียมใหม่
-                                </div>
-                            )}
-                            <textarea
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)}
-                                placeholder={actionType === "approve" ? "หมายเหตุ (ถ้ามี)..." : "ระบุจุดที่ต้องแก้ไขอย่างละเอียด..."}
-                                rows={4}
-                                className="w-full px-3 py-2 border rounded-lg"
-                                required={actionType === "reject"}
-                            />
-                            <div className="flex gap-3">
-                                <button onClick={() => setShowActionModal(false)} className="flex-1 py-3 border border-slate-300 rounded-xl">
-                                    ยกเลิก
+                {
+                    app.phase === 1 && (
+                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4">
+                            <div className="max-w-7xl mx-auto flex justify-end gap-4">
+                                <button
+                                    onClick={() => handleAction("reject")}
+                                    className="px-8 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 flex items-center gap-2"
+                                >
+                                    <IconReturn size={16} /> ส่งคืนแก้ไข
                                 </button>
                                 <button
-                                    onClick={submitAction}
-                                    disabled={actionType === "reject" && !comment}
-                                    className={`flex-1 py-3 text-white rounded-xl disabled:opacity-50 ${actionType === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
-                                        }`}
+                                    onClick={() => handleAction("approve")}
+                                    className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 flex items-center gap-2"
                                 >
-                                    ยืนยัน
+                                    <IconCheckCircle size={16} /> อนุมัติเอกสาร
                                 </button>
                             </div>
                         </div>
+                    )
+                }
+            </main >
+
+            {/* Action Modal */}
+            {
+                showActionModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+                            <div className="px-6 py-4 border-b">
+                                <h3 className="text-lg font-semibold">
+                                    {actionType === "approve" ? <><IconCheckCircle size={16} /> ยืนยันอนุมัติเอกสาร</> : <><IconReturn size={16} /> ส่งคืนแก้ไข</>}
+                                </h3>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                {actionType === "reject" && (
+                                    <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm">
+                                        <IconWarning size={16} /> ผู้สมัครแก้ไขฟรี {3 - app.submissionCount} ครั้ง หลังจากนั้นต้องชำระค่าธรรมเนียมใหม่
+                                    </div>
+                                )}
+                                <textarea
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    placeholder={actionType === "approve" ? "หมายเหตุ (ถ้ามี)..." : "ระบุจุดที่ต้องแก้ไขอย่างละเอียด..."}
+                                    rows={4}
+                                    className="w-full px-3 py-2 border rounded-lg"
+                                    required={actionType === "reject"}
+                                />
+                                <div className="flex gap-3">
+                                    <button onClick={() => setShowActionModal(false)} className="flex-1 py-3 border border-slate-300 rounded-xl">
+                                        ยกเลิก
+                                    </button>
+                                    <button
+                                        onClick={submitAction}
+                                        disabled={actionType === "reject" && !comment}
+                                        className={`flex-1 py-3 text-white rounded-xl disabled:opacity-50 ${actionType === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"
+                                            }`}
+                                    >
+                                        ยืนยัน
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

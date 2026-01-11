@@ -48,12 +48,12 @@ const getMasterData = async (req, res) => {
                 { id: 'OWN', label: 'เจ้าของ', labelEN: 'Owner' },
                 { id: 'RENT', label: 'เช่า', labelEN: 'Renter' },
                 { id: 'CONSENT', label: 'ได้รับยินยอม', labelEN: 'Consent' },
-            ]
+            ],
         };
 
         res.json({
             success: true,
-            data: data
+            data: data,
         });
     } catch (error) {
         console.error('Master Data Error:', error);
@@ -62,5 +62,5 @@ const getMasterData = async (req, res) => {
 };
 
 module.exports = {
-    getMasterData
+    getMasterData,
 };

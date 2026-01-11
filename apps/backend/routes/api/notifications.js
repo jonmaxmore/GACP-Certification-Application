@@ -1,5 +1,5 @@
 /**
- * V2 Notification Routes - Prisma Version
+ * Notification Routes 
  * In-app notification system using PostgreSQL
  */
 
@@ -118,13 +118,13 @@ router.get('/', notificationController.getNotifications);
 // GET /api/notifications/unread-count
 router.get('/unread-count', notificationController.getUnreadCount);
 
-// PUT /api/v2/notifications/:id/read
+// PUT /api/notifications/:id/read
 router.put('/:id/read', checkPermission('dashboard.view'), notificationController.markAsRead);
 
-// PUT /api/v2/notifications/mark-all-read
+// PUT /api/notifications/mark-all-read
 router.put('/mark-all-read', checkPermission('dashboard.view'), notificationController.markAllAsRead);
 
-// POST /api/v2/notifications (Admin/Staff only)
+// POST /api/notifications (Admin/Staff only)
 router.post('/', checkPermission('system.admin'), notificationController.createNotification);
 
 module.exports = router;

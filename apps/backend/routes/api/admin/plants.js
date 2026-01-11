@@ -7,7 +7,7 @@ const logger = require('../../../shared/logger');
 router.get('/', async (req, res) => {
     try {
         const plants = await prisma.plantSpecies.findMany({
-            orderBy: { sortOrder: 'asc' }
+            orderBy: { sortOrder: 'asc' },
         });
         res.json({ success: true, data: plants });
     } catch (error) {
@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
         }
 
         const existing = await prisma.plantSpecies.findUnique({
-            where: { name }
+            where: { name },
         });
 
         if (existing) {
@@ -38,8 +38,8 @@ router.post('/', async (req, res) => {
                 name,
                 productionInputs: productionInputs || {}, // Default to empty object if not provided
                 sortOrder: 100, // Default sort order
-                isActive: true
-            }
+                isActive: true,
+            },
         });
 
         logger.info(`Plant created: ${name} (${plant.id})`);
@@ -62,8 +62,8 @@ router.patch('/:id', async (req, res) => {
                 ...(name && { name }),
                 ...(productionInputs && { productionInputs }),
                 ...(isActive !== undefined && { isActive }),
-                ...(sortOrder !== undefined && { sortOrder })
-            }
+                ...(sortOrder !== undefined && { sortOrder }),
+            },
         });
 
         logger.info(`Plant updated: ${plant.name} (${plant.id})`);
@@ -84,7 +84,7 @@ router.delete('/:id', async (req, res) => {
 
         // Check for dependencies (this is a simplified check, ideally should check PlantingCycles)
         const cycles = await prisma.plantingCycle.findFirst({
-            where: { plantSpeciesId: id }
+            where: { plantSpeciesId: id },
         });
 
         if (cycles) {

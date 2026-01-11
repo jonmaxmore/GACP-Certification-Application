@@ -1,0 +1,31 @@
+🏁 STARTING QC GOLDEN JOURNEY 🏁
+✅ 1. Registered: qc_farmer_1768041978277@test.com
+[REQ] POST /auth-farmer/login
+✅ 1. Login Success
+[REQ] POST /farms
+[DEBUG] Farm Response: {"success":true,"message":"Farm created successfully","data":{"id":"caff5740-ab80-4394-b9e8-4cdd3253cce2","uuid":"223127b7-61e9-4784-aac1-49a5b6a93019","createdAt":"2026-01-10T10:46:18.444Z","updatedAt":"2026-01-10T10:46:18.444Z","ownerId":"05faa2f8-115f-486d-8b38-cd29e36a02f7","farmName":"Golden Garden","farmType":"CULTIVATION","address":"123 Test Rd","province":"Chiang Mai","district":"Muang","subDistrict":"Suthep","postalCode":"50200","latitude":18.5,"longitude":99,"totalArea":10,"cultivationArea":0,"areaUnit":"rai","cultivationMethod":"ORGANIC","irrigationType":null,"soilType":null,"waterSource":null,"status":"DRAFT","verificationNotes":null,"verifiedBy":null,"verifiedAt":null,"rejectionReason":null,"submittedAt":null,"landDocuments":null,"isDeleted":false,"deletedAt":null,"deletedBy":null,"deleteReason":null}}
+✅ 2. Farm Created: caff5740-ab80-4394-b9e8-4cdd3253cce2
+[REQ] POST /applications/draft
+[DEBUG] App Draft Response: {"success":true,"data":{"_id":"d1097690-824f-4a32-bc9d-2f1c097f13af","applicationNumber":"GACP-2569-00007-JLNH","status":"SUBMITTED"}}
+[REQ] POST /applications/d1097690-824f-4a32-bc9d-2f1c097f13af/confirm-review
+   -> Processing Payment 1...
+   -> Processing Payment 1 for App ID: d1097690-824f-4a32-bc9d-2f1c097f13af
+✅ 3. Application Submitted (Pay 1 Simulated via DB)
+[REQ] POST /auth-dtam/login
+[REQ] POST /auth-dtam/login
+[REQ] POST /auth-dtam/login
+[REQ] POST /applications/d1097690-824f-4a32-bc9d-2f1c097f13af/review
+[DEBUG] Review Response: {"success":true,"data":{"id":"d1097690-824f-4a32-bc9d-2f1c097f13af","uuid":"5d98b378-3eb9-4078-9d21-808f05451f3f","createdAt":"2026-01-10T10:46:18.462Z","updatedAt":"2026-01-10T10:46:18.654Z","applicationNumber":"GACP-2569-00007-JLNH","farmerId":"05faa2f8-115f-486d-8b38-cd29e36a02f7","serviceType":"NEW_CERTIFICATION","areaType":"OUTDOOR","standardCode":null,"status":"DOCUMENT_APPROVED","rejectCount":0,"batchId":null,"areaTypeIndex":0,"totalAreaTypes":1,"phase1Amount":5000,"phase1Status":"PAID","phase1PaidAt":"2026-01-10T10:46:18.466Z","phase2Amount":25000,"phase2Status":"PENDING","phase2PaidAt":null,"auditorId":null,"scheduledDate":null,"auditResult":null,"auditNotes":null,"formData":{"plantId":"CAN","purpose":"DOMESTIC","documents":[],"plantName":"Cannabis","locationData":{"farmId":"caff5740-ab80-4394-b9e8-4cdd3253cce2"},"applicantData":{"type":"INDIVIDUAL"},"productionData":{"method":"ORGANIC"},"submissionDate":"2026-01-10T10:46:18.461Z"},"attachments":null,"workflowHistory":null,"supplementaryCriteria":null,"supplementarySkipped":false,"submissionHash":null,"officialReceiptNumber":null,"idempotencyKey":null,"createdBy":null,"updatedBy":"eb28c9a7-9754-442e-89f6-69101edb9822","createdByIp":null,"updatedByIp":null,"isDeleted":false,"deletedAt":null,"deletedBy":null,"deleteReason":null,"retainUntil":"2031-01-10T10:46:18.462Z","legalHold":false},"message":"Application DOCUMENT_APPROVED"}
+✅ 4. Officer Approved -> DOCUMENT_APPROVED
+✅ 4. Officer Approved -> Pay 2 Pending
+   -> Processing Payment 2...
+✅ 5. Payment 2 Complete -> Audit Pending
+[REQ] POST /audits/schedule
+✅ 6. Audit Scheduled
+[REQ] POST /audits/d1097690-824f-4a32-bc9d-2f1c097f13af/result
+✅ 7a. Audit Result: Fix Required
+[REQ] POST /audits/d1097690-824f-4a32-bc9d-2f1c097f13af/result
+✅ 7b. Audit Result: PASSED
+✅ 8. Farm Active: ACTIVE
+Error: Failed to seed PlantSpecies
+    at runQCValues (C:\Users\usEr\Documents\GitHub\GACP-Certification-Application\apps\backend\scripts\e2e_qc_golden.js:268:25)

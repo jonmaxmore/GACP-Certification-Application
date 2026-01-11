@@ -7,7 +7,9 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../../services/prisma-database').prisma;
-const { authLimiter } = require('../../middleware/rate-limiter');
+const path = require('path');
+const { authLimiter } = require(path.join(__dirname, '../../middleware/rate-limiter.js'));
+// const authLimiter = (req, res, next) => next(); // Dummy middleware for tests
 const jwtConfig = require('../../config/jwt-security');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'gacp-jwt-secret-key-2024';
@@ -176,11 +178,13 @@ router.post('/logout', (req, res) => {
 router.get('/me', async (req, res) => {
     try {
         const authHeader = req.headers.authorization;
-        if (!authHeader?.startsWith('Bearer ')) {
+        const headerToken = authHeader && authHeader.split(' ')[1];
+        const cookieToken = req.cookies?.staff_token;
+        const token = headerToken || cookieToken;
+
+        if (!token) {
             return res.status(401).json({ success: false, error: 'Unauthorized' });
         }
-
-        const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, JWT_SECRET);
 
         const staff = await prisma.dTAMStaff.findUnique({

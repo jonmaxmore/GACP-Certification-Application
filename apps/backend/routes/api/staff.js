@@ -1,5 +1,5 @@
 /**
- * Staff Routes for Scheduler and Admin (Migrated to V2)
+ * Staff Routes for Scheduler and Admin 
  * Uses Prisma DTAMStaff model
  */
 const express = require('express');
@@ -15,8 +15,8 @@ router.get('/', authenticateDTAM, async (req, res) => {
         const { role, isActive } = req.query;
 
         const where = { isDeleted: false };
-        if (role) {where.role = role.toLowerCase();}
-        if (isActive !== undefined) {where.isActive = isActive === 'true';}
+        if (role) { where.role = role.toLowerCase(); }
+        if (isActive !== undefined) { where.isActive = isActive === 'true'; }
 
         const staff = await prisma.dTAMStaff.findMany({
             where,
@@ -88,6 +88,15 @@ router.get('/roles', authenticateDTAM, async (req, res) => {
 // Create new staff member
 router.post('/', authenticateDTAM, async (req, res) => {
     try {
+        // RPAC: Only Admin/SuperAdmin can create staff
+        const currentUserRole = req.user?.role?.toLowerCase();
+        if (currentUserRole !== 'admin' && currentUserRole !== 'super_admin') {
+            return res.status(403).json({
+                success: false,
+                error: 'Unauthorized: Only Admins can create staff accounts',
+            });
+        }
+
         const { username, email, password, firstName, lastName, role, employeeId } = req.body;
 
         // Check required fields
@@ -182,15 +191,24 @@ router.get('/:id', authenticateDTAM, async (req, res) => {
 // Update staff
 router.patch('/:id', authenticateDTAM, async (req, res) => {
     try {
+        // RPAC: Only Admin/SuperAdmin can update staff
+        const currentUserRole = req.user?.role?.toLowerCase();
+        if (currentUserRole !== 'admin' && currentUserRole !== 'super_admin') {
+            return res.status(403).json({
+                success: false,
+                error: 'Unauthorized: Only Admins can manage staff accounts',
+            });
+        }
+
         const { id } = req.params;
         const { firstName, lastName, role, isActive, employeeId } = req.body;
 
         const updateData = {};
-        if (firstName) {updateData.firstName = firstName;}
-        if (lastName) {updateData.lastName = lastName;}
-        if (role) {updateData.role = role.toLowerCase();}
-        if (isActive !== undefined) {updateData.isActive = isActive;}
-        if (employeeId) {updateData.employeeId = employeeId;}
+        if (firstName) { updateData.firstName = firstName; }
+        if (lastName) { updateData.lastName = lastName; }
+        if (role) { updateData.role = role.toLowerCase(); }
+        if (isActive !== undefined) { updateData.isActive = isActive; }
+        if (employeeId) { updateData.employeeId = employeeId; }
         updateData.updatedBy = req.user?.id;
 
         const updated = await prisma.dTAMStaff.update({

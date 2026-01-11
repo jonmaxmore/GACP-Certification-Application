@@ -1,0 +1,33 @@
+// =============================================================================
+// AUDIT LOG MODEL (ISO 27799 Compliance)
+// =============================================================================
+model AuditLog {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  // Actor
+  userId    String?
+  // user      User?    @relation(fields: [userId], references: [id]) // Optional relation to avoid circular dependency issues during quick fixes
+  userRole  String?  // Snapshot of role at time of action
+  ipAddress String?
+  userAgent String?
+
+  // Action
+  action    String   // LOGIN, VIEW, CREATE, UPDATE, DELETE, APPROVE, REJECT
+  resource  String?  // APPLICATION, CERTIFICATE, USER
+  resourceId String? // Target ID
+  
+  // Details
+  status    String   @default("SUCCESS") // SUCCESS, FAILURE, WARNING
+  details   Json?    // Changed fields, error message, etc.
+  companyId String?  // For multi-tenant isolation if needed
+
+  // Severity
+  severity  String   @default("INFO") // INFO, WARNING, CRITICAL
+
+  @@index([userId])
+  @@index([action])
+  @@index([resourceId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

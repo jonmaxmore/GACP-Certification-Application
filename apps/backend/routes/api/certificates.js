@@ -1,6 +1,6 @@
 /**
  * Certificate Routes for V2 API (Prisma Implementation)
- * GET /api/v2/certificates/my - Get user's certificates
+ * GET /api/certificates/my - Get user's certificates
  */
 
 const express = require('express');
@@ -93,7 +93,7 @@ router.get('/my', authenticateFarmer, async (req, res) => {
 });
 
 /**
- * GET /api/v2/certificates/:id
+ * GET /api/certificates/:id
  * Get certificate by ID
  */
 router.get('/:id', authenticateFarmer, async (req, res) => {
@@ -135,7 +135,28 @@ router.get('/:id', authenticateFarmer, async (req, res) => {
 });
 
 /**
- * GET /api/v2/certificates/verify/:certificateNumber
+ * GET /api/certificates/:id/download
+ * Download certificate as PDF
+ */
+router.get('/:id/download', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const certificateService = require('../../services/certificate-service');
+
+        const pdfBuffer = await certificateService.getCertificatePdf(id);
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="GACP-Certificate-${id}.pdf"`);
+        res.send(pdfBuffer);
+
+    } catch (error) {
+        logger.error('[Certificates] download error:', error);
+        res.status(500).send('Error generating certificate PDF');
+    }
+});
+
+/**
+ * GET /api/certificates/verify/:certificateNumber
  * Public endpoint to verify certificate
  */
 router.get('/verify/:certificateNumber', async (req, res) => {

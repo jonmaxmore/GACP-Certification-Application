@@ -81,11 +81,16 @@ class ApiClient {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
 
+        // Handle FormData (remove Content-Type to let browser set boundary)
+        if (body instanceof FormData) {
+            delete headers['Content-Type'];
+        }
+
         try {
             const response = await fetch(url, {
                 ...init,
                 headers,
-                body: body ? JSON.stringify(body) : undefined,
+                body: body ? (body instanceof FormData ? body : JSON.stringify(body)) : undefined,
                 signal: controller.signal,
                 credentials: 'include', // 🔐 Send httpOnly cookies automatically
             });
@@ -176,6 +181,46 @@ class ApiClient {
      */
     async delete<T>(endpoint: string, options?: RequestOptions): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+    }
+
+    /**
+     * GET Blob request (for file downloads)
+     */
+    async getBlob(endpoint: string, options?: RequestOptions): Promise<Blob | null> {
+        const { skipAuth = false, timeout = this.defaultTimeout, body, ...init } = options || {};
+
+        const headers: Record<string, string> = {
+            ...(init.headers as Record<string, string>),
+        };
+
+        if (!skipAuth) {
+            const token = AuthService.getToken();
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+        }
+
+        let fullEndpoint = endpoint;
+        if (!endpoint.startsWith('http')) {
+            if (!endpoint.startsWith('/api')) {
+                fullEndpoint = `/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+            }
+        }
+        const url = fullEndpoint.startsWith('http') ? fullEndpoint : `${this.baseUrl}${fullEndpoint}`;
+
+        try {
+            const response = await fetch(url, {
+                ...init,
+                method: 'GET',
+                headers,
+                credentials: 'include',
+            });
+
+            if (!response.ok) return null;
+            return await response.blob();
+        } catch {
+            return null;
+        }
     }
 
     /**

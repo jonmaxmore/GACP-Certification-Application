@@ -1,12 +1,12 @@
 /**
- * V2 Supplementary Criteria API
+ * Supplementary Criteria API
  * Manages dynamic criteria for application form (step-12)
  * 
- * GET    /api/v2/criteria - List active criteria (public)
- * GET    /api/v2/criteria/all - List all criteria (admin)
- * POST   /api/v2/criteria - Create criterion (admin)
- * PATCH  /api/v2/criteria/:id - Update criterion (admin)
- * DELETE /api/v2/criteria/:id - Delete criterion (admin)
+ * GET    /api/criteria - List active criteria (public)
+ * GET    /api/criteria/all - List all criteria (admin)
+ * POST   /api/criteria - Create criterion (admin)
+ * PATCH  /api/criteria/:id - Update criterion (admin)
+ * DELETE /api/criteria/:id - Delete criterion (admin)
  */
 
 const express = require('express');
@@ -17,7 +17,7 @@ const authModule = require('../../middleware/auth-middleware');
 const authenticateDTAM = authModule.authenticateDTAM;
 
 /**
- * GET /api/v2/criteria
+ * GET /api/criteria
  * Get all active supplementary criteria (public - for form)
  */
 router.get('/', async (req, res) => {
@@ -80,7 +80,7 @@ router.get('/', async (req, res) => {
 });
 
 /**
- * GET /api/v2/criteria/all
+ * GET /api/criteria/all
  * Get all criteria including inactive (admin only)
  */
 router.get('/all', authenticateDTAM, async (req, res) => {
@@ -108,7 +108,7 @@ router.get('/all', authenticateDTAM, async (req, res) => {
 });
 
 /**
- * POST /api/v2/criteria
+ * POST /api/criteria
  * Create new criterion (admin only)
  */
 router.post('/', authenticateDTAM, async (req, res) => {
@@ -176,7 +176,7 @@ router.post('/', authenticateDTAM, async (req, res) => {
 });
 
 /**
- * PATCH /api/v2/criteria/:id
+ * PATCH /api/criteria/:id
  * Update criterion (admin only)
  */
 router.patch('/:id', authenticateDTAM, async (req, res) => {
@@ -215,7 +215,7 @@ router.patch('/:id', authenticateDTAM, async (req, res) => {
 });
 
 /**
- * DELETE /api/v2/criteria/:id
+ * DELETE /api/criteria/:id
  * Delete criterion (admin only)
  */
 router.delete('/:id', authenticateDTAM, async (req, res) => {

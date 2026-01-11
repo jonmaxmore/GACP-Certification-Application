@@ -45,7 +45,7 @@ export interface ApplicantData {
 
     // วิสาหกิจชุมชน (Community Enterprise)
     communityName?: string;           // ชื่อวิสาหกิจชุมชน
-    presidentName?: string;            // ชื่อประธาน
+    presidentName?: string;            // พื่อประธาน
     presidentIdCard?: string;          // เลขบัตรประชาชนประธาน
     registrationSVC01?: string;        // รหัส สวช.01
     registrationTVC3?: string;         // รหัส ท.ว.ช.3
@@ -155,6 +155,7 @@ export interface DocumentUpload {
     type?: string;
     url?: string;
     uploaded: boolean;
+    metadata?: any; // [NEW] For storing extracted data (e.g., Land Area)
 }
 
 export interface WizardState {
@@ -171,6 +172,8 @@ export interface WizardState {
     productionData: ProductionData | null;
     securityData: SecurityData | null;
     documents: DocumentUpload[];
+    youtubeUrl?: string; // Added for GACP V2
+    locationType: SiteType | null; // [NEW] Added for Step 1.5
     applicationId?: string;
     createdAt?: string;
     updatedAt?: string;
@@ -192,6 +195,8 @@ const initialState: WizardState = {
     productionData: null,
     securityData: null,
     documents: [],
+    youtubeUrl: '',
+    locationType: null,
 };
 
 export function useWizardStore() {
@@ -269,6 +274,14 @@ export function useWizardStore() {
         setState(prev => ({ ...prev, documents }));
     }, []);
 
+    const setLocationType = useCallback((locationType: SiteType) => {
+        setState(prev => ({ ...prev, locationType }));
+    }, []);
+
+    const setYoutubeUrl = useCallback((youtubeUrl: string) => {
+        setState(prev => ({ ...prev, youtubeUrl }));
+    }, []);
+
     const setCurrentStep = useCallback((step: number) => {
         setState(prev => ({ ...prev, currentStep: step }));
     }, []);
@@ -291,19 +304,20 @@ export function useWizardStore() {
     }, []);
 
     // Validation helpers
+    // Updated to match page.tsx steps:
+    // 0: Plant, 1: Land, 2: Plots, 3: Production, 4: Docs, 5: PreCheck, 6: Review, 7: Quote, 8: Invoice, 9: Success
     const canProceedFromStep = useCallback((step: number): boolean => {
         switch (step) {
-            case 0: return !!state.plantId;
-            case 1: return !!state.certificationPurpose && state.siteTypes.length > 0;
-            case 2: return !!state.serviceType;
-            case 3: return state.consentedPDPA;
-            case 4: return state.acknowledgedStandards;
-            case 5: return !!state.applicantData?.firstName || !!state.applicantData?.companyName;
-            case 6: return !!state.siteData?.siteName;
-            case 7: return true; // Production data optional
-            case 8: return state.documents.filter(d => d.uploaded).length > 0;
-            case 9: return true; // Review step
-            case 10: return true; // Payment step
+            case 0: return !!state.plantId && !!state.certificationPurpose && state.siteTypes.length > 0;
+            case 1: return !!state.siteData?.siteName && !!state.siteData?.gpsLat;
+            case 2: return true; // Plots (Optional or handled in step)
+            case 3: return true; // Production (Optional)
+            case 4: return state.documents.filter(d => d.uploaded).length > 0;
+            case 5: return true; // PreCheck (Handled by component internal state)
+            case 6: return true; // Review
+            case 7: return true; // Quote
+            case 8: return true; // Invoice
+            case 9: return true; // Success
             default: return false;
         }
     }, [state]);
@@ -334,13 +348,15 @@ export function useWizardStore() {
         setProductionData,
         setSecurityData,
         setDocuments,
+        setYoutubeUrl,
         setCurrentStep,
         consentPDPA,
         acknowledgeStandards,
         resetWizard,
         setApplicationId,
         canProceedFromStep,
+        canProceedFromStep,
         getCompletedSteps,
+        setLocationType,
     };
 }
-

@@ -8,7 +8,7 @@ const router = express.Router();
 const BatchService = require('../../services/BatchSubmissionService');
 
 /**
- * @route POST /api/v2/batch/submit
+ * @route POST /api/batch/submit
  * @description Submit multi-area application (auto-split)
  */
 router.post('/submit', async (req, res) => {
@@ -71,7 +71,7 @@ router.post('/submit', async (req, res) => {
 });
 
 /**
- * @route GET /api/v2/batch/:batchId
+ * @route GET /api/batch/:batchId
  * @description Get all applications in a batch
  */
 router.get('/:batchId', async (req, res) => {
@@ -100,7 +100,7 @@ router.get('/:batchId', async (req, res) => {
 });
 
 /**
- * @route POST /api/v2/batch/:batchId/payment
+ * @route POST /api/batch/:batchId/payment
  * @description Update payment status for entire batch
  */
 router.post('/:batchId/payment', async (req, res) => {
@@ -124,7 +124,7 @@ router.post('/:batchId/payment', async (req, res) => {
 });
 
 /**
- * @route GET /api/v2/batch/preview-fee
+ * @route GET /api/batch/preview-fee
  * @description Preview fee for multiple area types
  */
 router.get('/preview-fee', async (req, res) => {

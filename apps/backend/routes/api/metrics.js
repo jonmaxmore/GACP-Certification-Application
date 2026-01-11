@@ -130,7 +130,7 @@ const setGauge = (name, value) => {
 };
 
 /**
- * @route GET /api/v2/metrics
+ * @route GET /api/metrics
  * @desc Prometheus metrics endpoint
  * @access Public (for Prometheus scraper)
  */
@@ -140,7 +140,7 @@ router.get('/', (req, res) => {
 });
 
 /**
- * @route GET /api/v2/metrics/json
+ * @route GET /api/metrics/json
  * @desc JSON format metrics for debugging
  * @access Private
  */

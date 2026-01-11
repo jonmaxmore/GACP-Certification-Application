@@ -49,7 +49,7 @@ class AuthController {
 
             if (!isValid) {
                 // Cleanup file if validation fails early
-                if (req.file && req.file.path) {fs.unlink(req.file.path, () => { });}
+                if (req.file && req.file.path) { fs.unlink(req.file.path, () => { }); }
                 return res.status(400).json({
                     success: false,
                     error: errorMessage,
@@ -81,7 +81,7 @@ class AuthController {
             // Cleanup Orphan File
             if (req.file && req.file.path) {
                 fs.unlink(req.file.path, (err) => {
-                    if (err) {console.error('[AuthController] Cleanup Failed:', err.message);}
+                    if (err) { console.error('[AuthController] Cleanup Failed:', err.message); }
                 });
             }
 
@@ -218,7 +218,7 @@ class AuthController {
             const user = await AuthService.getProfile(req.user.id);
             res.status(200).json({
                 success: true,
-                data: { user },
+                data: user,
             });
         } catch (error) {
             res.status(500).json({ success: false, error: 'Server Error' });
@@ -310,9 +310,9 @@ class AuthController {
 
             // Allow updating valid fields
             const updateData = {};
-            if (data.firstName) {updateData.firstName = data.firstName;}
-            if (data.lastName) {updateData.lastName = data.lastName;}
-            if (data.phoneNumber) {updateData.phoneNumber = data.phoneNumber;}
+            if (data.firstName) { updateData.firstName = data.firstName; }
+            if (data.lastName) { updateData.lastName = data.lastName; }
+            if (data.phoneNumber) { updateData.phoneNumber = data.phoneNumber; }
 
             const user = await AuthService.updateProfile(userId, updateData);
 

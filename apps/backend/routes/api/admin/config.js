@@ -7,7 +7,7 @@ const logger = require('../../../shared/logger');
 router.get('/', async (req, res) => {
     try {
         const configs = await prisma.systemConfig.findMany({
-            orderBy: { key: 'asc' }
+            orderBy: { key: 'asc' },
         });
 
         // Transform array to object for easier frontend consumption, OR return array
@@ -37,8 +37,8 @@ router.patch('/:key', async (req, res) => {
                 value: String(value),
                 type: type || 'STRING',
                 description: description || '',
-                updatedBy: 'ADMIN'
-            }
+                updatedBy: 'ADMIN',
+            },
         });
 
         logger.info(`Config updated: ${key} = ${value}`);

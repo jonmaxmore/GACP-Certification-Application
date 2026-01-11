@@ -26,6 +26,7 @@ const NotifyType = {
     APPLICATION_APPROVED: 'APPLICATION_APPROVED',
     APPLICATION_REJECTED: 'APPLICATION_REJECTED',
     REVISION_REQUIRED: 'REVISION_REQUIRED',
+    AUDIT_SCHEDULED: 'AUDIT_SCHEDULED', // [NEW]
 
     // Team workflow
     TEAM_REVIEW_COMPLETE: 'TEAM_REVIEW_COMPLETE',
@@ -56,6 +57,10 @@ const NotifyTemplates = {
     [NotifyType.PAYMENT_REMINDER]: (data) => ({
         title: '💳 แจ้งเตือนการชำระเงิน',
         message: `กรุณาชำระเงินใบวางบิลเลขที่ ${data.invoiceNumber || '-'} ภายในวันที่ ${data.dueDate || '-'}`,
+    }),
+    [NotifyType.AUDIT_SCHEDULED]: (data) => ({
+        title: '📅 นัดหมายการตรวจประเมิน',
+        message: `คำขอของคุณถูกนัดหมายการตรวจแบบ ${data.auditMode === 'ONLINE' ? 'ออนไลน์' : 'ลงพื้นที่'} ในวันที่ ${data.scheduledDate} เวลา ${data.scheduledTime} น.`,
     }),
 };
 

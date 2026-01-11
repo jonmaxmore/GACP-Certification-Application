@@ -1,5 +1,5 @@
 /**
- * V2 Plants Route
+ * Plants Route
  * Maps V2 endpoints to PlantController (Prisma Refactored)
  */
 

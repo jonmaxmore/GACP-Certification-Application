@@ -1,11 +1,11 @@
 /**
- * V2 Planting Cycles API Route
+ * Planting Cycles API Route
  * Manages planting cycles (รอบการปลูก) for farms
  * 
- * GET /api/v2/planting-cycles - List cycles for a farm
- * POST /api/v2/planting-cycles - Create new cycle
- * GET /api/v2/planting-cycles/:id - Get cycle details
- * PATCH /api/v2/planting-cycles/:id - Update cycle
+ * GET /api/planting-cycles - List cycles for a farm
+ * POST /api/planting-cycles - Create new cycle
+ * GET /api/planting-cycles/:id - Get cycle details
+ * PATCH /api/planting-cycles/:id - Update cycle
  */
 
 const express = require('express');
@@ -14,7 +14,7 @@ const { prisma } = require('../../services/prisma-database');
 const qrcodeService = require('../../services/qrcode/qrcode-service');
 
 /**
- * GET /api/v2/planting-cycles
+ * GET /api/planting-cycles
  * List planting cycles for a farm
  * @query farmId - Required farm ID
  * @query status - Optional filter by status
@@ -65,11 +65,12 @@ router.get('/', async (req, res) => {
 });
 
 /**
- * POST /api/v2/planting-cycles
+ * POST /api/planting-cycles
  * Create a new planting cycle
  */
 router.post('/', async (req, res) => {
     try {
+        console.log('DEBUG PLANTING CYCLE BODY:', req.body);
         const {
             farmId,
             certificateId,
@@ -77,6 +78,7 @@ router.post('/', async (req, res) => {
             cycleName,
             startDate,
             expectedHarvestDate,
+            plotId, // [NEW] Added plotId extraction
             plotName,
             plotArea,
             areaUnit,
@@ -98,30 +100,43 @@ router.post('/', async (req, res) => {
             });
         }
 
-        // Get next cycle number for this farm
-        const cycleCount = await prisma.plantingCycle.count({
-            where: { farmId },
-        });
+        // [NEW] Verify Active Certificate Requirement
 
+        // 2. Validate Certificate (Optional but Good)
+        // If certificateId is provided, ensure it's ACTIVE
+        if (certificateId) {
+            const cert = await prisma.certificate.findUnique({ where: { id: certificateId } });
+            if (!cert || cert.status !== 'active') {
+                return res.status(400).json({ success: false, message: 'ใบรับรองไม่ถูกต้องหรือหมดอายุ' });
+            }
+        }
+
+        // Get next cycle number for this farm (This logic is removed as cycleNumber is not in the new data payload)
+        // const cycleCount = await prisma.plantingCycle.count({
+        //     where: { farmId },
+        // });
+
+        // 3. Create Cycle
         const cycle = await prisma.plantingCycle.create({
             data: {
                 farmId,
-                certificateId: certificateId || null,
+                certificateId, // Can be null if starting before cert? (Usually blocked by frontend)
                 plantSpeciesId,
                 cycleName,
-                cycleNumber: cycleCount + 1,
+                // cycleNumber: cycleCount + 1, // Removed
                 startDate: new Date(startDate),
                 expectedHarvestDate: expectedHarvestDate ? new Date(expectedHarvestDate) : null,
+                plotId, // Link to Real Plot
                 plotName,
                 plotArea: plotArea ? parseFloat(plotArea) : null,
-                areaUnit: areaUnit || 'rai',
+                // areaUnit: areaUnit || 'rai', // Removed
                 seedSource,
                 seedQuantity: seedQuantity ? parseFloat(seedQuantity) : null,
                 cultivationType: cultivationType || 'SELF_GROWN',
-                soilType,
-                irrigationType,
-                estimatedYield: estimatedYield ? parseFloat(estimatedYield) : null,
-                varietyName,
+                // soilType, // Removed
+                // irrigationType, // Removed
+                // estimatedYield: estimatedYield ? parseFloat(estimatedYield) : null, // Removed
+                // varietyName, // Removed
                 notes,
                 status: 'PLANTED',
             },
@@ -143,7 +158,7 @@ router.post('/', async (req, res) => {
 });
 
 /**
- * GET /api/v2/planting-cycles/:id
+ * GET /api/planting-cycles/:id
  * Get planting cycle details with batches
  */
 router.get('/:id', async (req, res) => {
@@ -204,7 +219,7 @@ router.get('/:id', async (req, res) => {
 });
 
 /**
- * PATCH /api/v2/planting-cycles/:id
+ * PATCH /api/planting-cycles/:id
  * Update planting cycle (status, harvest data, etc.)
  */
 router.patch('/:id', async (req, res) => {
@@ -252,7 +267,7 @@ router.patch('/:id', async (req, res) => {
 });
 
 /**
- * POST /api/v2/planting-cycles/:id/harvest
+ * POST /api/planting-cycles/:id/harvest
  * Create harvest batch from planting cycle with QR code
  */
 router.post('/:id/harvest', async (req, res) => {

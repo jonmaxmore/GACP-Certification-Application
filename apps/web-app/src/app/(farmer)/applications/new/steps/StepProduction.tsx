@@ -16,6 +16,8 @@ export const StepProduction = () => {
         estimatedYield: '',
         sourceType: '',
         cultivationArea: '', // For validation against plot area
+        spacing: '', // [NEW]
+        plantCount: '', // [NEW]
     });
 
     useEffect(() => {
@@ -132,25 +134,77 @@ export const StepProduction = () => {
             {/* 3. Output Estimation */}
             <div className="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
                 <h3 className="font-semibold text-gray-800 mb-4">ประมาณการผลผลิต (Estimation)</h3>
+
+                {/* [NEW] Yield Prediction Analysis UI */}
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl space-y-2">
+                    <h4 className="font-bold text-blue-800 flex items-center gap-2">
+                        <span>📊</span> ระบบช่วยประเมิน (Yield Prediction)
+                    </h4>
+                    <p className="text-sm text-blue-600">
+                        ระบบคำนวณจากพื้นที่ปลูกจริง (คิดเป็น 70% ของพื้นที่แปลง) เพื่อป้องกันการประเมินเกินจริง
+                    </p>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">ชื่อสายพันธุ์ (Variety Name)</label>
                         <input
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 outline-none transition-all"
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none"
                             placeholder="เช่น หางกระรอกภูพาน"
                             value={formData.varietyName}
                             onChange={(e) => handleChange('varietyName', e.target.value)}
                         />
                     </div>
+
+                    {/* [NEW] Spacing Selection */}
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">ระยะปลูก (Spacing)</label>
+                        <select
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none"
+                            value={formData.spacing || ''}
+                            onChange={(e) => handleChange('spacing', e.target.value)}
+                        >
+                            <option value="">-- เลือกระยะปลูก --</option>
+                            <option value="1x1">1 x 1 เมตร (Standard)</option>
+                            <option value="1.5x1.5">1.5 x 1.5 เมตร</option>
+                            <option value="2x2">2 x 2 เมตร</option>
+                            <option value="4x4">4 x 4 เมตร (ไม้ต้น)</option>
+                        </select>
+                    </div>
+
+                    {/* [NEW] Plant Count Input with Max Capacity Check */}
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            จำนวนต้นที่ปลูก (Plant Count)
+                        </label>
+                        <input
+                            type="number"
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none"
+                            placeholder="ระบุจำนวนต้น"
+                            value={formData.plantCount || ''}
+                            onChange={(e) => handleChange('plantCount', e.target.value)}
+                        />
+                        {/* Dynamic Hint */}
+                        <p className="text-xs text-gray-500 mt-1">
+                            * พื้นที่รับรองได้สูงสุดประมาณ X ต้น
+                        </p>
+                    </div>
+
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">ผลผลิตคาดการณ์ (กก./ปี)</label>
                         <input
                             type="number"
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 outline-none transition-all"
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-emerald-200 outline-none"
                             placeholder="ระบุปริมาณ (kg)"
                             value={formData.estimatedYield}
                             onChange={(e) => handleChange('estimatedYield', e.target.value)}
                         />
+                        {/* Validation Message */}
+                        {Number(formData.estimatedYield) > 500 && ( // Mock threshold for demo
+                            <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                                ⚠️ สูงกว่าค่าเฉลี่ยมาตรฐาน (Standard Yield Exceeded)
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LockIcon, EyeIcon } from "@/components/ui/icons";
+import { IconUser, IconLock, EyeIcon } from "@/components/ui/icons";
 
 // Local Icons
 const UserIcon = () => (
@@ -171,7 +171,7 @@ export default function StaffLoginPage() {
                             </label>
                             <div className="relative">
                                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
-                                    <LockIcon />
+                                    <IconLock />
                                 </div>
                                 <input
                                     type={showPassword ? "text" : "password"}

@@ -1,5 +1,5 @@
 /**
- * V2 Farms/Establishments API
+ * Farms/Establishments API
  * Manages farmer's cultivation plots and farm data
  * 
  * GET    /api/farms/my - List current farmer's farms
@@ -12,16 +12,7 @@
 const express = require('express');
 const router = express.Router();
 const { prisma } = require('../../services/prisma-database');
-const authModule = require('../../middleware/auth-middleware');
-
-// Safely get authenticateFarmer
-const authenticateFarmer = (req, res, next) => {
-    if (typeof authModule.authenticateFarmer === 'function') {
-        return authModule.authenticateFarmer(req, res, next);
-    }
-    console.error('CRITICAL: authenticateFarmer is not a function');
-    return res.status(500).json({ success: false, message: 'Auth middleware error' });
-};
+const { authenticateFarmer } = require('../../middleware/auth-middleware');
 
 // Configure Upload Middleware (using shared middleware or custom if needed)
 // Legacy module used 'uploads/establishments'
@@ -246,10 +237,10 @@ router.patch('/:id', authenticateFarmer, async (req, res) => {
         }
 
         // Parse numeric fields
-        if (updateData.latitude) {updateData.latitude = parseFloat(updateData.latitude);}
-        if (updateData.longitude) {updateData.longitude = parseFloat(updateData.longitude);}
-        if (updateData.totalArea) {updateData.totalArea = parseFloat(updateData.totalArea);}
-        if (updateData.cultivationArea) {updateData.cultivationArea = parseFloat(updateData.cultivationArea);}
+        if (updateData.latitude) { updateData.latitude = parseFloat(updateData.latitude); }
+        if (updateData.longitude) { updateData.longitude = parseFloat(updateData.longitude); }
+        if (updateData.totalArea) { updateData.totalArea = parseFloat(updateData.totalArea); }
+        if (updateData.cultivationArea) { updateData.cultivationArea = parseFloat(updateData.cultivationArea); }
 
         const farm = await prisma.farm.update({
             where: { id },
@@ -312,6 +303,78 @@ router.delete('/:id', authenticateFarmer, async (req, res) => {
             message: 'Failed to delete farm',
             error: error.message,
         });
+    }
+});
+
+/**
+ * GET /api/farms/:id/qrcode
+ * Generate printable QR Code for the farm (e.g. for farm gate)
+ */
+router.get('/:id/qrcode', authenticateFarmer, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const QRCode = require('qrcode'); // Ensure qrcode is installed or use service
+
+        // Check ownership
+        const farm = await prisma.farm.findFirst({
+            where: { id, ownerId: req.user.id, isDeleted: false },
+        });
+
+        if (!farm) {return res.status(404).send('Farm not found');}
+
+        // Public Verification URL (Mock for now or use env)
+        const publicUrl = `${process.env.PUBLIC_APP_URL || 'https://gacp.dtam.go.th'}/verify/farm/${farm.id}`;
+
+        // Generate QR Data URL
+        const qrDataUrl = await QRCode.toDataURL(publicUrl, { width: 400, margin: 2 });
+
+        // Generate Printable HTML
+        const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>QR Code: ${farm.farmName}</title>
+                <style>
+                    body { font-family: 'Sarabun', sans-serif; text-align: center; padding: 20px; }
+                    .sticker { 
+                        border: 2px solid #2E7D32; 
+                        border-radius: 10px;
+                        padding: 20px; 
+                        width: 300px; 
+                        margin: 0 auto; 
+                        text-align: center;
+                    }
+                    h2 { color: #2E7D32; margin: 10px 0; font-size: 1.2em; }
+                    h3 { color: #555; margin: 5px 0; font-size: 1em; font-weight: normal; }
+                    img { width: 200px; height: 200px; }
+                    .footer { font-size: 0.8em; color: #888; margin-top: 10px; }
+                    @media print {
+                        .no-print { display: none; }
+                        body { padding: 0; }
+                        .sticker { border: none; } 
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="sticker">
+                    <h2>GACP THAILAND</h2>
+                    <h3>${farm.farmName}</h3>
+                    <img src="${qrDataUrl}" alt="Farm QR Code" />
+                    <div class="footer">Scan to verify farm status</div>
+                    <div class="footer">ID: ${farm.id}</div>
+                </div>
+                <div class="no-print" style="margin-top: 20px;">
+                    <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; background: #2E7D32; color: white; border: none; border-radius: 5px; cursor: pointer;">Print Sticker</button>
+                </div>
+            </body>
+            </html>
+        `;
+
+        res.send(html);
+
+    } catch (error) {
+        console.error('[Farms] QR error:', error);
+        res.status(500).send('Error generating QR Code');
     }
 });
 

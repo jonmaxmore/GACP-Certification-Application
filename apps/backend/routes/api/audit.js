@@ -260,7 +260,7 @@ const express = require('express');
 const router = express.Router();
 
 /**
- * @route GET /api/v2/audit
+ * @route GET /api/audit
  * @desc Query audit logs
  * @access Admin only
  */
@@ -285,7 +285,7 @@ router.get('/', (req, res) => {
 });
 
 /**
- * @route GET /api/v2/audit/stats
+ * @route GET /api/audit/stats
  * @desc Get audit statistics
  * @access Admin only
  */

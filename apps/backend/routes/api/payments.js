@@ -1,5 +1,5 @@
 /**
- * Payment Routes for V2 API (Prisma Implementation)
+ * Payment Routes (Prisma Implementation)
  * Handles payment document listing and confirmation
  */
 
@@ -10,16 +10,10 @@ const authModule = require('../../middleware/auth-middleware');
 const upload = require('../../middleware/upload-middleware');
 const logger = require('../../shared/logger');
 
-// Safe middleware wrapper
-const authenticateFarmer = (req, res, next) => {
-    if (typeof authModule.authenticateFarmer === 'function') {
-        return authModule.authenticateFarmer(req, res, next);
-    }
-    return res.status(500).json({ error: 'Auth middleware not loaded' });
-};
+const { authenticateFarmer } = require('../../middleware/auth-middleware');
 
 /**
- * GET /api/v2/payments/my
+ * GET /api/payments/my
  * Get payments (Invoices) for authenticated user
  */
 router.get('/my', authenticateFarmer, async (req, res) => {
@@ -53,7 +47,7 @@ router.get('/my', authenticateFarmer, async (req, res) => {
 });
 
 /**
- * POST /api/v2/payments/confirm
+ * POST /api/payments/confirm
  * Upload payment slip and mark invoice as pending verification
  */
 router.post('/confirm', authenticateFarmer, upload.single('slipImage'), async (req, res) => {

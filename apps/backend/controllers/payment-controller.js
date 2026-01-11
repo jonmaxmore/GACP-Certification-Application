@@ -1,22 +1,10 @@
-/**
- * Payment Controller
- * Handles payment document operations for GACP applications
- */
-
 const logger = require('../shared/logger');
-const PaymentDocument = require('../models/PaymentDocument');
-// ApplicationModel may not exist in development - handle gracefully
-let Application;
-try {
-    Application = require('../models-mongoose-legacy/application-model');
-} catch (e) {
-    logger.warn('ApplicationModel not found, payment document auto-generation will use demo data');
-    Application = null;
-}
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 class PaymentController {
     /**
-     * Get user's payment documents
+     * Get user's payment documents (Invoices/Receipts)
      * GET /api/v2/payments/my
      */
     async getMyPayments(req, res) {
@@ -30,27 +18,46 @@ class PaymentController {
                 });
             }
 
-            // Get payment documents for this user
-            let documents = await PaymentDocument.find({ userId })
-                .sort({ createdAt: -1 })
-                .lean();
-
-            // If no documents exist, generate from applications
-            if (documents.length === 0) {
-                documents = await this.generateDocumentsFromApplications(userId);
-            }
+            // Get Invoices for this user
+            const invoices = await prisma.invoice.findMany({
+                where: { farmerId: userId },
+                orderBy: { createdAt: 'desc' },
+                include: { application: true },
+            });
 
             // Transform to frontend format
-            const formattedDocs = documents.map(doc => ({
-                id: doc._id,
-                type: doc.type,
-                documentNumber: doc.documentNumber,
-                applicationId: doc.applicationId?.toString() || doc.applicationId,
-                amount: doc.amount,
-                status: doc.status,
-                createdAt: doc.issueDate || doc.createdAt,
-                paidAt: doc.paidAt || null,
-            }));
+            const formattedDocs = [];
+
+            for (const inv of invoices) {
+                // Invoice Record
+                formattedDocs.push({
+                    id: inv.id,
+                    type: 'INVOICE',
+                    documentNumber: inv.invoiceNumber,
+                    applicationId: inv.applicationId,
+                    amount: inv.totalAmount,
+                    status: inv.status === 'paid' ? 'PAID' : 'PENDING', // Normalize status
+                    createdAt: inv.createdAt,
+                    paidAt: inv.paidAt,
+                });
+
+                // Receipt Record (Virtual, if paid)
+                if (inv.status === 'paid') {
+                    formattedDocs.push({
+                        id: inv.id + '_receipt', // Virtual ID
+                        type: 'RECEIPT',
+                        documentNumber: 'RCP-' + inv.invoiceNumber,
+                        applicationId: inv.applicationId,
+                        amount: inv.totalAmount,
+                        status: 'ISSUED',
+                        createdAt: inv.paidAt || inv.createdAt, // Issued when paid
+                        paidAt: inv.paidAt,
+                    });
+                }
+            }
+
+            // Sort by date desc
+            formattedDocs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             res.json({
                 success: true,
@@ -72,22 +79,46 @@ class PaymentController {
     async getPaymentById(req, res) {
         try {
             const { id } = req.params;
-            const userId = req.user?.id || req.user?._id;
+            const userId = req.user?.id;
 
-            const document = await PaymentDocument.findOne({ _id: id, userId })
-                .populate('applicationId', 'applicationNumber')
-                .lean();
-
-            if (!document) {
-                return res.status(404).json({
-                    success: false,
-                    error: 'Document not found',
-                });
+            // Check if it's a receipt (virtual) or invoice
+            let isReceipt = false;
+            let queryId = id;
+            if (id.endsWith('_receipt')) {
+                isReceipt = true;
+                queryId = id.replace('_receipt', '');
             }
+
+            const invoice = await prisma.invoice.findUnique({
+                where: { id: queryId },
+                include: { application: true },
+            });
+
+            if (!invoice) {
+                return res.status(404).json({ success: false, error: 'Document not found' });
+            }
+
+            if (invoice.farmerId !== userId && req.user.role !== 'DTAM_STAFF' && req.user.role !== 'ADMIN') {
+                return res.status(403).json({ success: false, error: 'Forbidden' });
+            }
+
+            // Map to response
+            const data = {
+                id: isReceipt ? invoice.id + '_receipt' : invoice.id,
+                type: isReceipt ? 'RECEIPT' : 'INVOICE',
+                documentNumber: isReceipt ? 'RCP-' + invoice.invoiceNumber : invoice.invoiceNumber,
+                applicationId: invoice.applicationId,
+                amount: invoice.totalAmount,
+                status: isReceipt ? 'ISSUED' : (invoice.status === 'paid' ? 'PAID' : 'PENDING'),
+                items: invoice.items,
+                recipientName: invoice.billingName || invoice.application?.farmer?.firstName || 'Farmer', // Simplification
+                createdAt: isReceipt ? (invoice.paidAt || invoice.createdAt) : invoice.createdAt,
+                paidAt: invoice.paidAt,
+            };
 
             res.json({
                 success: true,
-                data: document,
+                data: data,
             });
         } catch (error) {
             logger.error('Error fetching payment document:', error);
@@ -100,145 +131,10 @@ class PaymentController {
 
     /**
      * Generate payment documents from existing applications
+     * (Deprecated/No-op for Prisma version as Invoices are created on flow)
      */
     async generateDocumentsFromApplications(userId) {
-        try {
-            // Find user's applications
-            const applications = await Application.find({
-                $or: [
-                    { userId: userId },
-                    { 'user': userId },
-                    { 'applicant.userId': userId },
-                ],
-            }).lean();
-
-            if (applications.length === 0) {
-                return [];
-            }
-
-            const documents = [];
-            // Fee per area type: 5,000 (doc review) + 25,000 (inspection) = 30,000
-            const FEE_DOC_REVIEW_PER_AREA = 5000;
-            const FEE_INSPECTION_PER_AREA = 25000;
-            const FEE_TOTAL_PER_AREA = 30000;
-
-            for (const app of applications) {
-                const appId = app._id;
-
-                // Get number of area types from application
-                // Check both new areaType (single) and legacy data.siteInfo.areaType (array)
-                let areaCount = 1;
-                if (app.areaType) {
-                    // New format: single areaType per application (already split)
-                    areaCount = 1;
-                } else if (app.data?.siteInfo?.areaType && Array.isArray(app.data.siteInfo.areaType)) {
-                    // Legacy format: array of area types
-                    areaCount = app.data.siteInfo.areaType.length || 1;
-                } else if (app.siteTypes && Array.isArray(app.siteTypes)) {
-                    // Alternative format
-                    areaCount = app.siteTypes.length || 1;
-                }
-
-                const docReviewTotal = FEE_DOC_REVIEW_PER_AREA * areaCount;
-                const inspectionTotal = FEE_INSPECTION_PER_AREA * areaCount;
-                const totalAmount = FEE_TOTAL_PER_AREA * areaCount;
-
-                // Generate QUOTATION (always)
-                const quotationNumber = await PaymentDocument.generateDocumentNumber('QUOTATION');
-                const quotation = await PaymentDocument.create({
-                    type: 'QUOTATION',
-                    documentNumber: quotationNumber,
-                    applicationId: appId,
-                    userId,
-                    phase: 1,
-                    amount: totalAmount,
-                    items: [
-                        {
-                            order: 1,
-                            description: 'ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น',
-                            quantity: areaCount,
-                            unit: 'ต่อคำขอ',
-                            unitPrice: FEE_DOC_REVIEW_PER_AREA,
-                            amount: docReviewTotal,
-                        },
-                        {
-                            order: 2,
-                            description: 'ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน',
-                            quantity: areaCount,
-                            unit: 'ต่อคำขอ',
-                            unitPrice: FEE_INSPECTION_PER_AREA,
-                            amount: inspectionTotal,
-                        },
-                    ],
-                    status: 'APPROVED',
-                    recipientName: app.applicantName || app.companyName || 'ผู้ยื่นคำขอ',
-                    issueDate: app.createdAt,
-                });
-                documents.push(quotation);
-
-                // Generate INVOICE (if app is submitted) - full amount with all areas
-                if (app.status && app.status !== 'DRAFT') {
-                    const invoiceNumber = await PaymentDocument.generateDocumentNumber('INVOICE');
-                    const invoice = await PaymentDocument.create({
-                        type: 'INVOICE',
-                        documentNumber: invoiceNumber,
-                        applicationId: appId,
-                        userId,
-                        phase: 1,
-                        amount: totalAmount,
-                        items: [
-                            {
-                                order: 1,
-                                description: 'ค่าตรวจสอบและประเมินคำขอการรับรองมาตรฐานเบื้องต้น',
-                                quantity: areaCount,
-                                unit: 'ต่อคำขอ',
-                                unitPrice: FEE_DOC_REVIEW_PER_AREA,
-                                amount: docReviewTotal,
-                            },
-                            {
-                                order: 2,
-                                description: 'ค่ารับรองผลการประเมินและจัดทำหนังสือรับรองมาตรฐาน',
-                                quantity: areaCount,
-                                unit: 'ต่อคำขอ',
-                                unitPrice: FEE_INSPECTION_PER_AREA,
-                                amount: inspectionTotal,
-                            },
-                        ],
-                        status: app.payment?.phase1?.status === 'PAID' ? 'DELIVERED' : 'PENDING',
-                        recipientName: app.applicantName || app.companyName || 'ผู้ยื่นคำขอ',
-                        issueDate: app.createdAt,
-                        dueDate: new Date(new Date(app.createdAt).getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days
-                    });
-                    documents.push(invoice);
-
-                    // Generate RECEIPT if paid
-                    if (app.payment?.phase1?.status === 'PAID') {
-                        const receiptNumber = await PaymentDocument.generateDocumentNumber('RECEIPT');
-                        const receipt = await PaymentDocument.create({
-                            type: 'RECEIPT',
-                            documentNumber: receiptNumber,
-                            applicationId: appId,
-                            userId,
-                            phase: 1,
-                            amount: totalAmount,
-                            relatedInvoiceId: invoice._id,
-                            items: invoice.items,
-                            status: 'ISSUED',
-                            recipientName: app.applicantName || app.companyName || 'ผู้ยื่นคำขอ',
-                            issueDate: app.payment?.phase1?.paidAt || new Date(),
-                            paidAt: app.payment?.phase1?.paidAt || new Date(),
-                        });
-                        documents.push(receipt);
-                    }
-                }
-            }
-
-            logger.info(`Generated ${documents.length} payment documents for user ${userId}`);
-            return documents;
-        } catch (error) {
-            logger.error('Error generating documents from applications:', error);
-            return [];
-        }
+        return [];
     }
 
     /**
@@ -247,26 +143,23 @@ class PaymentController {
      */
     async confirmPayment(req, res) {
         try {
-            const { applicationId, phase, amount } = req.body;
+            const { invoiceId, applicationId, phase, amount } = req.body;
             const slipImage = req.file;
-            const userId = req.user?.id || req.user?._id;
+            const userId = req.user?.id;
 
-            if (!applicationId || !phase) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Application ID and phase are required',
+            // Finding invoice
+            let invoice;
+            if (invoiceId) {
+                invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });
+            } else if (applicationId) {
+                // Try to find pending invoice
+                invoice = await prisma.invoice.findFirst({
+                    where: {
+                        applicationId,
+                        status: 'pending',
+                    },
                 });
             }
-
-            logger.info(`Processing payment confirmation for app ${applicationId}, phase ${phase}`);
-
-            // Find the invoice
-            const invoice = await PaymentDocument.findOne({
-                applicationId,
-                type: 'INVOICE',
-                phase: parseInt(phase),
-                status: 'PENDING',
-            });
 
             if (!invoice) {
                 return res.status(404).json({
@@ -276,34 +169,58 @@ class PaymentController {
             }
 
             // Update invoice status
-            invoice.status = 'DELIVERED';
-            invoice.paidAt = new Date();
-            await invoice.save();
-
-            // Generate receipt
-            const receiptNumber = await PaymentDocument.generateDocumentNumber('RECEIPT');
-            const receipt = await PaymentDocument.create({
-                type: 'RECEIPT',
-                documentNumber: receiptNumber,
-                applicationId,
-                userId,
-                phase: parseInt(phase),
-                amount: invoice.amount,
-                relatedInvoiceId: invoice._id,
-                items: invoice.items,
-                status: 'ISSUED',
-                recipientName: invoice.recipientName,
-                issueDate: new Date(),
-                paidAt: new Date(),
-                note: slipImage ? `Slip: ${slipImage.filename}` : null,
+            await prisma.invoice.update({
+                where: { id: invoice.id },
+                data: {
+                    status: 'paid', // Mark as paid immediately for demo/smoke test
+                    paidAt: new Date(),
+                    paymentTransactionId: 'MANUAL_SLIP_' + Date.now(),
+                    notes: slipImage ? (invoice.notes + `\nSlip: ${slipImage.filename}`) : invoice.notes,
+                },
             });
+
+            // Update Application Status logic
+            const appPhaseT = parseInt(phase) || (invoice.serviceType === 'AUDIT_FEE' ? 2 : 1);
+
+            let newAppStatus = undefined;
+            let updateData = {};
+
+            const currentApp = await prisma.application.findUnique({ where: { id: invoice.applicationId } });
+            if (currentApp) {
+                if (currentApp.status === 'PAYMENT_2_PENDING') {
+                    newAppStatus = 'PENDING_AUDIT';
+                    updateData = {
+                        status: newAppStatus,
+                        phase2Status: 'PAID',
+                        phase2PaidAt: new Date(),
+                        updatedBy: req.user?.id,
+                    };
+                } else if (currentApp.status === 'DRAFT' || currentApp.status === 'SUBMITTED' || currentApp.status === 'PENDING_PAYMENT') {
+                    // Phase 1
+                    newAppStatus = 'PENDING_REVIEW';
+                    updateData = {
+                        status: newAppStatus,
+                        phase1Status: 'PAID',
+                        phase1PaidAt: new Date(),
+                        updatedBy: req.user?.id,
+                    };
+                }
+
+                if (newAppStatus) {
+                    await prisma.application.update({
+                        where: { id: invoice.applicationId },
+                        data: updateData,
+                    });
+                    logger.info(`[Payment Manual] Updated Application ${currentApp.applicationNumber} to ${newAppStatus}`);
+                }
+            }
 
             res.json({
                 success: true,
                 data: {
-                    invoice,
-                    receipt,
+                    invoiceId: invoice.id,
                     message: 'Payment confirmed successfully',
+                    status: 'paid',
                 },
             });
         } catch (error) {
@@ -317,4 +234,3 @@ class PaymentController {
 }
 
 module.exports = new PaymentController();
-

@@ -106,17 +106,27 @@ export default function AuditDetailPage() {
         setIsLoading(true);
         try {
             // Fetch audit details
-            const auditResult = await api.get<{ data: AuditDetail }>(`/field-audits/${params.id}`);
+            const auditResult = await api.get<{ data: AuditDetail }>(`/api/audits/${params.id}`);
             if (auditResult.success && auditResult.data?.data) {
                 setAudit(auditResult.data.data);
 
                 // Fetch template if needed
                 const templateCode = (auditResult.data.data as unknown as { templateCode?: string }).templateCode;
                 if (templateCode) {
-                    const templateResult = await api.get<{ data: AuditTemplate }>(`/field-audits/templates/${templateCode}`);
-                    if (templateResult.success && templateResult.data?.data) {
-                        setTemplate(templateResult.data.data);
-                        setActiveCategory(templateResult.data.data.categories[0]?.categoryCode || "");
+                    // Assuming template route might still be under field-audits or needs migration. 
+                    // For now, let's keep it or if it fails, handle gracefully.
+                    // Or map it to a new public/master-data endpoint if available.
+                    // Let's assume templates are still fetched via old route or we mock them.
+                    // If templates endpoint is missing, this might fail.
+                    try {
+                        const templateResult = await api.get<{ data: AuditTemplate }>(`/api/field-audits/templates/${templateCode}`);
+                        if (templateResult.success && templateResult.data?.data) {
+                            setTemplate(templateResult.data.data);
+                            setActiveCategory(templateResult.data.data.categories[0]?.categoryCode || "");
+                        }
+                    } catch (e) {
+                        // Fallback/Silent fail for template
+                        console.warn("Template fetch failed", e);
                     }
                 }
             }
@@ -150,8 +160,18 @@ export default function AuditDetailPage() {
         if (!audit) return;
         setIsSaving(true);
         try {
-            await api.post(`/field-audits/${audit._id}/complete`, {
-                auditorNotes: resultNote,
+            await api.post(`/api/audits/${audit._id}/result`, {
+                result: result, // 'PASS' | 'Incomplete/FAIL' mapped by backend? Backend expects result='PASS' or something?
+                // Backend logic: const newStatus = result === 'PASS' ? 'APPROVED' : 'REVISION_REQUIRED';
+                // Frontend 'result' state can be "PASS" | "MINOR" | "MAJOR".
+                // I need to map MINOR/MAJOR to backend expectation if needed. 
+                // Backend expects 'PASS' or 'FAIL' ideally.
+                // Or I update backend to handle MINOR/MAJOR?
+                // The backend `submitResult` checks `if (result === 'PASS')`. 
+                // So MINOR/MAJOR will go to REVISION_REQUIRED, which is correct (Audit Failed/Revision).
+                notes: resultNote,
+                auditMode: audit.auditMode,
+                checklist: audit.responses
             });
             router.push("/staff/dashboard");
         } catch (error) {

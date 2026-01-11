@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { apiClient as api } from "@/lib/api/api-client";
 import { AuthService } from "@/lib/services/auth-service";
 import {
-    IconUser, IconDocument, IconCheckCircle, LockIcon
+    IconUser, IconDocument, IconCheckCircle, IconLock
 } from "@/components/ui/icons";
 
 /* Additional local icons if not in shared lib */
@@ -160,7 +160,7 @@ export default function ProfilePage() {
             <div className={`rounded-2xl p-6 mb-5 border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                 <div className="flex items-center gap-3 mb-5">
                     <div className={`w-13 h-13 rounded-2xl flex items-center justify-center ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'}`}>
-                        <LockIcon color={accentColor} size={24} />
+                        <IconLock color={accentColor} size={24} />
                     </div>
                     <div><h2 className="text-lg font-semibold">ความปลอดภัย</h2><p className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>จัดการรหัสผ่านและการตั้งค่าความปลอดภัย</p></div>
                 </div>

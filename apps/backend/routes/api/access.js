@@ -14,7 +14,7 @@ const STAFF_ROLES = ['REVIEWER_AUDITOR', 'SCHEDULER', 'ADMIN', 'SUPER_ADMIN'];
 const ADMIN_ROLES = ['ADMIN', 'SUPER_ADMIN'];
 
 /**
- * @route POST /api/v2/access/check
+ * @route POST /api/access/check
  * @description Check if user has access to a specific resource
  * @access Private (requires auth)
  */
@@ -91,7 +91,7 @@ router.post('/check', authenticateFarmer, async (req, res) => {
 });
 
 /**
- * @route POST /api/v2/access/verify-staff
+ * @route POST /api/access/verify-staff
  * @description Verify if user is valid staff member (for login)
  * @body { role: string }
  */
@@ -122,7 +122,7 @@ router.post('/verify-staff', (req, res) => {
 });
 
 /**
- * @route GET /api/v2/access/roles
+ * @route GET /api/access/roles
  * @description Get list of available roles and their permissions
  * @access Public (for documentation)
  */

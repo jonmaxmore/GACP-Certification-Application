@@ -1,35 +1,61 @@
 /**
- * V2 Documents Route
- * Maps V2 endpoints to DocumentAnalysisController (Prisma Refactored)
+ * Document Verification Routes
+ * Handles AI/OCR verification of uploaded documents
  */
-
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const DocumentAnalysisController = require('../../controllers/DocumentAnalysisController');
+const path = require('path');
+const fs = require('fs');
+const documentAnalysisService = require('../../services/document-analysis-service');
 const authModule = require('../../middleware/auth-middleware');
 
-// Configure multer for memory storage (we pass buffer to OCR)
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-    fileFilter: (req, file, cb) => {
-        const allowed = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
-        if (allowed.includes(file.mimetype)) {
-            cb(null, true);
-        } else {
-            cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and PDF are allowed.'));
+// Helper to resolve file path safe-ish
+const UPLOADS_DIR = path.join(__dirname, '../../../../uploads'); // Assuming apps/backend/uploads or root/uploads? wrapper needed.
+// Better: use the same logic as upload-middleware or config.
+// For now, allow relative path from project root or absolute if sensible.
+
+// Use upload middleware to handle file from FormData
+const upload = require('../../middleware/upload-middleware');
+
+/**
+ * POST /api/documents/verify
+ * Verify an uploaded document
+ * Accepts multipart/form-data: { file, expectedType }
+ */
+router.post('/verify', authModule.authenticateFarmer, upload.single('file'), async (req, res) => {
+    try {
+        const { expectedType } = req.body;
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({ success: false, error: 'File is required' });
         }
-    },
+
+        console.log(`[AI] Verifying document: ${file.filename} as ${expectedType}`);
+
+        // Call the AI Service with the absolute path from multer
+        const result = await documentAnalysisService.verifyUploadedDocument(file.path, expectedType || 'UNKNOWN');
+
+        // Map service response to frontend expectation
+        const responseData = {
+            verification: {
+                isMatch: result.valid,
+                confidence: result.confidencePercent,
+                message: result.valid ? 'Document Verified' : (result.issues?.[0] || 'Verification failed'),
+            },
+            extractedData: result.extractedData,
+            raw: result,
+        };
+
+        res.json({
+            success: true,
+            data: responseData,
+        });
+
+    } catch (error) {
+        console.error('[AI] Verification Failed:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
-
-// Public/Protected endpoints
-router.get('/requirements/:plantId', DocumentAnalysisController.getPlantRequirements);
-router.post('/analyze', DocumentAnalysisController.analyzeDocuments);
-router.post('/validate', DocumentAnalysisController.validateDocuments);
-router.get('/plants', DocumentAnalysisController.getAvailablePlants);
-
-// AI-Powered Document Verification (new)
-router.post('/verify', upload.single('file'), DocumentAnalysisController.verifyDocument);
 
 module.exports = router;

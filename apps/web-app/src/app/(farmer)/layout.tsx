@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { BottomNav } from '@/components/ui';
 import { Sidebar } from '@/components/ui/sidebar';
+import { usePathname } from 'next/navigation';
 
 interface FarmerLayoutProps {
     children: React.ReactNode;
@@ -10,6 +11,10 @@ interface FarmerLayoutProps {
 
 export function FarmerLayout({ children }: FarmerLayoutProps) {
     const [isDark, setIsDark] = useState(false);
+
+    const pathname = usePathname();
+    // Hide sidebar on the application wizard page
+    const isWizard = pathname === '/applications/new';
 
     useEffect(() => {
         setIsDark(localStorage.getItem("theme") === "dark");
@@ -30,9 +35,9 @@ export function FarmerLayout({ children }: FarmerLayoutProps) {
 
     return (
         <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-stone-50 text-slate-800'}`}>
-            <Sidebar isDark={isDark} toggleTheme={toggleTheme} />
+            {!isWizard && <Sidebar isDark={isDark} toggleTheme={toggleTheme} />}
 
-            <main className="lg:ml-[72px] pb-[72px] lg:pb-0">
+            <main className={`${isWizard ? 'w-full' : 'lg:ml-[72px]'} pb-[72px] lg:pb-0`}>
                 {children}
             </main>
 

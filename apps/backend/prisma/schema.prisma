@@ -76,6 +76,16 @@ model User {
   createdByIp String?
   updatedByIp String?
 
+  // Identity Verification (eKYC)
+  verificationDocuments   Json?     // { idCard: "url", selfie: "url", companyCert: "url" }
+  verificationSubmittedAt DateTime?
+  verificationNote        String?   @db.Text
+  verificationAttempts    Int       @default(0)
+  verificationLockedUntil DateTime?
+
+  // Audit Logs
+  verificationStatus      String    @default("NEW") // NEW, PENDING, APPROVED, REJECTED
+
   // Soft Delete
   isDeleted    Boolean   @default(false)
   deletedAt    DateTime?
@@ -609,9 +619,13 @@ model PlantSpecies {
   imageUrl       String?
   
   // GACP Configuration
-  group          String   // HIGH_CONTROL, GENERAL
+  group          String   @default("GENERAL") // HIGH_CONTROL, GENERAL
   requiresLicense Boolean @default(false)
   sortOrder      Int      @default(0)
+
+  // Yield Prediction Data (New Phase 5 Requirement)
+  maxYieldPerPlant Float   @default(0.0) // Max Dry Weight (kg) per plant per cycle
+  standardSpacing  String? // Recommended spacing (e.g. "1x1", "1.5x1.5")
   
   // Dynamic Configuration (JSON)
   units          Json?    // ["ไร่", "Rai"] or ["ต้น", "Tree"]
@@ -697,7 +711,11 @@ model PlantingCycle {
   plantSpecies   PlantSpecies @relation(fields: [plantSpeciesId], references: [id])
   varietyName    String?      // พันธุ์ (ถ้ามี)
 
-  // ข้อมูลแปลง
+  // ข้อมูลแปลง (Relation to Plot)
+  plotId    String?
+  plot      Plot?    @relation(fields: [plotId], references: [id])
+  
+  // Legacy Fields (Deprecated)
   plotName  String?  // @deprecated Use relation to Plot table instead
   plotArea  Float?   // @deprecated Use relation to Plot table instead
   areaUnit  String   @default("rai")
@@ -759,6 +777,9 @@ model Plot {
   // Coordinates (Optional for specific plot location)
   latitude    Float?
   longitude   Float?
+
+  // Relations
+  plantingCycles PlantingCycle[]
 
   @@index([farmId])
   @@map("plots")
@@ -1044,4 +1065,3 @@ model SystemConfig {
 
   @@map("system_configs")
 }
-

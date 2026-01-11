@@ -15,7 +15,7 @@ const router = express.Router();
 const License = require('../../models-mongoose-legacy/license-model');
 
 /**
- * @route POST /api/v2/licenses
+ * @route POST /api/licenses
  * @description User อัปโหลดใบอนุญาต (optional - จะ link ไปที่ application หรือเก็บเป็น reference)
  */
 router.post('/', async (req, res) => {
@@ -77,7 +77,7 @@ router.post('/', async (req, res) => {
 });
 
 /**
- * @route GET /api/v2/licenses/my
+ * @route GET /api/licenses/my
  * @description Get user's licenses
  */
 router.get('/my', async (req, res) => {
@@ -107,7 +107,7 @@ router.get('/my', async (req, res) => {
 });
 
 /**
- * @route GET /api/v2/licenses/check/:plantType
+ * @route GET /api/licenses/check/:plantType
  * @description Check if user has any license for plant type
  */
 router.get('/check/:plantType', async (req, res) => {
@@ -150,7 +150,7 @@ router.get('/check/:plantType', async (req, res) => {
 });
 
 /**
- * @route GET /api/v2/licenses/required/:plantType
+ * @route GET /api/licenses/required/:plantType
  * @description Get required license types for a plant type
  */
 router.get('/required/:plantType', (req, res) => {

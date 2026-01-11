@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { apiClient as api } from "@/lib/api";
 import StaffLayout from "../components/StaffLayout";
 import { IconCalendar, IconCheckCircle, IconClock } from "@/components/ui/icons";
+import { createGoogleCalendarUrl } from "@/lib/calendar";
 
 // Additional icons
 const IconVideo = ({ size = 24, className }: { size?: number; className?: string }) => (
@@ -74,6 +75,7 @@ export default function StaffCalendarPage() {
     const [auditMode, setAuditMode] = useState<"ONLINE" | "ONSITE">("ONLINE");
     const [vdoLink, setVdoLink] = useState("");
     const [location, setLocation] = useState("");
+    const [successModalData, setSuccessModalData] = useState<{ title: string; date: string; time: string; link: string; type: string } | null>(null);
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -124,7 +126,26 @@ export default function StaffCalendarPage() {
                 auditMode, meetingUrl: auditMode === "ONLINE" ? vdoLink : undefined,
                 location: auditMode === "ONSITE" ? location : undefined
             });
-            if (result.success) { alert("จัดนัดหมายสำเร็จ!"); fetchData(); setShowScheduleModal(false); }
+
+            if (result.success) {
+                // Prepare Google Calendar Data
+                const startDateTime = new Date(`${scheduleDate}T${scheduleTime}:00`);
+                const title = `Audit: ${selectedApp.applicationNumber} - ${selectedApp.firstName} ${selectedApp.lastName}`;
+                const desc = `Plant: ${selectedApp.plantType}\nMode: ${auditMode}\n${auditMode === 'ONLINE' ? `Link: ${vdoLink}` : ''}`;
+                const loc = auditMode === 'ONLINE' ? 'Online (Google Meet)' : location;
+                const gCalLink = createGoogleCalendarUrl(title, desc, loc, startDateTime);
+
+                setSuccessModalData({
+                    title,
+                    date: scheduleDate,
+                    time: scheduleTime,
+                    link: gCalLink,
+                    type: auditMode
+                });
+
+                fetchData();
+                setShowScheduleModal(false);
+            }
             else alert(`เกิดข้อผิดพลาด: ${result.error}`);
         } catch { alert("เกิดข้อผิดพลาดในการสร้างนัดหมาย"); }
     };
@@ -201,11 +222,28 @@ export default function StaffCalendarPage() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            {audit.auditMode === "ONLINE" && audit.onlineSession?.meetingUrl && (
-                                                <a href={audit.onlineSession.meetingUrl} target="_blank" rel="noopener" className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 text-sm">
-                                                    <IconVideo size={16} /> เข้าห้อง VDO Call
+                                            <div className="flex flex-col items-end gap-2">
+                                                {audit.auditMode === "ONLINE" && audit.onlineSession?.meetingUrl && (
+                                                    <a href={audit.onlineSession.meetingUrl} target="_blank" rel="noopener" className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 text-sm">
+                                                        <IconVideo size={16} /> เข้าห้อง VDO
+                                                    </a>
+                                                )}
+                                                <a
+                                                    href={createGoogleCalendarUrl(
+                                                        `Audit: ${audit.auditNumber} - ${audit.farmerName}`,
+                                                        `Plant: ${audit.plantType}\nMode: ${audit.auditMode}\n${audit.auditMode === 'ONLINE' && audit.onlineSession?.meetingUrl ? `Link: ${audit.onlineSession.meetingUrl}` : ''}`,
+                                                        audit.auditMode === 'ONLINE' ? 'Online' : (audit.farmLocation?.address || 'On-site'),
+                                                        new Date(`${audit.scheduledDate?.split('T')[0]}T${audit.scheduledTime}:00`)
+                                                    )}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm border ${isDark ? 'border-slate-600 hover:bg-slate-700' : 'border-slate-200 hover:bg-slate-50'}`}
+                                                    title="Add to Google Calendar"
+                                                >
+                                                    <IconCalendar size={16} className="text-slate-500" />
+                                                    <span className="hidden xl:inline">+ Calendar</span>
                                                 </a>
-                                            )}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -218,53 +256,87 @@ export default function StaffCalendarPage() {
                         )}
                     </div>
                 </div>
-            </div>
+            </div >
 
             {/* Modal */}
-            {showScheduleModal && selectedApp && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className={`rounded-xl w-full max-w-lg ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
-                        <div className={`px-5 py-4 border-b flex justify-between items-center ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
-                            <h3 className="text-lg font-semibold">จัดนัดตรวจประเมิน</h3>
-                            <button onClick={() => setShowScheduleModal(false)} className="text-slate-400 hover:text-slate-600"><IconX size={20} /></button>
-                        </div>
-                        <div className="p-5 space-y-4">
-                            <div className={`p-4 rounded-xl ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}>
-                                <p className="font-mono text-xs text-slate-500">{selectedApp.applicationNumber}</p>
-                                <p className="font-semibold">{selectedApp.firstName} {selectedApp.lastName}</p>
-                                <p className="text-sm text-slate-500">{selectedApp.plantType}</p>
+            {
+                showScheduleModal && selectedApp && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                        <div className={`rounded-xl w-full max-w-lg ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
+                            <div className={`px-5 py-4 border-b flex justify-between items-center ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
+                                <h3 className="text-lg font-semibold">จัดนัดตรวจประเมิน</h3>
+                                <button onClick={() => setShowScheduleModal(false)} className="text-slate-400 hover:text-slate-600"><IconX size={20} /></button>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div><label className="block text-sm text-slate-500 mb-1">วันที่</label><input type="date" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} min={new Date().toISOString().split("T")[0]} className={`w-full px-3 py-2 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200'}`} /></div>
-                                <div><label className="block text-sm text-slate-500 mb-1">เวลา</label><input type="time" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)} className={`w-full px-3 py-2 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200'}`} /></div>
-                            </div>
-                            <div>
-                                <label className="block text-sm text-slate-500 mb-2">รูปแบบการตรวจ</label>
-                                <div className="flex gap-4">
-                                    {[{ key: "ONLINE", Icon: IconVideo, label: "VDO Call", sub: "ตรวจออนไลน์" }, { key: "ONSITE", Icon: IconMapPin, label: "ลงพื้นที่", sub: "ตรวจหน้างาน" }].map(opt => (
-                                        <button key={opt.key} type="button" onClick={() => setAuditMode(opt.key as "ONLINE" | "ONSITE")} className={`flex-1 p-4 rounded-xl border-2 transition-all ${auditMode === opt.key ? `border-emerald-500 ${isDark ? 'bg-emerald-500/10' : 'bg-emerald-50'}` : `${isDark ? 'border-slate-600' : 'border-slate-200'}`}`}>
-                                            <opt.Icon size={24} className={auditMode === opt.key ? 'text-emerald-600' : 'text-slate-400'} />
-                                            <p className="font-semibold mt-2">{opt.label}</p>
-                                            <p className="text-xs text-slate-500">{opt.sub}</p>
-                                        </button>
-                                    ))}
+                            <div className="p-5 space-y-4">
+                                <div className={`p-4 rounded-xl ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}>
+                                    <p className="font-mono text-xs text-slate-500">{selectedApp.applicationNumber}</p>
+                                    <p className="font-semibold">{selectedApp.firstName} {selectedApp.lastName}</p>
+                                    <p className="text-sm text-slate-500">{selectedApp.plantType}</p>
                                 </div>
-                            </div>
-                            {auditMode === "ONLINE" ? (
-                                <div><label className="block text-sm text-slate-500 mb-1">ลิงก์ VDO Call</label><div className="flex gap-2"><input type="url" value={vdoLink} onChange={e => setVdoLink(e.target.value)} placeholder="https://meet.google.com/..." className={`flex-1 px-3 py-2 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200'}`} /><button type="button" onClick={generateMeetLink} className="flex items-center gap-1 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm"><IconLink size={14} /> สร้าง</button></div></div>
-                            ) : (
-                                <div><label className="block text-sm text-slate-500 mb-1">สถานที่ตรวจ</label><input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="เช่น จ.เชียงใหม่ อ.เมือง" className={`w-full px-3 py-2 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200'}`} /></div>
-                            )}
-                            <div className="flex gap-3 pt-4">
-                                <button onClick={() => setShowScheduleModal(false)} className={`flex-1 py-3 rounded-xl border ${isDark ? 'border-slate-600 hover:bg-slate-700' : 'border-slate-200 hover:bg-slate-50'}`}>ยกเลิก</button>
-                                <button onClick={handleSubmit} disabled={!scheduleDate || !scheduleTime || (auditMode === "ONLINE" && !vdoLink) || (auditMode === "ONSITE" && !location)} className="flex items-center justify-center gap-2 flex-1 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50">
-                                    <IconCheckCircle size={16} /> ยืนยันนัดหมาย
-                                </button>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div><label className="block text-sm text-slate-500 mb-1">วันที่</label><input type="date" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} min={new Date().toISOString().split("T")[0]} className={`w-full px-3 py-2 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200'}`} /></div>
+                                    <div><label className="block text-sm text-slate-500 mb-1">เวลา</label><input type="time" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)} className={`w-full px-3 py-2 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200'}`} /></div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-slate-500 mb-2">รูปแบบการตรวจ</label>
+                                    <div className="flex gap-4">
+                                        {[{ key: "ONLINE", Icon: IconVideo, label: "Google Meet", sub: "ตรวจออนไลน์" }, { key: "ONSITE", Icon: IconMapPin, label: "ลงพื้นที่", sub: "ตรวจหน้างาน" }].map(opt => (
+                                            <button key={opt.key} type="button" onClick={() => setAuditMode(opt.key as "ONLINE" | "ONSITE")} className={`flex-1 p-4 rounded-xl border-2 transition-all ${auditMode === opt.key ? `border-emerald-500 ${isDark ? 'bg-emerald-500/10' : 'bg-emerald-50'}` : `${isDark ? 'border-slate-600' : 'border-slate-200'}`}`}>
+                                                <opt.Icon size={24} className={auditMode === opt.key ? 'text-emerald-600' : 'text-slate-400'} />
+                                                <p className="font-semibold mt-2">{opt.label}</p>
+                                                <p className="text-xs text-slate-500">{opt.sub}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                {auditMode === "ONLINE" ? (
+                                    <div><label className="block text-sm text-slate-500 mb-1">ลิงก์ Google Meet</label><div className="flex gap-2"><input type="url" value={vdoLink} onChange={e => setVdoLink(e.target.value)} placeholder="https://meet.google.com/..." className={`flex-1 px-3 py-2 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200'}`} /><button type="button" onClick={generateMeetLink} className="flex items-center gap-1 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm"><IconLink size={14} /> สร้าง</button></div></div>
+                                ) : (
+                                    <div><label className="block text-sm text-slate-500 mb-1">สถานที่ตรวจ</label><input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="เช่น จ.เชียงใหม่ อ.เมือง" className={`w-full px-3 py-2 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200'}`} /></div>
+                                )}
+                                <div className="flex gap-3 pt-4">
+                                    <button onClick={() => setShowScheduleModal(false)} className={`flex-1 py-3 rounded-xl border ${isDark ? 'border-slate-600 hover:bg-slate-700' : 'border-slate-200 hover:bg-slate-50'}`}>ยกเลิก</button>
+                                    <button onClick={handleSubmit} disabled={!scheduleDate || !scheduleTime || (auditMode === "ONLINE" && !vdoLink) || (auditMode === "ONSITE" && !location)} className="flex items-center justify-center gap-2 flex-1 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50">
+                                        <IconCheckCircle size={16} /> ยืนยันนัดหมาย
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </StaffLayout>
+                )
+            }
+
+            {/* Success Modal */}
+            {
+                successModalData && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                        <div className={`rounded-2xl w-full max-w-sm p-6 text-center ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
+                            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <IconCheckCircle size={32} className="text-emerald-600" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">นัดหมายสำเร็จ!</h3>
+                            <p className="text-slate-500 mb-6">ได้ทำการนัดหมายเรียบร้อยแล้ว</p>
+
+                            <a
+                                href={successModalData.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 mb-3"
+                            >
+                                <IconCalendar size={20} />
+                                เพิ่มลง Google Calendar
+                            </a>
+
+                            <button
+                                onClick={() => setSuccessModalData(null)}
+                                className="w-full py-3 text-slate-500 hover:bg-slate-100 rounded-xl"
+                            >
+                                ปิด
+                            </button>
+                        </div>
+                    </div>
+                )
+            }
+        </StaffLayout >
     );
 }

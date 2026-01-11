@@ -15,11 +15,11 @@ const { prisma } = require('../../services/prisma-database');
 // ============================================================================
 
 /**
- * @route   GET /api/v2/harvest-batches
+ * @route   GET /api/harvest-batches
  * @desc    Get all harvest batches for a farm
  * @query   farmId, status, speciesId
  * @access  Auth required
- * @test    GET http://localhost:3000/api/v2/harvest-batches?farmId=xxx
+ * @test    GET http://localhost:3000/api/harvest-batches?farmId=xxx
  */
 router.get('/', async (req, res) => {
     try {
@@ -52,10 +52,10 @@ router.get('/', async (req, res) => {
 });
 
 /**
- * @route   GET /api/v2/harvest-batches/:id
+ * @route   GET /api/harvest-batches/:id
  * @desc    Get harvest batch by ID
  * @access  Auth required
- * @test    GET http://localhost:3000/api/v2/harvest-batches/:id
+ * @test    GET http://localhost:3000/api/harvest-batches/:id
  */
 router.get('/:id', async (req, res) => {
     try {
@@ -86,10 +86,10 @@ router.get('/:id', async (req, res) => {
 });
 
 /**
- * @route   GET /api/v2/harvest-batches/lot/:batchNumber
+ * @route   GET /api/harvest-batches/lot/:batchNumber
  * @desc    Get harvest batch by Lot Number (for QR/traceability)
  * @access  Public
- * @test    GET http://localhost:3000/api/v2/harvest-batches/lot/LOT-2024-001
+ * @test    GET http://localhost:3000/api/harvest-batches/lot/LOT-2024-001
  */
 router.get('/lot/:batchNumber', async (req, res) => {
     try {
@@ -135,10 +135,10 @@ router.get('/lot/:batchNumber', async (req, res) => {
 });
 
 /**
- * @route   POST /api/v2/harvest-batches
+ * @route   POST /api/harvest-batches
  * @desc    Create new harvest batch
  * @access  Farmer
- * @test    POST http://localhost:3000/api/v2/harvest-batches
+ * @test    POST http://localhost:3000/api/harvest-batches
  */
 router.post('/', async (req, res) => {
     try {
@@ -200,10 +200,10 @@ router.post('/', async (req, res) => {
 });
 
 /**
- * @route   PUT /api/v2/harvest-batches/:id
+ * @route   PUT /api/harvest-batches/:id
  * @desc    Update harvest batch
  * @access  Farmer
- * @test    PUT http://localhost:3000/api/v2/harvest-batches/:id
+ * @test    PUT http://localhost:3000/api/harvest-batches/:id
  */
 router.put('/:id', async (req, res) => {
     try {
@@ -247,10 +247,10 @@ router.put('/:id', async (req, res) => {
 });
 
 /**
- * @route   POST /api/v2/harvest-batches/:id/harvest
+ * @route   POST /api/harvest-batches/:id/harvest
  * @desc    Record harvest for a batch
  * @access  Farmer
- * @test    POST http://localhost:3000/api/v2/harvest-batches/:id/harvest
+ * @test    POST http://localhost:3000/api/harvest-batches/:id/harvest
  */
 router.post('/:id/harvest', async (req, res) => {
     try {
@@ -297,10 +297,10 @@ router.post('/:id/harvest', async (req, res) => {
 });
 
 /**
- * @route   GET /api/v2/harvest-batches/stats/:farmId
+ * @route   GET /api/harvest-batches/stats/:farmId
  * @desc    Get harvest statistics for a farm
  * @access  Farmer
- * @test    GET http://localhost:3000/api/v2/harvest-batches/stats/:farmId
+ * @test    GET http://localhost:3000/api/harvest-batches/stats/:farmId
  */
 router.get('/stats/:farmId', async (req, res) => {
     try {

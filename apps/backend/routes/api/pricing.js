@@ -22,7 +22,7 @@ const prisma = new PrismaClient();
 // ... existing code ...
 
 /**
- * @route GET /api/v2/pricing/fees
+ * @route GET /api/pricing/fees
  * @description Get all platform fees and configuration
  * @access Public
  */
@@ -44,7 +44,7 @@ router.get('/fees', (req, res) => {
 });
 
 /**
- * @route POST /api/v2/pricing/calculate
+ * @route POST /api/pricing/calculate
  * @description Calculate fee based on service type and area selection
  * @access Public
  */
@@ -82,7 +82,7 @@ router.post('/calculate', (req, res) => {
 });
 
 /**
- * @route GET /api/v2/pricing/quotation/:applicationId
+ * @route GET /api/pricing/quotation/:applicationId
  * @description Get quotation for specific application
  * @access Private (requires auth)
  */
@@ -151,7 +151,7 @@ router.get('/quotation/:applicationId', async (req, res) => {
 });
 
 /**
- * @route GET /api/v2/pricing/invoice/:phase
+ * @route GET /api/pricing/invoice/:phase
  * @description Get invoice amounts for payment phases
  * @access Private (requires auth)
  */

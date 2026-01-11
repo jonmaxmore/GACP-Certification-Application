@@ -45,6 +45,9 @@ app.use('/api/uploads', uploadsRouter); // Generic uploads
 app.use('/api/pricing', pricingRouter);
 app.use('/api', apiRoutes); // Unified API routes (no /v2 prefix)
 app.use('/api', plotsRouter); // [NEW] Mount Plot Routes
+if (process.env.NODE_ENV !== 'production') {
+    app.use('/api/mock-payment', require('./routes/mock-payment'));
+}
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -74,6 +77,10 @@ app.get(['/health', '/api/health'], async (req, res) => {
 // Global Error Handler
 app.use((err, req, res, next) => {
     logger.error(err.stack);
+    try {
+        const fs = require('fs');
+        fs.writeFileSync(path.join(__dirname, 'critical-error.log'), new Date().toISOString() + '\n' + err.stack);
+    } catch (e) { console.error('Log write failed', e); }
     res.status(500).json({
         success: false,
         message: 'Internal Server Error',

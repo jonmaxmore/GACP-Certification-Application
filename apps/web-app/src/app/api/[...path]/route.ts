@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
 // Production Server - Always use this
-const BACKEND_URL = 'http://47.129.167.71';
+// Production Server - Always use this (Dev Override)
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 
 /**
  * Generic API Proxy for all /api/* endpoints (excluding /api/v2, /api/auth-*, /api/health, /api/proxy)
@@ -13,16 +14,21 @@ async function proxyRequest(request: NextRequest, path: string, method: string) 
         const cookieStore = await cookies();
         const authToken = cookieStore.get('auth_token')?.value;
 
-        const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
-        };
+        // Start with empty headers
+        const headers: Record<string, string> = {};
 
-        // Add Authorization header from cookie
+        // 1. Copy Content-Type (Essential for multipart/form-data boundaries)
+        const contentType = request.headers.get('content-type');
+        if (contentType) {
+            headers['Content-Type'] = contentType;
+        }
+
+        // 2. Add Authorization header
         if (authToken) {
             headers['Authorization'] = `Bearer ${authToken}`;
         }
 
-        // Development/Test Mode: Allow X-User-ID header for testing without real JWT
+        // 3. Forward test headers if needed
         const testUserId = request.headers.get('X-User-ID');
         if (testUserId && !authToken) {
             headers['X-User-ID'] = testUserId;
@@ -33,31 +39,34 @@ async function proxyRequest(request: NextRequest, path: string, method: string) 
 
         console.log(`[API Proxy] ${method} ${backendUrl}`);
 
-        // Forward request body for POST/PUT/PATCH
-        let body: string | undefined;
-        if (['POST', 'PUT', 'PATCH'].includes(method)) {
-            try {
-                body = JSON.stringify(await request.json());
-            } catch {
-                body = undefined;
-            }
-        }
+        // 4. Forward Body as Stream (don't parse JSON)
+        // For GET/HEAD, body must be undefined/null
+        const body = (method === 'GET' || method === 'HEAD') ? undefined : request.body;
 
         const response = await fetch(backendUrl, {
             method,
             headers,
             body,
+            // @ts-ignore - Required for Node.js fetch with ReadableStream body
+            duplex: 'half'
         });
 
-        // Use text() then JSON.parse to avoid stream issues
-        const text = await response.text();
-        const data = text ? JSON.parse(text) : {};
+        // 5. Return Response
+        // Use blob() to handle both JSON and Binary responses correctly
+        const responseBody = await response.blob();
 
-        return NextResponse.json(data, { status: response.status });
-    } catch (error) {
+        return new NextResponse(responseBody, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: {
+                'Content-Type': response.headers.get('Content-Type') || 'application/json'
+            }
+        });
+
+    } catch (error: any) {
         console.error('[API Proxy] Error:', error);
         return NextResponse.json(
-            { success: false, error: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้' },
+            { success: false, error: 'Proxy Error: ' + (error.message || 'Unknown') },
             { status: 500 }
         );
     }

@@ -18,7 +18,7 @@ const { DOCUMENT_SLOTS, getRequiredDocuments } = require('../../constants/docume
 // ============================================================================
 
 /**
- * @route   POST /api/v2/validation/land-check
+ * @route   POST /api/validation/land-check
  * @desc    Smart Land Check (Coordinates & restricted zones)
  * @access  Farmer
  */
@@ -48,8 +48,8 @@ router.post('/land-check', async (req, res) => {
                 data: {
                     valid: false,
                     reason: 'Located in restricted zone (National Park/Military Base)',
-                    type: 'RESTRICTED_ZONE'
-                }
+                    type: 'RESTRICTED_ZONE',
+                },
             });
         }
 
@@ -63,8 +63,8 @@ router.post('/land-check', async (req, res) => {
                 data: {
                     valid: false,
                     reason: 'Land overlaps with existing registered farm',
-                    type: 'OVERLAP'
-                }
+                    type: 'OVERLAP',
+                },
             });
         }
 
@@ -78,10 +78,10 @@ router.post('/land-check', async (req, res) => {
 });
 
 /**
- * @route   POST /api/v2/validation/pre-submission
+ * @route   POST /api/validation/pre-submission
  * @desc    Validate application before submission
  * @access  Farmer
- * @test    POST http://localhost:3000/api/v2/validation/pre-submission
+ * @test    POST http://localhost:3000/api/validation/pre-submission
  */
 router.post('/pre-submission', async (req, res) => {
     try {
@@ -350,10 +350,10 @@ router.post('/pre-submission', async (req, res) => {
 });
 
 /**
- * @route   GET /api/v2/validation/checklist
+ * @route   GET /api/validation/checklist
  * @desc    Get submission checklist template
  * @access  Public
- * @test    GET http://localhost:3000/api/v2/validation/checklist
+ * @test    GET http://localhost:3000/api/validation/checklist
  */
 router.get('/checklist', async (req, res) => {
     try {

@@ -169,7 +169,18 @@ class DocumentClassifier {
 
             case 'LAND_TITLE': {
                 // Extract area measurements
-                const areaMatch = extractedText.match(/(\d+)\s*ไร่\s*(\d+)?\s*งาน?\s*(\d+(?:\.\d+)?)?\s*ตารางวา?/);
+                // Extract area measurements - Try multiple patterns
+                // Pattern 1: Full Thai text (e.g., 5 ไร่ 2 งาน 30 ตารางวา)
+                let areaMatch = extractedText.match(/(\d+)\s*ไร่\s*(?:(\d+)\s*งาน)?\s*(?:(\d+(?:\.\d+)?)\s*ตารางวา)?/);
+
+                // Pattern 2: Short numeric format commonly found in tables (e.g., 5-2-30 or 5 - 2 - 30)
+                if (!areaMatch) {
+                    const shortMatch = extractedText.match(/เนื้อที่\s*(\d+)[\s-]*(\d+)[\s-]*(\d+(?:\.\d+)?)/);
+                    if (shortMatch) {
+                        areaMatch = shortMatch;
+                    }
+                }
+
                 if (areaMatch) {
                     data.area = {
                         rai: parseInt(areaMatch[1]) || 0,

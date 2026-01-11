@@ -1,5 +1,5 @@
 /**
- * V2 Trace API Route (Public + Auth)
+ * Trace API Route (Public + Auth)
  * Public traceability endpoint for QR code scanning
  * 
  * GET /api/trace/:qrCode - Get batch/lot/cycle info by QR code (Public)

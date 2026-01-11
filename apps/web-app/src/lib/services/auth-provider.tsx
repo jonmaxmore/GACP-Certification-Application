@@ -2,24 +2,13 @@
 
 /**
  * AuthProvider - React component to initialize AuthService
- * 
- * Usage in layout.tsx:
- *   import { AuthProvider } from '@/lib/services/auth-provider';
- *   
- *   export default function RootLayout({ children }) {
- *     return (
- *       <html>
- *         <body>
- *           <AuthProvider>{children}</AuthProvider>
- *         </body>
- *       </html>
- *     );
- *   }
  */
 
-import { useEffect, createContext, useContext, useState, useCallback, type ReactNode } from 'react';
-import { AuthService, type AuthUser, type AuthEventType } from './auth-service';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { AuthService, AuthUser, AuthEventType } from './auth-service';
 
+// Define Context Type
 interface AuthContextValue {
     user: AuthUser | null;
     isAuthenticated: boolean;
@@ -29,15 +18,18 @@ interface AuthContextValue {
     updateUser: (user: AuthUser) => void;
 }
 
+// Create Context
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 interface AuthProviderProps {
-    children: ReactNode;
+    children: React.ReactNode;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
+    const pathname = usePathname();
 
     // Initialize auth service and sync state
     useEffect(() => {
@@ -57,14 +49,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const unsubscribe = AuthService.onAuthChange((event: AuthEventType, data?: unknown) => {
             switch (event) {
                 case 'login':
-                    setUser(AuthService.getUser());
+                    const u = AuthService.getUser();
+                    setUser(u);
+                    // Check verification on login
+                    checkVerification(u);
                     break;
                 case 'logout':
                 case 'session_expired':
                     setUser(null);
                     break;
                 case 'tab_sync':
-                    // Sync user state from storage
                     if (AuthService.isAuthenticated()) {
                         setUser(AuthService.getUser());
                     } else {
@@ -79,10 +73,43 @@ export function AuthProvider({ children }: AuthProviderProps) {
         };
     }, []);
 
+    // Verification Check Logic
+    const checkVerification = useCallback((u: AuthUser | null) => {
+        if (!u) return;
+
+        // Skip for Staff
+        const role = u.role?.toUpperCase();
+        if (role && ['ADMIN', 'STAFF', 'SCHEDULER', 'AUDITOR', 'Reviewer', 'JURISTIC_OFFICER'].some(r => role.includes(r))) {
+            return;
+        }
+
+        const vStatus = u.verificationStatus || 'NEW';
+
+        // REMOVED for Gradual Engagement:
+        // Users can now access dashboard but will see a warning banner.
+        // Actions are gated at the button level.
+        /* 
+        if (vStatus === 'NEW' || vStatus === 'REJECTED') {
+            if (pathname !== '/verify-identity' && pathname !== '/login') {
+                router.push('/verify-identity');
+            }
+        } 
+        */
+    }, [pathname, router]);
+
+    // Check on path change or user update
+    useEffect(() => {
+        if (!isLoading && user) {
+            checkVerification(user);
+        }
+    }, [isLoading, user, pathname, checkVerification]);
+
+
     const login = useCallback((token: string, user: AuthUser) => {
         AuthService.saveSession({ token, user });
         setUser(user);
-    }, []);
+        checkVerification(user);
+    }, [checkVerification]);
 
     const logout = useCallback(async () => {
         await AuthService.logout();

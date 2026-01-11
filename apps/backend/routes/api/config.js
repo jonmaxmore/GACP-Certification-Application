@@ -27,10 +27,10 @@ const cannabisTemplatesData = [];
 // ============================================================================
 
 /**
- * @route   GET /api/v2/config/document-slots
+ * @route   GET /api/config/document-slots
  * @desc    Get all document slots
  * @access  Public
- * @test    GET http://localhost:3000/api/v2/config/document-slots
+ * @test    GET http://localhost:3000/api/config/document-slots
  */
 router.get('/document-slots', (req, res) => {
     try {
@@ -50,11 +50,11 @@ router.get('/document-slots', (req, res) => {
 });
 
 /**
- * @route   GET /api/v2/config/document-slots/required
+ * @route   GET /api/config/document-slots/required
  * @desc    Get required documents based on criteria
  * @query   plantType, objectives[], applicantType
  * @access  Public
- * @test    GET http://localhost:3000/api/v2/config/document-slots/required?plantType=cannabis&applicantType=INDIVIDUAL
+ * @test    GET http://localhost:3000/api/config/document-slots/required?plantType=cannabis&applicantType=INDIVIDUAL
  */
 router.get('/document-slots/required', (req, res) => {
     try {
@@ -83,11 +83,11 @@ router.get('/document-slots/required', (req, res) => {
 });
 
 /**
- * @route   GET /api/v2/config/document-slots/warnings
+ * @route   GET /api/config/document-slots/warnings
  * @desc    Get warnings for selected objectives
  * @query   objectives[]
  * @access  Public
- * @test    GET http://localhost:3000/api/v2/config/document-slots/warnings?objectives=PROCESSING,EXPORT
+ * @test    GET http://localhost:3000/api/config/document-slots/warnings?objectives=PROCESSING,EXPORT
  */
 router.get('/document-slots/warnings', (req, res) => {
     try {
@@ -110,11 +110,11 @@ router.get('/document-slots/warnings', (req, res) => {
 });
 
 /**
- * @route   POST /api/v2/config/document-slots/validate
+ * @route   POST /api/config/document-slots/validate
  * @desc    Validate if user can proceed with objectives
  * @body    { objectives: [], uploadedSlots: [] }
  * @access  Public
- * @test    POST http://localhost:3000/api/v2/config/document-slots/validate
+ * @test    POST http://localhost:3000/api/config/document-slots/validate
  */
 router.post('/document-slots/validate', (req, res) => {
     try {
@@ -136,10 +136,10 @@ router.post('/document-slots/validate', (req, res) => {
 // ============================================================================
 
 /**
- * @route   GET /api/v2/config/templates
+ * @route   GET /api/config/templates
  * @desc    Get all form templates (metadata only)
  * @access  Public
- * @test    GET http://localhost:3000/api/v2/config/templates
+ * @test    GET http://localhost:3000/api/config/templates
  */
 router.get('/templates', (req, res) => {
     try {
@@ -166,11 +166,11 @@ router.get('/templates', (req, res) => {
 });
 
 /**
- * @route   GET /api/v2/config/templates/:type
+ * @route   GET /api/config/templates/:type
  * @desc    Get template by type with all questions
  * @param   type - pre_cultivation_assessment, cultivation_practices, harvest_processing
  * @access  Public
- * @test    GET http://localhost:3000/api/v2/config/templates/pre_cultivation_assessment
+ * @test    GET http://localhost:3000/api/config/templates/pre_cultivation_assessment
  */
 router.get('/templates/:type', (req, res) => {
     try {
@@ -202,10 +202,10 @@ router.get('/templates/:type', (req, res) => {
 });
 
 /**
- * @route   GET /api/v2/config/templates/:type/questions
+ * @route   GET /api/config/templates/:type/questions
  * @desc    Get only questions for a template type
  * @access  Public
- * @test    GET http://localhost:3000/api/v2/config/templates/pre_cultivation_assessment/questions
+ * @test    GET http://localhost:3000/api/config/templates/pre_cultivation_assessment/questions
  */
 router.get('/templates/:type/questions', (req, res) => {
     try {
@@ -239,10 +239,10 @@ router.get('/templates/:type/questions', (req, res) => {
 // ============================================================================
 
 /**
- * @route   GET /api/v2/config/standards
+ * @route   GET /api/config/standards
  * @desc    Get list of available GACP standards
  * @access  Public
- * @test    GET http://localhost:3000/api/v2/config/standards
+ * @test    GET http://localhost:3000/api/config/standards
  */
 router.get('/standards', (req, res) => {
     try {
@@ -263,11 +263,11 @@ router.get('/standards', (req, res) => {
 });
 
 /**
- * @route   GET /api/v2/config/standards/:code
+ * @route   GET /api/config/standards/:code
  * @desc    Get specific standard details
  * @param   code - thai, who, eu
  * @access  Public
- * @test    GET http://localhost:3000/api/v2/config/standards/thai
+ * @test    GET http://localhost:3000/api/config/standards/thai
  */
 router.get('/standards/:code', (req, res) => {
     try {
@@ -467,10 +467,10 @@ router.get('/applicant-types', (req, res) => {
 // ============================================================================
 
 /**
- * @route   GET /api/v2/config/pricing
+ * @route   GET /api/config/pricing
  * @desc    Get pricing information
  * @access  Public
- * @test    GET http://localhost:3000/api/v2/config/pricing
+ * @test    GET http://localhost:3000/api/config/pricing
  */
 router.get('/pricing', (req, res) => {
     try {
@@ -507,11 +507,11 @@ router.get('/pricing', (req, res) => {
 });
 
 /**
- * @route   GET /api/v2/config/pricing/calculate
+ * @route   GET /api/config/pricing/calculate
  * @desc    Calculate total cost
  * @query   areaTypes[], serviceType, hasProcessing, hasExport
  * @access  Public
- * @test    GET http://localhost:3000/api/v2/config/pricing/calculate?areaTypes=OUTDOOR,INDOOR&serviceType=new
+ * @test    GET http://localhost:3000/api/config/pricing/calculate?areaTypes=OUTDOOR,INDOOR&serviceType=new
  */
 router.get('/pricing/calculate', (req, res) => {
     try {

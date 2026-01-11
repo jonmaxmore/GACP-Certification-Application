@@ -181,7 +181,7 @@ export const GroupIcon = ({ color = "#6B7280", size = 24 }: IconProps) => (
     </svg>
 );
 
-export const LockIcon = ({ color = "#1B5E20", size = 20 }: IconProps) => (
+export const IconLock = ({ color = "#1B5E20", size = 20 }: IconProps) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
         <rect x="5" y="11" width="14" height="10" rx="2" stroke={color} strokeWidth="2" />
         <path d="M8 11V7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7V11" stroke={color} strokeWidth="2" />
@@ -202,6 +202,37 @@ export const EyeIcon = ({ open, color = "#6B7280" }: { open: boolean; color?: st
                 <path d="M4 4L20 20" />
             </>
         )}
+    </svg>
+);
+
+export const IconXCircle = ({ color = "currentColor", size = 24, className }: IconProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <circle cx="12" cy="12" r="10" />
+        <line x1="15" y1="9" x2="9" y2="15" />
+        <line x1="9" y1="9" x2="15" y2="15" />
+    </svg>
+);
+
+export const IconArrowLeft = ({ color = "currentColor", size = 24, className }: IconProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <line x1="19" y1="12" x2="5" y2="12" />
+        <polyline points="12 19 5 12 12 5" />
+    </svg>
+);
+
+export const IconAlertCircle = ({ color = "currentColor", size = 24, className }: IconProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+);
+
+export const IconUpload = ({ color = "currentColor", size = 24, className }: IconProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="17 8 12 3 7 8" />
+        <line x1="12" y1="3" x2="12" y2="15" />
     </svg>
 );
 
@@ -233,5 +264,10 @@ export const Icons = {
     Clock: IconClock,
     Receipt: IconReceipt,
     Leaf: IconLeaf,
+    // Utils
+    XCircle: IconXCircle,
+    ArrowLeft: IconArrowLeft,
+    AlertCircle: IconAlertCircle,
+    Upload: IconUpload,
 };
 

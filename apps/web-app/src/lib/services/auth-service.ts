@@ -37,6 +37,16 @@ export interface AuthUser {
     accountType?: string;
     userType?: string;
     role?: string;
+    status?: string;
+    verificationStatus?: string;
+    verificationNote?: string;
+    verificationSubmittedAt?: string;
+    taxId?: string;
+    laserCode?: string;
+    idCard?: string;
+    address?: string;
+    province?: string;
+    companyName?: string;
     [key: string]: unknown;
 }
 

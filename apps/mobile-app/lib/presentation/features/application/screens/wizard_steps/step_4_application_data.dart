@@ -373,7 +373,7 @@ class _ProjectForm extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: solarSystem,
+                initialValue: solarSystem,
                 items: const [
                   DropdownMenuItem(value: 'OUTDOOR', child: Text('กลางแจ้ง')),
                   DropdownMenuItem(value: 'INDOOR', child: Text('Indoor')),

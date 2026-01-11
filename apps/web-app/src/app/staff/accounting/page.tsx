@@ -43,10 +43,12 @@ interface InvoiceItem {
     applicationNumber: string;
     farmerName: string;
     amount: number;
-    status: "PENDING" | "PAID" | "OVERDUE" | "CANCELLED";
+    status: "PENDING" | "PAID" | "OVERDUE" | "CANCELLED" | "payment_verification_pending";
     dueDate: string;
     paidAt?: string;
     createdAt: string;
+    notes?: string; // Added for slip parsing
+    id: string; // Ensure we have id
 }
 
 interface PaymentSummary {
@@ -65,6 +67,10 @@ export default function AccountingDashboard() {
     const [isLoading, setIsLoading] = useState(true);
     const [isDark, setIsDark] = useState(false);
 
+    // Modal State
+    const [selectedInvoice, setSelectedInvoice] = useState<InvoiceItem | null>(null);
+    const [isVerifying, setIsVerifying] = useState(false);
+
     const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -74,7 +80,15 @@ export default function AccountingDashboard() {
             ]);
             if (summaryRes.success && summaryRes.data?.data) setSummary(summaryRes.data.data);
             else setSummary({ totalRevenue: 0, pendingAmount: 0, overdueAmount: 0, monthlyRevenue: 0, invoiceCount: { total: 0, pending: 0, paid: 0, overdue: 0 } });
-            if (invoicesRes.success && invoicesRes.data?.data?.invoices) setInvoices(invoicesRes.data.data.invoices);
+
+            if (invoicesRes.success && invoicesRes.data?.data?.invoices) {
+                // Map _id to id if needed, Prisma usually returns id
+                const mappedInvoices = invoicesRes.data.data.invoices.map((inv: any) => ({
+                    ...inv,
+                    items: inv.items ? (typeof inv.items === 'string' ? JSON.parse(inv.items) : inv.items) : [],
+                }));
+                setInvoices(mappedInvoices);
+            }
             else setInvoices([]);
         } catch { setSummary(null); setInvoices([]); }
         finally { setIsLoading(false); }
@@ -103,12 +117,52 @@ export default function AccountingDashboard() {
             PAID: { color: "bg-emerald-100 text-emerald-700", label: "ชำระแล้ว" },
             OVERDUE: { color: "bg-red-100 text-red-700", label: "เกินกำหนด" },
             CANCELLED: { color: "bg-slate-100 text-slate-700", label: "ยกเลิก" },
+            payment_verification_pending: { color: "bg-blue-100 text-blue-700", label: "รอตรวจสอบ" }
         };
         const c = config[status] || { color: "bg-gray-100", label: status };
         return <span className={`px-3 py-1 rounded-lg text-xs font-medium ${c.color}`}>{c.label}</span>;
     };
 
-    const filteredInvoices = invoices.filter(inv => activeTab === "all" || inv.status === activeTab.toUpperCase());
+    // Extract slip filename from notes
+    const getSlipUrl = (notes?: string) => {
+        if (!notes) return null;
+        const match = notes.match(/\[Slip Uploaded: (.*?)\]/);
+        if (match && match[1]) {
+            // BACKEND_URL needs to be accessible. 
+            // We can hardcode specific dev/prod logic or just use relative if proxy was set up (it isn't for /uploads).
+            // Using direct port 5000 for now or relying on Next.js env.
+            // A robust way: use the API base and strip '/api'
+            return `http://localhost:5000/uploads/${match[1]}`;
+        }
+        return null;
+    };
+
+    const handleVerifyPayment = async () => {
+        if (!selectedInvoice) return;
+        if (!confirm("ยืนยันการชำระเงินใช่หรือไม่?")) return;
+
+        setIsVerifying(true);
+        try {
+            const res = await api.post(`/api/invoices/${selectedInvoice.id}/pay`, { transactionId: 'MANUAL_VERIFY' });
+            if (res.success) {
+                alert("บันทึกการชำระเงินเรียบร้อยแล้ว");
+                setSelectedInvoice(null);
+                fetchData();
+            } else {
+                alert("เกิดข้อผิดพลาด: " + res.error);
+            }
+        } catch (error) {
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+        } finally {
+            setIsVerifying(false);
+        }
+    };
+
+    const filteredInvoices = invoices.filter(inv => {
+        if (activeTab === "all") return true;
+        if (activeTab === "pending") return inv.status === "PENDING" || inv.status === "payment_verification_pending";
+        return inv.status === (activeTab.toUpperCase() as any);
+    });
 
     const stats = [
         { label: "รายได้รวม", value: summary ? formatCurrency(summary.totalRevenue) : "฿0", Icon: IconDollar, bgColor: "bg-emerald-500", sub: `${summary?.invoiceCount.paid || 0} ใบเสร็จ` },
@@ -117,7 +171,7 @@ export default function AccountingDashboard() {
         { label: "รายได้เดือนนี้", value: summary ? formatCurrency(summary.monthlyRevenue) : "฿0", Icon: IconCreditCard, bgColor: "bg-blue-500", sub: "ม.ค. 2569" },
     ];
 
-    if (isLoading) {
+    if (isLoading && invoices.length === 0) {
         return (
             <StaffLayout title="ระบบบัญชี" subtitle="กำลังโหลด...">
                 <div className="flex justify-center py-20">
@@ -151,7 +205,7 @@ export default function AccountingDashboard() {
                     <div className="flex gap-2">
                         {[
                             { key: "all", label: "ทั้งหมด", count: invoices.length },
-                            { key: "pending", label: "รอชำระ", count: invoices.filter(i => i.status === "PENDING").length },
+                            { key: "pending", label: "รอชำระ", count: invoices.filter(i => i.status === "PENDING" || i.status === "payment_verification_pending").length },
                             { key: "paid", label: "ชำระแล้ว", count: invoices.filter(i => i.status === "PAID").length },
                             { key: "overdue", label: "เกินกำหนด", count: invoices.filter(i => i.status === "OVERDUE").length },
                         ].map(tab => (
@@ -184,7 +238,7 @@ export default function AccountingDashboard() {
                         </thead>
                         <tbody className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-slate-200'}`}>
                             {filteredInvoices.map(inv => (
-                                <tr key={inv._id} className={`${isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'} transition-colors`}>
+                                <tr key={inv.id} className={`${isDark ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'} transition-colors`}>
                                     <td className="px-6 py-4">
                                         <p className="font-mono text-sm font-semibold">{inv.invoiceNumber}</p>
                                         <p className="text-xs text-slate-400">{inv.applicationNumber}</p>
@@ -198,12 +252,16 @@ export default function AccountingDashboard() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex gap-2">
-                                            <button className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-700'}`}>
+                                            <button
+                                                onClick={() => setSelectedInvoice(inv)}
+                                                className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-700'}`}>
                                                 <IconEye size={12} /> ดู
                                             </button>
-                                            {inv.status === "PENDING" && (
-                                                <button className="flex items-center gap-1 px-3 py-1.5 text-xs bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200">
-                                                    <IconCheckCircle size={12} /> ยืนยันชำระ
+                                            {inv.status === "payment_verification_pending" && (
+                                                <button
+                                                    onClick={() => { setSelectedInvoice(inv); }}
+                                                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">
+                                                    <IconCheckCircle size={12} /> ตรวจสอบ
                                                 </button>
                                             )}
                                         </div>
@@ -220,6 +278,87 @@ export default function AccountingDashboard() {
                     </div>
                 )}
             </div>
+
+            {/* Payment Verification Modal */}
+            {selectedInvoice && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className={`max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
+                        <div className="p-6 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-inherit z-10">
+                            <div>
+                                <h3 className="text-lg font-bold">รายละเอียดการชำระเงิน</h3>
+                                <p className="text-sm text-slate-500">Invoice: {selectedInvoice.invoiceNumber}</p>
+                            </div>
+                            <button onClick={() => setSelectedInvoice(null)} className="p-2 hover:bg-slate-100 rounded-full">
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Invoice Info */}
+                            <div className="space-y-4">
+                                <h4 className="font-semibold text-emerald-600 border-b pb-2">ข้อมูลใบแจ้งหนี้</h4>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div className="text-slate-500">จำนวนเงิน:</div>
+                                    <div className="font-bold text-lg">{formatCurrency(selectedInvoice.amount)}</div>
+
+                                    <div className="text-slate-500">วันที่ออกเอกสาร:</div>
+                                    <div>{formatDate(selectedInvoice.createdAt)}</div>
+
+                                    <div className="text-slate-500">กำหนดชำระ:</div>
+                                    <div>{formatDate(selectedInvoice.dueDate)}</div>
+
+                                    <div className="text-slate-500">เกษตรกร:</div>
+                                    <div>{selectedInvoice.farmerName}</div>
+
+                                    <div className="text-slate-500">เลขที่ใบสมัคร:</div>
+                                    <div>{selectedInvoice.applicationNumber}</div>
+
+                                    <div className="text-slate-500">สถานะปัจจุบัน:</div>
+                                    <div>{getStatusBadge(selectedInvoice.status)}</div>
+                                </div>
+
+                                {(selectedInvoice.status === "PENDING" || selectedInvoice.status === "payment_verification_pending") && (
+                                    <div className="pt-4 mt-4 border-t">
+                                        <button
+                                            onClick={handleVerifyPayment}
+                                            disabled={isVerifying}
+                                            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-200 transition-all flex justify-center items-center gap-2">
+                                            {isVerifying ? 'กำลังบันทึก...' :
+                                                <><IconCheckCircle /> ยืนยันการได้รับเงินถูกต้อง</>
+                                            }
+                                        </button>
+                                        <p className="text-xs text-center text-slate-400 mt-2">
+                                            การกระทำนี้จะเปลี่ยนสถานะเป็น "ชำระแล้ว" และออกใบเสร็จรับเงินทันที
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Slip Image */}
+                            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 flex flex-col items-center">
+                                <h4 className="font-semibold text-slate-700 mb-4 w-full">หลักฐานการชำระเงิน</h4>
+                                {getSlipUrl(selectedInvoice.notes) ? (
+                                    <a href={getSlipUrl(selectedInvoice.notes)!} target="_blank" rel="noopener noreferrer" className="block w-full">
+                                        <img
+                                            src={getSlipUrl(selectedInvoice.notes)!}
+                                            alt="Payment Slip"
+                                            className="w-full h-auto rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-zoom-in"
+                                        />
+                                        <p className="text-center text-xs text-blue-500 mt-2">คลิกเพื่อดูรูปขยาย</p>
+                                    </a>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center h-64 text-slate-400 w-full bg-slate-100 rounded-lg border-dashed border-2 border-slate-300">
+                                        <IconDocument size={48} className="mb-2 opacity-50" />
+                                        <p>ไม่พบหลักฐานการชำระเงิน</p>
+                                        <p className="text-xs">หรือยังไม่ได้อัปโหลด</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </StaffLayout>
     );
 }

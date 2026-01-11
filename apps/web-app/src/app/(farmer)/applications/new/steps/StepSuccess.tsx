@@ -3,11 +3,15 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { useWizardStore } from '../hooks/useWizardStore';
+
 export const StepSuccess = () => {
     const router = useRouter();
+    const { state } = useWizardStore();
 
-    // Generate a random Application ID for display
-    const appId = `APP-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    // Use actual Application ID/Number from store (set during StepReview submission)
+    // Fallback to "PENDING" if undefined (should not happen in happy path)
+    const appId = state.applicationId || `GACP-TEMP-${new Date().getTime().toString().slice(-4)}`;
 
     return (
         <div className="flex flex-col items-center justify-center py-12 animate-fadeIn">

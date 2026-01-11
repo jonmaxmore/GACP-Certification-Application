@@ -12,8 +12,12 @@ export interface Application {
         applicantInfo?: { name: string };
         formData?: { plantId: string };
     };
+    scheduledDate?: string;
     audit?: {
-        scheduledDate?: string;
+        mode?: "ONLINE" | "ONSITE";
+        meetingUrl?: string;
+        location?: string;
+        scheduledDate?: string; // Legacy or redundant, keeping for safe measure
     };
 }
 
@@ -28,8 +32,24 @@ export const ApplicationService = {
     /**
      * Get statistics for Staff Dashboard
      */
+    /**
+     * Get statistics for Staff Dashboard
+     */
     getStats: async () => {
-        return apiClient.get<{ total: number; pending: number; approved: number; todayChecked: number }>("/applications/stats");
+        // Updated to use the new Reports API
+        const response = await apiClient.get<any>("/reports/dashboard");
+        if (response.success && response.data) {
+            return {
+                success: true,
+                data: {
+                    total: response.data.total,
+                    pending: response.data.pendingReview, // Map 'pendingReview' to 'pending'
+                    approved: response.data.approved,
+                    todayChecked: 0 // Not yet implemented in backend
+                }
+            };
+        }
+        return response;
     },
 
     /**
@@ -56,7 +76,30 @@ export const ApplicationService = {
     /**
      * Get single application by ID
      */
-    getApplicationById: async (id: string) => {
-        return apiClient.get<Application>(`/applications/${id}`);
+    getMyCertificates: async () => {
+        return apiClient.get<Certificate[]>("/certificates/my");
+    },
+
+    /**
+     * Download Certificate (Mock)
+     */
+    downloadCertificate: async (id: string) => {
+        // This would typically trigger a blob download
+        // For now, we return the URL to open in new tab
+        return {
+            success: true,
+            data: `/api/certificates/${id}/download`
+        };
     }
 };
+
+export interface Certificate {
+    _id: string;
+    certificateNumber: string;
+    siteName: string; // Farm Name
+    plantType: string;
+    issuedDate: string;
+    expiryDate: string;
+    status: string;
+    qrCode: string;
+}

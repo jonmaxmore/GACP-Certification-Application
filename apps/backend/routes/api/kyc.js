@@ -1,5 +1,5 @@
 /**
- * V2 KYC Routes - Prisma Version
+ * KYC Routes 
  * User verification system using PostgreSQL
  */
 

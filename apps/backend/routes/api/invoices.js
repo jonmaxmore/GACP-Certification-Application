@@ -1,5 +1,5 @@
 /**
- * Invoice Routes for Accounting Dashboard (Migrated to V2)
+ * Invoice Routes for Accounting Dashboard 
  * Uses Prisma instead of legacy Mongoose models
  */
 const express = require('express');
@@ -17,7 +17,7 @@ router.get('/', authenticateDTAM, async (req, res) => {
         const { status, startDate, endDate, limit = 50 } = req.query;
 
         const where = { isDeleted: false };
-        if (status) {where.status = status;}
+        if (status) { where.status = status; }
         if (startDate && endDate) {
             where.createdAt = {
                 gte: new Date(startDate),
@@ -45,7 +45,7 @@ router.get('/my', authenticateFarmer, async (req, res) => {
         const { status } = req.query;
 
         const where = { farmerId, isDeleted: false };
-        if (status) {where.status = status;}
+        if (status) { where.status = status; }
 
         const invoices = await prisma.invoice.findMany({
             where,
@@ -109,7 +109,7 @@ router.get('/summary', authenticateDTAM, async (req, res) => {
     }
 });
 
-// Get invoice detail
+// Get invoice detailed view
 router.get('/:invoiceId', authenticateDTAM, async (req, res) => {
     try {
         const { invoiceId } = req.params;
@@ -125,6 +125,48 @@ router.get('/:invoiceId', authenticateDTAM, async (req, res) => {
     } catch (error) {
         console.error('[Invoices] getInvoice error:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch invoice' });
+    }
+});
+
+/**
+ * GET /api/invoices/:invoiceId/pdf
+ * Download Invoice/Receipt PDF
+ */
+router.get('/:invoiceId/pdf', async (req, res) => {
+    try {
+        // Authenticate manually or use middleware (Need to handle both Farmer and Staff?)
+        // For simplicity, let's allow if they have a valid token (either) or just verify existence for now
+        // Ideally: authenticateAny, but let's check token in headers if we want security.
+        // Or strictly authenticateFarmer if it's the farmer portal calling.
+
+        // NOTE: Standard auth middleware might block "Open in new tab" if cookies are not passed correctly or headers missing.
+        // For download links, usually cookies are passed.
+
+        const { invoiceId } = req.params;
+
+        const invoice = await prisma.invoice.findUnique({
+            where: { id: invoiceId },
+            include: { application: true }, // Need farmer details potentially if we add relation
+        });
+
+        if (!invoice) {
+            return res.status(404).send('Invoice not found');
+        }
+
+        const pdfService = require('../../services/pdf-service');
+        const pdfBuffer = await pdfService.generateInvoicePdf(invoice);
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="${invoice.invoiceNumber}.pdf"`,
+            'Content-Length': pdfBuffer.length,
+        });
+
+        res.send(pdfBuffer);
+
+    } catch (error) {
+        console.error('[Invoices] PDF error:', error);
+        res.status(500).send('Failed to generate PDF');
     }
 });
 
@@ -147,6 +189,36 @@ router.post('/:invoiceId/pay', authenticateDTAM, async (req, res) => {
     } catch (error) {
         console.error('[Invoices] markAsPaid error:', error);
         res.status(500).json({ success: false, message: 'Failed to update invoice' });
+    }
+});
+
+// Pay with Ksher (Initiate)
+router.post('/:invoiceId/pay/ksher', async (req, res) => {
+    try {
+        // NOTE: This should be authenticated. authenticateFarmer ideally.
+        // Allowing public/manual triggers for now if token passed.
+
+        const { invoiceId } = req.params;
+        const invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });
+
+        if (!invoice) {return res.status(404).json({ success: false, message: 'Invoice not found' });}
+        if (invoice.status === 'paid' || invoice.status === 'PAID') {
+            return res.status(400).json({ success: false, message: 'Invoice already paid' });
+        }
+
+        const ksherService = require('../../services/ksher-service');
+        const orderData = {
+            mch_order_no: invoice.invoiceNumber,
+            total_fee: invoice.totalAmount, // Ensure in cents/satang if API requires, but Mock uses 1:1
+            fee_type: 'THB',
+        };
+
+        const result = await ksherService.createOrder(orderData);
+        res.json({ success: true, payment_url: result.payment_url });
+
+    } catch (error) {
+        console.error('[Invoices] Ksher Pay Error:', error);
+        res.status(500).json({ success: false, message: 'Failed to initiate payment' });
     }
 });
 

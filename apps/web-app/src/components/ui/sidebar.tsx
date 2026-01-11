@@ -4,7 +4,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icons } from "./icons";
-import { AuthService } from "@/lib/services/auth-service";
+import { AuthService, AuthUser } from "@/lib/services/auth-service";
+import { useEffect, useState } from "react";
 
 interface SidebarProps {
     isDark: boolean;
@@ -13,17 +14,39 @@ interface SidebarProps {
 
 export function Sidebar({ isDark, toggleTheme }: SidebarProps) {
     const pathname = usePathname();
+    const [user, setUser] = useState<AuthUser | null>(null);
     const accentColor = isDark ? "#10B981" : "#16A34A";
     const mutedColor = isDark ? "#64748B" : "#9CA3AF";
 
+    useEffect(() => {
+        // Initial load
+        const currentUser = AuthService.getUser();
+        setUser(currentUser);
+
+        // Listen for updates (login/profile update)
+        const unsubscribe = AuthService.onAuthChange((event, data) => {
+            if (event === 'login' && data && typeof data === 'object' && 'user' in data) {
+                setUser((data as { user: AuthUser }).user);
+            } else {
+                // Refresh from storage just in case
+                setUser(AuthService.getUser());
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const isVerified = user?.verificationStatus === 'APPROVED';
+
     const navItems = [
-        { href: "/dashboard", icon: Icons.Home, label: "หน้าหลัก" },
-        { href: "/applications", icon: Icons.Document, label: "คำขอ" },
-        { href: "/establishments", icon: Icons.Leaf, label: "แปลงปลูก" },
-        { href: "/certificates", icon: Icons.Certificate, label: "ใบรับรอง" },
-        { href: "/tracking", icon: Icons.Compass, label: "ติดตาม" },
-        { href: "/payments", icon: Icons.CreditCard, label: "การเงิน" },
-        { href: "/profile", icon: Icons.User, label: "โปรไฟล์" },
+        { href: "/dashboard", icon: Icons.Home, label: "หน้าหลัก", requiredVerify: false },
+        { href: "/applications", icon: Icons.Document, label: "คำขอ", requiredVerify: true },
+        { href: "/establishments", icon: Icons.Leaf, label: "แปลงปลูก", requiredVerify: true },
+        { href: "/planting", icon: Icons.Calendar, label: "รอบการปลูก", requiredVerify: true },
+        { href: "/certificates", icon: Icons.Certificate, label: "ใบรับรอง", requiredVerify: true },
+        { href: "/tracking", icon: Icons.Compass, label: "ติดตาม", requiredVerify: true },
+        { href: "/payments", icon: Icons.CreditCard, label: "การเงิน", requiredVerify: true },
+        { href: "/profile", icon: Icons.User, label: "โปรไฟล์", requiredVerify: false },
     ];
 
     const handleLogout = () => {
@@ -36,6 +59,11 @@ export function Sidebar({ isDark, toggleTheme }: SidebarProps) {
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-400 flex items-center justify-center text-white font-semibold text-xl mb-8">G</div>
             <nav className="flex-1 flex flex-col gap-1 w-full">
                 {navItems.map(item => {
+                    // Access Control Rule: Hide if requires verify and user is not verified
+                    if (item.requiredVerify && !isVerified) {
+                        return null;
+                    }
+
                     const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
                     return (
                         <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 py-3 relative">

@@ -25,6 +25,7 @@ const mfaRouter = require('./mfa');
 const publicRouter = require('./public');
 const consentRouter = require('./consent');
 const documentsRouter = require('./documents');
+
 const plantingCyclesRouter = require('./planting-cycles');
 const lotsRouter = require('./lots');
 const traceRouter = require('./trace');
@@ -45,6 +46,8 @@ router.use('/applications', applicationsRouter);
 router.use('/invoices', invoicesRouter);
 router.use('/staff', staffRouter);
 router.use('/audits', auditsRouter);
+router.use('/reports', require('./reports'));
+
 router.use('/certificates', certificatesRouter);
 router.use('/payments', paymentsRouter);
 router.use('/quotes', quotesRouter);
@@ -58,14 +61,18 @@ router.use('/documents', documentsRouter);
 router.use('/planting-cycles', plantingCyclesRouter);
 router.use('/lots', lotsRouter);
 router.use('/trace', traceRouter);
-router.use('/criteria', require('./criteria'));
+
+router.use('/identity', require('./identity')); // eKYC Identity Verification
 router.use('/standards', require('./standards'));
 router.use('/farms', farmsRouter);
 router.use('/dashboard', dashboardRouter);
 router.use('/master-data', require('./master-data'));
+router.use('/webhooks', require('./webhooks'));
 router.use('/admin', require('./admin')); // Admin CMS Routes
 
 // Health check with version info
+router.use('/', require('./plots')); // Mount Plots/Farm Sub-resources at root of API
+
 router.get('/health', (req, res) => {
   res.json({
     success: true,

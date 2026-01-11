@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Kanit, Sarabun, Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/lib/services/auth-provider";
 import SystemGuard from "@/components/system-guard";
 
 const kanit = Kanit({
@@ -37,9 +38,11 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body className={`${kanit.variable} ${sarabun.variable} ${inter.variable} font-kanit antialiased`} suppressHydrationWarning>
-        <SystemGuard>
-          {children}
-        </SystemGuard>
+        <AuthProvider>
+          <SystemGuard>
+            {children}
+          </SystemGuard>
+        </AuthProvider>
       </body>
     </html>
   );

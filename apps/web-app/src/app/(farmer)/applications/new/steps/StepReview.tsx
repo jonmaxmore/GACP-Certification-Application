@@ -2,16 +2,63 @@
 
 import { useWizardStore } from '../hooks/useWizardStore';
 import Image from 'next/image';
+import { useState } from 'react';
+import { apiClient } from '@/lib/api/api-client';
+import { useAuth } from '@/lib/services/auth-provider'; // Verified Data Source
+
+// Define response type
+interface DraftResponse {
+    _id: string;
+    applicationNo?: string;
+}
 
 export const StepReview = () => {
-    const { state, setCurrentStep } = useWizardStore();
+    const { user } = useAuth(); // Get Verified User
+    const { state, setCurrentStep, setApplicationId } = useWizardStore();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Simulated uploaded documents (In a real app, these would come from state.documents)
     // Using placeholders for visualization as requested by "Preview uploaded documents"
-    const attachedDocs = [
-        { title: 'บัตรประชาชน (National ID Card)', src: 'https://via.placeholder.com/600x400/e2e8f0/64748b?text=ID+Card+Preview' },
-        { title: 'ทะเบียนบ้าน (House Registration)', src: 'https://via.placeholder.com/600x400/e2e8f0/64748b?text=House+Registration+Preview' }
+    const attachedDocs = state.documents.length > 0 ? state.documents : [
+        { id: 'mock1', name: 'บัตรประชาชน (National ID Card)', url: 'https://via.placeholder.com/600x400/e2e8f0/64748b?text=ID+Card+Preview', uploaded: true },
+        { id: 'mock2', name: 'ทะเบียนบ้าน (House Registration)', url: 'https://via.placeholder.com/600x400/e2e8f0/64748b?text=House+Registration+Preview', uploaded: true }
     ];
+
+    const handleSubmit = async () => {
+        setIsSubmitting(true);
+        try {
+            // Construct Payload
+            const payload = {
+                plantId: state.plantId,
+                serviceType: state.serviceType,
+                purpose: state.certificationPurpose,
+                applicantData: state.applicantData,
+                locationData: state.siteData,
+                productionData: state.productionData,
+                documents: state.documents,
+                youtubeUrl: state.youtubeUrl, // Important!
+                youtubeUrl: state.youtubeUrl, // Important!
+                areaType: state.locationType || state.siteData?.plots?.[0]?.solarSystem || 'OUTDOOR', // Prioritize Global Type
+            };
+
+            const res = await apiClient.post<DraftResponse>('/applications/draft', payload);
+
+            if (res.success && res.data) {
+                // Save App ID to store for next steps (Invoice/Quote)
+                if (res.data._id) {
+                    setApplicationId(res.data._id);
+                }
+                setCurrentStep(6);
+            } else {
+                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + (res.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Submit error:', error);
+            alert('ไม่สามารถเชื่อมต่อระบบได้');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <div className="flex flex-col items-center p-6 bg-slate-50 min-h-screen font-thai print:p-0 print:bg-white">
@@ -28,10 +75,14 @@ export const StepReview = () => {
                         พิมพ์เอกสาร (Print All)
                     </button>
                     <button
-                        onClick={() => setCurrentStep(6)} // Go to Quote
-                        className="px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-500/30"
+                        onClick={handleSubmit}
+                        disabled={isSubmitting}
+                        className={`
+                            px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/30 transition-all
+                            ${isSubmitting ? 'opacity-70 cursor-wait' : 'hover:bg-emerald-700'}
+                        `}
                     >
-                        ถัดไป (Next) →
+                        {isSubmitting ? 'กำลังบันทึก...' : 'ยืนยันและถัดไป (Confirm & Next) →'}
                     </button>
                 </div>
             </div>
@@ -59,6 +110,28 @@ export const StepReview = () => {
                         <div className="border border-slate-300 rounded-lg p-6">
                             <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2">1. ข้อมูลทั่วไป (General Information)</h3>
                             <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+                                {/* Verified Applicant Info */}
+                                <div className="col-span-2 bg-emerald-50/50 p-4 rounded-lg border border-emerald-100 mb-2">
+                                    <h5 className="text-sm font-bold text-emerald-800 mb-2 flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        ข้อมูลผู้ยื่นคำขอ (Verified Applicant)
+                                    </h5>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-xs text-slate-500">ชื่อ-นามสกุล / นิติบุคคล</label>
+                                            <div className="font-medium text-slate-900">{user?.firstName} {user?.lastName} {user?.companyName ? `(${user.companyName})` : ''}</div>
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-slate-500">เลขประจำตัว (ID / Tax No)</label>
+                                            <div className="font-medium text-slate-900 font-mono">{user?.taxId || user?.laserCode || user?.idCard?.substring(0, 6) + 'xxxxxxx' || 'N/A'}</div>
+                                        </div>
+                                        <div className="col-span-2">
+                                            <label className="text-xs text-slate-500">ที่อยู่ (Address)</label>
+                                            <div className="font-medium text-slate-900">{user?.address || user?.province || 'ตามภูมิลำเนา (Registered Address)'}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div>
                                     <label className="text-xs text-slate-500 block">ประเภทคำขอ</label>
                                     <div className="font-medium">{state.serviceType === 'NEW' ? 'ขอใหม่ (New Application)' : 'ต่ออายุ (Renewal)'}</div>
@@ -85,6 +158,13 @@ export const StepReview = () => {
                                 <div>
                                     <label className="text-xs text-slate-500 block">ที่ตั้ง</label>
                                     <div className="font-medium">{state.siteData?.address} {state.siteData?.province} {state.siteData?.postalCode}</div>
+                                </div>
+                                <div>
+                                    <label className="text-xs text-slate-500 block">ลักษณะพื้นที่ (Cultivation System)</label>
+                                    <div className="font-medium text-emerald-700 font-bold">
+                                        {state.locationType === 'GREENHOUSE' ? 'โรงเรือน (Greenhouse)' :
+                                            state.locationType === 'INDOOR' ? 'ระบบปิด (Indoor)' : 'กลางแจ้ง (Outdoor)'}
+                                    </div>
                                 </div>
                             </div>
 
@@ -133,12 +213,12 @@ export const StepReview = () => {
                     <div className="grid grid-cols-1 gap-8">
                         {attachedDocs.map((doc, index) => (
                             <div key={index} className="flex flex-col items-center">
-                                <h4 className="self-start font-bold text-slate-700 mb-2">{index + 1}. {doc.title}</h4>
+                                <h4 className="self-start font-bold text-slate-700 mb-2">{index + 1}. {doc.name}</h4>
                                 <div className="w-full border border-slate-200 rounded-lg p-2 bg-slate-50">
                                     {/* Using img tag directly for print compatibility often better than Next Image for full page width handling in some cases, but sticking to img for simplicity in previews */}
                                     <img
-                                        src={doc.src}
-                                        alt={doc.title}
+                                        src={doc.url}
+                                        alt={doc.name}
                                         className="w-full h-auto object-contain max-h-[100mm]"
                                         loading="lazy"
                                     />

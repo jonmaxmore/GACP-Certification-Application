@@ -1,5 +1,5 @@
 /**
- * Accounting Dashboard Routes (Migrated to V2)
+ * Accounting Dashboard Routes 
  * Uses Prisma (PostgreSQL)
  */
 const express = require('express');

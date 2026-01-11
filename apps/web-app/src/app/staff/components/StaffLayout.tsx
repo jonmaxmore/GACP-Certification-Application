@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
     IconHome, IconDocument, IconSearch, IconCalendar, IconCreditCard,
-    IconChart, IconUser, IconSun, IconMoon, IconLogout
+    IconChart, IconUser, IconSun, IconMoon, IconLogout, IconCertificate
 } from "@/components/ui/icons";
 
 interface StaffUser {
@@ -49,9 +49,11 @@ const NAV_ITEMS: NavItem[] = [
     { href: "/staff/dashboard", Icon: IconHome, label: "หน้าหลัก" },
     { href: "/staff/applications", Icon: IconDocument, label: "คำขอ" },
     { href: "/staff/audits", Icon: IconSearch, label: "ตรวจแปลง" },
+    { href: "/staff/certificates", Icon: IconCertificate, label: "ใบรับรอง" },
     { href: "/staff/calendar", Icon: IconCalendar, label: "ปฏิทิน" },
     { href: "/staff/accounting", Icon: IconCreditCard, label: "บัญชี", roles: ["accountant", "ACCOUNTANT", "admin", "ADMIN", "SUPER_ADMIN"] },
     { href: "/staff/analytics", Icon: IconChart, label: "สถิติ" },
+    { href: "/staff/verification", Icon: IconUsers, label: "ตรวจสอบตัวตน", roles: ["admin", "ADMIN", "SUPER_ADMIN"] },
     { href: "/staff/management", Icon: IconUsers, label: "จัดการ", roles: ["admin", "ADMIN", "SUPER_ADMIN"] },
 ];
 

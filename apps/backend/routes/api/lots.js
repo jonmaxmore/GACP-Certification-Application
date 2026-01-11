@@ -1,11 +1,11 @@
 /**
- * V2 Lots API Route
+ * Lots API Route
  * Manages lots (บรรจุภัณฑ์) with QR code generation
  * 
- * POST /api/v2/lots - Create lot from batch
- * GET /api/v2/lots/:id - Get lot details
- * GET /api/v2/lots/:id/qr - Get QR code image
- * GET /api/v2/lots/:id/qr/print - Get printable QR label (PDF-like)
+ * POST /api/lots - Create lot from batch
+ * GET /api/lots/:id - Get lot details
+ * GET /api/lots/:id/qr - Get QR code image
+ * GET /api/lots/:id/qr/print - Get printable QR label (PDF-like)
  */
 
 const express = require('express');
@@ -14,7 +14,7 @@ const { prisma } = require('../../services/prisma-database');
 const qrcodeService = require('../../services/qrcode/qrcode-service');
 
 /**
- * POST /api/v2/lots
+ * POST /api/lots
  * Create a new lot from a harvest batch
  */
 router.post('/', async (req, res) => {
@@ -47,12 +47,37 @@ router.post('/', async (req, res) => {
         // Check batch exists
         const batch = await prisma.harvestBatch.findUnique({
             where: { id: batchId },
+            include: { lots: true }, // Fetch existing lots
         });
 
         if (!batch) {
             return res.status(404).json({
                 success: false,
                 message: 'Harvest batch not found',
+            });
+        }
+
+        // [New Phase 5 Requirement] Strict Quota Enforcement
+        // Calculate total weight used so far
+        const existingWeight = batch.lots.reduce((sum, lot) => sum + (lot.totalWeight || 0), 0);
+        const newWeight = parseFloat(quantity) * parseFloat(unitWeight);
+        const totalProjectedWeight = existingWeight + newWeight;
+
+        // Assuming batch.dryWeight or batch.freshWeight is the limit. 
+        // Using dryWeight as primary if available, else fresh.
+        const limitWeight = batch.dryWeight || batch.freshWeight || 0;
+
+        // Allow small buffer (e.g. 1%) for rounding errors, or strict? 
+        // User said "approved X -> QR X", implies strict.
+        if (limitWeight > 0 && totalProjectedWeight > limitWeight) {
+            return res.status(400).json({
+                success: false,
+                message: `Quota Exceeded! Batch limit: ${limitWeight}kg. Used: ${existingWeight}kg. Requested: ${newWeight}kg.`,
+                details: {
+                    limit: limitWeight,
+                    remaining: limitWeight - existingWeight,
+                    requested: newWeight,
+                },
             });
         }
 
@@ -111,7 +136,7 @@ router.post('/', async (req, res) => {
 });
 
 /**
- * GET /api/v2/lots/:id
+ * GET /api/lots/:id
  * Get lot details with batch and farm info
  */
 router.get('/:id', async (req, res) => {
@@ -169,7 +194,7 @@ router.get('/:id', async (req, res) => {
 });
 
 /**
- * GET /api/v2/lots/:id/qr
+ * GET /api/lots/:id/qr
  * Get QR code as PNG image
  */
 router.get('/:id/qr', async (req, res) => {
@@ -206,7 +231,7 @@ router.get('/:id/qr', async (req, res) => {
 });
 
 /**
- * GET /api/v2/lots/:id/qr/print
+ * GET /api/lots/:id/qr/print
  * Get printable QR label with product info (JSON for frontend to render)
  */
 router.get('/:id/qr/print', async (req, res) => {
@@ -275,7 +300,7 @@ router.get('/:id/qr/print', async (req, res) => {
 });
 
 /**
- * GET /api/v2/batches/:batchId/lots
+ * GET /api/batches/:batchId/lots
  * Get all lots for a batch
  */
 router.get('/batch/:batchId', async (req, res) => {

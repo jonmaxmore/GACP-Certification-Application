@@ -1,5 +1,5 @@
 /**
- * V2 Ticket Routes - Prisma Version
+ * Ticket Routes 
  * Support ticket system using PostgreSQL
  * Note: Ticket model not yet in schema - using simple JSON storage for now
  */

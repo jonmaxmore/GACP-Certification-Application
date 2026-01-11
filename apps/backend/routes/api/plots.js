@@ -1,8 +1,7 @@
 const express = require('express');
 const { logger } = require('../../shared');
-const { PrismaClient } = require('@prisma/client');
+const { prisma } = require('../../services/prisma-database');
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 /**
@@ -19,13 +18,36 @@ router.post('/farms/:farmId/plots', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
 
+        // 1. Fetch Farm to Check Authorization
+        const farm = await prisma.farm.findUnique({ where: { id: farmId } });
+        if (!farm) {
+            return res.status(404).json({ success: false, message: 'Farm not found' });
+        }
+
+        // 2. Validate Cultivation Method (The License Lock)
+        // If farm is authorized for OUTDOOR, they cannot create INDOOR plots
+        const requestedSystem = solarSystem || 'OUTDOOR';
+        if (farm.cultivationMethod !== 'BOTH' && farm.cultivationMethod !== requestedSystem) {
+            return res.status(400).json({
+                success: false,
+                message: `ไม่อนุญาต: ฟาร์มของคุณได้รับรองแบบ ${farm.cultivationMethod} ไม่สามารถสร้างแปลงแบบ ${requestedSystem} ได้`,
+            });
+        }
+
+        // 3. Validate Area (Optional: Check against total limit)
+        // const existingPlots = await prisma.plot.aggregate({ where: { farmId }, _sum: { area: true } });
+        // const currentTotal = existingPlots._sum.area || 0;
+        // if (currentTotal + parseFloat(area) > farm.cultivationArea) {
+        //      return res.status(400).json({ success: false, message: 'พื้นที่แปลงรวมเกินพื้นที่ขออนุญาต' });
+        // }
+
         const plot = await prisma.plot.create({
             data: {
                 farmId,
                 name,
                 area: parseFloat(area),
                 areaUnit: areaUnit || 'rai',
-                solarSystem: solarSystem || 'OUTDOOR', // OUTDOOR, INDOOR, GREENHOUSE
+                solarSystem: requestedSystem,
             },
         });
 

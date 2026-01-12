@@ -141,11 +141,33 @@ export default function RegisterPage() {
             case 'identifier':
                 const cleanId = value.replace(/-/g, "");
                 if (accountType === "INDIVIDUAL" && cleanId.length === 13) {
-                    if (!validateThaiId(value)) errors.identifier = "เลขบัตรประชาชนไม่ถูกต้อง";
-                    else delete errors.identifier;
+                    if (!validateThaiId(value)) {
+                        errors.identifier = "เลขบัตรประชาชนไม่ถูกต้อง";
+                        setFieldErrors(errors);
+                    } else {
+                        // Check availability (Promise-based)
+                        delete errors.identifier;
+                        setFieldErrors(errors); // Clear local error first
+                        fetch('/api/auth-farmer/check-identifier', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ identifier: cleanId, accountType })
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (!data.success || !data.available) {
+                                    setFieldErrors(prev => ({ ...prev, identifier: data.error || "หมายเลขนี้ถูกใช้งานแล้ว" }));
+                                }
+                            })
+                            .catch(() => { });
+                    }
                 } else if (cleanId.length > 0 && cleanId.length < 13) {
                     errors.identifier = `กรอกแล้ว ${cleanId.length}/13 หลัก`;
-                } else delete errors.identifier;
+                    setFieldErrors(errors);
+                } else {
+                    delete errors.identifier;
+                    setFieldErrors(errors);
+                }
                 break;
             case 'phone':
                 if (value.length > 0 && value.length < 10) errors.phone = `กรอกแล้ว ${value.length}/10 หลัก`;

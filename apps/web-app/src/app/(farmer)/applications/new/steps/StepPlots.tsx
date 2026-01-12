@@ -16,7 +16,6 @@ export const StepPlots = () => {
         name: '',
         areaSize: '',
         areaUnit: 'Rai',
-        areaUnit: 'Rai',
         solarSystem: state.locationType || 'OUTDOOR' // Initialize with global selection
     });
 
@@ -208,6 +207,73 @@ export const StepPlots = () => {
                                     </select>
                                 </div>
                             </div>
+
+                            {/* Yield Prediction Widget */}
+                            {currentPlot.areaSize && state.plantId && (
+                                <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-xl relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                                        <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" className="text-blue-600">
+                                            <path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z" />
+                                        </svg>
+                                    </div>
+                                    <h4 className="text-sm font-bold text-blue-800 flex items-center gap-2 mb-2">
+                                        ✨ AI Yield Prediction (คาดการณ์ผลผลิต)
+                                    </h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-xs text-blue-600 mb-1">ผลผลิต/รอบ (Dry)</p>
+                                            {(() => {
+                                                const PLANT_DATA: any = {
+                                                    'cannabis': { yield: 0.5, spacing: 1.5, price: 5000 },
+                                                    'kratom': { yield: 2.0, spacing: 4.0, price: 300 },
+                                                    'turmeric': { yield: 0.8, spacing: 0.5, price: 80 },
+                                                    'ginger': { yield: 0.6, spacing: 0.5, price: 120 },
+                                                    'black_galangal': { yield: 0.4, spacing: 0.3, price: 1500 },
+                                                    'plai': { yield: 1.2, spacing: 1.0, price: 100 }
+                                                };
+
+                                                const RISK: any = { 'INDOOR': 0.95, 'GREENHOUSE': 0.90, 'OUTDOOR': 0.70 };
+
+                                                const size = parseFloat(currentPlot.areaSize) || 0;
+                                                const unit = currentPlot.areaUnit || 'Rai';
+                                                const sqm = unit === 'Rai' ? size * 1600 : unit === 'Ngan' ? size * 400 : size;
+                                                const plant = PLANT_DATA[state.plantId] || PLANT_DATA['cannabis'];
+                                                const risk = RISK[currentPlot.solarSystem || 'OUTDOOR'];
+
+                                                // Calculation
+                                                const effectiveArea = sqm * 0.8;
+                                                const count = Math.floor(effectiveArea / plant.spacing);
+                                                const yieldVal = count * plant.yield * risk;
+                                                const revenue = yieldVal * plant.price;
+
+                                                return (
+                                                    <>
+                                                        <span className="text-2xl font-bold text-blue-900">
+                                                            {yieldVal.toLocaleString(undefined, { maximumFractionDigits: 1 })}
+                                                        </span>
+                                                        <span className="text-sm text-blue-700 font-medium ml-1">kg</span>
+
+                                                        <div className="mt-2">
+                                                            <p className="text-xs text-blue-600 mb-0.5">มูลค่าคาดการณ์ (บาท)</p>
+                                                            <span className="text-lg font-bold text-emerald-600">
+                                                                ฿{revenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                                            </span>
+                                                        </div>
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                        <div className="text-xs text-blue-600 space-y-1 border-l border-blue-200 pl-4">
+                                            <p>• ใช้พื้นที่จริง 80%</p>
+                                            <p>• ความเสี่ยง: {(() => {
+                                                const s = currentPlot.solarSystem || 'OUTDOOR';
+                                                return s === 'OUTDOOR' ? '30%' : s === 'GREENHOUSE' ? '10%' : '5%';
+                                            })()}</p>
+                                            <p>• ระยะปลูกมาตรฐาน</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex gap-3 mt-8">

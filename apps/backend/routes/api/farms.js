@@ -1,63 +1,31 @@
 /**
- * Farms/Establishments API
- * Manages farmer's cultivation plots and farm data
- * 
- * GET    /api/farms/my - List current farmer's farms
- * GET    /api/farms/:id - Get farm details
- * POST   /api/farms - Create new farm
- * PATCH  /api/farms/:id - Update farm
- * DELETE /api/farms/:id - Delete farm (soft delete)
+ * @swagger
+ * tags:
+ *   name: Farms
+ *   description: Farm establishment management
  */
 
 const express = require('express');
 const router = express.Router();
-const { prisma } = require('../../services/prisma-database');
+const farmService = require('../../services/farm-service');
 const { authenticateFarmer } = require('../../middleware/auth-middleware');
-
-// Configure Upload Middleware (using shared middleware or custom if needed)
-// Legacy module used 'uploads/establishments'
 const upload = require('../../middleware/upload-middleware');
-const fs = require('fs');
-const path = require('path');
 
 /**
- * GET /api/farms/my
- * Get all farms for the current authenticated farmer
+ * @swagger
+ * /api/farms/my:
+ *   get:
+ *     summary: Get all my farms
+ *     tags: [Farms]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of farms
  */
 router.get('/my', authenticateFarmer, async (req, res) => {
     try {
-        const farms = await prisma.farm.findMany({
-            where: {
-                ownerId: req.user.id,
-                isDeleted: false,
-            },
-            orderBy: { createdAt: 'desc' },
-            select: {
-                id: true,
-                uuid: true,
-                farmName: true,
-                farmType: true,
-                address: true,
-                province: true,
-                district: true,
-                subDistrict: true,
-                postalCode: true,
-                latitude: true,
-                longitude: true,
-                totalArea: true,
-                cultivationArea: true,
-                areaUnit: true,
-                cultivationMethod: true,
-                irrigationType: true,
-                soilType: true,
-                waterSource: true,
-                status: true,
-                verifiedAt: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        });
-
+        const farms = await farmService.getByOwner(req.user.id);
         res.json({
             success: true,
             count: farms.length,
@@ -65,124 +33,75 @@ router.get('/my', authenticateFarmer, async (req, res) => {
         });
     } catch (error) {
         console.error('[Farms] Error fetching farms:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch farms',
-            error: error.message,
-        });
+        res.status(500).json({ success: false, error: 'Failed to fetch farms' });
     }
 });
 
 /**
- * GET /api/farms/:id
- * Get a specific farm by ID
+ * @swagger
+ * /api/farms/{id}:
+ *   get:
+ *     summary: Get farm details
+ *     tags: [Farms]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
  */
 router.get('/:id', authenticateFarmer, async (req, res) => {
     try {
-        const { id } = req.params;
-
-        const farm = await prisma.farm.findFirst({
-            where: {
-                id,
-                ownerId: req.user.id,
-                isDeleted: false,
-            },
-            include: {
-                plantingCycles: {
-                    where: { isDeleted: false },
-                    orderBy: { createdAt: 'desc' },
-                    take: 5,
-                },
-                harvestBatches: {
-                    where: { isDeleted: false },
-                    orderBy: { createdAt: 'desc' },
-                    take: 5,
-                },
-            },
-        });
+        const farm = await farmService.getById(req.params.id, req.user.id);
 
         if (!farm) {
-            return res.status(404).json({
-                success: false,
-                message: 'Farm not found',
-            });
+            return res.status(404).json({ success: false, message: 'Farm not found' });
         }
 
-        res.json({
-            success: true,
-            data: farm,
-        });
+        res.json({ success: true, data: farm });
     } catch (error) {
         console.error('[Farms] Error fetching farm:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch farm',
-            error: error.message,
-        });
+        res.status(500).json({ success: false, error: 'Failed to fetch farm' });
     }
 });
 
 /**
- * POST /api/farms
- * Create a new farm
- * Supports 'evidence_photo' file upload
+ * @swagger
+ * /api/farms:
+ *   post:
+ *     summary: Create new farm
+ *     tags: [Farms]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               farmName:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               evidence_photo:
+ *                 type: string
+ *                 format: binary
  */
 router.post('/', authenticateFarmer, upload.single('evidence_photo'), async (req, res) => {
     try {
-        const {
-            farmName,
-            farmType,
-            address,
-            province,
-            district,
-            subDistrict,
-            postalCode,
-            latitude,
-            longitude,
-            totalArea,
-            cultivationArea,
-            areaUnit,
-            cultivationMethod,
-            irrigationType,
-            soilType,
-            waterSource,
-            landDocuments,
-        } = req.body;
+        const { farmName, address, province, district, subDistrict } = req.body;
 
-        // Validation
         if (!farmName || !address || !province || !district || !subDistrict) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing required fields: farmName, address, province, district, subDistrict',
+                message: 'Missing required fields',
             });
         }
 
-        const farm = await prisma.farm.create({
-            data: {
-                ownerId: req.user.id,
-                farmName,
-                farmType: farmType || 'CULTIVATION',
-                address,
-                province,
-                district,
-                subDistrict,
-                postalCode: postalCode || '',
-                latitude: latitude ? parseFloat(latitude) : null,
-                longitude: longitude ? parseFloat(longitude) : null,
-                totalArea: totalArea ? parseFloat(totalArea) : 0,
-                cultivationArea: cultivationArea ? parseFloat(cultivationArea) : 0,
-                areaUnit: areaUnit || 'rai',
-                cultivationMethod: cultivationMethod || 'OUTDOOR',
-                irrigationType,
-                soilType,
-                waterSource,
-                // Handle file upload or JSON body
-                landDocuments: req.file ? {
-                    images: [`/uploads/${req.file.filename}`],
-                } : (landDocuments || null),
-                status: 'DRAFT',
-            },
-        });
+        const farm = await farmService.createFarm(req.user.id, req.body, req.file);
 
         console.log(`[Farms] Farm created: ${farm.id} by user ${req.user.id}`);
 
@@ -193,185 +112,80 @@ router.post('/', authenticateFarmer, upload.single('evidence_photo'), async (req
         });
     } catch (error) {
         console.error('[Farms] Error creating farm:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to create farm',
-            error: error.message,
-        });
+        res.status(500).json({ success: false, error: 'Failed to create farm' });
     }
 });
 
 /**
- * PATCH /api/farms/:id
- * Update a farm
+ * @swagger
+ * /api/farms/{id}:
+ *   patch:
+ *     summary: Update farm
+ *     tags: [Farms]
+ *     security:
+ *       - BearerAuth: []
  */
 router.patch('/:id', authenticateFarmer, async (req, res) => {
     try {
-        const { id } = req.params;
+        const updated = await farmService.updateFarm(req.params.id, req.user.id, req.body);
 
-        // Check ownership
-        const existingFarm = await prisma.farm.findFirst({
-            where: { id, ownerId: req.user.id, isDeleted: false },
-        });
-
-        if (!existingFarm) {
-            return res.status(404).json({
-                success: false,
-                message: 'Farm not found or access denied',
-            });
+        if (!updated) {
+            return res.status(404).json({ success: false, message: 'Farm not found or access denied' });
         }
-
-        // Prepare update data (only include provided fields)
-        const updateData = {};
-        const allowedFields = [
-            'farmName', 'farmType', 'address', 'province', 'district',
-            'subDistrict', 'postalCode', 'latitude', 'longitude',
-            'totalArea', 'cultivationArea', 'areaUnit', 'cultivationMethod',
-            'irrigationType', 'soilType', 'waterSource', 'landDocuments',
-        ];
-
-        for (const field of allowedFields) {
-            if (req.body[field] !== undefined) {
-                updateData[field] = req.body[field];
-            }
-        }
-
-        // Parse numeric fields
-        if (updateData.latitude) { updateData.latitude = parseFloat(updateData.latitude); }
-        if (updateData.longitude) { updateData.longitude = parseFloat(updateData.longitude); }
-        if (updateData.totalArea) { updateData.totalArea = parseFloat(updateData.totalArea); }
-        if (updateData.cultivationArea) { updateData.cultivationArea = parseFloat(updateData.cultivationArea); }
-
-        const farm = await prisma.farm.update({
-            where: { id },
-            data: updateData,
-        });
 
         res.json({
             success: true,
             message: 'Farm updated successfully',
-            data: farm,
+            data: updated,
         });
     } catch (error) {
         console.error('[Farms] Error updating farm:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to update farm',
-            error: error.message,
-        });
+        res.status(500).json({ success: false, error: 'Failed to update farm' });
     }
 });
 
 /**
- * DELETE /api/farms/:id
- * Soft delete a farm
+ * @swagger
+ * /api/farms/{id}:
+ *   delete:
+ *     summary: Delete farm
+ *     tags: [Farms]
+ *     security:
+ *       - BearerAuth: []
  */
 router.delete('/:id', authenticateFarmer, async (req, res) => {
     try {
-        const { id } = req.params;
+        const deleted = await farmService.deleteFarm(req.params.id, req.user.id);
 
-        // Check ownership
-        const existingFarm = await prisma.farm.findFirst({
-            where: { id, ownerId: req.user.id, isDeleted: false },
-        });
-
-        if (!existingFarm) {
-            return res.status(404).json({
-                success: false,
-                message: 'Farm not found or access denied',
-            });
+        if (!deleted) {
+            return res.status(404).json({ success: false, message: 'Farm not found or access denied' });
         }
 
-        // Soft delete
-        await prisma.farm.update({
-            where: { id },
-            data: {
-                isDeleted: true,
-                deletedAt: new Date(),
-                deletedBy: req.user.id,
-            },
-        });
-
-        res.json({
-            success: true,
-            message: 'Farm deleted successfully',
-        });
+        res.json({ success: true, message: 'Farm deleted successfully' });
     } catch (error) {
         console.error('[Farms] Error deleting farm:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to delete farm',
-            error: error.message,
-        });
+        res.status(500).json({ success: false, error: 'Failed to delete farm' });
     }
 });
 
 /**
- * GET /api/farms/:id/qrcode
- * Generate printable QR Code for the farm (e.g. for farm gate)
+ * @swagger
+ * /api/farms/{id}/qrcode:
+ *   get:
+ *     summary: Get Farm QR Code Sticker
+ *     tags: [Farms]
+ *     security:
+ *       - BearerAuth: []
  */
 router.get('/:id/qrcode', authenticateFarmer, async (req, res) => {
     try {
-        const { id } = req.params;
-        const QRCode = require('qrcode'); // Ensure qrcode is installed or use service
+        const html = await farmService.generateQRCode(req.params.id, req.user.id);
 
-        // Check ownership
-        const farm = await prisma.farm.findFirst({
-            where: { id, ownerId: req.user.id, isDeleted: false },
-        });
-
-        if (!farm) {return res.status(404).send('Farm not found');}
-
-        // Public Verification URL (Mock for now or use env)
-        const publicUrl = `${process.env.PUBLIC_APP_URL || 'https://gacp.dtam.go.th'}/verify/farm/${farm.id}`;
-
-        // Generate QR Data URL
-        const qrDataUrl = await QRCode.toDataURL(publicUrl, { width: 400, margin: 2 });
-
-        // Generate Printable HTML
-        const html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>QR Code: ${farm.farmName}</title>
-                <style>
-                    body { font-family: 'Sarabun', sans-serif; text-align: center; padding: 20px; }
-                    .sticker { 
-                        border: 2px solid #2E7D32; 
-                        border-radius: 10px;
-                        padding: 20px; 
-                        width: 300px; 
-                        margin: 0 auto; 
-                        text-align: center;
-                    }
-                    h2 { color: #2E7D32; margin: 10px 0; font-size: 1.2em; }
-                    h3 { color: #555; margin: 5px 0; font-size: 1em; font-weight: normal; }
-                    img { width: 200px; height: 200px; }
-                    .footer { font-size: 0.8em; color: #888; margin-top: 10px; }
-                    @media print {
-                        .no-print { display: none; }
-                        body { padding: 0; }
-                        .sticker { border: none; } 
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="sticker">
-                    <h2>GACP THAILAND</h2>
-                    <h3>${farm.farmName}</h3>
-                    <img src="${qrDataUrl}" alt="Farm QR Code" />
-                    <div class="footer">Scan to verify farm status</div>
-                    <div class="footer">ID: ${farm.id}</div>
-                </div>
-                <div class="no-print" style="margin-top: 20px;">
-                    <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; background: #2E7D32; color: white; border: none; border-radius: 5px; cursor: pointer;">Print Sticker</button>
-                </div>
-            </body>
-            </html>
-        `;
+        if (!html) {
+            return res.status(404).send('Farm not found');
+        }
 
         res.send(html);
-
     } catch (error) {
         console.error('[Farms] QR error:', error);
         res.status(500).send('Error generating QR Code');

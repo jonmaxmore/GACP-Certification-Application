@@ -26,10 +26,10 @@ class OcrService {
             console.log(`🖼️ Pre-processing Image with Sharp...`);
             const buffer = await sharp(imagePath)
                 .grayscale() // Convert to B&W
-                // .threshold(128) // Binary B&W - sometimes too aggressive, try normalize first
-                .normalize() // Stretch contrast to full range
+                .threshold(128) // Binary B&W - FORCE HIGH CONTRAST
+                //.normalize() // Stretch logic removed in favor of threshold
                 .sharpen() // Make edges crisp
-                .resize(1000, null, { fit: 'inside' }) // Ensure decent resolution (width 1000px)
+                .resize(1000, null, { fit: 'inside' }) // Standard resolution
                 .toBuffer();
 
             return buffer;
@@ -67,6 +67,8 @@ class OcrService {
                             // quiet logs
                         }
                     },
+                    // [NEW] Optimize for document logic
+                    tessedit_char_whitelist: ' 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:/กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮฯะัาำิีึืฺุูเแโใไๅๆ็่้๊๋์',
                 },
             );
 
@@ -121,7 +123,7 @@ class OcrService {
      * @param {string} expectedIdNumber 
      */
     async verifyIdCard(imagePath, expectedIdNumber) {
-        const { text } = await this.extractText(imagePath, 'tha+eng');
+        const { text, confidence } = await this.extractText(imagePath, 'tha+eng');
 
         // 1. Strict Clean: Only Digits
         const cleanText = text.replace(/[^0-9]/g, '');
@@ -129,37 +131,45 @@ class OcrService {
 
         console.log(`🔍 Fuzzy Check: UserID=${cleanId} vs Extracted=${cleanText.substring(0, 20)}...`);
 
+        // Base result object
+        const result = {
+            match: false,
+            message: 'ไม่พบเลขบัตรประชาชน หรือภาพไม่ชัดเจน',
+            confidence: confidence,
+            extractedText: text.substring(0, 100) // Return snippet for debug
+        };
+
         // 2. Direct Match
         if (cleanText.includes(cleanId)) {
-            return { match: true, message: 'Exact Match Found' };
+            result.match = true;
+            result.message = 'Exact Match Found';
+            return result;
         }
 
         // 3. Fuzzy Match (Sliding Window)
-        // Check every 13-digit chunk for similarity (Thai ID is 13 digits)
         if (cleanId.length === 13) {
-            const threshold = 2; // Allow 2 differences
+            const threshold = 4; // Allow 4 differences (Increased from 2)
             for (let i = 0; i < cleanText.length - 12; i++) {
                 const chunk = cleanText.substring(i, i + 13);
                 const diff = this.levenshtein(cleanId, chunk);
                 if (diff <= threshold) {
-                    return { match: true, message: `Fuzzy Match Found (Diff: ${diff})` };
+                    result.match = true;
+                    result.message = `Fuzzy Match Found (Diff: ${diff})`;
+                    return result;
                 }
             }
         }
 
-        return {
-            match: false,
-            message: 'ไม่พบเลขบัตรประชาชน หรือภาพไม่ชัดเจน',
-        };
+        return result;
     }
 
     // Algorithm to calculate difference between strings
     levenshtein(a, b) {
-        if (a.length === 0) {return b.length;}
-        if (b.length === 0) {return a.length;}
+        if (a.length === 0) { return b.length; }
+        if (b.length === 0) { return a.length; }
         const matrix = [];
-        for (let i = 0; i <= b.length; i++) {matrix[i] = [i];}
-        for (let j = 0; j <= a.length; j++) {matrix[0][j] = j;}
+        for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+        for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
         for (let i = 1; i <= b.length; i++) {
             for (let j = 1; j <= a.length; j++) {
                 if (b.charAt(i - 1) === a.charAt(j - 1)) {

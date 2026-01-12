@@ -180,13 +180,14 @@ class AuthController {
             // Audit Log (Failed Login - System Error or Auth Failure)
             // Wrapped in try-catch to prevent crash if audit logging fails
             try {
-                await auditLogger.logActivity(
-                    req,
-                    'AUTH_LOGIN',
-                    AuditCategory.AUTH,
-                    AuditSeverity.WARNING,
-                    'Login failed',
-                    { error: error.message },
+                await auditLogger.logAuth(
+                    'LOGIN_FAILURE',
+                    'ANONYMOUS',
+                    'GUEST',
+                    'FAILURE',
+                    req.ip || req.connection?.remoteAddress,
+                    req.headers['user-agent'],
+                    { error: error.message, identifier: req.body.identifier || req.body.email },
                 );
             } catch (auditError) {
                 console.error('[AuthController] Audit Log Error:', auditError.message);

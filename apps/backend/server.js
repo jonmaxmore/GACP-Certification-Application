@@ -4,9 +4,10 @@
  * Database: PostgreSQL (Prisma)
  */
 
-require('dotenv').config();
-const express = require('express');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+console.log('SERVER STARTUP - DATABASE_URL:', process.env.DATABASE_URL);
+const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -20,18 +21,61 @@ const swaggerSpec = require('./config/swagger');
 
 // Import Modules
 const apiRoutes = require('./routes/api');
-const uploadsRouter = require('./routes/api/uploads');
 const pricingRouter = require('./routes/api/pricing');
 const plotsRouter = require('./routes/api/plots');
 
 const app = express();
 const port = process.env.PORT || 3000; // NOTE: Database and Redis connection moved to after app.listen() for graceful degradation
 
+const rateLimit = require('express-rate-limit');
+
 // Middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cors());
-app.use(helmet());
+
+// Security Hardening
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable for now if causing frontend issues, or configure strictly
+    crossOriginEmbedderPolicy: false
+}));
+
+// CORS Configuration
+const allowedOrigins = process.env.NODE_ENV === 'production'
+    ? ['https://gacp-platform.dtam.go.th', 'https://admin-gacp.dtam.go.th']
+    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:8080'];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true
+}));
+
+// Rate Limiting
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 500, // Limit each IP to 500 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: 'Too many requests from this IP, please try again later.'
+});
+
+const authLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 20, // Limit each IP to 20 failed login attempts
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true // Don't count successful logins
+});
+
+app.use('/api', globalLimiter);
+app.use('/api/auth/login', authLimiter);
+
 app.use(compression());
 app.use(morgan('combined', { stream: logger.stream }));
 app.use(cookieParser());
@@ -41,7 +85,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Mount Routes
 // Mount Routes
-app.use('/api/uploads', uploadsRouter); // Generic uploads
 app.use('/api/pricing', pricingRouter);
 app.use('/api', apiRoutes); // Unified API routes (no /v2 prefix)
 app.use('/api', plotsRouter); // [NEW] Mount Plot Routes
@@ -109,10 +152,15 @@ if (require.main === module) {
                 redisService.connect().catch(err => {
                     logger.warn('⚠️ Redis unavailable - running without cache:', err.message);
                 });
+
+                // Initialize Background Queues (SLA Monitor) [NEW]
+                const { initQueues } = require('./services/queue-service');
+                initQueues();
             });
         }
     });
 }
 
 module.exports = app;
+// Force Restart for Prisma Generate
 

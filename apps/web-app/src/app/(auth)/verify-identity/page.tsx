@@ -25,6 +25,8 @@ export default function VerifyIdentityPage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
+    const [aiResult, setAiResult] = useState<{ confidence: number; message: string; extractedSnippet: string } | null>(null);
+
     // Redirect if not logged in OR if already verified
     useEffect(() => {
         if (!isLoading) {
@@ -83,6 +85,11 @@ export default function VerifyIdentityPage() {
             });
 
             const data = await res.json();
+
+            // Set AI Analysis if available
+            if (data.aiAnalysis) {
+                setAiResult(data.aiAnalysis);
+            }
 
             // Handling Success (VERIFIED or PENDING manual)
             if (res.ok) {
@@ -304,6 +311,22 @@ export default function VerifyIdentityPage() {
                                 )}
                             </div>
                         </div>
+
+                        {/* AI Analysis Result (Debug Info) */}
+                        {(aiResult || ((error && error.includes('AI')))) && !success ? (
+                            <div className={`mb-4 p-4 rounded-lg border animate-fadeIn ${aiResult && aiResult.confidence > 80 ? 'bg-green-50 border-green-200' : 'bg-slate-100 border-slate-200'}`}>
+                                <h4 className={`text-sm font-bold flex items-center gap-2 mb-2 ${aiResult && aiResult.confidence > 80 ? 'text-green-800' : 'text-slate-700'}`}>
+                                    <Icons.Search className="w-4 h-4" />
+                                    ผลการตรวจสอบโดย AI {aiResult ? `(${aiResult.confidence}%)` : ''}
+                                </h4>
+                                <div className="text-xs space-y-1 font-mono">
+                                    <p className="text-slate-700">{aiResult ? aiResult.message : error}</p>
+                                    {aiResult && aiResult.extractedSnippet && (
+                                        <p className="text-slate-500 truncate mt-1">Found: "{aiResult.extractedSnippet.substring(0, 50)}..."</p>
+                                    )}
+                                </div>
+                            </div>
+                        ) : null}
 
                         {error && (
                             <div className="p-4 bg-red-50 text-red-600 rounded-lg text-sm border border-red-200">

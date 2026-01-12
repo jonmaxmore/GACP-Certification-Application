@@ -3,7 +3,7 @@
  * Matches Prisma AuditLog schema with Hash Chain for immutability
  */
 
-const { PrismaClient } = require('@prisma/client');
+const { prisma } = require('../services/prisma-database');
 const crypto = require('crypto');
 
 // Categories matching Prisma schema
@@ -38,7 +38,7 @@ const ResourceType = {
 
 class AuditLogger {
     constructor() {
-        this.prisma = new PrismaClient();
+        this.prisma = prisma; // Use singleton
         this.lastHash = null;
         this.sequenceCounter = 0;
     }

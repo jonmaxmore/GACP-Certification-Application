@@ -37,7 +37,6 @@ export const StepReview = () => {
                 productionData: state.productionData,
                 documents: state.documents,
                 youtubeUrl: state.youtubeUrl, // Important!
-                youtubeUrl: state.youtubeUrl, // Important!
                 areaType: state.locationType || state.siteData?.plots?.[0]?.solarSystem || 'OUTDOOR', // Prioritize Global Type
             };
 

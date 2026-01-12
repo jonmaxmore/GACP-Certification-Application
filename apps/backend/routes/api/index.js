@@ -73,12 +73,20 @@ router.use('/admin', require('./admin')); // Admin CMS Routes
 // Health check with version info
 router.use('/', require('./plots')); // Mount Plots/Farm Sub-resources at root of API
 
-router.get('/health', (req, res) => {
-  res.json({
-    success: true,
+const prismaDatabase = require('../../services/prisma-database');
+
+router.get('/health', async (req, res) => {
+  console.log('[API] Health Check Requested');
+  const dbHealth = await prismaDatabase.healthCheck();
+  console.log('[API] Health Check Result:', dbHealth);
+  const overallSuccess = dbHealth.status === 'connected';
+
+  res.status(overallSuccess ? 200 : 503).json({
+    success: overallSuccess,
     version: '2.0.0',
     database: 'postgresql',
-    message: 'V2 API is running',
+    dbStatus: dbHealth,
+    message: overallSuccess ? 'V2 API is running' : 'System Unhealthy',
   });
 });
 

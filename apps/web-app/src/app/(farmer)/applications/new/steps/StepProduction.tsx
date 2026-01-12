@@ -164,7 +164,7 @@ export const StepProduction = () => {
                             value={formData.spacing || ''}
                             onChange={(e) => handleChange('spacing', e.target.value)}
                         >
-                            <option value="">-- เลือกระยะปลูก --</option>
+                            <option value="">-- Select Spacing --</option>
                             <option value="1x1">1 x 1 เมตร (Standard)</option>
                             <option value="1.5x1.5">1.5 x 1.5 เมตร</option>
                             <option value="2x2">2 x 2 เมตร</option>
@@ -200,7 +200,7 @@ export const StepProduction = () => {
                             onChange={(e) => handleChange('estimatedYield', e.target.value)}
                         />
                         {/* Validation Message */}
-                        {Number(formData.estimatedYield) > 500 && ( // Mock threshold for demo
+                        {Number(formData.estimatedYield) > 500 && (
                             <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
                                 ⚠️ สูงกว่าค่าเฉลี่ยมาตรฐาน (Standard Yield Exceeded)
                             </p>
@@ -232,7 +232,6 @@ export const StepProduction = () => {
                 </button>
             </div>
 
-// End of component
         </div>
     );
 };

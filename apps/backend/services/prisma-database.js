@@ -9,8 +9,14 @@ const { PrismaClient } = require('@prisma/client');
 
 // Singleton pattern for Prisma Client
 if (!global.prisma) {
+    console.log('PRISMA INIT - URL:', process.env.DATABASE_URL);
     global.prisma = new PrismaClient({
         log: ['query', 'info', 'warn', 'error'],
+        datasources: {
+            db: {
+                url: process.env.DATABASE_URL
+            }
+        }
     });
 }
 const prisma = global.prisma;

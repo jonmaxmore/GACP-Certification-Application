@@ -139,6 +139,8 @@ export interface ProductionData {
     harvestMethod?: string;
     storageMethod?: string;
     qualityControl?: string;
+    spacing?: string;
+    plantCount?: string;
 }
 
 export interface SecurityData {
@@ -354,7 +356,6 @@ export function useWizardStore() {
         acknowledgeStandards,
         resetWizard,
         setApplicationId,
-        canProceedFromStep,
         canProceedFromStep,
         getCompletedSteps,
         setLocationType,

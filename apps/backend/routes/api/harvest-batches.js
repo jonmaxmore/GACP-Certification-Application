@@ -1,45 +1,37 @@
 /**
- * HarvestBatch API Routes
- * CRUD operations for HarvestBatch table (Lot tracking)
- * 
- * @version 1.0.0
- * @testable Postman
+ * @swagger
+ * tags:
+ *   name: HarvestBatches
+ *   description: Harvest batch tracking and traceability
  */
 
 const express = require('express');
 const router = express.Router();
-const { prisma } = require('../../services/prisma-database');
-
-// ============================================================================
-// HARVEST BATCH (LOT) API
-// ============================================================================
+const harvestService = require('../../services/harvest-service');
 
 /**
- * @route   GET /api/harvest-batches
- * @desc    Get all harvest batches for a farm
- * @query   farmId, status, speciesId
- * @access  Auth required
- * @test    GET http://localhost:3000/api/harvest-batches?farmId=xxx
+ * @swagger
+ * /api/harvest-batches:
+ *   get:
+ *     summary: List harvest batches
+ *     tags: [HarvestBatches]
+ *     parameters:
+ *       - in: query
+ *         name: farmId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of batches
  */
 router.get('/', async (req, res) => {
     try {
-        const { farmId, status, speciesId } = req.query;
-
-        const where = {};
-        if (farmId) {where.farmId = farmId;}
-        if (status) {where.status = status;}
-        if (speciesId) {where.speciesId = speciesId;}
-
-        const batches = await prisma.harvestBatch.findMany({
-            where,
-            include: {
-                species: {
-                    select: { id: true, thaiName: true, englishName: true },
-                },
-            },
-            orderBy: { createdAt: 'desc' },
-        });
-
+        const batches = await harvestService.list(req.query);
         res.json({
             success: true,
             count: batches.length,
@@ -47,73 +39,51 @@ router.get('/', async (req, res) => {
         });
     } catch (error) {
         console.error('[HarvestBatch API] Error:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Failed to fetch batches' });
     }
 });
 
 /**
- * @route   GET /api/harvest-batches/:id
- * @desc    Get harvest batch by ID
- * @access  Auth required
- * @test    GET http://localhost:3000/api/harvest-batches/:id
+ * @swagger
+ * /api/harvest-batches/{id}:
+ *   get:
+ *     summary: Get harvest batch details
+ *     tags: [HarvestBatches]
  */
 router.get('/:id', async (req, res) => {
     try {
-        const { id } = req.params;
-
-        const batch = await prisma.harvestBatch.findUnique({
-            where: { id },
-            include: {
-                species: true,
-            },
-        });
+        const batch = await harvestService.getById(req.params.id);
 
         if (!batch) {
-            return res.status(404).json({
-                success: false,
-                error: 'Harvest batch not found',
-            });
+            return res.status(404).json({ success: false, error: 'Harvest batch not found' });
         }
 
-        res.json({
-            success: true,
-            data: batch,
-        });
+        res.json({ success: true, data: batch });
     } catch (error) {
         console.error('[HarvestBatch API] Error:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Failed to fetch batch' });
     }
 });
 
 /**
- * @route   GET /api/harvest-batches/lot/:batchNumber
- * @desc    Get harvest batch by Lot Number (for QR/traceability)
- * @access  Public
- * @test    GET http://localhost:3000/api/harvest-batches/lot/LOT-2024-001
+ * @swagger
+ * /api/harvest-batches/lot/{batchNumber}:
+ *   get:
+ *     summary: Traceability lookup by Lot Number (Public)
+ *     tags: [HarvestBatches]
+ *     parameters:
+ *       - in: path
+ *         name: batchNumber
+ *         required: true
+ *         schema:
+ *           type: string
  */
 router.get('/lot/:batchNumber', async (req, res) => {
     try {
-        const { batchNumber } = req.params;
-
-        const batch = await prisma.harvestBatch.findUnique({
-            where: { batchNumber },
-            include: {
-                species: {
-                    select: {
-                        id: true,
-                        thaiName: true,
-                        englishName: true,
-                        scientificName: true,
-                    },
-                },
-            },
-        });
+        const batch = await harvestService.getByBatchNumber(req.params.batchNumber);
 
         if (!batch) {
-            return res.status(404).json({
-                success: false,
-                error: 'Lot number not found',
-            });
+            return res.status(404).json({ success: false, error: 'Lot number not found' });
         }
 
         // Public traceability info
@@ -130,31 +100,36 @@ router.get('/lot/:batchNumber', async (req, res) => {
         });
     } catch (error) {
         console.error('[HarvestBatch API] Error:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Traceability lookup failed' });
     }
 });
 
 /**
- * @route   POST /api/harvest-batches
- * @desc    Create new harvest batch
- * @access  Farmer
- * @test    POST http://localhost:3000/api/harvest-batches
+ * @swagger
+ * /api/harvest-batches:
+ *   post:
+ *     summary: Create new harvest batch (Growing Phase)
+ *     tags: [HarvestBatches]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [farmId, speciesId, plantingDate]
+ *             properties:
+ *               farmId:
+ *                 type: string
+ *               speciesId:
+ *                 type: integer
+ *               plantingDate:
+ *                 type: string
+ *                 format: date
  */
 router.post('/', async (req, res) => {
     try {
-        const {
-            farmId,
-            speciesId,
-            plantingDate,
-            cultivationType = 'SELF_GROWN',
-            seedSource,
-            plotName,
-            plotArea,
-            areaUnit = 'rai',
-            notes,
-        } = req.body;
+        const { farmId, speciesId, plantingDate } = req.body;
 
-        // Validate required fields
         if (!farmId || !speciesId || !plantingDate) {
             return res.status(400).json({
                 success: false,
@@ -162,31 +137,7 @@ router.post('/', async (req, res) => {
             });
         }
 
-        // Generate lot number
-        const year = new Date().getFullYear();
-        const count = await prisma.harvestBatch.count({
-            where: { farmId },
-        });
-        const batchNumber = `LOT-${farmId.substring(0, 8).toUpperCase()}-${year}-${String(count + 1).padStart(3, '0')}`;
-
-        const batch = await prisma.harvestBatch.create({
-            data: {
-                batchNumber,
-                farmId,
-                speciesId,
-                plantingDate: new Date(plantingDate),
-                cultivationType,
-                seedSource,
-                plotName,
-                plotArea: plotArea ? parseFloat(plotArea) : null,
-                areaUnit,
-                notes,
-                status: 'GROWING',
-            },
-            include: {
-                species: { select: { thaiName: true } },
-            },
-        });
+        const batch = await harvestService.createBatch(req.body);
 
         res.status(201).json({
             success: true,
@@ -200,41 +151,15 @@ router.post('/', async (req, res) => {
 });
 
 /**
- * @route   PUT /api/harvest-batches/:id
- * @desc    Update harvest batch
- * @access  Farmer
- * @test    PUT http://localhost:3000/api/harvest-batches/:id
+ * @swagger
+ * /api/harvest-batches/{id}:
+ *   put:
+ *     summary: Update harvest batch
+ *     tags: [HarvestBatches]
  */
 router.put('/:id', async (req, res) => {
     try {
-        const { id } = req.params;
-        const updateData = req.body;
-
-        // Check if batch exists
-        const existing = await prisma.harvestBatch.findUnique({ where: { id } });
-        if (!existing) {
-            return res.status(404).json({
-                success: false,
-                error: 'Harvest batch not found',
-            });
-        }
-
-        // Convert dates if provided
-        if (updateData.plantingDate) {
-            updateData.plantingDate = new Date(updateData.plantingDate);
-        }
-        if (updateData.harvestDate) {
-            updateData.harvestDate = new Date(updateData.harvestDate);
-        }
-        if (updateData.expectedHarvestDate) {
-            updateData.expectedHarvestDate = new Date(updateData.expectedHarvestDate);
-        }
-
-        const batch = await prisma.harvestBatch.update({
-            where: { id },
-            data: updateData,
-        });
-
+        const batch = await harvestService.updateBatch(req.params.id, req.body);
         res.json({
             success: true,
             message: 'Harvest batch updated successfully',
@@ -242,49 +167,20 @@ router.put('/:id', async (req, res) => {
         });
     } catch (error) {
         console.error('[HarvestBatch API] Error:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Failed to update batch' });
     }
 });
 
 /**
- * @route   POST /api/harvest-batches/:id/harvest
- * @desc    Record harvest for a batch
- * @access  Farmer
- * @test    POST http://localhost:3000/api/harvest-batches/:id/harvest
+ * @swagger
+ * /api/harvest-batches/{id}/harvest:
+ *   post:
+ *     summary: Record harvest (Complete Batch)
+ *     tags: [HarvestBatches]
  */
 router.post('/:id/harvest', async (req, res) => {
     try {
-        const { id } = req.params;
-        const { harvestDate, actualYield, yieldUnit = 'kg', qualityGrade, notes } = req.body;
-
-        // Check if batch exists
-        const existing = await prisma.harvestBatch.findUnique({ where: { id } });
-        if (!existing) {
-            return res.status(404).json({
-                success: false,
-                error: 'Harvest batch not found',
-            });
-        }
-
-        if (existing.status === 'HARVESTED') {
-            return res.status(400).json({
-                success: false,
-                error: 'This batch has already been harvested',
-            });
-        }
-
-        const batch = await prisma.harvestBatch.update({
-            where: { id },
-            data: {
-                harvestDate: harvestDate ? new Date(harvestDate) : new Date(),
-                actualYield: actualYield ? parseFloat(actualYield) : null,
-                yieldUnit,
-                qualityGrade,
-                status: 'HARVESTED',
-                notes: notes || existing.notes,
-            },
-        });
-
+        const batch = await harvestService.recordHarvest(req.params.id, req.body);
         res.json({
             success: true,
             message: 'Harvest recorded successfully',
@@ -297,34 +193,19 @@ router.post('/:id/harvest', async (req, res) => {
 });
 
 /**
- * @route   GET /api/harvest-batches/stats/:farmId
- * @desc    Get harvest statistics for a farm
- * @access  Farmer
- * @test    GET http://localhost:3000/api/harvest-batches/stats/:farmId
+ * @swagger
+ * /api/harvest-batches/stats/{farmId}:
+ *   get:
+ *     summary: Get harvest statistics
+ *     tags: [HarvestBatches]
  */
 router.get('/stats/:farmId', async (req, res) => {
     try {
-        const { farmId } = req.params;
-
-        const [total, growing, harvested] = await Promise.all([
-            prisma.harvestBatch.count({ where: { farmId } }),
-            prisma.harvestBatch.count({ where: { farmId, status: 'GROWING' } }),
-            prisma.harvestBatch.count({ where: { farmId, status: 'HARVESTED' } }),
-        ]);
-
-        res.json({
-            success: true,
-            data: {
-                farmId,
-                totalBatches: total,
-                growing,
-                harvested,
-                pending: total - growing - harvested,
-            },
-        });
+        const stats = await harvestService.getStats(req.params.farmId);
+        res.json({ success: true, data: stats });
     } catch (error) {
         console.error('[HarvestBatch API] Error:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Failed to fetch stats' });
     }
 });
 

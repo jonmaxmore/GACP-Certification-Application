@@ -12,7 +12,44 @@ const logger = require('../../shared/logger');
 
 const authenticateDTAM = authModule.authenticateDTAM;
 
-// Get ALL audits (unified list for frontend)
+/**
+ * @swagger
+ * /api/audits:
+ *   get:
+ *     summary: Get all audits (Unified list) (Staff Only)
+ *     tags: [Audits]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of audits
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     audits:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                           auditNumber:
+ *                             type: string
+ *                           status:
+ *                             type: string
+ *                           plantType:
+ *                             type: string
+ *                           scheduledDate:
+ *                             type: string
+ *                             format: date-time
+ */
 router.get('/', authenticateDTAM, async (req, res) => {
     try {
         const applications = await prisma.application.findMany({
@@ -55,7 +92,18 @@ router.get('/', authenticateDTAM, async (req, res) => {
     }
 });
 
-// Get pending applications for scheduling
+/**
+ * @swagger
+ * /api/audits/pending-schedule:
+ *   get:
+ *     summary: Get pending applications for scheduling (Staff Only)
+ *     tags: [Audits]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of pending applications
+ */
 router.get('/pending-schedule', authenticateDTAM, async (req, res) => {
     try {
         const applications = await prisma.application.findMany({
@@ -105,7 +153,27 @@ router.get('/scheduled', authenticateDTAM, async (req, res) => {
     }
 });
 
-// Get Audit Detail
+/**
+ * @swagger
+ * /api/audits/{id}:
+ *   get:
+ *     summary: Get Audit Detail (Staff Only)
+ *     tags: [Audits]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Audit ID or Application ID
+ *     responses:
+ *       200:
+ *         description: Audit details
+ *       404:
+ *         description: Audit not found
+ */
 router.get('/:id', authenticateDTAM, async (req, res) => {
     try {
         const { id } = req.params;
@@ -141,7 +209,41 @@ router.get('/:id', authenticateDTAM, async (req, res) => {
     }
 });
 
-// Schedule an audit
+/**
+ * @swagger
+ * /api/audits/schedule:
+ *   post:
+ *     summary: Schedule an audit (Staff Only)
+ *     tags: [Audits]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [applicationId, scheduledDate]
+ *             properties:
+ *               applicationId:
+ *                 type: string
+ *               scheduledDate:
+ *                 type: string
+ *                 format: date
+ *               scheduledTime:
+ *                 type: string
+ *                 example: "09:00"
+ *               auditMode:
+ *                 type: string
+ *                 enum: ['ONSITE', 'ONLINE']
+ *               auditorId:
+ *                 type: string
+ *               meetingUrl:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Scheduled successfully
+ */
 router.post('/schedule', authenticateDTAM, async (req, res) => {
     try {
         const { applicationId, scheduledDate, scheduledTime, auditorId, auditMode, meetingUrl } = req.body;
@@ -243,7 +345,39 @@ router.patch('/:id/schedule', authenticateDTAM, async (req, res) => {
     }
 });
 
-// Submit audit result (Pass/Fail)
+/**
+ * @swagger
+ * /api/audits/{id}/result:
+ *   post:
+ *     summary: Submit audit result (Pass/Fail) (Staff Only)
+ *     tags: [Audits]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [result]
+ *             properties:
+ *               result:
+ *                 type: string
+ *                 enum: ['PASS', 'FAIL']
+ *               notes:
+ *                 type: string
+ *               checklist:
+ *                 type: array
+ *     responses:
+ *       200:
+ *         description: Result submitted
+ */
 router.post('/:id/result', authenticateDTAM, async (req, res) => {
     try {
         const { id } = req.params;

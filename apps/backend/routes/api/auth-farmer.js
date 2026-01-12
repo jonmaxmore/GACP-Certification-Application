@@ -10,7 +10,7 @@ const loginRateLimiter = strictRateLimiter(15 * 60 * 1000, 10); // 10 per 15 min
 const registerRateLimiter = strictRateLimiter(60 * 60 * 1000, 100); // 100 per hour for UAT
 
 // Public Routes (with rate limiting)
-router.post('/register', registerRateLimiter, upload.single('idCardImage'), (req, res) => AuthController.register(req, res));
+router.post('/register', registerRateLimiter, (req, res) => AuthController.register(req, res));
 router.post('/login', (req, res) => AuthController.login(req, res));
 router.post('/check-identifier', (req, res) => AuthController.checkIdentifier(req, res));
 

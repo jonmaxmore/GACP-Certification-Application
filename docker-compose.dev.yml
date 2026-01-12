@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: gacp-postgres-dev
+    restart: always
+    environment:
+      POSTGRES_USER: gacp
+      POSTGRES_PASSWORD: gacp2024
+      POSTGRES_DB: gacp_db
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" # Expose to host for local debugging
+
+  redis:
+    image: redis:7-alpine
+    container_name: gacp-redis-dev
+    restart: always
+    volumes:
+      - redis_data_dev:/data
+    ports:
+      - "6379:6379" # Expose to host for local debugging
+
+volumes:
+  postgres_data_dev:
+  redis_data_dev:

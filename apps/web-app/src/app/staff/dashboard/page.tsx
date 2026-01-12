@@ -9,6 +9,7 @@ import {
     IconCheckCircle, IconClock, IconUser
 } from "@/components/ui/icons";
 import { ApplicationService, DashboardStats, Application } from "@/lib/services/application-service";
+import DataTable from "@/components/ui/DataTable";
 
 interface StaffUser {
     id: string;
@@ -164,59 +165,39 @@ export default function StaffDashboardPage() {
                 </div>
 
                 {/* Table Body */}
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 text-xs uppercase text-slate-500 font-semibold">
-                            <tr>
-                                <th className="px-6 py-3">JobID</th>
-                                <th className="px-6 py-3">ผู้ยื่นคำขอ</th>
-                                <th className="px-6 py-3">ชนิดพืช</th>
-                                <th className="px-6 py-3">สถานะ</th>
-                                <th className="px-6 py-3">เวลารอคอย</th>
-                                <th className="px-6 py-3 text-right">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                            {(activeTab === "documents" ? pendingDocuments : pendingAudits).map(item => (
-                                <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
-                                    <td className="px-6 py-4 font-mono text-slate-500">#{item.id?.slice(-6)}</td>
-                                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">{item.applicantName}</td>
-                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{item.plantType}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${item.submissionCount === 1
-                                            ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800'
-                                            : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800'
-                                            }`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${item.submissionCount === 1 ? 'bg-blue-500' : 'bg-amber-500'}`}></span>
-                                            {item.submissionCount === 1 ? 'ยื่นใหม่' : `แก้ไขครั้งที่ ${(item.submissionCount || 1) - 1}`}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="text-slate-600 dark:text-slate-400 font-medium">{item.waitTime}</span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <Link
-                                            href={`/staff/applications/${item.id}`}
-                                            className="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold transition-colors shadow-sm"
-                                        >
-                                            ตรวจสอบ
-                                        </Link>
-                                    </td>
-                                </tr>
-                            ))}
-                            {(activeTab === "documents" ? pendingDocuments : pendingAudits).length === 0 && (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
-                                        <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <IconCheckCircle className="text-slate-400" size={24} />
-                                        </div>
-                                        <p>ไม่มีรายการที่ต้องดำเนินการในขณะนี้</p>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <DataTable
+                    columns={[
+                        { key: 'id', label: 'JobID', render: (item: PendingItem) => <span className="font-mono text-slate-500">#{item.id?.slice(-6)}</span> },
+                        { key: 'applicantName', label: 'ผู้ยื่นคำขอ' },
+                        { key: 'plantType', label: 'ชนิดพืช' },
+                        {
+                            key: 'status', label: 'สถานะ', render: (item: PendingItem) => (
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${item.submissionCount === 1
+                                    ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800'
+                                    : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800'
+                                    }`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${item.submissionCount === 1 ? 'bg-blue-500' : 'bg-amber-500'}`}></span>
+                                    {item.submissionCount === 1 ? 'ยื่นใหม่' : `แก้ไขครั้งที่ ${(item.submissionCount || 1) - 1}`}
+                                </span>
+                            )
+                        },
+                        { key: 'waitTime', label: 'เวลารอคอย' },
+                        {
+                            key: 'actions', label: 'จัดการ', render: (item: PendingItem) => (
+                                <div className="text-right">
+                                    <Link
+                                        href={`/staff/applications/${item.id}`}
+                                        className="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold transition-colors shadow-sm"
+                                    >
+                                        ตรวจสอบ
+                                    </Link>
+                                </div>
+                            )
+                        }
+                    ]}
+                    data={activeTab === "documents" ? pendingDocuments : pendingAudits}
+                    emptyMessage="ไม่มีรายการที่ต้องดำเนินการในขณะนี้"
+                />
             </div>
 
             {/* 3. Quick Actions Grid */}

@@ -253,7 +253,7 @@ export const StepDocuments = () => {
             {/* Navigation */}
             <div className="pt-6 border-t flex justify-between">
                 <button
-                    onClick={() => setCurrentStep(3)}
+                    onClick={() => setCurrentStep(5)} // Back to Harvest
                     className="px-6 py-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
                 >
                     ← ย้อนกลับ (Back)
@@ -261,7 +261,7 @@ export const StepDocuments = () => {
                 <button
                     onClick={() => {
                         saveToStoreYoutubeUrl(youtubeUrl);
-                        setCurrentStep(5);
+                        setCurrentStep(7); // Next to PreCheck
                     }}
                     disabled={isNextDisabled}
                     className={`

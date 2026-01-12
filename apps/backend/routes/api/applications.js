@@ -32,6 +32,22 @@ const feeService = require('../../services/fee-service'); // Still needed for le
  *                 type: integer
  *               serviceType:
  *                 type: string
+ *               harvestData:
+ *                 type: object
+ *                 properties:
+ *                   harvestMethod:
+ *                     type: string
+ *                     enum: [MANUAL, MACHINE]
+ *                   dryingMethod:
+ *                     type: string
+ *                     enum: [SUN, OVEN, DEHYDRATOR, OTHER]
+ *                   dryingDetail:
+ *                     type: string
+ *                   storageSystem:
+ *                     type: string
+ *                     enum: [CONTROLLED, AMBIENT]
+ *                   packaging:
+ *                     type: string
  *     responses:
  *       200:
  *         description: Application saved successfully
@@ -49,7 +65,7 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
         });
     } catch (error) {
         console.error('[Applications Draft] Error:', error);
-        res.status(500).json({ success: false, error: 'Failed to save application' });
+        res.status(500).json({ success: false, error: 'Failed to save application', details: error.message });
     }
 });
 
@@ -85,8 +101,9 @@ router.get('/draft', authenticateFarmer, async (req, res) => {
                 applicantData: typeof draft.applicantData === 'string' ? JSON.parse(draft.applicantData) : (draft.applicantData || {}),
                 locationData: typeof draft.locationData === 'string' ? JSON.parse(draft.locationData) : (draft.locationData || {}),
                 productionData: typeof draft.productionData === 'string' ? JSON.parse(draft.productionData) : (draft.productionData || {}),
-                documents: typeof draft.documents === 'string' ? JSON.parse(draft.documents) : (draft.documents || []),
                 formData: typeof draft.formData === 'string' ? JSON.parse(draft.formData) : (draft.formData || {}), // Generic fallback
+                harvestData: (typeof draft.formData === 'string' ? JSON.parse(draft.formData) : (draft.formData || {})).harvestData || {}, // Extract from formData
+                documents: typeof draft.documents === 'string' ? JSON.parse(draft.documents) : (draft.documents || []),
                 estimatedFee: draft.estimatedFee,
                 status: draft.status,
                 createdAt: draft.createdAt,

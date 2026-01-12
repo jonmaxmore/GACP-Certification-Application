@@ -1,0 +1,57 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]:
+    - img [ref=e8]
+  - alert [ref=e11]
+  - generic [ref=e13]:
+    - generic [ref=e14]:
+      - img [ref=e16]
+      - heading "ระบบรับรองมาตรฐาน GACP" [level=1] [ref=e19]
+      - generic [ref=e20]: กรมการแพทย์แผนไทยและการแพทย์ทางเลือก
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]: ประเภทผู้ใช้งาน
+        - generic [ref=e24]:
+          - button "บุคคลธรรมดา เกษตรกรรายย่อย" [ref=e25]:
+            - img [ref=e27]
+            - generic [ref=e30]: บุคคลธรรมดา
+            - generic [ref=e31]: เกษตรกรรายย่อย
+          - button "นิติบุคคล บริษัท / ห้างหุ้นส่วน" [ref=e32]:
+            - img [ref=e34]
+            - generic [ref=e37]: นิติบุคคล
+            - generic [ref=e38]: บริษัท / ห้างหุ้นส่วน
+          - button "วิสาหกิจชุมชน กลุ่มเกษตรกร" [ref=e39]:
+            - img [ref=e41]
+            - generic [ref=e45]: วิสาหกิจชุมชน
+            - generic [ref=e46]: กลุ่มเกษตรกร
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - generic [ref=e49]: เลขบัตรประชาชน 13 หลัก
+          - generic [ref=e50]:
+            - img [ref=e52]
+            - textbox "1-2345-67890-12-3" [ref=e55]
+        - generic [ref=e56]:
+          - generic [ref=e57]: รหัสผ่าน
+          - generic [ref=e58]:
+            - img [ref=e60]
+            - textbox "กรอกรหัสผ่าน" [ref=e63]
+            - button [ref=e64] [cursor=pointer]:
+              - img [ref=e65]
+        - generic [ref=e69]:
+          - generic [ref=e70] [cursor=pointer]:
+            - checkbox "จดจำการเข้าสู่ระบบ" [ref=e71]
+            - generic [ref=e72]: จดจำการเข้าสู่ระบบ
+          - link "ลืมรหัสผ่าน?" [ref=e73] [cursor=pointer]:
+            - /url: /forgot-password
+        - button "เข้าสู่ระบบ →" [ref=e74]:
+          - text: เข้าสู่ระบบ
+          - generic [ref=e75]: →
+    - generic [ref=e76]:
+      - paragraph [ref=e77]: ยังไม่มีบัญชีใช้งาน?
+      - link "ลงทะเบียนผู้ใช้ใหม่" [ref=e78] [cursor=pointer]:
+        - /url: /register
+        - img [ref=e79]
+        - text: ลงทะเบียนผู้ใช้ใหม่
+```

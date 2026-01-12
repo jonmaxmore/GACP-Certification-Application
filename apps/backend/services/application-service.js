@@ -17,7 +17,7 @@ class ApplicationService {
         const {
             plantId, plantName,
             purpose, areaType, serviceType,
-            applicantData, locationData, productionData,
+            applicantData, locationData, productionData, harvestData,
             documents, youtubeUrl,
             requestedInspectionDate,
             estimatedProcessingDays, estimatedFee,
@@ -47,7 +47,7 @@ class ApplicationService {
             applicationNumber: existingDraft ? undefined : applicationNumber, // Don't overwrite if exists
             serviceType,
             areaType,
-            status: 'SUBMITTED', // Direct submission as per previous logic (or DRAFT if saved?) - Logic borrowed from route said "SUBMITTED"
+            status: 'DRAFT', // Corrected to DRAFT for "Save Draft" flow
             phase1Amount: feeService.calculatePhase1Fee().total,
             formData: {
                 plantId,
@@ -56,6 +56,7 @@ class ApplicationService {
                 applicantData,
                 locationData,
                 productionData,
+                harvestData, // Add Harvest Data
                 documents,
                 youtubeUrl,
                 estimatedFee,

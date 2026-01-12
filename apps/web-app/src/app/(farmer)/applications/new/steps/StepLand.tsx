@@ -273,13 +273,13 @@ export const StepLand = () => {
             {/* Navigation */}
             <div className="pt-6 border-t flex justify-between">
                 <button
-                    onClick={() => setCurrentStep(0)}
+                    onClick={() => setCurrentStep(1)} // Back to General
                     className="px-6 py-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
                 >
                     ← ย้อนกลับ (Back)
                 </button>
                 <button
-                    onClick={() => setCurrentStep(2)}
+                    onClick={() => setCurrentStep(3)} // Next to Plots
                     disabled={isNextDisabled}
                     className={`
                         px-8 py-3 rounded-xl font-semibold shadow-lg transition-all transform

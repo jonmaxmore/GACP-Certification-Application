@@ -212,13 +212,13 @@ export const StepProduction = () => {
             {/* Navigation */}
             <div className="pt-6 border-t flex justify-between">
                 <button
-                    onClick={() => setCurrentStep(2)}
+                    onClick={() => setCurrentStep(3)} // Back to Plots
                     className="px-6 py-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
                 >
                     ← ย้อนกลับ (Back)
                 </button>
                 <button
-                    onClick={() => setCurrentStep(4)}
+                    onClick={() => setCurrentStep(5)} // Next to Harvest
                     disabled={isNextDisabled}
                     className={`
                         px-8 py-3 rounded-xl font-semibold shadow-lg transition-all transform

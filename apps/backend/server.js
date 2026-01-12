@@ -21,7 +21,6 @@ const swaggerSpec = require('./config/swagger');
 
 // Import Modules
 const apiRoutes = require('./routes/api');
-const pricingRouter = require('./routes/api/pricing');
 const plotsRouter = require('./routes/api/plots');
 
 const app = express();
@@ -85,7 +84,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Mount Routes
 // Mount Routes
-app.use('/api/pricing', pricingRouter);
 app.use('/api', apiRoutes); // Unified API routes (no /v2 prefix)
 app.use('/api', plotsRouter); // [NEW] Mount Plot Routes
 if (process.env.NODE_ENV !== 'production') {

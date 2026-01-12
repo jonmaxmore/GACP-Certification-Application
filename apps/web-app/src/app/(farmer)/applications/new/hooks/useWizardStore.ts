@@ -73,6 +73,12 @@ export interface ApplicantData {
     licenseType?: 'BHT11' | 'BHT13' | 'BHT16';
 }
 
+// [NEW] General Information
+export interface GeneralInfo {
+    projectName: string;
+    certType: string;
+}
+
 // [NEW] Plot Definition
 export interface Plot {
     id: string; // uuid or temp-id
@@ -80,6 +86,8 @@ export interface Plot {
     areaSize: string; // e.g., "2"
     areaUnit: string; // e.g., "Rai"
     solarSystem: 'OUTDOOR' | 'INDOOR' | 'GREENHOUSE';
+    latitude?: number;
+    longitude?: number;
 }
 
 // Expanded SiteData with all fields from original Step6SiteSecurity
@@ -151,6 +159,15 @@ export interface SecurityData {
     securityNotes?: string;
 }
 
+// [NEW] Harvest & Post-Harvest
+export interface HarvestData {
+    harvestMethod: 'MANUAL' | 'MACHINE' | '';
+    dryingMethod: 'SUN' | 'OVEN' | 'DEHYDRATOR' | 'OTHER' | '';
+    dryingDetail?: string; // If OTHER
+    storageSystem: 'CONTROLLED' | 'AMBIENT' | '';
+    packaging: string;
+}
+
 export interface DocumentUpload {
     id: string;
     name?: string;
@@ -172,16 +189,18 @@ export interface WizardState {
     applicantData: ApplicantData | null;
     siteData: SiteData | null;
     productionData: ProductionData | null;
+    harvestData: HarvestData | null; // [NEW]
     securityData: SecurityData | null;
     documents: DocumentUpload[];
     youtubeUrl?: string; // Added for GACP V2
     locationType: SiteType | null; // [NEW] Added for Step 1.5
+    generalInfo: GeneralInfo | null; // [NEW] Added for Step 1
     applicationId?: string;
     createdAt?: string;
     updatedAt?: string;
 }
 
-const STORAGE_KEY = 'gacp_wizard_state';
+const STORAGE_KEY = 'gacp_wizard_state_v2'; // Changed key to force reset state
 
 const initialState: WizardState = {
     currentStep: 0,
@@ -195,10 +214,12 @@ const initialState: WizardState = {
     applicantData: null,
     siteData: null,
     productionData: null,
+    harvestData: null, // [NEW]
     securityData: null,
     documents: [],
     youtubeUrl: '',
     locationType: null,
+    generalInfo: null,
 };
 
 export function useWizardStore() {
@@ -268,6 +289,10 @@ export function useWizardStore() {
         setState(prev => ({ ...prev, productionData }));
     }, []);
 
+    const setHarvestData = useCallback((harvestData: HarvestData) => {
+        setState(prev => ({ ...prev, harvestData }));
+    }, []);
+
     const setSecurityData = useCallback((securityData: SecurityData) => {
         setState(prev => ({ ...prev, securityData }));
     }, []);
@@ -282,6 +307,10 @@ export function useWizardStore() {
 
     const setYoutubeUrl = useCallback((youtubeUrl: string) => {
         setState(prev => ({ ...prev, youtubeUrl }));
+    }, []);
+
+    const setGeneralInfo = useCallback((generalInfo: GeneralInfo) => {
+        setState(prev => ({ ...prev, generalInfo }));
     }, []);
 
     const setCurrentStep = useCallback((step: number) => {
@@ -306,27 +335,28 @@ export function useWizardStore() {
     }, []);
 
     // Validation helpers
-    // Updated to match page.tsx steps:
-    // 0: Plant, 1: Land, 2: Plots, 3: Production, 4: Docs, 5: PreCheck, 6: Review, 7: Quote, 8: Invoice, 9: Success
+    // 0: Plant, 1: General, 2: Land, 3: Plots, 4: Production, 5: Harvest, 6: Docs, 7: PreCheck, 8: Review, 9: Quote, 10: Invoice, 11: Success
     const canProceedFromStep = useCallback((step: number): boolean => {
         switch (step) {
             case 0: return !!state.plantId && !!state.certificationPurpose && state.siteTypes.length > 0;
-            case 1: return !!state.siteData?.siteName && !!state.siteData?.gpsLat;
-            case 2: return true; // Plots (Optional or handled in step)
-            case 3: return true; // Production (Optional)
-            case 4: return state.documents.filter(d => d.uploaded).length > 0;
-            case 5: return true; // PreCheck (Handled by component internal state)
-            case 6: return true; // Review
-            case 7: return true; // Quote
-            case 8: return true; // Invoice
-            case 9: return true; // Success
+            case 1: return !!state.generalInfo?.projectName;
+            case 2: return !!state.siteData?.siteName && !!state.siteData?.gpsLat;
+            case 3: return true; // Plots
+            case 4: return true; // Production
+            case 5: return !!state.harvestData?.harvestMethod; // [NEW] Harvest
+            case 6: return state.documents.filter(d => d.uploaded).length > 0;
+            case 7: return true; // PreCheck
+            case 8: return true; // Review
+            case 9: return true; // Quote
+            case 10: return true; // Invoice
+            case 11: return true; // Success
             default: return false;
         }
     }, [state]);
 
     const getCompletedSteps = useCallback((): number[] => {
         const completed: number[] = [];
-        for (let i = 0; i <= 9; i++) {
+        for (let i = 0; i <= 10; i++) {
             if (canProceedFromStep(i)) {
                 completed.push(i);
             } else {
@@ -348,9 +378,11 @@ export function useWizardStore() {
         setApplicantData,
         setSiteData,
         setProductionData,
+        setHarvestData,
         setSecurityData,
         setDocuments,
         setYoutubeUrl,
+        setGeneralInfo,
         setCurrentStep,
         consentPDPA,
         acknowledgeStandards,

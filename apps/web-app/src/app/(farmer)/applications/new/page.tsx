@@ -6,6 +6,7 @@ import { StepPlantSelection } from './steps/StepPlantSelection';
 import { StepLand } from './steps/StepLand';
 import { StepPlots } from './steps/StepPlots';
 import { StepProduction } from './steps/StepProduction';
+import { StepHarvest } from './steps/StepHarvest'; // [NEW]
 import { StepDocuments } from './steps/StepDocuments';
 import { StepPreCheck } from './steps/StepPreCheck';
 import { StepReview } from './steps/StepReview';
@@ -13,13 +14,17 @@ import { StepQuote } from './steps/StepQuote';
 import { StepInvoice } from './steps/StepInvoice';
 import { StepSuccess } from './steps/StepSuccess';
 
+import { StepGeneral } from './steps/StepGeneral';
+
 const STEPS = [
-    { title: 'ข้อมูลพืช', titleEN: 'Plant Information' },
+    { title: 'พืชสมุนไพร', titleEN: 'Plant Selection' },
+    { title: 'ข้อมูลทั่วไป', titleEN: 'General Info' }, // New Step 1
     { title: 'สถานที่', titleEN: 'Location' },
     { title: 'แปลงปลูก', titleEN: 'Plots' },
     { title: 'การผลิต', titleEN: 'Production' },
+    { title: 'เก็บเกี่ยว', titleEN: 'Harvest' }, // New Step
     { title: 'เอกสาร', titleEN: 'Documents' },
-    { title: 'ตรวจสอบก่อนส่ง', titleEN: 'Pre-Check' }, // Validates integrity
+    { title: 'ตรวจสอบก่อนส่ง', titleEN: 'Pre-Check' },
     { title: 'ตรวจสอบ', titleEN: 'Review' },
     { title: 'ใบเสนอราคา', titleEN: 'Quotation' },
     { title: 'ชำระเงิน', titleEN: 'Payment' },
@@ -42,7 +47,7 @@ function ApplicationWizard() {
                     <div className="flex items-center gap-2">
                         <div className="text-right hidden md:block">
                             <div className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Status</div>
-                            <div className="text-xs text-slate-500">{currentStep >= 6 ? 'ตรวจสอบเอกสาร' : 'กำลังดำเนินการ'}</div>
+                            <div className="text-xs text-slate-500">{currentStep >= 7 ? 'ตรวจสอบเอกสาร' : 'กำลังดำเนินการ'}</div>
                         </div>
                         <div className="w-10 h-10 rounded-full border-4 border-slate-100 border-t-emerald-500 flex items-center justify-center text-xs font-bold text-emerald-700 bg-white shadow-sm">
                             {currentStep + 1}
@@ -60,15 +65,18 @@ function ApplicationWizard() {
                     {/* Step Content */}
                     <div className="relative z-10 w-full">
                         {currentStep === 0 && <div className="p-8"><StepPlantSelection /></div>}
-                        {currentStep === 1 && <div className="p-8"><StepLand /></div>}
-                        {currentStep === 2 && <div className="p-8"><StepPlots /></div>}
-                        {currentStep === 3 && <div className="p-8"><StepProduction /></div>}
-                        {currentStep === 4 && <div className="p-8"><StepDocuments /></div>}
-                        {currentStep === 5 && <div className="p-8"><StepPreCheck /></div>}
-                        {currentStep === 6 && <StepReview />}
-                        {currentStep === 7 && <StepQuote />}
-                        {currentStep === 8 && <StepInvoice />}
-                        {currentStep === 9 && <div className="p-8"><StepSuccess /></div>}
+                        {currentStep === 1 && <div className="p-8"><StepGeneral /></div>}
+                        {currentStep === 2 && <div className="p-8"><StepLand /></div>}
+                        {currentStep === 3 && <div className="p-8"><StepPlots /></div>}
+                        {currentStep === 3 && <div className="p-8"><StepPlots /></div>}
+                        {currentStep === 4 && <div className="p-8"><StepProduction /></div>}
+                        {currentStep === 5 && <div className="p-8"><StepHarvest /></div>}
+                        {currentStep === 6 && <div className="p-8"><StepDocuments /></div>}
+                        {currentStep === 7 && <div className="p-8"><StepPreCheck /></div>}
+                        {currentStep === 8 && <StepReview />}
+                        {currentStep === 9 && <StepQuote />}
+                        {currentStep === 10 && <StepInvoice />}
+                        {currentStep === 11 && <div className="p-8"><StepSuccess /></div>}
                     </div>
                 </div>
             </main>

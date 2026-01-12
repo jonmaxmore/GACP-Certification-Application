@@ -33,7 +33,7 @@ export default function VerifyIdentityPage() {
             if (!isAuthenticated) {
                 router.push('/login');
             } else if (user?.verificationStatus === 'APPROVED') {
-                router.push('/dashboard');
+                router.push('/farmer/dashboard');
             }
         }
     }, [isLoading, isAuthenticated, user, router]);
@@ -150,7 +150,7 @@ export default function VerifyIdentityPage() {
                     </div>
 
                     <button
-                        onClick={() => router.push('/dashboard')}
+                        onClick={() => router.push('/farmer/dashboard')}
                         className="w-full bg-slate-100 text-slate-700 py-3 rounded-lg hover:bg-slate-200 transition-colors font-medium"
                     >
                         ไปที่หน้าแดชบอร์ด

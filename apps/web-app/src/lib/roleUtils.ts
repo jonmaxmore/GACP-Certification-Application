@@ -219,12 +219,12 @@ export const PROTECTED_ROUTES = {
 
     // Farmer-only routes
     farmer: [
-        '/dashboard',
-        '/applications',
-        '/certificates',
-        '/payments',
-        '/profile',
-        '/establishments',
+        '/farmer/dashboard',
+        '/farmer/applications',
+        '/farmer/certificates',
+        '/farmer/payments',
+        '/farmer/profile',
+        '/farmer/establishments',
     ],
 
     // Public routes (no auth required)

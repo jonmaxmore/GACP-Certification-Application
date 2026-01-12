@@ -4,16 +4,9 @@ import type { NextRequest } from 'next/server';
 // 🍎 Zero-Crash Security Middleware
 
 // Routes that require farmer authentication
+// Routes that require farmer authentication
 const protectedFarmerRoutes = [
-    '/dashboard',
-    '/applications',
-    '/establishments',
-    '/profile',
-    '/notifications',
-    '/tracking',
-    '/payments',
-    '/certificates',
-    '/documents',
+    '/farmer', // Protects all /farmer/* routes
 ];
 
 // Routes that require staff authentication
@@ -107,7 +100,7 @@ export function middleware(request: NextRequest) {
 
     // NOTE: Disabled to prevent redirect loop when cookie exists but localStorage empty
     // if (isAuthRoute && token) {
-    //     return NextResponse.redirect(new URL('/dashboard', request.url));
+    //     return NextResponse.redirect(new URL('/farmer/dashboard', request.url));
     // }
 
     // ========================================

@@ -39,14 +39,14 @@ export function Sidebar({ isDark, toggleTheme }: SidebarProps) {
     const isVerified = user?.verificationStatus === 'APPROVED';
 
     const navItems = [
-        { href: "/dashboard", icon: Icons.Home, label: "หน้าหลัก", requiredVerify: false },
-        { href: "/applications", icon: Icons.Document, label: "คำขอ", requiredVerify: true },
-        { href: "/establishments", icon: Icons.Leaf, label: "แปลงปลูก", requiredVerify: true },
-        { href: "/planting", icon: Icons.Calendar, label: "รอบการปลูก", requiredVerify: true },
-        { href: "/certificates", icon: Icons.Certificate, label: "ใบรับรอง", requiredVerify: true },
-        { href: "/tracking", icon: Icons.Compass, label: "ติดตาม", requiredVerify: true },
-        { href: "/payments", icon: Icons.CreditCard, label: "การเงิน", requiredVerify: true },
-        { href: "/profile", icon: Icons.User, label: "โปรไฟล์", requiredVerify: false },
+        { href: "/farmer/dashboard", icon: Icons.Home, label: "หน้าหลัก", requiredVerify: false },
+        { href: "/farmer/applications", icon: Icons.Document, label: "คำขอ", requiredVerify: true },
+        { href: "/farmer/establishments", icon: Icons.Leaf, label: "แปลงปลูก", requiredVerify: true },
+        { href: "/farmer/planting", icon: Icons.Calendar, label: "รอบการปลูก", requiredVerify: true },
+        { href: "/farmer/certificates", icon: Icons.Certificate, label: "ใบรับรอง", requiredVerify: true },
+        { href: "/farmer/tracking", icon: Icons.Compass, label: "ติดตาม", requiredVerify: true },
+        { href: "/farmer/payments", icon: Icons.CreditCard, label: "การเงิน", requiredVerify: true },
+        { href: "/farmer/profile", icon: Icons.User, label: "โปรไฟล์", requiredVerify: false },
     ];
 
     const handleLogout = () => {
@@ -64,7 +64,7 @@ export function Sidebar({ isDark, toggleTheme }: SidebarProps) {
                         return null;
                     }
 
-                    const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                    const isActive = pathname === item.href || (item.href !== "/farmer/dashboard" && pathname.startsWith(item.href));
                     return (
                         <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 py-3 relative">
                             {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-emerald-500 rounded-r" />}

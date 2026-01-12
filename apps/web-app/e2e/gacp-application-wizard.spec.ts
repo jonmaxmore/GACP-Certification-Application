@@ -14,141 +14,116 @@ test.describe('GACP Application Wizard Flow', () => {
         });
     });
 
-    test('Complete GACP Application Submission', async ({ page }) => {
-        // --- Login Step ---
+    test('Complete GACP Application Submission (Steps 1-12)', async ({ page }) => {
+        // --- 1. Login ---
         await page.goto('/login');
-
-        // Wait for page load
         await expect(page.getByRole('heading', { name: /GACP/ })).toBeVisible({ timeout: 10000 });
+        // Input fields use placeholder text as accessible name
+        await page.getByRole('textbox', { name: /1-2345-67890-12-3/ }).fill('1234567890121');
+        await page.getByRole('textbox', { name: /กรอกรหัสผ่าน/ }).fill('Test1234');
+        await page.getByRole('button', { name: /เข้าสู่ระบบ/ }).click();
+        await expect(page).toHaveURL(/\/farmer\/dashboard/, { timeout: 15000 });
 
-        // Fill Credentials (INDIVIDUAL is default)
-        // Trying generic text input first as placeholder might vary
-        await page.locator('input[type="text"]').first().fill('1234567890121');
-        await page.locator('input[type="password"]').fill('Test1234');
+        // Direct navigation to Step 1
+        await page.goto('/farmer/applications/new/step/1');
+        // Expect H1 in Layout
+        await expect(page.locator('h1')).toContainText('ยื่นคำขอใหม่');
+        // Expect Step Title
+        await expect(page.getByText('พืชสมุนไพร')).toBeVisible();
 
-        // Click Login
-        await page.getByRole('button', { name: 'เข้าสู่ระบบ' }).click();
+        // --- 3. Step 1: Plant Selection ---
+        // Use filter to find the exact button wrapper containing the text
+        await page.locator('button').filter({ hasText: 'กัญชา' }).first().click();
 
-        // Wait for redirect to dashboard
-        await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
+        // Select other mandatory fields
+        await page.locator('button').filter({ hasText: 'ขอใหม่' }).first().click();
+        await page.locator('button').filter({ hasText: 'เพื่อการพาณิชย์' }).first().click();
+        await page.locator('button').filter({ hasText: 'กลางแจ้ง' }).first().click();
 
-        // Navigate to Application Wizard
-        await page.goto('/applications/new');
+        // Click Next
+        await page.locator('button').filter({ hasText: 'ดำเนินการต่อ' }).click();
 
-        // --- Step 0: Plant & Initial Setup ---
-        // 1. Plant
-        await expect(page.getByText('เลือกพืชสมุนไพร')).toBeVisible();
-        await page.locator('section').filter({ hasText: 'เลือกพืชสมุนไพร' })
-            .getByRole('button', { name: /Cannabis/i }).first().click();
+        // --- 4. Step 2: General Info ---
+        await page.waitForURL('**/farmer/applications/new/step/2');
+        await page.fill('input[placeholder*="ฟาร์มสมุนไพร"]', 'ไร่กัญชาสุขใจ 2024');
+        await page.click('button:has-text("ถัดไป")');
 
-        // 2. Service Type
-        await page.locator('section').filter({ hasText: 'ประเภทคำขอ' })
-            .getByRole('button', { name: /^ขอใหม่/ }).first().click();
+        // --- 5. Step 3: Land Info ---
+        await page.waitForURL('**/farmer/applications/new/step/3');
+        await page.fill('input[placeholder*="ชื่อสถานที่"]', 'Green Valley Farm');
+        await page.fill('input[placeholder*="ที่อยู่"]', '123 Test Road');
+        await page.selectOption('select.w-full', { label: 'เชียงใหม่ (Chiang Mai)' });
+        await page.fill('input[placeholder*="รหัสไปรษณีย์"]', '50000');
+        // Select Land Ownership
+        await page.click('div:has-text("โฉนดที่ดิน")');
+        // Select Location Type
+        await page.click('div:has-text("โรงเรือน (Greenhouse)")');
+        await page.click('button:has-text("ถัดไป")');
 
-        // 3. Purpose
-        await page.getByRole('button', { name: 'เพื่อการพาณิชย์' }).click();
+        // --- 6. Step 4: Plots ---
+        await page.waitForURL('**/farmer/applications/new/step/4');
+        await page.click('button:has-text("เพิ่มแปลงปลูกใหม่")'); // Open Modal
+        await page.fill('input[placeholder*="โรงเรือน 1"]', 'GH-01');
+        await page.fill('input[type="number"]', '2'); // 2 Rai
+        await page.click('button:has-text("บันทึก")'); // Save Modal
+        await page.click('button:has-text("ถัดไป")');
 
-        // 4. Location Type
-        await page.getByRole('button', { name: /กลางแจ้ง/i }).click();
+        // --- 7. Step 5: Production ---
+        await page.waitForURL('**/farmer/applications/new/step/5');
+        await page.click('text=ช่อดอก (Flower)'); // Select Part
+        await page.selectOption('select:has-text("วิธีการขยายพันธุ์")', 'SEED');
+        await page.selectOption('select:has-text("แหล่งที่มา")', 'SELF');
+        await page.fill('input[placeholder*="พันธุ์"]', 'CharlotteWeb');
+        await page.fill('input[placeholder*="ปริมาณ"]', '100');
+        await page.click('button:has-text("ถัดไป")');
 
-        // Next
-        await page.getByRole('button', { name: 'ดำเนินการต่อ' }).click();
+        // --- 8. Step 6: Harvest ---
+        await page.waitForURL('**/farmer/applications/new/step/6');
+        await page.selectOption('#harvestMethod', 'MANUAL');
+        await page.selectOption('#dryingMethod', 'OVEN');
+        await page.selectOption('#storageSystem', 'CONTROLLED');
+        await page.fill('#packaging', 'Vacuum Sealed Bags');
+        await page.click('button:has-text("ถัดไป")');
 
+        // --- 9. Step 7: Documents ---
+        await page.waitForURL('**/farmer/applications/new/step/7');
+        // Upload Dummy
+        const fileChooserPromise = page.waitForEvent('filechooser');
+        await page.locator('label.cursor-pointer').first().click();
+        const fileChooser = await fileChooserPromise;
+        await fileChooser.setFiles({
+            name: 'test-doc.pdf',
+            mimeType: 'application/pdf',
+            buffer: Buffer.from('mock pdf')
+        });
+        await page.waitForTimeout(1000);
+        await page.click('button:has-text("ถัดไป")');
 
-        // --- Step 1: General Info (New Step) ---
-        await expect(page.getByText('ข้อมูลทั่วไป')).toBeVisible();
-        await page.getByPlaceholder('เช่น ฟาร์มสมุนไพรบ้านหนองขาว').fill('Test Farm Project');
-        // Ensure Cert Type is GACP
-        await page.locator('#certType').selectOption('GACP');
-        // await expect(page.getByLabel('มาตรฐานการรับรอง')).toHaveValue('GACP'); // Comment out strict check
-
-        // Next
-        await page.getByRole('button', { name: 'ถัดไป' }).click();
-
-
-        // --- Step 2: Site Location (Address) ---
-        await expect(page.getByText(/ข้อมูลที่ตั้ง/)).toBeVisible();
-
-        await page.getByLabel('ชื่อสถานที่').fill('Main Farm Site');
-        await page.getByLabel('ที่อยู่').fill('123 Test Road');
-        await page.getByLabel('จังหวัด').fill('Bangkok');
-        await page.getByLabel('อำเภอ').fill('Bang Rak');
-        await page.getByLabel('ตำบล').fill('Silom');
-        await page.getByLabel('รหัสไปรษณีย์').fill('10500');
-
-        // Next
-        await page.getByRole('button', { name: 'ถัดไป' }).click();
-
-
-        // --- Step 3: Plots (New Map Feature) ---
-        await expect(page.getByText('ข้อมูลแปลงปลูก')).toBeVisible();
-
-        // Open Add Plot Modal
-        await page.getByRole('button', { name: /เพิ่มแปลง/i }).click();
-
-        // Fill Plot Info
-        await page.getByPlaceholder('ชื่อแปลง').fill('Plot A');
-        await page.getByPlaceholder('ขนาด').fill('1');
-        await page.getByPlaceholder('หน่วย').fill('Rai');
-
-        // Test "Find Me" Map Button
-        const findMeBtn = page.getByRole('button', { name: /Find Me/i });
-        await expect(findMeBtn).toBeVisible();
-        await findMeBtn.click();
-
-        // Save Plot
-        await page.getByRole('button', { name: 'บันทึก' }).click();
-
-        // Verify Plot Added
-        await expect(page.getByText('Plot A')).toBeVisible();
-
-        // Next
-        await page.getByRole('button', { name: 'ถัดไป' }).click();
-
-
-        // --- Step 4: Production ---
-        await expect(page.getByText('ข้อมูลการผลิต')).toBeVisible();
-        await page.getByPlaceholder('ระบุจำนวน').first().fill('100');
-
-        // Next
-        await page.getByRole('button', { name: 'ถัดไป' }).click();
-
-
-        // --- Step 5: Harvest & Post-Harvest (New Step) ---
-        await expect(page.getByText('การเก็บเกี่ยวและจัดการหลังการเก็บเกี่ยว')).toBeVisible();
-
-        // 1. Harvest Method
-        await page.locator('#harvestMethod').selectOption('MANUAL');
-
-        // 2. Drying Method
-        await page.locator('#dryingMethod').selectOption('SUN');
-
-        // 3. Storage System
-        await page.locator('#storageSystem').selectOption('CONTROLLED');
-
-        // 4. Packaging
-        await page.locator('#packaging').fill('Food Grade Vacuum Bags');
-
-        // Next
-        await page.getByRole('button', { name: 'ถัดไป' }).click();
-
-
-        // --- Step 6: Documents ---
-        await expect(page.getByText('เอกสารแนบ')).toBeVisible();
-
-        // Upload dummy file
-        const fileInput = page.locator('input[type="file"]').first();
-        if (await fileInput.count() > 0) {
-            await fileInput.setInputFiles({
-                name: 'test.pdf',
-                mimeType: 'application/pdf',
-                buffer: Buffer.from('Dummy PDF Content')
-            });
+        // --- 10. Step 8: Pre-Check ---
+        await page.waitForURL('**/farmer/applications/new/step/8');
+        const checkboxes = await page.locator('.cursor-pointer').all();
+        for (const box of checkboxes) {
+            await box.click();
         }
+        await page.click('button:has-text("ยืนยัน")');
 
-        // Next
-        await page.getByRole('button', { name: 'ถัดไป' }).click();
+        // --- 11. Step 9: Review ---
+        await page.waitForURL('**/farmer/applications/new/step/9');
+        await page.click('button:has-text("ยืนยันและถัดไป")');
 
+        // --- 12. Step 10: Quote ---
+        await page.waitForURL('**/farmer/applications/new/step/10');
+        await page.click('input[type="checkbox"]');
+        await page.click('button:has-text("ออกใบแจ้งหนี้")');
+
+        // --- 13. Step 11: Invoice ---
+        await page.waitForURL('**/farmer/applications/new/step/11');
+        await page.click('button:has-text("ชำระเงิน")');
+        await page.click('button:has-text("จำลองการชำระเงินสำเร็จ")');
+
+        // --- 14. Step 12: Success ---
+        await page.waitForURL('**/farmer/applications/new/step/12');
+        await expect(page.locator('h2')).toContainText('ส่งคำขอสำเร็จ');
     });
 
 });

@@ -7,7 +7,7 @@ import { AuthService, AuthUser } from '@/lib/services/auth-service';
 
 const NAV_ITEMS = [
     {
-        href: '/dashboard', label: 'หน้าหลัก', requiredVerify: false, icon: (c: string) => (
+        href: '/farmer/dashboard', label: 'หน้าหลัก', requiredVerify: false, icon: (c: string) => (
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 <polyline points="9 22 9 12 15 12 15 22" />
@@ -15,7 +15,7 @@ const NAV_ITEMS = [
         )
     },
     {
-        href: '/applications', label: 'คำขอ', requiredVerify: true, icon: (c: string) => (
+        href: '/farmer/applications', label: 'คำขอ', requiredVerify: true, icon: (c: string) => (
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
@@ -41,7 +41,7 @@ const NAV_ITEMS = [
         )
     },
     {
-        href: '/profile', label: 'โปรไฟล์', requiredVerify: false, icon: (c: string) => (
+        href: '/farmer/profile', label: 'โปรไฟล์', requiredVerify: false, icon: (c: string) => (
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round">
                 <circle cx="12" cy="7" r="4" />
                 <path d="M5.5 21a7.5 7.5 0 0 1 13 0" />

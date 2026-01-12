@@ -28,7 +28,7 @@ export default function LoginPage() {
     useEffect(() => {
         // Check if already logged in using centralized AuthService
         if (AuthService.isAuthenticated()) {
-            window.location.href = "/dashboard";
+            window.location.href = "/farmer/dashboard";
             return;
         }
 
@@ -113,7 +113,7 @@ export default function LoginPage() {
 
             setIsLoading(false);
             setLoginState('success');
-            setTimeout(() => { window.location.href = "/dashboard"; }, 1500);
+            setTimeout(() => { window.location.href = "/farmer/dashboard"; }, 1500);
 
         } catch (err) {
             if (err instanceof Error && err.name === 'AbortError') {

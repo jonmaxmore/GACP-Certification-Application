@@ -141,7 +141,7 @@ export function useLogin(): UseLoginReturn {
             setLoginState('success');
 
             setTimeout(() => {
-                window.location.href = "/dashboard";
+                window.location.href = "/farmer/dashboard";
             }, 1500);
 
         } catch (err) {

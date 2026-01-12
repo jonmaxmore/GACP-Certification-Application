@@ -1,7 +1,7 @@
 {
   "name": "gacp-backend",
-  "version": "2.0.0",
-  "description": "GACP Platform Backend - Production Server",
+  "version": "3.0.0",
+  "description": "GACP Platform Backend - Production Server (V3.0)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -51,10 +51,12 @@ class QRCodeService {
         };
 
         try {
+            console.log(`[QRCodeService] Generating Data URL for ID: ${qrCodeId}...`);
             const dataUrl = await QRCode.toDataURL(url, qrOptions);
+            console.log(`[QRCodeService] Data URL Generated.`);
             return dataUrl;
         } catch (error) {
-            logger.error('QR Code generation failed:', error);
+            console.error('[QRCodeService] QR Code generation failed:', error);
             throw error;
         }
     }

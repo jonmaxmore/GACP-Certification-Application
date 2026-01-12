@@ -22,8 +22,8 @@ class CertificateService {
             include: { farmer: true },
         });
 
-        if (!app) {throw new Error('Application not found');}
-        if (app.status !== 'APPROVED') {throw new Error('Application must be APPROVED first');}
+        if (!app) { throw new Error('Application not found'); }
+        if (app.status !== 'APPROVED') { throw new Error('Application must be APPROVED first'); }
 
         // 2. Check overlap? (Skip for now, assume valid)
 
@@ -144,27 +144,34 @@ class CertificateService {
         }
 
         if (!species) {
-            console.warn('[Certificate] No Plant Species found. Skipping initial asset creation.');
+            console.error('[Certificate] CRITICAL: No Plant Species found for initial asset creation. Aborting.');
             return;
         }
+        console.log(`[Certificate] Found Species: ${species.nameTH} (ID: ${species.id})`);
 
         // 2. Create Planting Cycle
         const year = new Date().getFullYear() + 543;
-        const cycle = await prisma.plantingCycle.create({
-            data: {
-                generateId: true, // Only if using custom ID generator, otherwise ignore
-                cycleName: `Featured Cycle 1/${year}`,
-                cycleNumber: 1,
-                farmId: farm.id,
-                certificateId: certificate.id,
-                plantSpeciesId: species.id,
-                startDate: issuedDate, // Started today
-                status: 'PLANTED', // Active immediately
-                cultivationType: farm.cultivationMethod || 'SELF_GROWN',
-                notes: 'Auto-generated upon Certification',
-            },
-        });
-        console.log(`[Certificate] Auto-Created Cycle: ${cycle.id}`);
+        console.log('[Certificate] Creating PlantingCycle...');
+        let cycle;
+        try {
+            cycle = await prisma.plantingCycle.create({
+                data: {
+                    cycleName: `Featured Cycle 1/${year}`,
+                    cycleNumber: 1,
+                    farmId: farm.id,
+                    certificateId: certificate.id,
+                    plantSpeciesId: species.id,
+                    startDate: issuedDate, // Started today
+                    status: 'PLANTED', // Active immediately
+                    cultivationType: farm.cultivationMethod || 'SELF_GROWN',
+                    notes: 'Auto-generated upon Certification',
+                },
+            });
+            console.log(`[Certificate] Auto-Created Cycle: ${cycle.id}`);
+        } catch (cycleErr) {
+            console.error('[Certificate] Failed to create PlantingCycle:', cycleErr);
+            throw cycleErr; // Re-throw to catch in main try/catch covering createInitialAssets
+        }
 
         // 3. Create Harvest Batch (The "Lot")
         const batchNumber = `LOT-${year}-${farm.id.substring(0, 4).toUpperCase()}-001`; // Simple unique logic
@@ -203,7 +210,7 @@ class CertificateService {
      */
     async getCertificatePdf(certificateId) {
         const cert = await prisma.certificate.findUnique({ where: { id: certificateId } });
-        if (!cert) {throw new Error('Certificate not found');}
+        if (!cert) { throw new Error('Certificate not found'); }
 
         const pdfService = require('./pdf-service');
         return await pdfService.generateCertificatePdf(cert);

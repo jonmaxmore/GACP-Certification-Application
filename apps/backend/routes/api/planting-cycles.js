@@ -147,6 +147,34 @@ router.patch('/:id', async (req, res) => {
 
 /**
  * @swagger
+ * /api/planting-cycles/{id}/generate-units:
+ *   post:
+ *     summary: Generate PlantUnit records (Ethical Tracking)
+ *     tags: [PlantingCycles]
+ */
+router.post('/:id/generate-units', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await plantingService.generatePlantUnits(id);
+
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+
+        res.status(201).json({
+            success: true,
+            message: result.message,
+            data: { count: result.count }
+        });
+    } catch (error) {
+        console.error('Error generating plant units:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+
+/**
+ * @swagger
  * /api/planting-cycles/{id}/harvest:
  *   post:
  *     summary: Harvest a planting cycle (Convert to Batch)

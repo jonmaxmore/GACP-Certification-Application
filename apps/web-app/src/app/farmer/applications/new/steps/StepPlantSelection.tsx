@@ -9,6 +9,7 @@ import { CultivationMethodSelector } from '@/components/CultivationMethodSelecto
 import { getPlantIcon } from '@/components/icons/PlantIcons';
 import { CheckIcon, InfoIcon } from '@/components/icons/WizardIcons';
 import { WizardNavigation } from '@/components/wizard/WizardNavigation';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface Plant {
     id: string;
@@ -31,17 +32,18 @@ const FALLBACK_PLANTS: Plant[] = [
     { id: '7', code: 'bsd', nameTH: 'กระชายดำ', nameEN: 'Black Galingale', group: 'GENERAL', enabled: false, availableServiceTypes: ['NEW'] },
 ];
 
-const SERVICE_TYPES = [
-    { id: 'NEW', label: 'ขอใหม่', labelEN: 'New Application', desc: 'สำหรับผู้ที่ยังไม่เคยมีใบรับรอง GACP หรือใบรับรองเดิมหมดอายุเกินกำหนดต่ออายุ' },
-    { id: 'RENEWAL', label: 'ต่ออายุ', labelEN: 'Renewal', desc: 'สำหรับใบรับรองเดิมที่ใกล้หมดอายุ สามารถยื่นล่วงหน้าได้ 90 วัน' },
-    { id: 'MODIFY', label: 'เปลี่ยนแปลงรายการ', labelEN: 'Amendment', desc: 'แก้ไขข้อมูลในใบรับรองเดิม เช่น เปลี่ยนแปลงผู้ดำเนินกิจการ หรือพื้นที่ปลูก' }
-];
-
 export const StepPlantSelection = () => {
     const { state, setPlant, setServiceType, setCertificationPurpose, updateState } = useWizardStore();
     const [plants, setPlants] = useState<Plant[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { dict, language } = useLanguage();
+
+    const serviceTypes = [
+        { id: 'NEW', ...dict.wizard.plantSelection.serviceTypes.new },
+        { id: 'RENEWAL', ...dict.wizard.plantSelection.serviceTypes.renewal },
+        { id: 'MODIFY', ...dict.wizard.plantSelection.serviceTypes.modify }
+    ];
 
     useEffect(() => {
         const fetchPlants = async () => {
@@ -82,12 +84,12 @@ export const StepPlantSelection = () => {
             {/* Section 1: Plant Selection */}
             <section className="gacp-card">
                 <div className="flex items-center gap-4 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                    <div className="w-10 h-10 bg-primary gradient-mask rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ring-4 ring-primary-50">
                         1
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-primary">เลือกชนิดพืชสมุนไพร</h2>
-                        <p className="text-text-secondary text-sm">กรุณาเลือกพืชที่ต้องการขอรับรอง GACP</p>
+                        <h2 className="text-xl font-bold text-primary">{dict.wizard.plantSelection.sections.plant}</h2>
+                        <p className="text-text-secondary text-sm">{dict.wizard.plantSelection.sections.plantDesc}</p>
                     </div>
                 </div>
 
@@ -136,10 +138,10 @@ export const StepPlantSelection = () => {
                                     </div>
 
                                     <div className={`font-bold text-base mb-0.5 ${isSelected ? 'text-primary' : 'text-text-main'}`}>
-                                        {plant.nameTH}
+                                        {language === 'th' ? plant.nameTH : plant.nameEN}
                                     </div>
                                     <div className="text-xs text-text-muted uppercase font-medium">
-                                        {plant.nameEN}
+                                        {language === 'th' ? plant.nameEN : plant.nameTH}
                                     </div>
                                 </button>
                             );
@@ -151,17 +153,17 @@ export const StepPlantSelection = () => {
             {/* Section 2: Service Type */}
             <section className="gacp-card animate-slide-up" style={{ animationDelay: '100ms' }}>
                 <div className="flex items-center gap-4 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                    <div className="w-10 h-10 bg-primary gradient-mask rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ring-4 ring-primary-50">
                         2
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-primary">ประเภทคำขอ</h2>
-                        <p className="text-text-secondary text-sm">เลือกประเภทการยื่นคำขอของท่าน</p>
+                        <h2 className="text-xl font-bold text-primary">{dict.wizard.plantSelection.sections.serviceType}</h2>
+                        <p className="text-text-secondary text-sm">{dict.wizard.plantSelection.sections.serviceTypeDesc}</p>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {SERVICE_TYPES.filter(t => availableServiceTypes.includes(t.id)).map((type) => {
+                    {serviceTypes.filter(t => availableServiceTypes.includes(t.id)).map((type) => {
                         const isSelected = state.serviceType === type.id;
                         return (
                             <button
@@ -193,12 +195,12 @@ export const StepPlantSelection = () => {
                 {/* Section 3: Purpose */}
                 <section className="gacp-card h-full">
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                        <div className="w-10 h-10 bg-primary gradient-mask rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ring-4 ring-primary-50">
                             3
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-primary">วัตถุประสงค์</h2>
-                            <p className="text-text-secondary text-sm">เลือกวัตถุประสงค์การผลิต</p>
+                            <h2 className="text-xl font-bold text-primary">{dict.wizard.plantSelection.sections.purpose}</h2>
+                            <p className="text-text-secondary text-sm">{dict.wizard.plantSelection.sections.purposeDesc}</p>
                         </div>
                     </div>
                     <PurposeSelector
@@ -211,12 +213,12 @@ export const StepPlantSelection = () => {
                 {/* Section 4: Cultivation Method */}
                 <section className="gacp-card h-full">
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                        <div className="w-10 h-10 bg-primary gradient-mask rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ring-4 ring-primary-50">
                             4
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-primary">รูปแบบการปลูก</h2>
-                            <p className="text-text-secondary text-sm">เลือกวิธีการปลูกสมุนไพร</p>
+                            <h2 className="text-xl font-bold text-primary">{dict.wizard.plantSelection.sections.method}</h2>
+                            <p className="text-text-secondary text-sm">{dict.wizard.plantSelection.sections.methodDesc}</p>
                         </div>
                     </div>
 
@@ -229,7 +231,7 @@ export const StepPlantSelection = () => {
                     <div className="mt-6 flex items-start gap-3 p-4 bg-background-subtle rounded-xl border border-gray-100">
                         <InfoIcon className="text-primary mt-0.5 flex-shrink-0" />
                         <p className="text-xs text-text-secondary leading-relaxed">
-                            หนึ่งใบคำขอ = หนึ่งรูปแบบการเพาะปลูก หากมีหลายรูปแบบกรุณายื่นแยกคำขอ
+                            {dict.wizard.plantSelection.note}
                         </p>
                     </div>
                 </section>
@@ -239,7 +241,7 @@ export const StepPlantSelection = () => {
                 onNext={handleNext}
                 isNextDisabled={!isReady}
                 showBack={false}
-                nextLabel="ดำเนินการขั้นตอนถัดไป"
+                nextLabel={dict.wizard.navigation.next}
             />
         </div>
     );

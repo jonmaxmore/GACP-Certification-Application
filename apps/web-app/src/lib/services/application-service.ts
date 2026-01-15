@@ -30,6 +30,7 @@ export interface Application {
         address?: string;
         [key: string]: any;
     };
+    items?: any[];
 }
 
 export interface DashboardStats {

@@ -79,6 +79,15 @@ export interface ApplicantData {
     contactPhone?: string;            // โทรศัพท์ผู้ติดต่อ
     contactEmail?: string;            // อีเมลผู้ติดต่อ
 
+    // เพิ่มเติม (Documents)
+    idCardDoc?: string;
+    houseRegDoc?: string;
+    communityRegDoc?: string;
+    communityMeetingDoc?: string;
+    companyRegDoc?: string;
+    directorListDoc?: string;
+    contact?: string; // Adding to match potential usage
+
     // Legacy fields
     responsibleName?: string;
     qualification?: string;
@@ -170,6 +179,8 @@ export interface FarmData {
     hasWarningSign?: boolean;
     // เอกสารฟาร์ม
     documents?: StepDocument[];
+    environmentChecks?: Record<string, boolean>;
+    securityChecks?: Record<string, boolean>;
 }
 
 // [NEW] Lot - ล็อตการผลิต

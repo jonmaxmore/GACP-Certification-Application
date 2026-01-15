@@ -27,7 +27,6 @@ class PrismaAuthService {
         // ---------------------------------
 
 
-
         // Generate Hash for Uniqueness Check
         const crypto = require('crypto');
         let idCardHash = null;
@@ -38,6 +37,7 @@ class PrismaAuthService {
         const createPayload = {
             data: {
                 ...userData,
+                idCard: identifier || userData.idCard, // [FIX] Ensure idCard is set from identifier if provided
                 idCardHash, // Enforce Uniqueness
                 password: await bcrypt.hash(userData.password, 10),
                 verificationStatus,
@@ -71,6 +71,7 @@ class PrismaAuthService {
                 ],
             },
         });
+
         if (!user || !await bcrypt.compare(password, user.password)) {
             throw new Error('Invalid credentials');
         }

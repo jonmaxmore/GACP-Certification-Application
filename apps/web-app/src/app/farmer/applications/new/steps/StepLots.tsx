@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { useWizardStore, Lot } from '../hooks/useWizardStore';
 import { useRouter } from 'next/navigation';
 import { WizardNavigation } from '@/components/wizard/WizardNavigation';
-import { PlantIcon } from '@/components/icons/WizardIcons';
+import { CheckIcon, InfoIcon } from '@/components/icons/WizardIcons';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export const StepLots = () => {
-    const { state, setLots, addLot, removeLot } = useWizardStore();
+    const { state, setLots } = useWizardStore();
     const router = useRouter();
+    const { dict } = useLanguage();
 
     // Local lots state (sync with store)
     const [lots, setLotsLocal] = useState<Lot[]>(state.lots || []);
@@ -111,25 +113,28 @@ export const StepLots = () => {
                     6
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold text-primary-900">จัดการล็อตการผลิต (Lots Management)</h2>
+                    <h2 className="text-2xl font-bold text-primary-900">{dict.wizard.steps.lots || 'จัดการล็อตการผลิต (Lots Management)'}</h2>
                     <p className="text-text-secondary">วางแผนและจัดการล็อตการปลูกเพื่อการติดตามย้อนกลับ (Traceability)</p>
                 </div>
             </div>
 
             {/* Summary Card */}
-            <div className="gacp-card bg-gradient-to-br from-teal-50 to-white border-teal-100">
-                <div className="flex justify-between items-center">
+            <div className="gacp-card bg-gradient-to-br from-teal-50 to-white border-teal-100 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-teal-100/30 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+                <div className="flex justify-between items-center relative z-10">
                     <div>
-                        <p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">จำนวนล็อตทั้งหมด</p>
-                        <p className="text-3xl font-bold text-teal-700">{lots.length} <span className="text-lg text-text-secondary font-medium">ล็อต</span></p>
+                        <p className="text-xs font-bold text-teal-600 uppercase tracking-wider mb-1">จำนวนล็อตทั้งหมด</p>
+                        <p className="text-3xl font-bold text-teal-700">{lots.length} <span className="text-lg text-teal-600/70 font-medium">ล็อต</span></p>
                     </div>
+                    <div className="h-12 w-px bg-teal-100 hidden md:block"></div>
                     <div>
-                        <p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">จำนวนต้นพืชรวม</p>
-                        <p className="text-3xl font-bold text-emerald-700">{totalPlants.toLocaleString()} <span className="text-lg text-text-secondary font-medium">ต้น</span></p>
+                        <p className="text-xs font-bold text-teal-600 uppercase tracking-wider mb-1">จำนวนต้นพืชรวม</p>
+                        <p className="text-3xl font-bold text-emerald-700">{totalPlants.toLocaleString()} <span className="text-lg text-emerald-600/70 font-medium">ต้น</span></p>
                     </div>
+                    <div className="h-12 w-px bg-teal-100 hidden md:block"></div>
                     <div>
-                        <p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">แปลงปลูกที่มี</p>
-                        <p className="text-3xl font-bold text-primary-900">{availablePlots.length} <span className="text-lg text-text-secondary font-medium">แปลง</span></p>
+                        <p className="text-xs font-bold text-teal-600 uppercase tracking-wider mb-1">แปลงปลูกที่มี</p>
+                        <p className="text-3xl font-bold text-primary-900">{availablePlots.length} <span className="text-lg text-primary-600/70 font-medium">แปลง</span></p>
                     </div>
                 </div>
             </div>
@@ -169,7 +174,7 @@ export const StepLots = () => {
 
                 {/* Existing Lots */}
                 {lots.map((lot) => (
-                    <div key={lot.id} className="gacp-card group hover:border-primary-300 hover:shadow-premium-hover transition-all duration-300">
+                    <div key={lot.id} className="gacp-card group hover:border-primary-300 hover:shadow-premium-hover transition-all duration-300 animate-slide-up relative">
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
@@ -213,20 +218,25 @@ export const StepLots = () => {
             </div>
 
             {/* Info Banner */}
-            <div className="p-4 bg-blue-50/80 backdrop-blur-sm border border-blue-200 rounded-xl flex gap-3 text-blue-900 text-sm shadow-sm">
-                <span className="text-xl">💡</span>
-                <p className="leading-relaxed">
-                    <strong>ล็อตการผลิต (Lot)</strong> คือหน่วยสำคัญในการตรวจสอบย้อนกลับ (Traceability) ระบบจะสร้าง QR Code ประจำต้นสำหรับทุกต้นในล็อตนี้เมื่อได้รับอนุมัติ ซึ่งจะใช้ในการติดตามดูแลรักษาและการเก็บเกี่ยวต่อไป
-                </p>
+            <div className="p-6 bg-blue-50/80 backdrop-blur-sm border border-blue-200 rounded-2xl flex gap-4 text-blue-900 text-sm shadow-sm animate-slide-up" style={{ animationDelay: '200ms' }}>
+                <div className="p-2 bg-white rounded-xl shadow-sm h-fit">
+                    <InfoIcon className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="space-y-1">
+                    <p className="font-bold text-blue-900">เกร็ดความรู้: ล็อตการผลิต (Lot)</p>
+                    <p className="leading-relaxed text-blue-800/80">
+                        ล็อตการผลิตคือหน่วยสำคัญในการตรวจสอบย้อนกลับ (Traceability) ตามมาตรฐาน GACP ระบบจะสร้าง QR Code ประจำต้นเมื่อได้รับการอนุมัติ เพื่อใช้ในการติดตาทสถานะจนถึงการเก็บเกี่ยว
+                    </p>
+                </div>
             </div>
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-                    <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-md w-full p-8 shadow-2xl border border-white/50 animate-scale-in">
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
+                    <div className="bg-white/95 backdrop-blur-xl rounded-[2rem] max-w-md w-full p-8 shadow-2xl border border-white/50 animate-scale-in">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-xl font-bold text-gray-900">เพิ่มล็อตการผลิตใหม่</h3>
-                            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                            <h3 className="text-2xl font-bold text-primary-900">เพิ่มล็อตการผลิตใหม่</h3>
+                            <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-400 hover:text-gray-600 transition-colors">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                         </div>
@@ -234,8 +244,8 @@ export const StepLots = () => {
                         <div className="space-y-5">
                             {/* Lot Code */}
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1.5">รหัสล็อต (Auto)</label>
-                                <div className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 text-gray-500 font-mono text-lg font-medium tracking-wide text-center">
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">รหัสล็อต (Auto-generated)</label>
+                                <div className="w-full border border-gray-100 rounded-2xl px-4 py-4 bg-gray-50/50 text-gray-500 font-mono text-xl font-bold tracking-widest text-center shadow-inner">
                                     {currentLot.lotCode}
                                 </div>
                             </div>
@@ -244,7 +254,7 @@ export const StepLots = () => {
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-1.5">เลือกแปลงปลูก <span className="text-danger">*</span></label>
                                 <select
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-200 focus:border-primary-500 outline-none bg-white transition-all appearance-none"
+                                    className="gacp-input bg-white"
                                     value={currentLot.plotId || ''}
                                     onChange={e => setCurrentLot({ ...currentLot, plotId: e.target.value })}
                                 >
@@ -263,12 +273,12 @@ export const StepLots = () => {
                                 <div className="relative">
                                     <input
                                         type="number"
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-lg font-medium focus:ring-2 focus:ring-primary-200 focus:border-primary-500 outline-none transition-all"
+                                        className="gacp-input bg-white pr-12 text-lg font-bold"
                                         placeholder="0"
                                         value={currentLot.plantCount || ''}
                                         onChange={e => setCurrentLot({ ...currentLot, plantCount: parseInt(e.target.value) || 0 })}
                                     />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">ต้น</span>
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">ต้น</span>
                                 </div>
                             </div>
 
@@ -277,7 +287,7 @@ export const StepLots = () => {
                                 <label className="block text-sm font-bold text-gray-700 mb-1.5">วันที่คาดว่าจะปลูก</label>
                                 <input
                                     type="date"
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary-200 focus:border-primary-500 outline-none transition-all"
+                                    className="gacp-input bg-white"
                                     value={currentLot.estimatedPlantingDate || ''}
                                     onChange={e => setCurrentLot({ ...currentLot, estimatedPlantingDate: e.target.value })}
                                 />
@@ -287,8 +297,8 @@ export const StepLots = () => {
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-1.5">หมายเหตุ</label>
                                 <textarea
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 h-24 resize-none focus:ring-2 focus:ring-primary-200 focus:border-primary-500 outline-none transition-all text-sm"
-                                    placeholder="ข้อมูลเพิ่มเติม..."
+                                    className="gacp-input bg-white h-24 resize-none text-sm"
+                                    placeholder="ข้อมูลเพิ่มเติม เช่น รายละเอียดสายพันธุ์ย่อย หรือเทคนิคพิเศษ..."
                                     value={currentLot.notes || ''}
                                     onChange={e => setCurrentLot({ ...currentLot, notes: e.target.value })}
                                 />
@@ -296,18 +306,18 @@ export const StepLots = () => {
                         </div>
 
                         {/* Modal Actions */}
-                        <div className="flex gap-3 mt-8 pt-4 border-t border-gray-100">
+                        <div className="flex gap-4 mt-8 pt-4">
                             <button
                                 onClick={() => setIsModalOpen(false)}
-                                className="flex-1 px-4 py-3 border border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-50 transition-colors"
+                                className="flex-1 px-4 py-3.5 border border-gray-200 text-gray-600 rounded-2xl font-bold hover:bg-gray-50 transition-colors"
                             >
-                                ยกเลิก
+                                {dict?.wizard?.navigation?.back || 'ยกเลิก'}
                             </button>
                             <button
                                 onClick={handleAddLot}
                                 disabled={!currentLot.plotId || !currentLot.plantCount}
-                                className={`flex-1 px-4 py-3 rounded-xl font-bold shadow-md transition-all ${currentLot.plotId && currentLot.plantCount
-                                    ? 'bg-primary text-white hover:bg-primary-700 hover:shadow-lg hover:-translate-y-0.5'
+                                className={`flex-1 px-4 py-3.5 rounded-2xl font-bold shadow-lg transition-all ${currentLot.plotId && currentLot.plantCount
+                                    ? 'bg-primary text-white hover:bg-primary-700 hover:shadow-primary/30 hover:-translate-y-1'
                                     : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
                                     }`}
                             >

@@ -1,23 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiClient as api } from "@/lib/api/api-client";
 import { AuthService } from "@/lib/services/auth-service";
-import {
-    IconUser, IconDocument, IconCheckCircle, IconLock
-} from "@/components/ui/icons";
+import { Icons, IconUser, IconLock } from "@/components/ui/icons";
 
-/* Additional local icons if not in shared lib */
-const IconInfo = ({ color = "currentColor", size = 24 }: { color?: string; size?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5">
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 16v-4M12 8h.01" />
-    </svg>
-);
-
-interface User { id?: string; firstName?: string; lastName?: string; email?: string; phone?: string; identifier?: string; companyName?: string; communityName?: string; accountType?: string; createdAt?: string; lastLogin?: string; }
+interface User {
+    id?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    identifier?: string;
+    companyName?: string;
+    communityName?: string;
+    accountType?: string;
+    createdAt?: string;
+    lastLogin?: string;
+    verificationStatus?: string;
+}
 
 export default function ProfilePage() {
     const router = useRouter();
@@ -26,7 +28,6 @@ export default function ProfilePage() {
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState("");
     const [mounted, setMounted] = useState(false);
-    const [isDark, setIsDark] = useState(false);
 
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -35,72 +36,70 @@ export default function ProfilePage() {
     const [companyName, setCompanyName] = useState("");
     const [originalValues, setOriginalValues] = useState({ firstName: "", lastName: "", email: "", phone: "", companyName: "" });
 
-    const hasChanges = isEditing && (firstName !== originalValues.firstName || lastName !== originalValues.lastName || email !== originalValues.email || phone !== originalValues.phone || companyName !== originalValues.companyName);
+    const hasChanges = isEditing && (
+        firstName !== originalValues.firstName ||
+        lastName !== originalValues.lastName ||
+        email !== originalValues.email ||
+        phone !== originalValues.phone ||
+        companyName !== originalValues.companyName
+    );
 
     useEffect(() => {
         setMounted(true);
-        setIsDark(localStorage.getItem("theme") === "dark");
-
-        const currentUser = AuthService.getUser();
-        if (!currentUser) {
-            router.push("/login");
-            return;
-        }
-
-        // We use the user from localStorage first, but ideally we should fetch fresh profile
-        // For now, consistent with other pages, stick to localStorage user or fetch profile if needed.
-        // The original code used localStorage directly. AuthService.getUser() also uses localStorage/cookies logic.
-        // Let's rely on AuthService.getUser() but it returns a User object.
-        // We might need to cast or just use what we have.
-        // Actually, let's fetch profile to be sure.
+        const fetchProfile = async () => {
+            const res = await api.get<User>('/auth/me');
+            if (res.success && res.data) {
+                const u = res.data;
+                setUser(u);
+                initForm(u);
+            } else {
+                const u = AuthService.getUser();
+                if (u) {
+                    setUser(u as User);
+                    initForm(u as User);
+                } else {
+                    router.push("/login");
+                }
+            }
+        };
         fetchProfile();
     }, [router]);
 
-    const fetchProfile = async () => {
-        const res = await api.get<User>('/auth/me'); // Assuming an endpoint exists or we rely on stored user
-        // If /auth/me doesn't exist, fall back to localStorage user
-        if (res.success && res.data) {
-            const u = res.data;
-            setUser(u);
-            initForm(u);
-        } else {
-            // Fallback
-            const u = AuthService.getUser();
-            if (u) {
-                setUser(u as User);
-                initForm(u as User);
-            }
-        }
-    };
-
     const initForm = (u: User) => {
-        setFirstName(u.firstName || ""); setLastName(u.lastName || ""); setEmail(u.email || ""); setPhone(u.phone || ""); setCompanyName(u.companyName || u.communityName || "");
-        setOriginalValues({ firstName: u.firstName || "", lastName: u.lastName || "", email: u.email || "", phone: u.phone || "", companyName: u.companyName || u.communityName || "" });
+        setFirstName(u.firstName || "");
+        setLastName(u.lastName || "");
+        setEmail(u.email || "");
+        setPhone(u.phone || "");
+        setCompanyName(u.companyName || u.communityName || "");
+        setOriginalValues({
+            firstName: u.firstName || "",
+            lastName: u.lastName || "",
+            email: u.email || "",
+            phone: u.phone || "",
+            companyName: u.companyName || u.communityName || ""
+        });
     };
 
     const validateEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
     const validatePhone = (v: string) => /^0[689]\d{8}$/.test(v);
 
     const handleSaveProfile = async () => {
-        if (email && !validateEmail(email)) { setMessage("รูปแบบอีเมลไม่ถูกต้อง"); return; }
-        if (phone && !validatePhone(phone)) { setMessage("เบอร์โทรศัพท์ต้องขึ้นต้นด้วย 06, 08, 09"); return; }
-        setIsSaving(true); setMessage("");
+        if (email && !validateEmail(email)) { setMessage("❌ รูปแบบอีเมลไม่ถูกต้อง"); return; }
+        if (phone && !validatePhone(phone)) { setMessage("❌ เบอร์โทรศัพท์ต้องขึ้นต้นด้วย 06, 08, 09"); return; }
+        setIsSaving(true);
+        setMessage("");
 
-        // Use api client
         const result = await api.put("/auth-farmer/profile", { firstName, lastName, email, phone, companyName });
 
         if (result.success) {
             const updatedUser = { ...user, firstName, lastName, email, phone, companyName };
-            // Update auth service storage if possible, but AuthService might not expose direct setter easily if it uses cookies primarily.
-            // But we can update localStorage "user" manually as the app seems to rely on it for UI
             localStorage.setItem("user", JSON.stringify(updatedUser));
-
             setUser(updatedUser);
-            setMessage("บันทึกข้อมูลเรียบร้อยแล้ว");
+            setMessage("✅ บันทึกข้อมูลเรียบร้อยแล้ว");
             setIsEditing(false);
             setOriginalValues({ firstName, lastName, email, phone, companyName });
         } else {
-            setMessage((result.error || "เกิดข้อผิดพลาด"));
+            setMessage("❌ " + (result.error || "เกิดข้อผิดพลาดในการบันทึก"));
         }
         setIsSaving(false);
     };
@@ -110,84 +109,185 @@ export default function ProfilePage() {
         window.location.href = "/login";
     };
 
-    const getAccountTypeThai = () => { switch (user?.accountType) { case "INDIVIDUAL": return "บุคคลธรรมดา"; case "JURISTIC": return "นิติบุคคล"; case "COMMUNITY_ENTERPRISE": return "วิสาหกิจชุมชน"; default: return "ผู้สมัคร"; } };
-    const getName = () => user?.companyName || user?.communityName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "ผู้ใช้";
+    const getAccountTypeThai = () => {
+        switch (user?.accountType) {
+            case "INDIVIDUAL": return "บุคคลธรรมดา";
+            case "JURISTIC": return "นิติบุคคล";
+            case "COMMUNITY_ENTERPRISE": return "วิสาหกิจชุมชน";
+            default: return "เกษตรกร";
+        }
+    };
 
-    const accentColor = isDark ? "#10B981" : "#16A34A";
+    if (!user || !mounted) return (
+        <div className="min-h-[60vh] flex flex-col items-center justify-center">
+            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Loading Profile...</p>
+        </div>
+    );
 
-    if (!user || !mounted) return <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-slate-900' : 'bg-stone-50'}`}><div className="w-10 h-10 border-3 border-slate-300 border-t-emerald-500 rounded-full animate-spin" /></div>;
-
-    const inputClass = `w-full py-3.5 px-4 border rounded-xl text-sm outline-none transition-colors ${isEditing ? (isDark ? 'bg-slate-800 border-slate-600' : 'bg-white border-slate-200') : (isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-50 border-slate-200')} ${isDark ? 'text-slate-100' : 'text-slate-800'} focus:border-emerald-500`;
+    const inputClass = `w-full py-3.5 px-5 rounded-2xl border-2 transition-all outline-none font-medium ${isEditing ? 'bg-white border-primary/20 focus:border-primary focus:ring-4 focus:ring-primary/5' : 'bg-slate-50 border-slate-50 text-slate-500 cursor-not-allowed'}`;
 
     return (
-        <div className="p-6 lg:p-8 max-w-4xl mx-auto pb-24 lg:pb-8">
-            <header className="mb-7"><h1 className="text-2xl lg:text-3xl font-medium">ตั้งค่าบัญชี</h1><p className={`text-sm mt-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>จัดการข้อมูลส่วนตัวและการตั้งค่าบัญชี</p></header>
-
-            {message && <div className={`p-3.5 rounded-xl mb-5 text-sm flex items-center gap-2 ${message.includes('เรียบร้อย') ? (isDark ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-50 text-emerald-600') : (isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-600')}`}>
-                <IconCheckCircle color={message.includes('เรียบร้อย') ? accentColor : "#EF4444"} size={20} /> {message}
-            </div>}
-
-            {/* Personal Info Card */}
-            <div className={`rounded-2xl p-6 mb-5 border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
-                <div className="flex items-center gap-3 mb-6">
-                    <div className={`w-13 h-13 rounded-2xl flex items-center justify-center ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'}`}>
-                        <IconUser color={accentColor} size={24} />
-                    </div>
-                    <div><h2 className="text-lg font-semibold">ข้อมูลส่วนตัว</h2><p className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>อัปเดตข้อมูลโปรไฟล์และข้อมูลติดต่อ</p></div>
+        <div className="container mx-auto max-w-5xl py-10 px-6 animate-fade-in group">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+                <div>
+                    <h1 className="text-4xl font-black text-slate-800 tracking-tight mb-2">ข้อมูลผู้ใช้งาน</h1>
+                    <p className="text-slate-500 font-medium">จัดการข้อมูลส่วนบุคคลและการตั้งค่าบัญชีของคุณ</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label className={`text-sm block mb-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>ชื่อ-นามสกุล</label><input type="text" value={`${firstName} ${lastName}`.trim() || getName()} onChange={(e) => { const p = e.target.value.split(" "); setFirstName(p[0] || ""); setLastName(p.slice(1).join(" ") || ""); }} disabled={!isEditing} className={inputClass} /></div>
-                    <div><label className={`text-sm block mb-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>อีเมล</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={!isEditing} className={inputClass} /></div>
-                    <div><label className={`text-sm block mb-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>เบอร์โทรศัพท์</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!isEditing} className={inputClass} /></div>
-                    <div><label className={`text-sm block mb-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>เลขบัตรประชาชน</label><input type="text" value={user.identifier || ""} disabled className={`${inputClass} text-slate-400`} /></div>
-                    {(user.companyName || user.communityName) && <div className="md:col-span-2"><label className={`text-sm block mb-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>ชื่อองค์กร/บริษัท</label><input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!isEditing} className={inputClass} /></div>}
-                </div>
-                <div className="mt-5 flex justify-between items-center">
-                    {hasChanges && <span className="text-xs text-amber-500">มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก</span>}
-                    {!hasChanges && <div />}
-                    <div className="flex gap-3">
-                        {isEditing ? (<>
-                            <button onClick={() => { setFirstName(originalValues.firstName); setLastName(originalValues.lastName); setEmail(originalValues.email); setPhone(originalValues.phone); setCompanyName(originalValues.companyName); setIsEditing(false); setMessage(""); }} className={`px-5 py-2.5 rounded-xl text-sm border ${isDark ? 'border-slate-600 text-slate-400' : 'border-slate-200 text-slate-500'}`}>ยกเลิก</button>
-                            <button onClick={handleSaveProfile} disabled={isSaving} className="px-6 py-2.5 bg-gradient-to-br from-emerald-600 to-emerald-500 text-white rounded-xl text-sm font-semibold">{isSaving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}</button>
-                        </>) : (
-                            <button onClick={() => setIsEditing(true)} className="px-6 py-2.5 bg-gradient-to-br from-emerald-600 to-emerald-500 text-white rounded-xl text-sm font-semibold">แก้ไขข้อมูล</button>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Security */}
-            <div className={`rounded-2xl p-6 mb-5 border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
-                <div className="flex items-center gap-3 mb-5">
-                    <div className={`w-13 h-13 rounded-2xl flex items-center justify-center ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'}`}>
-                        <IconLock color={accentColor} size={24} />
-                    </div>
-                    <div><h2 className="text-lg font-semibold">ความปลอดภัย</h2><p className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>จัดการรหัสผ่านและการตั้งค่าความปลอดภัย</p></div>
-                </div>
-                <div className={`flex items-center justify-between p-4 rounded-xl ${isDark ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
-                    <div><p className="font-medium">รหัสผ่าน</p><p className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>เปลี่ยนรหัสผ่านเพื่อความปลอดภัย</p></div>
-                    <button onClick={() => alert("ฟีเจอร์นี้จะเปิดให้บริการเร็วๆ นี้")} className={`px-5 py-2.5 rounded-xl text-sm border ${isDark ? 'border-slate-600 text-slate-400' : 'border-slate-200 text-slate-500'}`}>เปลี่ยนรหัสผ่าน</button>
+                <div className="flex gap-3">
+                    {!isEditing ? (
+                        <button
+                            onClick={() => setIsEditing(true)}
+                            className="gacp-btn-primary px-8 py-3.5 rounded-2xl font-black flex items-center gap-2"
+                        >
+                            <Icons.Edit className="w-5 h-5" />
+                            แก้ไขโปรไฟล์
+                        </button>
+                    ) : (
+                        <>
+                            <button
+                                onClick={() => { initForm(user); setIsEditing(false); setMessage(""); }}
+                                className="gacp-btn-secondary px-8 py-3.5 rounded-2xl font-black text-rose-500 border-rose-100 hover:bg-rose-50"
+                            >
+                                ยกเลิก
+                            </button>
+                            <button
+                                onClick={handleSaveProfile}
+                                disabled={isSaving || !hasChanges}
+                                className="gacp-btn-primary px-8 py-3.5 rounded-2xl font-black disabled:opacity-50"
+                            >
+                                {isSaving ? "กกำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง"}
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 
-            {/* Account Info */}
-            <div className={`rounded-2xl p-6 mb-5 border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
-                <div className="flex items-center gap-3 mb-5">
-                    <div className={`w-13 h-13 rounded-2xl flex items-center justify-center ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'}`}>
-                        <IconInfo color={accentColor} size={24} />
-                    </div>
-                    <div><h2 className="text-lg font-semibold">ข้อมูลบัญชี</h2><p className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>ข้อมูลบัญชีและสถานะการใช้งาน</p></div>
+            {message && (
+                <div className={`mb-10 p-5 rounded-3xl border animate-head-shake flex items-center gap-3 font-bold text-sm ${message.includes('เรียบร้อย') ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-600'}`}>
+                    {message}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label className={`text-sm block mb-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>บทบาท</label><div className={`py-3.5 px-4 rounded-xl ${isDark ? 'bg-slate-700/50' : 'bg-slate-50'}`}>{getAccountTypeThai()}</div></div>
-                    <div><label className={`text-sm block mb-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>สถานะบัญชี</label><div className={`py-3.5 px-4 rounded-xl font-medium ${isDark ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>ใช้งานได้</div></div>
-                    <div><label className={`text-sm block mb-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>วันที่สร้างบัญชี</label><div className={`py-3.5 px-4 rounded-xl ${isDark ? 'bg-slate-700/50' : 'bg-slate-50'}`}>{user.createdAt ? new Date(user.createdAt).toLocaleDateString("th-TH") : "-"}</div></div>
-                    <div><label className={`text-sm block mb-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>เข้าสู่ระบบล่าสุด</label><div className={`py-3.5 px-4 rounded-xl ${isDark ? 'bg-slate-700/50' : 'bg-slate-50'}`}>{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString("th-TH") : "ไม่ระบุ"}</div></div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left: User Card */}
+                <div className="lg:col-span-1 space-y-8">
+                    <div className="gacp-card p-8 text-center relative overflow-hidden group/card shadow-premium">
+                        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-primary to-emerald-600 opacity-10"></div>
+                        <div className="relative z-10">
+                            <div className="w-24 h-24 bg-white rounded-[2rem] shadow-elevated mx-auto mb-6 flex items-center justify-center border-4 border-white">
+                                <IconUser className="w-12 h-12 text-primary" />
+                            </div>
+                            <h2 className="text-2xl font-black text-slate-800 leading-tight">
+                                {firstName || lastName ? `${firstName} ${lastName}` : companyName || 'ยังไม่ระบุชื่อ'}
+                            </h2>
+                            <p className="text-sm font-black text-primary uppercase tracking-widest mt-2">{getAccountTypeThai()}</p>
+
+                            <div className="mt-8 flex flex-col gap-2">
+                                <div className={`py-2 px-4 rounded-full text-xs font-black uppercase tracking-widest ${user.verificationStatus === 'APPROVED' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+                                    {user.verificationStatus === 'APPROVED' ? 'Verified Account' : 'Pending Verification'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="gacp-card p-8 shadow-soft">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
+                            <Icons.Info className="w-4 h-4" />
+                            ข้อมูลการใช้งาน
+                        </h3>
+                        <div className="space-y-6">
+                            <div>
+                                <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Registered On</p>
+                                <p className="text-sm font-bold text-slate-700">{user.createdAt ? new Date(user.createdAt).toLocaleDateString("th-TH", { year: 'numeric', month: 'long', day: 'numeric' }) : "-"}</p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Last Logged In</p>
+                                <p className="text-sm font-bold text-slate-700">{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString("th-TH", { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "ไม่ระบุ"}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={handleLogout}
+                        className="w-full py-5 rounded-3xl bg-rose-50 border border-rose-100 text-rose-500 font-black flex items-center justify-center gap-2 hover:bg-rose-100 transition-all shadow-soft"
+                    >
+                        <Icons.Logout className="w-5 h-5 font-black" />
+                        ออกจากระบบ
+                    </button>
+                </div>
+
+                {/* Right: Form Details */}
+                <div className="lg:col-span-2 space-y-8">
+                    <div className="gacp-card p-10 shadow-premium">
+                        <h3 className="text-xl font-black text-slate-800 mb-8 border-b border-slate-50 pb-6 flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                                <IconUser className="w-5 h-5" />
+                            </div>
+                            รายละเอียดข้อมูลส่วนบุคคล
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">ชื่อ</label>
+                                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} disabled={!isEditing} className={inputClass} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">นามสกุล</label>
+                                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} disabled={!isEditing} className={inputClass} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">อีเมล</label>
+                                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={!isEditing} className={inputClass} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">เบอร์โทรศัพท์</label>
+                                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!isEditing} className={inputClass} />
+                            </div>
+                            <div className="md:col-span-2 space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">เลขประจำตัว (ชื่อผู้ใช้งาน)</label>
+                                <div className="py-4 px-6 bg-slate-50 border-2 border-slate-50 rounded-2xl text-slate-400 font-mono text-lg tracking-wider">
+                                    {user.identifier || "-"}
+                                </div>
+                            </div>
+                            {(companyName || user.accountType !== 'INDIVIDUAL') && (
+                                <div className="md:col-span-2 space-y-2">
+                                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">ชื่อองค์กร/บริษัท</label>
+                                    <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!isEditing} className={inputClass} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="gacp-card p-10 shadow-soft">
+                        <h3 className="text-xl font-black text-slate-800 mb-8 border-b border-slate-50 pb-6 flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                                <IconLock className="w-5 h-5" />
+                            </div>
+                            ความปลอดภัยของบัญชี
+                        </h3>
+
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-6 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-white rounded-2xl shadow-soft flex items-center justify-center">
+                                    <Icons.Key className="w-6 h-6 text-slate-400" />
+                                </div>
+                                <div>
+                                    <p className="font-black text-slate-700">รหัสผ่านสำหรับเข้าสู่ระบบ</p>
+                                    <p className="text-xs font-bold text-slate-400">อัปเดตรหัสผ่านล่าสุดเมื่อ 3 เดือนที่ผ่านมา</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => alert("ระบบเปลี่ยนรหัสผ่านกำลังจะเปิดให้บริการเร็วๆ นี้")}
+                                className="gacp-btn-secondary px-6 py-2.5 rounded-xl border-slate-200 text-slate-600 font-black text-sm"
+                            >
+                                เปลี่ยนรหัสผ่าน
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            {/* Logout */}
-            <button onClick={handleLogout} className={`w-full py-4 rounded-2xl text-sm font-semibold border ${isDark ? 'bg-red-900/20 border-red-800/50 text-red-400' : 'bg-red-50 border-red-100 text-red-500'}`}>ออกจากระบบ</button>
         </div>
     );
 }

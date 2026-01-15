@@ -196,10 +196,11 @@ class AuthController {
             // Return 401 for known auth errors
             if (error.message === 'ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง' ||
                 error.message === 'บัญชีถูกระงับการใช้งาน' ||
-                error.message === 'Identifier and password are required') {
+                error.message === 'Identifier and password are required' ||
+                error.message === 'Invalid credentials') {
                 return res.status(401).json({
                     success: false,
-                    error: error.message,
+                    error: 'ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง', // Normalized Thai Error
                 });
             }
 

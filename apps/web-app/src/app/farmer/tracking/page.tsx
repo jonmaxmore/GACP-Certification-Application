@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiClient as api } from "@/lib/api/api-client";
 import { AuthService } from "@/lib/services/auth-service";
+import PlantUnitList from "@/components/PlantUnitList";
 
 /* Reuse generic icons or keep specific ones if needed. 
    For now, defining local specific ones to ensure UI consistency with previous design 
@@ -16,7 +17,7 @@ const Icons = {
     compassLarge: (c: string) => <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg>,
 };
 
-interface Application { _id: string; applicationNumber?: string; status: string; createdAt: string; }
+interface Application { _id: string; applicationNumber?: string; status: string; createdAt: string; data?: { farmId?: string }; }
 
 const STEPS = [
     { id: 1, label: "ยื่นคำขอ", statuses: ["DRAFT"] },
@@ -113,10 +114,21 @@ export default function TrackingPage() {
                             })}
                         </div>
 
+
+
                         <div className={`mt-6 p-4 rounded-xl ${isDark ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
-                            <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                                <strong>วันที่ยื่น:</strong> {new Date(app.createdAt).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}
-                            </p>
+                            <div className="flex justify-between items-center mb-2">
+                                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    <strong>วันที่ยื่น:</strong> {new Date(app.createdAt).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                            </div>
+
+                            {/* Insert PlantUnitList if Certified or Approved */}
+                            {(app.status === 'CERTIFIED' || app.status === 'AUDIT_SCHEDULED' || app.status === 'AUDIT_PENDING' || app.status === 'SUBMITTED') && app.data?.farmId && (
+                                <div className="mt-4 pt-4 border-t border-gray-200/50">
+                                    <PlantUnitList farmId={app.data.farmId} applicationId={app._id} canEdit={true} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 );

@@ -1,16 +1,16 @@
-'use client';
-
 import { useState, useEffect, useMemo } from 'react';
 import { useWizardStore, Plot } from '../hooks/useWizardStore';
 import { useGACPData } from '@/hooks/useGACPData';
 import { useRouter } from 'next/navigation';
 import { WizardNavigation } from '@/components/wizard/WizardNavigation';
 import { FormLabelWithHint } from '@/components/FormHint';
-import { PlantIcon, CheckIcon, WarningIcon } from '@/components/icons/WizardIcons';
+import { PlantIcon, WarningIcon } from '@/components/icons/WizardIcons';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export const StepPlots = () => {
     const { state, setSiteData } = useWizardStore();
     const router = useRouter();
+    const { dict, language } = useLanguage();
 
     // API-First: Fetch GACP data
     const { soilTypes, seedSources, ipmMethods } = useGACPData(5);
@@ -35,9 +35,9 @@ export const StepPlots = () => {
 
     // Cultivation Systems Display
     const cultivationSystems: Record<string, { label: string; icon: string; color: string }> = {
-        'OUTDOOR': { label: 'กลางแจ้ง (Outdoor)', icon: '🌿', color: 'bg-green-50 text-green-700 border-green-200' },
-        'GREENHOUSE': { label: 'โรงเรือน (Greenhouse)', icon: '🏠', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-        'INDOOR': { label: 'ระบบปิด (Indoor)', icon: '🏭', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+        'OUTDOOR': { label: language === 'th' ? 'กลางแจ้ง (Outdoor)' : 'Outdoor', icon: '🌿', color: 'bg-green-50 text-green-700 border-green-200' },
+        'GREENHOUSE': { label: language === 'th' ? 'โรงเรือน (Greenhouse)' : 'Greenhouse', icon: '🏠', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+        'INDOOR': { label: language === 'th' ? 'ระบบปิด (Indoor)' : 'Indoor', icon: '🏭', color: 'bg-purple-50 text-purple-700 border-purple-200' },
     };
 
     const currentSystem = cultivationSystems[state.locationType || 'OUTDOOR'];
@@ -129,8 +129,8 @@ export const StepPlots = () => {
                     4
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold text-primary-900">การแบ่งแปลงปลูก (Zoning)</h2>
-                    <p className="text-text-secondary">กำหนดโซนและแปลงย่อยสำหรับสร้าง QR Code และติดตามผลผลิต</p>
+                    <h2 className="text-2xl font-bold text-primary-900">{dict.wizard.plots.title}</h2>
+                    <p className="text-text-secondary">{dict.wizard.plots.subtitle}</p>
                 </div>
             </div>
 
@@ -141,7 +141,7 @@ export const StepPlots = () => {
                 <div className="flex items-center justify-between mb-6 relative z-10">
                     <h3 className="font-bold text-primary-900 flex items-center gap-3 text-lg">
                         <span className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center">📊</span>
-                        สรุปพื้นที่ทั้งหมด
+                        {dict.wizard.plots.summary.title}
                     </h3>
 
                     {/* Locked Cultivation System Badge */}
@@ -154,28 +154,28 @@ export const StepPlots = () => {
                 {summary.totalArea === 0 && (
                     <div className="mb-6 p-4 bg-warning-bg border border-warning-200 rounded-xl text-warning-text text-sm flex items-center gap-3 shadow-sm animate-pulse-soft">
                         <WarningIcon className="w-5 h-5 flex-shrink-0" />
-                        <span><strong>ไม่พบข้อมูลพื้นที่รวม:</strong> กรุณากรอกข้อมูลในขั้นตอนที่ 3 (ข้อมูลฟาร์ม) ก่อน</span>
+                        <span><strong>{dict.wizard.plots.summary.noTotalArea}</strong></span>
                     </div>
                 )}
 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
                     <div className="bg-white/60 backdrop-blur rounded-xl p-4 text-center border border-white shadow-sm">
                         <div className="text-2xl font-bold text-primary-900 mb-1">{summary.totalArea}</div>
-                        <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">พื้นที่ทั้งหมด ({summary.unit})</div>
+                        <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{dict.wizard.plots.summary.totalArea} ({summary.unit})</div>
                     </div>
                     <div className="bg-white/60 backdrop-blur rounded-xl p-4 text-center border border-white shadow-sm">
                         <div className="text-2xl font-bold text-primary mb-1">{summary.allocatedArea}</div>
-                        <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">แบ่งแล้ว ({summary.unit})</div>
+                        <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{dict.wizard.plots.summary.allocatedArea} ({summary.unit})</div>
                     </div>
                     <div className={`bg-white/60 backdrop-blur rounded-xl p-4 text-center border shadow-sm ${parseFloat(summary.remainingArea) < 0 ? 'border-red-200 bg-red-50/50' : 'border-white'}`}>
                         <div className={`text-2xl font-bold mb-1 ${parseFloat(summary.remainingArea) < 0 ? 'text-red-600' : 'text-amber-500'}`}>
                             {summary.remainingArea}
                         </div>
-                        <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">คงเหลือ ({summary.unit})</div>
+                        <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{dict.wizard.plots.summary.remainingArea} ({summary.unit})</div>
                     </div>
                     <div className="bg-white/60 backdrop-blur rounded-xl p-4 text-center border border-white shadow-sm">
                         <div className="text-2xl font-bold text-blue-600 mb-1">{summary.qrCount}</div>
-                        <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">QR Code</div>
+                        <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{dict.wizard.plots.summary.qrCount}</div>
                     </div>
                 </div>
             </div>
@@ -187,7 +187,7 @@ export const StepPlots = () => {
                         <span className="w-6 h-6 rounded bg-primary text-white flex items-center justify-center text-xs shadow-sm">
                             {plots.length}
                         </span>
-                        รายการแปลงปลูก
+                        {dict.wizard.plots.list.title}
                     </h4>
                 </div>
 
@@ -197,8 +197,8 @@ export const StepPlots = () => {
                             <PlantIcon className="w-8 h-8 opacity-50 group-hover:opacity-100" />
                         </div>
                         <div>
-                            <p className="font-medium text-lg text-primary-900">ยังไม่มีแปลงปลูก</p>
-                            <p className="text-sm">กดที่นี่ หรือปุ่มด้านล่างเพื่อเพิ่มแปลงใหม่</p>
+                            <p className="font-medium text-lg text-primary-900">{dict.wizard.plots.list.empty.title}</p>
+                            <p className="text-sm">{dict.wizard.plots.list.empty.subtitle}</p>
                         </div>
                     </div>
                 ) : (
@@ -228,9 +228,9 @@ export const StepPlots = () => {
 
                                 {/* Badges */}
                                 <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
-                                    {plot.soilType && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-100">ดิน</span>}
-                                    {plot.seedSource && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-green-50 text-green-700 border border-green-100">เมล็ดพันธุ์</span>}
-                                    {plot.hasIPMPlan && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100">IPM</span>}
+                                    {plot.soilType && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-100">{dict.wizard.plots.list.badges.soil}</span>}
+                                    {plot.seedSource && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-green-50 text-green-700 border border-green-100">{dict.wizard.plots.list.badges.seed}</span>}
+                                    {plot.hasIPMPlan && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100">{dict.wizard.plots.list.badges.ipm}</span>}
                                 </div>
 
                                 <button
@@ -263,8 +263,8 @@ export const StepPlots = () => {
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </div>
                         <div>
-                            <span className={`font-bold block ${isFormExpanded ? 'text-primary-900' : 'text-text-secondary'}`}>เพิ่มแปลงใหม่</span>
-                            {!isFormExpanded && <span className="text-xs text-text-muted">คลิกเพื่อกรอกรายละเอียดแปลง</span>}
+                            <span className={`font-bold block ${isFormExpanded ? 'text-primary-900' : 'text-text-secondary'}`}>{dict.wizard.plots.list.addTitle}</span>
+                            {!isFormExpanded && <span className="text-xs text-text-muted">{dict.wizard.plots.list.addSubtitle}</span>}
                         </div>
                     </div>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-gray-400 transition-transform ${isFormExpanded ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9" /></svg>
@@ -274,27 +274,27 @@ export const StepPlots = () => {
                     <div className="p-6 space-y-6 animate-slide-down">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                             <div className="md:col-span-1">
-                                <FormLabelWithHint label="ชื่อแปลง" required />
+                                <FormLabelWithHint label={dict.wizard.plots.form.name} required />
                                 <input
                                     autoFocus
-                                    placeholder="เช่น A1, โซน B"
+                                    placeholder={dict.wizard.plots.form.namePlaceholder}
                                     className="gacp-input"
                                     value={currentPlot.name}
                                     onChange={e => setCurrentPlot({ ...currentPlot, name: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <FormLabelWithHint label="ขนาดพื้นที่" required />
+                                <FormLabelWithHint label={dict.wizard.plots.form.area} required />
                                 <input
                                     type="number"
-                                    placeholder="จำนวน"
+                                    placeholder={dict.wizard.plots.form.areaPlaceholder}
                                     className="gacp-input"
                                     value={currentPlot.areaSize}
                                     onChange={e => setCurrentPlot({ ...currentPlot, areaSize: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <FormLabelWithHint label="หน่วย" />
+                                <FormLabelWithHint label={dict.wizard.plots.form.unit} />
                                 <select
                                     className="gacp-input"
                                     value={currentPlot.areaUnit}
@@ -316,7 +316,7 @@ export const StepPlots = () => {
                             >
                                 <div className="flex items-center gap-2">
                                     <PlantIcon className="w-4 h-4 text-amber-600" />
-                                    <span className="font-bold text-sm text-amber-900">ข้อมูลคุณภาพ (GACP)</span>
+                                    <span className="font-bold text-sm text-amber-900">{dict.wizard.plots.form.gacpTitle}</span>
                                     <span className="text-[10px] bg-white text-amber-600 px-1.5 py-0.5 rounded border border-amber-200">Optional</span>
                                 </div>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-amber-500 transition-transform ${showGACPFields ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9" /></svg>
@@ -326,26 +326,26 @@ export const StepPlots = () => {
                                 <div className="p-5 border-t border-amber-100 space-y-5 animate-slide-down">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div>
-                                            <FormLabelWithHint label="ประเภทดิน" />
+                                            <FormLabelWithHint label={dict.wizard.plots.form.soilType} />
                                             <select
                                                 className="gacp-input bg-white"
                                                 value={currentPlot.soilType || ''}
                                                 onChange={e => setCurrentPlot({ ...currentPlot, soilType: e.target.value })}
                                             >
-                                                <option value="">-- เลือก --</option>
+                                                <option value="">{dict.wizard.plots.form.select}</option>
                                                 {soilTypes.map(soil => (
                                                     <option key={soil.id} value={soil.id}>{soil.nameTH}</option>
                                                 ))}
                                             </select>
                                         </div>
                                         <div>
-                                            <FormLabelWithHint label="แหล่งเมล็ดพันธุ์" />
+                                            <FormLabelWithHint label={dict.wizard.plots.form.seedSource} />
                                             <select
                                                 className="gacp-input bg-white"
                                                 value={currentPlot.seedSource || ''}
                                                 onChange={e => setCurrentPlot({ ...currentPlot, seedSource: e.target.value })}
                                             >
-                                                <option value="">-- เลือก --</option>
+                                                <option value="">{dict.wizard.plots.form.select}</option>
                                                 {seedSources.map(seed => (
                                                     <option key={seed.id} value={seed.id}>{seed.nameTH}</option>
                                                 ))}
@@ -363,7 +363,7 @@ export const StepPlots = () => {
                                                 onChange={e => setCurrentPlot({ ...currentPlot, hasIPMPlan: e.target.checked })}
                                             />
                                             <label htmlFor="hasIPMPlan" className="text-sm font-bold text-gray-700 select-none cursor-pointer">
-                                                มีแผนการจัดการศัตรูพืชแบบผสมผสาน (IPM)
+                                                {dict.wizard.plots.form.ipmLabel}
                                             </label>
                                         </div>
 
@@ -398,7 +398,7 @@ export const StepPlots = () => {
                                 className="px-6 py-2.5 rounded-xl bg-primary text-white font-bold hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md flex items-center gap-2"
                             >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                                เพิ่มแปลง
+                                {dict.wizard.plots.list.addBtn}
                             </button>
                         </div>
                     </div>
@@ -409,6 +409,8 @@ export const StepPlots = () => {
                 onNext={() => router.push('/farmer/applications/new/step/5')}
                 onBack={() => router.push('/farmer/applications/new/step/3')} // Correctly point back to Step 3 (Farm/Land)
                 isNextDisabled={plots.length === 0}
+                nextLabel={dict.wizard.navigation.next}
+                backLabel={dict.wizard.navigation.back}
             />
         </div>
     );

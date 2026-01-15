@@ -105,7 +105,7 @@ class ApplicationController {
             // Cache miss - query database
             const applications = await Application.find({ farmerId: req.user.id })
                 .sort({ createdAt: -1 })
-                .select('applicationNumber status data.applicantInfo.name data.formData.plantId createdAt')
+                .select('applicationNumber status data.applicantInfo.name data.formData.plantId data.farmId createdAt')
                 .lean();
 
             const result = { data: applications, total: applications.length };

@@ -745,8 +745,11 @@ model PlantingCycle {
   irrigationType String?  // ระบบน้ำ
 
   // ผลผลิต
-  estimatedYield Float?  // ผลผลิตคาดการณ์ (กก.)
+  // ผลผลิต (Internal Estimation)
+  estimatedYield Float?  // @deprecated Use estimatedPlantCount instead
   actualYield    Float?  // ผลผลิตจริง (กก.)
+  estimatedPlantCount Int? @default(0) // Internal calculation (Area * Spacing)
+
 
   // สถานะ
   status String @default("PLANNING")
@@ -756,7 +759,10 @@ model PlantingCycle {
   notes String?
 
   // ความสัมพันธ์
-  batches HarvestBatch[]
+  // ความสัมพันธ์
+  batches     HarvestBatch[]
+  plantUnits  PlantUnit[]
+
 
   // Soft Delete
   isDeleted Boolean   @default(false)
@@ -798,7 +804,40 @@ model Plot {
 }
 
 // =============================================================================
+// =============================================================================
+// PLANT UNIT MODEL (รายต้น/หน่วยย่อย) - For Tree-by-Tree Tracking
+// =============================================================================
+model PlantUnit {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation to Cycle
+  cycleId   String
+  cycle     PlantingCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+
+  // Identification
+  code      String   // e.g. "CYCLE-001-TREE-005"
+  
+  // Status
+  status    String   @default("GROWING") // GROWING, HARVESTED, DIED, REMOVED
+  
+  // QR Code (Generated Post-Approval)
+  qrCode    String?  @unique 
+  qrUrl     String?
+  
+  // Coordinates (Optional for precision agriculture)
+  latitude  Float?
+  longitude Float?
+  
+  @@index([cycleId])
+  @@index([qrCode])
+  @@map("plant_units")
+}
+
+// =============================================================================
 // HARVEST BATCH MODEL (Lot การเก็บเกี่ยว)
+
 // =============================================================================
 model HarvestBatch {
   id        String   @id @default(uuid())

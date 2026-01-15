@@ -1,11 +1,11 @@
-
-"use client";
+'use client';
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icons } from "./icons";
 import { AuthService, AuthUser } from "@/lib/services/auth-service";
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface SidebarProps {
     isDark: boolean;
@@ -15,20 +15,16 @@ interface SidebarProps {
 export function Sidebar({ isDark, toggleTheme }: SidebarProps) {
     const pathname = usePathname();
     const [user, setUser] = useState<AuthUser | null>(null);
-    const accentColor = isDark ? "#10B981" : "#16A34A";
-    const mutedColor = isDark ? "#64748B" : "#9CA3AF";
+    const { dict } = useLanguage();
 
     useEffect(() => {
-        // Initial load
         const currentUser = AuthService.getUser();
         setUser(currentUser);
 
-        // Listen for updates (login/profile update)
         const unsubscribe = AuthService.onAuthChange((event, data) => {
             if (event === 'login' && data && typeof data === 'object' && 'user' in data) {
                 setUser((data as { user: AuthUser }).user);
             } else {
-                // Refresh from storage just in case
                 setUser(AuthService.getUser());
             }
         });
@@ -39,14 +35,15 @@ export function Sidebar({ isDark, toggleTheme }: SidebarProps) {
     const isVerified = user?.verificationStatus === 'APPROVED';
 
     const navItems = [
-        { href: "/farmer/dashboard", icon: Icons.Home, label: "หน้าหลัก", requiredVerify: false },
-        { href: "/farmer/applications", icon: Icons.Document, label: "คำขอ", requiredVerify: true },
-        { href: "/farmer/establishments", icon: Icons.Leaf, label: "แปลงปลูก", requiredVerify: true },
-        { href: "/farmer/planting", icon: Icons.Calendar, label: "รอบการปลูก", requiredVerify: true },
-        { href: "/farmer/certificates", icon: Icons.Certificate, label: "ใบรับรอง", requiredVerify: true },
-        { href: "/farmer/tracking", icon: Icons.Compass, label: "ติดตาม", requiredVerify: true },
-        { href: "/farmer/payments", icon: Icons.CreditCard, label: "การเงิน", requiredVerify: true },
-        { href: "/farmer/profile", icon: Icons.User, label: "โปรไฟล์", requiredVerify: false },
+        { href: "/farmer/dashboard", icon: Icons.Home, label: dict.sidebar.dashboard, requiredVerify: false },
+        { href: "/farmer/applications", icon: Icons.Document, label: dict.sidebar.applications, requiredVerify: true },
+        { href: "/farmer/establishments", icon: Icons.Leaf, label: dict.sidebar.establishments, requiredVerify: true },
+        { href: "/farmer/planting", icon: Icons.Calendar, label: dict.sidebar.planting, requiredVerify: true },
+        { href: "/farmer/certificates", icon: Icons.Certificate, label: dict.sidebar.certificates, requiredVerify: true },
+        { href: "/farmer/tracking", icon: Icons.Compass, label: dict.sidebar.tracking, requiredVerify: true },
+        { href: "/farmer/payments", icon: Icons.CreditCard, label: dict.sidebar.payments, requiredVerify: true },
+        { href: "/farmer/profile", icon: Icons.User, label: dict.sidebar.profile, requiredVerify: false },
+        { href: "/farmer/settings", icon: Icons.Settings, label: dict.sidebar.settings, requiredVerify: false },
     ];
 
     const handleLogout = () => {
@@ -55,33 +52,91 @@ export function Sidebar({ isDark, toggleTheme }: SidebarProps) {
     };
 
     return (
-        <aside className={`fixed left-0 top-0 bottom-0 w-[72px] border-r flex flex-col items-center py-5 transition-colors hidden lg:flex ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-400 flex items-center justify-center text-white font-semibold text-xl mb-8">G</div>
-            <nav className="flex-1 flex flex-col gap-1 w-full">
+        <aside className={`
+            fixed left-4 top-4 bottom-4 w-20 rounded-[2.5rem] flex flex-col items-center py-8 transition-all duration-500 z-50
+            hidden lg:flex 
+            ${isDark
+                ? 'bg-slate-900/90 border border-slate-700/50 backdrop-blur-xl shadow-2xl'
+                : 'bg-white/80 border border-white/40 backdrop-blur-xl shadow-soft'
+            }
+        `}>
+            {/* Logo Section */}
+            <div className="mb-10 relative group">
+                <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-xl group-hover:bg-primary/40 transition-all duration-700 scale-110"></div>
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary-800 flex items-center justify-center text-white font-black text-xl shadow-lg relative z-10 transform group-hover:rotate-12 transition-transform">
+                    G
+                </div>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 flex flex-col gap-2 w-full px-2 overflow-y-auto no-scrollbar">
                 {navItems.map(item => {
-                    // Access Control Rule: Hide if requires verify and user is not verified
-                    if (item.requiredVerify && !isVerified) {
-                        return null;
-                    }
+                    if (item.requiredVerify && !isVerified) return null;
 
                     const isActive = pathname === item.href || (item.href !== "/farmer/dashboard" && pathname.startsWith(item.href));
+
                     return (
-                        <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 py-3 relative">
-                            {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-emerald-500 rounded-r" />}
-                            <item.icon color={isActive ? accentColor : mutedColor} />
-                            <span className={`text-[10px] font-medium ${isActive ? 'text-emerald-500' : isDark ? 'text-slate-500' : 'text-slate-400'}`}>{item.label}</span>
-                        </Link>
-                    )
+                        <div key={item.href} className="group relative">
+                            <Link
+                                href={item.href}
+                                className={`
+                                    flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl transition-all duration-300 relative
+                                    ${isActive
+                                        ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-100'
+                                        : isDark
+                                            ? 'text-slate-500 hover:text-white hover:bg-white/5'
+                                            : 'text-gray-400 hover:text-primary hover:bg-primary-50'
+                                    }
+                                `}
+                            >
+                                <item.icon className={`w-6 h-6 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                                <span className={`text-[9px] font-black uppercase tracking-widest text-center px-1 leading-tight ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+                                    {item.label}
+                                </span>
+                            </Link>
+
+                            {/* Floating Tooltip/Indicator */}
+                            {!isActive && (
+                                <div className="absolute left-[84px] top-1/2 -translate-y-1/2 bg-gray-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-xl opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 transition-all z-[60] whitespace-nowrap shadow-xl">
+                                    <div className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                                    {item.label}
+                                </div>
+                            )}
+                        </div>
+                    );
                 })}
             </nav>
-            <div className="flex flex-col items-center gap-3">
-                <button onClick={toggleTheme} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-emerald-900/30 hover:bg-emerald-900/50' : 'bg-emerald-50 hover:bg-emerald-100'}`}>
-                    {isDark ? <Icons.Sun color={accentColor} /> : <Icons.Moon color={accentColor} />}
+
+            {/* Bottom Actions */}
+            <div className="mt-auto flex flex-col items-center gap-4 w-full px-3">
+                <button
+                    onClick={toggleTheme}
+                    className={`
+                        w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300
+                        ${isDark
+                            ? 'bg-slate-800 text-amber-400 hover:bg-slate-700 shadow-inner'
+                            : 'bg-gray-50 text-slate-500 hover:bg-white hover:shadow-soft border border-gray-100'
+                        }
+                    `}
+                >
+                    {isDark ? <Icons.Sun className="w-5 h-5" /> : <Icons.Moon className="w-5 h-5" />}
                 </button>
-                <button onClick={handleLogout} className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700">
-                    <Icons.Logout color={mutedColor} />
+
+                <button
+                    onClick={handleLogout}
+                    className={`
+                        w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 mb-2
+                        ${isDark
+                            ? 'text-slate-500 hover:text-red-400 hover:bg-red-400/10'
+                            : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
+                        }
+                    `}
+                >
+                    <Icons.Logout className="w-5 h-5" />
                 </button>
             </div>
         </aside>
     );
 }
+
+export default Sidebar;

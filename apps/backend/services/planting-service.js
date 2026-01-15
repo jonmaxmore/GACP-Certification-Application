@@ -65,6 +65,9 @@ class PlantingService {
                         _count: { select: { lots: true } },
                     },
                 },
+                plantUnits: {
+                    orderBy: { code: 'asc' }
+                }
             },
         });
     }
@@ -200,6 +203,61 @@ class PlantingService {
             include: { productionInputs: true }
         });
     }
+
+    /**
+     * Generate individual PlantUnit records for a cycle (Post-Approval)
+     * @param {string} cycleId
+     */
+    async generatePlantUnits(cycleId) {
+        return prisma.$transaction(async (tx) => {
+            // 1. Get Cycle info
+            const cycle = await tx.plantingCycle.findUnique({
+                where: { id: cycleId },
+                include: { plantUnits: { select: { id: true } } } // Check existing units
+            });
+
+            if (!cycle) throw new Error('Planting cycle not found');
+
+            // 2. Check if units already exist
+            if (cycle.plantUnits && cycle.plantUnits.length > 0) {
+                return {
+                    success: false,
+                    message: `Units already generated (${cycle.plantUnits.length} units)`,
+                    count: cycle.plantUnits.length
+                };
+            }
+
+            // 3. Determine count (Internal Estimate)
+            const count = cycle.estimatedPlantCount || 0;
+            if (count <= 0) {
+                throw new Error('Estimated plant count is 0 or invalid');
+            }
+
+            // 4. Generate Units in Batch
+            // Format: CYCLE-[Last4]-TREE-[Index]
+            const cycleCodeSuffix = cycle.id.slice(-4).toUpperCase();
+            const year = new Date().getFullYear();
+
+            // Prepare large data array
+            const unitsData = Array.from({ length: count }, (_, i) => ({
+                cycleId: cycle.id,
+                code: `UNIT-${year}-${cycleCodeSuffix}-${String(i + 1).padStart(4, '0')}`,
+                status: 'GROWING'
+            }));
+
+            // Use createMany for performance
+            await tx.plantUnit.createMany({
+                data: unitsData
+            });
+
+            return {
+                success: true,
+                message: `Successfully generated ${count} plant units`,
+                count: count
+            };
+        });
+    }
 }
+
 
 module.exports = new PlantingService();

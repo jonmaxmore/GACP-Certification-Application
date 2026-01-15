@@ -3,6 +3,7 @@ import { Kanit, Sarabun, Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/services/auth-provider";
 import SystemGuard from "@/components/system-guard";
+import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 
 const kanit = Kanit({
   variable: "--font-kanit",
@@ -39,9 +40,11 @@ export default function RootLayout({
     <html lang="th">
       <body className={`${kanit.variable} ${sarabun.variable} ${inter.variable} font-kanit antialiased`} suppressHydrationWarning>
         <AuthProvider>
-          <SystemGuard>
-            {children}
-          </SystemGuard>
+          <LanguageProvider>
+            <SystemGuard>
+              {children}
+            </SystemGuard>
+          </LanguageProvider>
         </AuthProvider>
       </body>
     </html>

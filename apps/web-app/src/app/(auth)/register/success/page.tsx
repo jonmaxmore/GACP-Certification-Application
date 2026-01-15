@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Icons } from "@/components/ui/icons";
 
 function RegisterSuccessContent() {
     const searchParams = useSearchParams();
@@ -19,93 +20,87 @@ function RegisterSuccessContent() {
             case "INDIVIDUAL": return "บุคคลธรรมดา";
             case "JURISTIC": return "นิติบุคคล";
             case "COMMUNITY_ENTERPRISE": return "วิสาหกิจชุมชน";
-            default: return "ผู้สมัคร";
+            default: return "เกษตรกร";
         }
     };
 
     if (!mounted) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-surface-50">
-                <div className="w-10 h-10 border-3 border-slate-200 border-t-primary-500 rounded-full animate-spin" />
+            <div className="flex flex-col items-center justify-center min-h-[40vh]">
+                <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-surface-50 p-6 font-sans">
-            <div className="max-w-md mx-auto">
-                {/* Success Card */}
-                <div className="bg-white rounded-2xl p-8 shadow-card text-center mt-10 animate-scale-in">
-                    {/* Success Animation */}
-                    <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3">
-                            <path d="M20 6L9 17L4 12" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                    </div>
-
-                    <h1 className="text-2xl font-bold text-primary-600 mb-2">ลงทะเบียนสำเร็จ!</h1>
-                    <p className="text-sm text-slate-500 mb-6">ยินดีต้อนรับเข้าสู่ระบบรับรอง GACP</p>
-
-                    {/* User Info Summary */}
-                    {(identifier || name) && (
-                        <div className="bg-surface-100 rounded-xl p-4 mb-6 text-left">
-                            <p className="text-sm font-semibold text-slate-500 mb-3">ข้อมูลบัญชีของคุณ</p>
-                            {accountType && (
-                                <div className="flex justify-between mb-2">
-                                    <span className="text-sm text-slate-500">ประเภทบัญชี:</span>
-                                    <span className="text-sm font-semibold text-slate-800">{getAccountTypeThai()}</span>
-                                </div>
-                            )}
-                            {identifier && (
-                                <div className="flex justify-between mb-2">
-                                    <span className="text-sm text-slate-500">เลขประจำตัว:</span>
-                                    <span className="text-sm font-semibold text-slate-800 font-mono">{identifier}</span>
-                                </div>
-                            )}
-                            {name && (
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-slate-500">ชื่อ:</span>
-                                    <span className="text-sm font-semibold text-slate-800">{name}</span>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Next Steps */}
-                    <div className="bg-primary-50 rounded-xl p-4 mb-6 text-left">
-                        <p className="text-sm font-semibold text-primary-700 mb-3">ขั้นตอนถัดไป</p>
-                        <ol className="pl-5 space-y-2">
-                            <li className="text-sm text-slate-700">เข้าสู่ระบบด้วยเลขประจำตัวและรหัสผ่าน</li>
-                            <li className="text-sm text-slate-700">เพิ่มข้อมูลสถานประกอบการ</li>
-                            <li className="text-sm text-slate-700">ยื่นคำขอรับรองมาตรฐาน GACP</li>
-                        </ol>
-                    </div>
-
-                    {/* CTA Button */}
-                    <Link
-                        href="/login"
-                        className="flex items-center justify-center gap-2 w-full py-4 bg-gradient-to-br from-primary-600 to-primary-500 text-white text-lg font-semibold rounded-xl shadow-lg shadow-primary-500/30 hover:-translate-y-0.5 transition-transform"
-                    >
-                        เข้าสู่ระบบ
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M9 18L15 12L9 6" />
-                        </svg>
-                    </Link>
-                </div>
-
-                {/* Footer */}
-                <div className="mt-6 text-center">
-                    <p className="text-xs text-slate-400">ข้อมูลของคุณถูกเก็บรักษาอย่างปลอดภัย</p>
+        <div className="auth-card animate-scale-in text-center">
+            {/* Success Icon */}
+            <div className="relative mb-10 inline-block">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse scale-150"></div>
+                <div className="w-24 h-24 bg-gradient-to-br from-primary to-emerald-600 rounded-full flex items-center justify-center relative z-10 shadow-premium">
+                    <Icons.CheckCircle className="w-12 h-12 text-white" />
                 </div>
             </div>
+
+            <h1 className="text-4xl font-black text-slate-800 mb-2">ลงทะเบียนสำเร็จ!</h1>
+            <p className="text-slate-500 font-bold mb-10 tracking-tight">คุณพร้อมสำหรับการยื่นขอรับรองมาตรฐาน GACP แล้ว</p>
+
+            {/* Account Info Box */}
+            <div className="bg-slate-50/80 rounded-[2rem] p-8 text-left mb-10 border border-slate-100 shadow-inner">
+                <div className="flex flex-col gap-4">
+                    <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Account Type</span>
+                        <span className="text-sm font-black text-primary bg-primary/5 px-3 py-1 rounded-full">{getAccountTypeThai()}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Username / ID</span>
+                        <span className="text-sm font-black text-slate-700 font-mono tracking-wider">{identifier}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Registered Name</span>
+                        <span className="text-sm font-black text-slate-700">{name}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Next Steps Guide */}
+            <div className="text-left mb-10 px-4">
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 text-center">สามขั้นตอนสู่มาตรฐาน GACP</h3>
+                <div className="grid grid-cols-3 gap-4">
+                    <div className="flex flex-col items-center text-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-xs">1</div>
+                        <span className="text-[10px] font-bold text-slate-500">เข้าสู่ระบบครั้งแรก</span>
+                    </div>
+                    <div className="flex flex-col items-center text-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-xs">2</div>
+                        <span className="text-[10px] font-bold text-slate-500">ยืนยันตัวตน (KYC)</span>
+                    </div>
+                    <div className="flex flex-col items-center text-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-xs">3</div>
+                        <span className="text-[10px] font-bold text-slate-500">ยื่นแบบขอรับรอง</span>
+                    </div>
+                </div>
+            </div>
+
+            <Link
+                href="/login"
+                className="gacp-btn-primary w-full py-5 rounded-2.5xl text-lg font-black"
+            >
+                ไปหน้าเข้าสู่ระบบ
+                <Icons.ArrowRight className="w-6 h-6 ml-2" />
+            </Link>
+
+            <p className="mt-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Safe and Secure Authentication by DTAM
+            </p>
         </div>
     );
 }
 
 function LoadingFallback() {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-surface-50">
-            <div className="w-10 h-10 border-3 border-slate-200 border-t-primary-500 rounded-full animate-spin" />
+        <div className="flex flex-col items-center justify-center min-vh-[50vh]">
+            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
         </div>
     );
 }

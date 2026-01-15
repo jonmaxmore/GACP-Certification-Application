@@ -47,8 +47,9 @@ interface InvoiceItem {
     dueDate: string;
     paidAt?: string;
     createdAt: string;
-    notes?: string; // Added for slip parsing
-    id: string; // Ensure we have id
+    notes?: string;
+    id: string;
+    items?: any;
 }
 
 interface PaymentSummary {
@@ -78,12 +79,11 @@ export default function AccountingDashboard() {
                 api.get<{ data: PaymentSummary }>('/api/invoices/summary'),
                 api.get<{ data: { invoices: InvoiceItem[] } }>('/api/invoices')
             ]);
-            if (summaryRes.success && summaryRes.data) setSummary(summaryRes.data);
+            if (summaryRes.success && summaryRes.data?.data) setSummary(summaryRes.data.data);
             else setSummary({ totalRevenue: 0, pendingAmount: 0, overdueAmount: 0, monthlyRevenue: 0, invoiceCount: { total: 0, pending: 0, paid: 0, overdue: 0 } });
 
-            if (invoicesRes.success && invoicesRes.data?.invoices) {
-                // Map _id to id if needed, Prisma usually returns id
-                const mappedInvoices = invoicesRes.data.invoices.map((inv: any) => ({
+            if (invoicesRes.success && invoicesRes.data?.data?.invoices) {
+                const mappedInvoices = invoicesRes.data.data.invoices.map((inv: any) => ({
                     ...inv,
                     items: inv.items ? (typeof inv.items === 'string' ? JSON.parse(inv.items) : inv.items) : [],
                 }));

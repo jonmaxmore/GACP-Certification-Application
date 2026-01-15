@@ -2,23 +2,46 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useWizardStore, ApplicantData } from '../hooks/useWizardStore';
+import { useWizardStore } from '../hooks/useWizardStore';
 import { useAuth } from '@/lib/services/auth-provider';
 import { InlineDocumentUpload } from '@/components/InlineDocumentUpload';
 import { FormLabelWithHint } from '@/components/FormHint';
 import { WizardNavigation } from '@/components/wizard/WizardNavigation';
-import { CheckIcon, InfoIcon } from '@/components/icons/WizardIcons';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { Icons } from '@/components/ui/icons';
 
-// Enhanced SVG Icons for applicant types (Keeping local as they are specific to this step for now)
-const IndividualIcon = ({ className }: { className?: string }) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+// Local Icons to avoid build crash
+const CheckIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12" />
+    </svg>
+);
+
+const PersonIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
         <circle cx="12" cy="7" r="4" />
     </svg>
 );
 
-const CommunityIcon = ({ className }: { className?: string }) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+const BuildingIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+        <path d="M9 22v-4h6v4" />
+        <path d="M8 6h.01" />
+        <path d="M16 6h.01" />
+        <path d="M8 10h.01" />
+        <path d="M16 10h.01" />
+        <path d="M8 14h.01" />
+        <path d="M16 14h.01" />
+        <path d="M12 6h.01" />
+        <path d="M12 10h.01" />
+        <path d="M12 14h.01" />
+    </svg>
+);
+
+const GroupIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -26,54 +49,101 @@ const CommunityIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const JuristicIcon = ({ className }: { className?: string }) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-        <path d="M12 7v14" />
-        <line x1="2" y1="13" x2="22" y2="13" />
-    </svg>
-);
+// Local interface definition to prevent import mismatches
+interface LocalApplicantData {
+    applicantType: 'INDIVIDUAL' | 'JURISTIC' | 'COMMUNITY';
+    firstName?: string;
+    lastName?: string;
+    idCard?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    province?: string;
+    district?: string;
+    subdistrict?: string;
+    postalCode?: string;
+    communityName?: string;
+    communityAddress?: string;
+    communityRegDate?: string;
+    presidentName?: string;
+    presidentIdCard?: string;
+    presidentPhone?: string;
+    memberCount?: number;
+    registrationSVC01?: string;
+    registrationTVC3?: string;
+    houseRegistrationCode?: string;
+    registeredAddress?: string;
+    companyName?: string;
+    companyAddress?: string;
+    companyPhone?: string;
+    companyType?: string;
+    taxId?: string;
+    registeredCapital?: string;
+    directorName?: string;
+    directorIdCard?: string;
+    directorPhone?: string;
+    directorEmail?: string;
+    directorPosition?: string;
+    registrationNumber?: string;
+    powerOfAttorneyUrl?: string;
+    coordinatorName?: string;
+    coordinatorPhone?: string;
+    coordinatorLineId?: string;
+    contactName?: string;
+    contactPhone?: string;
+    contactEmail?: string;
+    idCardDoc?: string;
+    houseRegDoc?: string;
+    communityRegDoc?: string;
+    communityMeetingDoc?: string;
+    companyRegDoc?: string;
+    directorListDoc?: string;
+    contact?: string;
+}
 
-const APPLICANT_TYPES = [
-    { id: 'INDIVIDUAL', label: 'บุคคลธรรมดา', labelEN: 'Individual', icon: IndividualIcon },
-    { id: 'COMMUNITY', label: 'วิสาหกิจชุมชน', labelEN: 'Community Enterprise', icon: CommunityIcon },
-    { id: 'JURISTIC', label: 'นิติบุคคล', labelEN: 'Juristic Person', icon: JuristicIcon },
-];
-
-export const StepGeneral = () => {
+const StepGeneralComponent = () => {
     const router = useRouter();
     const { user } = useAuth();
     const { state, setApplicantData } = useWizardStore();
+    const { dict } = useLanguage();
 
-    // Local form state
-    const [formData, setFormData] = useState<Partial<ApplicantData>>(() => {
-        if (state.applicantData?.applicantType) return state.applicantData;
-        const u = user;
+    const [formData, setFormData] = useState<Partial<LocalApplicantData>>(() => {
+        const existingData = state.applicantData as unknown as LocalApplicantData | null;
+        if (existingData?.applicantType) return existingData;
+
         return {
-            applicantType: 'INDIVIDUAL' as const,
-            firstName: u?.firstName ?? '',
-            lastName: u?.lastName ?? '',
-            idCard: u?.idCard ?? '',
-            phone: u?.phone ?? '',
-            address: u?.address ?? '',
-            email: u?.email ?? '',
+            applicantType: 'INDIVIDUAL',
+            firstName: user?.firstName ?? '',
+            lastName: user?.lastName ?? '',
+            idCard: user?.idCard ?? '',
+            phone: user?.phone ?? '',
+            address: user?.address ?? '',
+            email: user?.email ?? '',
         };
     });
 
-    // Document states - Individual
     const [idCardDoc, setIdCardDoc] = useState<string | null>(null);
     const [houseRegDoc, setHouseRegDoc] = useState<string | null>(null);
-    // Document states - Community Enterprise
     const [communityRegDoc, setCommunityRegDoc] = useState<string | null>(null);
     const [communityMeetingDoc, setCommunityMeetingDoc] = useState<string | null>(null);
-    const [presidentIdCardDoc, setPresidentIdCardDoc] = useState<string | null>(null);
-    // Document states - Juristic Person
     const [companyRegDoc, setCompanyRegDoc] = useState<string | null>(null);
     const [directorListDoc, setDirectorListDoc] = useState<string | null>(null);
 
     useEffect(() => {
-        if (user && !state.applicantData?.firstName) {
+        // Hydrate docs from state if available
+        const existing = state.applicantData as unknown as LocalApplicantData | null;
+        if (existing) {
+            setIdCardDoc(existing.idCardDoc || null);
+            setHouseRegDoc(existing.houseRegDoc || null);
+            setCommunityRegDoc(existing.communityRegDoc || null);
+            setCommunityMeetingDoc(existing.communityMeetingDoc || null);
+            setCompanyRegDoc(existing.companyRegDoc || null);
+            setDirectorListDoc(existing.directorListDoc || null);
+        }
+    }, [state.applicantData]);
+
+    useEffect(() => {
+        if (user && !formData.firstName) {
             setFormData(prev => ({
                 ...prev,
                 firstName: user.firstName ?? prev.firstName,
@@ -84,182 +154,187 @@ export const StepGeneral = () => {
                 email: user.email ?? prev.email,
             }));
         }
-    }, [user, state.applicantData]);
+    }, [user, formData.firstName]);
 
-    const handleChange = (field: keyof ApplicantData, value: any) => {
+    const handleTypeChange = (typeId: string) => {
+        setFormData(prev => ({
+            ...prev,
+            applicantType: typeId as any
+        }));
+    };
+
+    const handleChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    // Auto-save to store
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            if (formData.applicantType) {
-                setApplicantData(formData as ApplicantData);
-            }
-        }, 500);
-        return () => clearTimeout(timeout);
-    }, [formData, setApplicantData]);
+    const handleNext = () => {
+        const completeData: LocalApplicantData = {
+            ...formData as LocalApplicantData,
+            idCardDoc: idCardDoc || undefined,
+            houseRegDoc: houseRegDoc || undefined,
+            communityRegDoc: communityRegDoc || undefined,
+            communityMeetingDoc: communityMeetingDoc || undefined,
+            companyRegDoc: companyRegDoc || undefined,
+            directorListDoc: directorListDoc || undefined,
+        };
 
-    // Validation
-    const isReady = formData.applicantType && (
-        formData.applicantType === 'INDIVIDUAL'
-            ? formData.firstName && formData.lastName && formData.idCard && formData.phone
-            : formData.applicantType === 'COMMUNITY'
-                ? formData.communityName && formData.registrationSVC01 && formData.presidentName && formData.presidentIdCard
-                : formData.companyName && formData.registrationNumber && formData.directorName && formData.directorIdCard
+        setApplicantData(completeData as any);
+        router.push('/farmer/applications/new?step=2');
+    };
+
+    const renderInput = (id: string, label: string, value?: string, required = false, placeholder = '') => (
+        <div className="space-y-2">
+            <FormLabelWithHint label={label} required={required} />
+            <input
+                type="text"
+                value={value || ''}
+                onChange={(e) => handleChange(id, e.target.value)}
+                placeholder={placeholder}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all font-medium text-slate-700 placeholder:text-slate-400"
+            />
+        </div>
     );
 
-    const handleNext = () => {
-        if (isReady) {
-            setApplicantData(formData as ApplicantData);
-            router.push('/farmer/applications/new/step/3');
-        }
-    };
+    const isUserType = user && (user as any).applicantType;
 
     return (
         <div className="space-y-8 animate-fade-in max-w-5xl mx-auto pb-12">
-
-            {/* Header / Info Banner */}
-            {user?.firstName && (
-                <div className="bg-primary-50 border border-primary-100 rounded-xl p-6 flex flex-col md:flex-row items-start gap-4 shadow-sm">
-                    <div className="p-2 bg-white rounded-lg text-primary shadow-sm flex-shrink-0">
-                        <InfoIcon className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <p className="text-primary-800 font-bold mb-1">ข้อมูลถูกดึงอัตโนมัติ</p>
-                        <p className="text-sm text-primary-700 leading-relaxed">
-                            ระบบได้ดึงข้อมูลจากบัญชีของท่าน <span className="font-semibold px-2 py-0.5 bg-white rounded text-primary-900 mx-1 border border-primary-200">{user.firstName} {user.lastName}</span> มาให้อัตโนมัติ กรุณาตรวจสอบความถูกต้องก่อนดำเนินการต่อ
-                        </p>
-                    </div>
+            <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-primary gradient-mask rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-primary-50">
+                    2
                 </div>
-            )}
+                <div>
+                    <h2 className="text-2xl font-bold text-primary-900">{dict.wizard.general.title}</h2>
+                    <p className="text-text-secondary">{dict.wizard.general.subtitle}</p>
+                </div>
+            </div>
 
-            {/* Section 1: Applicant Type */}
-            <section className="gacp-card">
-                <div className="flex items-center gap-4 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-sm">
+            <section className="gacp-card p-10 space-y-8">
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black">
                         1
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-primary">ประเภทผู้ขอรับรอง</h2>
-                        <p className="text-text-secondary text-sm">เลือกประเภทสถานะของผู้ยื่นคำขอ</p>
-                    </div>
+                    <h3 className="text-xl font-black text-slate-800">{dict.wizard.general.typeHeader || 'เลือกประเภทผู้ยื่นคำขอ'}</h3>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {APPLICANT_TYPES.map((type) => {
-                        const isSelected = formData.applicantType === type.id;
-                        const isLocked = user?.applicantType && user.applicantType !== type.id;
-                        const Icon = type.icon;
+                <div className="flex flex-col md:flex-row gap-6">
+                    {/* INDIVIDUAL BUTTON */}
+                    <button
+                        onClick={() => !(isUserType && isUserType !== 'INDIVIDUAL') && handleTypeChange('INDIVIDUAL')}
+                        disabled={!!(isUserType && isUserType !== 'INDIVIDUAL')}
+                        className={`
+                            relative p-6 rounded-[1.5rem] border-2 text-left transition-all duration-300 group
+                            ${formData.applicantType === 'INDIVIDUAL'
+                                ? 'border-primary-500 bg-primary-50/50 shadow-md ring-4 ring-primary-500/10'
+                                : isUserType && isUserType !== 'INDIVIDUAL'
+                                    ? 'border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed'
+                                    : 'border-slate-100 bg-white hover:border-primary-200 hover:shadow-lg hover:-translate-y-1'
+                            }
+                        `}
+                    >
+                        <div className={`
+                            w-14 h-14 rounded-2xl flex items-center justify-center mb-4 transition-colors duration-300
+                            ${formData.applicantType === 'INDIVIDUAL' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-slate-100 text-slate-400 group-hover:bg-primary-50 group-hover:text-primary-600'}
+                        `}>
+                            <PersonIcon className="w-7 h-7" />
+                        </div>
+                        <h4 className={`font-bold text-lg mb-1 ${formData.applicantType === 'INDIVIDUAL' ? 'text-primary-900' : 'text-slate-700'}`}>
+                            บุคคลธรรมดา
+                        </h4>
+                        <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">Individual</p>
+                        {formData.applicantType === 'INDIVIDUAL' && (
+                            <div className="absolute top-4 right-4 text-primary animate-scale-in">
+                                <CheckIcon className="w-6 h-6" />
+                            </div>
+                        )}
+                    </button>
 
-                        return (
-                            <button
-                                key={type.id}
-                                onClick={() => !isLocked && handleChange('applicantType', type.id)}
-                                disabled={!!isLocked}
-                                className={`
-                                    relative p-6 rounded-xl flex flex-col items-center justify-center min-h-[160px] transition-all duration-200 border-2 text-center
-                                    ${isLocked
-                                        ? 'bg-gray-50 border-gray-100 grayscale opacity-50 cursor-not-allowed'
-                                        : isSelected
-                                            ? 'bg-primary-50 border-primary shadow-md ring-2 ring-primary/20 scale-105 z-10'
-                                            : 'bg-white border-transparent hover:border-gray-200 hover:shadow-lg hover:-translate-y-1'
-                                    }
-                                `}
-                            >
-                                {isSelected && (
-                                    <span className="absolute top-3 right-3 text-primary animate-scale-in">
-                                        <CheckIcon className="w-5 h-5" />
-                                    </span>
-                                )}
-                                <div className={`mb-4 transition-colors ${isSelected ? 'text-primary' : 'text-gray-400 group-hover:text-primary'}`}>
-                                    <Icon className="w-12 h-12 stroke-[1.5]" />
-                                </div>
-                                <div className={`font-bold text-base mb-1 ${isSelected ? 'text-primary-800' : 'text-text-main'}`}>
-                                    {type.label}
-                                </div>
-                                <div className="text-xs text-text-muted uppercase font-medium">
-                                    {type.labelEN}
-                                </div>
-                            </button>
-                        );
-                    })}
+                    {/* COMMUNITY BUTTON */}
+                    <button
+                        onClick={() => !(isUserType && isUserType !== 'COMMUNITY') && handleTypeChange('COMMUNITY')}
+                        disabled={!!(isUserType && isUserType !== 'COMMUNITY')}
+                        className={`
+                            relative p-6 rounded-[1.5rem] border-2 text-left transition-all duration-300 group
+                            ${formData.applicantType === 'COMMUNITY'
+                                ? 'border-primary-500 bg-primary-50/50 shadow-md ring-4 ring-primary-500/10'
+                                : isUserType && isUserType !== 'COMMUNITY'
+                                    ? 'border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed'
+                                    : 'border-slate-100 bg-white hover:border-primary-200 hover:shadow-lg hover:-translate-y-1'
+                            }
+                        `}
+                    >
+                        <div className={`
+                            w-14 h-14 rounded-2xl flex items-center justify-center mb-4 transition-colors duration-300
+                            ${formData.applicantType === 'COMMUNITY' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-slate-100 text-slate-400 group-hover:bg-primary-50 group-hover:text-primary-600'}
+                        `}>
+                            <GroupIcon className="w-7 h-7" />
+                        </div>
+                        <h4 className={`font-bold text-lg mb-1 ${formData.applicantType === 'COMMUNITY' ? 'text-primary-900' : 'text-slate-700'}`}>
+                            วิสาหกิจชุมชน
+                        </h4>
+                        <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">Community Enterprise</p>
+                        {formData.applicantType === 'COMMUNITY' && (
+                            <div className="absolute top-4 right-4 text-primary animate-scale-in">
+                                <CheckIcon className="w-6 h-6" />
+                            </div>
+                        )}
+                    </button>
+
+                    {/* JURISTIC BUTTON */}
+                    <button
+                        onClick={() => !(isUserType && isUserType !== 'JURISTIC') && handleTypeChange('JURISTIC')}
+                        disabled={!!(isUserType && isUserType !== 'JURISTIC')}
+                        className={`
+                            relative p-6 rounded-[1.5rem] border-2 text-left transition-all duration-300 group
+                            ${formData.applicantType === 'JURISTIC'
+                                ? 'border-primary-500 bg-primary-50/50 shadow-md ring-4 ring-primary-500/10'
+                                : isUserType && isUserType !== 'JURISTIC'
+                                    ? 'border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed'
+                                    : 'border-slate-100 bg-white hover:border-primary-200 hover:shadow-lg hover:-translate-y-1'
+                            }
+                        `}
+                    >
+                        <div className={`
+                            w-14 h-14 rounded-2xl flex items-center justify-center mb-4 transition-colors duration-300
+                            ${formData.applicantType === 'JURISTIC' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-slate-100 text-slate-400 group-hover:bg-primary-50 group-hover:text-primary-600'}
+                        `}>
+                            <BuildingIcon className="w-7 h-7" />
+                        </div>
+                        <h4 className={`font-bold text-lg mb-1 ${formData.applicantType === 'JURISTIC' ? 'text-primary-900' : 'text-slate-700'}`}>
+                            นิติบุคคล
+                        </h4>
+                        <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">Juristic Person</p>
+                        {formData.applicantType === 'JURISTIC' && (
+                            <div className="absolute top-4 right-4 text-primary animate-scale-in">
+                                <CheckIcon className="w-6 h-6" />
+                            </div>
+                        )}
+                    </button>
                 </div>
             </section>
 
-            {/* Section 2: Form Details */}
-            <section className="gacp-card animate-slide-up" style={{ animationDelay: '100ms' }}>
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-sm">
+            <section className="gacp-card p-10 space-y-8">
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black">
                         2
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-primary">
-                            {formData.applicantType === 'INDIVIDUAL' ? 'ข้อมูลบุคคลธรรมดา' :
-                                formData.applicantType === 'COMMUNITY' ? 'ข้อมูลวิสาหกิจชุมชน' : 'ข้อมูลนิติบุคคล'}
-                        </h2>
-                        <p className="text-text-secondary text-sm">กรอกข้อมูลรายละเอียดผู้ขอ</p>
-                    </div>
+                    <h3 className="text-xl font-black text-slate-800">{dict.wizard.general.infoHeader || 'ข้อมูลผู้สมัคร'}</h3>
                 </div>
 
-                {/* INDIVIDUAL FORM */}
                 {formData.applicantType === 'INDIVIDUAL' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <FormLabelWithHint label="ชื่อ" required hint="ไม่ต้องระบุคำนำหน้า" />
-                            <input
-                                type="text"
-                                className="gacp-input"
-                                placeholder="สมชาย"
-                                value={formData.firstName || ''}
-                                onChange={(e) => handleChange('firstName', e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <FormLabelWithHint label="นามสกุล" required />
-                            <input
-                                type="text"
-                                className="gacp-input"
-                                placeholder="ใจดี"
-                                value={formData.lastName || ''}
-                                onChange={(e) => handleChange('lastName', e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <FormLabelWithHint label="เลขบัตรประชาชน" required hint="13 หลัก" />
-                            <input
-                                type="text"
-                                className="gacp-input font-mono tracking-wide"
-                                placeholder="0-0000-00000-00-0"
-                                value={formData.idCard || ''}
-                                onChange={(e) => handleChange('idCard', e.target.value)}
-                                maxLength={17}
-                            />
-                        </div>
-                        <div>
-                            <FormLabelWithHint label="เบอร์โทรศัพท์" required />
-                            <input
-                                type="tel"
-                                className="gacp-input"
-                                placeholder="08x-xxx-xxxx"
-                                value={formData.phone || ''}
-                                onChange={(e) => handleChange('phone', e.target.value)}
-                            />
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
+                        {renderInput('firstName', 'ชื่อ', formData.firstName, true)}
+                        {renderInput('lastName', 'นามสกุล', formData.lastName, true)}
+                        {renderInput('idCard', 'เลขบัตรประชาชน', formData.idCard, true)}
+                        {renderInput('phone', 'เบอร์โทรศัพท์', formData.phone, true)}
                         <div className="md:col-span-2">
-                            <FormLabelWithHint label="ที่อยู่ตามบัตรประชาชน" required />
-                            <textarea
-                                className="gacp-input min-h-[100px] resize-none"
-                                placeholder="บ้านเลขที่, หมู่, ถนน, ตำบล, อำเภอ, จังหวัด..."
-                                value={formData.address || ''}
-                                onChange={(e) => handleChange('address', e.target.value)}
-                            />
+                            {renderInput('address', 'ที่อยู่ตามทะเบียนบ้าน', formData.address, true)}
                         </div>
-                        <div className="md:col-span-2 border-t border-gray-100 pt-6 mt-2">
-                            <h3 className="font-bold text-text-main mb-4 flex items-center gap-2">
-                                <span className="w-1 h-6 bg-primary rounded-full"></span>
-                                เอกสารประกอบ (บุคคลธรรมดา)
-                            </h3>
+                        <div className="md:col-span-2 bg-slate-50/50 rounded-[2rem] p-8 border border-slate-100 mt-4">
+                            <h4 className="font-black text-slate-800 mb-6 flex items-center gap-3">
+                                <Icons.FileText className="w-5 h-5 text-primary" />
+                                เอกสารยืนยันตัวตน
+                            </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <InlineDocumentUpload
                                     id="id-card"
@@ -282,10 +357,9 @@ export const StepGeneral = () => {
                     </div>
                 )}
 
-                {/* COMMUNITY FORM */}
                 {formData.applicantType === 'COMMUNITY' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="md:col-span-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="md:col-span-2 space-y-2">
                             <FormLabelWithHint label="ชื่อวิสาหกิจชุมชน" required />
                             <input
                                 type="text"
@@ -295,7 +369,7 @@ export const StepGeneral = () => {
                                 onChange={(e) => handleChange('communityName', e.target.value)}
                             />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <FormLabelWithHint label="รหัสทะเบียน ทว.ช.3" required />
                             <input
                                 type="text"
@@ -305,7 +379,7 @@ export const StepGeneral = () => {
                                 onChange={(e) => handleChange('registrationSVC01', e.target.value)}
                             />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <FormLabelWithHint label="ชื่อ-นามสกุล ประธาน" required />
                             <input
                                 type="text"
@@ -314,20 +388,21 @@ export const StepGeneral = () => {
                                 onChange={(e) => handleChange('presidentName', e.target.value)}
                             />
                         </div>
-                        <div className="md:col-span-2">
+                        <div className="md:col-span-2 space-y-2">
                             <FormLabelWithHint label="ที่อยู่วิสาหกิจชุมชน" required />
                             <textarea
-                                className="gacp-input min-h-[100px] resize-none"
+                                className="gacp-input min-h-[120px] resize-none py-4"
                                 placeholder="ที่ตั้งวิสาหกิจ..."
                                 value={formData.communityAddress || ''}
                                 onChange={(e) => handleChange('communityAddress', e.target.value)}
                             />
                         </div>
-                        <div className="md:col-span-2 border-t border-gray-100 pt-6 mt-2">
-                            <h3 className="font-bold text-text-main mb-4 flex items-center gap-2">
-                                <span className="w-1 h-6 bg-primary rounded-full"></span>
-                                เอกสารประกอบ (วิสาหกิจชุมชน)
-                            </h3>
+
+                        <div className="md:col-span-2 bg-slate-50/50 rounded-[2rem] p-8 border border-slate-100 mt-4">
+                            <h4 className="font-black text-slate-800 mb-6 flex items-center gap-3">
+                                <Icons.FileText className="w-5 h-5 text-primary" />
+                                เอกสารประกอบวิสาหกิจชุมชน
+                            </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <InlineDocumentUpload
                                     id="community-reg"
@@ -350,10 +425,9 @@ export const StepGeneral = () => {
                     </div>
                 )}
 
-                {/* JURISTIC FORM */}
                 {formData.applicantType === 'JURISTIC' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="md:col-span-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="md:col-span-2 space-y-2">
                             <FormLabelWithHint label="ชื่อบริษัท/ห้างหุ้นส่วน" required />
                             <input
                                 type="text"
@@ -362,17 +436,17 @@ export const StepGeneral = () => {
                                 onChange={(e) => handleChange('companyName', e.target.value)}
                             />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <FormLabelWithHint label="เลขทะเบียนนิติบุคคล" required hint="13 หลัก" />
                             <input
                                 type="text"
-                                className="gacp-input font-mono"
+                                className="gacp-input font-mono tracking-widest"
                                 value={formData.registrationNumber || ''}
                                 onChange={(e) => handleChange('registrationNumber', e.target.value)}
                                 maxLength={13}
                             />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <FormLabelWithHint label="ประเภทนิติบุคคล" required />
                             <select
                                 className="gacp-input"
@@ -385,11 +459,12 @@ export const StepGeneral = () => {
                                 <option value="LIMITED_PARTNERSHIP">ห้างหุ้นส่วนจำกัด</option>
                             </select>
                         </div>
-                        <div className="md:col-span-2 border-t border-gray-100 pt-6 mt-2">
-                            <h3 className="font-bold text-text-main mb-4 flex items-center gap-2">
-                                <span className="w-1 h-6 bg-primary rounded-full"></span>
-                                เอกสารประกอบ (นิติบุคคล)
-                            </h3>
+
+                        <div className="md:col-span-2 bg-slate-50/50 rounded-[2rem] p-8 border border-slate-100 mt-4">
+                            <h4 className="font-black text-slate-800 mb-6 flex items-center gap-3">
+                                <Icons.FileText className="w-5 h-5 text-primary" />
+                                เอกสารประกอบนิติบุคคล
+                            </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <InlineDocumentUpload
                                     id="company-reg"
@@ -413,64 +488,15 @@ export const StepGeneral = () => {
                 )}
             </section>
 
-            {/* Section 3: Personnel & Hygiene (GACP) */}
-            <section className="gacp-card animate-slide-up" style={{ animationDelay: '200ms' }}>
-                <div className="flex items-center gap-4 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-sm">
-                        3
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-primary">บุคลากรและสุขอนามัย</h2>
-                        <p className="text-text-secondary text-sm">การจัดการด้านบุคลากรตามมาตรฐาน GACP</p>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                    {[
-                        { id: 'trainingProvided', label: 'มีการอบรมพนักงาน (Training)', desc: 'พนักงานได้รับความรู้เรื่อง GACP และสุขลักษณะส่วนบุคคล' },
-                        { id: 'healthCheck', label: 'มีการตรวจสุขภาพประจำปี (Health Check)', desc: 'พนักงานได้รับการตรวจสุขภาพและไม่มีโรคติดต่อร้ายแรง' },
-                        { id: 'protectiveGear', label: 'มีชุดป้องกัน/อุปกรณ์ป้องกัน (PPE)', desc: 'สวมใส่ชุดปฏิบัติงานที่เหมาะสม หมวก ถุงมือ รองเท้าบูท' }
-                    ].map((item) => {
-                        const isChecked = formData.personnelHygiene?.[item.id as keyof typeof formData.personnelHygiene] || false;
-                        return (
-                            <button
-                                key={item.id}
-                                onClick={() => {
-                                    const current = formData.personnelHygiene || { trainingProvided: false, healthCheck: false, protectiveGear: false };
-                                    setFormData(prev => ({
-                                        ...prev,
-                                        personnelHygiene: { ...current, [item.id]: !isChecked }
-                                    }));
-                                }}
-                                className={`
-                                    relative p-4 rounded-xl text-left border transition-all duration-200 flex items-center gap-4
-                                    ${isChecked
-                                        ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500 shadow-sm'
-                                        : 'border-gray-200 bg-white hover:border-emerald-300 hover:shadow-md'
-                                    }
-                                `}
-                            >
-                                <div className={`w-6 h-6 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${isChecked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-gray-300 bg-white'}`}>
-                                    {isChecked && <CheckIcon className="w-4 h-4" />}
-                                </div>
-                                <div>
-                                    <span className={`block font-bold text-base ${isChecked ? 'text-emerald-900' : 'text-gray-800'}`}>{item.label}</span>
-                                    <span className="text-sm text-gray-500">{item.desc}</span>
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-            </section>
-
             <WizardNavigation
                 onNext={handleNext}
-                onBack={() => router.push('/farmer/applications/new/step/1')}
-                isNextDisabled={!isReady}
-                showBack={true}
+                onBack={() => router.push('/farmer/dashboard')}
+                isNextDisabled={!formData.firstName || !formData.lastName || !formData.phone}
+                nextLabel={dict.wizard.next}
+                backLabel={dict.wizard.back}
             />
         </div>
     );
 };
 
-export default StepGeneral;
+export const StepGeneral = StepGeneralComponent;

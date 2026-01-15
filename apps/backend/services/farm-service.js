@@ -129,6 +129,7 @@ class FarmService {
             'subDistrict', 'postalCode', 'latitude', 'longitude',
             'totalArea', 'cultivationArea', 'areaUnit', 'cultivationMethod',
             'irrigationType', 'soilType', 'waterSource', 'landDocuments',
+            'sanitationInfo', 'siteHistory' // [NEW] GACP Fields
         ];
 
         for (const field of allowedFields) {

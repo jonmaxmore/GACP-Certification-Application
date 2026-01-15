@@ -128,7 +128,7 @@ export function CultivationMethodSelector({
     return (
         <div className="space-y-6">
             {/* Main cultivation types (3 options) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 desktop:grid-cols-3 gap-5">
                 {MAIN_CULTIVATION_METHODS.map((method) => {
                     const isSelected = localSelectedTypes.includes(method.id);
                     return (
@@ -138,49 +138,55 @@ export function CultivationMethodSelector({
                             onClick={() => handleMainTypeSelect(method.id)}
                             disabled={disabled}
                             className={`
-                                relative p-5 rounded-lg border-2 text-left transition-all duration-150
+                                group relative p-5 rounded-xl text-left transition-all duration-300 transform
                                 ${isSelected
-                                    ? 'border-[#00695C] bg-[#E0F2F1]'
-                                    : 'border-[#CFD8DC] bg-white hover:border-[#00695C]'
+                                    ? 'bg-gradient-to-br from-dtam-100 via-dtam-200 to-dtam-300 shadow-3d-hover scale-[1.02] border-2 border-dtam'
+                                    : 'bg-white shadow-3d hover:shadow-3d-hover hover:scale-[1.02] hover:-translate-y-1 border border-surface-200'
                                 }
                                 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                             `}
                         >
                             {/* Selection indicator */}
                             {isSelected && (
-                                <span className="absolute top-3 right-3 w-5 h-5 bg-[#00695C] rounded-full flex items-center justify-center">
-                                    <CheckIcon className="text-white" size={12} />
+                                <span className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-br from-dtam-light to-dtam rounded-full flex items-center justify-center shadow-green-glow">
+                                    <CheckIcon className="text-white" size={14} />
                                 </span>
                             )}
 
                             {/* Icon & Name */}
                             <div className="flex items-center gap-3 mb-3">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isSelected ? 'text-[#00695C] bg-white' : 'text-[#546E7A] bg-[#ECEFF1]'}`}>
+                                <div className={`
+                                    w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300
+                                    ${isSelected
+                                        ? 'bg-gradient-to-br from-dtam-light to-dtam text-white shadow-lg'
+                                        : 'bg-gradient-to-br from-surface-100 to-surface-200 text-dtam group-hover:from-dtam-100 group-hover:to-dtam-200 group-hover:text-dtam-dark'
+                                    }
+                                `}>
                                     {getCultivationIcon(method.id, { size: 24 })}
                                 </div>
                                 <div>
-                                    <div className={`font-semibold ${isSelected ? 'text-[#00695C]' : 'text-[#263238]'}`}>
+                                    <div className={`font-bold ${isSelected ? 'text-dtam-dark' : 'text-content-primary group-hover:text-dtam-dark'}`}>
                                         {method.name}
                                     </div>
-                                    <div className="text-[10px] text-[#90A4AE]">{method.nameEn}</div>
+                                    <div className={`text-[10px] ${isSelected ? 'text-dtam' : 'text-content-muted'}`}>{method.nameEn}</div>
                                 </div>
                             </div>
 
                             {/* Description */}
-                            <p className="text-xs text-[#546E7A] mb-3">
+                            <p className={`text-xs leading-relaxed mb-3 ${isSelected ? 'text-dtam-dark' : 'text-content-secondary group-hover:text-content-primary'}`}>
                                 {method.description}
                             </p>
 
                             {/* Pros/Cons (shown when selected) */}
                             {isSelected && (
-                                <div className="pt-3 border-t border-[#B2DFDB] space-y-2 text-xs">
-                                    <div>
-                                        <span className="font-medium text-[#2E7D32]">ข้อดี:</span>
-                                        <span className="text-[#546E7A]"> {method.pros.join(', ')}</span>
+                                <div className="pt-3 border-t border-dtam-300 space-y-2 text-xs">
+                                    <div className="flex items-start gap-2">
+                                        <span className="font-bold text-dtam-light">ข้อดี:</span>
+                                        <span className="text-dtam-dark"> {method.pros.join(', ')}</span>
                                     </div>
-                                    <div>
-                                        <span className="font-medium text-[#E65100]">ข้อจำกัด:</span>
-                                        <span className="text-[#546E7A]"> {method.cons.join(', ')}</span>
+                                    <div className="flex items-start gap-2">
+                                        <span className="font-bold text-amber-500">ข้อจำกัด:</span>
+                                        <span className="text-dtam-dark"> {method.cons.join(', ')}</span>
                                     </div>
                                 </div>
                             )}
@@ -191,17 +197,17 @@ export function CultivationMethodSelector({
 
             {/* Fee calculation preview */}
             {localSelectedTypes.length > 0 && (
-                <div className="bg-[#E8F5E9] border border-[#A5D6A7] rounded-lg p-4">
+                <div className="bg-gradient-to-r from-dtam-50 via-surface-50 to-dtam-100 border-2 border-dtam-200 rounded-xl p-5 shadow-card">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-[#2E7D32]">ค่าธรรมเนียม GACP (ประมาณการ)</p>
-                            <p className="text-xs text-[#66BB6A] mt-1">
+                            <p className="text-base font-bold text-dtam-dark">ค่าธรรมเนียม GACP (ประมาณการ)</p>
+                            <p className="text-sm text-content-secondary mt-1">
                                 ค่าตรวจเอกสาร ฿{activeFees.documentReview.toLocaleString()} + ค่าตรวจพื้นที่ ฿{activeFees.siteInspection.toLocaleString()}
                             </p>
                         </div>
                         <div className="text-right">
-                            <p className="text-2xl font-bold text-[#2E7D32]">฿{feeInfo.total.toLocaleString()}</p>
-                            <p className="text-[10px] text-[#81C784]">ต่อใบคำขอ</p>
+                            <p className="text-3xl font-bold bg-gradient-to-r from-dtam-light to-dtam bg-clip-text text-transparent">฿{feeInfo.total.toLocaleString()}</p>
+                            <p className="text-xs text-dtam">ต่อใบคำขอ</p>
                         </div>
                     </div>
                 </div>

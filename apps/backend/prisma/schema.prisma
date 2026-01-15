@@ -160,6 +160,10 @@ model Application {
   // Form Data (JSON)
   formData Json?
 
+  // GACP Personnel Hygiene (JSON) [NEW for Standard]
+  // Structure: { trainingProvided: boolean, healthCheck: boolean, protectiveGear: string[] }
+  personnelHygiene Json?
+
   // Attachments (JSON array)
   attachments Json?
 
@@ -468,6 +472,14 @@ model Farm {
 
   // Land Documents (JSON)
   landDocuments Json?
+
+  // GACP Sanitation & Facilities (JSON) [NEW for Standard]
+  // Structure: { hasToilet: boolean, toiletDistance: number, hasHandWashing: boolean, wasteManagement: string }
+  sanitationInfo Json? 
+
+  // GACP Site History (JSON) [NEW for Standard]
+  // Structure: { previousLandUse: string, hasChemicalHistory: boolean, riskAssessment: string }
+  siteHistory    Json?
 
   // Soft Delete
   isDeleted    Boolean   @default(false)
@@ -798,54 +810,58 @@ model HarvestBatch {
   batchNumber String @unique // เช่น "LOT-2025-001"
   
   // ความสัมพันธ์ (เพิ่ม cycleId)
-  farmId    String
-  farm      Farm         @relation(fields: [farmId], references: [id])
-  speciesId String
-  species   PlantSpecies @relation(fields: [speciesId], references: [id])
-  cycleId   String?
-  cycle     PlantingCycle? @relation(fields: [cycleId], references: [id])
+  cycleId     String?
+  cycle       PlantingCycle? @relation(fields: [cycleId], references: [id])
   
-  // ข้อมูลการปลูก
-  plantingDate    DateTime  // วันปลูก
-  harvestDate     DateTime? // วันเก็บเกี่ยว
-  cultivationType String    @default("SELF_GROWN") // ปลูกเอง (DTAM required)
-  seedSource      String?   // แหล่งเมล็ดพันธุ์
+  // Relation to Farm
+  farmId      String
+  farm        Farm           @relation(fields: [farmId], references: [id])
   
-  // พื้นที่
-  plotName        String?   // ชื่อแปลง
-  plotArea        Float?    // พื้นที่ปลูก
-  areaUnit        String    @default("rai")
+  // ข้อมูลพืช (Relation to Plant)
+  plantCode   String? // e.g. "CAN"
+  plant       PlantSpecies? @relation(fields: [plantCode], references: [code])
   
-  // ปริมาณ
-  estimatedYield  Float?    // ผลผลิตที่คาดการณ์
-  actualYield     Float?    // ผลผลิตจริง
-  yieldUnit       String    @default("kg")
+  // วันที่
+  harvestDate DateTime @default(now())
+  
+  // ผลผลิต
+  freshWeight Float    // น้ำหนักสด (กก.)
+  dryWeight   Float?   // น้ำหนักแห้ง (กก.)
+  lossWeight  Float?   // น้ำหนักสูญเสีย (กก.)
+  
+  // คุณภาพ
+  moistureContent Float? // ความชื้น (%)
+  qualityGrade    String? // A, B, C, REJECT
+  
+  // การแปรรูปเบื้องต้น (Primary Processing)
+  isDried       Boolean @default(false)
+  dryingMethod  String? // SUN_DRY, OVEN_DRY, DEHUMIDIFIER
+  dryingTemp    Float?  // อุณหภูมิ (C)
+  dryingDuration Int?   // ระยะเวลา (ชั่วโมง)
+  
+  // การตรวจสอบ (QC)
+  qcPassed      Boolean @default(false)
+  qcNotes       String?
+  qcBy          String?
   
   // สถานะ
-  status          String    @default("GROWING") // GROWING, READY_HARVEST, HARVESTED, PROCESSED
-  qualityGrade    String?   // A, B, C
+  status        String @default("RECEIVED") // RECEIVED, DRYING, PROCESSED, PACKED, SOLD
   
-  // หมายเหตุ
-  notes           String?
-  
-  // QR Code Tracking
-  qrCode      String? @unique // UUID for public lookup
-  trackingUrl String?         // Full URL with domain
+  // Audit Trail
+  recordedBy    String?
+  notes         String?
 
-  // Related Lots
-  lots Lot[]
+  // Relation to Lots
+  lots          Lot[]
   
   // Soft Delete
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime?
+  isDeleted     Boolean @default(false)
   
-  @@index([farmId])
-  @@index([speciesId])
+  @@index([batchNumber])
   @@index([status])
-  @@index([harvestDate])
-  @@index([isDeleted])
   @@map("harvest_batches")
 }
+
 
 // =============================================================================
 // DTAM STAFF MODEL (เจ้าหน้าที่กรมการแพทย์แผนไทย)

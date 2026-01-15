@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { apiClient } from "@/lib/api";
 import { IconUser, IconLock, EyeIcon } from "@/components/ui/icons";
 
 // Local Icons
@@ -56,27 +57,23 @@ export default function StaffLoginPage() {
         }
 
         try {
-            const response = await fetch('/api/auth-dtam/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: loginId.trim(),
-                    password,
-                    userType: 'DTAM_STAFF',
-                }),
+            const response = await apiClient.post<{
+                user: any,
+                token: string,
+                tokens?: { accessToken: string }
+            }>('/auth-dtam/login', {
+                username: loginId.trim(),
+                password,
+                userType: 'DTAM_STAFF',
             });
 
-            const result = await response.json();
-
-            if (!response.ok || !result.success) {
-                setError(result.error || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+            if (!response.success || !response.data) {
+                setError(response.error || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
                 setIsLoading(false);
                 return;
             }
 
-            // Normalize response structure
-            // API might return { data: { user: ..., token: ... } } or { data: { tokens: { accessToken: ... }, user: ... } }
-            const responseData = result.data?.data || result.data; // Handle potentially nested data
+            const responseData = response.data;
             const user = responseData?.user;
             const token = responseData?.token || responseData?.tokens?.accessToken;
 
@@ -87,20 +84,15 @@ export default function StaffLoginPage() {
             }
 
             // Validate Role
-            const staffRoles = ['admin', 'scheduler', 'assessor', 'accountant', 'inspector', 'auditor', 'reviewer', 'manager'];
-            const userRole = (user.role || '').toLowerCase();
-            // Note: Admin might be just "ADMIN" or "admin".
+            // Allow all for now, as backend should have validated basic access
 
-            // Allow all for now, or strict check? 
-            // The mock had a check. Let's keep a basic check but be permissive if role is loosely typed.
-            // If the backend says success, they are likely staff.
-
-            localStorage.setItem("staff_token", token || "");
+            localStorage.setItem("staff_token", token);
             localStorage.setItem("staff_user", JSON.stringify(user));
+
+            // Set cookie for middleware compatibility
             document.cookie = `staff_token=${token}; path=/; max-age=${60 * 60 * 8}; SameSite=Lax`;
 
             setIsLoading(false);
-            // Default to dashboard, or use user preference if available
             router.push("/staff/dashboard");
         } catch (err) {
             console.error("Login error:", err);

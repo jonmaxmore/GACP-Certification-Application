@@ -71,6 +71,36 @@ router.post('/draft', authenticateFarmer, async (req, res) => {
 
 /**
  * @swagger
+ * /api/applications/submit:
+ *   post:
+ *     summary: Submit Application (Finalize Draft)
+ *     tags: [Applications]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Application submitted successfully
+ */
+router.post('/submit', authenticateFarmer, async (req, res) => {
+    try {
+        const payload = { ...req.body, status: 'SUBMITTED' }; // Force status to SUBMITTED
+        const application = await applicationService.saveDraft(req.user.id, payload);
+        res.json({
+            success: true,
+            data: {
+                _id: application.id,
+                applicationNumber: application.applicationNumber,
+                status: application.status,
+            },
+        });
+    } catch (error) {
+        console.error('[Applications Submit] Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to submit application', details: error.message });
+    }
+});
+
+/**
+ * @swagger
  * /api/applications/draft:
  *   get:
  *     summary: Get current draft
@@ -180,7 +210,10 @@ router.get('/my', authenticateFarmer, async (req, res) => {
                     location: app.formData?.auditLocation,
                     auditorId: app.auditorId,
                 },
-                fees: app.formData?.fees,
+                fees: app.formData?.fees || {
+                    phase1: feeService.calculatePhase1Fee(),
+                    phase2: feeService.calculatePhase2Fee(app.formData || {}),
+                },
             })),
         });
     } catch (error) {
@@ -303,6 +336,74 @@ router.post('/:id/review', authenticateDTAM, async (req, res) => {
     } catch (error) {
         console.error('[Review] Error:', error);
         res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * @swagger
+ * /api/applications/:id/payment:
+ *   post:
+ *     summary: Process Payment (Simulated)
+ *     tags: [Applications]
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post('/:id/payment', authenticateFarmer, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { phase, amount, method } = req.body;
+
+        const application = await prisma.application.findFirst({
+            where: { id, farmerId: req.user.id },
+            include: { invoices: true }
+        });
+
+        if (!application) {
+            return res.status(404).json({ success: false, error: 'Application not found' });
+        }
+
+        // Find pending invoice for this phase
+        const invoiceServiceType = phase === 1 ? 'APPLICATION_FEE' : 'AUDIT_FEE';
+        const invoice = await prisma.invoice.findFirst({
+            where: {
+                applicationId: application.id,
+                serviceType: invoiceServiceType,
+                status: 'pending'
+            }
+        });
+
+        if (invoice) {
+            // Update Invoice
+            await prisma.invoice.update({
+                where: { id: invoice.id },
+                data: {
+                    status: 'paid',
+                    paidAt: new Date(),
+                    paymentMethod: method || 'QR_CASH'
+                }
+            });
+        }
+
+        // Update Application Status
+        const newStatus = phase === 1 ? 'PAYMENT_1_COMPLETED' : 'PAYMENT_2_COMPLETED';
+        await prisma.application.update({
+            where: { id: application.id },
+            data: { status: newStatus }
+        });
+
+        // Trigger Notification
+        const { sendNotification, NotifyType } = require('../../services/notification-service');
+        await sendNotification(req.user.id, NotifyType.PAYMENT_COMPLETED, {
+            applicationNumber: application.applicationNumber,
+            amount: amount,
+            invoiceNumber: invoice?.invoiceNumber || 'INV-UNKNOWN'
+        });
+
+        res.json({ success: true, message: 'Payment processed successfully' });
+
+    } catch (error) {
+        console.error('[Payment] Error:', error);
+        res.status(500).json({ success: false, error: 'Payment processing failed' });
     }
 });
 

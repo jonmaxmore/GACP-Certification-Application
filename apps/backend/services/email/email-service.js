@@ -7,7 +7,7 @@
 
 const nodemailer = require('nodemailer');
 const logger = require('../../shared/logger');
-const EmailTemplateEngine = require('./EmailTemplateEngine');
+const EmailTemplateEngine = require('./email-template-engine');
 
 class EmailService {
   constructor() {

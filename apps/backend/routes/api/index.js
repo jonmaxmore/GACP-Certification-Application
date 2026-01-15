@@ -25,6 +25,7 @@ const mfaRouter = require('./mfa');
 const publicRouter = require('./public');
 const consentRouter = require('./consent');
 const documentsRouter = require('./documents');
+const journeyRouter = require('./journey'); // Master Data - Cultivation Config
 
 const plantingCyclesRouter = require('./planting-cycles');
 const lotsRouter = require('./lots');
@@ -67,6 +68,9 @@ router.use('/standards', require('./standards'));
 router.use('/farms', farmsRouter);
 router.use('/dashboard', dashboardRouter);
 router.use('/master-data', require('./master-data'));
+router.use('/master-data', journeyRouter); // Cultivation config (merged with master-data)
+router.use('/applications', require('./applications-config')); // Application config by journey
+router.use('/calculations', require('./calculations')); // Utility calculations
 router.use('/webhooks', require('./webhooks'));
 router.use('/admin', require('./admin')); // Admin CMS Routes
 

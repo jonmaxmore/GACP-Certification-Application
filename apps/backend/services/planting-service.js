@@ -78,7 +78,7 @@ class PlantingService {
             farmId, certificateId, plantSpeciesId, cycleName,
             startDate, expectedHarvestDate, plotId, plotName,
             plotArea, areaUnit, seedSource, seedQuantity,
-            cultivationType, notes
+            cultivationType, notes, productionInputs // [NEW] GACP Inputs
         } = data;
 
         // Verify Active Certificate
@@ -88,6 +88,24 @@ class PlantingService {
                 throw new Error('Certificate is invalid or not active');
             }
         }
+
+        // Prepare Production Inputs if any
+        const inputsCreate = productionInputs && Array.isArray(productionInputs)
+            ? {
+                create: productionInputs.map(input => ({
+                    type: input.type,
+                    name: input.name,
+                    sourceType: input.sourceType,
+                    usageStage: input.usageStage,
+                    quantity: input.quantity ? parseFloat(input.quantity) : null,
+                    unit: input.unit,
+                    frequency: input.frequency,
+                    isOrganic: input.isOrganic || false,
+                    manufacturer: input.manufacturer,
+                    certNumber: input.certNumber
+                }))
+            }
+            : undefined;
 
         return prisma.plantingCycle.create({
             data: {
@@ -105,7 +123,11 @@ class PlantingService {
                 cultivationType: cultivationType || 'SELF_GROWN',
                 notes,
                 status: 'PLANTED',
+                productionInputs: inputsCreate, // [NEW]
             },
+            include: { // Return inputs in response
+                productionInputs: true
+            }
         });
     }
 
@@ -116,12 +138,14 @@ class PlantingService {
      */
     async updateCycle(id, data) {
         const updateData = { ...data };
+        const { productionInputs } = data; // Extract inputs
 
-        // Remove immutable fields
+        // Remove immutable fields & extracted relations
         delete updateData.id;
         delete updateData.uuid;
         delete updateData.createdAt;
         delete updateData.farmId;
+        delete updateData.productionInputs;
 
         // Format Dates
         if (updateData.actualHarvestDate) updateData.actualHarvestDate = new Date(updateData.actualHarvestDate);
@@ -130,9 +154,50 @@ class PlantingService {
         // Format Numbers
         if (updateData.actualYield) updateData.actualYield = parseFloat(updateData.actualYield);
 
+        // Transaction for GACP Inputs (Sync: Delete All + Create New)
+        // Only trigger if productionInputs is provided (not undefined)
+        if (productionInputs && Array.isArray(productionInputs)) {
+            return prisma.$transaction(async (tx) => {
+                // 1. Update basic info
+                const cycle = await tx.plantingCycle.update({
+                    where: { id },
+                    data: updateData
+                });
+
+                // 2. Replace inputs
+                await tx.productionInput.deleteMany({ where: { plantingCycleId: id } });
+
+                if (productionInputs.length > 0) {
+                    await tx.productionInput.createMany({
+                        data: productionInputs.map(input => ({
+                            plantingCycleId: id,
+                            type: input.type,
+                            name: input.name,
+                            sourceType: input.sourceType,
+                            usageStage: input.usageStage,
+                            quantity: input.quantity ? parseFloat(input.quantity) : null,
+                            unit: input.unit,
+                            frequency: input.frequency,
+                            isOrganic: input.isOrganic || false,
+                            manufacturer: input.manufacturer,
+                            certNumber: input.certNumber
+                        }))
+                    });
+                }
+
+                // 3. Return updated cycle with inputs
+                return tx.plantingCycle.findUnique({
+                    where: { id },
+                    include: { productionInputs: true }
+                });
+            });
+        }
+
+        // Standard update if no inputs provided
         return prisma.plantingCycle.update({
             where: { id },
             data: updateData,
+            include: { productionInputs: true }
         });
     }
 }

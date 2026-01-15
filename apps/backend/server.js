@@ -134,6 +134,8 @@ app.use((err, req, res, next) => {
 if (require.main === module) {
     app.listen(port, '0.0.0.0', () => {
         logger.info(`✅ GACP Backend running on port ${port}`);
+        console.log(`\n🐛 [DEBUG] Backend Server listening on port ${port}`); // Explicit Debug Log
+        console.log(`🐛 [DEBUG] Environment: ${process.env.NODE_ENV}\n`);
         logger.info(`📡 Server accepting requests...`);
 
         // Connect to database AFTER server is already listening

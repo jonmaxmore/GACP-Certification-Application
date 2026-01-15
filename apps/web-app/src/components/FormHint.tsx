@@ -35,7 +35,7 @@ const icons = {
 
 const iconColors = {
     info: 'text-blue-500 hover:text-blue-600',
-    help: 'text-slate-400 hover:text-slate-600',
+    help: 'text-content-tertiary hover:text-dtam',
     warning: 'text-amber-500 hover:text-amber-600',
 };
 
@@ -56,17 +56,17 @@ export function FormHint({
     };
 
     const arrowClasses = {
-        top: 'top-full left-1/2 -translate-x-1/2 border-t-slate-800',
-        bottom: 'bottom-full left-1/2 -translate-x-1/2 border-b-slate-800',
-        left: 'left-full top-1/2 -translate-y-1/2 border-l-slate-800',
-        right: 'right-full top-1/2 -translate-y-1/2 border-r-slate-800',
+        top: 'top-full left-1/2 -translate-x-1/2 border-t-dtam-dark',
+        bottom: 'bottom-full left-1/2 -translate-x-1/2 border-b-dtam-dark',
+        left: 'left-full top-1/2 -translate-y-1/2 border-l-dtam-dark',
+        right: 'right-full top-1/2 -translate-y-1/2 border-r-dtam-dark',
     };
 
     return (
         <div className="relative inline-flex">
             <button
                 type="button"
-                className={`${iconColors[icon]} transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded-full`}
+                className={`${iconColors[icon]} transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-dtam rounded-full`}
                 onMouseEnter={() => setIsOpen(true)}
                 onMouseLeave={() => setIsOpen(false)}
                 onClick={() => setIsOpen(!isOpen)}
@@ -80,13 +80,13 @@ export function FormHint({
                     className={`absolute z-50 ${positionClasses[position]} w-64 max-w-xs`}
                     role="tooltip"
                 >
-                    <div className="bg-slate-800 text-white text-sm rounded-lg shadow-lg p-3">
+                    <div className="bg-dtam-dark text-white text-sm rounded-lg shadow-lg p-3">
                         <p className="leading-relaxed">{hint}</p>
 
                         {example && (
-                            <div className="mt-2 pt-2 border-t border-slate-700">
-                                <span className="text-slate-400 text-xs">ตัวอย่าง:</span>
-                                <p className="text-emerald-400 font-mono text-xs mt-1">{example}</p>
+                            <div className="mt-2 pt-2 border-t border-dtam-800">
+                                <span className="text-dtam-300 text-xs">ตัวอย่าง:</span>
+                                <p className="text-white font-mono text-xs mt-1">{example}</p>
                             </div>
                         )}
 
@@ -132,7 +132,7 @@ export function FormLabelWithHint({
         <div className={`flex items-center gap-1.5 ${className}`}>
             <label
                 htmlFor={htmlFor}
-                className="text-sm font-medium text-slate-700"
+                className="text-sm font-bold text-dtam-dark"
             >
                 {label}
                 {required && <span className="text-red-500 ml-0.5">*</span>}

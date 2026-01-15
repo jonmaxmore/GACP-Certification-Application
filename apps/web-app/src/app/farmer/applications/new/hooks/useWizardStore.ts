@@ -85,6 +85,13 @@ export interface ApplicantData {
     plantingStatus?: 'NOTIFY' | 'LICENSED';
     licenseNumber?: string;
     licenseType?: 'BHT11' | 'BHT13' | 'BHT16';
+
+    // [GACP] Personnel Hygiene (หมวด 3: บุคลากร)
+    personnelHygiene?: {
+        trainingProvided: boolean; // การอบรม
+        healthCheck: boolean;      // ตรวจสุขภาพ
+        protectiveGear: boolean;   // อุปกรณ์ป้องกัน (PPE)
+    };
 }
 
 // [NEW] General Information
@@ -102,6 +109,83 @@ export interface Plot {
     solarSystem: 'OUTDOOR' | 'INDOOR' | 'GREENHOUSE';
     latitude?: number;
     longitude?: number;
+    // [NEW] Dynamic cultivation config fields
+    farmLayoutId?: string; // e.g., "row_cultivation", "raised_bed"
+    growingStyleId?: string; // e.g., "sog", "scrog", "vertical" (indoor only)
+    tiers?: number; // For vertical farming (1-5)
+    estimatedPlants?: number; // Calculated plant count
+    plantDensity?: number; // plants per sqm
+
+    // [GACP] Soil Analysis (หมวด 4: วัสดุปลูก)
+    soilType?: string; // ประเภทดิน
+    soilAnalysisStatus?: 'none' | 'pending' | 'passed' | 'failed';
+    hasHeavyMetalTest?: boolean;
+    hasPesticideTest?: boolean;
+
+    // [GACP] Seed/Material Source (หมวด 4)
+    seedSource?: string; // แหล่งเมล็ดพันธุ์
+    seedCertificate?: boolean; // มีใบรับรองเมล็ดพันธุ์
+    seedProviderName?: string;
+
+    // [GACP] IPM Plan (หมวด 6)
+    hasIPMPlan?: boolean;
+    ipmMethods?: string[]; // วิธีการป้องกันศัตรูพืช
+}
+
+// [NEW] Farm Data - สถานประกอบการ
+export interface FarmData {
+    id?: string;
+    farmName: string; // ชื่อฟาร์ม
+    address: string;
+    province: string;
+    district: string;
+    subdistrict: string;
+    postalCode: string;
+    // GPS จุดศูนย์กลาง
+    gpsLat?: string;
+    gpsLng?: string;
+    // พื้นที่รวม
+    totalAreaSize: string;
+    totalAreaUnit: 'Rai' | 'Ngan' | 'Sqm';
+    // กรรมสิทธิ์
+    landOwnership: 'OWN' | 'RENT' | 'CONSENT';
+    // อาณาเขต
+    northBorder?: string;
+    southBorder?: string;
+    eastBorder?: string;
+    westBorder?: string;
+    // โครงสร้างพื้นฐาน
+    waterSource?: string;
+    electricitySource?: string;
+
+    // [GACP] Soil Information
+    soilType?: string;          // e.g., "Clay", "Loam"
+    soilPH?: string;            // [NEW]
+    soilHistory?: string;       // [NEW] History of land use
+
+    // ระบบรักษาความปลอดภัย
+    hasFence?: boolean;
+    hasCCTV?: boolean;
+    hasAccessControl?: boolean;
+    hasWarningSign?: boolean;
+    // เอกสารฟาร์ม
+    documents?: StepDocument[];
+}
+
+// [NEW] Lot - ล็อตการผลิต
+export interface Lot {
+    id: string;
+    lotCode: string; // e.g., "LOT-67-001"
+    plotId: string; // เชื่อมกับแปลง
+    plotName?: string; // for display
+    plantCount: number; // จำนวนต้นที่จะปลูก
+    estimatedPlantingDate?: string; // ISO date
+    estimatedHarvestDate?: string; // ISO date
+    estimatedYieldKg?: number; // [NEW] Added for GACP
+    status: 'PLANNED' | 'ACTIVE' | 'HARVESTED' | 'CANCELLED';
+    notes?: string;
+    // เอกสารล็อต
+    documents?: StepDocument[];
 }
 
 // Expanded SiteData with all fields from original Step6SiteSecurity
@@ -137,6 +221,15 @@ export interface SiteData {
     plots?: Plot[];
 }
 
+// [NEW] Plant Variety Detail
+export interface PlantVariety {
+    id: string;
+    name: string;
+    sourceType: 'SELF' | 'BUY' | 'IMPORT';
+    sourceName?: string; // Shop name or location
+    quantity?: number;
+}
+
 // Expanded ProductionData with all fields from original Step5Production
 export interface ProductionData {
     plantParts?: string[];
@@ -144,7 +237,11 @@ export interface ProductionData {
     propagationType?: 'SEED' | 'CUTTING' | 'TISSUE' | 'OTHER';
     cultivationMethod?: 'OUTDOOR' | 'INDOOR' | 'GREENHOUSE'; // Added for GACP
     irrigationType?: 'DRIP' | 'SPRINKLER' | 'MANUAL' | 'FLOOD'; // Added for GACP
-    varietyName?: string;
+
+    // Varieties (Upgraded from single varietyName)
+    varieties?: PlantVariety[]; // [NEW]
+    varietyName?: string;       // Deprecated but kept for compatibility
+
     seedSource?: string;
     varietySource?: string;
     treeCount?: number;
@@ -264,6 +361,15 @@ export interface WizardState {
     plantTracking: PlantTrackingData[];
     qrCount: number;
     estimatedQRCost: number;
+    // [NEW] Farm-Plot-Lot structure
+    farmData: FarmData | null;
+    plots: Plot[];
+    lots: Lot[];
+    // [NEW] Quote Data
+    milestone1?: {
+        dtamQuote: { number: string; amount: number; accepted: boolean };
+        platformQuote: { number: string; amount: number; accepted: boolean };
+    };
 }
 
 interface WizardActions {
@@ -288,6 +394,14 @@ interface WizardActions {
     acknowledgeStandards: () => void;
     resetWizard: () => void;
     setApplicationId: (applicationId: string) => void;
+    // [NEW] Farm-Plot-Lot actions
+    setFarmData: (farmData: FarmData) => void;
+    setPlots: (plots: Plot[]) => void;
+    setLots: (lots: Lot[]) => void;
+    addPlot: (plot: Plot) => void;
+    removePlot: (plotId: string) => void;
+    addLot: (lot: Lot) => void;
+    removeLot: (lotId: string) => void;
 }
 
 const initialState: WizardState = {
@@ -315,6 +429,10 @@ const initialState: WizardState = {
     plantTracking: [],
     qrCount: 0,
     estimatedQRCost: 0,
+    // [NEW] Farm-Plot-Lot
+    farmData: null,
+    plots: [],
+    lots: [],
 };
 
 const STORAGE_KEY = 'gacp_wizard_state_v3'; // Bumped version for Zustand migration
@@ -369,11 +487,23 @@ const useWizardStoreBase = create<WizardState & WizardActions>()(
             resetWizard: () => set(initialState),
 
             setApplicationId: (applicationId) => set({ applicationId }),
+
+            // [NEW] Farm-Plot-Lot actions
+            setFarmData: (farmData) => set({ farmData }),
+            setPlots: (plots) => set({ plots }),
+            setLots: (lots) => set({ lots }),
+            addPlot: (plot) => set((state) => ({ plots: [...state.plots, plot] })),
+            removePlot: (plotId) => set((state) => ({
+                plots: state.plots.filter(p => p.id !== plotId),
+                lots: state.lots.filter(l => l.plotId !== plotId)
+            })),
+            addLot: (lot) => set((state) => ({ lots: [...state.lots, lot] })),
+            removeLot: (lotId) => set((state) => ({ lots: state.lots.filter(l => l.id !== lotId) })),
         }),
         {
             name: STORAGE_KEY,
-            // Only persist on client side
-            skipHydration: true,
+            // Enable automatic hydration from localStorage
+            skipHydration: false,
         }
     )
 );
@@ -439,6 +569,10 @@ export function useWizardStore() {
         plantTracking: store.plantTracking,
         qrCount: store.qrCount,
         estimatedQRCost: store.estimatedQRCost,
+        // Farm-Plot-Lot
+        farmData: store.farmData,
+        plots: store.plots,
+        lots: store.lots,
     };
 
     return {
@@ -464,6 +598,14 @@ export function useWizardStore() {
         resetWizard: store.resetWizard,
         setApplicationId: store.setApplicationId,
         setLocationType: store.setLocationType,
+        // Farm-Plot-Lot actions
+        setFarmData: store.setFarmData,
+        setPlots: store.setPlots,
+        setLots: store.setLots,
+        addPlot: store.addPlot,
+        removePlot: store.removePlot,
+        addLot: store.addLot,
+        removeLot: store.removeLot,
         canProceedFromStep: (step: number) => canProceedFromStep(state, step),
         getCompletedSteps: () => getCompletedSteps(state),
     };

@@ -98,12 +98,67 @@ async function sendNotification(recipientId, type, data = {}, overrides = {}) {
         });
 
         console.log(`[NotificationService] Sent ${type} notification to user ${recipientId}`);
+
+        // --- EMAIL INTEGRATION ---
+        // Fire-and-forget email sending to avoid blocking response
+        _sendEmailForNotification(recipientId, type, data, overrides).catch(err => {
+            console.error(`[NotificationService] Failed to send email for ${type}:`, err.message);
+        });
+        // -------------------------
+
         return notification;
 
     } catch (error) {
         console.error('[NotificationService] Error sending notification:', error.message);
         return null;
     }
+}
+
+// Internal Helper: Map Notification Type to Email Template & Send
+const EmailService = require('./email/email-service');
+const emailService = new EmailService();
+
+async function _sendEmailForNotification(userId, type, data, overrides) {
+    // 1. Define Email Mapping (NotifyType -> Email Template)
+    const EMAIL_MAP = {
+        [NotifyType.QUOTE_RECEIVED]: { template: 'quote-received', subject: 'ใบเสนอราคาใหม่' },
+        [NotifyType.INVOICE_RECEIVED]: { template: 'invoice-received', subject: 'ใบแจ้งหนี้ใหม่' },
+        [NotifyType.PAYMENT_REMINDER]: { template: 'payment-reminder', subject: 'แจ้งเตือนการชำระเงิน' },
+        [NotifyType.PAYMENT_COMPLETED]: { template: 'payment-receipt', subject: 'บิลเงินสด/ใบเสร็จรับเงิน' },
+        [NotifyType.APPLICATION_SUBMITTED]: { template: 'application-received', subject: 'ยืนยันการรับใบสมัคร' },
+        [NotifyType.APPLICATION_APPROVED]: { template: 'application-status', subject: 'ผลการพิจารณา: อนุมัติ' },
+        [NotifyType.APPLICATION_REJECTED]: { template: 'application-status', subject: 'ผลการพิจารณา: ไม่ผ่าน/แก้ไข' },
+        [NotifyType.AUDIT_SCHEDULED]: { template: 'inspection-scheduled', subject: 'นัดหมายการตรวจประเมิน' },
+    };
+
+    const config = EMAIL_MAP[type];
+    if (!config) return; // No email needed for this type
+
+    // 2. Fetch User to get Email
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true, firstName: true, lastName: true } // Minimal fields
+    });
+
+    if (!user || !user.email) {
+        console.warn(`[NotificationService] User ${userId} has no email, skipping email notification.`);
+        return;
+    }
+
+    // 3. Prepare Template Data
+    // Merge notification data with user data for templates
+    const templateData = {
+        name: `${user.firstName} ${user.lastName}`.trim() || user.email,
+        ...data
+    };
+
+    // 4. Send Email
+    await emailService.sendEmail({
+        to: user.email,
+        subject: overrides.subject || config.subject, // Allow override
+        template: config.template,
+        data: templateData
+    });
 }
 
 /**

@@ -148,15 +148,10 @@ export default function RegisterPage() {
                         // Check availability (Promise-based)
                         delete errors.identifier;
                         setFieldErrors(errors); // Clear local error first
-                        fetch('/api/auth-farmer/check-identifier', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ identifier: cleanId, accountType })
-                        })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (!data.success || !data.available) {
-                                    setFieldErrors(prev => ({ ...prev, identifier: data.error || "หมายเลขนี้ถูกใช้งานแล้ว" }));
+                        AuthService.checkIdentifier(cleanId, accountType)
+                            .then(result => {
+                                if (!result.available) {
+                                    setFieldErrors(prev => ({ ...prev, identifier: result.error || "หมายเลขนี้ถูกใช้งานแล้ว" }));
                                 }
                             })
                             .catch(() => { });
@@ -221,14 +216,9 @@ export default function RegisterPage() {
         else { data.communityName = sanitize(communityName); data.representativeName = sanitize(representativeName); data.communityRegistrationNo = identifier.replace(/[<>'"&]/g, ""); }
 
         try {
-            const response = await fetch('/api/auth-farmer/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            const result = await response.json();
+            const result = await AuthService.register(data);
 
-            if (!response.ok || !result.success) {
+            if (!result.success) {
                 setError(result.error || "เกิดข้อผิดพลาดในการลงทะเบียน");
                 setIsLoading(false);
                 return;

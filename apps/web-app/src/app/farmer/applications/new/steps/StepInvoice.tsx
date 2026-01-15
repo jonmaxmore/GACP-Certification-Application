@@ -2,16 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useWizardStore } from '../hooks/useWizardStore';
-import { ApplicationService } from '@/lib/services/application-service';
+import { ApplicationService, Application } from '@/lib/services/application-service';
 import { apiClient } from '@/lib/api/api-client';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { WizardNavigation } from '@/components/wizard/WizardNavigation';
+import { SecureIcon, WarningIcon } from '@/components/icons/WizardIcons';
 
 export const StepInvoice = () => {
     const { setCurrentStep } = useWizardStore();
     const router = useRouter();
     const [showQrModal, setShowQrModal] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [appData, setAppData] = useState<any>(null);
+    const [appData, setAppData] = useState<Application | null>(null);
     const [phase, setPhase] = useState<1 | 2>(1);
 
     const invoiceNumber = `INV-${new Date().getFullYear()}${(Math.random() * 10000).toFixed(0)}`;
@@ -26,7 +29,10 @@ export const StepInvoice = () => {
         const fetchApp = async () => {
             const res = await ApplicationService.getMyApplications();
             if (res.success && res.data) {
-                const apps = (Array.isArray(res.data) ? res.data : (res.data as any).data || []);
+                // Safely handle potential data structure variations
+                const apps: Application[] = Array.isArray(res.data)
+                    ? res.data
+                    : (res.data as unknown as { data: Application[] })?.data || [];
                 const activeApp = apps[0]; // Assuming single active app
                 if (activeApp) {
                     setAppData(activeApp);
@@ -38,27 +44,12 @@ export const StepInvoice = () => {
                     }
                     setPhase(currentPhase);
 
-                    // Extract Fees from Saved Data
-                    // Note: formData might be nested or direct depending on API
-                    // Assuming API returns it in `formData` or root if mapped
-                    // Our ApplicationService might mask `formData`. Let's assume it's available or map it.
-                    // Actually, `Application` interface might not have `formData`.
-                    // But in strict mode, we should assume the API returns it or we stored it in specific fields.
-                    // The backend returns mapped fields. But `formData` is not fully mapped in `getMyApplications`.
-                    // Wait! `getMyApplications` maps specific fields.
-                    // I need to update `getMyApplications` or the endpoint `GET /my` to include `fees`.
-                    // Checking `applications.js` GET /my ... mapped `audit` but NOT `fees`.
-                    // CRITICAL: Update Backend `GET /my` to include `fees`.
-                    // For now, I will assume fallback logic here if fees missing.
-
-                    // Fallback Logic (if backend not updated yet)
-                    // I will add the backend `fees` mapping in next step.
-                    // Here I implement the rendering logic assuming data will arrive.
-                    const feeData = (activeApp as any).fees || {};
+                    // Fallback Logic
+                    const feeData = activeApp.fees || {};
                     const phaseData = currentPhase === 1 ? feeData.phase1 : feeData.phase2;
 
                     if (phaseData && phaseData.items) {
-                        setInvoiceItems(phaseData.items.map((i: any) => ({
+                        setInvoiceItems(phaseData.items.map((i) => ({
                             label: i.description,
                             amount: i.amount
                         })));
@@ -76,11 +67,14 @@ export const StepInvoice = () => {
                             ]);
                         }
                     }
+
+                    // Force store step update to 9 (0-indexed for Step 10)
+                    setCurrentStep(9);
                 }
             }
         };
         fetchApp();
-    }, []);
+    }, [setCurrentStep]);
 
     const handlePayClick = () => {
         setIsProcessing(true);
@@ -97,7 +91,6 @@ export const StepInvoice = () => {
                 const total = invoiceItems.reduce((acc, item) => acc + item.amount, 0);
 
                 // Call API to confirm payment
-                // Using a generic payment endpoint or status update
                 await apiClient.post(`/applications/${appData._id}/payment`, {
                     phase: phase,
                     amount: total,
@@ -111,7 +104,7 @@ export const StepInvoice = () => {
                 if (phase === 2) {
                     router.push('/farmer/dashboard');
                 } else {
-                    router.push('/farmer/applications/new/step/12'); // Success
+                    router.push('/farmer/applications/new/step/15'); // Success
                 }
             }, 1000);
         } catch (error) {
@@ -124,121 +117,198 @@ export const StepInvoice = () => {
     const totalAmount = invoiceItems.reduce((acc, item) => acc + item.amount, 0);
 
     return (
-        <div className="flex flex-col items-center p-6 bg-slate-50 min-h-screen font-thai">
+        <div className="space-y-8 animate-fade-in pb-20 max-w-5xl mx-auto font-thai">
 
-            <div className="w-full max-w-[210mm] mb-4 text-center">
-                <h2 className="text-xl font-bold text-slate-700 mb-2">
-                    {phase === 1 ? "ขั้นตอนที่ 3: ชำระค่าธรรมเนียมคำขอ" : "ชำระค่าธรรมเนียมการตรวจประเมิน"}
-                </h2>
-                <p className="text-sm text-slate-500">โปรดชำระเงินตามใบแจ้งหนี้ด้านล่าง</p>
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-8">
+                <div className="w-14 h-14 bg-primary gradient-mask rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-primary-50">
+                    {phase === 1 ? '14' : 'P2'}
+                </div>
+                <div>
+                    <h2 className="text-2xl font-bold text-primary-900">
+                        {phase === 1 ? "ชำระค่าธรรมเนียม (Payment)" : "ชำระค่าธรรมเนียมการตรวจประเมิน"}
+                    </h2>
+                    <p className="text-text-secondary">โปรดชำระเงินตามใบแจ้งหนี้เพื่อดำเนินการในขั้นตอนถัดไป</p>
+                </div>
             </div>
 
-            {/* Invoice Paper */}
-            <div className="w-full max-w-[210mm] bg-white rounded-xl shadow-xl overflow-hidden border border-slate-200 mb-6 relative">
-                <div className="p-[20mm] font-[Sarabun]">
-                    {/* Header */}
-                    <div className="flex items-start justify-between border-b-2 border-blue-600 pb-6 mb-8">
-                        <div className="flex items-start gap-4">
-                            <img src="/dtam_logo_new.png" alt="DTAM Logo" className="w-16 h-16 object-contain" />
-                            <div>
-                                <h1 className="text-xl font-bold text-blue-900">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</h1>
-                                <p className="text-xs text-slate-600 mt-1">Department of Thai Traditional and Alternative Medicine</p>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <div className="inline-block px-4 py-1 bg-blue-100 text-blue-800 text-sm font-bold border border-blue-200 rounded mb-2">
-                                ใบวางบิล/แจ้งหนี้ (INVOICE)
-                            </div>
-                            <p className="text-sm">เลขที่: <span className="font-mono font-bold">{invoiceNumber}</span></p>
-                            <p className="text-sm">วันที่: {currentDate.toLocaleDateString('th-TH')}</p>
-                            <p className="text-sm text-red-600 font-bold">วันครบกำหนด: {dueDate.toLocaleDateString('th-TH')}</p>
-                        </div>
-                    </div>
+            {/* Invoice Paper Container with Glossy Effect */}
+            <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-100/30 to-blue-100/30 rounded-[2rem] transform rotate-1 scale-[1.01] blur-sm transition-transform group-hover:rotate-0 group-hover:scale-100"></div>
 
-                    {/* Table */}
-                    <table className="w-full text-sm mb-8">
-                        <thead>
-                            <tr className="bg-blue-800 text-white">
-                                <th className="py-3 px-4 text-center w-16 border border-blue-900">ลำดับ</th>
-                                <th className="py-3 px-4 text-left border border-blue-900">รายการ (Description)</th>
-                                <th className="py-3 px-4 text-right w-32 border border-blue-900">จำนวนเงิน (บาท)</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200 border border-slate-200">
-                            {invoiceItems.map((item, idx) => (
-                                <tr key={idx}>
-                                    <td className="py-4 px-4 text-center align-top border-r border-slate-200">{idx + 1}</td>
-                                    <td className="py-4 px-4 align-top border-r border-slate-200">
-                                        <p className="font-bold">{item.label}</p>
-                                    </td>
-                                    <td className="py-4 px-4 text-right align-top">{item.amount.toFixed(2)}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                        <tfoot className="border-t-2 border-slate-300">
-                            <tr className="bg-blue-50">
-                                <td colSpan={2} className="py-4 px-4 text-right font-bold text-blue-900 text-lg">ยอดชำระสุทธิ (Net Amount)</td>
-                                <td className="py-4 px-4 text-right font-bold text-blue-900 text-lg border border-slate-200">{totalAmount.toFixed(2)}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                {/* Invoice Paper */}
+                <div className="relative bg-white rounded-[1.5rem] shadow-card hover:shadow-card-hover transition-all overflow-hidden border border-gray-100 print:shadow-none print:border-none">
 
-                    {/* Payment Info */}
-                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 mb-8 flex gap-6 items-center">
-                        <div className="w-24 h-24 bg-white border border-slate-300 flex items-center justify-center shrink-0">
-                            <div className="text-center">
-                                <span className="text-[10px] text-slate-400">QR</span>
+                    {/* Top Decor Bar */}
+                    <div className="h-2 bg-gradient-to-r from-primary-400 via-primary to-primary-700"></div>
+
+                    <div className="p-8 md:p-12 font-[Sarabun]">
+                        {/* Invoice Header */}
+                        <div className="flex flex-col md:flex-row justify-between items-start border-b border-gray-100 pb-8 mb-8 gap-6">
+                            <div className="flex items-start gap-4">
+                                <div className="p-3 bg-white rounded-xl shadow-sm border border-gray-100 relative w-20 h-20 flex items-center justify-center">
+                                    <span className="text-3xl">🌿</span>
+                                </div>
+                                <div className="mt-1">
+                                    <h1 className="text-xl font-bold text-primary-900">กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</h1>
+                                    <p className="text-sm text-text-secondary mt-1 max-w-xs">Department of Thai Traditional and Alternative Medicine</p>
+                                    <p className="text-xs text-text-tertiary mt-2">88/23 หมู่ 4 ถนนติวานนท์ อำเภอเมือง จังหวัดนนทบุรี 11000</p>
+                                </div>
+                            </div>
+                            <div className="text-right w-full md:w-auto">
+                                <div className="inline-block px-4 py-1.5 bg-primary-50 text-primary-700 text-sm font-bold border border-primary-100 rounded-lg mb-4">
+                                    ใบวางบิล/แจ้งหนี้ (INVOICE)
+                                </div>
+                                <div className="space-y-1 text-sm bg-gray-50 p-4 rounded-xl border border-gray-100 min-w-[200px]">
+                                    <p className="flex justify-between md:justify-end gap-6"><span className="text-text-tertiary">เลขที่:</span> <span className="font-mono font-bold text-primary-900">{invoiceNumber}</span></p>
+                                    <p className="flex justify-between md:justify-end gap-6"><span className="text-text-tertiary">วันที่:</span> <span className="font-medium text-gray-900">{currentDate.toLocaleDateString('th-TH')}</span></p>
+                                    <p className="flex justify-between md:justify-end gap-6"><span className="text-text-tertiary">วันครบกำหนด:</span> <span className="font-bold text-red-600 font-mono">{dueDate.toLocaleDateString('th-TH')}</span></p>
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <p className="font-bold text-blue-900 mb-1">ชำระเงินผ่าน QR Code (Scan to Pay)</p>
-                            <p className="text-xs text-slate-600 mb-2">สามารถสแกนได้ด้วยแอปพลิเคชันธนาคารทุกธนาคาร</p>
+
+                        {/* Customer Info */}
+                        <div className="mb-8 p-6 bg-gray-50/50 rounded-xl border border-gray-100">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-xs font-bold text-text-tertiary uppercase mb-1">ชื่อผู้ขอรับบริการ (Customer)</p>
+                                    <p className="font-bold text-primary-900 text-lg">{appData?.applicantData?.firstName || 'ผู้ยื่นคำขอ GACP'} {appData?.applicantData?.lastName || ''}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold text-text-tertiary uppercase mb-1">ที่อยู่ (Address)</p>
+                                    <p className="text-sm text-text-secondary">{appData?.applicantData?.address || '-'}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Table */}
+                        <div className="overflow-hidden rounded-xl border border-gray-200 mb-8">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="bg-primary text-white">
+                                        <th className="py-4 px-4 text-center w-20 font-medium">ลำดับ</th>
+                                        <th className="py-4 px-4 text-left font-medium">รายการ (Description)</th>
+                                        <th className="py-4 px-4 text-right w-40 font-medium">จำนวนเงิน (บาท)</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100 bg-white">
+                                    {invoiceItems.map((item, idx) => (
+                                        <tr key={idx} className="hover:bg-primary-50/10 transition-colors">
+                                            <td className="py-4 px-4 text-center align-top text-text-tertiary font-mono">{idx + 1}</td>
+                                            <td className="py-4 px-4 align-top">
+                                                <p className="font-bold text-gray-900">{item.label}</p>
+                                            </td>
+                                            <td className="py-4 px-4 text-right align-top font-mono font-medium text-gray-900">{item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                        </tr>
+                                    ))}
+                                    {/* Spacer Rows */}
+                                    {[...Array(Math.max(0, 3 - invoiceItems.length))].map((_, i) => (
+                                        <tr key={`spacer-${i}`}>
+                                            <td className="py-4 px-4">&nbsp;</td>
+                                            <td className="py-4 px-4">&nbsp;</td>
+                                            <td className="py-4 px-4">&nbsp;</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                                <tfoot className="border-t border-gray-200 bg-gray-50">
+                                    <tr>
+                                        <td colSpan={2} className="py-6 px-6 text-right font-bold text-gray-600 text-lg">ยอดชำระสุทธิ (Net Amount)</td>
+                                        <td className="py-6 px-6 text-right font-bold text-primary-700 text-2xl border-l border-gray-200 bg-white shadow-inner">{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        {/* Payment Info & Footer */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+                            <div className="bg-gradient-to-br from-primary-50 to-blue-50 rounded-xl p-5 flex gap-4 items-center border border-primary-100 shadow-sm">
+                                <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center border border-primary-100 shadow-sm text-primary">
+                                    <SecureIcon className="w-8 h-8" />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-primary-900 mb-0.5">ชำระเงินผ่าน QR Code</p>
+                                    <p className="text-xs text-primary-700">รองรับ Mobile Banking ทุกธนาคาร</p>
+                                </div>
+                            </div>
+                            <div className="text-right text-xs text-text-tertiary">
+                                <p className="mb-1">เอกสารนี้จัดทำโดยระบบคอมพิวเตอร์</p>
+                                <p>© GACP Platform Co., Ltd. สงวนลิขสิทธิ์</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Actions */}
-            <div className="w-full max-w-[210mm] flex gap-4 justify-center">
-                <button
-                    onClick={() => phase === 2 ? router.push('/farmer/dashboard') : router.push('/farmer/applications/new/step/10')}
-                    className="px-8 py-3 rounded-xl font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50"
-                >
-                    {phase === 2 ? "ยกเลิก" : "ย้อนกลับ"}
-                </button>
-                <button
-                    onClick={handlePayClick}
-                    disabled={isProcessing}
-                    className="px-8 py-3 rounded-xl font-bold text-white shadow-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:shadow-blue-500/30 hover:-translate-y-1 transition-all flex items-center gap-2"
-                >
-                    {isProcessing ? 'กำลังประมวลผล...' : 'ชำระเงิน (Proceed to Payment)'}
-                </button>
+            {/* Navigation using standardized WizardNavigation */}
+            <div className="pt-8">
+                <WizardNavigation
+                    onNext={handlePayClick}
+                    onBack={() => phase === 2 ? router.push('/farmer/dashboard') : router.push('/farmer/applications/new/step/13')}
+                    isNextDisabled={isProcessing}
+                    nextLabel={isProcessing ? 'กำลังประมวลผล...' : 'ยืนยันการชำระเงิน'}
+                    backLabel={phase === 2 ? "ยกเลิก" : "ย้อนกลับ"}
+                    backIcon={phase === 2 ? undefined : undefined} // Use default
+                />
             </div>
 
             {/* Simulated Ksher Modal */}
             {showQrModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-fade-in">
-                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-scale-in">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-md p-4 animate-fade-in">
+                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-scale-in relative border border-white/20">
+                        {/* Modal Header */}
                         <div className="bg-[#E60000] p-6 text-white text-center relative overflow-hidden">
-                            <h3 className="text-2xl font-bold relative z-10">Ksher Pay</h3>
-                            <p className="text-white/80 text-sm relative z-10">Secure Payment Gateway</p>
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
+                            <h3 className="text-2xl font-bold relative z-10 tracking-tight flex items-center justify-center gap-2">
+                                Ksher Pay
+                            </h3>
+                            <p className="text-white/80 text-xs relative z-10 font-medium tracking-wide">Secure Payment Gateway</p>
                         </div>
-                        <div className="p-8 text-center">
-                            <p className="text-slate-500 mb-4 font-medium">สแกน QR Code เพื่อชำระเงิน ({totalAmount.toFixed(2)} THB)</p>
-                            <div className="w-64 h-64 bg-slate-100 mx-auto rounded-2xl border-2 border-slate-200 p-2 mb-6 shadow-inner">
-                                <div className="w-full h-full bg-white rounded-xl flex items-center justify-center border border-dashed border-slate-300">
-                                    <div className="text-center">
-                                        <div className="text-xs text-slate-400 font-mono">SIMULATED QR</div>
+
+                        <div className="p-8 text-center space-y-6">
+                            <div>
+                                <p className="text-text-secondary mb-2 font-medium text-sm">สแกน QR Code เพื่อชำระเงิน</p>
+                                <p className="text-4xl font-bold text-gray-900 tracking-tight">฿{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                            </div>
+
+                            {/* QR Container */}
+                            <div className="w-64 h-64 bg-white mx-auto rounded-2xl border-2 border-gray-100 p-2 shadow-inner relative group cursor-pointer hover:border-primary-300 transition-colors">
+                                <div className="absolute inset-0 bg-scan-line animate-scan pointer-events-none opacity-30 rounded-2xl overflow-hidden"></div>
+                                <div className="w-full h-full bg-gray-900 rounded-xl flex items-center justify-center overflow-hidden">
+                                    {/* Mock QR Pattern */}
+                                    <div className="w-full h-full bg-white p-4 grid grid-cols-2 gap-2 relative">
+                                        <div className="border-[6px] border-black w-20 h-20 rounded-lg bg-black/5 absolute top-3 left-3">
+                                            <div className="w-10 h-10 bg-black absolute top-1.5 left-1.5 rounded-sm"></div>
+                                        </div>
+                                        <div className="border-[6px] border-black w-20 h-20 rounded-lg bg-black/5 absolute top-3 right-3">
+                                            <div className="w-10 h-10 bg-black absolute top-1.5 left-1.5 rounded-sm"></div>
+                                        </div>
+                                        <div className="border-[6px] border-black w-20 h-20 rounded-lg bg-black/5 absolute bottom-3 left-3">
+                                            <div className="w-10 h-10 bg-black absolute top-1.5 left-1.5 rounded-sm"></div>
+                                        </div>
+                                        <div className="w-full h-full flex items-center justify-center absolute inset-0 z-10">
+                                            <div className="w-14 h-14 bg-white rounded-full p-1 shadow-md flex items-center justify-center">
+                                                <span className="text-2xl">🌿</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <button
-                                onClick={handlePaymentSuccess}
-                                className="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-500/30 mb-3"
-                            >
-                                ✅ จำลองการชำระเงินสำเร็จ
-                            </button>
-                            <button onClick={() => setShowQrModal(false)} className="text-slate-400 text-sm">ยกเลิก</button>
+
+                            <div className="space-y-3 pt-2">
+                                <button
+                                    onClick={handlePaymentSuccess}
+                                    className="w-full inline-flex items-center justify-center gap-2 py-3.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all"
+                                >
+                                    <SecureIcon className="w-5 h-5" />
+                                    จำลองการชำระเงินสำเร็จ
+                                </button>
+                                <button
+                                    onClick={() => setShowQrModal(false)}
+                                    className="w-full py-2 text-text-tertiary text-sm font-medium hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50"
+                                >
+                                    ยกเลิกทำรายการ
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -246,3 +316,5 @@ export const StepInvoice = () => {
         </div>
     );
 };
+
+export default StepInvoice;

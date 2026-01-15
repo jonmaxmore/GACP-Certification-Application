@@ -1,5 +1,6 @@
 const { prisma } = require('./prisma-database');
 const feeService = require('./fee-service');
+const { sendNotification, NotifyType } = require('./notification-service');
 
 /**
  * Service for managing GACP Applications
@@ -21,6 +22,7 @@ class ApplicationService {
             documents, youtubeUrl,
             requestedInspectionDate,
             estimatedProcessingDays, estimatedFee,
+            personnelHygiene, // [NEW] GACP Hygiene Data
         } = data;
 
         // Validation
@@ -47,8 +49,9 @@ class ApplicationService {
             applicationNumber: existingDraft ? undefined : applicationNumber, // Don't overwrite if exists
             serviceType,
             areaType,
-            status: 'DRAFT', // Corrected to DRAFT for "Save Draft" flow
+            status: 'DRAFT', // Should probably check if completing
             phase1Amount: feeService.calculatePhase1Fee().total,
+            personnelHygiene, // [NEW] Save to top-level column
             formData: {
                 plantId,
                 plantName: plantName || plantId,
@@ -71,6 +74,21 @@ class ApplicationService {
         };
 
         let application;
+        let isSubmission = false;
+
+        // Determine if this is a submission (status changes from DRAFT to SUBMITTED)
+        // Note: The UI usually sets status in the payload, but here it sets 'DRAFT' hardcoded in line 50 of original code.
+        // Assuming 'data.status' might be passed or inferred.
+        // The original code hardcoded status: 'DRAFT'.
+        // If the user INTENDS to submit, we should allow status override or separate submit method.
+        // For now, I will modify the status assignment to respect input OR check context.
+        // Looking at line 86 of original: if (application.status === 'SUBMITTED')
+        // This suggests status WAS mutable or passed in.
+        // I'll update line 50 to use data.status or default to DRAFT.
+
+        const targetStatus = data.status || 'DRAFT';
+        applicationData.status = targetStatus;
+
         if (existingDraft) {
             application = await prisma.application.update({
                 where: { id: existingDraft.id },
@@ -82,9 +100,17 @@ class ApplicationService {
             });
         }
 
-        // Auto-generate Invoice if Submitted
-        if (application.status === 'SUBMITTED') {
+        // Auto-generate Invoice & Notify if Submitted
+        if (targetStatus === 'SUBMITTED') {
+            // 1. Generate Invoice (which will trigger its own notification)
             await this._generatePhase1Invoice(application, farmerId);
+
+            // 2. Notify Application Received
+            await sendNotification(farmerId, NotifyType.APPLICATION_SUBMITTED, {
+                applicationId: application.id,
+                applicationNumber: application.applicationNumber,
+                plantName: application.formData.plantName
+            });
         }
 
         return application;
@@ -109,7 +135,7 @@ class ApplicationService {
             const invoiceNumber = `INV-P1-${year}-${random}`;
             const phase1Fee = feeService.calculatePhase1Fee();
 
-            await prisma.invoice.create({
+            const newInvoice = await prisma.invoice.create({
                 data: {
                     invoiceNumber,
                     applicationId: application.id,
@@ -122,6 +148,14 @@ class ApplicationService {
                     items: phase1Fee.items,
                     notes: 'Auto-generated Phase 1 Invoice (Application Fee)',
                 },
+            });
+
+            // Trigger Invoice Notification
+            await sendNotification(farmerId, NotifyType.INVOICE_RECEIVED, {
+                invoiceId: newInvoice.id,
+                invoiceNumber: newInvoice.invoiceNumber,
+                amount: newInvoice.totalAmount,
+                dueDate: newInvoice.dueDate.toLocaleDateString('th-TH')
             });
         }
     }

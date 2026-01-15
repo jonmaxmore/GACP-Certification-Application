@@ -22,12 +22,14 @@ export const StepPreCheck = () => {
 
     return (
         <div className="space-y-8 animate-fadeIn max-w-2xl mx-auto">
-            <div className="text-center">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-800 bg-clip-text text-transparent">
-                    ตรวจสอบก่อนส่ง (Pre-Submission Checklist)
-                </h2>
-                <p className="text-gray-500 mt-2">กรุณายืนยันความถูกต้องของข้อมูลก่อนดำเนินการต่อ</p>
-            </div>
+            {/* Official Header */}
+            <header className="border-b-2 border-[#00695C] pb-6 mb-2">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-1 h-8 bg-[#00695C] rounded-full" />
+                    <h1 className="text-2xl font-bold text-[#263238]">ตรวจสอบก่อนส่ง</h1>
+                </div>
+                <p className="text-[#546E7A] text-sm ml-4">กรุณายืนยันความถูกต้องของข้อมูลก่อนดำเนินการต่อ</p>
+            </header>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
                 <div onClick={() => toggle('confirmTruth')} className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-50 cursor-pointer border border-transparent hover:border-emerald-100 transition-all">
@@ -71,25 +73,26 @@ export const StepPreCheck = () => {
                 </div>
             </div>
 
-            <div className="pt-6 border-t flex justify-between">
+            {/* Navigation */}
+            <div className="pt-6 border-t border-[#CFD8DC] flex justify-between">
                 <button
-                    onClick={() => router.push('/farmer/applications/new/step/7')} // Back to Docs
-                    className="px-6 py-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
+                    onClick={() => router.push('/farmer/applications/new/step/9')}
+                    className="inline-flex items-center gap-2 px-6 py-3 text-[#00695C] border border-[#00695C] rounded-lg hover:bg-[#E0F2F1] transition-colors font-medium"
                 >
-                    ← ย้อนกลับ (Back)
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                    ย้อนกลับ
                 </button>
                 <button
-                    onClick={() => router.push('/farmer/applications/new/step/9')} // Go to Review
+                    onClick={() => router.push('/farmer/applications/new/step/11')}
                     disabled={!allChecked}
-                    className={`
-                        px-8 py-3 rounded-xl font-semibold shadow-lg transition-all transform
+                    className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all
                         ${allChecked
-                            ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:shadow-xl hover:-translate-y-0.5'
-                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        }
-                    `}
+                            ? 'bg-[#00695C] text-white hover:bg-[#00796B]'
+                            : 'bg-[#CFD8DC] text-[#90A4AE] cursor-not-allowed'
+                        }`}
                 >
-                    ยืนยันและดำเนินการต่อ (Next) →
+                    ยืนยันและดำเนินการต่อ
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                 </button>
             </div>
         </div>

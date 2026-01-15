@@ -169,7 +169,7 @@ async function main() {
         console.log('\n--- 2. Submitting Application ---');
         let appRes;
         try {
-            appRes = await axios.post(`${API_URL}/applications/draft`, {
+            appRes = await axios.post(`${API_URL}/applications/submit`, {
                 plantId: 'P001',
                 plantName: 'Cannabis',
                 serviceType: 'CERTIFICATION',

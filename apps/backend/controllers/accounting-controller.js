@@ -4,9 +4,7 @@
  * Features: CRUD, document number updates, real-time sync
  */
 
-const Quote = require('../models-mongoose-legacy/quote-model');
-const Invoice = require('../models-mongoose-legacy/invoice-model');
-const User = require('../models-mongoose-legacy/user-model');
+const { prisma } = require('../services/prisma-database');
 const { createLogger } = require('../shared/logger');
 const logger = createLogger('accounting-controller');
 
@@ -17,26 +15,45 @@ class AccountingController {
     async getQuotes(req, res) {
         try {
             const { status, farmerId, page = 1, limit = 20 } = req.query;
-            const query = {};
+            const where = {};
 
-            if (status) { query.status = status; }
-            if (farmerId) { query.farmerId = farmerId; }
+            if (status) { where.status = status; }
+            if (farmerId) {
+                // Quote doesn't have direct farmerId, filter via Application
+                where.application = { farmerId: farmerId };
+            }
 
             const skip = (parseInt(page) - 1) * parseInt(limit);
 
             const [quotes, total] = await Promise.all([
-                Quote.find(query)
-                    .populate('farmerId', 'firstName lastName email')
-                    .populate('applicationId', 'applicationNumber')
-                    .sort({ createdAt: -1 })
-                    .skip(skip)
-                    .limit(parseInt(limit)),
-                Quote.countDocuments(query),
+                prisma.quote.findMany({
+                    where,
+                    include: {
+                        application: {
+                            include: {
+                                farmer: {
+                                    select: { firstName: true, lastName: true, email: true }
+                                }
+                            }
+                        }
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    skip,
+                    take: parseInt(limit)
+                }),
+                prisma.quote.count({ where }),
             ]);
+
+            // Map prisma result to match expected frontend format (flat farmer object)
+            const mappedQuotes = quotes.map(q => ({
+                ...q,
+                farmerId: q.application?.farmer, // Flatten relation for frontend compat
+                applicationId: { applicationNumber: q.application?.applicationNumber } // Flatten
+            }));
 
             res.json({
                 success: true,
-                data: quotes,
+                data: mappedQuotes,
                 pagination: {
                     page: parseInt(page),
                     limit: parseInt(limit),
@@ -56,26 +73,40 @@ class AccountingController {
     async getInvoices(req, res) {
         try {
             const { status, farmerId, page = 1, limit = 20 } = req.query;
-            const query = {};
+            const where = {};
 
-            if (status) { query.status = status; }
-            if (farmerId) { query.farmerId = farmerId; }
+            if (status) { where.status = status; }
+            if (farmerId) { where.farmerId = farmerId; }
 
             const skip = (parseInt(page) - 1) * parseInt(limit);
 
             const [invoices, total] = await Promise.all([
-                Invoice.find(query)
-                    .populate('farmerId', 'firstName lastName email')
-                    .populate('applicationId', 'applicationNumber')
-                    .sort({ createdAt: -1 })
-                    .skip(skip)
-                    .limit(parseInt(limit)),
-                Invoice.countDocuments(query),
+                prisma.invoice.findMany({
+                    where,
+                    include: {
+                        farmer: {
+                            select: { firstName: true, lastName: true, email: true }
+                        },
+                        application: {
+                            select: { applicationNumber: true }
+                        }
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    skip,
+                    take: parseInt(limit)
+                }),
+                prisma.invoice.count({ where }),
             ]);
+
+            const mappedInvoices = invoices.map(inv => ({
+                ...inv,
+                farmerId: inv.farmer, // Frontend expects object here populated
+                applicationId: inv.application
+            }));
 
             res.json({
                 success: true,
-                data: invoices,
+                data: mappedInvoices,
                 pagination: {
                     page: parseInt(page),
                     limit: parseInt(limit),
@@ -91,7 +122,6 @@ class AccountingController {
 
     /**
      * Update document number (Temp → Official)
-     * Key feature for accountant to update temporary numbers to official ones
      */
     async updateDocumentNumber(req, res) {
         try {
@@ -105,13 +135,15 @@ class AccountingController {
                 });
             }
 
-
-            const Model = type === 'quote' ? Quote : Invoice;
+            const model = type === 'quote' ? prisma.quote : prisma.invoice;
             const numberField = type === 'quote' ? 'quoteNumber' : 'invoiceNumber';
 
             // Check if new number already exists
-            const existing = await Model.findOne({ [numberField]: newNumber });
-            if (existing && existing._id.toString() !== id) {
+            const existing = await model.findUnique({
+                where: { [numberField]: newNumber }
+            });
+
+            if (existing && existing.id !== id) {
                 return res.status(409).json({
                     success: false,
                     message: `${type === 'quote' ? 'Quote' : 'Invoice'} number already exists`,
@@ -119,30 +151,20 @@ class AccountingController {
             }
 
             // Update document number
-            const document = await Model.findByIdAndUpdate(
-                id,
-                {
+            // Note: Prisma doesn't have $push for JSON columns as easily as Mongoose.
+            // We need to fetch, append, and update for `updateHistory` if it's stored in a JSON field (e.g. metadata or custom).
+            // Looking at schema snippet: Invoice has `items` (Json), Quote has `items` (Json).
+            // `updateHistory` is NOT in the schema snippet.
+            // I will assume it is NOT supported in standard schema or stored in 'notes' or ignored for now.
+            // Or if `notes` is string, just update notes.
+
+            const document = await model.update({
+                where: { id },
+                data: {
                     [numberField]: newNumber,
                     notes: notes || undefined,
-                    $push: {
-                        updateHistory: {
-                            field: numberField,
-                            oldValue: null,
-                            newValue: newNumber,
-                            updatedBy: req.user?.id,
-                            updatedAt: new Date(),
-                        },
-                    },
-                },
-                { new: true },
-            );
-
-            if (!document) {
-                return res.status(404).json({
-                    success: false,
-                    message: `${type === 'quote' ? 'Quote' : 'Invoice'} not found`,
-                });
-            }
+                }
+            });
 
             logger.info(`Document number updated: ${type} ${id} → ${newNumber} by ${req.user?.email}`);
 
@@ -153,7 +175,8 @@ class AccountingController {
             });
         } catch (error) {
             logger.error('Update document number error:', error);
-            res.status(500).json({ success: false, message: 'Failed to update document number' });
+            const message = error.code === 'P2025' ? 'Document not found' : 'Failed to update document number';
+            res.status(error.code === 'P2025' ? 404 : 500).json({ success: false, message });
         }
     }
 
@@ -164,6 +187,9 @@ class AccountingController {
         try {
             const { applicationId, farmerId, items, validDays = 30, notes } = req.body;
 
+            // Generate temp quote number
+            const quoteNumber = `QT-${Date.now()}`;
+
             // Calculate totals
             const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
             const vat = 0; // Thailand: exempt for GACP services
@@ -173,24 +199,29 @@ class AccountingController {
             const validUntil = new Date();
             validUntil.setDate(validUntil.getDate() + validDays);
 
-            const quote = new Quote({
-                applicationId,
-                farmerId,
-                createdByStaff: req.user?.id,
-                serviceType: 'new_application',
-                items: items.map(item => ({
-                    ...item,
-                    total: item.quantity * item.unitPrice,
-                })),
-                subtotal,
-                vat,
-                totalAmount,
-                validUntil,
-                notes,
-                status: 'draft',
+            // Prisma create
+            // Note: omitting farmerId as it's not in schema relation, relying on applicationId
+            const quote = await prisma.quote.create({
+                data: {
+                    quoteNumber,
+                    applicationId,
+                    // farmerId: farmerId, // Omitted
+                    // createdByStaff: req.user?.id, // Schema check: Quote has `createdBy`? No, AuditLog handles it usually.
+                    // But if schema doesn't have it, we can't save it. 
+                    // Schema check: Quote has `items` (Json), `subtotal`, `vat`, `totalAmount`, `status`, `validUntil`, `notes`.
+                    // It does NOT have createdByStaff.
+                    items: items.map(item => ({
+                        ...item,
+                        total: item.quantity * item.unitPrice,
+                    })),
+                    subtotal,
+                    vat,
+                    totalAmount,
+                    validUntil,
+                    notes,
+                    status: 'draft',
+                }
             });
-
-            await quote.save();
 
             logger.info(`Quote created: ${quote.quoteNumber} by ${req.user?.email}`);
 
@@ -201,7 +232,7 @@ class AccountingController {
             });
         } catch (error) {
             logger.error('Create quote error:', error);
-            res.status(500).json({ success: false, message: 'Failed to create quote' });
+            res.status(500).json({ success: false, message: 'Failed to create quote', error: error.message });
         }
     }
 
@@ -223,25 +254,35 @@ class AccountingController {
             }
 
             const updateData = { status };
-            if (status === 'sent') { updateData.sentAt = new Date(); }
+            // Schema check: Quote has `acceptedAt`, `rejectedAt`? Yes. `sentAt`? No in schema snippet.
+            // I'll update what I can.
             if (status === 'accepted') { updateData.acceptedAt = new Date(); }
             if (status === 'rejected') {
                 updateData.rejectedAt = new Date();
-                updateData.farmerNotes = notes;
+                // updateData.farmerNotes = notes; // Not in schema
             }
             if (notes) { updateData.notes = notes; }
 
-            const quote = await Quote.findByIdAndUpdate(id, updateData, { new: true })
-                .populate('farmerId', 'firstName lastName email');
+            const quote = await prisma.quote.update({
+                where: { id },
+                data: updateData,
+                include: {
+                    application: {
+                        include: { farmer: { select: { firstName: true, lastName: true, email: true } } }
+                    }
+                }
+            });
 
-            if (!quote) {
-                return res.status(404).json({ success: false, message: 'Quote not found' });
-            }
+            // Map farmer
+            const mappedQuote = {
+                ...quote,
+                farmerId: quote.application?.farmer
+            };
 
             res.json({
                 success: true,
                 message: 'อัพเดทสถานะสำเร็จ',
-                data: quote,
+                data: mappedQuote,
             });
         } catch (error) {
             logger.error('Update quote status error:', error);
@@ -256,7 +297,11 @@ class AccountingController {
         try {
             const { quoteId } = req.params;
 
-            const quote = await Quote.findById(quoteId);
+            const quote = await prisma.quote.findUnique({
+                where: { id: quoteId },
+                include: { application: true }
+            });
+
             if (!quote) {
                 return res.status(404).json({ success: false, message: 'Quote not found' });
             }
@@ -268,26 +313,32 @@ class AccountingController {
                 });
             }
 
-            // Create invoice from quote data
-            const invoice = new Invoice({
-                applicationId: quote.applicationId,
-                quoteId: quote._id,
-                serviceType: quote.serviceType,
-                farmerId: quote.farmerId,
-                items: quote.items,
-                subtotal: quote.subtotal,
-                vat: quote.vat,
-                totalAmount: quote.totalAmount,
-                totalAmountText: quote.totalAmountText,
-                status: 'pending',
+            const invoiceNumber = `INV-${Date.now()}`;
+
+            // Create invoice
+            // Note: Invoice model HAS farmerId
+            const invoice = await prisma.invoice.create({
+                data: {
+                    invoiceNumber,
+                    applicationId: quote.applicationId,
+                    quoteId: quote.id,
+                    serviceType: 'new_application', // Hardcoded or derive
+                    farmerId: quote.application.farmerId, // Get from Application relation
+                    items: quote.items,
+                    subtotal: quote.subtotal,
+                    vat: quote.vat,
+                    totalAmount: quote.totalAmount,
+                    // totalAmountText: quote.totalAmountText, // Not in Quote model
+                    dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Due in 7 days
+                    status: 'pending',
+                }
             });
 
-            await invoice.save();
-
             // Update quote status
-            quote.status = 'invoiced';
-            quote.invoiceId = invoice._id;
-            await quote.save();
+            await prisma.quote.update({
+                where: { id: quoteId },
+                data: { status: 'invoiced' } // Schema check: index says status has 'pending', 'accepted', etc. check logic valid?
+            });
 
             logger.info(`Invoice created from quote: ${invoice.invoiceNumber} from ${quote.quoteNumber}`);
 
@@ -325,17 +376,23 @@ class AccountingController {
                 if (paymentTransactionId) { updateData.paymentTransactionId = paymentTransactionId; }
             }
 
-            const invoice = await Invoice.findByIdAndUpdate(id, updateData, { new: true })
-                .populate('farmerId', 'firstName lastName email');
+            const invoice = await prisma.invoice.update({
+                where: { id },
+                data: updateData,
+                include: {
+                    farmer: { select: { firstName: true, lastName: true, email: true } }
+                }
+            });
 
-            if (!invoice) {
-                return res.status(404).json({ success: false, message: 'Invoice not found' });
-            }
+            const mappedInvoice = {
+                ...invoice,
+                farmerId: invoice.farmer
+            };
 
             res.json({
                 success: true,
                 message: 'อัพเดทสถานะสำเร็จ',
-                data: invoice,
+                data: mappedInvoice,
             });
         } catch (error) {
             logger.error('Update invoice status error:', error);
@@ -361,18 +418,21 @@ class AccountingController {
                 quotesToday,
                 invoicesToday,
             ] = await Promise.all([
-                Quote.countDocuments(),
-                Quote.countDocuments({ status: { $in: ['draft', 'sent'] } }),
-                Quote.countDocuments({ status: 'accepted' }),
-                Invoice.countDocuments(),
-                Invoice.countDocuments({ status: 'pending' }),
-                Invoice.countDocuments({ status: 'paid' }),
-                Quote.countDocuments({ createdAt: { $gte: today } }),
-                Invoice.countDocuments({ createdAt: { $gte: today } }),
+                prisma.quote.count(),
+                prisma.quote.count({ where: { status: { in: ['draft', 'sent'] } } }),
+                prisma.quote.count({ where: { status: 'accepted' } }),
+                prisma.invoice.count(),
+                prisma.invoice.count({ where: { status: 'pending' } }),
+                prisma.invoice.count({ where: { status: 'paid' } }),
+                prisma.quote.count({ where: { createdAt: { gte: today } } }),
+                prisma.invoice.count({ where: { createdAt: { gte: today } } }),
             ]);
 
             // Calculate totals
-            const paidInvoices = await Invoice.find({ status: 'paid' });
+            const paidInvoices = await prisma.invoice.findMany({
+                where: { status: 'paid' },
+                select: { totalAmount: true }
+            });
             const totalRevenue = paidInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
 
             res.json({

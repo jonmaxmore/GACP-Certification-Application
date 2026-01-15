@@ -19,6 +19,17 @@ export interface Application {
         location?: string;
         scheduledDate?: string; // Legacy or redundant, keeping for safe measure
     };
+    // [NEW] Expanded fields for UI
+    fees?: {
+        phase1?: { items: { description: string; amount: number }[] };
+        phase2?: { items: { description: string; amount: number }[] };
+    };
+    applicantData?: {
+        firstName?: string;
+        lastName?: string;
+        address?: string;
+        [key: string]: any;
+    };
 }
 
 export interface DashboardStats {

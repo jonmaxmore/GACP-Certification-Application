@@ -13,6 +13,8 @@
  * @version 2.0.0
  */
 
+import { apiClient } from '../api/api-client';
+
 // Storage keys - centralized to prevent typos
 const STORAGE_KEYS = {
     ACCESS_TOKEN: 'accessToken',
@@ -47,6 +49,8 @@ export interface AuthUser {
     address?: string;
     province?: string;
     companyName?: string;
+    phone?: string;
+    applicantType?: string;
     [key: string]: unknown;
 }
 
@@ -97,6 +101,92 @@ class AuthServiceClass {
 
     constructor(config: Partial<AuthConfig> = {}) {
         this.config = { ...DEFAULT_CONFIG, ...config };
+    }
+
+    // ==================== API ACTIONS ====================
+
+    /**
+     * Login with centralized API client
+     */
+    async login(credentials: { identifier: string; password: string; accountType?: string }): Promise<{ success: boolean; error?: string }> {
+        try {
+            const response = await apiClient.post<SessionData>('/auth-farmer/login', credentials);
+
+            if (!response.success || !response.data) {
+                return {
+                    success: false,
+                    error: response.error || 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง'
+                };
+            }
+
+            const data = response.data;
+            const token = data.tokens?.accessToken || data.token || data.accessToken;
+
+            if (!token) {
+                return { success: false, error: 'ไม่ได้รับ Token จากระบบ' };
+            }
+
+            // Auto-save session
+            this.saveSession({
+                ...data,
+                token
+            });
+
+            return { success: true };
+        } catch (error) {
+            console.error('[AuthService] Login failed:', error);
+            return { success: false, error: 'เกิดข้อผิดพลาดในการเชื่อมต่อ' };
+        }
+    }
+
+    /**
+     * Register new farmer
+     */
+    async register(data: unknown): Promise<{ success: boolean; error?: string; data?: unknown }> {
+        try {
+            const response = await apiClient.post<{ user: AuthUser }>('/auth-farmer/register', data);
+
+            if (!response.success) {
+                return { success: false, error: response.error };
+            }
+
+            return { success: true, data: response.data };
+        } catch (error) {
+            console.error('[AuthService] Register failed:', error);
+            return { success: false, error: 'เกิดข้อผิดพลาดในการเชื่อมต่อ' };
+        }
+    }
+
+    /**
+     * Check if identifier exists
+     */
+    async checkIdentifier(identifier: string, accountType: string): Promise<{ available: boolean; error?: string }> {
+        try {
+            const response = await apiClient.post<{ available: boolean; error?: string }>('/auth-farmer/check-identifier', {
+                identifier,
+                accountType
+            });
+
+            if (!response.success) {
+                return { available: false, error: response.error };
+            }
+
+            // API returns success: true even if available: false
+            // The available flag is inside data if success is true?
+            // Checking api-client wrapper response structure vs controller response
+            // Controller returns: { success: true, available: false, error: "..." }
+            // ApiClient returns: { success: true, data: { available, error } }
+
+            const result = response.data;
+            if (!result) return { available: false, error: 'No data' };
+
+            return {
+                available: !!result.available,
+                error: result.error
+            };
+        } catch (error) {
+            return { available: false, error: 'Connection Error' };
+        }
     }
 
     /**
@@ -216,7 +306,8 @@ class AuthServiceClass {
         if (accessToken) {
             localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
             // Sync cookie for middleware
-            document.cookie = `auth_token=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+            const isSecure = window.location.protocol === 'https:';
+            document.cookie = `auth_token=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}`;
         }
 
         if (refreshToken) {
@@ -381,7 +472,8 @@ class AuthServiceClass {
 
             if (data.success && data.data?.accessToken) {
                 localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, data.data.accessToken);
-                document.cookie = `auth_token=${data.data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+                const isSecure = window.location.protocol === 'https:';
+                document.cookie = `auth_token=${data.data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}`;
 
                 // Schedule next refresh
                 this.scheduleTokenRefresh();

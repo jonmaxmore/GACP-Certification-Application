@@ -54,13 +54,11 @@ export const StepHarvest = () => {
     const showNextButtonError = !isValid && Object.values(touched).some(t => t);
 
     return (
-        <div className="space-y-8 animate-fadeIn">
-            <div className="text-center">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-800 bg-clip-text text-transparent">
-                    การเก็บเกี่ยวและจัดการหลังการเก็บเกี่ยว
-                </h2>
-                <h3 className="text-xl text-gray-500 mt-2 font-medium">Harvest & Post-Harvest Handling</h3>
-                <p className="text-gray-400 mt-1 text-sm">ระบุวิธีการจัดการผลผลิตเพื่อป้องกันการปนเปื้อน (Contamination Control)</p>
+        <div className="space-y-6">
+            {/* Official Header */}
+            <div className="border-l-4 border-[#00695C] pl-4 mb-6">
+                <h2 className="text-xl font-bold text-[#263238]">การเก็บเกี่ยวและจัดการหลังการเก็บเกี่ยว</h2>
+                <p className="text-sm text-[#546E7A]">Harvest & Post-Harvest Handling - ระบุวิธีการจัดการผลผลิต</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -327,16 +325,19 @@ export const StepHarvest = () => {
                 </div>
             </div>
 
-            <div className="pt-6 border-t flex justify-between items-center">
+            <div className="pt-6 border-t border-[#CFD8DC] flex justify-between items-center">
                 <button
-                    onClick={() => router.push('/farmer/applications/new/step/5')}
-                    className="px-6 py-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
+                    onClick={() => router.push('/farmer/applications/new/step/7')}
+                    className="px-6 py-2.5 rounded-lg border-2 border-[#00695C] text-[#00695C] font-semibold hover:bg-[#E0F2F1] transition-colors flex items-center gap-2"
                 >
-                    ← ย้อนกลับ (Back)
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+                    </svg>
+                    ย้อนกลับ
                 </button>
 
                 {showNextButtonError && (
-                    <span className="text-sm text-red-500 font-medium animate-pulse">
+                    <span className="text-sm text-[#C62828] font-medium">
                         * กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน
                     </span>
                 )}
@@ -345,17 +346,20 @@ export const StepHarvest = () => {
                     onClick={() => {
                         const allTouched = Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {});
                         setTouched(allTouched);
-                        if (isValid) router.push('/farmer/applications/new/step/7');
+                        if (isValid) router.push('/farmer/applications/new/step/9');
                     }}
                     className={`
-                        px-8 py-3 rounded-xl font-semibold shadow-lg transition-all transform
+                        px-6 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2
                         ${isValid
-                            ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:shadow-xl hover:-translate-y-0.5'
-                            : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-70'
+                            ? 'bg-[#00695C] text-white hover:bg-[#004D40] shadow-md hover:shadow-lg'
+                            : 'bg-[#CFD8DC] text-[#90A4AE] cursor-not-allowed'
                         }
                     `}
                 >
-                    ถัดไป (Next) →
+                    ดำเนินการต่อ
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                    </svg>
                 </button>
             </div>
         </div>

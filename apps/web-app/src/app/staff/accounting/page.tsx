@@ -132,7 +132,7 @@ export default function AccountingDashboard() {
             // We can hardcode specific dev/prod logic or just use relative if proxy was set up (it isn't for /uploads).
             // Using direct port 5000 for now or relying on Next.js env.
             // A robust way: use the API base and strip '/api'
-            return `http://localhost:5000/uploads/${match[1]}`;
+            return `http://localhost:8000/uploads/${match[1]}`;
         }
         return null;
     };

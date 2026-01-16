@@ -9,7 +9,7 @@ import { cookies } from 'next/headers';
 import { getSession } from './users';
 import type { SafeApplicationDTO } from './types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 /**
  * Get applications for current user

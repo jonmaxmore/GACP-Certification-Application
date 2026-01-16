@@ -40,10 +40,26 @@ export const IconCreditCard = ({ color = "currentColor", size = 24, className }:
     </svg>
 );
 
+export const IconPayment = ({ color = "currentColor", size = 24, className }: IconProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <rect x="3" y="6" width="18" height="12" rx="2" />
+        <path d="M3 10h18" />
+        <circle cx="8" cy="15" r="1" />
+        <circle cx="16" cy="15" r="1" />
+    </svg>
+);
+
 export const IconUser = ({ color = "currentColor", size = 24, className }: IconProps) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
         <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
         <circle cx="12" cy="7" r="4" />
+    </svg>
+);
+
+export const IconCamera = ({ color = "currentColor", size = 24, className }: IconProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+        <circle cx="12" cy="13" r="4" />
     </svg>
 );
 
@@ -484,7 +500,7 @@ export const Icons = {
 
     Document: IconDocument,
     Compass: IconCompass,
-    CreditCard: IconCreditCard,
+    Payment: IconPayment,
     User: IconUser,
     // Actions
     Sun: IconSun,

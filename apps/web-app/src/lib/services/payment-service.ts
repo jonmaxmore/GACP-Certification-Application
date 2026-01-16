@@ -1,4 +1,5 @@
 import { api } from "../api/api-client";
+import { AuthService } from "./auth-service";
 
 export interface PaymentRecord {
     id: string;
@@ -12,17 +13,38 @@ export interface PaymentRecord {
     serviceType?: string; // APPLICATION_FEE, AUDIT_FEE
 }
 
+interface ApiResponse {
+    success: boolean;
+    data: InvoiceData[] | { data: InvoiceData[] } | InvoiceData;
+}
+
+interface InvoiceData {
+    id: string;
+    documentNumber?: string;
+    invoiceNumber?: string;
+    applicationId?: string;
+    application?: { id: string; applicationNumber?: string };
+    amount?: number;
+    totalAmount?: number;
+    status: string;
+    createdAt: string;
+    paidAt?: string;
+    serviceType?: string;
+}
+
 export const PaymentService = {
     /**
      * Fetch user's payments and map to frontend model
      */
     async getMyPayments(): Promise<PaymentRecord[]> {
-        const result = await api.get<any[]>("/invoices/my");
+        const result = await api.get<ApiResponse>("/invoices/my");
         if (!result.success || !result.data) return [];
 
-        const invoices = Array.isArray(result.data) ? result.data : (result.data as any).data || (result.data as any) || [];
+        const invoices = Array.isArray(result.data) ? result.data : 
+            (result.data as { data: InvoiceData[] }).data || 
+            [result.data as unknown as InvoiceData];
 
-        return invoices.map((inv: any) => {
+        return invoices.map((inv: InvoiceData) => {
             // Map status
             let status = "PENDING";
             if (inv.status === "paid" || inv.status === "PAID") status = "APPROVED";
@@ -36,7 +58,7 @@ export const PaymentService = {
             let sType = inv.serviceType;
             if (!sType) {
                 // Infer from amount if missing (Legacy support)
-                sType = inv.totalAmount <= 5000 ? 'APPLICATION_FEE' : 'AUDIT_FEE';
+                sType = (inv.totalAmount || 0) <= 5000 ? 'APPLICATION_FEE' : 'AUDIT_FEE';
             }
 
             return {
@@ -86,20 +108,8 @@ export const PaymentService = {
         // Our api-client attaches headers.
 
         try {
-            const response = await api.get<Blob>(`/invoices/${invoiceId}/pdf`, {
-                headers: { 'Accept': 'application/pdf' }
-            });
-
-            // api-client usually returns JSON parsed. We need blob.
-            // The api-client `request` method parses JSON by default: 
-            // const data = await response.json(); 
-            // This is a problem for binary data.
-
             // WORKAROUND: Use direct fetch with auth token for this specific binary call
-            // OR modify api-client to handle blobs (too risky given context).
-
-            // Let's use direct native fetch here using AuthService token
-            const { AuthService } = require('../services/auth-service'); // Lazy import to avoid cycle if any
+            // The api-client parses JSON by default, which doesn't work for binary data
             const token = AuthService.getToken();
 
             const res = await fetch(`/api/invoices/${invoiceId}/pdf`, {

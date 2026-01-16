@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   authors: [{ name: "GACP Platform" }],
   creator: "GACP Platform",
   publisher: "GACP Platform",
-  formatDetection: { email: "support@gacp-platform.com" },
+  formatDetection: { email: true },
   metadataBase: new URL("https://gacp-platform.com"),
   alternates: {
     canonical: "https://gacp-platform.com",
@@ -76,11 +76,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: {
-      other: {
-        content: "your-google-verification-code",
-      },
-    },
+    google: "your-google-verification-code",
   },
 };
 

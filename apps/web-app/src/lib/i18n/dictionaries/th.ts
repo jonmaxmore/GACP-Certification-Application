@@ -152,6 +152,7 @@ export const th: Dictionary = {
         general: {
             title: "ข้อมูลผู้ยื่นคำขอ",
             subtitle: "กรุณาระบุข้อมูลของผู้ยื่นคำขอให้ครบถ้วน",
+            infoHeader: "ข้อมูลผู้สมัคร",
             applicantName: "ชื่อ-นามสกุล ผู้ยื่นคำขอ",
             firstName: "ชื่อ",
             lastName: "นามสกุล",

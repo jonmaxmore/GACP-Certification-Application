@@ -51,7 +51,7 @@ export function validateThaiIdCard(idCard: string): { valid: boolean; error?: st
         sum += digits[i] * weights[i];
     }
 
-    let checkDigit = (11 - (sum % 11)) % 10;
+    const checkDigit = (11 - (sum % 11)) % 10;
 
     // Compare with last digit
     if (checkDigit !== digits[12]) {

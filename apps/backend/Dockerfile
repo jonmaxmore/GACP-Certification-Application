@@ -44,14 +44,14 @@ RUN mkdir -p uploads logs certificates
 
 # Set environment
 ENV NODE_ENV=production
-ENV PORT=5000
+ENV PORT=8000
 
 # Expose port (internal only - not accessible from public)
-EXPOSE 5000
+EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:5000/health || exit 1
+  CMD curl -f http://localhost:8000/health || exit 1
 
 # Start with dumb-init for proper signal handling
 ENTRYPOINT ["dumb-init", "--"]

@@ -1,0 +1,51 @@
+/* GACP Platform - Global Styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font Variables */
+:root {
+  --font-kanit: var(--font-kanit);
+  --font-sarabun: var(--font-sarabun);
+  --font-inter: var(--font-inter);
+}
+
+/* Base Styles - เฉพาะที่ Tailwind ทำไม่ได้ */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-kanit), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Thai Language Support */
+.thai-text {
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+}
+
+/* Custom Animations */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

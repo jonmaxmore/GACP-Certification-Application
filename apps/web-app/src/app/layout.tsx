@@ -83,8 +83,6 @@ export const metadata: Metadata = {
     },
   },
 };
-  description: "กรมการแพทย์แผนไทยและการแพทย์ทางเลือก",
-};
 
 export default function RootLayout({
   children,

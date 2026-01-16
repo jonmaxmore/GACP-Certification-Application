@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 console.log(`\n🐛 [DEBUG] Frontend Server (Next.js) loading config...`);
-const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const backendUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 console.log(`🐛 [DEBUG] Target Backend URL: ${backendUrl}\n`);
 
 const nextConfig: NextConfig = {

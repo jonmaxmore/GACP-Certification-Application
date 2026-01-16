@@ -7,9 +7,23 @@
 
 const { PrismaClient } = require('@prisma/client');
 
+function redactDatabaseUrl(url) {
+    if (!url || typeof url !== 'string') return url;
+    try {
+        const parsed = new URL(url);
+        if (parsed.password) {
+            parsed.password = '***';
+        }
+        return parsed.toString();
+    } catch {
+        // Fallback redaction for non-standard URL strings
+        return url.replace(/:\/\/([^:\/]+):([^@]+)@/g, '://$1:***@');
+    }
+}
+
 // Singleton pattern for Prisma Client
 if (!global.prisma) {
-    console.log('PRISMA INIT - URL:', process.env.DATABASE_URL);
+    console.log('PRISMA INIT - URL:', redactDatabaseUrl(process.env.DATABASE_URL));
     global.prisma = new PrismaClient({
         log: ['query', 'info', 'warn', 'error'],
         datasources: {

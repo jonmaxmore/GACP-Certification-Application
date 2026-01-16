@@ -87,30 +87,47 @@ class AuthController {
 
             // Handle Prisma duplicate key error (P2002)
             let errorMessage = error.message;
+            let statusCode = 500;
+            
             if (error.code === 'P2002') {
                 const target = error.meta?.target || [];
                 const targetField = Array.isArray(target) ? target[0] : target;
+                statusCode = 400;
 
                 console.log('[AuthController] Duplicate Key Target:', targetField);
 
                 if (targetField === 'idCardHash' || targetField.includes('idCardHash')) {
-                    errorMessage = 'เลขบัตรประชาชนนี้ถูกลงทะเบียนแล้ว';
+                    errorMessage = 'เลขบัตรประชาชนนี้ถูกลงทะเบียนแล้ว กรุณาตรวจสอบข้อมูลหรือติดต่อผู้ดูแลระบบ';
                 } else if (targetField === 'taxIdHash' || targetField.includes('taxIdHash')) {
-                    errorMessage = 'เลขทะเบียนนิติบุคคลนี้ถูกลงทะเบียนแล้ว';
+                    errorMessage = 'เลขทะเบียนนิติบุคคลนี้ถูกลงทะเบียนแล้ว กรุณาตรวจสอบข้อมูลหรือติดต่อผู้ดูแลระบบ';
                 } else if (targetField === 'communityRegistrationNoHash' || targetField.includes('communityRegistrationNoHash')) {
-                    errorMessage = 'เลขทะเบียนวิสาหกิจชุมชนนี้ถูกลงทะเบียนแล้ว';
+                    errorMessage = 'เลขทะเบียนวิสาหกิจชุมชนนี้ถูกลงทะเบียนแล้ว กรุณาตรวจสอบข้อมูลหรือติดต่อผู้ดูแลระบบ';
                 } else if (targetField === 'phoneNumber' || targetField.includes('phoneNumber')) {
-                    errorMessage = 'เบอร์โทรศัพท์นี้ถูกใช้งานแล้ว';
+                    errorMessage = 'เบอร์โทรศัพท์นี้ถูกใช้งานแล้ว กรุณาใช้เบอร์อื่นหรือติดต่อผู้ดูแลระบบ';
                 } else if (targetField === 'email' || targetField.includes('email')) {
-                    errorMessage = 'อีเมลนี้ถูกใช้งานแล้ว';
+                    errorMessage = 'อีเมลนี้ถูกใช้งานแล้ว กรุณาใช้อีเมลอื่นหรือติดต่อผู้ดูแลระบบ';
                 } else {
-                    errorMessage = 'ข้อมูลนี้ถูกลงทะเบียนในระบบแล้ว';
+                    errorMessage = 'ข้อมูลนี้ถูกลงทะเบียนในระบบแล้ว กรุณาตรวจสอบข้อมูลหรือติดต่อผู้ดูแลระบบ';
                 }
+            } else if (error.message.includes('Invalid file format')) {
+                statusCode = 400;
+                errorMessage = 'รูปแบบไฟล์ไม่ถูกต้อง กรุณาอัปโหลดไฟล์รูปภาพ (JPG, PNG) ที่มีขนาดไม่เกิน 5MB';
+            } else if (error.message.includes('File too large')) {
+                statusCode = 400;
+                errorMessage = 'ไฟล์มีขนาดใหญ่เกินไป กรุณาอัปโหลดไฟล์ที่มีขนาดไม่เกิน 5MB';
+            } else if (error.message.includes('Database connection')) {
+                errorMessage = 'เซิร์ฟเวอร์มีปัญหาในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่ในภายหลัง';
+            } else if (error.message.includes('Network')) {
+                errorMessage = 'เครือข่ายมีปัญหา กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตและลองใหม่';
+            } else {
+                errorMessage = 'การลงทะเบียนล้มเหลว กรุณาลองใหม่อีกครั้ง หากยังไม่สำเร็จกรุณาติดต่อผู้ดูแลระบบ';
             }
 
-            res.status(400).json({
+            res.status(statusCode).json({
                 success: false,
                 error: errorMessage,
+                timestamp: new Date().toISOString(),
+                requestId: req.id || 'unknown'
             });
         }
     }
@@ -193,21 +210,36 @@ class AuthController {
                 console.error('[AuthController] Audit Log Error:', auditError.message);
             }
 
-            // Return 401 for known auth errors
+            // Enhanced error messages
+            let errorMessage = 'ระบบเกิดข้อผิดพลาด กรุณาลองใหม่';
+            let statusCode = 500;
+
             if (error.message === 'ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง' ||
                 error.message === 'บัญชีถูกระงับการใช้งาน' ||
                 error.message === 'Identifier and password are required' ||
                 error.message === 'Invalid credentials') {
-                return res.status(401).json({
-                    success: false,
-                    error: 'ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง', // Normalized Thai Error
-                });
+                statusCode = 401;
+                errorMessage = 'ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบข้อมูลและลองใหม่';
+            } else if (error.message.includes('Account locked')) {
+                statusCode = 423;
+                errorMessage = 'บัญชีถูกระงับการใช้งานชั่วคราว เนื่องจากพยายามเข้าสู่ระบบหลายครั้ง กรุณารอ 15 นาทีแล้วลองใหม่';
+            } else if (error.message.includes('Database connection')) {
+                errorMessage = 'เซิร์ฟเวอร์มีปัญหาในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่ในภายหลัง';
+            } else if (error.message.includes('Network')) {
+                errorMessage = 'เครือข่ายมีปัญหา กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตและลองใหม่';
+            } else if (error.message.includes('Rate limit')) {
+                statusCode = 429;
+                errorMessage = 'คุณพยายามเข้าสู่ระบบหลายครั้งเกินไป กรุณารอสักครู่แล้วลองใหม่';
+            } else if (error.message.includes('Service unavailable')) {
+                statusCode = 503;
+                errorMessage = 'บริการชั่วคราวไม่สามารถใช้งานได้ กรุณาลองใหม่ในภายหลัง';
             }
 
-            res.status(500).json({
+            res.status(statusCode).json({
                 success: false,
-                error: 'ระบบเกิดข้อผิดพลาด กรุณาลองใหม่',
-                // stack: error.stack // Hide stack in production/fixes
+                error: errorMessage,
+                timestamp: new Date().toISOString(),
+                requestId: req.id || 'unknown'
             });
         }
     }
@@ -215,7 +247,11 @@ class AuthController {
     async getMe(req, res) {
         try {
             if (!req.user || !req.user.id) {
-                return res.status(401).json({ success: false, error: 'Unauthorized' });
+                return res.status(401).json({ 
+                    success: false, 
+                    error: 'ไม่ได้รับอนุญาตให้เข้าใช้งาน กรุณาเข้าสู่ระบบใหม่',
+                    code: 'UNAUTHORIZED'
+                });
             }
             const user = await AuthService.getProfile(req.user.id);
             res.status(200).json({
@@ -223,7 +259,26 @@ class AuthController {
                 data: user,
             });
         } catch (error) {
-            res.status(500).json({ success: false, error: 'Server Error' });
+            console.error('[AuthController] Get Profile Error:', error.message);
+            let errorMessage = 'ไม่สามารถดึงข้อมูลผู้ใช้งานได้ กรุณาลองใหม่';
+            let statusCode = 500;
+            
+            if (error.message.includes('User not found')) {
+                statusCode = 404;
+                errorMessage = 'ไม่พบข้อมูลผู้ใช้งานนี้ในระบบ';
+            } else if (error.message.includes('Database connection')) {
+                errorMessage = 'เซิร์ฟเวอร์มีปัญหาในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่ในภายหลัง';
+            } else if (error.message.includes('Token expired')) {
+                statusCode = 401;
+                errorMessage = 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่';
+            }
+            
+            res.status(statusCode).json({ 
+                success: false, 
+                error: errorMessage,
+                timestamp: new Date().toISOString(),
+                requestId: req.id || 'unknown'
+            });
         }
     }
 
@@ -297,10 +352,24 @@ class AuthController {
 
         } catch (error) {
             console.error('[AuthController] Check Identifier Error:', error.message);
-            res.status(500).json({
+            let errorMessage = 'เซิร์ฟเวอร์มีปัญหา กรุณาลองใหม่';
+            let statusCode = 500;
+            
+            if (error.message.includes('Database connection')) {
+                errorMessage = 'เซิร์ฟเวอร์มีปัญหาในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่ในภายหลัง';
+            } else if (error.message.includes('Network')) {
+                errorMessage = 'เครือข่ายมีปัญหา กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตและลองใหม่';
+            } else if (error.message.includes('Rate limit')) {
+                statusCode = 429;
+                errorMessage = 'คุณตรวจสอบข้อมูลหลายครั้งเกินไป กรุณารอสักครู่แล้วลองใหม่';
+            }
+            
+            res.status(statusCode).json({
                 success: false,
-                error: 'Server Error',
+                error: errorMessage,
                 available: false,
+                timestamp: new Date().toISOString(),
+                requestId: req.id || 'unknown'
             });
         }
     }
@@ -318,10 +387,35 @@ class AuthController {
 
             const user = await AuthService.updateProfile(userId, updateData);
 
-            res.json({ success: true, data: user });
+            res.json({ 
+                success: true, 
+                data: user,
+                message: 'อัปเดตข้อมูลส่วนตัวสำเร็จ'
+            });
         } catch (error) {
             console.error('[AuthController] Update Profile Error:', error.message);
-            res.status(500).json({ success: false, error: 'Failed to update profile' });
+            let errorMessage = 'ไม่สามารถอัปเดตข้อมูลส่วนตัวได้ กรุณาลองใหม่';
+            let statusCode = 500;
+            
+            if (error.message.includes('User not found')) {
+                statusCode = 404;
+                errorMessage = 'ไม่พบข้อมูลผู้ใช้งานนี้ในระบบ';
+            } else if (error.message.includes('Database connection')) {
+                errorMessage = 'เซิร์ฟเวอร์มีปัญหาในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่ในภายหลัง';
+            } else if (error.message.includes('Invalid phone number')) {
+                statusCode = 400;
+                errorMessage = 'รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง กรุณากรอกเบอร์โทรศัพท์ 10 หลัก';
+            } else if (error.message.includes('Unauthorized')) {
+                statusCode = 401;
+                errorMessage = 'ไม่ได้รับอนุญาตให้แก้ไขข้อมูลนี้ กรุณาเข้าสู่ระบบใหม่';
+            }
+            
+            res.status(statusCode).json({ 
+                success: false, 
+                error: errorMessage,
+                timestamp: new Date().toISOString(),
+                requestId: req.id || 'unknown'
+            });
         }
     }
 }

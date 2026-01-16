@@ -103,6 +103,13 @@ model User {
   notifications Notification[]
   farms         Farm[]
 
+  // Profile Settings
+  privacySettings     Json? // { profileVisibility: "public", dataSharing: false, ... }
+  notificationSettings Json? // { email: true, sms: false, push: true, ... }
+  twoFactorSecret     String? // TOTP secret for 2FA
+  twoFactorEnabled    Boolean @default(false)
+  twoFactorBackupCodes Json? // Array of backup codes
+
   @@index([email])
   @@index([role, status])
   @@index([accountType])

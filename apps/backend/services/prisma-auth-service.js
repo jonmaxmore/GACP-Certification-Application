@@ -2,6 +2,8 @@ const { prisma } = require('./prisma-database');
 const bcrypt = require('bcryptjs');
 const jwtConfig = require('../config/jwt-security');
 
+const crypto = require('crypto');
+
 class PrismaAuthService {
     async register(data) {
         const { idCardImage, identifier, confirmPassword, ...userData } = data;
@@ -63,21 +65,43 @@ class PrismaAuthService {
     }
 
     async login(loginId, password, accountType) {
-        const user = await prisma.user.findFirst({
-            where: {
-                OR: [
-                    { email: loginId },
-                    { idCard: loginId },
-                ],
-            },
-        });
+        console.log('[AuthService] Login attempt:', { loginId, accountType });
+        
+        try {
+            const user = await prisma.user.findFirst({
+                where: {
+                    OR: [
+                        { email: loginId },
+                        { idCard: loginId },
+                    ],
+                },
+            });
 
-        if (!user || !await bcrypt.compare(password, user.password)) {
-            throw new Error('Invalid credentials');
+            console.log('[AuthService] User found:', user ? 'YES' : 'NO');
+            
+            if (!user) {
+                console.log('[AuthService] User not found');
+                throw new Error('ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง');
+            }
+
+            console.log('[AuthService] Comparing password...');
+            const passwordMatch = await bcrypt.compare(password, user.password);
+            console.log('[AuthService] Password match:', passwordMatch ? 'YES' : 'NO');
+
+            if (!passwordMatch) {
+                console.log('[AuthService] Password incorrect');
+                throw new Error('ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง');
+            }
+
+            console.log('[AuthService] Login successful for user:', user.id);
+            
+            const token = jwtConfig.generateToken({ id: user.id, role: user.accountType });
+            return { user, token };
+            
+        } catch (error) {
+            console.log('[AuthService] Login error:', error.message);
+            throw error;
         }
-
-        const token = jwtConfig.generateToken({ id: user.id, role: user.accountType });
-        return { user, token };
     }
 
     async getProfile(userId) {
@@ -92,9 +116,30 @@ class PrismaAuthService {
         });
     }
 
-    async checkIdentifierExists(identifier) {
-        // checks...
-        return false;
+    async checkIdentifierExists(identifier, accountType = 'INDIVIDUAL') {
+        const cleanId = (identifier || '').replace(/-/g, '');
+        if (!cleanId) {
+            return false;
+        }
+
+        const hashed = crypto.createHash('sha256').update(cleanId).digest('hex');
+        let where;
+
+        switch (accountType) {
+            case 'JURISTIC':
+                where = { taxIdHash: hashed };
+                break;
+            case 'COMMUNITY_ENTERPRISE':
+                where = { communityRegistrationNoHash: hashed };
+                break;
+            case 'INDIVIDUAL':
+            default:
+                where = { idCardHash: hashed };
+                break;
+        }
+
+        const existing = await prisma.user.findFirst({ where });
+        return !!existing;
     }
 }
 

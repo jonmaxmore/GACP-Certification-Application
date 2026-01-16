@@ -4,20 +4,20 @@
 # ===========================================
 # Stage 1: Dependencies
 # ===========================================
-FROM node:20-alpine AS deps
+FROM node:20-slim AS deps
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package manifest (avoid lockfile mismatch across OS for optional deps like lightningcss)
+COPY package.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # ===========================================
 # Stage 2: Builder
 # ===========================================
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
@@ -38,13 +38,13 @@ RUN npm run build
 # ===========================================
 # Stage 3: Production Runner
 # ===========================================
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 
 WORKDIR /app
 
 # Security: Run as non-root user
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+RUN groupadd -g 1001 nodejs && \
+    useradd -u 1001 -g nodejs -m nextjs
 
 # Set environment
 ENV NODE_ENV=production
@@ -67,7 +67,7 @@ USER nextjs
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+    CMD node -e "require('http').get('http://localhost:3000', r => process.exit(r.statusCode && r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1));"
 
 # Expose port
 EXPOSE 3000

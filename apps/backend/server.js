@@ -6,7 +6,19 @@
 
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
-console.log('SERVER STARTUP - DATABASE_URL:', process.env.DATABASE_URL);
+function redactDatabaseUrl(url) {
+    if (!url || typeof url !== 'string') return url;
+    try {
+        const parsed = new URL(url);
+        if (parsed.password) {
+            parsed.password = '***';
+        }
+        return parsed.toString();
+    } catch {
+        return url.replace(/:\/\/([^:\/]+):([^@]+)@/g, '://$1:***@');
+    }
+}
+console.log('SERVER STARTUP - DATABASE_URL:', redactDatabaseUrl(process.env.DATABASE_URL));
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');

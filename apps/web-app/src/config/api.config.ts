@@ -16,7 +16,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 // Port Configuration
 const PORTS = {
     FRONTEND: 3000,
-    BACKEND: 5000,
+    BACKEND: 3001,
 } as const;
 
 // Base URLs
@@ -28,7 +28,7 @@ export const API_CONFIG = {
     // Frontend runs on port 3000
     frontendUrl: `http://localhost:${PORTS.FRONTEND}`,
 
-    // Backend API base URL (port 5000)
+    // Backend API base URL
     backendUrl: process.env.NEXT_PUBLIC_API_URL || `http://${BACKEND_HOST}:${BACKEND_PORT}`,
 
     // API endpoints

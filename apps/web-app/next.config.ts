@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 console.log(`\n🐛 [DEBUG] Frontend Server (Next.js) loading config...`);
-const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 console.log(`🐛 [DEBUG] Target Backend URL: ${backendUrl}\n`);
 
 const nextConfig: NextConfig = {
@@ -14,12 +14,12 @@ const nextConfig: NextConfig = {
   // We use a catch-all rewrite for all other backend services.
   async rewrites() {
     // backendUrl is defined at top level
-    const url = process.env.BACKEND_URL || 'http://localhost:5000';
+    const url = backendUrl;
     console.log(`🐛 [DEBUG] Frontend Rewrite Proxy -> ${url}`);
     return [
       {
         source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*`,
+        destination: `${url}/api/:path*`,
       },
     ];
   },
@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
 
   // Environment variables
   env: {
-    BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:5000',
+    NEXT_PUBLIC_API_URL: backendUrl,
   },
 };
 

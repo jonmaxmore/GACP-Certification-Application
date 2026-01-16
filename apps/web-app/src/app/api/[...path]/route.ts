@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 
 // Production Server - Always use this
 // Production Server - Always use this (Dev Override)
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 /**
  * Generic API Proxy for all /api/* endpoints (excluding /api/v2, /api/auth-*, /api/health, /api/proxy)

@@ -16,10 +16,6 @@ const REPLACEMENTS = [
     replacement: "DTAM_JWT_SECRET = process.env.DTAM_JWT_SECRET || 'CHANGE_ME'"
   },
   {
-    pattern: /mongodb:\/\/localhost:27017\/([a-zA-Z0-9_-]+)/g,
-    replacement: "process.env.MONGODB_URI || 'mongodb://localhost:27017/$1'"
-  },
-  {
     pattern: /redis:\/\/localhost:6379/g,
     replacement: "process.env.REDIS_URL || 'redis://localhost:6379'"
   }

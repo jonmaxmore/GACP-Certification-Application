@@ -25,10 +25,10 @@ class EnvironmentValidator {
       },
 
       // Database Configuration
-      MONGODB_URI: {
+      DATABASE_URL: {
         required: true,
-        pattern: /^mongodb(\+srv)?:\/\/.+/,
-        description: 'MongoDB connection string',
+        pattern: /^postgresql:\/\/.+/,
+        description: 'PostgreSQL connection string',
       },
 
       // Government API Integration
@@ -346,7 +346,7 @@ class EnvironmentValidator {
       nodeEnv: process.env.NODE_ENV || 'development',
       port: process.env.PORT || 3000,
       jwtConfigured: !!process.env.JWT_SECRET,
-      databaseConfigured: !!process.env.MONGODB_URI,
+      databaseConfigured: !!process.env.DATABASE_URL,
       governmentApisConfigured: {
         doa: !!(process.env.DOA_API_URL && process.env.DOA_CLIENT_ID),
         fda: !!(process.env.FDA_API_URL && process.env.FDA_API_KEY),

@@ -8,7 +8,7 @@ const path = require('path');
 
 class EnvironmentConfig {
   constructor() {
-    this.required = ['NODE_ENV', 'PORT', 'MONGODB_URI', 'JWT_SECRET'];
+    this.required = ['NODE_ENV', 'PORT', 'DATABASE_URL', 'JWT_SECRET'];
 
     this.optional = {
       REDIS_URL: 'redis://localhost:6379',
@@ -61,7 +61,7 @@ class EnvironmentConfig {
     };
 
     return {
-      uri: this.get('MONGODB_URI'),
+      uri: this.get('DATABASE_URL'),
       options: {
         serverSelectionTimeoutMS: timeout.server,
         socketTimeoutMS: timeout.socket,
@@ -113,7 +113,7 @@ class EnvironmentConfig {
       'PORT=5000',
       '',
       '# Database',
-      'MONGODB_URI=mongodb://localhost:27017/gacp-platform',
+      'DATABASE_URL=postgresql://localhost:5432/gacp-platform',
       'DB_TIMEOUT=5000',
       '',
       '# Authentication',

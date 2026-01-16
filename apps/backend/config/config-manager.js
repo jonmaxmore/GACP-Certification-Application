@@ -136,8 +136,8 @@ function loadConfig() {
         port: parseInt(process.env.PORT) || 5000,
         host: process.env.HOST || 'localhost',
       },
-      mongodb: {
-        uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/botanical-audit',
+      postgresql: {
+        uri: process.env.DATABASE_URL || 'postgresql://localhost:5432/botanical-audit',
       },
       auth: {
         jwtSecret: process.env.JWT_SECRET || 'development_secret_change_in_production',
@@ -209,9 +209,9 @@ function isObject(item) {
 
 // Override config with environment variables
 function overrideWithEnvVars(config) {
-  // Example: MONGODB_URI environment variable overrides config.mongodb.uri
-  if (process.env.MONGODB_URI) {
-    config.mongodb.uri = process.env.MONGODB_URI;
+  // Example: DATABASE_URL environment variable overrides config.postgresql.uri
+  if (process.env.DATABASE_URL) {
+    config.postgresql.uri = process.env.DATABASE_URL;
   }
 
   // Storage configuration

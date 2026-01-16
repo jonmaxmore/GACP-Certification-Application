@@ -202,7 +202,7 @@ Admin:
 
 ```env
 # Database
-MONGODB_URI=mongodb://localhost:27017/botanical-audit-uat
+DATABASE_URL=postgresql://localhost:5432/gacp_development
 
 # Server
 NODE_ENV=uat

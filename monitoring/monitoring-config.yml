@@ -98,7 +98,7 @@ dashboards:
       - title: 'Database Connection Pool'
         type: graph
         targets:
-          - expr: mongodb_connections{state="current"}
+          - expr: pg_stat_database_numbackends{datname="gacp_db"}
 
       # Certificate Processing
       - title: 'Certificates Issued Today'
@@ -287,19 +287,7 @@ services:
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
 
-  # MongoDB Metrics
-  mongodb-exporter:
-    image: percona/mongodb_exporter:latest
-    container_name: gacp-mongodb-exporter
-    ports:
-      - '9216:9216'
-    environment:
-      - MONGODB_URI=mongodb://mongodb:27017
-    command:
-      - '--mongodb.uri=mongodb://mongodb:27017'
-      - '--collect-all'
-
-volumes:
+  volumes:
   prometheus_data:
   grafana_data:
   loki_data:

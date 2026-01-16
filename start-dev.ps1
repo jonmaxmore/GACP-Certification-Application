@@ -42,8 +42,8 @@ Write-Host "✅ Cache cleared" -ForegroundColor Green
 Write-Host "`n[4/5] Starting Backend on port 5000..." -ForegroundColor Yellow
 $backendPath = Join-Path $PSScriptRoot "apps\backend"
 $env:PORT = 5000
-# Read MONGODB_URI from .env file (more secure - not hardcoded)
-# Make sure apps/backend/.env has: MONGODB_URI=mongodb+srv://...
+# Read DATABASE_URL from .env file (more secure - not hardcoded)
+# Make sure apps/backend/.env has: DATABASE_URL=postgresql://...
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$backendPath'; `$env:PORT=5000; node simple-start.js" -WindowStyle Normal
 Start-Sleep -Seconds 5
 

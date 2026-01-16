@@ -17,8 +17,7 @@ PORT=3000
 HOST=localhost
 
 # Database Configuration
-MONGODB_URI=mongodb://localhost:27017/gacp-platform
-MONGODB_TEST_URI=mongodb://localhost:27017/gacp-platform-test
+DATABASE_URL=postgresql://postgres:password@localhost:5432/gacp_db
 
 # Redis Configuration
 REDIS_URL=redis://localhost:6379

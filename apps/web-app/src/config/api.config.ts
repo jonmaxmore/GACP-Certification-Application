@@ -5,13 +5,18 @@
  * Change values here once → affects entire application
  */
 
+import { config } from 'dotenv';
+
+// Load environment variables
+config({ path: '.env.local' });
+
 // Environment detection
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // Port Configuration
 const PORTS = {
-    FRONTEND: 3001,
-    BACKEND: 3002,
+    FRONTEND: 3000,
+    BACKEND: 5000,
 } as const;
 
 // Base URLs

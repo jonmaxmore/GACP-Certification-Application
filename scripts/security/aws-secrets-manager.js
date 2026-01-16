@@ -45,7 +45,7 @@ resource "aws_secretsmanager_secret_version" "gacp_secrets_version" {
   secret_string = jsonencode({
     FARMER_JWT_SECRET     = var.farmer_jwt_secret
     DTAM_JWT_SECRET       = var.dtam_jwt_secret
-    MONGODB_URI           = var.mongodb_uri
+    DATABASE_URL         = var.database_url
     REDIS_URL             = var.redis_url
     AWS_ACCESS_KEY_ID     = var.aws_access_key
     AWS_SECRET_ACCESS_KEY = var.aws_secret_key
@@ -65,7 +65,7 @@ variable "dtam_jwt_secret" {
   sensitive = true
 }
 
-variable "mongodb_uri" {
+variable "database_url" {
   type      = string
   sensitive = true
 }
@@ -192,7 +192,7 @@ if [ "$NODE_ENV" = "production" ]; then
   
   export FARMER_JWT_SECRET=$(echo $SECRET_JSON | jq -r '.FARMER_JWT_SECRET')
   export DTAM_JWT_SECRET=$(echo $SECRET_JSON | jq -r '.DTAM_JWT_SECRET')
-  export MONGODB_URI=$(echo $SECRET_JSON | jq -r '.MONGODB_URI')
+  export DATABASE_URL=$(echo $SECRET_JSON | jq -r '.DATABASE_URL')
   export REDIS_URL=$(echo $SECRET_JSON | jq -r '.REDIS_URL')
   
   echo "✅ Secrets loaded successfully"

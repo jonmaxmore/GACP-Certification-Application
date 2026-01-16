@@ -1,5 +1,5 @@
 /**
- * Audit Trail Service
+ * Audit Trail Service (Unified)
  * บันทึก Log ทุกการเปลี่ยนแปลงข้อมูลในระบบ GACP
  *
  * Apple Audit Requirements:
@@ -7,7 +7,7 @@
  * - 5-year retention (ตามระเบียบ DTAM)
  * - Complete traceability
  *
- * @version 1.0.0
+ * @version 2.0.0 - PostgreSQL with Prisma
  */
 
 const { prisma } = require('./prisma-database');

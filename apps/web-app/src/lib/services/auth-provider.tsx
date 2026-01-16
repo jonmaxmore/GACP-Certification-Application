@@ -5,7 +5,8 @@
  */
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { flushSync } from 'react-dom';
 import { AuthService, AuthUser, AuthEventType } from './auth-service';
 
 // Define Context Type
@@ -28,8 +29,34 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const router = useRouter();
     const pathname = usePathname();
+
+    // Verification Check Logic - Move before usage
+    const checkVerification = useCallback((u: AuthUser | null) => {
+        if (!u) return;
+
+        // Skip for Staff
+        const role = u.role?.toUpperCase();
+        if (role && ['ADMIN', 'STAFF', 'SCHEDULER', 'AUDITOR', 'Reviewer', 'JURISTIC_OFFICER'].some(r => role.includes(r))) {
+            return;
+        }
+
+        // Verification status is available but not used for now
+        // Users can access dashboard with warning banner
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _vStatus = u.verificationStatus || 'NEW';
+
+        // REMOVED for Gradual Engagement:
+        // Users can now access dashboard but will see a warning banner.
+        // Actions are gated at the button level.
+        /* 
+        if (_vStatus === 'NEW' || _vStatus === 'REJECTED') {
+            if (pathname !== '/verify-identity' && pathname !== '/login') {
+                router.push('/verify-identity');
+            }
+        } 
+        */
+    }, []);
 
     // Initialize auth service and sync state
     useEffect(() => {
@@ -40,13 +67,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const currentUser = AuthService.getUser();
         const isAuth = AuthService.isAuthenticated();
 
-        if (isAuth && currentUser) {
-            setUser(currentUser);
-        }
-        setIsLoading(false);
+        // Use flushSync to avoid cascading renders
+        flushSync(() => {
+            if (isAuth && currentUser) {
+                setUser(currentUser);
+            }
+            setIsLoading(false);
+        });
 
-        // Subscribe to auth events
-        const unsubscribe = AuthService.onAuthChange((event: AuthEventType, data?: unknown) => {
+        // Auth Event Listener
+        const unsubscribe = AuthService.onAuthChange((event: AuthEventType) => {
             switch (event) {
                 case 'login':
                     const u = AuthService.getUser();
@@ -71,31 +101,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return () => {
             unsubscribe();
         };
-    }, []);
-
-    // Verification Check Logic
-    const checkVerification = useCallback((u: AuthUser | null) => {
-        if (!u) return;
-
-        // Skip for Staff
-        const role = u.role?.toUpperCase();
-        if (role && ['ADMIN', 'STAFF', 'SCHEDULER', 'AUDITOR', 'Reviewer', 'JURISTIC_OFFICER'].some(r => role.includes(r))) {
-            return;
-        }
-
-        const vStatus = u.verificationStatus || 'NEW';
-
-        // REMOVED for Gradual Engagement:
-        // Users can now access dashboard but will see a warning banner.
-        // Actions are gated at the button level.
-        /* 
-        if (vStatus === 'NEW' || vStatus === 'REJECTED') {
-            if (pathname !== '/verify-identity' && pathname !== '/login') {
-                router.push('/verify-identity');
-            }
-        } 
-        */
-    }, [pathname, router]);
+    }, [checkVerification]);
 
     // Check on path change or user update
     useEffect(() => {

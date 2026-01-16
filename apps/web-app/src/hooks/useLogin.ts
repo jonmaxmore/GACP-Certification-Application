@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { formatThaiId } from '@/utils/thai-id-validator';
 
 export type LoginState = 'idle' | 'loading' | 'success' | 'error';
@@ -35,28 +35,46 @@ export interface UseLoginReturn {
  * 🍎 Apple Single Responsibility: Handles all login logic
  */
 export function useLogin(): UseLoginReturn {
-    const [accountType, setAccountType] = useState("INDIVIDUAL");
-    const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [loginState, setLoginState] = useState<LoginState>('idle');
     const [error, setError] = useState("");
-    const [rememberMe, setRememberMe] = useState(false);
     const [capsLockOn, setCapsLockOn] = useState(false);
 
-    // Load remembered credentials
-    useEffect(() => {
-        const remembered = localStorage.getItem("remember_login");
-        if (remembered) {
-            try {
-                const data = JSON.parse(remembered);
-                setAccountType(data.accountType || "INDIVIDUAL");
-                setIdentifier(data.identifier || "");
-                setRememberMe(true);
-            } catch { }
+    // Initialize with lazy state from localStorage
+    const [accountType, setAccountType] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const remembered = localStorage.getItem("remember_login");
+            if (remembered) {
+                try {
+                    const data = JSON.parse(remembered);
+                    return data.accountType || "INDIVIDUAL";
+                } catch { }
+            }
         }
-    }, []);
+        return "INDIVIDUAL";
+    });
+    
+    const [identifier, setIdentifier] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const remembered = localStorage.getItem("remember_login");
+            if (remembered) {
+                try {
+                    const data = JSON.parse(remembered);
+                    return data.identifier || "";
+                } catch { }
+            }
+        }
+        return "";
+    });
+    
+    const [rememberMe, setRememberMe] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem("remember_login") !== null;
+        }
+        return false;
+    });
 
     const formatIdentifier = (value: string): string => {
         return formatThaiId(value);

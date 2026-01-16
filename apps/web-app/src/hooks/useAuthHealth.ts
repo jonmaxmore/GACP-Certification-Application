@@ -6,7 +6,11 @@ import { useState, useEffect } from 'react';
 interface AuthHealthStatus {
   success: boolean;
   frontend: string;
-  backend: any;
+  backend: {
+    status: string;
+    message?: string;
+    timestamp?: string;
+  };
   error?: string;
   timestamp: string;
 }

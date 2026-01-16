@@ -17,15 +17,28 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-    const [language, setLanguageState] = useState<Language>('th');
-    const [mounted, setMounted] = useState(false);
+    // Initialize language from localStorage on mount
+    const [language, setLanguageState] = useState<Language>(() => {
+        if (typeof window !== 'undefined') {
+            const savedLang = localStorage.getItem('language') as Language;
+            return (savedLang === 'th' || savedLang === 'en') ? savedLang : 'th';
+        }
+        return 'th';
+    });
 
     useEffect(() => {
-        setMounted(true);
-        const savedLang = localStorage.getItem('language') as Language;
-        if (savedLang && (savedLang === 'th' || savedLang === 'en')) {
-            setLanguageState(savedLang);
-        }
+        // Sync with localStorage if language changes from other tabs
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'language') {
+                const newLang = e.newValue as Language;
+                if (newLang === 'th' || newLang === 'en') {
+                    setLanguageState(newLang);
+                }
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
     const setLanguage = (lang: Language) => {
@@ -38,14 +51,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     // Simple nested key retrieval for t("settings.title") style usage
     const t = (path: string): string => {
         const keys = path.split('.');
-        let current: any = dict;
+        let current: Record<string, unknown> = dict;
 
         for (const key of keys) {
             if (current[key] === undefined) {
                 // If on server or first render before mount, fallback might be needed but we default to 'th'
                 return path;
             }
-            current = current[key];
+            current = current[key] as Record<string, unknown>;
         }
 
         return typeof current === 'string' ? current : path;

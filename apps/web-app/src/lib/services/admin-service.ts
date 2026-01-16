@@ -4,7 +4,7 @@ import { apiClient } from '@/lib/api/api-client';
 export interface Plant {
     id: string;
     name: string;
-    productionInputs: Record<string, any>;
+    productionInputs: Record<string, unknown>;
     sortOrder: number;
     isActive: boolean;
     createdAt?: string;
@@ -25,7 +25,7 @@ export const AdminService = {
         return await apiClient.get<Plant[]>('/admin/plants');
     },
 
-    async createPlant(data: { name: string; productionInputs: any }) {
+    async createPlant(data: { name: string; productionInputs: Record<string, unknown> }) {
         return await apiClient.post<Plant>('/admin/plants', data);
     },
 

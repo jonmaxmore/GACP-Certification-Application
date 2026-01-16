@@ -1,33 +1,47 @@
 // File: src/app/api/auth/2fa/setup/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import speakeasy from 'speakeasy';
+import QRCode from 'qrcode';
+
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    // TODO: Implement actual 2FA setup logic
-    // 1. Generate TOTP secret
-    // 2. Create QR code for authenticator apps
-    // 3. Generate backup codes
-    // 4. Store in database (not yet enabled)
-    
-    // Mock data for demo
-    const mockQrCode = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
-    const mockBackupCodes = [
-      '12345678',
-      '87654321',
-      '11111111',
-      '22222222',
-      '33333333',
-      '44444444',
-      '55555555',
-      '66666666',
-      '77777777',
-      '88888888'
-    ];
-    
+    // TODO: Get user ID from authentication context
+    // For now, we'll use a mock user ID
+    const userId = 'mock-user-id';
+
+    // Generate TOTP secret
+    const secret = speakeasy.generateSecret({
+      name: `GACP Platform (${userId})`,
+      issuer: 'GACP Platform',
+      length: 32
+    });
+
+    // Generate QR code
+    const qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url!);
+
+    // Generate backup codes
+    const backupCodes = Array.from({ length: 10 }, () => 
+      Math.random().toString(36).substring(2, 10).toUpperCase()
+    );
+
+    // Store secret and backup codes in database (not yet enabled)
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        twoFactorSecret: secret.base32,
+        twoFactorBackupCodes: backupCodes,
+        twoFactorEnabled: false // Will be enabled after verification
+      }
+    });
+
     return NextResponse.json({
       success: true,
-      qrCode: mockQrCode,
-      backupCodes: mockBackupCodes
+      qrCode: qrCodeUrl,
+      backupCodes: backupCodes,
+      secret: secret.base32
     });
 
   } catch (error) {

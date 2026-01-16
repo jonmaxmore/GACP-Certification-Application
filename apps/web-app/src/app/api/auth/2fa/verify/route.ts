@@ -1,5 +1,9 @@
 // File: src/app/api/auth/2fa/verify/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import speakeasy from 'speakeasy';
+
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,19 +16,41 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // TODO: Implement actual 2FA verification logic
-    // 1. Verify TOTP code against stored secret
-    // 2. Enable 2FA for user in database
-    // 3. Log the change for audit trail
-    
-    // For demo, accept any 6-digit code
-    const isValidCode = /^\d{6}$/.test(code);
-    
-    if (!isValidCode) {
+    // TODO: Get user ID from authentication context
+    // For now, we'll use a mock user ID
+    const userId = 'mock-user-id';
+
+    // Get user's 2FA secret from database
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { twoFactorSecret: true }
+    });
+
+    if (!user || !user.twoFactorSecret) {
       return NextResponse.json({ 
-        error: 'Invalid verification code format' 
+        error: '2FA not set up for this user' 
       }, { status: 400 });
     }
+
+    // Verify TOTP code
+    const verified = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: 'base32',
+      token: code,
+      window: 2 // Allow 2 steps before/after for time drift
+    });
+
+    if (!verified) {
+      return NextResponse.json({ 
+        error: 'Invalid verification code' 
+      }, { status: 400 });
+    }
+    
+    // Enable 2FA for user in database
+    await prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorEnabled: true }
+    });
     
     return NextResponse.json({
       success: true,

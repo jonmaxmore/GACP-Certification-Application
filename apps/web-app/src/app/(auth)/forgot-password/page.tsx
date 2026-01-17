@@ -41,7 +41,17 @@ export default function ForgotPasswordPage() {
             {/* LEFT PANEL (Recovery Context) */}
             <div className="hidden lg:flex lg:w-5/12 bg-[#006837] relative flex-col items-center justify-center overflow-hidden z-0 text-white p-12 text-center">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#005c30] to-[#003820] opacity-100 z-0"></div>
-                <div className="absolute inset-0 bg-[url('/images/thai-pattern-bg.png')] opacity-[0.06] mix-blend-overlay bg-repeat bg-[length:300px] z-0"></div>
+                {/* Decorative Pattern - Abstract lines */}
+                <div className="absolute inset-0 opacity-10 z-0 pointer-events-none">
+                    <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="grid-pattern-fp" width="40" height="40" patternUnits="userSpaceOnUse">
+                                <circle cx="2" cy="2" r="1" fill="white" opacity="0.5" />
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#grid-pattern-fp)" />
+                    </svg>
+                </div>
 
                 <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] bg-emerald-400/10 rounded-full blur-[100px] pointer-events-none"></div>
 

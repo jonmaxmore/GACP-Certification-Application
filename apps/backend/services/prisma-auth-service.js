@@ -222,7 +222,7 @@ class PrismaAuthService {
             });
         }
 
-        const token = jwtConfig.generateToken({ id: user.id, role: user.accountType });
+        const token = jwtConfig.generateToken({ id: user.id, role: user.role || user.accountType });
         return { user, token };
     }
 }

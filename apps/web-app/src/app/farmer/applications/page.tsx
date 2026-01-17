@@ -72,7 +72,13 @@ export default function ApplicationsPage() {
         <div className="space-y-8 animate-fade-in">
             {/* Header with Official Gradient */}
             <div className="bg-gradient-to-br from-[#006837] to-[#004d28] rounded-[2rem] p-8 lg:p-12 text-white relative overflow-hidden shadow-xl">
-                <div className="absolute inset-0 bg-[url('/images/thai-pattern-bg.png')] opacity-10 mix-blend-overlay"></div>
+                {/* Decorative Pattern - Abstract lines */}
+                <div className="absolute inset-0 opacity-10">
+                    <svg className="w-full h-full" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0,200 C100,100 300,300 400,200" fill="none" stroke="white" strokeWidth="2" />
+                        <path d="M0,100 C150,250 250,50 400,200" fill="none" stroke="white" strokeWidth="2" opacity="0.5" />
+                    </svg>
+                </div>
                 <div className="absolute top-0 right-0 w-[50%] h-full bg-gradient-to-l from-emerald-400/20 to-transparent"></div>
 
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">

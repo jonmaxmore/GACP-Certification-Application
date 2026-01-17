@@ -110,7 +110,7 @@ export default function StaffDashboardPage() {
 
     return (
         <StaffLayout title="Dashboard" subtitle={`ภาพรวมการทำงาน (${roleInfo.label})`}>
-            {/* 1. Key Metrics */}
+            {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 {[
                     { label: "งานทั้งหมดในระบบ", value: dashboardStats.total, icon: IconCalendar, color: "text-slate-400" },
@@ -130,9 +130,8 @@ export default function StaffDashboardPage() {
                 ))}
             </div>
 
-            {/* 2. Work Queue (Tabs & Table) */}
+            {/* Work Queue */}
             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden mb-8">
-                {/* Tabs */}
                 {user.role === "REVIEWER_AUDITOR" && (
                     <div className="flex border-b border-slate-200 dark:border-slate-700">
                         {[
@@ -154,7 +153,6 @@ export default function StaffDashboardPage() {
                     </div>
                 )}
 
-                {/* Table Header */}
                 <div className="px-6 py-4 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                     <h3 className="font-semibold text-slate-700 dark:text-slate-200">
                         {activeTab === "documents" ? "รายการเอกสารรอตรวจสอบ" : "รายการนัดหมายตรวจแปลง"}
@@ -164,7 +162,6 @@ export default function StaffDashboardPage() {
                     </div>
                 </div>
 
-                {/* Table Body */}
                 <DataTable
                     columns={[
                         { key: 'id', label: 'JobID', render: (item: PendingItem) => <span className="font-mono text-slate-500">#{item.id?.slice(-6)}</span> },
@@ -200,9 +197,8 @@ export default function StaffDashboardPage() {
                 />
             </div>
 
-            {/* 3. Quick Actions Grid */}
+            {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Internal Tools */}
                 <div className="md:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                     <h3 className="font-semibold mb-4 text-slate-800 dark:text-slate-200">เครื่องมือเจ้าหน้าที่</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -222,7 +218,6 @@ export default function StaffDashboardPage() {
                     </div>
                 </div>
 
-                {/* System Status */}
                 <div className="bg-slate-900 text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
                     <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-indigo-500 rounded-full blur-3xl opacity-20"></div>
                     <div className="relative z-10">

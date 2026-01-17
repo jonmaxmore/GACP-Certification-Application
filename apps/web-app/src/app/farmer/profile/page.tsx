@@ -142,7 +142,7 @@ export default function ProfilePage() {
                     {!isEditing ? (
                         <button
                             onClick={() => setIsEditing(true)}
-                            className="gacp-btn-primary px-8 py-3.5 rounded-2xl font-black flex items-center gap-2"
+                            className="btn btn-primary text-white px-8 py-3.5 rounded-2xl font-black flex items-center gap-2"
                         >
                             <Icons.Edit className="w-5 h-5" />
                             แก้ไขโปรไฟล์
@@ -151,14 +151,14 @@ export default function ProfilePage() {
                         <>
                             <button
                                 onClick={() => { initForm(user); setIsEditing(false); setMessage(""); }}
-                                className="gacp-btn-secondary px-8 py-3.5 rounded-2xl font-black text-rose-500 border-rose-100 hover:bg-rose-50"
+                                className="btn btn-outline border-slate-300 bg-white text-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 px-8 py-3.5 rounded-2xl font-black"
                             >
                                 ยกเลิก
                             </button>
                             <button
                                 onClick={handleSaveProfile}
                                 disabled={isSaving || !hasChanges}
-                                className="gacp-btn-primary px-8 py-3.5 rounded-2xl font-black disabled:opacity-50"
+                                className="btn btn-primary text-white px-8 py-3.5 rounded-2xl font-black disabled:opacity-50"
                             >
                                 {isSaving ? "กกำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง"}
                             </button>
@@ -176,7 +176,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left: User Card */}
                 <div className="lg:col-span-1 space-y-8">
-                    <div className="gacp-card p-8 text-center relative overflow-hidden group/card shadow-premium">
+                    <div className="card bg-base-100 shadow-xl border border-slate-100 p-8 text-center relative overflow-hidden group/card">
                         <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-primary to-emerald-600 opacity-10"></div>
                         <div className="relative z-10">
                             <div className="w-24 h-24 bg-white rounded-[2rem] shadow-elevated mx-auto mb-6 flex items-center justify-center border-4 border-white">
@@ -195,7 +195,7 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    <div className="gacp-card p-8 shadow-soft">
+                    <div className="card bg-base-100 shadow-lg border border-slate-100 p-8">
                         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
                             <Icons.Info className="w-4 h-4" />
                             ข้อมูลการใช้งาน
@@ -223,7 +223,7 @@ export default function ProfilePage() {
 
                 {/* Right: Form Details */}
                 <div className="lg:col-span-2 space-y-8">
-                    <div className="gacp-card p-10 shadow-premium">
+                    <div className="card bg-base-100 shadow-xl border border-slate-100 p-10">
                         <h3 className="text-xl font-black text-slate-800 mb-8 border-b border-slate-50 pb-6 flex items-center gap-3">
                             <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                                 <IconUser className="w-5 h-5" />
@@ -263,7 +263,7 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    <div className="gacp-card p-10 shadow-soft">
+                    <div className="card bg-base-100 shadow-lg border border-slate-100 p-10">
                         <h3 className="text-xl font-black text-slate-800 mb-8 border-b border-slate-50 pb-6 flex items-center gap-3">
                             <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                                 <IconLock className="w-5 h-5" />
@@ -283,7 +283,7 @@ export default function ProfilePage() {
                             </div>
                             <button
                                 onClick={() => alert("ระบบเปลี่ยนรหัสผ่านกำลังจะเปิดให้บริการเร็วๆ นี้")}
-                                className="gacp-btn-secondary px-6 py-2.5 rounded-xl border-slate-200 text-slate-600 font-black text-sm"
+                                className="btn btn-outline border-slate-200 bg-white text-slate-600 hover:bg-slate-50 px-6 py-2.5 rounded-xl font-black text-sm"
                             >
                                 เปลี่ยนรหัสผ่าน
                             </button>

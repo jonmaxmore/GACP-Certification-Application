@@ -1,47 +1,37 @@
 import { test, expect } from '@playwright/test';
 import staffData from '../data/staff-test-data.json';
 
-test.describe('Staff: Auditor Loop', () => {
+test.describe('Staff: Audit Execution', () => {
 
     test.beforeEach(async ({ page }) => {
-        // Login as Reviewer/Auditor (Dual role in test data)
+        // Using Reviewer credentials to act as Auditor (Dual Role)
+        const { email, password } = staffData.reviewer;
         await page.goto('/staff/login');
-        await page.fill('input[name="email"]', staffData.reviewer.email); // Using 'reviewer' as auditor
-        await page.fill('input[name="password"]', staffData.reviewer.password);
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', password);
         await page.getByRole('button', { name: 'เข้าสู่ระบบ' }).click();
         await expect(page).toHaveURL(/.*\/staff\/dashboard/);
     });
 
-    test('Scenario 1: Complete Audit', async ({ page }) => {
-        // Navigate to Waiting for Audit
-        // Tabs might be Reviewer focused pending on Role.
-        // Reviewer role sees "audits" tab.
+    test('should allow submitting field audit results', async ({ page }) => {
+        page.on('dialog', dialog => dialog.accept());
+
+        // Navigate to Audit Queue
         await page.getByRole('button', { name: /รอตรวจประเมิน/ }).click();
+        await page.getByRole('link', { name: 'ตรวจสอบ' }).first().click();
 
-        // Find "Check" button for Audit
-        const checkBtn = page.getByRole('link', { name: 'ตรวจสอบ' }).first();
-        await expect(checkBtn).toBeVisible();
-        await checkBtn.click();
-
-        // Switch to Audit Tab in Detail
+        // Open Audit Checklist
         await page.getByRole('button', { name: 'ผลตรวจประเมิน' }).click();
-
-        // Verify Checklist
         await expect(page.getByText('แบบบันทึกการตรวจประเมิน GACP')).toBeVisible();
 
-        // Check Items
+        // Complete All Checks
         const checkboxes = await page.locator('input[type="checkbox"]').all();
         for (const box of checkboxes) {
             await box.check();
         }
 
-        // Handle Confirmation Dialog
-        page.on('dialog', dialog => dialog.accept());
-
-        // Submit Pass
+        // Submit Result
         await page.getByRole('button', { name: 'ผ่านการประเมิน (Pass)' }).click();
-
-        // Verify Redirect
         await expect(page).toHaveURL(/.*\/staff\/dashboard/);
     });
 

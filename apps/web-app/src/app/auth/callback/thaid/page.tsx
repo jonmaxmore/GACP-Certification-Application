@@ -91,7 +91,7 @@ export default function ThaIDCallbackPage() {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-[#1a237e] text-white p-4 relative overflow-hidden">
             {/* Decorative BG */}
-            <div className="absolute inset-0 bg-[url('/images/thai-pattern-bg.png')] opacity-10"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"></div>
 
             <div className="relative z-10 text-center max-w-md">
                 <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-8 border border-white/20 shadow-2xl animate-bounce">

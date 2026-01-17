@@ -7,9 +7,7 @@ export { StatusBadge } from './StatusBadge';
 export { ErrorBoundary } from './error-boundary';
 export { default as FileUpload } from './file-upload';
 export { Input as FormInput, Select as FormSelect } from './form-input';
-export { GACPButton } from './gacp-button';
-export { GACPCard } from './gacp-card';
-export { GACPInput } from './gacp-input';
+
 export { LoadingSpinner } from './loading-spinner';
 export { ModernButton } from './modern-button';
 export { ModernCard } from './modern-card';

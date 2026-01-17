@@ -6,7 +6,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
-import { flushSync } from 'react-dom';
+
 import { AuthService, AuthUser, AuthEventType } from './auth-service';
 
 // Define Context Type
@@ -67,13 +67,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const currentUser = AuthService.getUser();
         const isAuth = AuthService.isAuthenticated();
 
-        // Use flushSync to avoid cascading renders
-        flushSync(() => {
-            if (isAuth && currentUser) {
-                setUser(currentUser);
-            }
-            setIsLoading(false);
-        });
+        if (isAuth && currentUser) {
+            setUser(currentUser);
+        }
+        setIsLoading(false);
 
         // Auth Event Listener
         const unsubscribe = AuthService.onAuthChange((event: AuthEventType) => {

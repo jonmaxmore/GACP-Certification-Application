@@ -33,11 +33,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <div className={`min-h-screen transition-all duration-500 selection:bg-primary/30 ${isDark ? 'bg-slate-950 text-slate-100' : 'bg-[#F8F9FA] text-slate-800'}`}>
             {/* Background decorative elements */}
-            {/* Background decorative elements (Official Thai Pattern) */}
-            {/* Background decorative elements (Official Thai Pattern) */}
+            {/* Background decorative elements */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
                 <div className={`absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] mix-blend-multiply`}></div>
-                <div className="absolute inset-0 bg-[url('/images/thai-pattern-bg.png')] opacity-[0.03] animate-fade-in fixed"></div>
                 <div className={`absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-400/10 rounded-full blur-[100px] mix-blend-multiply`}></div>
             </div>
 

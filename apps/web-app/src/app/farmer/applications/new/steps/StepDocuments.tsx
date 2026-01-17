@@ -202,63 +202,63 @@ export const StepDocuments = () => {
 
         return (
             <div key={req.slotId} className={`
-                relative bg-white rounded-2xl transition-all duration-300 overflow-hidden group
+                relative bg-white rounded-2xl transition-all duration-300 overflow-hidden group border
                 ${doc
-                    ? 'border-2 border-primary/20 shadow-sm'
-                    : 'border border-gray-200 shadow-sm hover:shadow-lg hover:border-primary/40'
+                    ? 'border-emerald-200 shadow-sm'
+                    : 'border-slate-200 shadow-sm hover:border-emerald-300'
                 }
             `}>
-                <div className="p-6">
-                    <div className="flex justify-between items-start mb-4">
+                <div className="p-4">
+                    <div className="flex justify-between items-start mb-3">
                         <div className="flex-1 min-w-0 pr-4">
-                            <h4 className={`font-bold text-sm mb-1 flex flex-wrap items-center gap-2 ${doc ? 'text-primary-900' : 'text-gray-700'}`}>
+                            <h4 className={`font-bold text-sm mb-1 flex flex-wrap items-center gap-2 ${doc ? 'text-emerald-900' : 'text-slate-800'}`}>
                                 {displayName}
                                 {(req.required || req.conditionalRequired) && !doc && (
-                                    <span className="text-[10px] text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100 font-bold">
-                                        * {language === 'th' ? 'จำเป็น' : 'Required'}
+                                    <span className="text-[10px] text-rose-500 bg-rose-50 px-2 py-0.5 rounded border border-rose-100 font-bold">
+                                        * จำเป็น
                                     </span>
                                 )}
                             </h4>
-                            <p className="text-[10px] text-text-tertiary flex items-center gap-1">
-                                {isAiSupported && <span className="text-primary-600 font-bold bg-primary-50 px-1.5 py-0.5 rounded-md">✨ AI Smart Scan</span>}
-                                {req.helperText || (language === 'th' ? 'รองรับ PDF, JPG, PNG' : 'Supports PDF, JPG, PNG')}
+                            <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                                {isAiSupported && <span className="text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">✨ AI Scan</span>}
+                                {req.helperText || 'PDF, JPG, PNG'}
                             </p>
                         </div>
                         {doc && (
-                            <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow-lg animate-scale-in">
-                                <CheckIcon className="w-4 h-4" />
+                            <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm animate-scale-in">
+                                <CheckIcon className="w-3.5 h-3.5" />
                             </div>
                         )}
                     </div>
 
                     {req.templateUrl && !doc && (
-                        <div className="mb-4">
-                            <a href={req.templateUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[10px] text-primary font-bold hover:bg-primary hover:text-white bg-primary-50 px-3 py-1.5 rounded-xl border border-primary-100 transition-all">
+                        <div className="mb-3">
+                            <a href={req.templateUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[10px] text-emerald-600 font-bold hover:underline bg-emerald-50/50 px-2 py-1 rounded-lg border border-emerald-100 transition-all">
                                 <Icons.Download className="w-3 h-3" />
-                                {dict.wizard.documents.downloadForm}
+                                โหลดแบบฟอร์ม
                             </a>
                         </div>
                     )}
 
                     {!doc ? (
                         <label className={`
-                            relative h-32 w-full rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all duration-300 overflow-hidden bg-gray-50/50
+                            relative h-24 w-full rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all duration-300 overflow-hidden bg-slate-50
                             ${isUploading
-                                ? 'border-primary bg-primary-50'
-                                : 'border-gray-200 hover:border-primary-300 hover:bg-primary-50/30'
+                                ? 'border-emerald-400 bg-emerald-50'
+                                : 'border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/10'
                             }
                         `}>
                             {isUploading ? (
                                 <div className="flex flex-col items-center animate-pulse">
-                                    <div className="w-8 h-8 border-[3px] border-primary border-t-transparent rounded-full animate-spin mb-2"></div>
-                                    <span className="text-[10px] font-bold text-primary">{dict.wizard.documents.messages.analyzing}</span>
+                                    <div className="w-6 h-6 border-[3px] border-emerald-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                                    <span className="text-[10px] font-bold text-emerald-600">กำลังตรวจสอบ...</span>
                                 </div>
                             ) : (
                                 <>
-                                    <div className="w-12 h-12 rounded-2xl bg-white text-gray-400 flex items-center justify-center mb-2 group-hover:scale-110 group-hover:text-primary group-hover:shadow-md transition-all shadow-sm border border-gray-100">
-                                        <UploadIcon className="w-6 h-6" />
+                                    <div className="w-8 h-8 rounded-full bg-white text-slate-400 flex items-center justify-center mb-1 shadow-sm border border-slate-100">
+                                        <UploadIcon className="w-4 h-4" />
                                     </div>
-                                    <span className="text-[10px] font-bold text-gray-500 group-hover:text-primary transition-colors">{dict.wizard.documents.upload}</span>
+                                    <span className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-600 transition-colors">แตะเพื่ออัปโหลด</span>
                                 </>
                             )}
                             <input
@@ -273,17 +273,17 @@ export const StepDocuments = () => {
                             />
                         </label>
                     ) : (
-                        <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-4 border border-gray-100 group-hover:border-primary-100 transition-all shadow-inner">
+                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
                             <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-3 overflow-hidden">
-                                    <div className="w-10 h-10 bg-white rounded-xl border border-gray-100 flex items-center justify-center text-primary shadow-sm">
-                                        <DocIcon className="w-5 h-5" />
+                                <div className="flex items-center gap-2 overflow-hidden">
+                                    <div className="w-8 h-8 bg-white rounded-lg border border-slate-200 flex items-center justify-center text-emerald-600 shadow-sm">
+                                        <DocIcon className="w-4 h-4" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="text-xs font-bold text-gray-900 truncate">{doc.name}</div>
-                                        <div className="text-[10px] text-emerald-600 font-bold flex items-center gap-1 mt-0.5">
-                                            <CheckIcon className="w-3 h-3" />
-                                            {dict.wizard.documents.messages.valid}
+                                        <div className="text-[11px] font-bold text-slate-800 truncate">{doc.name}</div>
+                                        <div className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                                            <CheckIcon className="w-2.5 h-2.5" />
+                                            ตรวจสอบแล้ว
                                         </div>
                                     </div>
                                 </div>
@@ -292,37 +292,35 @@ export const StepDocuments = () => {
                                         setDocuments(state.documents.filter(d => d.id !== req.slotId));
                                         setAiResults(prev => { const n = { ...prev }; delete n[req.slotId]; return n; });
                                     }}
-                                    className="p-1.5 rounded-xl text-gray-300 hover:text-danger hover:bg-danger-50 transition-all"
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all"
                                 >
-                                    <Icons.Trash className="w-4 h-4" />
+                                    <Icons.Trash className="w-3.5 h-3.5" />
                                 </button>
                             </div>
 
                             {/* Specialized Fields: Land Deed */}
                             {req.slotId === 'land_deed' && (
-                                <div className="mt-4 pt-4 border-t border-dashed border-gray-200 animate-slide-up">
-                                    <div className="flex justify-between items-center mb-2 px-1">
-                                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{language === 'th' ? 'ข้อมูลขนาดพื้นที่ (โฉนด)' : 'Title Deed Area'}</span>
+                                <div className="mt-3 pt-3 border-t border-dashed border-slate-200 animate-slide-up">
+                                    <div className="flex justify-between items-center mb-1.5 px-1">
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ขนาดพื้นที่ (โฉนด)</span>
                                         {!doc.metadata?.manualEntry && (
                                             <button
                                                 onClick={() => handleUpdateMetadata(req.slotId, { manualEntry: true })}
-                                                className="text-[10px] text-primary hover:underline font-black"
+                                                className="text-[10px] text-emerald-600 hover:underline font-bold"
                                             >
-                                                {language === 'th' ? 'แก้ไข' : 'Edit'}
+                                                แก้ไข
                                             </button>
                                         )}
                                     </div>
                                     <div className="grid grid-cols-3 gap-2">
                                         {['rai', 'ngan', 'sqWa'].map((unit) => (
-                                            <div key={unit} className="bg-white rounded-xl border border-gray-100 p-2 text-center shadow-sm">
-                                                <label className="block text-[8px] text-gray-400 uppercase font-bold mb-0.5">
-                                                    {unit === 'sqWa' ? (language === 'th' ? 'ตร.ว.' : 'Sq.Wa') :
-                                                        (unit === 'rai' ? (language === 'th' ? 'ไร่' : 'Rai') :
-                                                            (language === 'th' ? 'งาน' : 'Ngan'))}
+                                            <div key={unit} className="bg-white rounded-lg border border-slate-200 p-1.5 text-center shadow-sm">
+                                                <label className="block text-[8px] text-slate-400 uppercase font-bold mb-0.5">
+                                                    {unit === 'sqWa' ? 'ตร.ว.' : (unit === 'rai' ? 'ไร่' : 'งาน')}
                                                 </label>
                                                 <input
                                                     type="number"
-                                                    className="w-full text-center text-xs font-black text-gray-900 bg-transparent outline-none"
+                                                    className="w-full text-center text-[10px] font-black text-slate-800 bg-transparent outline-none p-0"
                                                     value={doc.metadata?.area?.[unit as keyof typeof doc.metadata.area] ?? ''}
                                                     placeholder="0"
                                                     onChange={(e) => handleAreaChange(req.slotId, unit as any, e.target.value)}
@@ -336,14 +334,14 @@ export const StepDocuments = () => {
 
                             {/* AI Result Feedback */}
                             {aiResult && (
-                                <div className={`mt-3 text-[10px] p-2.5 rounded-xl flex items-center justify-between font-bold animate-slide-down ${aiResult.valid ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-red-50 text-red-700 border border-red-100'
+                                <div className={`mt-2 text-[10px] p-2 rounded-lg flex items-center justify-between font-bold animate-slide-down ${aiResult.valid ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'
                                     }`}>
                                     <span className="flex items-center gap-1.5 leading-none">
-                                        {aiResult.valid ? <CheckIcon className="w-3.5 h-3.5" /> : <WarningIcon className="w-3.5 h-3.5" />}
+                                        {aiResult.valid ? <CheckIcon className="w-3 h-3" /> : <WarningIcon className="w-3 h-3" />}
                                         {aiResult.message}
                                     </span>
                                     {aiResult.confidence && aiResult.valid && (
-                                        <span className="bg-white/60 px-1.5 py-0.5 rounded-lg shadow-sm font-black">
+                                        <span className="bg-white/60 px-1.5 py-0.5 rounded shadow-sm font-black text-[9px]">
                                             {Math.round(aiResult.confidence)}%
                                         </span>
                                     )}
@@ -357,77 +355,47 @@ export const StepDocuments = () => {
     };
 
     return (
-        <div className="space-y-8 animate-fade-in max-w-5xl mx-auto pb-12">
+        <div className="space-y-6 animate-fade-in px-4 max-w-xl mx-auto pb-12">
             {/* Header */}
             <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-primary gradient-mask rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-primary-50">
                     9
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold text-primary-900">{dict.wizard.documents.title}</h2>
-                    <p className="text-text-secondary">{dict.wizard.documents.subtitle}</p>
+                    <h2 className="text-2xl font-bold text-primary-900">{dict.wizard.documents.title || 'เอกสารประกอบ'}</h2>
+                    <p className="text-slate-500 text-sm">อัปโหลดเอกสารเพื่อยืนยันตัวตนและสิทธิ์การใช้พื้นที่</p>
                 </div>
             </div>
 
             {loadingReqs ? (
-                <div className="flex flex-col items-center justify-center h-80 gap-6 bg-white rounded-[2rem] border border-gray-100 shadow-premium">
-                    <div className="relative">
-                        <div className="w-16 h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
-                        <div className="absolute inset-x-0 -bottom-8 flex justify-center">
-                            <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]"></span>
-                            <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s] mx-1"></span>
-                            <span className="w-2 h-2 rounded-full bg-primary animate-bounce"></span>
-                        </div>
-                    </div>
-                    <span className="text-gray-400 font-bold uppercase tracking-widest text-xs">{language === 'th' ? 'กำลังเตรียมรายการเอกสาร...' : 'Preparing document list...'}</span>
+                <div className="flex flex-col items-center justify-center h-48 gap-4 bg-white rounded-2xl border border-slate-200">
+                    <div className="w-8 h-8 border-2 border-emerald-200 border-t-emerald-500 rounded-full animate-spin"></div>
+                    <span className="text-slate-400 font-bold text-xs">กำลังเตรียมรายการเอกสาร...</span>
                 </div>
             ) : (
                 <>
-                    {/* Dashboard Status Card */}
-                    <div className="gacp-card bg-gradient-to-br from-primary shadow-soft relative overflow-hidden border-none text-white p-8 animate-slide-up">
-                        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
-
-                        <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-                            <div className="flex items-center gap-8 w-full md:w-auto">
-                                <div className="text-center md:text-left">
-                                    <p className="text-[10px] text-white/60 font-black uppercase tracking-widest mb-1">{dict.wizard.documents.status.mandatory}</p>
-                                    <p className="text-4xl font-black">{mandatoryDocs.length}</p>
-                                </div>
-                                <div className="h-12 w-px bg-white/20"></div>
-                                <div className="text-center md:text-left">
-                                    <p className="text-[10px] text-white/60 font-black uppercase tracking-widest mb-1">{dict.wizard.documents.status.uploaded}</p>
-                                    <p className="text-4xl font-black text-emerald-300">{completedRequirements.length}</p>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col items-center md:items-end gap-3">
-                                {missingRequirements.length === 0 ? (
-                                    <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-md text-white rounded-2xl text-sm font-black shadow-lg border border-white/30 animate-pulse-soft">
-                                        <CheckIcon className="w-5 h-5 text-emerald-300" />
-                                        {dict.wizard.documents.status.complete}
-                                    </div>
-                                ) : (
-                                    <div className="inline-flex items-center gap-2 px-6 py-3 bg-white text-primary rounded-2xl text-sm font-black shadow-lg">
-                                        <Icons.Info className="w-5 h-5 text-amber-500" />
-                                        {dict.wizard.documents.status.missingCount.replace('{n}', missingRequirements.length.toString())}
-                                    </div>
-                                )}
-                                <p className="text-[10px] text-white/50 font-medium italic">* แนะนำให้อัปโหลดไฟล์ PDF เพื่อความชัดเจนสูงสุด</p>
-                            </div>
+                    {/* Simplified Stats */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm text-center">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">ต้องใช้ทั้งหมด</p>
+                            <p className="text-2xl font-black text-slate-800">{mandatoryDocs.length}</p>
+                        </div>
+                        <div className={`p-4 rounded-2xl border shadow-sm text-center transition-colors ${missingRequirements.length === 0 ? 'bg-emerald-50 border-emerald-100 text-emerald-800' : 'bg-white border-slate-200 text-slate-800'}`}>
+                            <p className="text-[10px] opacity-60 font-bold uppercase tracking-wider mb-1">อัปโหลดแล้ว</p>
+                            <p className="text-2xl font-black">{completedRequirements.length}</p>
                         </div>
                     </div>
 
                     {/* Missing Documents Section */}
                     {missingRequirements.length > 0 && (
-                        <div className="space-y-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
-                            <div className="flex items-center gap-3">
-                                <div className="w-2 h-8 bg-amber-400 rounded-full"></div>
-                                <h3 className="font-black text-xl text-gray-800 tracking-tight">
-                                    {dict.wizard.documents.headers.todo}
+                        <div className="space-y-4 animate-slide-up">
+                            <div className="flex items-center gap-2">
+                                <div className="w-1 h-5 bg-amber-400 rounded-full"></div>
+                                <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">
+                                    สิ่งที่ต้องอัปโหลด ({missingRequirements.length})
                                 </h3>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 gap-3">
                                 {missingRequirements.map((req) => renderDocCard(req))}
                             </div>
                         </div>
@@ -435,36 +403,31 @@ export const StepDocuments = () => {
 
                     {/* Completed Documents Section */}
                     {completedRequirements.length > 0 && (
-                        <div className="space-y-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
-                            <div className="flex items-center gap-3">
-                                <div className="w-2 h-8 bg-emerald-500 rounded-full"></div>
-                                <h3 className="font-black text-xl text-gray-800 tracking-tight">
-                                    {dict.wizard.documents.headers.done}
+                        <div className="space-y-4 animate-slide-up">
+                            <div className="flex items-center gap-2">
+                                <div className="w-1 h-5 bg-emerald-500 rounded-full"></div>
+                                <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">
+                                    เรียบร้อยแล้ว ({completedRequirements.length})
                                 </h3>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
                                 {completedRequirements.map((req) => {
                                     const doc = state.documents.find(d => d.id === req.slotId);
-                                    const displayName = String(dict.wizard.documents.docNames[req.nameKey as keyof typeof dict.wizard.documents.docNames] || req.nameKey);
                                     if (!doc) return null;
                                     return (
-                                        <div key={req.slotId} className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-                                            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
-                                            <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0 border border-emerald-100">
-                                                <Icons.CheckCircle className="w-6 h-6" />
+                                        <div key={req.slotId} className="bg-white border border-emerald-100 rounded-xl p-3 flex flex-col items-center justify-center text-center gap-2 shadow-sm relative overflow-hidden group">
+                                            <div className="w-8 h-8 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center">
+                                                <CheckIcon className="w-4 h-4" />
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="text-[10px] font-black text-emerald-500 uppercase mb-0.5 tracking-wider">Completed</div>
-                                                <div className="text-xs font-bold text-gray-900 truncate" title={displayName}>{displayName}</div>
-                                            </div>
+                                            <div className="text-[10px] font-bold text-slate-600 truncate w-full px-1">{doc.name}</div>
                                             <button
                                                 onClick={() => {
                                                     setDocuments(state.documents.filter(d => d.id !== req.slotId));
                                                     setAiResults(prev => { const n = { ...prev }; delete n[req.slotId]; return n; });
                                                 }}
-                                                className="text-gray-300 hover:text-danger opacity-0 group-hover:opacity-100 transition-all p-1"
+                                                className="absolute top-1 right-1 p-1 text-slate-300 hover:text-rose-500 transition-colors"
                                             >
-                                                <Icons.Trash className="w-4 h-4" />
+                                                <Icons.Trash className="w-3 h-3" />
                                             </button>
                                         </div>
                                     );
@@ -473,38 +436,35 @@ export const StepDocuments = () => {
                         </div>
                     )}
 
-                    {/* Optional / Extra Links */}
-                    <div className="gacp-card p-8 mt-12 animate-slide-up bg-gradient-to-br from-white to-blue-50/30 border-blue-100" style={{ animationDelay: '300ms' }}>
-                        <div className="flex items-center gap-3 mb-8">
-                            <div className="p-3 bg-blue-100 text-blue-600 rounded-2xl shadow-sm">
-                                <Icons.Video className="w-6 h-6" />
+                    {/* Extra Links */}
+                    <div className="p-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 mt-8 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100">
+                                <Icons.Video className="w-5 h-5 text-slate-400" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-black text-gray-800 tracking-tight">{dict.wizard.documents.extra.video}</h3>
-                                <p className="text-xs text-gray-500">{dict.wizard.documents.extra.hint}</p>
+                                <h3 className="text-sm font-bold text-slate-700">{dict.wizard.documents.extra.video}</h3>
+                                <p className="text-[10px] text-slate-400">ลิงก์วิดีโอแนะนำแปลงปลูก (ถ้ามี)</p>
                             </div>
                         </div>
 
-                        <div className="mb-10 max-w-2xl">
-                            <FormLabelWithHint label={dict.wizard.documents.extra.video} hint={dict.wizard.documents.extra.hint} />
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-4 flex items-center text-gray-400 group-focus-within:text-primary transition-colors">
-                                    <Icons.Link className="w-5 h-5" />
-                                </div>
-                                <input
-                                    type="text"
-                                    placeholder="https://youtube.com/watch?v=..."
-                                    className="gacp-input pl-12 bg-white"
-                                    value={youtubeUrl}
-                                    onChange={(e) => setYoutubeUrl(e.target.value)}
-                                />
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-3 flex items-center text-slate-400 pointer-events-none">
+                                <Icons.Link className="w-4 h-4" />
                             </div>
+                            <input
+                                type="text"
+                                placeholder="https://youtube.com/..."
+                                className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm"
+                                value={youtubeUrl}
+                                onChange={(e) => setYoutubeUrl(e.target.value)}
+                            />
                         </div>
 
                         {optionalDocs.length > 0 && (
-                            <div className="space-y-6">
-                                <h4 className="font-bold text-sm text-gray-600 uppercase tracking-widest px-1">เอกสารเพิ่มเติม (Optional)</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="pt-2">
+                                <h4 className="font-bold text-xs text-slate-400 uppercase tracking-widest px-1 mb-2">เอกสารเพิ่มเติม</h4>
+                                <div className="space-y-3">
                                     {optionalDocs.map((req) => renderDocCard(req))}
                                 </div>
                             </div>

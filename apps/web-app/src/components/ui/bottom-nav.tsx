@@ -88,58 +88,26 @@ export function BottomNav({ isDark = false }: BottomNavProps) {
     }
 
     return (
-        <>
-            <nav className={`
-                fixed bottom-0 left-0 right-0 h-[72px] z-50
-                flex justify-around items-center px-2
-                border-t md:hidden
-                ${isDark
-                    ? 'bg-slate-800 border-slate-700'
-                    : 'bg-white border-slate-200'
-                }
-            `}>
-                {NAV_ITEMS.map((item) => {
-                    // Access Control Rule
-                    if (item.requiredVerify && !isVerified) {
-                        return null;
-                    }
+        <nav className={`
+            fixed bottom-0 left-0 right-0 h-[60px] z-50
+            flex justify-between items-center px-6 pb-safe
+            bg-white border-t border-slate-100 md:hidden
+        `}>
+            {NAV_ITEMS.map((item) => {
+                if (item.requiredVerify && !isVerified) return null;
+                const isActive = pathname === item.href;
 
-                    const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
-                    const activeColor = '#10B981';
-                    const inactiveColor = isDark ? '#6B7280' : '#9CA3AF';
-
-                    return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className="flex flex-col items-center gap-1 py-2 px-3 min-w-[56px] relative no-underline"
-                        >
-                            {isActive && (
-                                <span className="absolute -top-px left-1/2 -translate-x-1/2 w-6 h-0.5 bg-emerald-500 rounded-b" />
-                            )}
-                            <span className={`
-                                flex items-center justify-center w-8 h-8 rounded-xl transition-all
-                                ${isActive
-                                    ? isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'
-                                    : 'bg-transparent'
-                                }
-                            `}>
-                                {item.icon(isActive ? activeColor : inactiveColor)}
-                            </span>
-                            <span className={`
-                                text-[10px] font-medium
-                                ${isActive ? 'text-emerald-500 font-semibold' : isDark ? 'text-slate-400' : 'text-slate-400'}
-                            `}>
-                                {item.label}
-                            </span>
-                        </Link>
-                    );
-                })}
-            </nav>
-
-            {/* Spacer for bottom nav (mobile only) */}
-            <div className="h-[72px] md:hidden" />
-        </>
+                return (
+                    <Link
+                        key={item.href}
+                        href={item.href}
+                        className="flex flex-col items-center justify-center p-2 active:scale-95 transition-transform"
+                    >
+                        {item.icon(isActive ? '#000000' : '#CCCCCC')}
+                    </Link>
+                );
+            })}
+        </nav>
     );
 }
 

@@ -2,374 +2,257 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ApplicationService, Application, Certificate } from "@/lib/services/application-service";
+import { ApplicationService, Application } from "@/lib/services/application-service";
 import { AuthService } from "@/lib/services/auth-service";
 import { useRouter } from "next/navigation";
-import { IconLeaf, IconDocument, IconCheckCircle, IconClock, IconSearch, IconWarning, IconReceipt, IconLock, Icons } from "@/components/ui/icons";
+import { IconSearch, Icons } from "@/components/ui/icons";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-interface User {
-    id: string;
-    firstName?: string;
-    lastName?: string;
-    companyName?: string;
-    accountType?: string;
-    verificationStatus?: string;
-}
+// --- Modern Icons ---
+const HomeIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+);
+const BellIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
+);
+const UserIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+);
+const PlusIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+);
+const MoreHorizontaly = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg>
+);
 
 export default function DashboardPage() {
     const router = useRouter();
-    const { dict, language } = useLanguage();
-    const [user, setUser] = useState<User | null>(null);
+    const { dict } = useLanguage();
+    const [user, setUser] = useState<any>(null);
     const [applications, setApplications] = useState<Application[]>([]);
-    const [certificates, setCertificates] = useState<Certificate[]>([]);
-    const [stats, setStats] = useState({ total: 0, active: 0, certified: 0 });
-    const [isLoading, setIsLoading] = useState(true);
-
-    const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: any }> = {
-        DRAFT: { label: dict.dashboard.status.DRAFT, color: "text-slate-600", bg: "bg-slate-100", icon: IconDocument },
-        SUBMITTED: { label: dict.dashboard.status.SUBMITTED, color: "text-blue-600", bg: "bg-blue-50", icon: IconClock },
-        PAYMENT_1_PENDING: { label: dict.dashboard.status.PAYMENT_1_PENDING, color: "text-amber-600", bg: "bg-amber-50", icon: IconReceipt },
-        PAID_PHASE_1: { label: dict.dashboard.status.PAID_PHASE_1, color: "text-emerald-600", bg: "bg-emerald-50", icon: IconCheckCircle },
-        PAYMENT_2_PENDING: { label: dict.dashboard.status.PAYMENT_2_PENDING, color: "text-pink-600", bg: "bg-pink-50", icon: IconReceipt },
-        PAID_PHASE_2: { label: dict.dashboard.status.PAID_PHASE_2, color: "text-emerald-600", bg: "bg-emerald-50", icon: IconCheckCircle },
-        REVISION_REQUIRED: { label: dict.dashboard.status.REVISION_REQUIRED, color: "text-red-600", bg: "bg-red-50", icon: IconWarning },
-        DOCUMENT_APPROVED: { label: dict.dashboard.status.DOCUMENT_APPROVED, color: "text-indigo-600", bg: "bg-indigo-50", icon: IconCheckCircle },
-        PENDING_AUDIT: { label: dict.dashboard.status.PENDING_AUDIT, color: "text-purple-600", bg: "bg-purple-50", icon: IconSearch },
-        APPROVED: { label: dict.dashboard.status.APPROVED, color: "text-green-600", bg: "bg-green-50", icon: IconCheckCircle },
-    };
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const sessionUser = AuthService.getUser();
-        if (!sessionUser) { router.push("/login"); return; }
-        setUser(sessionUser);
+        const u = AuthService.getUser();
+        if (!u) { router.push("/login"); return; }
+        setUser(u);
 
-        const loadData = async () => {
-            try {
-                setIsLoading(true);
-                // Fetch fresh profile
-                try {
-                    const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth-farmer/me`, {
-                        headers: { 'Authorization': `Bearer ${AuthService.getToken()}` },
-                        cache: 'no-store'
-                    });
-                    if (profileRes.ok) {
-                        const profileData = await profileRes.json();
-                        const freshUser = profileData.data.user || profileData.data;
-                        setUser(freshUser);
-                        AuthService.updateUser(freshUser);
-                    }
-                } catch (err) { console.warn('Profile refresh failed', err); }
-
-                const [appRes, certRes] = await Promise.all([
-                    ApplicationService.getMyApplications(),
-                    ApplicationService.getMyCertificates()
-                ]);
-
-                if (appRes.success && appRes.data) {
-                    const apps: Application[] = Array.isArray(appRes.data) ? appRes.data : (appRes.data as any).data || [];
-                    setApplications(apps);
-                    setStats({
-                        total: apps.length,
-                        active: apps.filter(a => !['APPROVED', 'REJECTED'].includes(a.status)).length,
-                        certified: apps.filter(a => a.status === 'APPROVED').length
-                    });
-                }
-
-                if (certRes.success && certRes.data) {
-                    const certs = Array.isArray(certRes.data) ? certRes.data : (certRes.data as any).data || [];
-                    setCertificates(certs);
-                }
-            } catch (error) {
-                console.error("Dashboard Load Error", error);
-            } finally {
-                setIsLoading(false);
+        // Load "Feed" (Applications)
+        ApplicationService.getMyApplications().then(res => {
+            if (res.success) {
+                const apps = Array.isArray(res.data) ? res.data : (res.data as any).data || [];
+                setApplications(apps);
             }
-        };
-        loadData();
-    }, [router]);
+            setLoading(false);
+        });
+    }, []);
 
-    const getGreeting = () => {
-        const h = new Date().getHours();
-        if (h < 12) return dict.dashboard.greeting.morning;
-        if (h < 17) return dict.dashboard.greeting.afternoon;
-        return dict.dashboard.greeting.evening;
-    };
-
-    if (!user || isLoading) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
-                <p className="text-slate-400 font-medium animate-pulse">{dict.common?.loading || 'กำลังโหลด...'}</p>
-            </div>
-        );
-    }
-
-    const latestApp = applications[0];
+    if (loading) return <div className="h-screen flex items-center justify-center bg-white"><div className="animate-spin w-8 h-8 border-2 border-slate-200 border-t-black rounded-full"></div></div>;
 
     return (
-        <div className="space-y-10 animate-fade-in">
-            {/* 0. Verification Banner */}
-            {user.verificationStatus !== 'APPROVED' && (
-                <div className="gacp-card bg-gradient-to-r from-warning-bg to-white border-warning/20 overflow-visible">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-5">
-                            <div className="w-14 h-14 rounded-2xl bg-warning-bg flex items-center justify-center shadow-inner">
-                                <IconWarning className="w-8 h-8 text-warning" />
-                            </div>
-                            <div>
-                                <h3 className="text-xl font-black text-warning-text leading-tight">{dict.dashboard.verification.warningTitle}</h3>
-                                <p className="text-slate-600 mt-1 max-w-xl">{dict.dashboard.verification.warningMsg}</p>
-                            </div>
-                        </div>
-                        <Link href="/verify-identity" className="gacp-btn-primary bg-gradient-to-r from-warning to-orange-600 shadow-warning/20 whitespace-nowrap">
-                            {dict.dashboard.verification.button}
-                        </Link>
-                    </div>
-                </div>
-            )}
+        <div className="min-h-screen bg-white font-sans text-slate-900 flex justify-center">
 
-            {/* 1. Hero & Stats Section */}
-            <div className="grid lg:grid-cols-4 gap-8">
-                {/* Hero Card */}
-                <div className="lg:col-span-3 gacp-card bg-[#006837] text-white border-0 shadow-xl p-0 overflow-hidden min-h-[240px] relative group">
-                    {/* Official Watermark & Gradients */}
-                    <div className="absolute inset-0 bg-[url('/images/thai-pattern-bg.png')] opacity-10 mix-blend-overlay"></div>
-                    <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-emerald-400/20 to-transparent"></div>
-                    <div className="absolute -bottom-10 -right-10 opacity-10 transition-transform group-hover:scale-110 duration-700">
-                        <img src="/images/dtam-logo.png" alt="Watermark" className="w-80 h-80 brightness-0 invert" />
+            {/* L: Sidebar (Desktop) */}
+            <div className="hidden lg:flex w-[275px] flex-col h-screen sticky top-0 px-4 py-4 border-r border-slate-100 items-end pr-8">
+                <div className="flex flex-col gap-6 w-full max-w-[220px]">
+                    <div className="text-3xl font-black tracking-tighter hover:bg-slate-50 p-3 rounded-full w-fit cursor-pointer transition-colors">
+                        <Icons.Leaf className="w-8 h-8 text-black" />
                     </div>
 
-                    <div className="h-full p-8 flex flex-col justify-between relative z-10">
-                        <div>
-                            <div className="flex items-center gap-2 mb-3">
-                                <span className="flex h-2 w-2 relative">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-                                </span>
-                                <span className="text-emerald-100/90 text-sm font-bold tracking-widest uppercase">{getGreeting()}</span>
-                            </div>
-                            <h1 className="text-4xl lg:text-5xl font-black text-white leading-tight drop-shadow-sm">
-                                {user.firstName} <span className="text-emerald-200">{user.lastName}</span>
-                            </h1>
-                            <div className="flex items-center gap-2 mt-2">
-                                <div className="p-1 bg-white/20 rounded-lg backdrop-blur-sm">
-                                    <IconLeaf className="w-4 h-4 text-white" />
-                                </div>
-                                <p className="text-emerald-50 font-medium">{user.companyName || 'วิสาหกิจชุมชนเกษตรกรไทย'}</p>
-                            </div>
-                        </div>
+                    <nav className="space-y-2">
+                        <NavItem href="/farmer/dashboard" icon={HomeIcon} label="Home" active />
+                        <NavItem href="/farmer/notifications" icon={BellIcon} label="Notifications" />
+                        <NavItem href="/farmer/profile" icon={UserIcon} label="Profile" />
+                    </nav>
 
-                        <div className="flex flex-wrap items-center gap-4 mt-6">
-                            {user.verificationStatus === 'APPROVED' ? (
-                                <Link href="/farmer/applications/new" className="gacp-btn-primary bg-white text-primary hover:bg-emerald-50 shadow-white/10 border-0 px-8">
-                                    <IconLeaf className="w-5 h-5" />
-                                    {dict.dashboard.hero.newApp}
-                                </Link>
-                            ) : (
-                                <button className="gacp-btn-secondary bg-white/10 border-white/20 text-white cursor-not-allowed px-8">
-                                    <IconLock className="w-5 h-5 mr-2 opacity-50" />
-                                    {dict.dashboard.hero.verifyToStart}
-                                </button>
-                            )}
-                            <div className="flex -space-x-3 overflow-hidden ml-2 items-center">
-                                <div className="inline-block h-8 w-8 rounded-full ring-2 ring-primary bg-emerald-500 overflow-hidden flex items-center justify-center text-[10px] font-bold">DT</div>
-                                <div className="inline-block h-8 w-8 rounded-full ring-2 ring-primary bg-emerald-600 overflow-hidden flex items-center justify-center text-[10px] font-bold">AM</div>
-                                <span className="ml-4 text-xs text-emerald-100/60 font-medium">Verified by Department</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Vertical Stat Cards */}
-                <div className="flex flex-col gap-4">
-                    <div className="flex-1 gacp-card p-6 flex flex-col justify-between group hover:bg-primary-50">
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{dict.dashboard.stats.total}</span>
-                        <div className="flex items-end justify-between">
-                            <span className="text-4xl font-black text-slate-800">{stats.total}</span>
-                            <div className="p-2 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-white group-hover:text-primary transition-colors">
-                                <IconDocument className="w-6 h-6" />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex-1 gacp-card p-6 flex flex-col justify-between group hover:bg-emerald-50">
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{dict.dashboard.stats.certified}</span>
-                        <div className="flex items-end justify-between">
-                            <span className="text-4xl font-black text-primary">{stats.certified}</span>
-                            <div className="p-2 rounded-xl bg-primary-50 text-primary transition-colors">
-                                <IconCheckCircle className="w-6 h-6" />
-                            </div>
-                        </div>
-                    </div>
+                    <Link href="/farmer/applications/new" className="bg-primary text-white font-bold text-lg py-3.5 rounded-full shadow-lg hover:bg-primary-hover transition-colors text-center w-full block mt-4">
+                        New Post
+                    </Link>
                 </div>
             </div>
 
-            {/* 2. Main Content Grid */}
-            <div className="grid lg:grid-cols-3 gap-10">
+            {/* C: Main Feed */}
+            <div className="w-full max-w-[600px] border-r border-slate-100 min-h-screen">
 
-                {/* Left Column: Recent Activity & Alerts */}
-                <div className="lg:col-span-2 space-y-8">
+                {/* Mobile Header (Sticky) */}
+                <div className="lg:hidden sticky top-0 bg-white/80 backdrop-blur-md z-40 border-b border-slate-100 flex items-center justify-between px-4 py-3">
+                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                        <Icons.Leaf className="w-5 h-5" />
+                    </div>
+                    <div className="font-bold text-lg">Home</div>
+                    <div className="w-8"></div>
+                </div>
 
-                    {/* Critical Alerts */}
-                    {(latestApp?.status === 'PAYMENT_1_PENDING' || latestApp?.status === 'PAYMENT_2_PENDING') && (
-                        <div className="gacp-card bg-gradient-to-br from-rose-600 to-pink-700 text-white border-0 shadow-premium group">
-                            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:rotate-12 transition-transform">
-                                        <IconReceipt className="w-8 h-8" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-black">{dict.dashboard.alerts?.paymentTitle}</h3>
-                                        <p className="text-rose-100 text-sm mt-1">{dict.dashboard.alerts?.paymentDesc}</p>
-                                    </div>
+                {/* Desk Header */}
+                <div className="hidden lg:flex sticky top-0 bg-white/90 backdrop-blur-sm z-40 border-b border-slate-100 px-4 py-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                    <h2 className="text-xl font-bold">Home</h2>
+                </div>
+
+                {/* Create Bar */}
+                <div className="hidden sm:block p-4 border-b border-slate-100">
+                    <div className="flex gap-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-200 flex-shrink-0"></div>
+                        <div className="flex-1">
+                            <input type="text" placeholder="What's happening on your farm?" className="w-full py-2 outline-none text-lg placeholder:text-slate-500" />
+                            <div className="flex justify-between items-center mt-3">
+                                <div className="flex gap-2 text-primary">
+                                    <div className="w-8 h-8 rounded-full hover:bg-green-50 flex items-center justify-center cursor-pointer">📷</div>
+                                    <div className="w-8 h-8 rounded-full hover:bg-green-50 flex items-center justify-center cursor-pointer">📍</div>
                                 </div>
-                                <Link href="/farmer/payments" className="gacp-btn-primary bg-white text-rose-600 border-0 hover:bg-rose-50 shadow-white/10 px-8">
-                                    {dict.dashboard.alerts?.paymentButton}
-                                </Link>
+                                <button className="bg-primary/50 text-white font-bold px-4 py-1.5 rounded-full text-sm cursor-not-allowed">Post</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Feed Stream */}
+                <div>
+                    {applications.length > 0 ? (
+                        applications.map((app) => (
+                            <FeedCard key={app._id} app={app} user={user} />
+                        ))
+                    ) : (
+                        <div className="p-8 text-center">
+                            <h3 className="text-xl font-bold mb-2">Welcome to GACP!</h3>
+                            <p className="text-slate-500 mb-6">This is where your certification journey lives. Start by creating your first application.</p>
+                            <Link href="/farmer/applications/new" className="inline-block bg-sky-500 text-white font-bold py-2 px-6 rounded-full hover:bg-sky-600 transition-colors">
+                                Let's go!
+                            </Link>
                         </div>
                     )}
-
-                    {/* Active Application Status */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                                <span className="w-2 h-8 bg-primary rounded-full"></span>
-                                {dict.dashboard.sections.recent}
-                            </h2>
-                            {latestApp && (
-                                <Link href="/farmer/applications" className="text-sm font-bold text-primary hover:underline">
-                                    {dict.common?.viewAll}
-                                </Link>
-                            )}
-                        </div>
-
-                        {latestApp ? (
-                            <div className="gacp-card p-0 group overflow-visible">
-                                <div className="p-8 border-b border-slate-100 flex flex-wrap justify-between items-start gap-4">
-                                    <div className="flex items-center gap-5">
-                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${STATUS_MAP[latestApp.status]?.bg}`}>
-                                            {(() => {
-                                                const StatusIcon = STATUS_MAP[latestApp.status]?.icon || IconDocument;
-                                                return <StatusIcon className={`w-8 h-8 ${STATUS_MAP[latestApp.status]?.color || 'text-slate-400'}`} />;
-                                            })()}
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <h3 className="text-xl font-bold text-slate-800 uppercase tracking-tight">{dict.dashboard.appCard.title}</h3>
-                                                <span className="text-xs font-mono font-bold text-slate-400">#{latestApp._id?.slice(-8).toUpperCase()}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <span className={`gacp-badge ${STATUS_MAP[latestApp.status]?.bg} ${STATUS_MAP[latestApp.status]?.color}`}>
-                                                    {STATUS_MAP[latestApp.status]?.label || latestApp.status}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col items-end">
-                                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{dict.dashboard.appCard.lastUpdate}</span>
-                                        <span className="text-sm font-bold text-slate-700">
-                                            {new Date(latestApp.updatedAt || latestApp.createdAt).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', {
-                                                day: 'numeric', month: 'long', year: 'numeric'
-                                            })}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="p-8 bg-slate-50/50 flex flex-col md:flex-row items-center justify-between gap-6">
-                                    <div className="flex items-center gap-8">
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Type</span>
-                                            <span className="text-sm font-bold text-slate-600">GACP Certification</span>
-                                        </div>
-                                        <div className="w-px h-8 bg-slate-200"></div>
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Plants</span>
-                                            <span className="text-sm font-bold text-slate-600">{latestApp.items?.length || 0} Species</span>
-                                        </div>
-                                    </div>
-                                    <Link
-                                        href={`/farmer/applications/new/step/${latestApp.status === 'PAYMENT_1_PENDING' || latestApp.status === 'PAYMENT_2_PENDING' ? '14' : '1'}`}
-                                        className="gacp-btn-primary px-10"
-                                    >
-                                        {dict.dashboard.appCard.continue}
-                                        <Icons.ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                                    </Link>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="gacp-card py-20 bg-white border-dashed border-2 flex flex-col items-center justify-center text-center opacity-70">
-                                <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6">
-                                    <IconDocument className="w-10 h-10 text-slate-200" />
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-800">{dict.dashboard.empty.title}</h3>
-                                <p className="text-slate-500 max-w-xs mx-auto mt-2">{dict.dashboard.empty.desc}</p>
-                                <Link href="/farmer/applications/new" className="gacp-btn-secondary mt-8 border-slate-200 text-slate-600">
-                                    {dict.common?.startNow}
-                                </Link>
-                            </div>
-                        )}
-                    </div>
                 </div>
 
-                {/* Right Column: Widgets */}
-                <div className="space-y-8">
+            </div>
 
-                    {/* Certificates Widget */}
-                    <div className="space-y-4">
-                        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                            <span className="w-2 h-8 bg-indigo-500 rounded-full"></span>
-                            {dict.dashboard.sections.certificates}
-                        </h2>
+            {/* R: Widgets (Trends) */}
+            <div className="hidden lg:block w-[350px] pl-8 py-4 h-screen sticky top-0">
+                <div className="bg-slate-50 rounded-2xl p-4 mb-4">
+                    <h3 className="font-bold text-xl mb-4 text-slate-900">Trends for you</h3>
+                    <TrendItem category="Technology" tag="#SmartFarming" posts="12.5K posts" />
+                    <TrendItem category="Regulation" tag="#GACP2026" posts="2,400 posts" />
+                    <TrendItem category="Market" tag="#ThaiHerbsExport" posts="50K posts" />
+                </div>
 
-                        {certificates.length === 0 ? (
-                            <div className="gacp-card py-10 flex flex-col items-center justify-center text-center opacity-60">
-                                <IconCheckCircle className="w-12 h-12 text-slate-200 mb-4" />
-                                <p className="text-slate-400 font-bold">{dict.dashboard.sections.noCert}</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {certificates.map(cert => (
-                                    <div key={cert._id} className="gacp-card p-5 hover:border-indigo-100 group">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
-                                                <IconDocument className="w-6 h-6" />
-                                            </div>
-                                            <span className="text-[10px] font-black uppercase text-slate-400 group-hover:text-indigo-400 transition-colors">#{cert.certificateNumber}</span>
-                                        </div>
-                                        <h4 className="text-lg font-black text-slate-800 leading-tight">{cert.plantType || 'Herb Plant'}</h4>
-                                        <p className="text-xs text-slate-500 mt-1">Exp: {new Date(cert.expiryDate).toLocaleDateString()}</p>
-                                        <button className="w-full mt-4 py-2 border border-slate-100 rounded-xl text-xs font-black text-indigo-600 uppercase tracking-widest hover:bg-indigo-50 hover:border-indigo-100 transition-all">
-                                            {dict.dashboard.buttons.download}
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Quick Menu */}
-                    <div className="space-y-4">
-                        <h2 className="text-2xl font-black text-slate-800 tracking-tight">{dict.dashboard.sections.quickMenu}</h2>
-                        <div className="grid gap-4">
-                            {[
-                                { title: dict.dashboard.menus.manual, desc: dict.dashboard.menus.manualDesc, icon: IconDocument, color: 'text-blue-600', bg: 'bg-blue-50' },
-                                { title: dict.dashboard.menus.report, desc: dict.dashboard.menus.reportDesc, icon: IconWarning, color: 'text-amber-600', bg: 'bg-amber-50' }
-                            ].map((item, idx) => (
-                                <button key={idx} className="gacp-card p-4 flex items-center gap-4 hover:bg-slate-50 text-left border-0 shadow-soft group">
-                                    <div className={`w-12 h-12 rounded-2xl ${item.bg} ${item.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                                        <item.icon className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-black text-slate-800 text-sm whitespace-nowrap">{item.title}</h4>
-                                        <p className="text-slate-400 text-xs mt-0.5 font-medium">{item.desc}</p>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
+                <div className="text-sm text-slate-400 leading-relaxed px-2">
+                    Terms of Service Privacy Policy Cookie Policy<br />
+                    © 2026 GACP Platform, Inc.
                 </div>
             </div>
+
         </div>
     );
 }
+
+// --- Sub Components ---
+
+function NavItem({ href, icon: Icon, label, active }: any) {
+    return (
+        <Link href={href} className="group flex items-center gap-4 p-3 rounded-full hover:bg-slate-100 transition-all w-fit pr-6">
+            <Icon className={`w-7 h-7 ${active ? 'fill-black' : ''}`} />
+            <span className={`text-xl ${active ? 'font-bold' : 'font-medium'}`}>{label}</span>
+        </Link>
+    )
+}
+
+function TrendItem({ category, tag, posts }: any) {
+    return (
+        <div className="py-3 cursor-pointer hover:bg-slate-200/50 -mx-2 px-2 rounded-lg transition-colors">
+            <div className="text-xs text-slate-500 flex justify-between">
+                <span>{category} · Trending</span>
+                <MoreHorizontaly className="w-4 h-4" />
+            </div>
+            <div className="font-bold text-slate-900 mt-0.5">{tag}</div>
+            <div className="text-xs text-slate-500 mt-0.5">{posts}</div>
+        </div>
+    )
+}
+
+function FeedCard({ app, user }: { app: Application, user: any }) {
+    return (
+        <div className="p-4 border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer group">
+            <div className="flex gap-3">
+                <div className="w-10 h-10 rounded-full bg-slate-200 flex-shrink-0"></div> {/* Avatar */}
+                <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-slate-900">
+                            <span className="font-bold hover:underline">{user?.firstName || 'User'}</span>
+                            <span className="text-slate-500 text-sm">@{user?.username || 'farmer'} · 2h</span>
+                        </div>
+                        <div className="group-hover:bg-blue-50 p-2 rounded-full -mr-2 transition-colors">
+                            <MoreHorizontaly className="w-5 h-5 text-slate-400 group-hover:text-blue-500" />
+                        </div>
+                    </div>
+
+                    <p className="mt-1 text-slate-900 text-[15px] leading-normal">
+                        Just submitted a new request for <strong>{app.plant}</strong>! 🌿 <br />
+                        Status: <span className="text-blue-500 hover:underline">#{app.status}</span>
+                    </p>
+
+                    <div className="mt-3 border rounded-xl overflow-hidden border-slate-200 hover:bg-slate-50 transition-colors">
+                        <div className="h-32 bg-slate-100 w-full flex items-center justify-center text-slate-400">
+                            Application Preview Image
+                        </div>
+                        <div className="p-3">
+                            <div className="text-slate-500 text-sm">gacp.moph.go.th</div>
+                            <div className="font-medium">Application ID: {app._id.slice(-8)}</div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between mt-3 max-w-md text-slate-500">
+                        <div className="flex items-center gap-2 group/icon hover:text-blue-500 cursor-pointer">
+                            <div className="p-2 rounded-full group-hover/icon:bg-blue-50 transition-colors">
+                                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.295c-4.42 0-8.005-3.58-8.005-8z"></path></svg>
+                            </div>
+                            <span className="text-sm">2</span>
+                        </div>
+                        <div className="flex items-center gap-2 group/icon hover:text-green-500 cursor-pointer">
+                            <div className="p-2 rounded-full group-hover/icon:bg-green-50 transition-colors">
+                                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"></path></svg>
+                            </div>
+                            <span className="text-sm">5</span>
+                        </div>
+                        <div className="flex items-center gap-2 group/icon hover:text-red-500 cursor-pointer">
+                            <div className="p-2 rounded-full group-hover/icon:bg-red-50 transition-colors">
+                                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zM12.609 5.15c1.715-2.003 3.524-2.175 4.908-2.094 1.932.11 3.655 1.218 4.519 2.972 1.144 2.32 1.146 5.253-.941 9.09C19.23 18.55 15.69 22 12.01 22c-3.69 0-7.228-3.45-9.106-6.882-2.09-3.83-2.08-6.75-.935-9.08.864-1.75 2.585-2.86 4.516-2.97 1.383-.08 3.19.08 4.904 2.08l.61.73.61-.73z"></path></svg>
+                            </div>
+                            <span className="text-sm">24</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function FeedSkeleton() {
+    return (
+        <div className="w-full max-w-[600px] mx-auto border-r border-slate-100 h-full overflow-hidden bg-white">
+            <div className="h-[53px] border-b border-slate-100 sticky top-0 bg-white/90 backdrop-blur z-10" />
+            <div className="p-4 border-b border-slate-100">
+                <div className="flex gap-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-100 animate-pulse" />
+                    <div className="flex-1 space-y-2 py-1">
+                        <div className="h-8 bg-slate-100 rounded-full w-full animate-pulse" />
+                    </div>
+                </div>
+            </div>
+            {[1, 2, 3].map(i => (
+                <div key={i} className="p-4 border-b border-slate-100">
+                    <div className="flex gap-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-100 animate-pulse flex-shrink-0" />
+                        <div className="flex-1 space-y-3">
+                            <div className="flex justify-between">
+                                <div className="h-4 bg-slate-100 rounded w-32 animate-pulse" />
+                                <div className="h-4 bg-slate-100 rounded w-8 animate-pulse" />
+                            </div>
+                            <div className="h-4 bg-slate-100 rounded w-3/4 animate-pulse" />
+                            <div className="h-32 bg-slate-100 rounded-xl w-full animate-pulse" />
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    )
+}
+
+

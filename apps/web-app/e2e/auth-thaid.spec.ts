@@ -15,9 +15,16 @@ test.describe('ThaID Login Flow', () => {
         await page.getByRole('button', { name: 'เข้าสู่ระบบด้วย ThaID' }).click();
 
         // 3. Should redirect to Mock ThaID Provider
-        // Verify we are on the mock page structure (blue header, Sarabun font)
-        await expect(page.locator('text=เข้าสู่ระบบด้วย ThaID')).toBeVisible();
-        await expect(page.locator('text=ระบบจำลองสำหรับนักพัฒนา')).toBeVisible();
+        console.log('Waiting for redirect...');
+        await page.waitForTimeout(3000);
+        console.log('Current URL:', page.url());
+
+        // Verify URL first to ensure we hit the backend
+        await expect(page).toHaveURL(/.*\/mock-thaid\/authorize/);
+
+        // Verify page content
+        await expect(page.getByRole('heading', { name: 'เข้าสู่ระบบด้วย ThaID' })).toBeVisible();
+        await expect(page.getByText('ระบบจำลองสำหรับนักพัฒนา')).toBeVisible();
 
         // 4. Click "Approve" (Simulate giving consent)
         await page.getByRole('button', { name: 'ยินยอม (Approve)' }).click();

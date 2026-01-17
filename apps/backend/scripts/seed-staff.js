@@ -1,138 +1,131 @@
-process.env.DATABASE_URL = 'postgresql://gacp:gacp2024@localhost:5432/gacp_db';
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 
-async function seed() {
+const prisma = new PrismaClient();
+
+// Ensure DB connection string if not in env
+if (!process.env.DATABASE_URL) {
+    process.env.DATABASE_URL = 'postgresql://gacp:gacp2024@localhost:5432/gacp_db';
+}
+
+async function main() {
+    console.log('🌱 Seeding Staff & Test Data...');
+    const hashedPassword = await bcrypt.hash('gacp2024', 10);
+
     try {
-        const email = 'reviewer@dtam.go.th';
-        const hashedPassword = await bcrypt.hash('Password123!', 10);
+        // 1. Create Users (Parallel)
+        console.log('...Upserting Users');
+        const [reviewer, scheduler, auditor, farmer] = await Promise.all([
+            prisma.user.upsert({
+                where: { email: 'reviewer@dtam.go.th' },
+                update: {},
+                create: {
+                    email: 'reviewer@dtam.go.th',
+                    password: hashedPassword,
+                    firstName: 'Somsak',
+                    lastName: 'Reviewer',
+                    role: 'REVIEWER_AUDITOR',
+                    accountType: 'STAFF',
+                    status: 'ACTIVE',
+                    phoneNumber: '020001234'
+                }
+            }),
+            prisma.user.upsert({
+                where: { email: 'scheduler@dtam.go.th' },
+                update: {},
+                create: {
+                    email: 'scheduler@dtam.go.th',
+                    password: hashedPassword,
+                    firstName: 'Somying',
+                    lastName: 'Scheduler',
+                    role: 'SCHEDULER',
+                    accountType: 'STAFF',
+                    status: 'ACTIVE'
+                }
+            }),
+            prisma.user.upsert({
+                where: { email: 'auditor@dtam.go.th' },
+                update: {},
+                create: {
+                    email: 'auditor@dtam.go.th',
+                    password: hashedPassword,
+                    firstName: 'Somsak',
+                    lastName: 'Auditor',
+                    role: 'REVIEWER_AUDITOR',
+                    accountType: 'STAFF',
+                    status: 'ACTIVE'
+                }
+            }),
+            prisma.user.upsert({
+                where: { email: 'farmer_test@gacp.com' },
+                update: {},
+                create: {
+                    email: 'farmer_test@gacp.com',
+                    password: hashedPassword,
+                    firstName: 'Somsak',
+                    lastName: 'Farmer',
+                    role: 'FARMER',
+                    accountType: 'INDIVIDUAL',
+                    status: 'ACTIVE'
+                }
+            })
+        ]);
 
-        const upsertUser = await prisma.user.upsert({
-            where: { email },
-            update: {},
-            create: {
-                email,
-                password: hashedPassword,
-                firstName: 'Somchai',
-                lastName: 'Reviewer',
-                role: 'REVIEWER_AUDITOR',
-                accountType: 'STAFF',
-                status: 'ACTIVE',
-                phoneNumber: '020001234'
-            },
-        });
-        console.log('Seeded Staff:', upsertUser.email);
+        // 2. Create Applications
+        console.log('...Upserting Applications');
 
-        // Seed Farmer
-        const farmerEmail = 'farmer_test@gacp.com';
-        const farmerUser = await prisma.user.upsert({
-            where: { email: farmerEmail },
-            update: {},
-            create: {
-                email: farmerEmail,
-                password: hashedPassword,
-                firstName: 'Somsak',
-                lastName: 'Farmer',
-                role: 'FARMER',
-                accountType: 'INDIVIDUAL',
-                status: 'ACTIVE'
-            },
-        });
-
-        // Seed Application
-        const appNum = 'APP-TEST-001';
-        await prisma.application.upsert({
-            where: { applicationNumber: appNum },
-            update: { status: 'SUBMITTED' },
-            create: {
-                applicationNumber: appNum,
-                farmerId: farmerUser.id,
+        // Define Scenarios
+        const scenarios = [
+            {
+                appNum: 'APP-TEST-001',
                 status: 'SUBMITTED',
-                serviceType: 'new_application',
-                areaType: 'OUTDOOR',
-                phase1Status: 'PAID',
-                formData: { plantId: 'CAN' }
-            }
-        });
-        console.log('Seeded Application:', appNum);
-
-        // Seed Scheduler
-        await prisma.user.upsert({
-            where: { email: 'scheduler@dtam.go.th' },
-            update: {},
-            create: {
-                email: 'scheduler@dtam.go.th',
-                password: hashedPassword,
-                firstName: 'Somying',
-                lastName: 'Scheduler',
-                role: 'SCHEDULER',
-                accountType: 'STAFF',
-                status: 'ACTIVE'
+                plantId: 'CAN',
+                phase1Config: { phase1Status: 'PAID' }
             },
-        });
-
-        // Seed Auditor
-        await prisma.user.upsert({
-            where: { email: 'auditor@dtam.go.th' },
-            update: {},
-            create: {
-                email: 'auditor@dtam.go.th',
-                password: hashedPassword,
-                firstName: 'Somsak',
-                lastName: 'Auditor',
-                role: 'REVIEWER_AUDITOR', // Same role as Reviewer usually, or specific? Controller check uses REVIEWER_AUDITOR for both.
-                accountType: 'STAFF',
-                status: 'ACTIVE'
-            },
-        });
-
-        // Seed App for Scheduling
-        const appSched = 'APP-TEST-SCHED-01';
-        await prisma.application.upsert({
-            where: { applicationNumber: appSched },
-            update: { status: 'PENDING_SCHEDULE' },
-            create: {
-                applicationNumber: appSched,
-                farmerId: farmerUser.id,
+            {
+                appNum: 'APP-TEST-SCHED-01',
                 status: 'PENDING_SCHEDULE',
-                serviceType: 'new_application',
-                areaType: 'INDOOR',
-                phase1Status: 'PAID',
-                phase2Status: 'PAID', // Must be paid to schedule
-                formData: { plantId: 'KRA' }
-            }
-        });
-        console.log('Seeded Scheduler Data');
-
-        // Seed App for Audit
-        const appAudit = 'APP-TEST-AUDIT-01';
-        await prisma.application.upsert({
-            where: { applicationNumber: appAudit },
-            update: { status: 'PENDING_AUDIT', auditorId: upsertUser.id }, // upsertUser is Auditor/Reviewer? No, upsertUser is Staff Reviewer (first one).
-            // Wait, I need Auditor ID.
-            // I'll assume 'auditor@dtam.go.th' is the one logging in. get its ID?
-            // Since seed-staff script runs sequentially, I can fetch it or use the one created.
-            // upsertUser is the first one (Reviewer).
-            // Use Reviewer as Auditor for simplicity (Dual role).
-            create: {
-                applicationNumber: appAudit,
-                farmerId: farmerUser.id,
+                plantId: 'KRA',
+                phase1Config: { phase1Status: 'PAID', phase2Status: 'PAID' }
+            },
+            {
+                appNum: 'APP-TEST-AUDIT-01',
                 status: 'PENDING_AUDIT',
-                serviceType: 'new_application',
-                areaType: 'OUTDOOR',
-                phase1Status: 'PAID',
-                phase2Status: 'PAID',
-                formData: { plantId: 'TUR' }
-                // auditorId: upsertUser.id // Optional if we test assignment logic
+                plantId: 'TUR',
+                phase1Config: { phase1Status: 'PAID', phase2Status: 'PAID' },
+                auditorId: auditor.id
             }
-        });
-        console.log('Seeded Auditor Data');
-    } catch (e) {
-        console.error(e);
+        ];
+
+        // Process Applications
+        for (const scenario of scenarios) {
+            await prisma.application.upsert({
+                where: { applicationNumber: scenario.appNum },
+                update: {
+                    status: scenario.status,
+                    auditorId: scenario.auditorId || undefined
+                },
+                create: {
+                    applicationNumber: scenario.appNum,
+                    farmerId: farmer.id,
+                    status: scenario.status,
+                    serviceType: 'new_application',
+                    areaType: scenario.plantId === 'KRA' ? 'INDOOR' : 'OUTDOOR',
+                    ...scenario.phase1Config,
+                    formData: { plantId: scenario.plantId },
+                    auditorId: scenario.auditorId
+                }
+            });
+        }
+
+        console.log('✅ Seeding Complete.');
+
+    } catch (err) {
+        console.error('❌ Seeding Failed:', err);
+        process.exit(1);
     } finally {
         await prisma.$disconnect();
     }
 }
 
-seed();
+main();

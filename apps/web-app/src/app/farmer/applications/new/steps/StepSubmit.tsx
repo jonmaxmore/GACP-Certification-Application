@@ -59,83 +59,75 @@ export const StepSubmit = () => {
     };
 
     return (
-        <div className="space-y-8 animate-fade-in pb-12 max-w-5xl mx-auto">
+        <div className="space-y-6 animate-fade-in max-w-xl mx-auto pb-12">
             {/* Header */}
             <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-primary gradient-mask rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-primary-50">
                     12
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold text-primary-900">ยืนยันการส่งคำขอรับรอง GACP</h2>
-                    <p className="text-text-secondary">กรุณายอมรับข้อกำหนดและเงื่อนไขทางกฎหมายก่อนส่งข้อมูลเข้าสู่ระบบ</p>
+                    <h2 className="text-2xl font-bold text-primary-900">ยืนยันการส่งคำขอ</h2>
+                    <p className="text-slate-500 text-sm">กรุณายอมรับข้อกำหนดและเงื่อนไขทางกฎหมายก่อนส่งข้อมูล</p>
                 </div>
             </div>
 
-            {/* Final Confirmation Hero */}
-            <div className="gacp-card bg-gradient-to-br from-primary shadow-soft relative overflow-hidden border-none text-white p-10 animate-slide-up">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
+            {/* Summary Card */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-slide-up text-center">
+                <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 border border-emerald-100">
+                    <Icons.ShieldCheck className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">สรุปข้อมูลคำขอ</h3>
+                <p className="text-slate-500 text-sm leading-relaxed max-w-md mx-auto">
+                    ท่านกำลังจะส่งคำขอรับรองมาตรฐาน GACP สำหรับ <strong className="text-slate-800">{state.plantId?.toUpperCase() || '-'}</strong>
+                    <br />เพื่อวัตถุประสงค์ <strong className="text-slate-800">{state.certificationPurpose || '-'}</strong>
+                </p>
 
-                <div className="relative z-10 space-y-8">
-                    <div className="flex items-start gap-6">
-                        <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-xl">
-                            <Icons.ShieldCheck className="w-10 h-10 text-white" />
-                        </div>
-                        <div className="space-y-2 max-w-2xl">
-                            <h3 className="text-2xl font-black tracking-tight">สรุปข้อมูลคำขอ</h3>
-                            <p className="text-white/70 text-sm leading-relaxed">
-                                ท่านกำลังจะส่งคำขอรับรองมาตรฐาน GACP สำหรับ <strong>{state.plantId?.toUpperCase() || '-'}</strong>
-                                เพื่อวัตถุประสงค์ <strong>{state.certificationPurpose || '-'}</strong> กรุณาตรวจสอบความถูกต้องของข้อมูลผู้ยื่นคำขอและเงื่อนไขด้านล่าง
-                            </p>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-100 text-left">
+                    <div className="space-y-1">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ผู้ยื่นคำขอ</p>
+                        <p className="font-bold text-slate-800 truncate">
+                            {state.applicantData?.applicantType === 'INDIVIDUAL'
+                                ? `${state.applicantData?.firstName} ${state.applicantData?.lastName}`
+                                : state.applicantData?.applicantType === 'COMMUNITY'
+                                    ? state.applicantData?.communityName
+                                    : state.applicantData?.companyName || '-'
+                            }
+                        </p>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-                        <div className="space-y-1">
-                            <p className="text-[10px] text-white/50 font-black uppercase tracking-widest leading-none">ผู้ยื่นคำขอ / องค์กร</p>
-                            <p className="text-2xl font-black font-noto">
-                                {state.applicantData?.applicantType === 'INDIVIDUAL'
-                                    ? `${state.applicantData?.firstName} ${state.applicantData?.lastName}`
-                                    : state.applicantData?.applicantType === 'COMMUNITY'
-                                        ? state.applicantData?.communityName
-                                        : state.applicantData?.companyName || '-'
-                                }
-                            </p>
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-[10px] text-white/50 font-black uppercase tracking-widest leading-none">สถานที่ผลิต (ฟาร์ม)</p>
-                            <p className="text-2xl font-black font-noto">{state.farmData?.farmName || '-'}</p>
-                        </div>
+                    <div className="space-y-1">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">สถานที่ผลิต</p>
+                        <p className="font-bold text-slate-800 truncate">{state.farmData?.farmName || '-'}</p>
                     </div>
                 </div>
             </div>
 
             {/* Legal Checks */}
-            <div className="space-y-4 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <div className="space-y-3 animate-slide-up" style={{ animationDelay: '100ms' }}>
                 <div
                     onClick={() => toggleCheck('dataCorrect')}
                     className={`
-                        group flex items-start gap-5 p-6 rounded-3xl cursor-pointer transition-all duration-300 border-2
+                        group flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all duration-300 border bg-white
                         ${confirmChecks.dataCorrect
-                            ? 'bg-primary/5 border-primary/20 shadow-sm'
-                            : 'bg-white border-gray-100 hover:border-primary/30 hover:bg-gray-50/50'
+                            ? 'border-emerald-500 ring-1 ring-emerald-500 shadow-sm'
+                            : 'border-slate-200 hover:border-emerald-300 hover:shadow-md'
                         }
                     `}
                 >
                     <div className={`
-                        w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-500 flex-shrink-0 mt-0.5
+                        w-6 h-6 rounded-lg border flex items-center justify-center transition-all duration-300 mt-0.5 shrink-0
                         ${confirmChecks.dataCorrect
-                            ? 'bg-primary border-primary'
-                            : 'bg-white border-gray-300 group-hover:border-primary'
+                            ? 'bg-emerald-500 border-emerald-500'
+                            : 'bg-slate-50 border-slate-300 group-hover:border-emerald-400'
                         }
                     `}>
-                        {confirmChecks.dataCorrect && <CheckIcon className="w-5 h-5 text-white animate-scale-in" />}
+                        {confirmChecks.dataCorrect && <CheckIcon className="w-3.5 h-3.5 text-white animate-scale-in" />}
                     </div>
                     <div>
-                        <h4 className="font-black text-gray-800 text-lg mb-1 leading-tight">ข้าพเจ้ายืนยันความถูกต้องของข้อมูล</h4>
-                        <p className="text-sm text-gray-500 leading-relaxed">
-                            ข้อมูลและเอกสารประกอบคำขอทั้งหมดที่ระบุในคำขอนี้เป็นความจริงและเป็นปัจจุบันทุกประการ
-                            หากมีการตรวจพบว่าข้อมูลเป็นเท็จ ข้าพเจ้ายินยอมให้ยกเลิกคำขอทันที
+                        <h4 className={`font-bold text-sm mb-1 transition-colors ${confirmChecks.dataCorrect ? 'text-emerald-900' : 'text-slate-800'}`}>
+                            ยืนยันความถูกต้องของข้อมูล
+                        </h4>
+                        <p className="text-xs text-slate-500 leading-relaxed">
+                            ข้อมูลและเอกสารทั้งหมดเป็นความจริง หากตรวจพบว่าเป็นเท็จ ยินยอมให้ยกเลิกคำขอทันที
                         </p>
                     </div>
                 </div>
@@ -143,27 +135,28 @@ export const StepSubmit = () => {
                 <div
                     onClick={() => toggleCheck('termsAccepted')}
                     className={`
-                        group flex items-start gap-5 p-6 rounded-3xl cursor-pointer transition-all duration-300 border-2
+                         group flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all duration-300 border bg-white
                         ${confirmChecks.termsAccepted
-                            ? 'bg-primary/5 border-primary/20 shadow-sm'
-                            : 'bg-white border-gray-100 hover:border-primary/30 hover:bg-gray-50/50'
+                            ? 'border-emerald-500 ring-1 ring-emerald-500 shadow-sm'
+                            : 'border-slate-200 hover:border-emerald-300 hover:shadow-md'
                         }
                     `}
                 >
                     <div className={`
-                        w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-500 flex-shrink-0 mt-0.5
+                        w-6 h-6 rounded-lg border flex items-center justify-center transition-all duration-300 mt-0.5 shrink-0
                         ${confirmChecks.termsAccepted
-                            ? 'bg-primary border-primary'
-                            : 'bg-white border-gray-300 group-hover:border-primary'
+                            ? 'bg-emerald-500 border-emerald-500'
+                            : 'bg-slate-50 border-slate-300 group-hover:border-emerald-400'
                         }
                     `}>
-                        {confirmChecks.termsAccepted && <CheckIcon className="w-5 h-5 text-white animate-scale-in" />}
+                        {confirmChecks.termsAccepted && <CheckIcon className="w-3.5 h-3.5 text-white animate-scale-in" />}
                     </div>
                     <div>
-                        <h4 className="font-black text-gray-800 text-lg mb-1 leading-tight">ข้าพเจ้าได้อ่านและยอมรับข้อกำหนด (GACP Standards)</h4>
-                        <p className="text-sm text-gray-500 leading-relaxed">
-                            ข้าพเจ้าเข้าใจมาตรฐานการปฏิบัติทางการเกษตรที่ดีสำหรับพืชสมุนไพร (GACP)
-                            และตกลงที่จะปฏิบัติตามมาตรฐานอย่างเคร่งครัดตลอดระยะเวลาการรับรอง
+                        <h4 className={`font-bold text-sm mb-1 transition-colors ${confirmChecks.termsAccepted ? 'text-emerald-900' : 'text-slate-800'}`}>
+                            ยอมรับข้อกำหนด (GACP Standards)
+                        </h4>
+                        <p className="text-xs text-slate-500 leading-relaxed">
+                            ข้าพเจ้าเข้าใจและตกลงที่จะปฏิบัติตามมาตรฐาน GACP อย่างเคร่งครัด
                         </p>
                     </div>
                 </div>
@@ -171,42 +164,40 @@ export const StepSubmit = () => {
                 <div
                     onClick={() => toggleCheck('paymentUnderstood')}
                     className={`
-                        group flex items-start gap-5 p-6 rounded-3xl cursor-pointer transition-all duration-300 border-2
+                         group flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all duration-300 border bg-white
                         ${confirmChecks.paymentUnderstood
-                            ? 'bg-primary/5 border-primary/20 shadow-sm'
-                            : 'bg-white border-gray-100 hover:border-primary/30 hover:bg-gray-50/50'
+                            ? 'border-emerald-500 ring-1 ring-emerald-500 shadow-sm'
+                            : 'border-slate-200 hover:border-emerald-300 hover:shadow-md'
                         }
                     `}
                 >
                     <div className={`
-                        w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-500 flex-shrink-0 mt-0.5
+                        w-6 h-6 rounded-lg border flex items-center justify-center transition-all duration-300 mt-0.5 shrink-0
                         ${confirmChecks.paymentUnderstood
-                            ? 'bg-primary border-primary'
-                            : 'bg-white border-gray-300 group-hover:border-primary'
+                            ? 'bg-emerald-500 border-emerald-500'
+                            : 'bg-slate-50 border-slate-300 group-hover:border-emerald-400'
                         }
                     `}>
-                        {confirmChecks.paymentUnderstood && <CheckIcon className="w-5 h-5 text-white animate-scale-in" />}
+                        {confirmChecks.paymentUnderstood && <CheckIcon className="w-3.5 h-3.5 text-white animate-scale-in" />}
                     </div>
                     <div>
-                        <h4 className="font-black text-gray-800 text-lg mb-1 leading-tight">รับทราบเรื่องค่าธรรมเนียม</h4>
-                        <p className="text-sm text-gray-500 leading-relaxed">
-                            ข้าพเจ้าเข้าใจว่าจะต้องชำระค่าธรรมเนียมการตรวจประเมินหลังจากได้รับใบแจ้งหนี้ (Invoice)
-                            และการไม่ชำระอาจส่งผลให้การพิจารณาคำขอหยุดชะงัก
+                        <h4 className={`font-bold text-sm mb-1 transition-colors ${confirmChecks.paymentUnderstood ? 'text-emerald-900' : 'text-slate-800'}`}>
+                            รับทราบเรื่องค่าธรรมเนียม
+                        </h4>
+                        <p className="text-xs text-slate-500 leading-relaxed">
+                            จะต้องชำระค่าธรรมเนียมหลังจากได้รับใบแจ้งหนี้ (Invoice) เพื่อดำเนินการต่อ
                         </p>
                     </div>
                 </div>
             </div>
 
             {/* Submission Warning */}
-            <div className="p-6 bg-blue-50/50 border border-blue-100 rounded-[2rem] flex gap-4 animate-slide-up" style={{ animationDelay: '200ms' }}>
-                <div className="p-3 bg-white rounded-2xl shadow-sm h-fit">
-                    <InfoIcon className="w-6 h-6 text-blue-600" />
-                </div>
+            <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-2xl flex gap-3 animate-slide-up" style={{ animationDelay: '200ms' }}>
+                <InfoIcon className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                    <p className="font-black text-blue-900 text-sm italic">คำแนะนำสำหรับการส่งคำขอ</p>
+                    <p className="font-bold text-blue-900 text-sm">คำแนะนำ</p>
                     <p className="text-xs leading-relaxed text-blue-800/80">
-                        เมื่อท่านกดยืนยัน ข้อมูลจะถูกบันทึกเข้าสู่ระบบ และท่านจะไม่สามารถกลับมาแก้ไขข้อมูลได้ด้วยตนเองจนกว่าเจ้าหน้าที่จะทำการตรวจสอบ
-                        กรุณาตรวจสอบหน้า <strong>&quot;Preview&quot;</strong> อีกครั้งหากไม่มั่นใจ
+                        เมื่อกดยืนยัน ข้อมูลจะถูกบันทึกเข้าระบบทันทีและไม่สามารถแก้ไขได้จนกว่าจะได้รับการตรวจสอบ
                     </p>
                 </div>
             </div>
@@ -215,7 +206,7 @@ export const StepSubmit = () => {
                 onNext={handleSubmit}
                 onBack={() => router.push('/farmer/applications/new/step/11')}
                 isNextDisabled={!allChecked || isSubmitting}
-                nextLabel={isSubmitting ? 'กำลังส่งคำขอเข้าสู่ระบบ...' : 'ยืนยันและส่งคำขอ'}
+                nextLabel={isSubmitting ? 'กำลังส่งคำขอ...' : 'ยืนยันและส่งคำขอ'}
             />
         </div>
     );

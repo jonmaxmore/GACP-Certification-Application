@@ -122,7 +122,7 @@ export const StepPlots = () => {
     };
 
     return (
-        <div className="space-y-8 animate-fade-in max-w-5xl mx-auto pb-12">
+        <div className="space-y-8 animate-fade-in pb-12 px-4 max-w-xl mx-auto">
             {/* Header */}
             <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-primary gradient-mask rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-primary-50">
@@ -130,61 +130,57 @@ export const StepPlots = () => {
                 </div>
                 <div>
                     <h2 className="text-2xl font-bold text-primary-900">{dict.wizard.plots.title}</h2>
-                    <p className="text-text-secondary">{dict.wizard.plots.subtitle}</p>
+                    <p className="text-slate-500 text-sm">{dict.wizard.plots.subtitle}</p>
                 </div>
             </div>
 
             {/* Summary Card */}
-            <div className="gacp-card bg-gradient-to-br from-primary-50 to-white border-primary-100 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-gradient-to-bl from-primary-100/40 to-transparent rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-
-                <div className="flex items-center justify-between mb-6 relative z-10">
-                    <h3 className="font-bold text-primary-900 flex items-center gap-3 text-lg">
-                        <span className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center">📊</span>
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm relative overflow-hidden">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2 text-sm">
+                        <span className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center">📊</span>
                         {dict.wizard.plots.summary.title}
                     </h3>
-
-                    {/* Locked Cultivation System Badge */}
-                    <div className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium ${currentSystem.color}`}>
+                    <div className={`hidden md:flex items-center gap-2 px-2 py-1 rounded-md border text-xs font-medium ${currentSystem.color}`}>
                         <span>{currentSystem.icon}</span>
                         <span>{currentSystem.label}</span>
                     </div>
                 </div>
 
                 {summary.totalArea === 0 && (
-                    <div className="mb-6 p-4 bg-warning-bg border border-warning-200 rounded-xl text-warning-text text-sm flex items-center gap-3 shadow-sm animate-pulse-soft">
-                        <WarningIcon className="w-5 h-5 flex-shrink-0" />
-                        <span><strong>{dict.wizard.plots.summary.noTotalArea}</strong></span>
+                    <div className="mb-4 p-3 bg-amber-50 border border-amber-100 rounded-xl text-amber-800 text-xs flex items-center gap-2">
+                        <WarningIcon className="w-4 h-4 flex-shrink-0" />
+                        <span>{dict.wizard.plots.summary.noTotalArea}</span>
                     </div>
                 )}
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
-                    <div className="bg-white/60 backdrop-blur rounded-xl p-4 text-center border border-white shadow-sm">
-                        <div className="text-2xl font-bold text-primary-900 mb-1">{summary.totalArea}</div>
-                        <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{dict.wizard.plots.summary.totalArea} ({summary.unit})</div>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+                        <div className="text-xl font-bold text-slate-900 mb-0.5">{summary.totalArea}</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{dict.wizard.plots.summary.totalArea} ({summary.unit})</div>
                     </div>
-                    <div className="bg-white/60 backdrop-blur rounded-xl p-4 text-center border border-white shadow-sm">
-                        <div className="text-2xl font-bold text-primary mb-1">{summary.allocatedArea}</div>
-                        <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{dict.wizard.plots.summary.allocatedArea} ({summary.unit})</div>
+                    <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+                        <div className="text-xl font-bold text-emerald-600 mb-0.5">{summary.allocatedArea}</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{dict.wizard.plots.summary.allocatedArea} ({summary.unit})</div>
                     </div>
-                    <div className={`bg-white/60 backdrop-blur rounded-xl p-4 text-center border shadow-sm ${parseFloat(summary.remainingArea) < 0 ? 'border-red-200 bg-red-50/50' : 'border-white'}`}>
-                        <div className={`text-2xl font-bold mb-1 ${parseFloat(summary.remainingArea) < 0 ? 'text-red-600' : 'text-amber-500'}`}>
+                    <div className={`rounded-xl p-3 text-center border ${parseFloat(summary.remainingArea) < 0 ? 'bg-rose-50 border-rose-100' : 'bg-slate-50 border-slate-100'}`}>
+                        <div className={`text-xl font-bold mb-0.5 ${parseFloat(summary.remainingArea) < 0 ? 'text-rose-600' : 'text-amber-500'}`}>
                             {summary.remainingArea}
                         </div>
-                        <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{dict.wizard.plots.summary.remainingArea} ({summary.unit})</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{dict.wizard.plots.summary.remainingArea} ({summary.unit})</div>
                     </div>
-                    <div className="bg-white/60 backdrop-blur rounded-xl p-4 text-center border border-white shadow-sm">
-                        <div className="text-2xl font-bold text-blue-600 mb-1">{summary.qrCount}</div>
-                        <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{dict.wizard.plots.summary.qrCount}</div>
+                    <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+                        <div className="text-xl font-bold text-blue-600 mb-0.5">{summary.qrCount}</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{dict.wizard.plots.summary.qrCount}</div>
                     </div>
                 </div>
             </div>
 
             {/* Plot List & Add Button */}
-            <div className="space-y-6">
+            <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-lg text-primary-900 flex items-center gap-2">
-                        <span className="w-6 h-6 rounded bg-primary text-white flex items-center justify-center text-xs shadow-sm">
+                    <h4 className="font-bold text-base text-slate-800 flex items-center gap-2">
+                        <span className="w-5 h-5 rounded bg-emerald-600 text-white flex items-center justify-center text-[10px] shadow-sm">
                             {plots.length}
                         </span>
                         {dict.wizard.plots.list.title}
@@ -192,53 +188,52 @@ export const StepPlots = () => {
                 </div>
 
                 {plots.length === 0 ? (
-                    <div className="text-center py-16 px-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-3xl flex flex-col items-center justify-center gap-4 text-text-muted group hover:border-primary-300 hover:bg-white transition-all duration-300 cursor-pointer" onClick={() => setIsFormExpanded(true)}>
-                        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary-50 group-hover:text-primary transition-all duration-300">
-                            <PlantIcon className="w-8 h-8 opacity-50 group-hover:opacity-100" />
+                    <div
+                        className="text-center py-12 px-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-3 text-slate-400 cursor-pointer hover:bg-white hover:border-emerald-300 transition-all active:scale-[0.99]"
+                        onClick={() => setIsFormExpanded(true)}
+                    >
+                        <div className="w-12 h-12 rounded-full bg-white border border-slate-100 flex items-center justify-center">
+                            <PlantIcon className="w-6 h-6 opacity-50" />
                         </div>
                         <div>
-                            <p className="font-medium text-lg text-primary-900">{dict.wizard.plots.list.empty.title}</p>
-                            <p className="text-sm">{dict.wizard.plots.list.empty.subtitle}</p>
+                            <p className="font-medium text-slate-900">{dict.wizard.plots.list.empty.title}</p>
+                            <p className="text-xs">{dict.wizard.plots.list.empty.subtitle}</p>
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {plots.map((plot, index) => (
                             <div
                                 key={plot.id}
-                                className="gacp-card p-5 hover:shadow-lg hover:border-primary-200 hover:-translate-y-1 transition-all group relative overflow-hidden"
+                                className="bg-white rounded-2xl border border-slate-200 p-4 hover:border-emerald-200 hover:shadow-sm transition-all relative group"
                             >
-                                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-primary-50 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none opacity-50"></div>
-
-                                <span className="absolute top-3 right-3 text-[10px] font-bold text-primary-400 bg-primary-50 px-2 py-0.5 rounded-full border border-primary-100">
+                                <span className="absolute top-3 right-3 text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md">
                                     #{String(index + 1).padStart(2, '0')}
                                 </span>
 
-                                <div className="flex items-start gap-3 mb-3">
-                                    <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-xl shadow-sm">
+                                <div className="flex items-start gap-3 mb-2">
+                                    <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-lg">
                                         {currentSystem.icon}
                                     </div>
-                                    <div className="pt-0.5">
-                                        <h5 className="font-bold text-lg text-primary-900 leading-tight">{plot.name}</h5>
-                                        <span className="text-xs font-medium text-text-secondary">
+                                    <div>
+                                        <h5 className="font-bold text-base text-slate-900 leading-tight">{plot.name}</h5>
+                                        <span className="text-xs font-medium text-slate-500 block mt-0.5">
                                             {plot.areaSize} {plot.areaUnit === 'Rai' ? 'ไร่' : plot.areaUnit === 'Ngan' ? 'งาน' : 'ตร.ม.'}
                                         </span>
                                     </div>
                                 </div>
 
-                                {/* Badges */}
-                                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
-                                    {plot.soilType && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-100">{dict.wizard.plots.list.badges.soil}</span>}
-                                    {plot.seedSource && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-green-50 text-green-700 border border-green-100">{dict.wizard.plots.list.badges.seed}</span>}
-                                    {plot.hasIPMPlan && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100">{dict.wizard.plots.list.badges.ipm}</span>}
+                                <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-slate-50">
+                                    {plot.soilType && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-100">{dict.wizard.plots.list.badges.soil}</span>}
+                                    {plot.seedSource && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100">{dict.wizard.plots.list.badges.seed}</span>}
+                                    {plot.hasIPMPlan && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100">{dict.wizard.plots.list.badges.ipm}</span>}
                                 </div>
 
                                 <button
                                     onClick={(e) => { e.stopPropagation(); handleRemovePlot(plot.id); }}
-                                    className="absolute bottom-3 right-3 p-1.5 text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                                    title="ลบแปลง"
+                                    className="absolute bottom-3 right-3 p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                                 >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
                                 </button>
                             </div>
                         ))}
@@ -250,35 +245,33 @@ export const StepPlots = () => {
             <div className={`
                 bg-white rounded-2xl border transition-all duration-300 overflow-hidden
                 ${isFormExpanded
-                    ? 'border-primary shadow-lg ring-1 ring-primary-100'
-                    : 'border-dashed border-gray-300 hover:border-primary-300 hover:shadow-md'
+                    ? 'border-emerald-500 shadow-sm ring-1 ring-emerald-500/10'
+                    : 'border-dashed border-slate-300'
                 }
             `}>
                 <button
                     onClick={() => setIsFormExpanded(!isFormExpanded)}
-                    className={`w-full p-5 text-left flex items-center justify-between transition-colors ${isFormExpanded ? 'bg-gray-50 border-b border-gray-200' : 'hover:bg-gray-50'}`}
+                    className={`w-full p-4 text-left flex items-center justify-between transition-colors ${isFormExpanded ? 'bg-slate-50 border-b border-slate-100' : 'hover:bg-slate-50/50'}`}
                 >
                     <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isFormExpanded ? 'bg-primary text-white rotate-45' : 'bg-gray-100 text-gray-400'}`}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${isFormExpanded ? 'bg-emerald-500 text-white rotate-45' : 'bg-slate-100 text-slate-400'}`}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </div>
                         <div>
-                            <span className={`font-bold block ${isFormExpanded ? 'text-primary-900' : 'text-text-secondary'}`}>{dict.wizard.plots.list.addTitle}</span>
-                            {!isFormExpanded && <span className="text-xs text-text-muted">{dict.wizard.plots.list.addSubtitle}</span>}
+                            <span className={`font-bold text-sm block ${isFormExpanded ? 'text-slate-900' : 'text-slate-500'}`}>{dict.wizard.plots.list.addTitle}</span>
                         </div>
                     </div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-gray-400 transition-transform ${isFormExpanded ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9" /></svg>
                 </button>
 
                 {isFormExpanded && (
-                    <div className="p-6 space-y-6 animate-slide-down">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="p-5 space-y-5 animate-slide-down">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="md:col-span-1">
                                 <FormLabelWithHint label={dict.wizard.plots.form.name} required />
                                 <input
                                     autoFocus
                                     placeholder={dict.wizard.plots.form.namePlaceholder}
-                                    className="gacp-input"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm font-medium"
                                     value={currentPlot.name}
                                     onChange={e => setCurrentPlot({ ...currentPlot, name: e.target.value })}
                                 />
@@ -288,7 +281,7 @@ export const StepPlots = () => {
                                 <input
                                     type="number"
                                     placeholder={dict.wizard.plots.form.areaPlaceholder}
-                                    className="gacp-input"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm font-medium"
                                     value={currentPlot.areaSize}
                                     onChange={e => setCurrentPlot({ ...currentPlot, areaSize: e.target.value })}
                                 />
@@ -296,7 +289,7 @@ export const StepPlots = () => {
                             <div>
                                 <FormLabelWithHint label={dict.wizard.plots.form.unit} />
                                 <select
-                                    className="gacp-input"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm font-medium"
                                     value={currentPlot.areaUnit}
                                     onChange={e => setCurrentPlot({ ...currentPlot, areaUnit: e.target.value })}
                                 >
@@ -308,27 +301,27 @@ export const StepPlots = () => {
                         </div>
 
                         {/* GACP Toggle */}
-                        <div className="bg-amber-50 rounded-xl border border-amber-100 overflow-hidden">
+                        <div className="bg-amber-50/50 rounded-xl border border-amber-100/50 overflow-hidden">
                             <button
                                 type="button"
                                 onClick={() => setShowGACPFields(!showGACPFields)}
-                                className="w-full text-left px-5 py-3 flex items-center justify-between hover:bg-amber-100/50 transition-colors"
+                                className="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-amber-100/50 transition-colors"
                             >
                                 <div className="flex items-center gap-2">
-                                    <PlantIcon className="w-4 h-4 text-amber-600" />
-                                    <span className="font-bold text-sm text-amber-900">{dict.wizard.plots.form.gacpTitle}</span>
-                                    <span className="text-[10px] bg-white text-amber-600 px-1.5 py-0.5 rounded border border-amber-200">Optional</span>
+                                    <PlantIcon className="w-3.5 h-3.5 text-amber-600" />
+                                    <span className="font-bold text-xs text-amber-900">{dict.wizard.plots.form.gacpTitle}</span>
+                                    <span className="text-[9px] bg-white text-amber-600 px-1 py-0.5 rounded border border-amber-200 uppercase tracking-wide">Optional</span>
                                 </div>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-amber-500 transition-transform ${showGACPFields ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9" /></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-amber-500 transition-transform ${showGACPFields ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9" /></svg>
                             </button>
 
                             {showGACPFields && (
-                                <div className="p-5 border-t border-amber-100 space-y-5 animate-slide-down">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div className="p-4 border-t border-amber-100 space-y-4 animate-slide-down bg-white/50">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <FormLabelWithHint label={dict.wizard.plots.form.soilType} />
                                             <select
-                                                className="gacp-input bg-white"
+                                                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500/20 text-sm"
                                                 value={currentPlot.soilType || ''}
                                                 onChange={e => setCurrentPlot({ ...currentPlot, soilType: e.target.value })}
                                             >
@@ -341,7 +334,7 @@ export const StepPlots = () => {
                                         <div>
                                             <FormLabelWithHint label={dict.wizard.plots.form.seedSource} />
                                             <select
-                                                className="gacp-input bg-white"
+                                                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500/20 text-sm"
                                                 value={currentPlot.seedSource || ''}
                                                 onChange={e => setCurrentPlot({ ...currentPlot, seedSource: e.target.value })}
                                             >
@@ -353,27 +346,27 @@ export const StepPlots = () => {
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col gap-3">
-                                        <div className="flex items-center gap-3">
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center gap-2">
                                             <input
                                                 type="checkbox"
                                                 id="hasIPMPlan"
-                                                className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300"
+                                                className="w-3.5 h-3.5 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300"
                                                 checked={currentPlot.hasIPMPlan || false}
                                                 onChange={e => setCurrentPlot({ ...currentPlot, hasIPMPlan: e.target.checked })}
                                             />
-                                            <label htmlFor="hasIPMPlan" className="text-sm font-bold text-gray-700 select-none cursor-pointer">
+                                            <label htmlFor="hasIPMPlan" className="text-xs font-bold text-slate-700 select-none cursor-pointer">
                                                 {dict.wizard.plots.form.ipmLabel}
                                             </label>
                                         </div>
 
                                         {currentPlot.hasIPMPlan && (
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-7 animate-fade-in">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-6 animate-fade-in">
                                                 {ipmMethods.map(method => (
-                                                    <label key={method.id} className="flex items-center gap-2 p-2 bg-white rounded border border-gray-200 cursor-pointer hover:border-primary-300">
+                                                    <label key={method.id} className="flex items-center gap-2 p-2 bg-white rounded border border-gray-100 cursor-pointer hover:border-emerald-200">
                                                         <input
                                                             type="checkbox"
-                                                            className="w-3.5 h-3.5 rounded text-primary border-gray-300 focus:ring-primary"
+                                                            className="w-3 h-3 rounded text-emerald-600 border-gray-300 focus:ring-emerald-500"
                                                             checked={currentPlot.ipmMethods?.includes(method.id) || false}
                                                             onChange={e => {
                                                                 const methods = currentPlot.ipmMethods || [];
@@ -381,7 +374,7 @@ export const StepPlots = () => {
                                                                 setCurrentPlot({ ...currentPlot, ipmMethods: newMethods });
                                                             }}
                                                         />
-                                                        <span className="text-xs text-gray-700">{method.nameTH}</span>
+                                                        <span className="text-[10px] text-slate-700">{method.nameTH}</span>
                                                     </label>
                                                 ))}
                                             </div>
@@ -395,9 +388,9 @@ export const StepPlots = () => {
                             <button
                                 onClick={handleAddPlot}
                                 disabled={!currentPlot.name || !currentPlot.areaSize}
-                                className="px-6 py-2.5 rounded-xl bg-primary text-white font-bold hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md flex items-center gap-2"
+                                className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95 flex items-center gap-2 text-sm"
                             >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                                 {dict.wizard.plots.list.addBtn}
                             </button>
                         </div>
@@ -407,7 +400,7 @@ export const StepPlots = () => {
 
             <WizardNavigation
                 onNext={() => router.push('/farmer/applications/new/step/5')}
-                onBack={() => router.push('/farmer/applications/new/step/3')} // Correctly point back to Step 3 (Farm/Land)
+                onBack={() => router.push('/farmer/applications/new/step/3')}
                 isNextDisabled={plots.length === 0}
                 nextLabel={dict.wizard.navigation.next}
                 backLabel={dict.wizard.navigation.back}

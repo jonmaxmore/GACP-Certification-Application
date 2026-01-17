@@ -1,136 +1,58 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { useWizardStore } from './hooks/useWizardStore';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
-// Official step configuration - 11 steps total
-const STEPS = [
-    { title: 'ข้อมูลพืช', titleEN: 'Plant & Purpose' },
-    { title: 'ผู้ขอ', titleEN: 'Applicant' },
-    { title: 'ที่ตั้ง', titleEN: 'Site Location' },
-    { title: 'แปลง', titleEN: 'Plot Details' },
-    { title: 'ผลผลิต', titleEN: 'Production' },
-    { title: 'เอกสาร', titleEN: 'Documents' },
-    { title: 'ตรวจสอบ', titleEN: 'Review' },
-    { title: 'ใบเสนอราคา', titleEN: 'Quotation' },
-    { title: 'ส่งคำขอ', titleEN: 'Submit' },
-    { title: 'ชำระเงิน', titleEN: 'Payment' },
-    { title: 'สำเร็จ', titleEN: 'Complete' },
-];
+const TOTAL_STEPS = 11;
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
     const { state: { currentStep } } = useWizardStore();
+    const router = useRouter();
     const pathname = usePathname();
 
     // Derive step from URL or fallback to store
     const stepMatch = pathname?.match(/\/step\/(\d+)/);
-    const urlStep = stepMatch ? parseInt(stepMatch[1], 10) - 1 : currentStep;
-    const activeStep = urlStep >= 0 ? urlStep : currentStep;
+    const activeStep = stepMatch ? parseInt(stepMatch[1], 10) : (currentStep + 1);
+
+    // Progress percentage
+    const progress = (activeStep / TOTAL_STEPS) * 100;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50/50 to-teal-50/30">
-            {/* Official Header with DTAM Branding */}
-            <header className="bg-white/90 backdrop-blur-md border-b border-dtam/30 sticky top-0 z-30 shadow-soft">
-                <div className="max-w-[1600px] mx-auto px-6 py-4">
-                    <div className="flex items-center justify-between">
-                        {/* Logo + Title */}
-                        <div className="flex items-center gap-4">
-                            <div className="relative w-14 h-14 flex-shrink-0">
-                                <Image
-                                    src="/images/dtam-logo.png"
-                                    alt="กรมการแพทย์แผนไทยและการแพทย์ทางเลือก"
-                                    fill
-                                    className="object-contain"
-                                    priority
-                                />
-                            </div>
-                            <div>
-                                <h1 className="text-xl font-bold text-dtam-dark">
-                                    ยื่นคำขอใบรับรอง GACP
-                                </h1>
-                                <p className="text-sm text-dtam">
-                                    กรมการแพทย์แผนไทยและการแพทย์ทางเลือก
-                                </p>
-                            </div>
-                        </div>
+        <div className="min-h-screen bg-white font-sans text-slate-900 flex flex-col items-center">
 
-                        {/* Current Step Badge - Glassmorphism Style */}
-                        <div className="flex items-center gap-4">
-                            <div className="text-right">
-                                <p className="text-sm font-semibold text-dtam">
-                                    ขั้นตอนที่ {activeStep + 1} / {STEPS.length}
-                                </p>
-                                <p className="text-sm text-content-secondary">
-                                    {STEPS[activeStep]?.title}
-                                </p>
-                            </div>
-                            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-dtam-light to-dtam text-white flex items-center justify-center font-bold text-lg shadow-glass">
-                                {activeStep + 1}
-                            </div>
-                        </div>
-                    </div>
+            {/* Native App Header: [X] Title [Next/Save] */}
+            <div className="w-full max-w-[600px] border-b border-slate-100 sticky top-0 bg-white/95 backdrop-blur z-50">
+                <div className="flex items-center justify-between px-4 h-14">
+                    <button
+                        onClick={() => router.push('/farmer/dashboard')}
+                        className="p-2 -ml-2 rounded-full hover:bg-slate-100 transition-colors"
+                    >
+                        <svg viewBox="0 0 24 24" className="w-6 h-6 stroke-slate-900" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+
+                    <span className="font-bold text-lg">New Request</span>
+
+                    {/* Placeholder for 'Save' or 'Next' if we want it in header, but keeping it empty for valid 'Post' feel */}
+                    <div className="w-10"></div>
                 </div>
 
-                {/* Progress Bar - Full Width for Desktop */}
-                <div className="bg-gradient-to-r from-emerald-50/80 via-white to-green-50/50 px-6 py-3 border-t border-emerald-100">
-                    <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-2">
-                        {STEPS.map((step, i) => {
-                            const isActive = i === activeStep;
-                            const isCompleted = i < activeStep;
-                            return (
-                                <div key={i} className="flex items-center flex-1 last:flex-initial">
-                                    <button
-                                        type="button"
-                                        disabled={i > activeStep}
-                                        className={`
-                                            flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all
-                                            ${isActive
-                                                ? 'bg-gradient-to-br from-dtam-light to-dtam text-white shadow-glass'
-                                                : isCompleted
-                                                    ? 'bg-dtam-100 text-dtam hover:bg-dtam-200 cursor-pointer'
-                                                    : 'bg-surface-100 text-content-muted cursor-not-allowed'
-                                            }
-                                        `}
-                                    >
-                                        <span className={`
-                                            w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold
-                                            ${isActive
-                                                ? 'bg-white/30 text-white'
-                                                : isCompleted
-                                                    ? 'bg-dtam text-white'
-                                                    : 'bg-surface-200 text-content-muted'
-                                            }
-                                        `}>
-                                            {isCompleted ? '✓' : i + 1}
-                                        </span>
-                                        <span className="hidden desktop:inline whitespace-nowrap">{step.title}</span>
-                                    </button>
-                                    {i < STEPS.length - 1 && (
-                                        <div className={`flex-1 h-0.5 mx-2 min-w-[16px] ${isCompleted ? 'bg-dtam' : 'bg-surface-200'}`} />
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
+                {/* Minimal Progress Line */}
+                <div className="h-1 w-full bg-slate-100">
+                    <div
+                        className="h-full bg-primary transition-all duration-300 ease-out"
+                        style={{ width: `${progress}%` }}
+                    />
                 </div>
-            </header>
+            </div>
 
-            {/* Main Content - Wide Desktop Layout */}
-            <main className="max-w-[1400px] mx-auto px-6 py-8">
-                <div className="bg-white rounded-2xl border border-emerald-100/50 shadow-xl shadow-emerald-500/5 min-h-[700px]">
-                    <div className="p-8 desktop:p-10">
-                        {children}
-                    </div>
+            {/* Main Content: Focused Feed Style */}
+            <main className="w-full max-w-[600px] flex-1 pb-20">
+                <div className="animate-fade-in">
+                    {children}
                 </div>
             </main>
 
-            {/* Footer */}
-            <footer className="py-8 text-center text-sm text-emerald-700/60 mt-8">
-                <p>ระบบรับรองมาตรฐาน GACP | กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</p>
-            </footer>
         </div>
     );
 }
-

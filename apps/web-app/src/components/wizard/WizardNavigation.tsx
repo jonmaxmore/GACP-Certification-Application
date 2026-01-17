@@ -33,7 +33,7 @@ export const WizardNavigation: React.FC<WizardNavigationProps> = ({
                     <button
                         onClick={onBack}
                         disabled={isBackDisabled}
-                        className="gacp-btn-secondary group"
+                        className="btn btn-outline border-base-300 bg-white text-base-content hover:bg-base-200 group"
                     >
                         <svg
                             width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -55,7 +55,7 @@ export const WizardNavigation: React.FC<WizardNavigationProps> = ({
                     <button
                         onClick={onNext}
                         disabled={isNextDisabled || isSubmitting}
-                        className="gacp-btn-primary group min-w-[160px]"
+                        className="btn btn-primary text-white group min-w-[160px]"
                     >
                         {isSubmitting ? (
                             <>

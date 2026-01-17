@@ -153,7 +153,7 @@ export default function VerifyIdentityPage() {
 
                 <button
                     onClick={() => router.push('/farmer/dashboard')}
-                    className="gacp-btn-primary w-full py-5 rounded-2.5xl text-lg font-black"
+                    className="btn btn-primary text-white w-full py-5 rounded-2.5xl text-lg font-black"
                 >
                     เข้าสู่หน้าแดชบอร์ด
                     <Icons.ArrowRight className="w-6 h-6 ml-2" />
@@ -324,7 +324,7 @@ export default function VerifyIdentityPage() {
                             type="submit"
                             id="verify-form-btn"
                             disabled={isSubmitting}
-                            className="w-full gacp-btn-primary py-5 rounded-3xl text-lg font-black tracking-tight"
+                            className="w-full btn btn-primary text-white py-5 rounded-3xl text-lg font-black tracking-tight"
                         >
                             {isSubmitting ? (
                                 <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>

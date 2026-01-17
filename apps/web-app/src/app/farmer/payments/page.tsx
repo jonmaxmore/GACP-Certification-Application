@@ -121,7 +121,8 @@ export default function PaymentsPage() {
         <div className="space-y-8 animate-fade-in pb-20">
             {/* Header */}
             <div className="bg-gradient-to-br from-[#1e293b] to-[#0f172a] rounded-[2rem] p-8 lg:p-12 text-white relative overflow-hidden shadow-2xl">
-                <div className="absolute inset-0 bg-[url('/images/thai-pattern-bg.png')] opacity-5 mix-blend-overlay"></div>
+                {/* Decorative background circle */}
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
                 <div className="relative z-10 flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl lg:text-4xl font-black mb-2 tracking-tight">Financial Center</h1>

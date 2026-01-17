@@ -51,7 +51,7 @@ export const StepQuote = () => {
     };
 
     return (
-        <div className="space-y-8 animate-fade-in pb-12 max-w-5xl mx-auto">
+        <div className="space-y-6 animate-fade-in pb-12 max-w-5xl mx-auto">
             {/* Header */}
             <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-primary gradient-mask rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-primary-50">
@@ -59,206 +59,178 @@ export const StepQuote = () => {
                 </div>
                 <div>
                     <h2 className="text-2xl font-bold text-primary-900">{dict.wizard.quote.title}</h2>
-                    <p className="text-text-secondary">{dict.wizard.quote.subtitle}</p>
+                    <p className="text-slate-500 text-sm">{dict.wizard.quote.subtitle}</p>
                 </div>
             </div>
 
             {/* Instruction Banner */}
-            <div className="bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 rounded-[2.5rem] p-10 shadow-soft relative overflow-hidden group animate-slide-up">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none group-hover:bg-primary/10 transition-all duration-1000"></div>
-
-                <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-8">
-                    <div className="w-20 h-20 rounded-[2rem] bg-white text-primary flex items-center justify-center shadow-premium-hover shrink-0 scale-110 md:scale-100">
-                        <Icons.Calculator className="w-10 h-10" />
-                    </div>
-                    <div className="text-center md:text-left">
-                        <h3 className="font-black text-primary-900 text-2xl mb-3 tracking-tight">{dict.wizard.quote.milestone1Title}</h3>
-                        <p className="text-gray-500 text-sm leading-relaxed max-w-2xl">
-                            {dict.wizard.quote.milestone1Desc}
-                        </p>
-                    </div>
+            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 flex flex-col md:flex-row gap-4 items-start">
+                <div className="w-12 h-12 rounded-xl bg-white text-indigo-600 flex items-center justify-center shadow-sm shrink-0">
+                    <Icons.Calculator className="w-6 h-6" />
+                </div>
+                <div>
+                    <h3 className="font-bold text-indigo-900 text-lg mb-1">{dict.wizard.quote.milestone1Title}</h3>
+                    <p className="text-slate-600 text-sm leading-relaxed max-w-2xl">
+                        {dict.wizard.quote.milestone1Desc}
+                    </p>
                 </div>
             </div>
 
             {/* Quote Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: '100ms' }}>
 
                 {/* DTAM Quote */}
                 <div className={`
-                    relative gacp-card p-8 transition-all duration-500 border-2 overflow-hidden group
+                    relative p-6 rounded-2xl transition-all duration-300 border bg-white flex flex-col
                     ${dtamQuoteAccepted
-                        ? 'border-emerald-500 bg-emerald-50/10 shadow-emerald-100'
-                        : 'border-white bg-white hover:border-primary/20 hover:shadow-premium'
+                        ? 'border-emerald-500 ring-1 ring-emerald-500 shadow-sm'
+                        : 'border-slate-200 hover:border-emerald-300 hover:shadow-md'
                     }
                 `}>
-                    {dtamQuoteAccepted && (
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl animate-pulse"></div>
-                    )}
-
-                    <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 bg-white rounded-2xl border border-gray-100 flex items-center justify-center p-2 shadow-sm overflow-hidden relative">
-                                <Image src="/dtam_logo_new.png" alt="DTAM" fill className="object-contain p-2" />
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-white rounded-lg border border-slate-100 flex items-center justify-center p-1 shadow-sm shrink-0">
+                                <div className="w-full h-full relative">
+                                    <Image src="/dtam_logo_new.png" alt="DTAM" fill className="object-contain" />
+                                </div>
                             </div>
                             <div>
-                                <h4 className="font-black text-gray-900 text-lg leading-none">{dict.wizard.quote.dtam.title}</h4>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Certification Body</p>
+                                <h4 className="font-bold text-slate-900 text-sm leading-tight">{dict.wizard.quote.dtam.title}</h4>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Certification Body</p>
                             </div>
                         </div>
                         {dtamQuoteAccepted && (
-                            <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-lg animate-scale-in">
-                                <CheckIcon className="w-5 h-5" />
+                            <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm animate-scale-in">
+                                <CheckIcon className="w-3.5 h-3.5" />
                             </div>
                         )}
                     </div>
 
-                    <div className="bg-gray-50/50 rounded-2xl p-6 border border-gray-100/50 mb-8 space-y-4">
-                        <div className="flex justify-between items-center text-xs">
-                            <span className="text-gray-400 font-bold uppercase tracking-widest">Fee Description</span>
-                            <span className="text-gray-400 font-bold uppercase tracking-widest">Amount</span>
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 mb-6 flex-1">
+                        <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                            <span>Fee Description</span>
+                            <span>Amount</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <p className="text-sm font-bold text-gray-700">{dict.wizard.quote.dtam.feeLabel}</p>
-                            <p className="text-xl font-black text-gray-900">฿{dtamFee.toLocaleString()}</p>
+                            <p className="text-sm font-medium text-slate-700">{dict.wizard.quote.dtam.feeLabel}</p>
+                            <p className="text-lg font-black text-slate-900">฿{dtamFee.toLocaleString()}</p>
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-3">
-                        <div className="flex justify-between items-baseline mb-2 px-1">
-                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Quote Total</span>
-                            <span className={`text-4xl font-black transition-colors ${dtamQuoteAccepted ? 'text-emerald-600' : 'text-gray-900'}`}>
-                                ฿{dtamFee.toLocaleString()}
-                            </span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            <button
-                                onClick={() => setShowDtamQuote(true)}
-                                className="px-4 py-3 rounded-2xl bg-white border border-gray-200 text-gray-500 font-bold text-xs hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
-                            >
-                                <Icons.Eye className="w-4 h-4" />
-                                {dict.wizard.quote.buttons.viewDetails}
-                            </button>
-                            <button
-                                onClick={() => setDtamQuoteAccepted(!dtamQuoteAccepted)}
-                                className={`
-                                    px-4 py-3 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-sm
-                                    ${dtamQuoteAccepted
-                                        ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                                        : 'bg-primary text-white hover:shadow-premium'
-                                    }
-                                `}
-                            >
-                                {dtamQuoteAccepted ? <CheckIcon className="w-4 h-4" /> : <Icons.CheckCircle className="w-4 h-4" />}
-                                {dtamQuoteAccepted ? dict.wizard.quote.buttons.accepted : dict.wizard.quote.buttons.accept}
-                            </button>
-                        </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowDtamQuote(true)}
+                            className="flex-1 px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+                        >
+                            <Icons.Eye className="w-3.5 h-3.5" />
+                            {dict.wizard.quote.buttons.viewDetails}
+                        </button>
+                        <button
+                            onClick={() => setDtamQuoteAccepted(!dtamQuoteAccepted)}
+                            className={`
+                                flex-1 px-3 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm
+                                ${dtamQuoteAccepted
+                                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                                    : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                                }
+                            `}
+                        >
+                            {dtamQuoteAccepted ? <CheckIcon className="w-3.5 h-3.5" /> : <Icons.CheckCircle className="w-3.5 h-3.5" />}
+                            {dtamQuoteAccepted ? dict.wizard.quote.buttons.accepted : dict.wizard.quote.buttons.accept}
+                        </button>
                     </div>
                 </div>
 
                 {/* Platform Quote */}
                 <div className={`
-                    relative gacp-card p-8 transition-all duration-500 border-2 overflow-hidden group
+                    relative p-6 rounded-2xl transition-all duration-300 border bg-white flex flex-col
                     ${platformQuoteAccepted
-                        ? 'border-blue-500 bg-blue-50/10 shadow-blue-100'
-                        : 'border-white bg-white hover:border-primary/20 hover:shadow-premium'
+                        ? 'border-blue-500 ring-1 ring-blue-500 shadow-sm'
+                        : 'border-slate-200 hover:border-blue-300 hover:shadow-md'
                     }
                 `}>
-                    {platformQuoteAccepted && (
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl animate-pulse"></div>
-                    )}
-
-                    <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-200">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black text-sm shadow-sm shrink-0">
                                 GP
                             </div>
                             <div>
-                                <h4 className="font-black text-gray-900 text-lg leading-none">{dict.wizard.quote.platform.title}</h4>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Software Platform</p>
+                                <h4 className="font-bold text-slate-900 text-sm leading-tight">{dict.wizard.quote.platform.title}</h4>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Software Platform</p>
                             </div>
                         </div>
                         {platformQuoteAccepted && (
-                            <div className="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-lg animate-scale-in">
-                                <CheckIcon className="w-5 h-5" />
+                            <div className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-sm animate-scale-in">
+                                <CheckIcon className="w-3.5 h-3.5" />
                             </div>
                         )}
                     </div>
 
-                    <div className="bg-gray-50/50 rounded-2xl p-6 border border-gray-100/50 mb-8 space-y-4">
-                        <div className="flex justify-between items-center text-xs">
-                            <span className="text-gray-400 font-bold uppercase tracking-widest">Fee Description</span>
-                            <span className="text-gray-400 font-bold uppercase tracking-widest">Amount</span>
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 mb-6 flex-1">
+                        <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                            <span>Fee Description</span>
+                            <span>Amount</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <p className="text-sm font-bold text-gray-700">{dict.wizard.quote.platform.feeLabel}</p>
-                            <p className="text-xl font-black text-gray-900">฿{platformFee.toLocaleString()}</p>
+                            <p className="text-sm font-medium text-slate-700">{dict.wizard.quote.platform.feeLabel}</p>
+                            <p className="text-lg font-black text-slate-900">฿{platformFee.toLocaleString()}</p>
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-3">
-                        <div className="flex justify-between items-baseline mb-2 px-1">
-                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Quote Total</span>
-                            <span className={`text-4xl font-black transition-colors ${platformQuoteAccepted ? 'text-blue-600' : 'text-gray-900'}`}>
-                                ฿{platformFee.toLocaleString()}
-                            </span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            <button
-                                onClick={() => setShowPlatformQuote(true)}
-                                className="px-4 py-3 rounded-2xl bg-white border border-gray-200 text-gray-500 font-bold text-xs hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
-                            >
-                                <Icons.Eye className="w-4 h-4" />
-                                {dict.wizard.quote.buttons.viewDetails}
-                            </button>
-                            <button
-                                onClick={() => setPlatformQuoteAccepted(!platformQuoteAccepted)}
-                                className={`
-                                    px-4 py-3 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-sm
-                                    ${platformQuoteAccepted
-                                        ? 'bg-blue-500 text-white hover:bg-blue-600'
-                                        : 'bg-primary text-white hover:shadow-premium'
-                                    }
-                                `}
-                            >
-                                {platformQuoteAccepted ? <Icons.CheckCircle className="w-4 h-4" /> : <Icons.CheckCircle className="w-4 h-4" />}
-                                {platformQuoteAccepted ? dict.wizard.quote.buttons.accepted : dict.wizard.quote.buttons.accept}
-                            </button>
-                        </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowPlatformQuote(true)}
+                            className="flex-1 px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+                        >
+                            <Icons.Eye className="w-3.5 h-3.5" />
+                            {dict.wizard.quote.buttons.viewDetails}
+                        </button>
+                        <button
+                            onClick={() => setPlatformQuoteAccepted(!platformQuoteAccepted)}
+                            className={`
+                                flex-1 px-3 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm
+                                ${platformQuoteAccepted
+                                    ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                                }
+                            `}
+                        >
+                            {platformQuoteAccepted ? <Icons.CheckCircle className="w-3.5 h-3.5" /> : <Icons.CheckCircle className="w-3.5 h-3.5" />}
+                            {platformQuoteAccepted ? dict.wizard.quote.buttons.accepted : dict.wizard.quote.buttons.accept}
+                        </button>
                     </div>
                 </div>
             </div>
 
             {/* Net Total Summary */}
             <div className={`
-                transition-all duration-700 transform px-2
-                ${allAccepted ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-40 grayscale'}
+                transition-all duration-500 transform
+                ${allAccepted ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-50 grayscale'}
             `}>
-                <div className="bg-gray-900 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden group border border-white/5">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[100px] -mr-40 -mt-40 pointer-events-none"></div>
-
-                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10">
-                        <div className="space-y-6 text-center md:text-left">
-                            <div>
-                                <h4 className="text-2xl font-black tracking-tight mb-2">{dict.wizard.quote.summary.netTotal}</h4>
-                                <p className="text-white/40 text-xs font-medium uppercase tracking-widest">Milestone 1: Application & Document Audit</p>
-                            </div>
-                            <div className="flex flex-wrap justify-center md:justify-start items-center gap-4">
-                                <div className={`flex items-center gap-3 px-4 py-2 rounded-2xl border transition-all ${dtamQuoteAccepted ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-white/30'}`}>
-                                    <Icons.CheckCircle className="w-4 h-4" />
-                                    <span className="text-xs font-black uppercase tracking-widest">DTAM Accepted</span>
-                                </div>
-                                <div className={`flex items-center gap-3 px-4 py-2 rounded-2xl border transition-all ${platformQuoteAccepted ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-white/5 border-white/10 text-white/30'}`}>
-                                    <Icons.CheckCircle className="w-4 h-4" />
-                                    <span className="text-xs font-black uppercase tracking-widest">Platform Accepted</span>
-                                </div>
-                            </div>
+                <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="text-center md:text-left space-y-2">
+                        <div>
+                            <h4 className="text-lg font-bold tracking-tight">{dict.wizard.quote.summary.netTotal}</h4>
+                            <p className="text-slate-400 text-[10px] font-medium uppercase tracking-wider">Milestone 1: Application & Document Audit</p>
                         </div>
-
-                        <div className="flex flex-col items-center md:items-end gap-2 bg-white/5 p-8 rounded-[2rem] border border-white/10 min-w-[280px]">
-                            <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">{dict.wizard.quote.summary.totalLabel}</p>
-                            <p className="text-6xl font-black tracking-tighter shadow-primary drop-shadow-2xl">฿{totalMilestone1.toLocaleString()}</p>
-                            <p className="text-[10px] text-white/30 font-medium">* รวมภาษีมูลค่าเพิ่มแล้ว</p>
+                        <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                            {dtamQuoteAccepted && (
+                                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-wider">
+                                    <Icons.CheckCircle className="w-3 h-3" /> DTAM
+                                </span>
+                            )}
+                            {platformQuoteAccepted && (
+                                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/20 text-[10px] font-bold uppercase tracking-wider">
+                                    <Icons.CheckCircle className="w-3 h-3" /> Platform
+                                </span>
+                            )}
                         </div>
+                    </div>
+
+                    <div className="flex flex-col items-center md:items-end">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{dict.wizard.quote.summary.totalLabel}</p>
+                        <p className="text-4xl font-black tracking-tight text-white mb-1">฿{totalMilestone1.toLocaleString()}</p>
+                        <p className="text-[10px] text-slate-500">* รวมภาษีมูลค่าเพิ่มแล้ว</p>
                     </div>
                 </div>
             </div>

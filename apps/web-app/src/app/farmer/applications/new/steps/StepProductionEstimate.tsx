@@ -73,26 +73,27 @@ export const StepProductionEstimate = () => {
     const canProceed = estimatedPlants > 0;
 
     return (
-        <div className="space-y-8 animate-fade-in max-w-5xl mx-auto pb-12">
+    return (
+        <div className="space-y-6 animate-fade-in px-4 max-w-xl mx-auto pb-12">
             {/* Header */}
             <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-primary gradient-mask rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-primary-50">
                     7
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold text-primary-900">{dict.wizard.preview?.headers?.production || 'ประมาณการผลผลิต (Production Estimate)'}</h2>
-                    <p className="text-text-secondary">ข้อมูลสำหรับประเมินศักยภาพการผลิตและตรวจสอบมาตรฐาน GACP</p>
+                    <h2 className="text-2xl font-bold text-primary-900">{dict.wizard.preview?.headers?.production || 'ประมาณการผลผลิต'}</h2>
+                    <p className="text-slate-500 text-sm">ข้อมูลสำหรับประเมินศักยภาพการผลิตและตรวจสอบมาตรฐาน GACP</p>
                 </div>
             </div>
 
             {/* Info Banner */}
-            <div className="p-6 bg-blue-50/80 backdrop-blur-sm border border-blue-200 rounded-2xl flex gap-4 text-blue-900 text-sm shadow-sm animate-slide-up">
-                <div className="p-2 bg-white rounded-xl shadow-sm h-fit">
-                    <InfoIcon className="w-6 h-6 text-blue-600" />
+            <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50 flex gap-3">
+                <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <InfoIcon className="w-3 h-3 text-blue-600" />
                 </div>
-                <div className="space-y-1">
-                    <p className="font-bold text-blue-900">คำแนะนำมาตรฐาน GACP</p>
-                    <p className="leading-relaxed text-blue-800/80">
+                <div>
+                    <p className="text-xs font-bold text-blue-800 mb-0.5">คำแนะนำมาตรฐาน GACP</p>
+                    <p className="text-[11px] leading-relaxed text-blue-700/80">
                         กรุณาระบุจำนวนต้นพืชที่คาดว่าจะปลูก เพื่อใช้ประเมินความเหมาะสมของพื้นที่ (Density Check)
                         {totalPlantsFromLots > 0 && " ระบบสรุปยอดรวมจากแปลงที่คุณแบ่งไว้ในขั้นตอนก่อนหน้าโดยอัตโนมัติ"}
                     </p>
@@ -100,109 +101,109 @@ export const StepProductionEstimate = () => {
             </div>
 
             {/* Summary Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
-                <div className="gacp-card bg-gradient-to-br from-primary-50/50 to-white text-center p-6 border-primary-100 hover:shadow-md transition-shadow">
-                    <p className="text-xs font-bold text-primary-600 uppercase tracking-wider mb-2">พื้นที่ปลูกทั้งหมด</p>
-                    <p className="text-4xl font-black text-primary-900">{totalAreaRai} <span className="text-lg text-primary-600 font-medium">ไร่</span></p>
+            <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">พื้นที่ปลูก</p>
+                    <p className="text-lg font-black text-slate-800">{totalAreaRai} <span className="text-[10px] text-slate-400 font-bold">ไร่</span></p>
                 </div>
-                <div className="gacp-card bg-gradient-to-br from-indigo-50/50 to-white text-center p-6 border-indigo-100 hover:shadow-md transition-shadow">
-                    <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">ระบบการปลูก</p>
-                    <div className="flex items-center justify-center gap-2">
-                        <span className="text-2xl">{cultivationSystem === 'INDOOR' ? '🏭' : cultivationSystem === 'GREENHOUSE' ? '🏠' : '🌿'}</span>
-                        <p className="text-2xl font-black text-indigo-900">{systemConfig.label}</p>
+                <div className="rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ระบบ</p>
+                    <div className="flex items-center justify-center gap-1">
+                        <span className="text-base">{cultivationSystem === 'INDOOR' ? '🏭' : cultivationSystem === 'GREENHOUSE' ? '🏠' : '🌿'}</span>
+                        <p className="text-lg font-black text-slate-800 truncate text-[10px]">{systemConfig.label.split(' ')[0]}</p>
                     </div>
                 </div>
-                <div className="gacp-card bg-gradient-to-br from-teal-50/50 to-white text-center p-6 border-teal-100 hover:shadow-md transition-shadow">
-                    <p className="text-xs font-bold text-teal-600 uppercase tracking-wider mb-2">จำนวนล็อต/แปลง</p>
-                    <p className="text-4xl font-black text-teal-900">{state.lots?.length || 0} <span className="text-lg text-teal-600 font-medium">รายการ</span></p>
+                <div className="rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">แปลง</p>
+                    <p className="text-lg font-black text-slate-800">{state.lots?.length || 0} <span className="text-[10px] text-slate-400 font-bold">จุด</span></p>
                 </div>
             </div>
 
             {/* Main Estimate Form */}
-            <div className="gacp-card p-8 space-y-8 animate-slide-up relative overflow-hidden" style={{ animationDelay: '200ms' }}>
-                <div className="absolute top-0 right-0 w-64 h-64 bg-primary-100/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-
+            <div className="space-y-6">
                 {/* Estimated Plants Input */}
-                <div className="relative z-10">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
-                        <FormLabelWithHint
-                            label={dict.wizard.preview?.labels?.totalPlants || "จำนวนต้นพืชประมาณการ"}
-                            hint="จำนวนต้นทั้งหมดที่คาดว่าจะปลูกในรอบนี้"
-                            required
-                        />
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-xl border border-gray-100">
-                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                            <span className="text-xs font-medium text-gray-500">
-                                ช่วงแนะนำ: {recommendedMin.toLocaleString()} - {recommendedMax.toLocaleString()} ต้น
+                <div className="p-5 bg-white rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between">
+                        <label className="font-bold text-slate-800">จำนวนต้นพืชประมาณการ</label>
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-100 rounded-lg">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                            <span className="text-[10px] font-bold text-slate-500">
+                                แนะนำ: {recommendedMin.toLocaleString()} - {recommendedMax.toLocaleString()}
                             </span>
                         </div>
                     </div>
 
-                    <div className="relative transition-all duration-300">
+                    <div className="relative">
                         <input
                             type="number"
                             readOnly={totalPlantsFromLots > 0}
-                            className={`w-full border rounded-2xl px-6 py-5 text-4xl font-black outline-none transition-all shadow-sm
-                                ${totalPlantsFromLots > 0 ? 'bg-gray-50 text-gray-400 border-gray-100' :
-                                    validationWarning ? 'border-amber-300 bg-amber-50 focus:ring-4 focus:ring-amber-100 text-amber-900' :
-                                        'border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary-100 text-primary-900'}`}
-                            placeholder={`แนะนำ: ${recommendedDefault.toLocaleString()} ต้น`}
+                            className={`w-full bg-slate-50 border rounded-2xl px-5 py-4 text-3xl font-black outline-none transition-all text-center
+                                ${totalPlantsFromLots > 0 ? 'text-slate-400 border-slate-200' :
+                                    validationWarning ? 'border-amber-300 bg-amber-50 text-amber-900 focus:ring-4 focus:ring-amber-100' :
+                                        'border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 text-slate-800'}`}
+                            placeholder="0"
                             value={estimatedPlants || ''}
                             onChange={e => setEstimatedPlants(parseInt(e.target.value) || 0)}
                         />
-                        <div className={`absolute right-6 top-1/2 -translate-y-1/2 font-black text-2xl pointer-events-none py-2 px-4 rounded-xl ${totalPlantsFromLots > 0 ? 'bg-gray-100 text-gray-300' : 'bg-primary-50 text-primary-500'}`}>
-                            ต้น
-                        </div>
+                        <span className="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">ต้น</span>
                     </div>
 
                     {totalPlantsFromLots > 0 && (
-                        <p className="mt-3 text-sm text-primary-600 flex items-center gap-2 font-medium">
-                            <Icons.CheckCircle className="w-4 h-4" />
-                            ดึงข้อมูลจากรายการล็อตที่คุณสร้างไว้อัตโนมัติ
+                        <p className="text-xs text-emerald-600 flex items-center justify-center gap-1.5 font-bold bg-emerald-50 py-2 rounded-xl">
+                            <Icons.CheckCircle className="w-3.5 h-3.5" />
+                            ดึงข้อมูลจากรายการล็อตอัตโนมัติ
                         </p>
                     )}
 
                     {validationWarning && (
-                        <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex gap-3 text-amber-800 animate-slide-down">
-                            <WarningIcon className="w-6 h-6 shrink-0" />
-                            <div className="text-sm">
+                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex gap-3 text-amber-800 animate-slide-down">
+                            <WarningIcon className="w-5 h-5 shrink-0 mt-0.5" />
+                            <div className="text-xs leading-relaxed">
                                 <p className="font-bold mb-0.5">ข้อควรระวัง</p>
-                                <p className="opacity-80">{validationWarning}</p>
+                                <p className="opacity-90">{validationWarning}</p>
                             </div>
                         </div>
                     )}
                 </div>
 
                 {/* Density Analysis */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-                    <div className="p-6 rounded-2xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 shadow-inner group transition-all hover:border-primary-200">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-2 bg-white rounded-xl shadow-sm">
-                                <PlantIcon className="w-6 h-6 text-primary-600" />
+                <div className="grid grid-cols-1 gap-4">
+                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-2">
+                                <div className="p-1.5 bg-white rounded-lg shadow-sm">
+                                    <PlantIcon className="w-4 h-4 text-emerald-600" />
+                                </div>
+                                <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">ความหนาแน่น</span>
                             </div>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-100 px-2 py-1 rounded-md">Analysis</span>
+                            <span className="text-[10px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded shadow-sm border border-slate-100">Analysis</span>
                         </div>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">ความหนาแน่น (Plant Density)</p>
-                        <div className="flex items-baseline gap-2">
-                            <p className="text-3xl font-black text-gray-900">
+
+                        <div className="flex items-baseline gap-2 mb-3">
+                            <p className="text-3xl font-black text-slate-800">
                                 {(estimatedPlants / (totalAreaSqm || 1)).toFixed(2)}
                             </p>
-                            <span className="text-sm text-gray-400 font-bold">ต้น / ตร.ม.</span>
+                            <span className="text-xs text-slate-400 font-bold">ต้น / ตร.ม.</span>
                         </div>
-                        <div className="mt-4 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+
+                        <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
                             <div
-                                className={`h-full transition-all duration-1000 ${estimatedPlants > recommendedMax ? 'bg-amber-400' : 'bg-primary'}`}
+                                className={`h-full transition-all duration-1000 rounded-full ${estimatedPlants > recommendedMax ? 'bg-amber-400' : 'bg-emerald-500'}`}
                                 style={{ width: `${Math.min(100, (estimatedPlants / (recommendedMax || 1)) * 100)}%` }}
                             ></div>
                         </div>
+                        <div className="flex justify-between mt-1 text-[10px] font-bold text-slate-400">
+                            <span>0</span>
+                            <span>Max: {recommendedMax.toLocaleString()}</span>
+                        </div>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                         <div>
                             <FormLabelWithHint label={dict.wizard.preview?.labels?.plantingDate || "วันที่เริ่มปลูก / คาดว่าจะปลูก"} />
                             <input
                                 type="date"
-                                className="gacp-input font-bold text-primary-900"
+                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm font-bold text-slate-700"
                                 value={plantingDate}
                                 onChange={e => setPlantingDate(e.target.value)}
                             />
@@ -210,7 +211,7 @@ export const StepProductionEstimate = () => {
                         <div>
                             <FormLabelWithHint label="หมายเหตุการผลิต" hint="เช่น แผนการเก็บเกี่ยว หรือข้อมูลเพิ่มเติม..." />
                             <textarea
-                                className="gacp-input min-h-[100px] resize-none text-sm"
+                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm min-h-[100px] resize-none placeholder:text-slate-400"
                                 placeholder="ระบุข้อมูลเพิ่มเติม..."
                                 value={notes}
                                 onChange={e => setNotes(e.target.value)}

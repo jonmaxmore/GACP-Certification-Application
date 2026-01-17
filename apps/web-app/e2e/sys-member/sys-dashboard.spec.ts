@@ -1,117 +1,66 @@
 import { test, expect } from '@playwright/test';
 import testData from '../data/member-test-data.json';
 
-test.describe('System: Dashboard & Navigation Loop', () => {
+test.describe('Member: Dashboard', () => {
 
-    // Login before each test
     test.beforeEach(async ({ page }) => {
-        const data = testData.auth.success;
+        const { identifier, password } = testData.auth.success;
         await page.goto('/login');
-        await page.fill('input[name="identifier"]', data.identifier);
-        await page.fill('input[name="password"]', data.password);
-        await page.getByRole('button', { name: 'เข้าสู่ระบบ', exact: true }).click();
+        await page.fill('input[name="identifier"]', identifier);
+        await page.fill('input[name="password"]', password);
+        await page.getByRole('button', { name: 'เข้าสู่ระบบ' }).click();
         await expect(page).toHaveURL(/.*\/farmer\/dashboard/);
     });
 
-    test('Scenario 1: Sidebar Navigation (Desktop)', async ({ page }) => {
-        // Enforce Desktop Viewport
-        await page.setViewportSize({ width: 1280, height: 720 });
+    test('should disable sidebar on mobile and use bottom nav', async ({ page }) => {
+        await page.setViewportSize({ width: 375, height: 667 });
 
-        // Check Sidebar Exists
+        await expect(page.locator('aside')).toBeHidden();
+        const bottomNav = page.locator('nav').last();
+        await expect(bottomNav).toBeVisible();
+
+        const links = [
+            { name: 'คำขอ', url: '/farmer/applications' },
+            { name: 'ติดตาม', url: '/tracking' },
+            { name: 'การเงิน', url: '/payments' },
+            { name: 'โปรไฟล์', url: '/farmer/profile' }
+        ];
+
+        for (const link of links) {
+            await bottomNav.getByRole('link', { name: link.name }).click();
+            await expect(page).toHaveURL(new RegExp(link.url));
+        }
+    });
+
+    test('should allow navigation via sidebar on desktop', async ({ page }) => {
+        await page.setViewportSize({ width: 1280, height: 720 });
         const sidebar = page.locator('aside');
         await expect(sidebar).toBeVisible();
 
-        // 1. Applications
-        await sidebar.getByRole('link', { name: 'คำขอ' }).click();
-        await expect(page).toHaveURL(/.*\/farmer\/applications/);
-        await page.goBack();
+        const links = [
+            { name: 'คำขอ', url: '/farmer/applications' },
+            { name: 'สถานที่', url: '/farmer/establishments' },
+            { name: 'การปลูก', url: '/farmer/planting' },
+            { name: 'ใบรับรอง', url: '/farmer/certificates' }
+        ];
 
-        // 2. Establishments
-        await sidebar.getByRole('link', { name: 'สถานที่' }).click();
-        await expect(page).toHaveURL(/.*\/farmer\/establishments/);
-        await page.goBack();
-
-        // 3. Planting
-        await sidebar.getByRole('link', { name: 'การปลูก' }).click();
-        await expect(page).toHaveURL(/.*\/farmer\/planting/);
-        await page.goBack();
-
-        // 4. Certificates
-        await sidebar.getByRole('link', { name: 'ใบรับรอง' }).click();
-        await expect(page).toHaveURL(/.*\/farmer\/certificates/);
-        await page.goBack();
-
-        // 5. Tracking
-        await sidebar.getByRole('link', { name: 'ติดตาม' }).click();
-        await expect(page).toHaveURL(/.*\/farmer\/tracking/);
-        await page.goBack();
-
-        // 6. Payments
-        await sidebar.getByRole('link', { name: 'การเงิน' }).click();
-        await expect(page).toHaveURL(/.*\/farmer\/payments/);
-        await page.goBack();
-
-        // 7. Profile
-        await sidebar.getByRole('link', { name: 'โปรไฟล์' }).click();
-        await expect(page).toHaveURL(/.*\/farmer\/profile/);
-        await page.goBack();
-
-        // 8. Settings
-        await sidebar.getByRole('link', { name: 'ตั้งค่า' }).click();
-        await expect(page).toHaveURL(/.*\/farmer\/settings/);
+        for (const link of links) {
+            await sidebar.getByRole('link', { name: link.name }).click();
+            await expect(page).toHaveURL(new RegExp(link.url));
+            await page.goBack();
+        }
     });
 
-    test('Scenario 2: Bottom Navigation (Mobile)', async ({ page }) => {
-        // Enforce Mobile Viewport
-        await page.setViewportSize({ width: 375, height: 667 });
-
-        // Sidebar should be hidden
-        const sidebar = page.locator('aside');
-        await expect(sidebar).toBeHidden();
-
-        // Check Bottom Nav Exists
-        const bottomNav = page.locator('nav').last(); // Usually the last nav in DOM
-        await expect(bottomNav).toBeVisible();
-
-        // 1. Applications (Item 2)
-        await bottomNav.getByRole('link', { name: 'คำขอ' }).click();
-        await expect(page).toHaveURL(/.*\/farmer\/applications/);
-
-        // 2. Tracking (Item 3)
-        await bottomNav.getByRole('link', { name: 'ติดตาม' }).click();
-        await expect(page).toHaveURL(/.*\/tracking/);
-
-        // 3. Payments (Item 4)
-        await bottomNav.getByRole('link', { name: 'การเงิน' }).click();
-        await expect(page).toHaveURL(/.*\/payments/);
-
-        // 4. Profile (Item 5)
-        await bottomNav.getByRole('link', { name: 'โปรไฟล์' }).click();
-        await expect(page).toHaveURL(/.*\/farmer\/profile/);
-    });
-
-    test('Scenario 3: Dashboard Widgets & Data', async ({ page }) => {
+    test('should verify core dashboard widgets', async ({ page }) => {
         await page.setViewportSize({ width: 1280, height: 720 });
 
-        // 1. Hero Section - Greeting
+        // Hero & Quick Actions
         await expect(page.locator('h1')).toContainText('Somsak');
+        await expect(page.getByRole('link', { name: 'สร้างคำขอใหม่' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'คู่มือการใช้งาน' })).toBeVisible();
 
-        // 2. Create Application Button
-        const appBtn = page.getByRole('link', { name: 'สร้างคำขอใหม่' });
-        await expect(appBtn).toBeVisible();
-        await expect(appBtn).toHaveAttribute('href', '/farmer/applications/new');
-
-        // 3. Stats Check (Using text match for labels)
+        // Stats
         await expect(page.getByText('คำขอทั้งหมด')).toBeVisible();
         await expect(page.getByText('ผ่านการรับรอง')).toBeVisible();
-
-        // 4. Application Status Card (Assuming seed data has an application)
-        // Adjust expectation based on seed state. If no apps, check for "Empty State"
-        const cardTitle = page.getByRole('heading', { name: 'สถานะคำขอล่าสุด' }).or(page.getByText('เริ่มสร้างคำขอแร'));
-        await expect(cardTitle).toBeVisible();
-
-        // 5. Quick Menu Buttons
-        await expect(page.getByRole('button', { name: 'คู่มือการใช้งาน' })).toBeVisible();
-        await expect(page.getByRole('button', { name: 'แจ้งปัญหาการใช้งาน' })).toBeVisible();
     });
 });

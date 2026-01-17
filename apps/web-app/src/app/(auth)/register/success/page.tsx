@@ -85,7 +85,7 @@ function RegisterSuccessContent() {
 
             <Link
                 href="/login"
-                className="gacp-btn-primary w-full py-5 rounded-2.5xl text-lg font-black"
+                className="btn btn-primary text-white w-full py-5 rounded-2.5xl text-lg font-black"
             >
                 ไปหน้าเข้าสู่ระบบ
                 <Icons.ArrowRight className="w-6 h-6 ml-2" />

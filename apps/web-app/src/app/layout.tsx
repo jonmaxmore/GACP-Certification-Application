@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Kanit, Sarabun, Inter } from "next/font/google";
-import "./globals.css";
+import "./tailwind.css";
 import { AuthProvider } from "@/lib/services/auth-provider";
 import SystemGuard from "@/components/system-guard";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
@@ -86,8 +86,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th">
-      <body className={`${kanit.variable} ${sarabun.variable} ${inter.variable} font-kanit antialiased`} suppressHydrationWarning>
+    <html lang="en" className="h-full overscroll-none">
+      <body className={`${inter.variable} ${kanit.variable} ${sarabun.variable} font-sans antialiased bg-white text-slate-900 h-full overflow-hidden select-none`} suppressHydrationWarning>
         <AuthProvider>
           <LanguageProvider>
             <SystemGuard>

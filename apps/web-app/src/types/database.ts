@@ -516,6 +516,8 @@ export interface FarmInput {
     cultivatedArea: number;
 }
 
-export default {
+const databaseTypes = {
     // Re-export for convenience
 };
+
+export default databaseTypes;

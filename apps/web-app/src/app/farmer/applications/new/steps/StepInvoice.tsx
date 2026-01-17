@@ -22,10 +22,13 @@ export const StepInvoice = () => {
     const [appData, setAppData] = useState<Application | null>(null);
     const [phase, setPhase] = useState<1 | 2>(1);
 
-    const invoiceNumber = `INV-${new Date().getFullYear()}${(Math.random() * 10000).toFixed(0)}`;
-    const currentDate = new Date();
-    const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 7);
+    const [invoiceNumber] = useState(() => `INV-${new Date().getFullYear()}${(Math.random() * 10000).toFixed(0)}`);
+    const [currentDate] = useState(() => new Date());
+    const [dueDate] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 7);
+        return d;
+    });
 
     const [invoiceItems, setInvoiceItems] = useState<{ label: string; amount: number }[]>([]);
 

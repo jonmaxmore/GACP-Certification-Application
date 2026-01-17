@@ -109,6 +109,7 @@ export function CultivationMethodSelector({
 
     useEffect(() => {
         if (selectedTypes.length > 0) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setLocalSelectedTypes(selectedTypes);
         }
     }, [selectedTypes]);

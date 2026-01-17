@@ -132,12 +132,12 @@ async function _sendEmailForNotification(userId, type, data, overrides) {
     };
 
     const config = EMAIL_MAP[type];
-    if (!config) return; // No email needed for this type
+    if (!config) {return;} // No email needed for this type
 
     // 2. Fetch User to get Email
     const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { email: true, firstName: true, lastName: true } // Minimal fields
+        select: { email: true, firstName: true, lastName: true }, // Minimal fields
     });
 
     if (!user || !user.email) {
@@ -149,7 +149,7 @@ async function _sendEmailForNotification(userId, type, data, overrides) {
     // Merge notification data with user data for templates
     const templateData = {
         name: `${user.firstName} ${user.lastName}`.trim() || user.email,
-        ...data
+        ...data,
     };
 
     // 4. Send Email
@@ -157,7 +157,7 @@ async function _sendEmailForNotification(userId, type, data, overrides) {
         to: user.email,
         subject: overrides.subject || config.subject, // Allow override
         template: config.template,
-        data: templateData
+        data: templateData,
     });
 }
 

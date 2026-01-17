@@ -31,7 +31,18 @@ export default function ApplicationsPage() {
     const [isDark, setIsDark] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    const loadApplications = async () => {
+        setLoading(true);
+        const result = await api.get<Application[]>("/applications/my");
+        if (result.success && result.data) {
+            const apps = Array.isArray(result.data) ? result.data : (result.data as any).data || [];
+            setApplications(apps);
+        }
+        setLoading(false);
+    };
+
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
         setIsDark(localStorage.getItem("theme") === "dark");
 
@@ -43,16 +54,6 @@ export default function ApplicationsPage() {
 
         loadApplications();
     }, [router]);
-
-    const loadApplications = async () => {
-        setLoading(true);
-        const result = await api.get<Application[]>("/applications/my");
-        if (result.success && result.data) {
-            const apps = Array.isArray(result.data) ? result.data : (result.data as any).data || [];
-            setApplications(apps);
-        }
-        setLoading(false);
-    };
 
     if (!mounted) return (
         <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-slate-900' : 'bg-stone-50'}`}>

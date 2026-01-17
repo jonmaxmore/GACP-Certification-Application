@@ -72,7 +72,9 @@ export function PlantQRCalculator({
     // Track previous values to prevent infinite loops
     const prevValuesRef = useRef({ qrCount: -1, estimatedCost: -1 });
     const onChangeRef = useRef(onChange);
-    onChangeRef.current = onChange;
+    useEffect(() => {
+        onChangeRef.current = onChange;
+    }, [onChange]);
 
     useEffect(() => {
         const prev = prevValuesRef.current;

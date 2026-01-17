@@ -13,6 +13,7 @@ const registerRateLimiter = strictRateLimiter(60 * 60 * 1000, 100); // 100 per h
 router.post('/register', registerRateLimiter, (req, res) => AuthController.register(req, res));
 router.post('/login', (req, res) => AuthController.login(req, res));
 router.post('/check-identifier', (req, res) => AuthController.checkIdentifier(req, res));
+router.post('/thaid-callback', (req, res) => AuthController.thaidCallback(req, res));
 
 // Protected Routes
 router.get('/me', authenticateFarmer, (req, res) => AuthController.getMe(req, res));

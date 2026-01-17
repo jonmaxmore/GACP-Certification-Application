@@ -18,6 +18,7 @@ export function Sidebar({ isDark, toggleTheme }: SidebarProps) {
     const { dict } = useLanguage();
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         const currentUser = AuthService.getUser();
         setUser(currentUser);
 

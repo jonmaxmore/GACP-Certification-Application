@@ -1,0 +1,71 @@
+{
+    "registration": {
+        "standard_individual": {
+            "desc": "Standard Individual Registration",
+            "accountType": "INDIVIDUAL",
+            "idCard": "1100702334033",
+            "firstName": "Somsak",
+            "lastName": "LoopTest",
+            "phoneNumber": "0812345678",
+            "password": "Password123!",
+            "expectedStatus": 200,
+            "expectedUrl": "/login"
+        },
+        "duplicate_check": {
+            "desc": "Duplicate ID Card Registration",
+            "accountType": "INDIVIDUAL",
+            "idCard": "1100702334033",
+            "firstName": "Somsak",
+            "lastName": "Duplicate",
+            "phoneNumber": "0812345679",
+            "password": "Password123!",
+            "expectedError": "เลขบัตรประชาชนนี้ถูกลงทะเบียนแล้ว"
+        },
+        "invalid_id_format": {
+            "desc": "Invalid ID Card Format (Short)",
+            "accountType": "INDIVIDUAL",
+            "idCard": "12345",
+            "firstName": "Somsak",
+            "lastName": "ShortID",
+            "phoneNumber": "0812345678",
+            "password": "Password123!",
+            "expectedError": "รหัสบัตรประชาชนไม่ถูกต้อง"
+        },
+        "text_in_id": {
+            "desc": "Text in ID Card Field",
+            "accountType": "INDIVIDUAL",
+            "idCard": "ABCD123456789",
+            "firstName": "Somsak",
+            "lastName": "TextID",
+            "phoneNumber": "0812345678",
+            "password": "Password123!",
+            "expectedError": "ตัวเลขเท่านั้น"
+        }
+    },
+    "auth": {
+        "success": {
+            "desc": "Login Success",
+            "identifier": "1100702334033",
+            "password": "Password123!",
+            "expectedUrl": "/farmer/dashboard"
+        },
+        "bad_password": {
+            "desc": "Login Failed (Bad Password)",
+            "identifier": "1100702334033",
+            "password": "WrongPassword!",
+            "expectedError": "ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง"
+        },
+        "non_existent": {
+            "desc": "Login Failed (User Not Found)",
+            "identifier": "9999999999999",
+            "password": "Password123!",
+            "expectedError": "ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง"
+        },
+        "lockout_target": {
+            "desc": "Account Lockout Target",
+            "identifier": "1234567890123",
+            "password": "Password123!",
+            "expectedError": "บัญชีถูกระงับการใช้งานชั่วคราว"
+        }
+    }
+}

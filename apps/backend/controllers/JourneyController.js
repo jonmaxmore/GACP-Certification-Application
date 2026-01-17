@@ -24,14 +24,14 @@ class JourneyController {
             res.json({
                 success: true,
                 data: journeyConfig.PURPOSES,
-                count: journeyConfig.PURPOSES.length
+                count: journeyConfig.PURPOSES.length,
             });
         } catch (error) {
             console.error('Error fetching purposes:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch purposes',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -45,14 +45,14 @@ class JourneyController {
             res.json({
                 success: true,
                 data: journeyConfig.CULTIVATION_METHODS,
-                count: journeyConfig.CULTIVATION_METHODS.length
+                count: journeyConfig.CULTIVATION_METHODS.length,
             });
         } catch (error) {
             console.error('Error fetching cultivation methods:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch cultivation methods',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -77,14 +77,14 @@ class JourneyController {
                 success: true,
                 data: layouts,
                 count: layouts.length,
-                filter: method || 'all'
+                filter: method || 'all',
             });
         } catch (error) {
             console.error('Error fetching farm layouts:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch farm layouts',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -98,14 +98,14 @@ class JourneyController {
             res.json({
                 success: true,
                 data: journeyConfig.GROWING_STYLES,
-                count: journeyConfig.GROWING_STYLES.length
+                count: journeyConfig.GROWING_STYLES.length,
             });
         } catch (error) {
             console.error('Error fetching growing styles:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch growing styles',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -123,7 +123,7 @@ class JourneyController {
             if (!config) {
                 return res.status(404).json({
                     success: false,
-                    message: `Journey config not found for purpose=${purpose}, method=${method}`
+                    message: `Journey config not found for purpose=${purpose}, method=${method}`,
                 });
             }
 
@@ -146,15 +146,15 @@ class JourneyController {
                     documents,
                     security,
                     layouts,
-                    styles
-                }
+                    styles,
+                },
             });
         } catch (error) {
             console.error('Error fetching journey config:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch journey config',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -175,7 +175,7 @@ class JourneyController {
             if (!area || !layoutId) {
                 return res.status(400).json({
                     success: false,
-                    message: 'area and layoutId are required'
+                    message: 'area and layoutId are required',
                 });
             }
 
@@ -187,15 +187,15 @@ class JourneyController {
                 data: {
                     input: { area: parseFloat(area), unit, layoutId, styleId, tiers },
                     areaSqm,
-                    ...result
-                }
+                    ...result,
+                },
             });
         } catch (error) {
             console.error('Error calculating plants:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to calculate plants',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -208,7 +208,7 @@ class JourneyController {
         try {
             const docs = Object.entries(journeyConfig.DOCUMENT_DEFINITIONS).map(([id, def]) => ({
                 id,
-                ...def
+                ...def,
             }));
 
             // Group by category
@@ -224,14 +224,14 @@ class JourneyController {
                 success: true,
                 data: docs,
                 grouped,
-                count: docs.length
+                count: docs.length,
             });
         } catch (error) {
             console.error('Error fetching documents:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch documents',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -244,7 +244,7 @@ class JourneyController {
         try {
             const security = Object.entries(journeyConfig.SECURITY_DEFINITIONS).map(([id, def]) => ({
                 id,
-                ...def
+                ...def,
             }));
 
             // Group by category
@@ -260,14 +260,14 @@ class JourneyController {
                 success: true,
                 data: security,
                 grouped,
-                count: security.length
+                count: security.length,
             });
         } catch (error) {
             console.error('Error fetching security:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch security',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -292,16 +292,16 @@ class JourneyController {
                         level: j.level,
                         requiredFieldCount: j.requiredFields.length,
                         requiredDocumentCount: j.requiredDocuments.length,
-                        securityRequirementCount: j.securityRequirements.length
-                    }))
-                }
+                        securityRequirementCount: j.securityRequirements.length,
+                    })),
+                },
             });
         } catch (error) {
             console.error('Error fetching full config:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch full config',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -315,14 +315,14 @@ class JourneyController {
             res.json({
                 success: true,
                 data: journeyConfig.GACP_CATEGORIES,
-                count: journeyConfig.GACP_CATEGORIES.length
+                count: journeyConfig.GACP_CATEGORIES.length,
             });
         } catch (error) {
             console.error('Error fetching GACP categories:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch GACP categories',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -336,14 +336,14 @@ class JourneyController {
             res.json({
                 success: true,
                 data: journeyConfig.ENVIRONMENT_CHECKLIST,
-                count: journeyConfig.ENVIRONMENT_CHECKLIST.length
+                count: journeyConfig.ENVIRONMENT_CHECKLIST.length,
             });
         } catch (error) {
             console.error('Error fetching environment checklist:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch environment checklist',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -357,14 +357,14 @@ class JourneyController {
             res.json({
                 success: true,
                 data: journeyConfig.WATER_SOURCES,
-                count: journeyConfig.WATER_SOURCES.length
+                count: journeyConfig.WATER_SOURCES.length,
             });
         } catch (error) {
             console.error('Error fetching water sources:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch water sources',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -381,13 +381,13 @@ class JourneyController {
             if (!requirements) {
                 return res.status(404).json({
                     success: false,
-                    message: `No requirements found for step ${stepNumber}`
+                    message: `No requirements found for step ${stepNumber}`,
                 });
             }
 
             // Enrich with GACP category details
             const categories = requirements.gacpCategories.map(catId =>
-                journeyConfig.GACP_CATEGORIES.find(c => c.id === catId)
+                journeyConfig.GACP_CATEGORIES.find(c => c.id === catId),
             ).filter(Boolean);
 
             // Enrich with document details
@@ -401,15 +401,15 @@ class JourneyController {
                     gacpCategories: categories,
                     fields: requirements.fields,
                     requiredDocuments: requiredDocs,
-                    optionalDocuments: optionalDocs
-                }
+                    optionalDocuments: optionalDocs,
+                },
             });
         } catch (error) {
             console.error('Error fetching step requirements:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch step requirements',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -423,14 +423,14 @@ class JourneyController {
             res.json({
                 success: true,
                 data: journeyConfig.SOIL_TYPES,
-                count: journeyConfig.SOIL_TYPES.length
+                count: journeyConfig.SOIL_TYPES.length,
             });
         } catch (error) {
             console.error('Error fetching soil types:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch soil types',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -444,14 +444,14 @@ class JourneyController {
             res.json({
                 success: true,
                 data: journeyConfig.SEED_SOURCES,
-                count: journeyConfig.SEED_SOURCES.length
+                count: journeyConfig.SEED_SOURCES.length,
             });
         } catch (error) {
             console.error('Error fetching seed sources:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch seed sources',
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -465,14 +465,14 @@ class JourneyController {
             res.json({
                 success: true,
                 data: journeyConfig.IPM_METHODS,
-                count: journeyConfig.IPM_METHODS.length
+                count: journeyConfig.IPM_METHODS.length,
             });
         } catch (error) {
             console.error('Error fetching IPM methods:', error);
             res.status(500).json({
                 success: false,
                 message: 'Failed to fetch IPM methods',
-                error: error.message
+                error: error.message,
             });
         }
     }

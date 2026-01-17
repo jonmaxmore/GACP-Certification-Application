@@ -501,6 +501,7 @@ export const Icons = {
     Document: IconDocument,
     Compass: IconCompass,
     Payment: IconPayment,
+    CreditCard: IconCreditCard,
     User: IconUser,
     // Actions
     Sun: IconSun,

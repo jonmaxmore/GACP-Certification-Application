@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { Certificate, RENEWAL_FEE } from './types';
 
@@ -10,12 +11,22 @@ interface SuccessStepProps {
 }
 
 export function SuccessStep({ certificate, renewalId, isDark }: SuccessStepProps) {
+    const [confetti] = useState(() => [...Array(30)].map((_, i) => ({
+        id: i,
+        width: 8 + Math.random() * 8,
+        height: 8 + Math.random() * 8,
+        bg: ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6'][i % 5],
+        radius: i % 3 === 0 ? '50%' : '2px',
+        left: Math.random() * 100,
+        delay: Math.random() * 0.8
+    })));
+
     return (
         <div className={`min-h-screen p-6 font-sans ${isDark ? 'bg-slate-900' : 'bg-gradient-to-b from-primary-50 to-surface-100'}`}>
             {/* Confetti */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
-                {[...Array(30)].map((_, i) => (
-                    <div key={i} className="absolute animate-[confetti_2s_ease-out_forwards]" style={{ width: `${8 + Math.random() * 8}px`, height: `${8 + Math.random() * 8}px`, background: ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6'][i % 5], borderRadius: i % 3 === 0 ? '50%' : '2px', left: `${Math.random() * 100}%`, top: '-20px', animationDelay: `${Math.random() * 0.8}s` }} />
+                {confetti.map((item) => (
+                    <div key={item.id} className="absolute animate-[confetti_2s_ease-out_forwards]" style={{ width: `${item.width}px`, height: `${item.height}px`, background: item.bg, borderRadius: item.radius, left: `${item.left}%`, top: '-20px', animationDelay: `${item.delay}s` }} />
                 ))}
             </div>
 

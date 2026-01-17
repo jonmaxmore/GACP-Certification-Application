@@ -8,7 +8,7 @@
 const { PrismaClient } = require('@prisma/client');
 
 function redactDatabaseUrl(url) {
-    if (!url || typeof url !== 'string') return url;
+    if (!url || typeof url !== 'string') { return url; }
     try {
         const parsed = new URL(url);
         if (parsed.password) {
@@ -17,7 +17,8 @@ function redactDatabaseUrl(url) {
         return parsed.toString();
     } catch {
         // Fallback redaction for non-standard URL strings
-        return url.replace(/:\/\/([^:\/]+):([^@]+)@/g, '://$1:***@');
+        const re = new RegExp('://([^:/]+):([^@]+)@', 'g');
+        return url.replace(re, '://$1:***@');
     }
 }
 
@@ -28,9 +29,9 @@ if (!global.prisma) {
         log: ['query', 'info', 'warn', 'error'],
         datasources: {
             db: {
-                url: process.env.DATABASE_URL
-            }
-        }
+                url: process.env.DATABASE_URL,
+            },
+        },
     });
 }
 const prisma = global.prisma;

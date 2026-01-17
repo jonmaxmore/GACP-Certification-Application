@@ -109,7 +109,7 @@ function ReplacementContent() {
                     <div className={`rounded-2xl p-8 border text-center ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-surface-200'}`}>
                         <div className="w-16 h-16 rounded-full bg-primary-600 flex items-center justify-center mx-auto mb-4"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg></div>
                         <h3 className={`text-xl font-semibold mb-2 ${isDark ? 'text-surface-100' : 'text-slate-900'}`}>ส่งคำขอเรียบร้อย</h3>
-                        <p className={`text-sm mb-6 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ทีมงานจะตรวจสอบและส่งใบเสนอราคาให้ท่าน<br />กรุณาตรวจสอบในหน้า "การเงิน" เพื่อดูสถานะ</p>
+                        <p className={`text-sm mb-6 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ทีมงานจะตรวจสอบและส่งใบเสนอราคาให้ท่าน<br />กรุณาตรวจสอบในหน้า &quot;การเงิน&quot; เพื่อดูสถานะ</p>
                         <div className="flex gap-3 justify-center">
                             <button onClick={() => router.push('/farmer/applications')} className={`px-6 py-3.5 rounded-xl text-sm font-medium border ${isDark ? 'border-slate-600 text-slate-400' : 'border-surface-200 text-slate-600'}`}>กลับหน้าคำขอ</button>
                             <button onClick={() => router.push('/payments')} className="px-6 py-3.5 rounded-xl text-sm font-semibold bg-gradient-to-br from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/40">ไปหน้าการเงิน</button>

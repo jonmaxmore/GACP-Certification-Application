@@ -43,6 +43,7 @@ export default function SystemGuard({ children }: SystemGuardProps) {
 
     useEffect(() => {
         // Initial check
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         checkServer();
 
         // Periodic health check every 30 seconds

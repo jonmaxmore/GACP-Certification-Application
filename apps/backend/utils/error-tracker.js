@@ -15,7 +15,7 @@ const SENTRY_ENVIRONMENT = process.env.NODE_ENV || 'development';
 const SENTRY_RELEASE = process.env.npm_package_version || '1.0.0';
 
 // Sentry-like error tracking without external dependency
-// Replace with actual Sentry SDK when ready: npm install @sentry/node
+// Replace with actual Sentry SDK when ready: npm install sentry-node
 
 class ErrorTracker {
     constructor() {

@@ -90,10 +90,12 @@ export const shadows = {
 };
 
 // Default export for convenience
-export default {
+const designTokens = {
     colors,
     typography,
     spacing,
     borderRadius,
     shadows,
 };
+
+export default designTokens;

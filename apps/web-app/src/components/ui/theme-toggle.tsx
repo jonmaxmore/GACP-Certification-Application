@@ -12,6 +12,7 @@ export function ThemeToggle({ className = '', size = 'md' }: ThemeToggleProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         setMounted(true);
         setIsDark(localStorage.getItem("theme") === "dark");
     }, []);

@@ -156,10 +156,12 @@ export function validateIdByType(
 }
 
 // Default export for convenience
-export default {
+const thaiIdValidatorUtils = {
     validateThaiId,
     validateJuristicId,
     validateCommunityEnterpriseId,
     validateIdByType,
     formatThaiId,
 };
+
+export default thaiIdValidatorUtils;

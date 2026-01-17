@@ -13,13 +13,13 @@ class MetricsService {
                 statusGroups,
                 plantGroups,
                 provinceGroups,
-                monthlyTrend
+                monthlyTrend,
             ] = await Promise.all([
                 this.getTotalApplications(),
                 this.getStatusDistribution(),
                 this.getPlantTypeDistribution(),
                 this.getProvinceDistribution(),
-                this.getMonthlyTrend()
+                this.getMonthlyTrend(),
             ]);
 
             // Process Status Groups
@@ -34,10 +34,10 @@ class MetricsService {
                 const c = g._count.status;
                 byStatus[s] = c;
 
-                if (['DOCUMENT_CHECKING', 'SUBMITTED', 'REVISION_REQUIRED', 'PAYMENT_1_PENDING'].includes(s)) pendingReview += c;
-                if (['PAYMENT_2_PENDING', 'AUDIT_PENDING', 'AUDIT_SCHEDULED', 'AUDIT_IN_PROGRESS', 'AWAITING_SCHEDULE', 'PENDING_AUDIT'].includes(s)) pendingAudit += c;
-                if (s === 'APPROVED') approved += c;
-                if (s === 'REJECTED') rejected += c;
+                if (['DOCUMENT_CHECKING', 'SUBMITTED', 'REVISION_REQUIRED', 'PAYMENT_1_PENDING'].includes(s)) {pendingReview += c;}
+                if (['PAYMENT_2_PENDING', 'AUDIT_PENDING', 'AUDIT_SCHEDULED', 'AUDIT_IN_PROGRESS', 'AWAITING_SCHEDULE', 'PENDING_AUDIT'].includes(s)) {pendingAudit += c;}
+                if (s === 'APPROVED') {approved += c;}
+                if (s === 'REJECTED') {rejected += c;}
             });
 
             return {
@@ -49,12 +49,12 @@ class MetricsService {
                     // So we combine review + audit? Or just show review? 
                     // Let's stick to the high level buckets.
                     approved,
-                    rejected
+                    rejected,
                 },
                 byStatus,
                 byPlantType: plantGroups,
                 byProvince: provinceGroups,
-                monthlyTrend
+                monthlyTrend,
             };
 
         } catch (error) {
@@ -71,7 +71,7 @@ class MetricsService {
         return await prisma.application.groupBy({
             by: ['status'],
             _count: { status: true },
-            where: { isDeleted: false }
+            where: { isDeleted: false },
         });
     }
 
@@ -92,7 +92,7 @@ class MetricsService {
             const map = {};
             result.forEach(r => {
                 const count = Number(r.count);
-                if (r.name) map[r.name] = count;
+                if (r.name) {map[r.name] = count;}
             });
             return map;
         } catch (e) {
@@ -117,7 +117,7 @@ class MetricsService {
             const map = {};
             result.forEach(r => {
                 const count = Number(r.count);
-                if (r.name) map[r.name] = count;
+                if (r.name) {map[r.name] = count;}
             });
             return map;
         } catch (e) {
@@ -144,7 +144,7 @@ class MetricsService {
             return result.map(r => ({
                 month: Number(r.month),
                 applications: Number(r.applications),
-                approved: Number(r.approved)
+                approved: Number(r.approved),
             }));
         } catch (e) {
             logger.warn('[Metrics] Monthly Trend failed:', e.message);

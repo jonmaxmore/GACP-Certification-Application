@@ -3,7 +3,9 @@ import { cookies } from 'next/headers';
 
 // Production Server - Always use this
 // Production Server - Always use this (Dev Override)
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Production Server - Always use this (Dev Override)
+// Use INTERNAL_API_URL for server-to-server communication (avoiding loopback to localhost:3000)
+const BACKEND_URL = process.env.INTERNAL_API_URL || 'http://127.0.0.1:8000';
 
 /**
  * Generic API Proxy for all /api/* endpoints (excluding /api/v2, /api/auth-*, /api/health, /api/proxy)
@@ -47,7 +49,7 @@ async function proxyRequest(request: NextRequest, path: string, method: string) 
             method,
             headers,
             body,
-            // @ts-ignore - Required for Node.js fetch with ReadableStream body
+            // @ts-expect-error - Required for Node.js fetch with ReadableStream body
             duplex: 'half'
         });
 

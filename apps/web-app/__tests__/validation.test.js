@@ -5,7 +5,7 @@
  * Must pass 100% before production deployment
  */
 
-const {
+import {
     validateThaiIdCard,
     formatThaiIdCard,
     maskThaiIdCard,
@@ -15,7 +15,7 @@ const {
     formatThaiPhone,
     validateEmail,
     validatePassword,
-} = require('../src/utils/validation');
+} from '../src/utils/validation';
 
 describe('🇹🇭 Thai ID Card Validation', () => {
     // Valid test cases

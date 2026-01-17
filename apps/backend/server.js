@@ -7,7 +7,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 function redactDatabaseUrl(url) {
-    if (!url || typeof url !== 'string') return url;
+    if (!url || typeof url !== 'string') { return url; }
     try {
         const parsed = new URL(url);
         if (parsed.password) {
@@ -15,7 +15,8 @@ function redactDatabaseUrl(url) {
         }
         return parsed.toString();
     } catch {
-        return url.replace(/:\/\/([^:\/]+):([^@]+)@/g, '://$1:***@');
+        const re = new RegExp('://([^:/]+):([^@]+)@', 'g');
+        return url.replace(re, '://$1:***@');
     }
 }
 console.log('SERVER STARTUP - DATABASE_URL:', redactDatabaseUrl(process.env.DATABASE_URL));
@@ -47,7 +48,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Security Hardening
 app.use(helmet({
     contentSecurityPolicy: false, // Disable for now if causing frontend issues, or configure strictly
-    crossOriginEmbedderPolicy: false
+    crossOriginEmbedderPolicy: false,
 }));
 
 // CORS Configuration
@@ -57,14 +58,14 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
+        // Allow requests with no origin (like mobile apps or curl requests) OR 'null' (redirects/opaque)
+        if (!origin || origin === 'null') { return callback(null, true); }
         if (allowedOrigins.indexOf(origin) === -1) {
             return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
         }
         return callback(null, true);
     },
-    credentials: true
+    credentials: true,
 }));
 
 // Rate Limiting
@@ -73,7 +74,7 @@ const globalLimiter = rateLimit({
     max: 500, // Limit each IP to 500 requests per windowMs
     standardHeaders: true,
     legacyHeaders: false,
-    message: 'Too many requests from this IP, please try again later.'
+    message: 'Too many requests from this IP, please try again later.',
 });
 
 const authLimiter = rateLimit({
@@ -81,7 +82,7 @@ const authLimiter = rateLimit({
     max: 20, // Limit each IP to 20 failed login attempts
     standardHeaders: true,
     legacyHeaders: false,
-    skipSuccessfulRequests: true // Don't count successful logins
+    skipSuccessfulRequests: true, // Don't count successful logins
 });
 
 app.use('/api', globalLimiter);

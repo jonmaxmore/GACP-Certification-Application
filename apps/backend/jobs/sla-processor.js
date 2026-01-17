@@ -16,12 +16,12 @@ const checkSlaBreaches = async (job) => {
         const staleApps = await prisma.application.findMany({
             where: {
                 status: {
-                    in: ['PENDING_AUDIT', 'DOCUMENT_APPROVED', 'SUBMITTED', 'AWAITING_SCHEDULE']
+                    in: ['PENDING_AUDIT', 'DOCUMENT_APPROVED', 'SUBMITTED', 'AWAITING_SCHEDULE'],
                 },
                 updatedAt: {
-                    lt: fiveDaysAgo
+                    lt: fiveDaysAgo,
                 },
-                isDeleted: false
+                isDeleted: false,
             },
             select: {
                 id: true,
@@ -31,10 +31,10 @@ const checkSlaBreaches = async (job) => {
                 farmer: {
                     select: {
                         firstName: true,
-                        lastName: true
-                    }
-                }
-            }
+                        lastName: true,
+                    },
+                },
+            },
         });
 
         if (staleApps.length === 0) {
@@ -56,7 +56,7 @@ const checkSlaBreaches = async (job) => {
 
             breaches.push({
                 appNo: app.applicationNumber,
-                days: daysStuck
+                days: daysStuck,
             });
         }
 

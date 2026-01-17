@@ -136,7 +136,7 @@ class OcrService {
             match: false,
             message: 'ไม่พบเลขบัตรประชาชน หรือภาพไม่ชัดเจน',
             confidence: confidence,
-            extractedText: text.substring(0, 100) // Return snippet for debug
+            extractedText: text.substring(0, 100), // Return snippet for debug
         };
 
         // 2. Direct Match

@@ -9,7 +9,7 @@ class InvoiceService {
      */
     async listAll(filters = {}, limit = 50) {
         const where = { isDeleted: false };
-        if (filters.status) where.status = filters.status;
+        if (filters.status) {where.status = filters.status;}
         if (filters.startDate && filters.endDate) {
             where.createdAt = {
                 gte: new Date(filters.startDate),
@@ -21,7 +21,7 @@ class InvoiceService {
             where,
             orderBy: { createdAt: 'desc' },
             take: limit,
-            include: { farmer: { select: { firstName: true, lastName: true, companyName: true } } }
+            include: { farmer: { select: { firstName: true, lastName: true, companyName: true } } },
         });
     }
 
@@ -30,7 +30,7 @@ class InvoiceService {
      */
     async listByFarmer(farmerId, status) {
         const where = { farmerId, isDeleted: false };
-        if (status) where.status = status;
+        if (status) {where.status = status;}
 
         return prisma.invoice.findMany({
             where,
@@ -89,7 +89,7 @@ class InvoiceService {
      */
     async generatePdf(id) {
         const invoice = await this.getById(id);
-        if (!invoice) throw new Error('Invoice not found');
+        if (!invoice) {throw new Error('Invoice not found');}
         return pdfService.generateInvoicePdf(invoice);
     }
 
@@ -112,7 +112,7 @@ class InvoiceService {
      */
     async initiateKsherPayment(id) {
         const invoice = await this.getById(id);
-        if (!invoice) throw new Error('Invoice not found');
+        if (!invoice) {throw new Error('Invoice not found');}
         if (invoice.status === 'paid' || invoice.status === 'PAID') {
             throw new Error('Invoice already paid');
         }

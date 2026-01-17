@@ -29,7 +29,7 @@ class StaffController {
 
             // Check if email already exists
             const existingUser = await prisma.user.findUnique({
-                where: { email: email.toLowerCase() }
+                where: { email: email.toLowerCase() },
             });
 
             if (existingUser) {
@@ -73,8 +73,8 @@ class StaffController {
                     // I will omit them for now to prevent crash, and log a warning.
                     status: 'ACTIVE',
                     verificationStatus: 'APPROVED', // Enum match? Schema says "NEW", "PENDING", ...
-                    isEmailVerified: true
-                }
+                    isEmailVerified: true,
+                },
             });
 
             logger.info(`Staff created: ${email} with role ${role} by ${req.user?.email || 'system'}`);
@@ -110,7 +110,7 @@ class StaffController {
 
             const where = {
                 role: { in: STAFF_ROLES },
-                accountType: 'STAFF'
+                accountType: 'STAFF',
             };
 
             if (role && STAFF_ROLES.includes(role)) {
@@ -129,11 +129,11 @@ class StaffController {
                         lastName: true,
                         role: true,
                         status: true,
-                        createdAt: true
+                        createdAt: true,
                     },
                     skip,
                     take: parseInt(limit),
-                    orderBy: { createdAt: 'desc' }
+                    orderBy: { createdAt: 'desc' },
                 }),
                 prisma.user.count({ where }),
             ]);
@@ -175,8 +175,8 @@ class StaffController {
                     role: true,
                     status: true,
                     createdAt: true,
-                    updatedAt: true
-                }
+                    updatedAt: true,
+                },
             });
 
             if (!staff || !STAFF_ROLES.includes(staff.role)) {
@@ -217,10 +217,10 @@ class StaffController {
             }
 
             const updateData = {};
-            if (firstName) updateData.firstName = firstName;
-            if (lastName) updateData.lastName = lastName;
-            if (role && STAFF_ROLES.includes(role)) updateData.role = role;
-            if (status) updateData.status = status;
+            if (firstName) {updateData.firstName = firstName;}
+            if (lastName) {updateData.lastName = lastName;}
+            if (role && STAFF_ROLES.includes(role)) {updateData.role = role;}
+            if (status) {updateData.status = status;}
 
             const updatedStaff = await prisma.user.update({
                 where: { id },
@@ -231,8 +231,8 @@ class StaffController {
                     firstName: true,
                     lastName: true,
                     role: true,
-                    status: true
-                }
+                    status: true,
+                },
             });
 
             logger.info(`Staff updated: ${updatedStaff.email} by ${req.user?.email || 'system'}`);

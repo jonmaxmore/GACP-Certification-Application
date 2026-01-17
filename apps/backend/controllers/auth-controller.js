@@ -88,7 +88,7 @@ class AuthController {
             // Handle Prisma duplicate key error (P2002)
             let errorMessage = error.message;
             let statusCode = 500;
-            
+
             if (error.code === 'P2002') {
                 const target = error.meta?.target || [];
                 const targetField = Array.isArray(target) ? target[0] : target;
@@ -127,7 +127,7 @@ class AuthController {
                 success: false,
                 error: errorMessage,
                 timestamp: new Date().toISOString(),
-                requestId: req.id || 'unknown'
+                requestId: req.id || 'unknown',
             });
         }
     }
@@ -239,7 +239,7 @@ class AuthController {
                 success: false,
                 error: errorMessage,
                 timestamp: new Date().toISOString(),
-                requestId: req.id || 'unknown'
+                requestId: req.id || 'unknown',
             });
         }
     }
@@ -247,10 +247,10 @@ class AuthController {
     async getMe(req, res) {
         try {
             if (!req.user || !req.user.id) {
-                return res.status(401).json({ 
-                    success: false, 
+                return res.status(401).json({
+                    success: false,
                     error: 'ไม่ได้รับอนุญาตให้เข้าใช้งาน กรุณาเข้าสู่ระบบใหม่',
-                    code: 'UNAUTHORIZED'
+                    code: 'UNAUTHORIZED',
                 });
             }
             const user = await AuthService.getProfile(req.user.id);
@@ -262,7 +262,7 @@ class AuthController {
             console.error('[AuthController] Get Profile Error:', error.message);
             let errorMessage = 'ไม่สามารถดึงข้อมูลผู้ใช้งานได้ กรุณาลองใหม่';
             let statusCode = 500;
-            
+
             if (error.message.includes('User not found')) {
                 statusCode = 404;
                 errorMessage = 'ไม่พบข้อมูลผู้ใช้งานนี้ในระบบ';
@@ -272,12 +272,12 @@ class AuthController {
                 statusCode = 401;
                 errorMessage = 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่';
             }
-            
-            res.status(statusCode).json({ 
-                success: false, 
+
+            res.status(statusCode).json({
+                success: false,
                 error: errorMessage,
                 timestamp: new Date().toISOString(),
-                requestId: req.id || 'unknown'
+                requestId: req.id || 'unknown',
             });
         }
     }
@@ -354,7 +354,7 @@ class AuthController {
             console.error('[AuthController] Check Identifier Error:', error.message);
             let errorMessage = 'เซิร์ฟเวอร์มีปัญหา กรุณาลองใหม่';
             let statusCode = 500;
-            
+
             if (error.message.includes('Database connection')) {
                 errorMessage = 'เซิร์ฟเวอร์มีปัญหาในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่ในภายหลัง';
             } else if (error.message.includes('Network')) {
@@ -363,13 +363,13 @@ class AuthController {
                 statusCode = 429;
                 errorMessage = 'คุณตรวจสอบข้อมูลหลายครั้งเกินไป กรุณารอสักครู่แล้วลองใหม่';
             }
-            
+
             res.status(statusCode).json({
                 success: false,
                 error: errorMessage,
                 available: false,
                 timestamp: new Date().toISOString(),
-                requestId: req.id || 'unknown'
+                requestId: req.id || 'unknown',
             });
         }
     }
@@ -387,16 +387,16 @@ class AuthController {
 
             const user = await AuthService.updateProfile(userId, updateData);
 
-            res.json({ 
-                success: true, 
+            res.json({
+                success: true,
                 data: user,
-                message: 'อัปเดตข้อมูลส่วนตัวสำเร็จ'
+                message: 'อัปเดตข้อมูลส่วนตัวสำเร็จ',
             });
         } catch (error) {
             console.error('[AuthController] Update Profile Error:', error.message);
             let errorMessage = 'ไม่สามารถอัปเดตข้อมูลส่วนตัวได้ กรุณาลองใหม่';
             let statusCode = 500;
-            
+
             if (error.message.includes('User not found')) {
                 statusCode = 404;
                 errorMessage = 'ไม่พบข้อมูลผู้ใช้งานนี้ในระบบ';
@@ -409,13 +409,99 @@ class AuthController {
                 statusCode = 401;
                 errorMessage = 'ไม่ได้รับอนุญาตให้แก้ไขข้อมูลนี้ กรุณาเข้าสู่ระบบใหม่';
             }
-            
-            res.status(statusCode).json({ 
-                success: false, 
+
+            res.status(statusCode).json({
+                success: false,
                 error: errorMessage,
                 timestamp: new Date().toISOString(),
-                requestId: req.id || 'unknown'
+                requestId: req.id || 'unknown',
             });
+        }
+    }
+
+    /**
+     * Handle ThaID Callback (Exchange Code -> Token -> UserInfo -> Login)
+     */
+    async thaidCallback(req, res) {
+        try {
+            const { code, redirectUri } = req.body;
+
+            if (!code) {
+                return res.status(400).json({ success: false, error: 'Authorization code is required' });
+            }
+
+            console.log('[AuthController] ThaID Callback Code:', code);
+
+            // 1. Exchange Code for Token (Call Local Mock or Real ThaID)
+            // Ideally we use an HTTP client, but since Mock is local we can cheat or use fetch
+            // Let's use fetch to call our own endpoint just to simulate real network flow
+            // 1. Exchange Code for Token (Call Local Mock or Real ThaID)
+            const tokenUrl = `http://localhost:${process.env.PORT || 3000}/api/mock-thaid/token`;
+            console.log('[AuthController] Exchanging Code at:', tokenUrl);
+
+            // Use Axios for Node.js compatibility
+            const axios = require('axios');
+            let accessToken;
+
+            try {
+                const tokenRes = await axios.post(tokenUrl, {
+                    code,
+                    grant_type: 'authorization_code',
+                    client_id: 'gacp-web',
+                    client_secret: 'mock-secret',
+                    redirect_uri: redirectUri,
+                });
+                accessToken = tokenRes.data.access_token;
+                console.log('[AuthController] Access Token:', accessToken);
+            } catch (err) {
+                console.error('[AuthController] Token Exchange Error:', err.message);
+                throw new Error('ThaID Token Exchange Failed');
+            }
+
+            // 2. Get User Info
+            const userInfoUrl = `http://localhost:${process.env.PORT || 3000}/api/mock-thaid/userinfo`;
+            console.log('[AuthController] Getting User Info from:', userInfoUrl);
+
+            let userInfo;
+            try {
+                const userRes = await axios.get(userInfoUrl, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` },
+                });
+                userInfo = userRes.data;
+            } catch (err) {
+                throw new Error('ThaID UserInfo Failed');
+            }
+
+            console.log('[AuthController] User Info:', JSON.stringify(userInfo));
+
+            // 3. Login/Register in System
+            const result = await AuthService.loginWithThaID({
+                idCard: userInfo.pid || userInfo.sub,
+                firstName: userInfo.given_name,
+                lastName: userInfo.family_name,
+                address: userInfo.address,
+            });
+
+            // 4. Return Session Token
+            // Set httpOnly cookies for web clients
+            res.cookie('auth_token', result.token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 24 * 60 * 60 * 1000, // 24 hours
+                path: '/',
+            });
+
+            res.json({
+                success: true,
+                token: result.token,
+                user: result.user,
+            });
+
+        } catch (error) {
+            console.error('[AuthController] ThaID Login Error Stack:', error.stack);
+            console.error('[AuthController] ThaID Login Error Message:', error.message);
+            res.status(500).json({ success: false, error: 'ThaID Login Failed: ' + error.message });
         }
     }
 }

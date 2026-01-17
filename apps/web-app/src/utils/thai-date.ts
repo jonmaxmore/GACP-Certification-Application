@@ -95,10 +95,12 @@ export function formatThaiRelative(dateString: string | Date | null | undefined)
     return `${Math.floor(diffDays / 365)} ปีก่อน`;
 }
 
-export default {
+const thaiDateUtils = {
     formatThaiDate,
     formatThaiDateLong,
     formatThaiDateNumeric,
     formatThaiDateTime,
     formatThaiRelative,
 };
+
+export default thaiDateUtils;

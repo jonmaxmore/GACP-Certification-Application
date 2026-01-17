@@ -111,7 +111,9 @@ class WizardRadioTile extends StatelessWidget {
       title: Text(title),
       value: value,
       groupValue: groupValue,
-      onChanged: (v) => onChanged(v!),
+      onChanged: (String? v) {
+        if (v != null) onChanged(v);
+      },
       dense: true,
       contentPadding: EdgeInsets.zero,
     );

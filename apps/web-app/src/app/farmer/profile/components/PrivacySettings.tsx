@@ -22,7 +22,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSettingsC
 
   const handleToggle = async (key: keyof PrivacySettings, value?: any) => {
     const newSettings = { ...settings, [key]: value !== undefined ? value : !settings[key] };
-    
+
     setSaving(true);
     try {
       const response = await fetch('/api/auth/privacy', {
@@ -30,7 +30,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSettingsC
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSettings),
       });
-      
+
       if (response.ok) {
         onSettingsChange(newSettings);
       } else {
@@ -44,7 +44,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSettingsC
     }
   };
 
-  const privacyOptions = [
+  const privacyOptions: { key: keyof PrivacySettings; label: string; description: string; type: 'select' | 'toggle'; options?: { value: string; label: string }[] }[] = [
     {
       key: 'profileVisibility',
       label: 'การมองเห็นโปรไฟล์',
@@ -79,16 +79,15 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSettingsC
               <div className="font-medium text-slate-700">{label}</div>
               <div className="text-sm text-slate-500 mt-1">{description}</div>
             </div>
-            
+
             {type === 'toggle' ? (
               <button
                 onClick={() => handleToggle(key)}
                 disabled={saving}
-                className={`w-12 h-6 rounded-full transition-colors ${
-                  settings[key] 
-                    ? 'bg-primary text-white' 
-                    : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
-                }`}
+                className={`w-12 h-6 rounded-full transition-colors ${settings[key]
+                  ? 'bg-primary text-white'
+                  : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                  }`}
               >
                 {settings[key] && (
                   <span className="text-white text-xs">✓</span>
@@ -96,7 +95,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSettingsC
               </button>
             ) : (
               <select
-                value={settings[key]}
+                value={settings[key] as string}
                 onChange={(e) => handleToggle(key, e.target.value)}
                 disabled={saving}
                 className="px-3 py-2 border-2 rounded-lg bg-white text-slate-700 focus:outline-none focus:border-primary"
@@ -142,7 +141,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSettingsC
         >
           คืนค่าเริ่มต้น
         </button>
-        
+
         <button
           onClick={() => alert('การตั้งค่าถูกบันทึกแล้ว')}
           className="gacp-btn-primary"

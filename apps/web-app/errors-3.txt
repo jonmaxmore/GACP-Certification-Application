@@ -1,0 +1,23 @@
+﻿src/app/api/auth/profile/image/route.ts(35,31): error TS2345: Argument of type 'ArrayBuffer' is not assignable to parameter of type 'string | ArrayBufferView<ArrayBufferLike> | Iterable<string | ArrayBufferView<ArrayBufferLike>> | AsyncIterable<...> | Stream'.
+  Type 'ArrayBuffer' is not assignable to type 'DataView<ArrayBufferLike> | Iterable<string | ArrayBufferView<ArrayBufferLike>> | AsyncIterable<string | ArrayBufferView<...>> | Stream'.
+    Type 'ArrayBuffer' is missing the following properties from type 'DataView<ArrayBufferLike>': buffer, byteOffset, getFloat32, getFloat64, and 20 more.
+src/app/farmer/applications/new/steps/StepGeneral.tsx(217,92): error TS2339: Property 'typeHeader' does not exist on type '{ title: string; subtitle: string; infoHeader: string; applicantName: string; firstName: string; lastName: string; personalId: string; address: string; contact: string; email: string; phone: string; }'.
+src/app/farmer/applications/new/steps/StepGeneral.tsx(495,40): error TS2339: Property 'next' does not exist on type '{ steps: { general: string; personnel: string; facilities: string; farm: string; planting: string; production: string; lots: string; review: string; }; plantSelection: { title: string; subtitle: string; sections: { ...; }; serviceTypes: { ...; }; note: string; }; ... 9 more ...; navigation: { ...; }; }'.
+src/app/farmer/applications/new/steps/StepGeneral.tsx(496,40): error TS2339: Property 'back' does not exist on type '{ steps: { general: string; personnel: string; facilities: string; farm: string; planting: string; production: string; lots: string; review: string; }; plantSelection: { title: string; subtitle: string; sections: { ...; }; serviceTypes: { ...; }; note: string; }; ... 9 more ...; navigation: { ...; }; }'.
+src/app/farmer/payments/page.tsx(131,26): error TS2304: Cannot find name 'IconPayment'.
+src/app/farmer/payments/page.tsx(308,42): error TS2304: Cannot find name 'IconWarning'.
+src/app/farmer/profile/components/EnhancedValidation.tsx(130,24): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ thaiId: string; taxId: string; phoneNumber: string; email: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ thaiId: string; taxId: string; phoneNumber: string; email: string; }'.
+src/app/farmer/profile/components/NotificationSettings.tsx(75,43): error TS2345: Argument of type 'string' is not assignable to parameter of type 'keyof NotificationSettings'.
+src/app/farmer/profile/components/NotificationSettings.tsx(78,17): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'NotificationSettings'.
+  No index signature with a parameter of type 'string' was found on type 'NotificationSettings'.
+src/app/farmer/profile/components/NotificationSettings.tsx(83,16): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'NotificationSettings'.
+  No index signature with a parameter of type 'string' was found on type 'NotificationSettings'.
+src/app/farmer/profile/components/PrivacySettings.tsx(85,45): error TS2345: Argument of type 'string' is not assignable to parameter of type 'keyof PrivacySettings'.
+src/app/farmer/profile/components/PrivacySettings.tsx(88,19): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'PrivacySettings'.
+  No index signature with a parameter of type 'string' was found on type 'PrivacySettings'.
+src/app/farmer/profile/components/PrivacySettings.tsx(93,18): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'PrivacySettings'.
+  No index signature with a parameter of type 'string' was found on type 'PrivacySettings'.
+src/app/farmer/profile/components/PrivacySettings.tsx(99,24): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'PrivacySettings'.
+  No index signature with a parameter of type 'string' was found on type 'PrivacySettings'.
+src/app/farmer/profile/components/PrivacySettings.tsx(100,47): error TS2345: Argument of type 'string' is not assignable to parameter of type 'keyof PrivacySettings'.

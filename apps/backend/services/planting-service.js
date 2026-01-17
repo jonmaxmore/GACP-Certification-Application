@@ -66,8 +66,8 @@ class PlantingService {
                     },
                 },
                 plantUnits: {
-                    orderBy: { code: 'asc' }
-                }
+                    orderBy: { code: 'asc' },
+                },
             },
         });
     }
@@ -81,7 +81,7 @@ class PlantingService {
             farmId, certificateId, plantSpeciesId, cycleName,
             startDate, expectedHarvestDate, plotId, plotName,
             plotArea, areaUnit, seedSource, seedQuantity,
-            cultivationType, notes, productionInputs // [NEW] GACP Inputs
+            cultivationType, notes, productionInputs, // [NEW] GACP Inputs
         } = data;
 
         // Verify Active Certificate
@@ -105,8 +105,8 @@ class PlantingService {
                     frequency: input.frequency,
                     isOrganic: input.isOrganic || false,
                     manufacturer: input.manufacturer,
-                    certNumber: input.certNumber
-                }))
+                    certNumber: input.certNumber,
+                })),
             }
             : undefined;
 
@@ -129,8 +129,8 @@ class PlantingService {
                 productionInputs: inputsCreate, // [NEW]
             },
             include: { // Return inputs in response
-                productionInputs: true
-            }
+                productionInputs: true,
+            },
         });
     }
 
@@ -151,11 +151,11 @@ class PlantingService {
         delete updateData.productionInputs;
 
         // Format Dates
-        if (updateData.actualHarvestDate) updateData.actualHarvestDate = new Date(updateData.actualHarvestDate);
-        if (updateData.expectedHarvestDate) updateData.expectedHarvestDate = new Date(updateData.expectedHarvestDate);
+        if (updateData.actualHarvestDate) {updateData.actualHarvestDate = new Date(updateData.actualHarvestDate);}
+        if (updateData.expectedHarvestDate) {updateData.expectedHarvestDate = new Date(updateData.expectedHarvestDate);}
 
         // Format Numbers
-        if (updateData.actualYield) updateData.actualYield = parseFloat(updateData.actualYield);
+        if (updateData.actualYield) {updateData.actualYield = parseFloat(updateData.actualYield);}
 
         // Transaction for GACP Inputs (Sync: Delete All + Create New)
         // Only trigger if productionInputs is provided (not undefined)
@@ -164,7 +164,7 @@ class PlantingService {
                 // 1. Update basic info
                 const cycle = await tx.plantingCycle.update({
                     where: { id },
-                    data: updateData
+                    data: updateData,
                 });
 
                 // 2. Replace inputs
@@ -183,15 +183,15 @@ class PlantingService {
                             frequency: input.frequency,
                             isOrganic: input.isOrganic || false,
                             manufacturer: input.manufacturer,
-                            certNumber: input.certNumber
-                        }))
+                            certNumber: input.certNumber,
+                        })),
                     });
                 }
 
                 // 3. Return updated cycle with inputs
                 return tx.plantingCycle.findUnique({
                     where: { id },
-                    include: { productionInputs: true }
+                    include: { productionInputs: true },
                 });
             });
         }
@@ -200,7 +200,7 @@ class PlantingService {
         return prisma.plantingCycle.update({
             where: { id },
             data: updateData,
-            include: { productionInputs: true }
+            include: { productionInputs: true },
         });
     }
 
@@ -213,17 +213,17 @@ class PlantingService {
             // 1. Get Cycle info
             const cycle = await tx.plantingCycle.findUnique({
                 where: { id: cycleId },
-                include: { plantUnits: { select: { id: true } } } // Check existing units
+                include: { plantUnits: { select: { id: true } } }, // Check existing units
             });
 
-            if (!cycle) throw new Error('Planting cycle not found');
+            if (!cycle) {throw new Error('Planting cycle not found');}
 
             // 2. Check if units already exist
             if (cycle.plantUnits && cycle.plantUnits.length > 0) {
                 return {
                     success: false,
                     message: `Units already generated (${cycle.plantUnits.length} units)`,
-                    count: cycle.plantUnits.length
+                    count: cycle.plantUnits.length,
                 };
             }
 
@@ -242,18 +242,18 @@ class PlantingService {
             const unitsData = Array.from({ length: count }, (_, i) => ({
                 cycleId: cycle.id,
                 code: `UNIT-${year}-${cycleCodeSuffix}-${String(i + 1).padStart(4, '0')}`,
-                status: 'GROWING'
+                status: 'GROWING',
             }));
 
             // Use createMany for performance
             await tx.plantUnit.createMany({
-                data: unitsData
+                data: unitsData,
             });
 
             return {
                 success: true,
                 message: `Successfully generated ${count} plant units`,
-                count: count
+                count: count,
             };
         });
     }

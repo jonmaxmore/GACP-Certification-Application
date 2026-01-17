@@ -52,6 +52,7 @@ export const StepProductionEstimate = () => {
     // Update estimated plants if lots change and were not manual
     useEffect(() => {
         if (totalPlantsFromLots > 0) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setEstimatedPlants(totalPlantsFromLots);
         }
     }, [totalPlantsFromLots]);
@@ -59,6 +60,7 @@ export const StepProductionEstimate = () => {
     // Validate plant count
     useEffect(() => {
         if (estimatedPlants > recommendedMax * 1.5) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setValidationWarning(`จำนวนต้นสูงกว่าค่าแนะนำมาก (สูงสุด ~${recommendedMax.toLocaleString()} ต้น สำหรับพื้นที่ ${totalAreaRai} ไร่)`);
         } else if (estimatedPlants < recommendedMin * 0.5 && estimatedPlants > 0) {
             setValidationWarning(`จำนวนต้นต่ำกว่าค่าแนะนำมาก (ต่ำสุด ~${recommendedMin.toLocaleString()} ต้น)`);

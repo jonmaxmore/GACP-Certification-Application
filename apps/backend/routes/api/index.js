@@ -58,10 +58,14 @@ router.use('/auth-dtam', authDtamRouter);
 router.use('/mfa', mfaRouter);
 router.use('/public', publicRouter);
 router.use('/consent', consentRouter);
+if (process.env.NODE_ENV !== 'production' && process.env.ENABLE_E2E_ROUTES === 'true') {
+  router.use('/mock-thaid', require('./mock-thaid'));
+}
 router.use('/documents', documentsRouter);
 router.use('/planting-cycles', plantingCyclesRouter);
 router.use('/lots', lotsRouter);
 router.use('/trace', traceRouter);
+router.use('/e2e', require('./e2e'));
 
 router.use('/identity', require('./identity')); // eKYC Identity Verification
 router.use('/standards', require('./standards'));

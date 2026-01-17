@@ -97,7 +97,7 @@ class _Step0PlantSelectionState extends ConsumerState<Step0PlantSelection> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha(13),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -219,8 +219,8 @@ class _Step0PlantSelectionState extends ConsumerState<Step0PlantSelection> {
                         CircleAvatar(
                           radius: 40,
                           backgroundColor: isHighControl
-                              ? AppTheme.primaryGreen.withOpacity(0.2)
-                              : Colors.orange.withOpacity(0.2),
+                              ? AppTheme.primaryGreen.withAlpha(51)
+                              : Colors.orange.withAlpha(51),
                           child: Icon(
                             isHighControl ? Icons.security : Icons.spa,
                             size: 40,
@@ -441,7 +441,7 @@ class _PlantCard extends StatelessWidget {
 
     return Card(
       elevation: 4,
-      shadowColor: color.withOpacity(0.3),
+      shadowColor: color.withAlpha(77),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
@@ -454,7 +454,7 @@ class _PlantCard extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 Colors.white,
-                color.withOpacity(0.05),
+                color.withAlpha(13),
               ],
             ),
           ),
@@ -463,7 +463,7 @@ class _PlantCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 35,
-                backgroundColor: color.withOpacity(0.15),
+                backgroundColor: color.withAlpha(38),
                 child: Icon(
                   isHighControl ? Icons.security : Icons.spa,
                   color: color,

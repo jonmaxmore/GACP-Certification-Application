@@ -206,7 +206,7 @@ export const StepSubmit = () => {
                     <p className="font-black text-blue-900 text-sm italic">คำแนะนำสำหรับการส่งคำขอ</p>
                     <p className="text-xs leading-relaxed text-blue-800/80">
                         เมื่อท่านกดยืนยัน ข้อมูลจะถูกบันทึกเข้าสู่ระบบ และท่านจะไม่สามารถกลับมาแก้ไขข้อมูลได้ด้วยตนเองจนกว่าเจ้าหน้าที่จะทำการตรวจสอบ
-                        กรุณาตรวจสอบหน้า <strong>"Preview"</strong> อีกครั้งหากไม่มั่นใจ
+                        กรุณาตรวจสอบหน้า <strong>&quot;Preview&quot;</strong> อีกครั้งหากไม่มั่นใจ
                     </p>
                 </div>
             </div>

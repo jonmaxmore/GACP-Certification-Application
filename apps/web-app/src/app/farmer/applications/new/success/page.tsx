@@ -17,7 +17,24 @@ export default function SuccessPage() {
     const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
     const [countdown, setCountdown] = useState(60);
 
+    const [confettiItems, setConfettiItems] = useState<any[]>([]);
+
     useEffect(() => {
+        const items = [...Array(40)].map((_, i) => ({
+            width: `${8 + Math.random() * 8}px`,
+            height: `${8 + Math.random() * 8}px`,
+            background: ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6', '#EF4444'][i % 6],
+            borderRadius: i % 3 === 0 ? '50%' : '2px',
+            left: `${Math.random() * 100}%`,
+            top: '-20px',
+            animationDelay: `${Math.random() * 0.8}s`
+        }));
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setConfettiItems(items);
+    }, []);
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsDark(localStorage.getItem("theme") === "dark");
         setAppId(localStorage.getItem('last_application_id') || `GACP-${Date.now().toString(36).toUpperCase()}`);
         const savedData = localStorage.getItem('last_payment_data');
@@ -40,8 +57,8 @@ export default function SuccessPage() {
             {/* Confetti */}
             {showConfetti && (
                 <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
-                    {[...Array(40)].map((_, i) => (
-                        <div key={i} className="absolute animate-[confetti_2s_ease-out_forwards]" style={{ width: `${8 + Math.random() * 8}px`, height: `${8 + Math.random() * 8}px`, background: ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6', '#EF4444'][i % 6], borderRadius: i % 3 === 0 ? '50%' : '2px', left: `${Math.random() * 100}%`, top: '-20px', animationDelay: `${Math.random() * 0.8}s` }} />
+                    {confettiItems.map((style, i) => (
+                        <div key={i} className="absolute animate-[confetti_2s_ease-out_forwards]" style={style} />
                     ))}
                 </div>
             )}

@@ -55,7 +55,7 @@ async function runAiTest() {
     console.log(`Average Time: ${avgTime.toFixed(0)}ms`);
     console.log(`Success Rate: ${results.filter(r => r.match).length}/${ITERATIONS}`);
 
-    if (avgConf < 50) console.warn('⚠️ WARNING: Low Confidence Baseline');
+    if (avgConf < 50) {console.warn('⚠️ WARNING: Low Confidence Baseline');}
 }
 
 runAiTest();

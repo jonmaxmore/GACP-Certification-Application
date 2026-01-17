@@ -11,9 +11,9 @@ class HarvestService {
      */
     async list(filter = {}) {
         const where = {};
-        if (filter.farmId) where.farmId = filter.farmId;
-        if (filter.status) where.status = filter.status;
-        if (filter.speciesId) where.speciesId = filter.speciesId;
+        if (filter.farmId) {where.farmId = filter.farmId;}
+        if (filter.status) {where.status = filter.status;}
+        if (filter.speciesId) {where.speciesId = filter.speciesId;}
 
         return prisma.harvestBatch.findMany({
             where,
@@ -66,7 +66,7 @@ class HarvestService {
     async createBatch(data) {
         const {
             farmId, speciesId, plantingDate, cultivationType,
-            seedSource, plotName, plotArea, areaUnit, notes
+            seedSource, plotName, plotArea, areaUnit, notes,
         } = data;
 
         const year = new Date().getFullYear();
@@ -104,9 +104,9 @@ class HarvestService {
         const updateData = { ...data };
 
         // Handle dates
-        if (updateData.plantingDate) updateData.plantingDate = new Date(updateData.plantingDate);
-        if (updateData.harvestDate) updateData.harvestDate = new Date(updateData.harvestDate);
-        if (updateData.expectedHarvestDate) updateData.expectedHarvestDate = new Date(updateData.expectedHarvestDate);
+        if (updateData.plantingDate) {updateData.plantingDate = new Date(updateData.plantingDate);}
+        if (updateData.harvestDate) {updateData.harvestDate = new Date(updateData.harvestDate);}
+        if (updateData.expectedHarvestDate) {updateData.expectedHarvestDate = new Date(updateData.expectedHarvestDate);}
 
         return prisma.harvestBatch.update({
             where: { id },
@@ -123,8 +123,8 @@ class HarvestService {
         const { harvestDate, actualYield, yieldUnit, qualityGrade, notes } = data;
 
         const existing = await this.getById(id);
-        if (!existing) throw new Error('Harvest batch not found');
-        if (existing.status === 'HARVESTED') throw new Error('This batch has already been harvested');
+        if (!existing) {throw new Error('Harvest batch not found');}
+        if (existing.status === 'HARVESTED') {throw new Error('This batch has already been harvested');}
 
         return prisma.harvestBatch.update({
             where: { id },

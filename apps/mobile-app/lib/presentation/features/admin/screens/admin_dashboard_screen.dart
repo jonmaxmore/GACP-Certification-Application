@@ -163,7 +163,7 @@ class AdminDashboardScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withAlpha(26),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: color),
@@ -200,7 +200,7 @@ class AdminDashboardScreen extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withAlpha(26),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: color),
@@ -238,7 +238,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 ),
                 Text(
                   'admin@gacp.go.th',
-                  style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  style: TextStyle(color: Colors.white.withAlpha(179)),
                 ),
               ],
             ),

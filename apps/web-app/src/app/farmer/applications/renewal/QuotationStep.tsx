@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import { Certificate, RENEWAL_FEE } from './types';
 
 interface QuotationStepProps {
@@ -11,10 +12,13 @@ interface QuotationStepProps {
 }
 
 export function QuotationStep({ certificate, renewalId, isDark, onBack, onProceed }: QuotationStepProps) {
-    const quoteNumber = `QT-${Date.now().toString(36).toUpperCase().slice(-6)}`;
-    const currentDate = new Date();
-    const validUntil = new Date(currentDate);
-    validUntil.setDate(validUntil.getDate() + 30);
+    const [quoteNumber] = useState(() => `QT-${Date.now().toString(36).toUpperCase().slice(-6)}`);
+    const [currentDate] = useState(() => new Date());
+    const [validUntil] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 30);
+        return d;
+    });
 
     return (
         <div className={`min-h-screen p-6 font-sans ${isDark ? 'bg-slate-900' : 'bg-surface-100'}`}>

@@ -71,6 +71,7 @@ export default function StaffLayout({ children, title, subtitle }: StaffLayoutPr
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
         // Force slate/dark theme preference for staff if not set
         const saved = localStorage.getItem("staff_theme");

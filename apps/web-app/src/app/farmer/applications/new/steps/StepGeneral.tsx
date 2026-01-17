@@ -133,6 +133,7 @@ const StepGeneralComponent = () => {
         // Hydrate docs from state if available
         const existing = state.applicantData as unknown as LocalApplicantData | null;
         if (existing) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIdCardDoc(existing.idCardDoc || null);
             setHouseRegDoc(existing.houseRegDoc || null);
             setCommunityRegDoc(existing.communityRegDoc || null);
@@ -144,17 +145,18 @@ const StepGeneralComponent = () => {
 
     useEffect(() => {
         if (user && !formData.firstName) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setFormData(prev => ({
                 ...prev,
-                firstName: user.firstName ?? prev.firstName,
-                lastName: user.lastName ?? prev.lastName,
-                idCard: user.idCard ?? prev.idCard,
-                phone: user.phone ?? prev.phone,
-                address: user.address ?? prev.address,
-                email: user.email ?? prev.email,
+                firstName: user.firstName || prev.firstName,
+                lastName: user.lastName || prev.lastName,
+                idCard: user.idCard || prev.idCard,
+                phone: user.phone || prev.phone,
+                address: user.address || prev.address,
+                email: user.email || prev.email,
             }));
         }
-    }, [user, formData.firstName]);
+    }, [user]); // Removed formData.firstName to prevent cyclic dependency
 
     const handleTypeChange = (typeId: string) => {
         setFormData(prev => ({
@@ -492,8 +494,8 @@ const StepGeneralComponent = () => {
                 onNext={handleNext}
                 onBack={() => router.push('/farmer/dashboard')}
                 isNextDisabled={!formData.firstName || !formData.lastName || !formData.phone}
-                nextLabel={dict.wizard.next}
-                backLabel={dict.wizard.back}
+                nextLabel={dict.wizard.navigation.next}
+                backLabel={dict.wizard.navigation.back}
             />
         </div>
     );

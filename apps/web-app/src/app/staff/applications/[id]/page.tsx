@@ -394,7 +394,7 @@ export default function JobSheetPage() {
 
                 {/* Action Bar - Fixed at bottom during Phase 1 */}
                 {
-                    app.phase === 1 && (
+                    app.phase === 1 && app.status !== 'PENDING_SCHEDULE' && (
                         <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4">
                             <div className="max-w-7xl mx-auto flex justify-end gap-4">
                                 <button
@@ -408,6 +408,42 @@ export default function JobSheetPage() {
                                     className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 flex items-center gap-2"
                                 >
                                     <IconCheckCircle size={16} /> อนุมัติเอกสาร
+                                </button>
+                            </div>
+                        </div>
+                    )
+                }
+
+                {/* Scheduling UI for Scheduler */}
+                {
+                    app.status === 'PENDING_SCHEDULE' && (
+                        <div className="mt-8 bg-white rounded-2xl shadow-lg p-6 border border-purple-100">
+                            <h3 className="font-semibold text-lg text-purple-900 mb-4 flex items-center gap-2">
+                                <IconCalendar className="text-purple-600" /> ลงนัดหมายการตรวจ (Scheduling)
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">วันที่นัดหมาย</label>
+                                    <input type="date" className="w-full px-4 py-3 border rounded-xl" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">ผู้ตรวจประเมิน</label>
+                                    <select className="w-full px-4 py-3 border rounded-xl">
+                                        <option value="">เลือกผู้ตรวจ...</option>
+                                        <option value="AUD-001">Somsak Auditor</option>
+                                        <option value="AUD-002">Vichai Inspector</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="mt-6 flex justify-end">
+                                <button
+                                    className="px-8 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 shadow-lg shadow-purple-200"
+                                    onClick={() => {
+                                        alert('บันทึกนัดหมายสำเร็จ');
+                                        router.push('/staff/dashboard');
+                                    }}
+                                >
+                                    บันทึกนัดหมาย
                                 </button>
                             </div>
                         </div>

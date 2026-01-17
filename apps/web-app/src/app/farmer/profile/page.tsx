@@ -44,7 +44,26 @@ export default function ProfilePage() {
         companyName !== originalValues.companyName
     );
 
+    const validateEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    const validatePhone = (v: string) => /^0[689]\d{8}$/.test(v);
+
+    const initForm = (u: User) => {
+        setFirstName(u.firstName || "");
+        setLastName(u.lastName || "");
+        setEmail(u.email || "");
+        setPhone(u.phone || "");
+        setCompanyName(u.companyName || u.communityName || "");
+        setOriginalValues({
+            firstName: u.firstName || "",
+            lastName: u.lastName || "",
+            email: u.email || "",
+            phone: u.phone || "",
+            companyName: u.companyName || u.communityName || ""
+        });
+    };
+
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
         const fetchProfile = async () => {
             const res = await api.get<User>('/auth/me');
@@ -65,23 +84,7 @@ export default function ProfilePage() {
         fetchProfile();
     }, [router]);
 
-    const initForm = (u: User) => {
-        setFirstName(u.firstName || "");
-        setLastName(u.lastName || "");
-        setEmail(u.email || "");
-        setPhone(u.phone || "");
-        setCompanyName(u.companyName || u.communityName || "");
-        setOriginalValues({
-            firstName: u.firstName || "",
-            lastName: u.lastName || "",
-            email: u.email || "",
-            phone: u.phone || "",
-            companyName: u.companyName || u.communityName || ""
-        });
-    };
 
-    const validateEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-    const validatePhone = (v: string) => /^0[689]\d{8}$/.test(v);
 
     const handleSaveProfile = async () => {
         if (email && !validateEmail(email)) { setMessage("❌ รูปแบบอีเมลไม่ถูกต้อง"); return; }

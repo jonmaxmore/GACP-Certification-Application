@@ -83,8 +83,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color:
-                              _getStatusColor(app['status']).withOpacity(0.1),
+                          color: _getStatusColor(app['status']).withAlpha(26),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(

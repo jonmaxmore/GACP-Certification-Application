@@ -28,12 +28,12 @@ async function main() {
                 dryingMethod: 'OVEN',
                 dryingDetail: '',
                 storageSystem: 'CONTROLLED',
-                packaging: 'Vacuum Sealed Bags'
-            }
+                packaging: 'Vacuum Sealed Bags',
+            },
         };
 
         const saveRes = await axios.post(`${BASE_URL}/applications/draft`, harvestPayload, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
         });
 
         if (saveRes.data.success) {
@@ -46,7 +46,7 @@ async function main() {
         // 3. Verify Data Persistence (GET)
         console.log('   Fetching Draft to Verify Persistence...');
         const getRes = await axios.get(`${BASE_URL}/applications/draft`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
         });
 
         const savedData = getRes.data.data.harvestData;

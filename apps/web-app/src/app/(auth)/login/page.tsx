@@ -31,6 +31,7 @@ export default function LoginPage() {
         }
         const remembered = AuthService.getRememberMe();
         if (remembered) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setAccountType(remembered.accountType || "INDIVIDUAL");
             setIdentifier(remembered.identifier || "");
             setRememberMe(true);
@@ -69,6 +70,22 @@ export default function LoginPage() {
             setLoginState('error');
             setIsLoading(false);
         }
+    };
+
+    const handleThaIDLogin = () => {
+        // Construct Authorization URL for Mock ThaID
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+        const clientId = 'gacp-web';
+        const redirectUri = `${window.location.origin}/auth/callback/thaid`;
+        const state = 'random_state_xyz'; // In prod, use proper CSRF state
+        const scope = 'openid profile offline_access';
+
+        // Check if backendUrl already ends with /api (legacy config support)
+        const apiBase = backendUrl.endsWith('/api') ? backendUrl : `${backendUrl}/api`;
+
+        const authUrl = `${apiBase}/mock-thaid/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}`;
+        console.log('Redirecting to ThaID:', authUrl);
+        window.location.href = authUrl;
     };
 
     return (
@@ -165,6 +182,30 @@ export default function LoginPage() {
                                 </button>
                             );
                         })}
+                    </div>
+
+                    {/* ThaID Integration Button */}
+                    <div className="mb-6">
+                        <button
+                            type="button"
+                            onClick={handleThaIDLogin}
+                            className="w-full bg-[#1a237e] hover:bg-[#283593] text-white py-4 rounded-2xl shadow-lg shadow-blue-900/20 hover:shadow-xl hover:shadow-blue-900/30 transition-all flex items-center justify-center gap-4 group relative overflow-hidden"
+                        >
+                            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                                <span className="text-[#1a237e] font-black text-xs">ID</span>
+                            </div>
+                            <div className="text-left">
+                                <span className="block text-[10px] uppercase tracking-widest text-blue-200 font-bold">Recommended</span>
+                                <span className="block text-base font-bold leading-none">เข้าสู่ระบบด้วย ThaID</span>
+                            </div>
+                            <Icons.ArrowRight className="w-5 h-5 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                        </button>
+                        <div className="flex items-center gap-4 my-6">
+                            <div className="flex-1 h-px bg-slate-200"></div>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">หรือเข้าสู่ระบบด้วยรหัสผ่าน</span>
+                            <div className="flex-1 h-px bg-slate-200"></div>
+                        </div>
                     </div>
 
                     {/* Form Input Fields (Ecobi Roundness) */}

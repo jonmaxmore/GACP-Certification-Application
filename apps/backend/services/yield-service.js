@@ -5,7 +5,7 @@ class YieldService {
         this.RISK_FACTORS = {
             'INDOOR': 0.95,    // 5% loss
             'GREENHOUSE': 0.90, // 10% loss
-            'OUTDOOR': 0.70    // 30% loss
+            'OUTDOOR': 0.70,    // 30% loss
         };
 
         // Mock data until DB seeding is complete
@@ -15,7 +15,7 @@ class YieldService {
             'TUR': { yieldPerPlant: 0.8, spacing: 0.5 },
             'GIN': { yieldPerPlant: 0.6, spacing: 0.5 },
             'BGA': { yieldPerPlant: 0.4, spacing: 0.3 },
-            'PLA': { yieldPerPlant: 1.2, spacing: 1.0 }
+            'PLA': { yieldPerPlant: 1.2, spacing: 1.0 },
         };
     }
 
@@ -53,7 +53,7 @@ class YieldService {
             return {
                 estimatedYield: Math.round(estimatedYield * 100) / 100, // Round to 2 decimals
                 plantCount,
-                unit: 'kg (Dry Weight)'
+                unit: 'kg (Dry Weight)',
             };
 
         } catch (error) {

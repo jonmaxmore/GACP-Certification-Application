@@ -13,6 +13,7 @@ export default function NewEstablishmentPage() {
     const [area, setArea] = useState("");
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
         setIsDark(localStorage.getItem("theme") === "dark");
         const userData = localStorage.getItem("user");

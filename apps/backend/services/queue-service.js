@@ -16,12 +16,12 @@ const initQueues = () => {
         slaQueue = new Queue('sla-monitor', redisUrl, {
             redis: {
                 maxRetriesPerRequest: 3,
-                enableReadyCheck: false
+                enableReadyCheck: false,
             },
             defaultJobOptions: {
                 removeOnComplete: true, // Keep memory clean
-                removeOnFail: 100
-            }
+                removeOnFail: 100,
+            },
         });
 
         // Register Processor
@@ -53,5 +53,5 @@ const getSlaQueue = () => slaQueue;
 
 module.exports = {
     initQueues,
-    getSlaQueue
+    getSlaQueue,
 };

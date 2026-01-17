@@ -39,7 +39,7 @@ class IdentityService {
             select: { idCard: true, verificationAttempts: true, verificationLockedUntil: true },
         });
 
-        if (!currentUser) throw new Error('User not found');
+        if (!currentUser) {throw new Error('User not found');}
 
         // 2. Check Lockout
         if (currentUser.verificationLockedUntil && new Date() < new Date(currentUser.verificationLockedUntil)) {
@@ -105,8 +105,8 @@ class IdentityService {
                 aiAnalysis: {
                     confidence: result?.confidence,
                     message: ocrMessage,
-                    extractedSnippet: result?.extractedText
-                }
+                    extractedSnippet: result?.extractedText,
+                },
             };
         } else {
             // Failure
@@ -140,8 +140,8 @@ class IdentityService {
                 aiAnalysis: {
                     confidence: result ? result.confidence : 0,
                     message: ocrMessage || 'No match found',
-                    extractedSnippet: result ? result.extractedText : ''
-                }
+                    extractedSnippet: result ? result.extractedText : '',
+                },
             };
         }
     }
@@ -160,7 +160,7 @@ class IdentityService {
             },
         });
 
-        if (!user) throw new Error('User not found');
+        if (!user) {throw new Error('User not found');}
 
         return {
             status: user.verificationStatus || 'NEW',

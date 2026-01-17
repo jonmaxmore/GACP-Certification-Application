@@ -1,0 +1,1031 @@
+﻿
+> web-app@3.0.0 lint
+> eslint
+
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\__tests__\validation.test.js
+  18:5  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\e2e\gacp-application-wizard.spec.ts
+  126:18  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\(auth)\login\page.tsx
+  17:11  warning  'router' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  34:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\(auth)\login\page.tsx:34:13
+  32 |         const remembered = AuthService.getRememberMe();
+  33 |         if (remembered) {
+> 34 |             setAccountType(remembered.accountType || "INDIVIDUAL");
+     |             ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  35 |             setIdentifier(remembered.identifier || "");
+  36 |             setRememberMe(true);
+  37 |         }  react-hooks/set-state-in-effect
+  67:18  warning  'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  94:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\(auth)\register\page.tsx
+   49:17  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\(auth)\register\page.tsx:49:17
+  47 |             try {
+  48 |                 const data = JSON.parse(savedData);
+> 49 |                 setStep(data.step || 0);
+     |                 ^^^^^^^ Avoid calling setState() directly within an effect
+  50 |                 setAccountType(data.accountType || "");
+  51 |                 setIdentifier(data.identifier || "");
+  52 |                 setFirstName(data.firstName || "");  react-hooks/set-state-in-effect
+  123:18  warning  'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  147:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\(auth)\register\success\page.tsx
+  16:21  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\(auth)\register\success\page.tsx:16:21
+  14 |     const name = searchParams.get("name") || "";
+  15 |
+> 16 |     useEffect(() => setMounted(true), []);
+     |                     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  17 |
+  18 |     const getAccountTypeThai = () => {
+  19 |         switch (accountType) {  react-hooks/set-state-in-effect
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\(auth)\verify-identity\page.tsx
+    6:43  warning  'GroupIcon' is defined but never used            @typescript-eslint/no-unused-vars
+   20:12  warning  'retryCount' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  102:23  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\admin\config\page.tsx
+   8:11  warning  'router' is assigned a value but never used                                                                @typescript-eslint/no-unused-vars
+  32:8   warning  React Hook useEffect has a missing dependency: 'config'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\admin\dashboard\page.tsx
+   7:35  warning  'IconCalendar' is defined but never used        @typescript-eslint/no-unused-vars
+   7:49  warning  'IconCreditCard' is defined but never used      @typescript-eslint/no-unused-vars
+   7:65  warning  'IconUser' is defined but never used            @typescript-eslint/no-unused-vars
+  26:7   warning  'IconLeaf' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  51:12  warning  'isLoading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\admin\kpi\page.tsx
+  59:9  error  Error: Cannot access variable before it is declared
+
+`loadKPIData` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\admin\kpi\page.tsx:59:9
+  57 |
+  58 |         // Load initial data
+> 59 |         loadKPIData();
+     |         ^^^^^^^^^^^ `loadKPIData` accessed before it is declared
+  60 |
+  61 |         // Auto-refresh every 5 minutes
+  62 |         const interval = setInterval(() => {
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\admin\kpi\page.tsx:69:5
+   67 |     }, [router, timeRange]);
+   68 |
+>  69 |     const loadKPIData = () => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  70 |         // Mock KPI data
+      | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  71 |         setKpi({
+      โ€ฆ
+      | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  98 |         setLastUpdate(new Date());
+      | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  99 |     };
+      | ^^^^^^^ `loadKPIData` is declared here
+  100 |
+  101 |     const formatCurrency = (amount: number) => {
+  102 |         return new Intl.NumberFormat("th-TH", { style: "currency", currency: "THB" }).format(amount);  react-hooks/immutability
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\admin\layout.tsx
+  15:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\admin\layout.tsx:15:9
+  13 |
+  14 |     useEffect(() => {
+> 15 |         setMounted(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  16 |         const token = localStorage.getItem("staff_token");
+  17 |         if (!token) {
+  18 |             // Redirect to staff login if not authenticated  react-hooks/set-state-in-effect
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\admin\plants\page.tsx
+  51:18  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\admin\users\page.tsx
+  5:8   warning  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+  6:23  warning  'api' is defined but never used   @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\api\[...path]\route.ts
+  50:13  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  66:21  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\api\auth\2fa\disable\route.ts
+  4:28  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\api\auth\2fa\setup\route.ts
+  9:28  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\api\auth\health\route.ts
+  4:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\api\auth\notifications\route.ts
+  55:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\api\auth\privacy\route.ts
+  60:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\[id]\page.tsx
+  34:213  warning  React Hook useEffect has missing dependencies: 'loadApplication' and 'router'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\amendment\page.tsx
+   16:52   error    Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+   22:110  warning  React Hook useEffect has a missing dependency: 'loadCertificate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+   27:38   error    Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+   48:43   error    Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+  134:166  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                     react/no-unescaped-entities
+  134:174  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                     react/no-unescaped-entities
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\hooks\useWizardStore.ts
+  344:16  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  454:15  warning  'get' is defined but never used           @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\step\[id]\page.tsx
+  77:8  warning  React Hook React.useEffect has missing dependencies: 'setCurrentStep' and 'stepIndex'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\InvoicePDF.tsx
+  15:54  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  42:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\MockInvoicePDF.tsx
+   1:8   warning  'Link' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+   8:62  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\MockInvoicePDF.tsx:8:62
+   6 |
+   7 | export const MockInvoicePDF = ({ onClose }: MockInvoiceProps) => {
+>  8 |     const invoiceNumber = `INV-${new Date().getFullYear()}${(Math.random() * 10000).toFixed(0)}`;
+     |                                                              ^^^^^^^^^^^^^ Cannot call impure function
+   9 |     const currentDate = new Date();
+  10 |     const dueDate = new Date();
+  11 |     dueDate.setDate(dueDate.getDate() + 7);  react-hooks/purity
+  36:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\MockQuotePDF.tsx
+  12:48  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\MockQuotePDF.tsx:12:48
+  10 |     const { state } = useWizardStore();
+  11 |     const currentDate = new Date();
+> 12 |     const quoteNumber = `G-${String(Math.floor(Math.random() * 900000000) + 100000000)}`;
+     |                                                ^^^^^^^^^^^^^ Cannot call impure function
+  13 |
+  14 |     const applicant = (state.applicantData || {}) as any;
+  15 |     const name = applicant.firstName ? `${applicant.firstName} ${applicant.lastName || ''}` : "เธเธฃเธดเธฉเธฑเธ— เธชเนเธกเธ เธเธฃเธนเธง เธเธณเธเธฑเธ”";  react-hooks/purity
+  14:54  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+  41:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepDocuments.tsx
+   12:5    warning  'InfoIcon' is defined but never used      @typescript-eslint/no-unused-vars
+  174:60   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  328:107  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepFarm.tsx
+  11:21  warning  'WarningIcon' is defined but never used   @typescript-eslint/no-unused-vars
+  11:34  warning  'PlantIcon' is defined but never used     @typescript-eslint/no-unused-vars
+  11:45  warning  'InfoIcon' is defined but never used      @typescript-eslint/no-unused-vars
+  82:57  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepGeneral.tsx
+  136:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepGeneral.tsx:136:13
+  134 |         const existing = state.applicantData as unknown as LocalApplicantData | null;
+  135 |         if (existing) {
+> 136 |             setIdCardDoc(existing.idCardDoc || null);
+      |             ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  137 |             setHouseRegDoc(existing.houseRegDoc || null);
+  138 |             setCommunityRegDoc(existing.communityRegDoc || null);
+  139 |             setCommunityMeetingDoc(existing.communityMeetingDoc || null);  react-hooks/set-state-in-effect
+  147:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepGeneral.tsx:147:13
+  145 |     useEffect(() => {
+  146 |         if (user && !formData.firstName) {
+> 147 |             setFormData(prev => ({
+      |             ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  148 |                 ...prev,
+  149 |                 firstName: user.firstName ?? prev.firstName,
+  150 |                 lastName: user.lastName ?? prev.lastName,                                                                                                                         react-hooks/set-state-in-effect
+  162:38  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+  181:42  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+  198:41  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepHarvest.tsx
+   16:13   warning  'dict' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+   30:40   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   35:49   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  111:38   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  111:46   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  111:135  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  111:142  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepInvoice.tsx
+  18:19  warning  'language' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+  25:62  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepInvoice.tsx:25:62
+  23 |     const [phase, setPhase] = useState<1 | 2>(1);
+  24 |
+> 25 |     const invoiceNumber = `INV-${new Date().getFullYear()}${(Math.random() * 10000).toFixed(0)}`;
+     |                                                              ^^^^^^^^^^^^^ Cannot call impure function
+  26 |     const currentDate = new Date();
+  27 |     const dueDate = new Date();
+  28 |     dueDate.setDate(dueDate.getDate() + 7);  react-hooks/purity
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepLots.tsx
+  7:10  warning  'CheckIcon' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepPreCheck.tsx
+   11:13  warning  'setCurrentStep' is assigned a value but never used              @typescript-eslint/no-unused-vars
+   13:13  warning  'dict' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+  137:70  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  137:91  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepPreview.tsx
+   8:31  warning  'DocIcon' is defined but never used        @typescript-eslint/no-unused-vars
+   8:40  warning  'WarningIcon' is defined but never used    @typescript-eslint/no-unused-vars
+  75:13  warning  'dict' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  91:29  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepProduction.tsx
+   9:10  warning  'PlantIcon' is defined but never used     @typescript-eslint/no-unused-vars
+  64:54  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepProductionEstimate.tsx
+  22:20  warning  'setLots' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  55:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepProductionEstimate.tsx:55:13
+  53 |     useEffect(() => {
+  54 |         if (totalPlantsFromLots > 0) {
+> 55 |             setEstimatedPlants(totalPlantsFromLots);
+     |             ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  56 |         }
+  57 |     }, [totalPlantsFromLots]);
+  58 |                                                                                                                                                                                                                                                                                              react-hooks/set-state-in-effect
+  62:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepProductionEstimate.tsx:62:13
+  60 |     useEffect(() => {
+  61 |         if (estimatedPlants > recommendedMax * 1.5) {
+> 62 |             setValidationWarning(`เธเธณเธเธงเธเธ•เนเธเธชเธนเธเธเธงเนเธฒเธเนเธฒเนเธเธฐเธเธณเธกเธฒเธ (เธชเธนเธเธชเธธเธ” ~${recommendedMax.toLocaleString()} เธ•เนเธ เธชเธณเธซเธฃเธฑเธเธเธทเนเธเธ—เธตเน ${totalAreaRai} เนเธฃเน)`);
+     |             ^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  63 |         } else if (estimatedPlants < recommendedMin * 0.5 && estimatedPlants > 0) {
+  64 |             setValidationWarning(`เธเธณเธเธงเธเธ•เนเธเธ•เนเธณเธเธงเนเธฒเธเนเธฒเนเธเธฐเธเธณเธกเธฒเธ (เธ•เนเธณเธชเธธเธ” ~${recommendedMin.toLocaleString()} เธ•เนเธ)`);
+  65 |         } else {  react-hooks/set-state-in-effect
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepQuote.tsx
+  10:21  warning  'DocIcon' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  10:30  warning  'InfoIcon' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  24:19  warning  'language' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  32:96  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepQuote.tsx:32:96
+  30 |
+  31 |     const quoteDate = new Date().toISOString();
+> 32 |     const [dtamQuoteNumber] = useState(`DTAM-QT-${new Date().getFullYear()}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`);
+     |                                                                                                ^^^^^^^^^^^^^ Cannot call impure function
+  33 |     const [platformQuoteNumber] = useState(`PLT-QT-${new Date().getFullYear()}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`);
+  34 |
+  35 |     const dtamFee = GACP_FEES.milestone1;                                                                         react-hooks/purity
+  33:99  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepQuote.tsx:33:99
+  31 |     const quoteDate = new Date().toISOString();
+  32 |     const [dtamQuoteNumber] = useState(`DTAM-QT-${new Date().getFullYear()}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`);
+> 33 |     const [platformQuoteNumber] = useState(`PLT-QT-${new Date().getFullYear()}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`);
+     |                                                                                                   ^^^^^^^^^^^^^ Cannot call impure function
+  34 |
+  35 |     const dtamFee = GACP_FEES.milestone1;
+  36 |     const platformFee = Math.round(dtamFee * PLATFORM_FEE_PERCENT);  react-hooks/purity
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\steps\StepSubmit.tsx
+    8:31  warning  'WarningIcon' is defined but never used                          @typescript-eslint/no-unused-vars
+  209:50  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  209:58  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\success\page.tsx
+   44:122  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\success\page.tsx:44:122
+  42 |                 <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+  43 |                     {[...Array(40)].map((_, i) => (
+> 44 |                         <div key={i} className="absolute animate-[confetti_2s_ease-out_forwards]" style={{ width: `${8 + Math.random() * 8}px`, height: `${8 + Math.random() * 8}px`, background: ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6', '#EF4444'][i % 6], borderRadius: i % 3 === 0 ? '50%' : '2px', left: `${Math.random() * 100}%`, top: '-20px', animationDelay: `${Math.random() * 0.8}s` }} />
+     |                                                                                                                          ^^^^^^^^^^^^^ Cannot call impure function
+  45 |                     ))}
+  46 |                 </div>
+  47 |             )}                                                                                                                                                                                                                                                                   react-hooks/purity
+   44:160  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\success\page.tsx:44:160
+  42 |                 <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+  43 |                     {[...Array(40)].map((_, i) => (
+> 44 |                         <div key={i} className="absolute animate-[confetti_2s_ease-out_forwards]" style={{ width: `${8 + Math.random() * 8}px`, height: `${8 + Math.random() * 8}px`, background: ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6', '#EF4444'][i % 6], borderRadius: i % 3 === 0 ? '50%' : '2px', left: `${Math.random() * 100}%`, top: '-20px', animationDelay: `${Math.random() * 0.8}s` }} />
+     |                                                                                                                                                                ^^^^^^^^^^^^^ Cannot call impure function
+  45 |                     ))}
+  46 |                 </div>
+  47 |             )}                                                                                                                                                                                                                             react-hooks/purity
+   44:322  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\success\page.tsx:44:322
+  42 |                 <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+  43 |                     {[...Array(40)].map((_, i) => (
+> 44 |                         <div key={i} className="absolute animate-[confetti_2s_ease-out_forwards]" style={{ width: `${8 + Math.random() * 8}px`, height: `${8 + Math.random() * 8}px`, background: ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6', '#EF4444'][i % 6], borderRadius: i % 3 === 0 ? '50%' : '2px', left: `${Math.random() * 100}%`, top: '-20px', animationDelay: `${Math.random() * 0.8}s` }} />
+     |                                                                                                                                                                                                                                                                                                                                  ^^^^^^^^^^^^^ Cannot call impure function
+  45 |                     ))}
+  46 |                 </div>
+  47 |             )}                                                           react-hooks/purity
+   44:379  error    Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\new\success\page.tsx:44:379
+  42 |                 <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+  43 |                     {[...Array(40)].map((_, i) => (
+> 44 |                         <div key={i} className="absolute animate-[confetti_2s_ease-out_forwards]" style={{ width: `${8 + Math.random() * 8}px`, height: `${8 + Math.random() * 8}px`, background: ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6', '#EF4444'][i % 6], borderRadius: i % 3 === 0 ? '50%' : '2px', left: `${Math.random() * 100}%`, top: '-20px', animationDelay: `${Math.random() * 0.8}s` }} />
+     |                                                                                                                                                                                                                                                                                                                                                                                           ^^^^^^^^^^^^^ Cannot call impure function
+  45 |                     ))}
+  46 |                 </div>
+  47 |             )}  react-hooks/purity
+  103:29   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\page.tsx
+  44:9   error  Error: Cannot access variable before it is declared
+
+`loadApplications` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\page.tsx:44:9
+  42 |         }
+  43 |
+> 44 |         loadApplications();
+     |         ^^^^^^^^^^^^^^^^ `loadApplications` accessed before it is declared
+  45 |     }, [router]);
+  46 |
+  47 |     const loadApplications = async () => {
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\page.tsx:47:5
+  45 |     }, [router]);
+  46 |
+> 47 |     const loadApplications = async () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 48 |         setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 49 |         const result = await api.get<Application[]>("/applications/my");
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 50 |         if (result.success && result.data) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 51 |             const apps = Array.isArray(result.data) ? result.data : (result.data as any).data || [];
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 52 |             setApplications(apps);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 53 |         }
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 54 |         setLoading(false);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 55 |     };
+     | ^^^^^^^ `loadApplications` is declared here
+  56 |
+  57 |     if (!mounted) return (
+  58 |         <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-slate-900' : 'bg-stone-50'}`}>  react-hooks/immutability
+  51:85  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\renewal\InvoiceStep.tsx
+  14:34  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\renewal\InvoiceStep.tsx:14:34
+  12 |
+  13 | export function InvoiceStep({ certificate, renewalId, isDark, onBack, onProceed }: InvoiceStepProps) {
+> 14 |     const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+     |                                  ^^^^^^^^^^ Cannot call impure function
+  15 |     const currentDate = new Date();
+  16 |     const dueDate = new Date(currentDate);
+  17 |     dueDate.setDate(dueDate.getDate() + 7);  react-hooks/purity
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\renewal\PaymentStep.tsx
+  29:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\renewal\QuotationStep.tsx
+  13:46  warning  'renewalId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+  14:31  error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\renewal\QuotationStep.tsx:14:31
+  12 |
+  13 | export function QuotationStep({ certificate, renewalId, isDark, onBack, onProceed }: QuotationStepProps) {
+> 14 |     const quoteNumber = `QT-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+     |                               ^^^^^^^^^^ Cannot call impure function
+  15 |     const currentDate = new Date();
+  16 |     const validUntil = new Date(currentDate);
+  17 |     validUntil.setDate(validUntil.getDate() + 30);  react-hooks/purity
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\renewal\SuccessStep.tsx
+  18:118  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\renewal\SuccessStep.tsx:18:118
+  16 |             <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+  17 |                 {[...Array(30)].map((_, i) => (
+> 18 |                     <div key={i} className="absolute animate-[confetti_2s_ease-out_forwards]" style={{ width: `${8 + Math.random() * 8}px`, height: `${8 + Math.random() * 8}px`, background: ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6'][i % 5], borderRadius: i % 3 === 0 ? '50%' : '2px', left: `${Math.random() * 100}%`, top: '-20px', animationDelay: `${Math.random() * 0.8}s` }} />
+     |                                                                                                                      ^^^^^^^^^^^^^ Cannot call impure function
+  19 |                 ))}
+  20 |             </div>
+  21 |                                                                                                                                                                                                                                                        react-hooks/purity
+  18:156  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\renewal\SuccessStep.tsx:18:156
+  16 |             <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+  17 |                 {[...Array(30)].map((_, i) => (
+> 18 |                     <div key={i} className="absolute animate-[confetti_2s_ease-out_forwards]" style={{ width: `${8 + Math.random() * 8}px`, height: `${8 + Math.random() * 8}px`, background: ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6'][i % 5], borderRadius: i % 3 === 0 ? '50%' : '2px', left: `${Math.random() * 100}%`, top: '-20px', animationDelay: `${Math.random() * 0.8}s` }} />
+     |                                                                                                                                                            ^^^^^^^^^^^^^ Cannot call impure function
+  19 |                 ))}
+  20 |             </div>
+  21 |                                                                                                                                                                                                                  react-hooks/purity
+  18:307  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\renewal\SuccessStep.tsx:18:307
+  16 |             <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+  17 |                 {[...Array(30)].map((_, i) => (
+> 18 |                     <div key={i} className="absolute animate-[confetti_2s_ease-out_forwards]" style={{ width: `${8 + Math.random() * 8}px`, height: `${8 + Math.random() * 8}px`, background: ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6'][i % 5], borderRadius: i % 3 === 0 ? '50%' : '2px', left: `${Math.random() * 100}%`, top: '-20px', animationDelay: `${Math.random() * 0.8}s` }} />
+     |                                                                                                                                                                                                                                                                                                                   ^^^^^^^^^^^^^ Cannot call impure function
+  19 |                 ))}
+  20 |             </div>
+  21 |                                                           react-hooks/purity
+  18:364  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\renewal\SuccessStep.tsx:18:364
+  16 |             <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+  17 |                 {[...Array(30)].map((_, i) => (
+> 18 |                     <div key={i} className="absolute animate-[confetti_2s_ease-out_forwards]" style={{ width: `${8 + Math.random() * 8}px`, height: `${8 + Math.random() * 8}px`, background: ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6'][i % 5], borderRadius: i % 3 === 0 ? '50%' : '2px', left: `${Math.random() * 100}%`, top: '-20px', animationDelay: `${Math.random() * 0.8}s` }} />
+     |                                                                                                                                                                                                                                                                                                                                                                            ^^^^^^^^^^^^^ Cannot call impure function
+  19 |                 ))}
+  20 |             </div>
+  21 |  react-hooks/purity
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\renewal\page.tsx
+  23:11  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  52:48  warning  'file' is defined but never used             @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\applications\replacement\page.tsx
+   19:52   error    Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+   22:110  warning  React Hook useEffect has a missing dependency: 'loadCertificate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+   24:93   error    Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+   29:43   error    Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+   79:160  warning  Expected an assignment or function call and instead saw an expression                                               @typescript-eslint/no-unused-expressions
+  112:166  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                     react/no-unescaped-entities
+  112:174  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                     react/no-unescaped-entities
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\certificates\page.tsx
+   28:8   warning  React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array                                                                                                                                                                                react-hooks/exhaustive-deps
+  137:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\dashboard\page.tsx
+   29:88   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   70:108  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   80:97   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  140:25   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\documents\[id]\page.tsx
+  22:210  warning  React Hook useEffect has missing dependencies: 'loadDocument' and 'router'. Either include them or remove the dependency array                                                                                                                                                           react-hooks/exhaustive-deps
+  99:33   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\establishments\new\page.tsx
+   8:11  warning  'router' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  16:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\establishments\new\page.tsx:16:9
+  14 |
+  15 |     useEffect(() => {
+> 16 |         setMounted(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  17 |         setIsDark(localStorage.getItem("theme") === "dark");
+  18 |         const userData = localStorage.getItem("user");
+  19 |         if (!userData) { window.location.href = "/login"; }  react-hooks/set-state-in-effect
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\layout.tsx
+  16:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\layout.tsx:16:9
+  14 |
+  15 |     useEffect(() => {
+> 16 |         setIsDark(localStorage.getItem("theme") === "dark");
+     |         ^^^^^^^^^ Avoid calling setState() directly within an effect
+  17 |
+  18 |         // Listen for theme changes
+  19 |         const handleStorage = () => {  react-hooks/set-state-in-effect
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\notifications\page.tsx
+  39:8  warning  React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\payments\page.tsx
+    4:8   warning  'Link' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+   37:12  warning  'payQR' is assigned a value but never used                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   37:19  warning  'setPayQR' is assigned a value but never used                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   71:18  warning  'error' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   87:11  warning  'filteredPayments' is assigned a value but never used                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  158:79  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  249:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\planting\new\page.tsx
+   9:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  46:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  77:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\planting\page.tsx
+   8:42   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:50   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  22:26   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:52   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:64   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:102  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:110  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  83:41   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\profile\components\EnhancedValidation.tsx
+  13:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\profile\components\NotificationSettings.tsx
+  41:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\profile\components\PasswordChange.tsx
+  75:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\profile\components\PrivacySettings.tsx
+  23:67  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:14  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\profile\components\ProfilePicture.tsx
+  41:9   warning  'handleUpload' is assigned a value but never used                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  62:14  warning  'error' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  73:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  75:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\profile\components\TwoFactorAuth.tsx
+   30:14  warning  'error' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   57:14  warning  'error' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   79:14  warning  'error' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  121:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\profile\page.tsx
+  54:17  error  Error: Cannot access variable before it is declared
+
+`initForm` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\profile\page.tsx:54:17
+  52 |                 const u = res.data;
+  53 |                 setUser(u);
+> 54 |                 initForm(u);
+     |                 ^^^^^^^^ `initForm` accessed before it is declared
+  55 |             } else {
+  56 |                 const u = AuthService.getUser();
+  57 |                 if (u) {
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\profile\page.tsx:68:5
+  66 |     }, [router]);
+  67 |
+> 68 |     const initForm = (u: User) => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 69 |         setFirstName(u.firstName || "");
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 70 |         setLastName(u.lastName || "");
+     โ€ฆ
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 80 |         });
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 81 |     };
+     | ^^^^^^^ `initForm` is declared here
+  82 |
+  83 |     const validateEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  84 |     const validatePhone = (v: string) => /^0[689]\d{8}$/.test(v);  react-hooks/immutability
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\tracking\cycles\page.tsx
+  179:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\tracking\lots\page.tsx
+   68:8   warning  React Hook useEffect has a missing dependency: 'fetchBatches'. Either include it or remove the dependency array                                                                                                                                                                          react-hooks/exhaustive-deps
+  280:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\tracking\page.tsx
+  58:9   error  Error: Cannot access variable before it is declared
+
+`loadApplications` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\tracking\page.tsx:58:9
+  56 |         }
+  57 |
+> 58 |         loadApplications();
+     |         ^^^^^^^^^^^^^^^^ `loadApplications` accessed before it is declared
+  59 |     }, [router]);
+  60 |
+  61 |     const loadApplications = async () => {
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\farmer\tracking\page.tsx:61:5
+  59 |     }, [router]);
+  60 |
+> 61 |     const loadApplications = async () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 62 |         const result = await api.get<Application[]>("/applications/my");
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 63 |         if (result.success && result.data) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 64 |             const apps = Array.isArray(result.data) ? result.data : (result.data as any).data || [];
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 65 |             setApplications(apps);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 66 |         }
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 67 |     };
+     | ^^^^^^^ `loadApplications` is declared here
+  68 |
+  69 |     const getStepForStatus = (status: string) => STEPS.findIndex(s => s.statuses.includes(status)) + 1;
+  70 |     const accentColor = isDark ? "#10B981" : "#16A34A";  react-hooks/immutability
+  64:85  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\accounting\page.tsx
+   52:13  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   86:81  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  154:18  warning  'error' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  164:59  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  331:75  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+  331:84  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+  342:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\analytics\page.tsx
+  61:8  warning  React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\applications\[id]\page.tsx
+  64:72  error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  93:12  warning  'isSubmitting' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\audits\[id]\page.tsx
+   31:7   warning  'IconWarning' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  102:12  warning  'isSaving' is assigned a value but never used     @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\certificates\page.tsx
+  4:8  warning  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\components\StaffLayout.tsx
+  66:56  warning  'subtitle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  74:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\components\StaffLayout.tsx:74:9
+  72 |
+  73 |     useEffect(() => {
+> 74 |         setMounted(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  75 |         // Force slate/dark theme preference for staff if not set
+  76 |         const saved = localStorage.getItem("staff_theme");
+  77 |         setIsDark(saved === "light" ? false : true);  react-hooks/set-state-in-effect
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\criteria\page.tsx
+  136:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  158:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\dashboard\admin\page.tsx
+  50:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\dashboard\admin\page.tsx:50:9
+  48 |             return;
+  49 |         }
+> 50 |         setUser(JSON.parse(stored));
+     |         ^^^^^^^ Avoid calling setState() directly within an effect
+  51 |     }, [router]);
+  52 |
+  53 |     const handleLogout = () => {  react-hooks/set-state-in-effect
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\dashboard\page.tsx
+    9:22  warning  'IconClock' is defined but never used                                                                                @typescript-eslint/no-unused-vars
+   62:8   warning  React Hook useEffect has a missing dependency: 'fetchPendingData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  144:72  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\login\page.tsx
+   7:10  warning  'IconUser' is defined but never used      @typescript-eslint/no-unused-vars
+  61:23  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\verification\[id]\page.tsx
+  220:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  241:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\staff\verification\page.tsx
+  19:19  warning  'staffUser' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\app\trace\[qrCode]\page.tsx
+  140:22  warning  'err' is defined but never used                      @typescript-eslint/no-unused-vars
+  190:11  warning  'isHarvestBatch' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\AuthHealthIndicator.tsx
+  7:11  warning  'health' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\CultivationMethodSelector.tsx
+   96:5   warning  'subType' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  101:5   warning  'multiSelect' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+  112:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\CultivationMethodSelector.tsx:112:13
+  110 |     useEffect(() => {
+  111 |         if (selectedTypes.length > 0) {
+> 112 |             setLocalSelectedTypes(selectedTypes);
+      |             ^^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  113 |         }
+  114 |     }, [selectedTypes]);
+  115 |  react-hooks/set-state-in-effect
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\FarmLayoutSelector.tsx
+  3:17  warning  'useState' is defined but never used      @typescript-eslint/no-unused-vars
+  3:27  warning  'useEffect' is defined but never used     @typescript-eslint/no-unused-vars
+  4:37  warning  'FarmLayout' is defined but never used    @typescript-eslint/no-unused-vars
+  4:54  warning  'GrowingStyle' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\InlineDocumentUpload.tsx
+   31:5   warning  'id' is defined but never used                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  180:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\InteractiveMap.tsx
+  3:21  warning  'useState' is defined but never used      @typescript-eslint/no-unused-vars
+  9:37  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\PlantQRCalculator.tsx
+  75:5  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\PlantQRCalculator.tsx:75:5
+  73 |     const prevValuesRef = useRef({ qrCount: -1, estimatedCost: -1 });
+  74 |     const onChangeRef = useRef(onChange);
+> 75 |     onChangeRef.current = onChange;
+     |     ^^^^^^^^^^^^^^^^^^^ Cannot update ref during render
+  76 |
+  77 |     useEffect(() => {
+  78 |         const prev = prevValuesRef.current;  react-hooks/refs
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\PlantUnitList.tsx
+  27:49  warning  'applicationId' is defined but never used                                                                     @typescript-eslint/no-unused-vars
+  34:8   warning  React Hook useEffect has a missing dependency: 'loadCycle'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  70:56  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+  72:18  warning  'error' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\system-guard.tsx
+  23:12  warning  'failedChecks' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  46:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\system-guard.tsx:46:9
+  44 |     useEffect(() => {
+  45 |         // Initial check
+> 46 |         checkServer();
+     |         ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  47 |
+  48 |         // Periodic health check every 30 seconds
+  49 |         const interval = setInterval(checkServer, 30000);  react-hooks/set-state-in-effect
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\ui\DocumentUploadCard.tsx
+  206:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\ui\bottom-nav.tsx
+  68:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\ui\bottom-nav.tsx:68:9
+  66 |         // Initial load
+  67 |         const currentUser = AuthService.getUser();
+> 68 |         setUser(currentUser);
+     |         ^^^^^^^ Avoid calling setState() directly within an effect
+  69 |
+  70 |         // Listen for updates (login/profile update)
+  71 |         const unsubscribe = AuthService.onAuthChange((event, data) => {  react-hooks/set-state-in-effect
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\ui\file-upload.tsx
+  128:37  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `validateFile`, but the source dependencies were [multiple, selectedFiles, onFileSelect, maxSize, accept]. Inferred different dependency than source.
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\ui\file-upload.tsx:128:37
+  126 |     };
+  127 |
+> 128 |     const handleFiles = useCallback((files: FileList | null) => {
+      |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 129 |         if (!files || files.length === 0) return;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 130 |
+      โ€ฆ
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 145 |         onFileSelect(newFiles);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 146 |     }, [multiple, selectedFiles, onFileSelect, maxSize, accept]);
+      | ^^^^^^ Could not preserve existing manual memoization
+  147 |
+  148 |     const handleDragEnter = (e: React.DragEvent) => {
+  149 |         e.preventDefault();  react-hooks/preserve-manual-memoization
+  146:8   warning  React Hook useCallback has a missing dependency: 'validateFile'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-hooks/exhaustive-deps
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\ui\sidebar.tsx
+  22:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\ui\sidebar.tsx:22:9
+  20 |     useEffect(() => {
+  21 |         const currentUser = AuthService.getUser();
+> 22 |         setUser(currentUser);
+     |         ^^^^^^^ Avoid calling setState() directly within an effect
+  23 |
+  24 |         const unsubscribe = AuthService.onAuthChange((event, data) => {
+  25 |             if (event === 'login' && data && typeof data === 'object' && 'user' in data) {  react-hooks/set-state-in-effect
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\ui\theme-toggle.tsx
+  15:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\components\ui\theme-toggle.tsx:15:9
+  13 |
+  14 |     useEffect(() => {
+> 15 |         setMounted(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  16 |         setIsDark(localStorage.getItem("theme") === "dark");
+  17 |     }, []);
+  18 |  react-hooks/set-state-in-effect
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\features\permit-form\components\application-selector.tsx
+   72:25  warning  'setServiceType' is assigned a value but never used                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   76:12  warning  'calculating' is assigned a value but never used                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   89:8   warning  React Hook useEffect has missing dependencies: 'calculateFee' and 'onSelectionChange'. Either include them or remove the dependency array. If 'onSelectionChange' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+   93:42  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+   97:18  warning  'error' is defined but never used                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  107:43  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+  117:18  warning  'error' is defined but never used                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\features\permit-form\components\documents\invoice-document.tsx
+  45:5  warning  'invoicePhase' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\features\permit-form\components\documents\quotation-document.tsx
+  4:46  warning  'DEFAULT_FEES' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\hooks\useCultivationConfig.ts
+  3:44  warning  'useMemo' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\hooks\useGACPData.ts
+  199:22  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\hooks\useRegistration.ts
+  134:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  221:73  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  228:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\hooks\useStaffDashboard.ts
+  114:61   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  122:126  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  124:70   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  152:23   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\lib\api\api-client.ts
+  190:35  warning  'timeout' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  190:66  warning  'body' is assigned a value but never used     @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\lib\services\application-service.ts
+  31:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  52:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\lib\services\auth-service.ts
+  187:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\usEr\Desktop\GACP-Certification-Application\apps\web-app\src\middleware.ts
+  93:11  warning  'isAuthRoute' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+โ– 245 problems (115 errors, 130 warnings)
+

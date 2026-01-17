@@ -18,7 +18,7 @@ const PURPOSES = [
         nameEN: 'Domestic Sales (B2B)',
         description: 'จำหน่ายให้กับผู้ประกอบการในประเทศ โรงพยาบาล คลินิก',
         requirements: ['GACP'],
-        sortOrder: 1
+        sortOrder: 1,
     },
     {
         id: 'export',
@@ -26,7 +26,7 @@ const PURPOSES = [
         nameEN: 'Export (International)',
         description: 'ส่งออกไปต่างประเทศ ต้องผ่านมาตรฐาน GACP ขั้นสูง',
         requirements: ['GACP_ADVANCED'],
-        sortOrder: 2
+        sortOrder: 2,
     },
     {
         id: 'research',
@@ -34,8 +34,8 @@ const PURPOSES = [
         nameEN: 'Research',
         description: 'การวิจัยและพัฒนา ต้องมี Protocol การวิจัย',
         requirements: ['GACP', 'RESEARCH_PROTOCOL'],
-        sortOrder: 3
-    }
+        sortOrder: 3,
+    },
 ];
 
 // =====================
@@ -51,7 +51,7 @@ const CULTIVATION_METHODS = [
         pros: ['ต้นทุนต่ำ', 'เหมาะกับพื้นที่กว้าง'],
         cons: ['ควบคุมสภาพแวดล้อมยาก', 'เสี่ยงศัตรูพืช'],
         feeMultiplier: 1.0,
-        sortOrder: 1
+        sortOrder: 1,
     },
     {
         id: 'greenhouse',
@@ -62,7 +62,7 @@ const CULTIVATION_METHODS = [
         pros: ['ควบคุมสภาพแวดล้อมได้บางส่วน', 'ปลูกได้ตลอดปี'],
         cons: ['ต้นทุนสูงกว่ากลางแจ้ง'],
         feeMultiplier: 1.0,
-        sortOrder: 2
+        sortOrder: 2,
     },
     {
         id: 'indoor',
@@ -73,8 +73,8 @@ const CULTIVATION_METHODS = [
         pros: ['ควบคุมทุกปัจจัยได้', 'คุณภาพสม่ำเสมอ'],
         cons: ['ต้นทุนสูง', 'ค่าไฟฟ้าสูง'],
         feeMultiplier: 1.0,
-        sortOrder: 3
-    }
+        sortOrder: 3,
+    },
 ];
 
 // =====================
@@ -91,7 +91,7 @@ const FARM_LAYOUTS = [
         plantsPerSqm: 1,
         spacingRowCm: 100,
         spacingPlantCm: 100,
-        icon: 'rows'
+        icon: 'rows',
     },
     {
         id: 'raised_bed',
@@ -102,7 +102,7 @@ const FARM_LAYOUTS = [
         plantsPerSqm: 4,
         spacingRowCm: 50,
         spacingPlantCm: 50,
-        icon: 'layer'
+        icon: 'layer',
     },
     {
         id: 'block_plot',
@@ -113,7 +113,7 @@ const FARM_LAYOUTS = [
         plantsPerSqm: 1,
         spacingRowCm: 100,
         spacingPlantCm: 100,
-        icon: 'grid'
+        icon: 'grid',
     },
     {
         id: 'container',
@@ -123,7 +123,7 @@ const FARM_LAYOUTS = [
         applicableTo: ['outdoor', 'greenhouse'],
         plantsPerSqm: 0, // Manual input
         manualPlantCount: true,
-        icon: 'pot'
+        icon: 'pot',
     },
     // GREENHOUSE layouts
     {
@@ -135,7 +135,7 @@ const FARM_LAYOUTS = [
         plantsPerSqm: 1,
         spacingRowCm: 100,
         spacingPlantCm: 100,
-        icon: 'rows'
+        icon: 'rows',
     },
     {
         id: 'raised_tables',
@@ -146,7 +146,7 @@ const FARM_LAYOUTS = [
         plantsPerSqm: 2,
         spacingRowCm: 70,
         spacingPlantCm: 70,
-        icon: 'table'
+        icon: 'table',
     },
     {
         id: 'hydroponic',
@@ -158,8 +158,8 @@ const FARM_LAYOUTS = [
         spacingRowCm: 50,
         spacingPlantCm: 50,
         icon: 'drop',
-        subTypes: ['nft', 'dwc', 'drip']
-    }
+        subTypes: ['nft', 'dwc', 'drip'],
+    },
 ];
 
 // =====================
@@ -173,7 +173,7 @@ const GROWING_STYLES = [
         description: 'ปลูกแบบธรรมชาติ ให้ต้นโตเต็มที่',
         applicableTo: ['indoor'],
         plantsPerSqm: 2,
-        icon: 'plant'
+        icon: 'plant',
     },
     {
         id: 'sog',
@@ -182,7 +182,7 @@ const GROWING_STYLES = [
         description: 'ปลูกต้นเล็กจำนวนมาก เก็บเกี่ยวเร็ว',
         applicableTo: ['indoor'],
         plantsPerSqm: 12,
-        icon: 'grid-3x3'
+        icon: 'grid-3x3',
     },
     {
         id: 'scrog',
@@ -191,7 +191,7 @@ const GROWING_STYLES = [
         description: 'ใช้ตาข่ายบังคับทิศทางการเติบโต',
         applicableTo: ['indoor'],
         plantsPerSqm: 2,
-        icon: 'net'
+        icon: 'net',
     },
     {
         id: 'vertical',
@@ -202,8 +202,8 @@ const GROWING_STYLES = [
         plantsPerSqm: 6,
         supportsMultipleTiers: true,
         maxTiers: 5,
-        icon: 'layers'
-    }
+        icon: 'layers',
+    },
 ];
 
 // =====================
@@ -221,23 +221,23 @@ const JOURNEY_CONFIGS = [
             'waterSource',
             'waterQuality',
             'ipmPlan',
-            'weatherProtection'
+            'weatherProtection',
         ],
         requiredDocuments: [
             'id_card',
             'house_registration',
             'land_document',
             'plot_map',
-            'soil_analysis_report'
+            'soil_analysis_report',
         ],
         securityRequirements: [
             'fence_2m',
             'barbed_wire',
             'cctv_entry',
             'cctv_plot',
-            'warning_signs'
+            'warning_signs',
         ],
-        availableLayouts: ['row_cultivation', 'raised_bed', 'block_plot', 'container']
+        availableLayouts: ['row_cultivation', 'raised_bed', 'block_plot', 'container'],
     },
     // DOMESTIC × GREENHOUSE
     {
@@ -250,7 +250,7 @@ const JOURNEY_CONFIGS = [
             'ventilationSystem',
             'temperatureControl',
             'waterSource',
-            'ipmPlan'
+            'ipmPlan',
         ],
         requiredDocuments: [
             'id_card',
@@ -258,16 +258,16 @@ const JOURNEY_CONFIGS = [
             'land_document',
             'plot_map',
             'greenhouse_specs',
-            'sop_cultivation'
+            'sop_cultivation',
         ],
         securityRequirements: [
             'fence_2m',
             'cctv_entry',
             'cctv_plot',
             'access_control',
-            'warning_signs'
+            'warning_signs',
         ],
-        availableLayouts: ['ground_rows', 'raised_tables', 'hydroponic', 'container']
+        availableLayouts: ['ground_rows', 'raised_tables', 'hydroponic', 'container'],
     },
     // DOMESTIC × INDOOR
     {
@@ -281,7 +281,7 @@ const JOURNEY_CONFIGS = [
             'temperatureHumidityControl',
             'co2Supplementation',
             'airFiltration',
-            'growingStyle'
+            'growingStyle',
         ],
         requiredDocuments: [
             'id_card',
@@ -292,7 +292,7 @@ const JOURNEY_CONFIGS = [
             'hvac_specs',
             'lighting_specs',
             'sop_cultivation',
-            'sop_environmental_control'
+            'sop_environmental_control',
         ],
         securityRequirements: [
             'fence_2m',
@@ -301,10 +301,10 @@ const JOURNEY_CONFIGS = [
             'cctv_rooms',
             'biometric_access',
             'access_log',
-            'warning_signs'
+            'warning_signs',
         ],
         availableLayouts: ['hydroponic'],
-        availableGrowingStyles: ['traditional', 'sog', 'scrog', 'vertical']
+        availableGrowingStyles: ['traditional', 'sog', 'scrog', 'vertical'],
     },
     // EXPORT × OUTDOOR
     {
@@ -319,7 +319,7 @@ const JOURNEY_CONFIGS = [
             'ipmPlan',
             'weatherProtection',
             'traceabilitySystem',
-            'qualityControlPlan'
+            'qualityControlPlan',
         ],
         requiredDocuments: [
             'id_card',
@@ -334,7 +334,7 @@ const JOURNEY_CONFIGS = [
             'lab_analysis_thc_cbd',
             'sop_cultivation',
             'sop_quality_control',
-            'traceability_plan'
+            'traceability_plan',
         ],
         securityRequirements: [
             'fence_2m',
@@ -345,9 +345,9 @@ const JOURNEY_CONFIGS = [
             'access_control',
             'access_log',
             'warning_signs',
-            'guard_24h'
+            'guard_24h',
         ],
-        availableLayouts: ['row_cultivation', 'raised_bed', 'block_plot']
+        availableLayouts: ['row_cultivation', 'raised_bed', 'block_plot'],
     },
     // EXPORT × GREENHOUSE
     {
@@ -364,7 +364,7 @@ const JOURNEY_CONFIGS = [
             'ipmPlan',
             'traceabilitySystem',
             'qualityControlPlan',
-            'batchTracking'
+            'batchTracking',
         ],
         requiredDocuments: [
             'id_card',
@@ -383,7 +383,7 @@ const JOURNEY_CONFIGS = [
             'sop_cultivation',
             'sop_quality_control',
             'sop_batch_management',
-            'traceability_plan'
+            'traceability_plan',
         ],
         securityRequirements: [
             'fence_2m',
@@ -393,9 +393,9 @@ const JOURNEY_CONFIGS = [
             'biometric_access',
             'access_log',
             'warning_signs',
-            'guard_24h'
+            'guard_24h',
         ],
-        availableLayouts: ['ground_rows', 'raised_tables', 'hydroponic']
+        availableLayouts: ['ground_rows', 'raised_tables', 'hydroponic'],
     },
     // EXPORT × INDOOR
     {
@@ -413,7 +413,7 @@ const JOURNEY_CONFIGS = [
             'traceabilitySystem',
             'qualityControlPlan',
             'batchTracking',
-            'growingStyle'
+            'growingStyle',
         ],
         requiredDocuments: [
             'id_card',
@@ -438,7 +438,7 @@ const JOURNEY_CONFIGS = [
             'sop_batch_management',
             'sop_cleanroom',
             'traceability_plan',
-            'validation_reports'
+            'validation_reports',
         ],
         securityRequirements: [
             'fence_2m',
@@ -450,10 +450,10 @@ const JOURNEY_CONFIGS = [
             'access_log',
             'mantrap_entry',
             'warning_signs',
-            'guard_24h'
+            'guard_24h',
         ],
         availableLayouts: ['hydroponic'],
-        availableGrowingStyles: ['traditional', 'sog', 'scrog', 'vertical']
+        availableGrowingStyles: ['traditional', 'sog', 'scrog', 'vertical'],
     },
     // RESEARCH × ALL (simplified)
     {
@@ -464,7 +464,7 @@ const JOURNEY_CONFIGS = [
         requiredFields: ['researchProtocol', 'principalInvestigator', 'institutionAffiliation'],
         requiredDocuments: ['id_card', 'research_protocol', 'institution_letter', 'ethics_approval'],
         securityRequirements: ['fence_2m', 'cctv_entry', 'access_log', 'warning_signs'],
-        availableLayouts: ['row_cultivation', 'raised_bed', 'container']
+        availableLayouts: ['row_cultivation', 'raised_bed', 'container'],
     },
     {
         id: 'research_greenhouse',
@@ -474,7 +474,7 @@ const JOURNEY_CONFIGS = [
         requiredFields: ['researchProtocol', 'principalInvestigator', 'institutionAffiliation', 'greenhouseStructure'],
         requiredDocuments: ['id_card', 'research_protocol', 'institution_letter', 'ethics_approval', 'greenhouse_specs'],
         securityRequirements: ['fence_2m', 'cctv_entry', 'access_control', 'access_log', 'warning_signs'],
-        availableLayouts: ['ground_rows', 'raised_tables', 'hydroponic']
+        availableLayouts: ['ground_rows', 'raised_tables', 'hydroponic'],
     },
     {
         id: 'research_indoor',
@@ -485,8 +485,8 @@ const JOURNEY_CONFIGS = [
         requiredDocuments: ['id_card', 'research_protocol', 'institution_letter', 'ethics_approval', 'floor_plan', 'hvac_specs'],
         securityRequirements: ['fence_2m', 'cctv_entry', 'cctv_rooms', 'biometric_access', 'access_log', 'warning_signs'],
         availableLayouts: ['hydroponic'],
-        availableGrowingStyles: ['traditional', 'sog', 'scrog', 'vertical']
-    }
+        availableGrowingStyles: ['traditional', 'sog', 'scrog', 'vertical'],
+    },
 ];
 
 // =====================
@@ -523,7 +523,7 @@ const DOCUMENT_DEFINITIONS = {
     validation_reports: { nameTH: 'รายงาน Validation', nameEN: 'Validation Reports', category: 'operations', required: false },
     research_protocol: { nameTH: 'โปรโตคอลวิจัย', nameEN: 'Research Protocol', category: 'research', required: false },
     institution_letter: { nameTH: 'หนังสือรับรองจากสถาบัน', nameEN: 'Institution Letter', category: 'research', required: false },
-    ethics_approval: { nameTH: 'การอนุมัติจริยธรรม', nameEN: 'Ethics Approval', category: 'research', required: false }
+    ethics_approval: { nameTH: 'การอนุมัติจริยธรรม', nameEN: 'Ethics Approval', category: 'research', required: false },
 };
 
 // =====================
@@ -541,7 +541,7 @@ const SECURITY_DEFINITIONS = {
     access_log: { nameTH: 'บันทึกการเข้าออก', nameEN: 'Access Log', category: 'access' },
     mantrap_entry: { nameTH: 'ประตู Mantrap', nameEN: 'Mantrap Entry', category: 'access' },
     warning_signs: { nameTH: 'ป้ายเตือน', nameEN: 'Warning Signs', category: 'signage' },
-    guard_24h: { nameTH: 'รปภ. 24 ชั่วโมง', nameEN: '24h Security Guard', category: 'personnel' }
+    guard_24h: { nameTH: 'รปภ. 24 ชั่วโมง', nameEN: '24h Security Guard', category: 'personnel' },
 };
 
 // =====================
@@ -561,7 +561,7 @@ const GACP_CATEGORIES = [
     { id: 11, nameTH: 'การบันทึกข้อมูล', nameEN: 'Record Keeping', steps: [6] },
     { id: 12, nameTH: 'ความปลอดภัย', nameEN: 'Security', steps: [4] },
     { id: 13, nameTH: 'การควบคุมคุณภาพ', nameEN: 'Quality Control', steps: [7] },
-    { id: 14, nameTH: 'เอกสารและ SOP', nameEN: 'Documents and SOP', steps: [8] }
+    { id: 14, nameTH: 'เอกสารและ SOP', nameEN: 'Documents and SOP', steps: [8] },
 ];
 
 // =====================
@@ -571,7 +571,7 @@ const ENVIRONMENT_CHECKLIST = [
     { id: 'no_waste_dump', nameTH: 'พื้นที่ไม่เคยเป็นที่ทิ้งขยะ/สารเคมี', nameEN: 'Not former waste/chemical dump', required: true, gacpCategory: 2 },
     { id: 'no_contamination', nameTH: 'ไม่อยู่ใกล้แหล่งปนเปื้อน (โรงงาน/โรงพยาบาล/คอกสัตว์)', nameEN: 'Not near contamination sources', required: true, gacpCategory: 2 },
     { id: 'no_chemicals_3y', nameTH: 'ไม่เคยใช้สารเคมีเข้มข้นในช่วง 3 ปี', nameEN: 'No intensive chemicals in last 3 years', required: false, gacpCategory: 2 },
-    { id: 'suitable_environment', nameTH: 'สภาพแวดล้อมเหมาะสมสำหรับการปลูกพืชสมุนไพร', nameEN: 'Suitable environment for herb cultivation', required: true, gacpCategory: 2 }
+    { id: 'suitable_environment', nameTH: 'สภาพแวดล้อมเหมาะสมสำหรับการปลูกพืชสมุนไพร', nameEN: 'Suitable environment for herb cultivation', required: true, gacpCategory: 2 },
 ];
 
 // =====================
@@ -582,7 +582,7 @@ const WATER_SOURCES = [
     { id: 'RAIN', nameTH: 'น้ำฝน', nameEN: 'Rainwater' },
     { id: 'RIVER', nameTH: 'แม่น้ำ/ลำคลอง', nameEN: 'River/Canal' },
     { id: 'TAP', nameTH: 'น้ำประปา', nameEN: 'Tap Water' },
-    { id: 'POND', nameTH: 'สระ/อ่างเก็บน้ำ', nameEN: 'Pond/Reservoir' }
+    { id: 'POND', nameTH: 'สระ/อ่างเก็บน้ำ', nameEN: 'Pond/Reservoir' },
 ];
 
 // =====================
@@ -595,7 +595,7 @@ const GACP_STEP_REQUIREMENTS = {
         fields: ['farmName', 'address', 'totalArea', 'landOwnership', 'waterSource', 'security'],
         documents: ['land_title', 'farm_map', 'water_quality_report'],
         docRequired: ['land_title', 'farm_map'],
-        docOptional: ['water_quality_report']
+        docOptional: ['water_quality_report'],
     },
     // Step 5: Plots
     5: {
@@ -603,7 +603,7 @@ const GACP_STEP_REQUIREMENTS = {
         fields: ['plotName', 'plotArea', 'gps', 'cultivationSystem', 'seedSource', 'ipmPlan'],
         documents: ['soil_analysis_report', 'seed_certificate'],
         docRequired: [],
-        docOptional: ['soil_analysis_report', 'seed_certificate']
+        docOptional: ['soil_analysis_report', 'seed_certificate'],
     },
     // Step 6: Lots
     6: {
@@ -611,7 +611,7 @@ const GACP_STEP_REQUIREMENTS = {
         fields: ['lotCode', 'plotId', 'plantCount', 'plantingDate'],
         documents: ['production_plan'],
         docRequired: [],
-        docOptional: ['production_plan']
+        docOptional: ['production_plan'],
     },
     // Step 7: Harvest & QC
     7: {
@@ -619,7 +619,7 @@ const GACP_STEP_REQUIREMENTS = {
         fields: ['harvestMethod', 'dryingMethod', 'storage', 'qcPlan'],
         documents: ['sop_cultivation', 'sop_quality_control'],
         docRequired: ['sop_cultivation'],
-        docOptional: ['sop_quality_control']
+        docOptional: ['sop_quality_control'],
     },
     // Step 8: Documents
     8: {
@@ -627,8 +627,8 @@ const GACP_STEP_REQUIREMENTS = {
         fields: [],
         documents: [], // Will be calculated dynamically
         docRequired: [],
-        docOptional: []
-    }
+        docOptional: [],
+    },
 };
 
 // =====================
@@ -641,7 +641,7 @@ const SOIL_TYPES = [
     { id: 'sandy', nameTH: 'ดินทราย', nameEN: 'Sandy' },
     { id: 'peat', nameTH: 'ดินพีท', nameEN: 'Peat' },
     { id: 'organic', nameTH: 'ดินอินทรีย์', nameEN: 'Organic' },
-    { id: 'hydroponic', nameTH: 'ไฮโดรโปนิกส์ (ไม่ใช้ดิน)', nameEN: 'Hydroponic (Soilless)' }
+    { id: 'hydroponic', nameTH: 'ไฮโดรโปนิกส์ (ไม่ใช้ดิน)', nameEN: 'Hydroponic (Soilless)' },
 ];
 
 // =====================
@@ -652,7 +652,7 @@ const SEED_SOURCES = [
     { id: 'certified', nameTH: 'ซื้อจากร้านพันธุ์พืชรับรอง', nameEN: 'Certified Seed Shop' },
     { id: 'government', nameTH: 'จากหน่วยงานราชการ', nameEN: 'Government Agency' },
     { id: 'research', nameTH: 'จากสถาบันวิจัย', nameEN: 'Research Institute' },
-    { id: 'import', nameTH: 'นำเข้าจากต่างประเทศ', nameEN: 'Imported' }
+    { id: 'import', nameTH: 'นำเข้าจากต่างประเทศ', nameEN: 'Imported' },
 ];
 
 // =====================
@@ -664,7 +664,7 @@ const IPM_METHODS = [
     { id: 'mechanical', nameTH: 'การควบคุมโดยกล', nameEN: 'Mechanical Control', description: 'กับดัก กาว ตาข่าย' },
     { id: 'physical', nameTH: 'การควบคุมทางกายภาพ', nameEN: 'Physical Control', description: 'คลุมพลาสติก ใช้ความร้อน' },
     { id: 'botanical', nameTH: 'สารสกัดจากพืช', nameEN: 'Botanical Pesticides', description: 'สะเดา หางไหล ขมิ้น' },
-    { id: 'organic', nameTH: 'สารอินทรีย์อนุญาต', nameEN: 'Approved Organic Substances', description: 'ตามรายการที่กรมวิชาการเกษตรอนุญาต' }
+    { id: 'organic', nameTH: 'สารอินทรีย์อนุญาต', nameEN: 'Approved Organic Substances', description: 'ตามรายการที่กรมวิชาการเกษตรอนุญาต' },
 ];
 
 // =====================
@@ -794,5 +794,5 @@ module.exports = {
     calculatePlantCount,
     convertToSqm,
     getDocumentDetails,
-    getSecurityDetails
+    getSecurityDetails,
 };

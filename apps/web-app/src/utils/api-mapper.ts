@@ -282,7 +282,7 @@ export function formatThaiDate(date: Date | string | null | undefined): string {
     return `${day}/${month}/${year}`;
 }
 
-export default {
+const apiMapperUtils = {
     toApi,
     fromApi,
     mapFields,
@@ -296,3 +296,5 @@ export default {
     formatThaiDate,
     FIELD_MAP,
 };
+
+export default apiMapperUtils;

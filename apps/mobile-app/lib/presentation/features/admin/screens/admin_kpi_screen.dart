@@ -152,7 +152,7 @@ class AdminKpiScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withAlpha(26),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(icon, color: color),

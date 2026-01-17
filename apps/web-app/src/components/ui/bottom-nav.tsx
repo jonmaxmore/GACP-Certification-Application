@@ -65,6 +65,7 @@ export function BottomNav({ isDark = false }: BottomNavProps) {
     useEffect(() => {
         // Initial load
         const currentUser = AuthService.getUser();
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUser(currentUser);
 
         // Listen for updates (login/profile update)

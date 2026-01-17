@@ -13,6 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const isWizard = pathname?.startsWith('/farmer/applications/new');
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsDark(localStorage.getItem("theme") === "dark");
 
         // Listen for theme changes

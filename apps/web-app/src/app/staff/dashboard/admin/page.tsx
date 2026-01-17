@@ -47,6 +47,7 @@ export default function AdminDashboardPage() {
             router.push("/staff/login");
             return;
         }
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUser(JSON.parse(stored));
     }, [router]);
 

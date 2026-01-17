@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 
 interface MockInvoiceProps {
@@ -5,10 +8,13 @@ interface MockInvoiceProps {
 }
 
 export const MockInvoicePDF = ({ onClose }: MockInvoiceProps) => {
-    const invoiceNumber = `INV-${new Date().getFullYear()}${(Math.random() * 10000).toFixed(0)}`;
-    const currentDate = new Date();
-    const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 7);
+    const [invoiceNumber] = useState(() => `INV-${new Date().getFullYear()}${(Math.random() * 10000).toFixed(0)}`);
+    const [currentDate] = useState(() => new Date());
+    const [dueDate] = useState(() => {
+        const date = new Date();
+        date.setDate(date.getDate() + 7);
+        return date;
+    });
 
     return (
         <div className="fixed inset-0 bg-black/70 z-[1100] flex items-center justify-center p-4 print:p-0 print:bg-white print:fixed print:inset-0" onClick={onClose}>

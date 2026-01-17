@@ -67,7 +67,7 @@ class AuthRepositoryImpl implements AuthRepository {
       });
 
       final response = await _dioClient.post(
-        '/v2/auth/register',
+        '/auth-farmer/register',
         data: formData,
       );
 
@@ -149,7 +149,7 @@ class AuthRepositoryImpl implements AuthRepository {
           RegExp(r'^\d{13}$').hasMatch(idCardOrEmail.replaceAll('-', ''));
 
       final response = await _dioClient.post(
-        '/v2/auth/login',
+        '/auth-farmer/login',
         data: {
           // Send as both fields for backend compatibility
           'email': isThaiId ? null : idCardOrEmail,
@@ -221,7 +221,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       // Staff uses different API endpoint
       final isStaff = accountType == 'STAFF';
-      final endpoint = isStaff ? '/v2/auth-staff/login' : '/v2/auth/login';
+      final endpoint = isStaff ? '/auth-dtam/login' : '/auth-farmer/login';
 
       final response = await _dioClient.post(
         endpoint,
@@ -292,7 +292,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
     try {
-      final response = await _dioClient.get('/v2/auth/me');
+      final response = await _dioClient.get('/auth-farmer/me');
 
       if (response.statusCode == 200) {
         final data = response.data;

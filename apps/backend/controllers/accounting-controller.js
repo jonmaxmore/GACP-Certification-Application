@@ -32,14 +32,14 @@ class AccountingController {
                         application: {
                             include: {
                                 farmer: {
-                                    select: { firstName: true, lastName: true, email: true }
-                                }
-                            }
-                        }
+                                    select: { firstName: true, lastName: true, email: true },
+                                },
+                            },
+                        },
                     },
                     orderBy: { createdAt: 'desc' },
                     skip,
-                    take: parseInt(limit)
+                    take: parseInt(limit),
                 }),
                 prisma.quote.count({ where }),
             ]);
@@ -48,7 +48,7 @@ class AccountingController {
             const mappedQuotes = quotes.map(q => ({
                 ...q,
                 farmerId: q.application?.farmer, // Flatten relation for frontend compat
-                applicationId: { applicationNumber: q.application?.applicationNumber } // Flatten
+                applicationId: { applicationNumber: q.application?.applicationNumber }, // Flatten
             }));
 
             res.json({
@@ -85,15 +85,15 @@ class AccountingController {
                     where,
                     include: {
                         farmer: {
-                            select: { firstName: true, lastName: true, email: true }
+                            select: { firstName: true, lastName: true, email: true },
                         },
                         application: {
-                            select: { applicationNumber: true }
-                        }
+                            select: { applicationNumber: true },
+                        },
                     },
                     orderBy: { createdAt: 'desc' },
                     skip,
-                    take: parseInt(limit)
+                    take: parseInt(limit),
                 }),
                 prisma.invoice.count({ where }),
             ]);
@@ -101,7 +101,7 @@ class AccountingController {
             const mappedInvoices = invoices.map(inv => ({
                 ...inv,
                 farmerId: inv.farmer, // Frontend expects object here populated
-                applicationId: inv.application
+                applicationId: inv.application,
             }));
 
             res.json({
@@ -140,7 +140,7 @@ class AccountingController {
 
             // Check if new number already exists
             const existing = await model.findUnique({
-                where: { [numberField]: newNumber }
+                where: { [numberField]: newNumber },
             });
 
             if (existing && existing.id !== id) {
@@ -163,7 +163,7 @@ class AccountingController {
                 data: {
                     [numberField]: newNumber,
                     notes: notes || undefined,
-                }
+                },
             });
 
             logger.info(`Document number updated: ${type} ${id} → ${newNumber} by ${req.user?.email}`);
@@ -220,7 +220,7 @@ class AccountingController {
                     validUntil,
                     notes,
                     status: 'draft',
-                }
+                },
             });
 
             logger.info(`Quote created: ${quote.quoteNumber} by ${req.user?.email}`);
@@ -268,15 +268,15 @@ class AccountingController {
                 data: updateData,
                 include: {
                     application: {
-                        include: { farmer: { select: { firstName: true, lastName: true, email: true } } }
-                    }
-                }
+                        include: { farmer: { select: { firstName: true, lastName: true, email: true } } },
+                    },
+                },
             });
 
             // Map farmer
             const mappedQuote = {
                 ...quote,
-                farmerId: quote.application?.farmer
+                farmerId: quote.application?.farmer,
             };
 
             res.json({
@@ -299,7 +299,7 @@ class AccountingController {
 
             const quote = await prisma.quote.findUnique({
                 where: { id: quoteId },
-                include: { application: true }
+                include: { application: true },
             });
 
             if (!quote) {
@@ -331,13 +331,13 @@ class AccountingController {
                     // totalAmountText: quote.totalAmountText, // Not in Quote model
                     dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Due in 7 days
                     status: 'pending',
-                }
+                },
             });
 
             // Update quote status
             await prisma.quote.update({
                 where: { id: quoteId },
-                data: { status: 'invoiced' } // Schema check: index says status has 'pending', 'accepted', etc. check logic valid?
+                data: { status: 'invoiced' }, // Schema check: index says status has 'pending', 'accepted', etc. check logic valid?
             });
 
             logger.info(`Invoice created from quote: ${invoice.invoiceNumber} from ${quote.quoteNumber}`);
@@ -380,13 +380,13 @@ class AccountingController {
                 where: { id },
                 data: updateData,
                 include: {
-                    farmer: { select: { firstName: true, lastName: true, email: true } }
-                }
+                    farmer: { select: { firstName: true, lastName: true, email: true } },
+                },
             });
 
             const mappedInvoice = {
                 ...invoice,
-                farmerId: invoice.farmer
+                farmerId: invoice.farmer,
             };
 
             res.json({
@@ -431,7 +431,7 @@ class AccountingController {
             // Calculate totals
             const paidInvoices = await prisma.invoice.findMany({
                 where: { status: 'paid' },
-                select: { totalAmount: true }
+                select: { totalAmount: true },
             });
             const totalRevenue = paidInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
 

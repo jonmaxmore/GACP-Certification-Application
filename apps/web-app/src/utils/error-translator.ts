@@ -66,4 +66,6 @@ export function translateError(englishError: string): string {
 }
 
 // Default export
-export default { translateError };
+const errorTranslatorUtils = { translateError };
+
+export default errorTranslatorUtils;

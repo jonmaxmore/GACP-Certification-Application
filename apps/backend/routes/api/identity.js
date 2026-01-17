@@ -54,7 +54,7 @@ const uploadFields = upload.fields([
  */
 router.post('/verify', auth.authenticateFarmer, (req, res) => {
     uploadFields(req, res, async (err) => {
-        if (err) return res.status(400).json({ success: false, error: err.message });
+        if (err) {return res.status(400).json({ success: false, error: err.message });}
 
         try {
             const result = await identityService.verifyIdentity(req.user.id, req.files || {}, req.body);
@@ -129,7 +129,7 @@ router.get('/pending', auth.authenticateDTAM, async (req, res) => {
 router.get('/user/:id', auth.authenticateDTAM, async (req, res) => {
     try {
         const user = await identityService.getUserDetails(req.params.id);
-        if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+        if (!user) {return res.status(404).json({ success: false, error: 'User not found' });}
         res.json({ success: true, data: user });
     } catch (error) {
         logger.error('[Identity] Get Details Error:', error);

@@ -66,7 +66,7 @@ class PrismaAuthService {
 
     async login(loginId, password, accountType) {
         console.log('[AuthService] Login attempt:', { loginId, accountType });
-        
+
         try {
             const user = await prisma.user.findFirst({
                 where: {
@@ -78,10 +78,25 @@ class PrismaAuthService {
             });
 
             console.log('[AuthService] User found:', user ? 'YES' : 'NO');
-            
+
             if (!user) {
                 console.log('[AuthService] User not found');
                 throw new Error('ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง');
+            }
+
+            // [LOCKOUT CHECK]
+            if (user.isLocked && user.lockedUntil && new Date() < user.lockedUntil) {
+                const remainingMs = user.lockedUntil.getTime() - new Date().getTime();
+                const remainingMin = Math.ceil(remainingMs / 60000);
+                throw new Error(`Account locked. Try again in ${remainingMin} minutes.`);
+            }
+
+            // [AUTO UNLOCK]
+            if (user.isLocked && user.lockedUntil && new Date() >= user.lockedUntil) {
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { isLocked: false, lockedUntil: null, loginAttempts: 0 }
+                });
             }
 
             console.log('[AuthService] Comparing password...');
@@ -90,14 +105,39 @@ class PrismaAuthService {
 
             if (!passwordMatch) {
                 console.log('[AuthService] Password incorrect');
+
+                // [INCREMENT ATTEMPTS]
+                const newAttempts = (user.loginAttempts || 0) + 1;
+                let updateData = { loginAttempts: newAttempts };
+
+                if (newAttempts >= 5) {
+                    updateData.isLocked = true;
+                    updateData.lockedUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+                }
+
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: updateData
+                });
+
+                if (newAttempts >= 5) {
+                    throw new Error('Account locked due to too many failed attempts.');
+                }
+
                 throw new Error('ไม่พบผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง');
             }
 
             console.log('[AuthService] Login successful for user:', user.id);
-            
+
+            // [RESET ATTEMPTS using updateMany or update to match id]
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { loginAttempts: 0, isLocked: false, lockedUntil: null, lastLoginAt: new Date() }
+            });
+
             const token = jwtConfig.generateToken({ id: user.id, role: user.accountType });
             return { user, token };
-            
+
         } catch (error) {
             console.log('[AuthService] Login error:', error.message);
             throw error;
@@ -140,6 +180,50 @@ class PrismaAuthService {
 
         const existing = await prisma.user.findFirst({ where });
         return !!existing;
+    }
+
+    /**
+     * Login or Register with ThaID (Trusted Source)
+     * @param {Object} userData - Data from ThaID (idCard, firstName, lastName, address)
+     * @returns {Object} { user, token }
+     */
+    async loginWithThaID(userData) {
+        console.log('[AuthService] Login with ThaID:', userData.idCard);
+
+        const idCardHash = crypto.createHash('sha256').update(userData.idCard).digest('hex');
+
+        let user = await prisma.user.findFirst({
+            where: { idCardHash },
+        });
+
+        if (user) {
+            console.log('[AuthService] ThaID User exists, logging in:', user.id);
+            // If exists, just update latest info if needed (optional)
+        } else {
+            console.log('[AuthService] ThaID User new, registering...');
+            // Auto-register
+            user = await prisma.user.create({
+                data: {
+                    firstName: userData.firstName,
+                    lastName: userData.lastName,
+                    phoneNumber: userData.phoneNumber || '', // Might need to ask user later
+                    email: userData.email || '',
+                    idCard: userData.idCard,
+                    idCardHash,
+                    password: await bcrypt.hash(crypto.randomBytes(16).toString('hex'), 10), // Random password
+                    accountType: 'INDIVIDUAL', // Default to Individual for ThaID
+                    role: 'INDIVIDUAL_FARMER',
+                    status: 'ACTIVE',
+                    verificationStatus: 'APPROVED', // Trusted Source!
+                    verificationNote: 'Verified via ThaID (Digital ID)',
+                    verificationSubmittedAt: new Date(),
+                    address: typeof userData.address === 'string' ? userData.address : JSON.stringify(userData.address),
+                },
+            });
+        }
+
+        const token = jwtConfig.generateToken({ id: user.id, role: user.accountType });
+        return { user, token };
     }
 }
 

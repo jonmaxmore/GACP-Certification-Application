@@ -74,7 +74,7 @@ class ApplicationService {
         };
 
         let application;
-        let isSubmission = false;
+        const isSubmission = false;
 
         // Determine if this is a submission (status changes from DRAFT to SUBMITTED)
         // Note: The UI usually sets status in the payload, but here it sets 'DRAFT' hardcoded in line 50 of original code.
@@ -109,7 +109,7 @@ class ApplicationService {
             await sendNotification(farmerId, NotifyType.APPLICATION_SUBMITTED, {
                 applicationId: application.id,
                 applicationNumber: application.applicationNumber,
-                plantName: application.formData.plantName
+                plantName: application.formData.plantName,
             });
         }
 
@@ -155,7 +155,7 @@ class ApplicationService {
                 invoiceId: newInvoice.id,
                 invoiceNumber: newInvoice.invoiceNumber,
                 amount: newInvoice.totalAmount,
-                dueDate: newInvoice.dueDate.toLocaleDateString('th-TH')
+                dueDate: newInvoice.dueDate.toLocaleDateString('th-TH'),
             });
         }
     }
@@ -190,15 +190,15 @@ class ApplicationService {
      */
     async getById(id, farmerId) {
         const where = { id };
-        if (farmerId) where.farmerId = farmerId;
+        if (farmerId) {where.farmerId = farmerId;}
 
         return prisma.application.findFirst({
             where,
             include: {
                 farmer: {
-                    select: { firstName: true, lastName: true, email: true, phoneNumber: true, province: true }
-                }
-            }
+                    select: { firstName: true, lastName: true, email: true, phoneNumber: true, province: true },
+                },
+            },
         });
     }
 }

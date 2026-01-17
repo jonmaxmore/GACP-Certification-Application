@@ -152,6 +152,8 @@ export const en: Dictionary = {
         general: {
             title: "Applicant Information",
             subtitle: "Please provide complete applicant details",
+            infoHeader: "Applicant Information",
+            typeHeader: "Select Applicant Type",
             applicantName: "Applicant Name",
             firstName: "First Name",
             lastName: "Last Name",

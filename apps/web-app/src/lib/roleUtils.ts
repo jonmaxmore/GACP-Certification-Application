@@ -264,7 +264,7 @@ export function requiresAdmin(path: string): boolean {
     );
 }
 
-export default {
+const roleUtils = {
     ROLES,
     PERMISSIONS,
     isStaff,
@@ -278,3 +278,5 @@ export default {
     requiresAdmin,
     PROTECTED_ROUTES,
 };
+
+export default roleUtils;

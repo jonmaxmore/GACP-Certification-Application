@@ -46,6 +46,7 @@ export default function RegisterPage() {
         if (savedData) {
             try {
                 const data = JSON.parse(savedData);
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setStep(data.step || 0);
                 setAccountType(data.accountType || "");
                 setIdentifier(data.identifier || "");

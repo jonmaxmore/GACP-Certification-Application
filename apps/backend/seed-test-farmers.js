@@ -60,14 +60,14 @@ async function main() {
             status: 'ACTIVE',
             role: 'FARMER',
             isEmailVerified: true,
-        }
+        },
     ];
 
     for (const farmer of testFarmers) {
         try {
             // Delete existing account (if any)
             const existing = await prisma.user.findFirst({
-                where: { email: farmer.email }
+                where: { email: farmer.email },
             });
 
             if (existing) {

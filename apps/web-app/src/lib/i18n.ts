@@ -100,7 +100,7 @@ export function hasTranslation(key: string): boolean {
     return typeof result === 'string';
 }
 
-export default {
+const i18nUtils = {
     setLocale,
     getLocale,
     loadTranslations,
@@ -108,3 +108,5 @@ export default {
     tp,
     hasTranslation,
 };
+
+export default i18nUtils;

@@ -141,6 +141,8 @@ export type Dictionary = {
         general: {
             title: string;
             subtitle: string;
+            infoHeader: string;
+            typeHeader: string;
             applicantName: string;
             firstName: string;
             lastName: string;

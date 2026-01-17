@@ -29,12 +29,12 @@ const EnhancedValidation: React.FC<EnhancedValidationProps> = ({ onValidationCom
       message: 'เลขบัตรประชาชนต้องมี 13 หลัก',
       isValid: (value: string) => {
         if (!/^\d{13}$/.test(value)) return false;
-        
+
         // Thai ID checksum validation
         const digits = value.split('').map(Number);
         const sum = digits.slice(0, 12).reduce((acc, digit, index) => acc + digit * (13 - index), 0);
         const checksum = (11 - (sum % 11)) % 10;
-        
+
         return checksum === digits[12];
       }
     },
@@ -57,7 +57,7 @@ const EnhancedValidation: React.FC<EnhancedValidationProps> = ({ onValidationCom
 
   const handleInputChange = (field: string, value: string) => {
     const cleanValue = value.replace(/[^0-9]/g, ''); // For numeric fields
-    
+
     setFormData(prev => ({
       ...prev,
       [field]: field === 'email' ? value : cleanValue
@@ -67,7 +67,7 @@ const EnhancedValidation: React.FC<EnhancedValidationProps> = ({ onValidationCom
     if (value.length > 0) {
       const rule = validationRules[field];
       const isValid = rule.isValid(field === 'email' ? value : cleanValue);
-      
+
       setValidations(prev => ({
         ...prev,
         [field]: isValid
@@ -91,10 +91,10 @@ const EnhancedValidation: React.FC<EnhancedValidationProps> = ({ onValidationCom
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const allValid = Object.keys(validations).every(key => validations[key]);
     const hasData = Object.values(formData).some(value => value.length > 0);
-    
+
     if (hasData && allValid) {
       onValidationComplete(true, formData);
     } else {
@@ -102,7 +102,7 @@ const EnhancedValidation: React.FC<EnhancedValidationProps> = ({ onValidationCom
     }
   };
 
-  const inputConfigs = [
+  const inputConfigs: { key: keyof typeof formData; label: string; placeholder: string; type: string; maxLength: number }[] = [
     { key: 'thaiId', label: 'เลขบัตรประชาชน', placeholder: '13 หลัก', type: 'text', maxLength: 13 },
     { key: 'taxId', label: 'เลขทะเบียนนิติบุคคล', placeholder: '13 หลัก', type: 'text', maxLength: 13 },
     { key: 'phoneNumber', label: 'เบอร์โทรศัพท์', placeholder: '0xxxxxxxxx', type: 'tel', maxLength: 10 },
@@ -131,13 +131,12 @@ const EnhancedValidation: React.FC<EnhancedValidationProps> = ({ onValidationCom
                 onChange={(e) => handleInputChange(key, e.target.value)}
                 maxLength={maxLength}
                 placeholder={placeholder}
-                className={`w-full p-3 border-2 rounded-lg pr-10 ${
-                  errors[key] 
-                    ? 'border-rose-300 bg-rose-50' 
-                    : validations[key] 
-                    ? 'border-emerald-300 bg-emerald-50'
-                    : 'border-slate-200'
-                }`}
+                className={`w-full p-3 border-2 rounded-lg pr-10 ${errors[key]
+                    ? 'border-rose-300 bg-rose-50'
+                    : validations[key]
+                      ? 'border-emerald-300 bg-emerald-50'
+                      : 'border-slate-200'
+                  }`}
               />
               <div className="absolute right-3 top-3">
                 {validations[key] && (

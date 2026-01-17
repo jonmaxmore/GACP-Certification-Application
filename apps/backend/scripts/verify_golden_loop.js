@@ -40,12 +40,12 @@ async function main() {
         try {
             const probeRes = await axios.post(`${API_URL}/auth-farmer/check-identifier`, {
                 identifier: '11000' + crypto.randomInt(10000000, 99999999), // Random ID
-                accountType: 'INDIVIDUAL'
+                accountType: 'INDIVIDUAL',
             });
             console.log('✅ Probe Result:', probeRes.data);
         } catch (probeErr) {
             console.warn('⚠️ Probe Failed:', probeErr.message);
-            if (probeErr.response) console.warn('   Probe Data:', probeErr.response.data);
+            if (probeErr.response) {console.warn('   Probe Data:', probeErr.response.data);}
         }
         // --- PRE-CHECK: Plant Species ---
         // Certificate Service fails silently if no species found. 
@@ -59,7 +59,7 @@ async function main() {
                     nameTH: 'Cannabis',
                     nameEN: 'Cannabis',
                     description: 'Test Plant',
-                }
+                },
             });
             console.log('✅ [Pre-Check] PlantSpecies \'Cannabis\' seeded.');
         } else {

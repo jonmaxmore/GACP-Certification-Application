@@ -164,7 +164,7 @@ router.post('/:id/generate-units', async (req, res) => {
         res.status(201).json({
             success: true,
             message: result.message,
-            data: { count: result.count }
+            data: { count: result.count },
         });
     } catch (error) {
         console.error('Error generating plant units:', error);

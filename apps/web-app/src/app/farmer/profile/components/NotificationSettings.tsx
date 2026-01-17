@@ -23,7 +23,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ settings, o
 
   const handleToggle = async (key: keyof NotificationSettings) => {
     const newSettings = { ...settings, [key]: !settings[key] };
-    
+
     setSaving(true);
     try {
       const response = await fetch('/api/auth/notifications', {
@@ -31,7 +31,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ settings, o
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSettings),
       });
-      
+
       if (response.ok) {
         onSettingsChange(newSettings);
       } else {
@@ -45,7 +45,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ settings, o
     }
   };
 
-  const notificationTypes = [
+  const notificationTypes: { key: keyof NotificationSettings; label: string; description: string }[] = [
     { key: 'email', label: 'อีเมล', description: 'รับแจ้งเตือนเกี่ยวกับใบสนคร' },
     { key: 'sms', label: 'SMS', description: 'แจ้งเตือนผ่าน SMS' },
     { key: 'push', label: 'Push', description: 'แจ้งเตือนในแอปพลิเคชั่น' },
@@ -74,11 +74,10 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ settings, o
             <button
               onClick={() => handleToggle(key)}
               disabled={saving}
-              className={`w-12 h-6 rounded-full transition-colors ${
-                settings[key] 
-                  ? 'bg-primary text-white' 
+              className={`w-12 h-6 rounded-full transition-colors ${settings[key]
+                  ? 'bg-primary text-white'
                   : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
-              }`}
+                }`}
             >
               {settings[key] && (
                 <span className="text-white text-xs">✓</span>

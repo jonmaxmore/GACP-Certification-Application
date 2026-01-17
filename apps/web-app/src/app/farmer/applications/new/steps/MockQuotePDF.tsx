@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useWizardStore } from "../hooks/useWizardStore";
 
 interface MockQuoteProps {
@@ -8,8 +9,8 @@ interface MockQuoteProps {
 
 export const MockQuotePDF = ({ onClose }: MockQuoteProps) => {
     const { state } = useWizardStore();
-    const currentDate = new Date();
-    const quoteNumber = `G-${String(Math.floor(Math.random() * 900000000) + 100000000)}`;
+    const [currentDate] = useState(() => new Date());
+    const [quoteNumber] = useState(() => `G-${String(Math.floor(Math.random() * 900000000) + 100000000)}`);
 
     const applicant = (state.applicantData || {}) as any;
     const name = applicant.firstName ? `${applicant.firstName} ${applicant.lastName || ''}` : "บริษัท สโมก ครูว จำกัด";

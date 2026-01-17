@@ -45,7 +45,16 @@ export default function TrackingPage() {
     const [mounted, setMounted] = useState(false);
     const [isDark, setIsDark] = useState(false);
 
+    const loadApplications = async () => {
+        const result = await api.get<Application[]>("/applications/my");
+        if (result.success && result.data) {
+            const apps = Array.isArray(result.data) ? result.data : (result.data as any).data || [];
+            setApplications(apps);
+        }
+    };
+
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
         setIsDark(localStorage.getItem("theme") === "dark");
 
@@ -57,14 +66,6 @@ export default function TrackingPage() {
 
         loadApplications();
     }, [router]);
-
-    const loadApplications = async () => {
-        const result = await api.get<Application[]>("/applications/my");
-        if (result.success && result.data) {
-            const apps = Array.isArray(result.data) ? result.data : (result.data as any).data || [];
-            setApplications(apps);
-        }
-    };
 
     const getStepForStatus = (status: string) => STEPS.findIndex(s => s.statuses.includes(status)) + 1;
     const accentColor = isDark ? "#10B981" : "#16A34A";

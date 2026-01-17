@@ -102,7 +102,7 @@ export default function FileUpload({
     const inputRef = useRef<HTMLInputElement>(null);
     const t = themes[theme];
 
-    const validateFile = (file: File): string | null => {
+    const validateFile = useCallback((file: File): string | null => {
         const maxBytes = maxSize * 1024 * 1024;
         if (file.size > maxBytes) {
             return `ไฟล์ ${file.name} มีขนาดเกิน ${maxSize} MB`;
@@ -123,7 +123,7 @@ export default function FileUpload({
         }
 
         return null;
-    };
+    }, [maxSize, accept]);
 
     const handleFiles = useCallback((files: FileList | null) => {
         if (!files || files.length === 0) return;
@@ -143,7 +143,7 @@ export default function FileUpload({
         const newFiles = multiple ? [...selectedFiles, ...fileArray] : fileArray;
         setSelectedFiles(newFiles);
         onFileSelect(newFiles);
-    }, [multiple, selectedFiles, onFileSelect, maxSize, accept]);
+    }, [multiple, selectedFiles, onFileSelect, validateFile]);
 
     const handleDragEnter = (e: React.DragEvent) => {
         e.preventDefault();

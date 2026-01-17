@@ -1,0 +1,29 @@
+{
+    "wizard": {
+        "valid_full_application": {
+            "step1_selection": {
+                "plantCode": "cannabis",
+                "serviceType": "NEW",
+                "purpose": "COMMERCIAL",
+                "method": "GREENHOUSE"
+            },
+            "step2_general": {
+                "farmerType": "INDIVIDUAL"
+            },
+            "step3_farm": {
+                "address": "123 Moo 1",
+                "province": "Chiang Mai",
+                "district": "Mueang",
+                "subdistrict": "Suthep",
+                "zipCode": "50200",
+                "titleDeedNo": "123456",
+                "gpsLat": "18.796",
+                "gpsLong": "98.979"
+            },
+            "step4_plots": {
+                "plotCount": 1,
+                "plotSize": "1 Rai"
+            }
+        }
+    }
+}

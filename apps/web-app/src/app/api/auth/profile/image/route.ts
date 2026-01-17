@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('profileImage') as File;
-    
+
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
@@ -31,12 +31,12 @@ export async function POST(request: NextRequest) {
     const filepath = path.join(uploadsDir, filename);
 
     // Save file
-    const buffer = await file.arrayBuffer();
+    const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(filepath, buffer);
 
     // Return file URL
     const fileUrl = `/uploads/profiles/${filename}`;
-    
+
     return NextResponse.json({
       success: true,
       profileImage: fileUrl

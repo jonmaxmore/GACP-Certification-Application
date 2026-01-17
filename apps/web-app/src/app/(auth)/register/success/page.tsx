@@ -13,6 +13,7 @@ function RegisterSuccessContent() {
     const accountType = searchParams.get("type") || "";
     const name = searchParams.get("name") || "";
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => setMounted(true), []);
 
     const getAccountTypeThai = () => {

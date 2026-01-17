@@ -52,7 +52,7 @@ class _AmendmentApplicationScreenState
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppTheme.primaryGreen.withOpacity(0.1),
+                            color: AppTheme.primaryGreen.withAlpha(26),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(Icons.edit_document,

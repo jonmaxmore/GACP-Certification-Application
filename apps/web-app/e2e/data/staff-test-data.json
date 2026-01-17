@@ -1,0 +1,26 @@
+{
+    "reviewer": {
+        "email": "reviewer@dtam.go.th",
+        "password": "Password123!",
+        "role": "REVIEWER_AUDITOR",
+        "firstName": "Somchai",
+        "lastName": "Reviewer"
+    },
+    "auditor": {
+        "email": "auditor@dtam.go.th",
+        "password": "Password123!",
+        "role": "REVIEWER_AUDITOR",
+        "firstName": "Somsak",
+        "lastName": "Auditor"
+    },
+    "scheduler": {
+        "email": "scheduler@dtam.go.th",
+        "password": "Password123!",
+        "role": "SCHEDULER"
+    },
+    "admin": {
+        "email": "admin@dtam.go.th",
+        "password": "Password123!",
+        "role": "ADMIN"
+    }
+}

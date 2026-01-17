@@ -153,7 +153,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                  color: AppTheme.primaryGreen.withOpacity(0.15),
+                  color: AppTheme.primaryGreen.withAlpha(38),
                   blurRadius: 30,
                   offset: const Offset(0, 15))
             ]),
@@ -171,7 +171,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-            color: AppTheme.primaryGreen.withOpacity(0.08),
+            color: AppTheme.primaryGreen.withAlpha(20),
             borderRadius: BorderRadius.circular(20)),
         child: const Text('กรมการแพทย์แผนไทยและการแพทย์ทางเลือก',
             style: TextStyle(
@@ -189,7 +189,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withAlpha(10),
                 blurRadius: 10,
                 offset: const Offset(0, 4))
           ]),
@@ -265,7 +265,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withAlpha(13),
                 blurRadius: 24,
                 offset: const Offset(0, 8))
           ]),
@@ -355,7 +355,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   backgroundColor: AppTheme.primaryGreen,
                   foregroundColor: Colors.white,
                   elevation: 4,
-                  shadowColor: AppTheme.primaryGreen.withOpacity(0.4),
+                  shadowColor: AppTheme.primaryGreen.withAlpha(102),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14))),
               child: _isLoading

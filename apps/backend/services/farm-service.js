@@ -81,7 +81,7 @@ class FarmService {
         const {
             farmName, farmType, address, province, district, subDistrict, postalCode,
             latitude, longitude, totalArea, cultivationArea, areaUnit,
-            cultivationMethod, irrigationType, soilType, waterSource, landDocuments
+            cultivationMethod, irrigationType, soilType, waterSource, landDocuments,
         } = data;
 
         return prisma.farm.create({
@@ -121,7 +121,7 @@ class FarmService {
     async updateFarm(id, ownerId, data) {
         // Check ownership
         const existing = await this.getById(id, ownerId);
-        if (!existing) return null;
+        if (!existing) {return null;}
 
         const updateData = {};
         const allowedFields = [
@@ -129,7 +129,7 @@ class FarmService {
             'subDistrict', 'postalCode', 'latitude', 'longitude',
             'totalArea', 'cultivationArea', 'areaUnit', 'cultivationMethod',
             'irrigationType', 'soilType', 'waterSource', 'landDocuments',
-            'sanitationInfo', 'siteHistory' // [NEW] GACP Fields
+            'sanitationInfo', 'siteHistory', // [NEW] GACP Fields
         ];
 
         for (const field of allowedFields) {
@@ -157,7 +157,7 @@ class FarmService {
      */
     async deleteFarm(id, ownerId) {
         const existing = await this.getById(id, ownerId);
-        if (!existing) return false;
+        if (!existing) {return false;}
 
         await prisma.farm.update({
             where: { id },
@@ -177,7 +177,7 @@ class FarmService {
      */
     async generateQRCode(id, ownerId) {
         const farm = await this.getById(id, ownerId);
-        if (!farm) return null;
+        if (!farm) {return null;}
 
         const publicUrl = `${process.env.PUBLIC_APP_URL || 'https://gacp.dtam.go.th'}/verify/farm/${farm.id}`;
         const qrDataUrl = await QRCode.toDataURL(publicUrl, { width: 400, margin: 2 });

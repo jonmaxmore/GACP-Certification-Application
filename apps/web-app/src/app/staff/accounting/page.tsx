@@ -328,7 +328,7 @@ export default function AccountingDashboard() {
                                             }
                                         </button>
                                         <p className="text-xs text-center text-slate-400 mt-2">
-                                            การกระทำนี้จะเปลี่ยนสถานะเป็น "ชำระแล้ว" และออกใบเสร็จรับเงินทันที
+                                            การกระทำนี้จะเปลี่ยนสถานะเป็น &quot;ชำระแล้ว&quot; และออกใบเสร็จรับเงินทันที
                                         </p>
                                     </div>
                                 )}

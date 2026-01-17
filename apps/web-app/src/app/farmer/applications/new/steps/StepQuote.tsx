@@ -28,9 +28,9 @@ export const StepQuote = () => {
     const [showDtamQuote, setShowDtamQuote] = useState(false);
     const [showPlatformQuote, setShowPlatformQuote] = useState(false);
 
-    const quoteDate = new Date().toISOString();
-    const [dtamQuoteNumber] = useState(`DTAM-QT-${new Date().getFullYear()}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`);
-    const [platformQuoteNumber] = useState(`PLT-QT-${new Date().getFullYear()}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`);
+    const [quoteDate] = useState(() => new Date().toISOString());
+    const [dtamQuoteNumber] = useState(() => `DTAM-QT-${new Date().getFullYear()}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`);
+    const [platformQuoteNumber] = useState(() => `PLT-QT-${new Date().getFullYear()}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`);
 
     const dtamFee = GACP_FEES.milestone1;
     const platformFee = Math.round(dtamFee * PLATFORM_FEE_PERCENT);

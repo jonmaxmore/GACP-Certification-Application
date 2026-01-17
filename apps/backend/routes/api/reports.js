@@ -22,7 +22,7 @@ router.get('/dashboard', authenticateDTAM, async (req, res) => {
 
         res.json({
             success: true,
-            data: stats
+            data: stats,
         });
 
     } catch (error) {

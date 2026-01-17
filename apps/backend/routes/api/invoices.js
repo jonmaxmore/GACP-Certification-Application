@@ -97,7 +97,7 @@ router.get('/summary', authenticateDTAM, async (req, res) => {
 router.get('/:invoiceId', authenticateDTAM, async (req, res) => {
     try {
         const invoice = await invoiceService.getById(req.params.invoiceId);
-        if (!invoice) return res.status(404).json({ success: false, message: 'Invoice not found' });
+        if (!invoice) {return res.status(404).json({ success: false, message: 'Invoice not found' });}
         res.json({ success: true, data: invoice });
     } catch (error) {
         console.error('[Invoices] Error:', error);

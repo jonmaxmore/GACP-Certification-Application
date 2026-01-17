@@ -115,7 +115,7 @@ router.get('/draft', authenticateFarmer, async (req, res) => {
     try {
         const draft = await applicationService.getDraft(req.user.id);
 
-        if (!draft) return res.json({ success: true, data: null });
+        if (!draft) {return res.json({ success: true, data: null });}
 
         // Transform backend model to frontend expectation
         res.json({
@@ -274,7 +274,7 @@ router.get('/:id', authenticateDTAM, async (req, res) => {
         const { id } = req.params;
         const app = await applicationService.getById(id); // Use new service
 
-        if (!app) return res.status(404).json({ success: false, error: 'Not Found' });
+        if (!app) {return res.status(404).json({ success: false, error: 'Not Found' });}
 
         res.json({ success: true, data: app });
     } catch (error) {
@@ -293,7 +293,7 @@ router.post('/:id/review', authenticateDTAM, async (req, res) => {
             where: { OR: [{ id }, { applicationNumber: id }] },
         });
 
-        if (!app) return res.status(404).json({ success: false, error: 'Application not found' });
+        if (!app) {return res.status(404).json({ success: false, error: 'Application not found' });}
 
         const newStatus = action === 'APPROVE' ? 'PAYMENT_2_PENDING' : 'REVISION_REQUIRED';
         const updateData = { status: newStatus, updatedBy: req.user?.id };
@@ -355,7 +355,7 @@ router.post('/:id/payment', authenticateFarmer, async (req, res) => {
 
         const application = await prisma.application.findFirst({
             where: { id, farmerId: req.user.id },
-            include: { invoices: true }
+            include: { invoices: true },
         });
 
         if (!application) {
@@ -368,8 +368,8 @@ router.post('/:id/payment', authenticateFarmer, async (req, res) => {
             where: {
                 applicationId: application.id,
                 serviceType: invoiceServiceType,
-                status: 'pending'
-            }
+                status: 'pending',
+            },
         });
 
         if (invoice) {
@@ -379,8 +379,8 @@ router.post('/:id/payment', authenticateFarmer, async (req, res) => {
                 data: {
                     status: 'paid',
                     paidAt: new Date(),
-                    paymentMethod: method || 'QR_CASH'
-                }
+                    paymentMethod: method || 'QR_CASH',
+                },
             });
         }
 
@@ -388,7 +388,7 @@ router.post('/:id/payment', authenticateFarmer, async (req, res) => {
         const newStatus = phase === 1 ? 'PAYMENT_1_COMPLETED' : 'PAYMENT_2_COMPLETED';
         await prisma.application.update({
             where: { id: application.id },
-            data: { status: newStatus }
+            data: { status: newStatus },
         });
 
         // Trigger Notification
@@ -396,7 +396,7 @@ router.post('/:id/payment', authenticateFarmer, async (req, res) => {
         await sendNotification(req.user.id, NotifyType.PAYMENT_COMPLETED, {
             applicationNumber: application.applicationNumber,
             amount: amount,
-            invoiceNumber: invoice?.invoiceNumber || 'INV-UNKNOWN'
+            invoiceNumber: invoice?.invoiceNumber || 'INV-UNKNOWN',
         });
 
         res.json({ success: true, message: 'Payment processed successfully' });

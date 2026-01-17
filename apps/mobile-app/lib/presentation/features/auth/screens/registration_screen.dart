@@ -505,7 +505,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? (type['color'] as Color).withOpacity(0.08)
+                      ? (type['color'] as Color).withAlpha(20)
                       : Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
@@ -517,7 +517,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: (type['color'] as Color).withOpacity(0.2),
+                            color: (type['color'] as Color).withAlpha(51),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -529,7 +529,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: (type['color'] as Color).withOpacity(0.1),
+                        color: (type['color'] as Color).withAlpha(26),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -590,7 +590,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: (config['color'] as Color).withOpacity(0.1),
+                  color: (config['color'] as Color).withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(Icons.badge_outlined,
@@ -670,7 +670,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryGreenDark.withOpacity(0.1),
+                  color: AppTheme.primaryGreenDark.withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -791,7 +791,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryGreenDark.withOpacity(0.1),
+                  color: AppTheme.primaryGreenDark.withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.lock_outline,
@@ -937,7 +937,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               elevation: 4,
-              shadowColor: AppTheme.primaryGreenDark.withOpacity(0.4),
+              shadowColor: AppTheme.primaryGreenDark.withAlpha(102),
               disabledBackgroundColor: Colors.grey.shade300,
             ),
             child: _isLoading
@@ -994,7 +994,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       borderRadius: BorderRadius.circular(20),
       boxShadow: [
         BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha(13),
             blurRadius: 20,
             offset: const Offset(0, 8))
       ],

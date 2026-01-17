@@ -305,7 +305,7 @@ export function sanitizeInput(input: string): string {
         .replace(/'/g, '&#x27;');
 }
 
-export default {
+const validationUtils = {
     validateThaiIdCard,
     formatThaiIdCard,
     maskThaiIdCard,
@@ -319,3 +319,5 @@ export default {
     isEmpty,
     sanitizeInput,
 };
+
+export default validationUtils;

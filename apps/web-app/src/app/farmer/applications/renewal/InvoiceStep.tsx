@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import { Certificate, RENEWAL_FEE } from './types';
 
 interface InvoiceStepProps {
@@ -11,10 +12,13 @@ interface InvoiceStepProps {
 }
 
 export function InvoiceStep({ certificate, renewalId, isDark, onBack, onProceed }: InvoiceStepProps) {
-    const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase().slice(-6)}`;
-    const currentDate = new Date();
-    const dueDate = new Date(currentDate);
-    dueDate.setDate(dueDate.getDate() + 7);
+    const [invoiceNumber] = useState(() => `INV-${Date.now().toString(36).toUpperCase().slice(-6)}`);
+    const [currentDate] = useState(() => new Date());
+    const [dueDate] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 7);
+        return d;
+    });
 
     return (
         <div className={`min-h-screen p-6 font-sans ${isDark ? 'bg-slate-900' : 'bg-surface-100'}`}>
